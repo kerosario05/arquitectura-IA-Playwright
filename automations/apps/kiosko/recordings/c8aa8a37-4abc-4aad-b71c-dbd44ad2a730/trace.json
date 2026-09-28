@@ -1,0 +1,424 @@
+{
+  "recordingId": "c8aa8a37-4abc-4aad-b71c-dbd44ad2a730",
+  "projectSlug": "kiosko",
+  "appSlug": "kiosko",
+  "platform": "web",
+  "baseUrl": "https://172.27.4.50/",
+  "label": "roque 6",
+  "recordingGoal": {
+    "declaredGoal": "roque 6",
+    "normalizedGoal": "roque 6",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-09-25T22:00:44.050Z",
+  "status": "stopped",
+  "events": [
+    {
+      "t": 12988,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://172.27.4.50/",
+      "seq": 0
+    },
+    {
+      "t": 13894,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://172.27.4.50/",
+      "seq": 1
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "9f12e61beacd",
+      "url": "https://172.27.4.50/",
+      "framePath": ".artifacts\\tmp\\recordings\\c8aa8a37-4abc-4aad-b71c-dbd44ad2a730\\0002-launch.png",
+      "seq": 2
+    },
+    {
+      "t": 15782,
+      "interactionId": "pointer-1",
+      "kind": "note",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "target": {
+        "label": "Estados de cuenta",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Estados de cuenta\"",
+      "observationType": "pointer",
+      "seq": 3
+    },
+    {
+      "t": 16180,
+      "kind": "navigate",
+      "screenKey": "9f12e61beacd",
+      "url": "https://172.27.4.50/client-identification",
+      "seq": 4
+    },
+    {
+      "t": 16363,
+      "interactionId": "pointer-1",
+      "kind": "tap",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/client-identification",
+      "target": {
+        "label": "Estados de cuenta",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Estados de cuenta",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Estados de cuenta",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Estados de cuenta"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",5],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",5],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "framePath": ".artifacts\\tmp\\recordings\\c8aa8a37-4abc-4aad-b71c-dbd44ad2a730\\0004-click.png",
+      "seq": 5
+    },
+    {
+      "t": 24042,
+      "interactionId": "pointer-2",
+      "kind": "note",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/client-identification",
+      "target": {
+        "label": "← Borrar",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "← Borrar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"← Borrar\"",
+      "observationType": "pointer",
+      "seq": 6
+    },
+    {
+      "t": 24858,
+      "interactionId": "pointer-2",
+      "kind": "tap",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/client-identification",
+      "target": {
+        "label": "← Borrar",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|← Borrar",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|← Borrar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "← Borrar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "framePath": ".artifacts\\tmp\\recordings\\c8aa8a37-4abc-4aad-b71c-dbd44ad2a730\\0007-click.png",
+      "seq": 7
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "9f12e61beacd",
+      "title": "¡Hola!",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "firstSeenAt": 14005,
+      "controls": [
+        {
+          "label": "Estados de cuenta",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Estados de cuenta"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Estados de cuenta",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Consulta de balance",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Consulta de balance"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Consulta de balance",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cartas y certificaciones",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Cartas y certificaciones"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cartas y certificaciones",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Canje de Puntos",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Canje de Puntos"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Canje de Puntos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Explora nuestros productos",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Explora nuestros productos"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Explora nuestros productos",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "¡Hola!",
+        "Estados de cuenta",
+        "Consulta de balance"
+      ],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "c1c78a3620fb",
+      "title": "Identificación del cliente",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/client-identification",
+      "firstSeenAt": 16444,
+      "controls": [
+        {
+          "label": "← Borrar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "← Borrar",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Espacio",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Espacio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Limpiar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Limpiar",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cancelar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cancelar ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Continuar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Continuar",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Identificación del cliente",
+        "Número de identificación"
+      ],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    }
+  ],
+  "endedAt": "2026-09-25T22:01:12.184Z",
+  "durationMs": 28134
+}

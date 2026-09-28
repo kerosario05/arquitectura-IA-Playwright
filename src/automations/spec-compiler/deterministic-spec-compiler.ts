@@ -710,6 +710,53 @@ function compileClickStep(
   });
 }
 
+/**
+ * A visible-text assertion is compilable only with everything that makes it deterministic: a
+ * literal text target, an oracle discovery actually backed live, and an EXPLICIT positive
+ * polarity. "No se muestra" or an unknown polarity is never guessed into "se muestra" -- it stays
+ * an unsupported capability (fail closed).
+ */
+function visibleTextAssertionOf(step: SpecExecutionContractStep): { text?: string; reason?: string } {
+  const text = step.target?.strategy === "text" ? step.target.value?.trim() : undefined;
+  if (!text) return { reason: "text_target_missing" };
+  if (step.oracle?.backed !== true) return { reason: "oracle_not_backed" };
+  if (step.executionStatus !== "executed") return { reason: `execution_status_${step.executionStatus}` };
+  const polarity = step.polarity ?? step.oracle.polarity;
+  if (polarity !== "positive") return { reason: `polarity_${polarity ?? "unresolved"}` };
+  return { text };
+}
+
+/**
+ * Recording outcome such as `Se muestra "¡Hola!"` (run verify-20260928134856): discovery verified
+ * the text live after the last action, but this compiler had no assertion branch and failed the
+ * whole spec closed on `operation_unsupported:noop`.
+ */
+function compileVisibleTextAssertion(
+  step: SpecExecutionContractStep,
+  lines: string[],
+  bindings: SpecCompileBinding[],
+  unsupportedCapabilities: string[],
+): void {
+  const { text, reason } = visibleTextAssertionOf(step);
+  if (!text) {
+    unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:assertion_unsupported:${reason}`);
+    return;
+  }
+  lines.push(`    await promotedRuntime.expectPromotedVisible({`);
+  lines.push(`      stepIndex: ${step.scenarioStepIndex},`);
+  lines.push(`      target: '${escapeString(text)}',`);
+  lines.push(`      description: '${escapeString(step.originalText)}',`);
+  lines.push(`      polarity: 'positive',`);
+  lines.push(`      assertion: async () => { await expect(page.getByText(${jsonLiteral(text)}).first()).toBeVisible(); }`);
+  lines.push(`    });`);
+  bindings.push({
+    scenarioStepIndex: step.scenarioStepIndex,
+    operation: step.operation,
+    runtimeMethod: "expectPromotedVisible",
+    targetRef: text,
+  });
+}
+
 function compileNavigationTransitionOracle(
   step: SpecExecutionContractStep,
   lines: string[],
@@ -768,9 +815,12 @@ export function compileDeterministicSpec(contract: SpecExecutionContract, compil
   // actually uses it will be emitted.
   const usesExpectOracle = contract.steps.some((s) =>
     s.required !== false
-    && s.oracle?.type === "navigation_transition"
-    && typeof s.oracle.mechanism?.expected?.urlPattern === "string"
-    && s.oracle.mechanism.expected.urlPattern.trim().length > 0
+    && (
+      (s.oracle?.type === "navigation_transition"
+        && typeof s.oracle.mechanism?.expected?.urlPattern === "string"
+        && s.oracle.mechanism.expected.urlPattern.trim().length > 0)
+      || (s.operation === "assertVisible" && s.oracle?.type !== "navigation_transition" && visibleTextAssertionOf(s).text !== undefined)
+    )
   );
 
   lines.push(usesExpectOracle ? `import { test, expect } from '@playwright/test';` : `import { test } from '@playwright/test';`);
@@ -834,6 +884,8 @@ export function compileDeterministicSpec(contract: SpecExecutionContract, compil
           compileClickStep(step, contract.steps, lines, bindings, unsupportedCapabilities, previousStepReplays);
           break;
       }
+    } else if (step.operation === "assertVisible" && !hasNavigationOracle) {
+      compileVisibleTextAssertion(step, lines, bindings, unsupportedCapabilities);
     } else if (!hasNavigationOracle) {
       unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:operation_unsupported:${step.operation}`);
     }

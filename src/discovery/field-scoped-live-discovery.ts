@@ -18,6 +18,8 @@ export type FieldScopedDomElement = {
   parentElement: FieldScopedDomElement | null;
   disabled?: boolean;
   hidden?: boolean;
+  /** Optional: a real DOM element's inline click handler (frameworks like React set it for onClick). */
+  onclick?: unknown;
   /** Optional: present on real DOM elements; lets the accepted scope carry an ephemeral marker. */
   setAttribute?(name: string, value: string): void;
 };
@@ -39,7 +41,7 @@ export type FieldScopeAncestorTrace = {
   compatibleCandidateCount: number;
   disabledCompatibleCandidateCount: number;
   otherOwnerCandidateCount: number;
-  scopeDecision: "continue" | "accepted" | "ambiguous";
+  scopeDecision: "continue" | "accepted" | "ambiguous" | "unrelated_owner";
 };
 
 export type FieldScopedDiagnostics = {
@@ -52,7 +54,7 @@ export type FieldScopedDiagnostics = {
   ancestorsInspected: number;
   ancestorTrace: FieldScopeAncestorTrace[];
   containerAccepted: boolean;
-  rejectReason?: "no_anchor_found" | "climb_exhausted" | "scope_ambiguous";
+  rejectReason?: "no_anchor_found" | "climb_exhausted" | "scope_ambiguous" | "unrelated_owner";
 };
 
 export type FieldScopedDomEvidence = {
@@ -242,8 +244,47 @@ export function extractFieldScopedDomEvidence(
   // owner/compatibility predicates, WITHOUT changing `walkAll`'s semantics for any other caller.
   function collectOwnerCandidatesIncludingSelf(node: FieldScopedDomElement): FieldScopedDomElement[] {
     const descendants = walkAll(node, isOwnerCandidate);
-    return isOwnerCandidate(node) ? [node, ...descendants] : descendants;
+    return isOwnerCandidate(node) || isClickHandlerSelfOwner(node, descendants) ? [node, ...descendants] : descendants;
   }
+
+  // The SAME generic click-handler signal the recorder and explorer already use
+  // (`typeof el.onclick === "function" || onclick attribute`) -- never a class name or app text.
+  function hasClickHandler(el: FieldScopedDomElement): boolean {
+    return typeof el.onclick === "function" || Boolean(el.getAttribute("onclick"));
+  }
+
+  // FIRST_LOSS fix (run 354fe8f4, kiosko product card): the clickable owner was a plain <div>
+  // with a framework onClick and no <button> inside. The climb only recognized native/ARIA
+  // owners, so it saw 0 candidates on the card itself, kept climbing, and accepted a page wrapper
+  // whose only button was the unrelated "Volver" control -- which was then clicked and navigated
+  // back. A scope node that carries its own click handler IS the owner for a click, but only
+  // when no real native/ARIA actionable control sits inside it (a real button always wins).
+  function isClickHandlerSelfOwner(
+    node: FieldScopedDomElement,
+    descendants: FieldScopedDomElement[] = walkAll(node, isOwnerCandidate),
+  ): boolean {
+    if (requiredCompatibility !== "actionable") return false;
+    if (isOwnerCandidate(node) || !hasClickHandler(node)) return false;
+    return !descendants.some((el) => isCompatibleForIntent(el, deriveOwnerRole(el)));
+  }
+
+  function isCompatibleOwnerInScope(el: FieldScopedDomElement, scopeNode: FieldScopedDomElement): boolean {
+    if (isCompatibleForIntent(el, deriveOwnerRole(el))) return true;
+    return el === scopeNode && isClickHandlerSelfOwner(scopeNode);
+  }
+
+  // A labeled control whose own name has no relation to the field's text is a different
+  // feature's control, not this field's owner. Unlabeled controls (icon buttons, inputs) carry
+  // no name to compare, so they are left to the existing structural rule.
+  function isOwnerNameUnrelated(el: FieldScopedDomElement): boolean {
+    const name = normalizeFieldText(el.getAttribute("aria-label") || el.textContent);
+    if (!name) return false;
+    return !(name.includes(target) || target.includes(name));
+  }
+
+  // Only a scope reached two or more levels above the anchor's own container is checked: a
+  // control that close is part of the same item (a card and its single "Solicitar" button).
+  const UNRELATED_OWNER_MIN_DEPTH = 2;
 
   function scopeCandidateStats(node: FieldScopedDomElement): {
     compatibleCount: number;
@@ -254,8 +295,7 @@ export function extractFieldScopedDomEvidence(
     let disabledCompatibleCount = 0;
     let otherCount = 0;
     for (const el of collectOwnerCandidatesIncludingSelf(node)) {
-      const role = deriveOwnerRole(el);
-      if (isCompatibleForIntent(el, role)) {
+      if (isCompatibleOwnerInScope(el, node)) {
         compatibleCount += 1;
         if (isOwnerDisabled(el)) disabledCompatibleCount += 1;
       } else {
@@ -296,13 +336,18 @@ export function extractFieldScopedDomEvidence(
   function findFieldScope(
     anchor: FieldScopedDomElement,
     trace?: FieldScopeAncestorTrace[],
-  ): { scope: FieldScopedDomElement | null; ambiguous: boolean } {
+  ): { scope: FieldScopedDomElement | null; ambiguous: boolean; unrelatedOwner?: boolean } {
     let node: FieldScopedDomElement | null = anchor;
     for (let depth = 0; depth < MAX_CONTAINER_CLIMB && node; depth++) {
       const stats = scopeCandidateStats(node);
       const hasStableAttribute = node.tagName.toLowerCase() !== "label" && Boolean(collectStableAttributes(node));
-      const scopeDecision: FieldScopeAncestorTrace["scopeDecision"] =
+      let scopeDecision: FieldScopeAncestorTrace["scopeDecision"] =
         stats.compatibleCount === 0 ? "continue" : stats.compatibleCount === 1 ? "accepted" : "ambiguous";
+      if (scopeDecision === "accepted" && requiredCompatibility === "actionable" && depth >= UNRELATED_OWNER_MIN_DEPTH) {
+        const scopeNode: FieldScopedDomElement = node;
+        const owner = collectOwnerCandidatesIncludingSelf(scopeNode).find((el) => isCompatibleOwnerInScope(el, scopeNode));
+        if (owner && isOwnerNameUnrelated(owner)) scopeDecision = "unrelated_owner";
+      }
       if (trace) {
         trace.push({
           depth,
@@ -316,6 +361,8 @@ export function extractFieldScopedDomEvidence(
       }
       if (scopeDecision === "accepted") return { scope: node, ambiguous: false };
       if (scopeDecision === "ambiguous") return { scope: null, ambiguous: true };
+      // Fail closed: climbing further only adds candidates, it can never reach this field's owner.
+      if (scopeDecision === "unrelated_owner") return { scope: null, ambiguous: false, unrelatedOwner: true };
       if (isFieldGroupingBoundary(node)) return { scope: null, ambiguous: false };
       node = node.parentElement;
     }
@@ -349,6 +396,7 @@ export function extractFieldScopedDomEvidence(
   let anchorFound = false;
   let anchorTag: string | undefined;
   let scopeAmbiguous = false;
+  let scopeUnrelatedOwner = false;
   const ancestorTrace: FieldScopeAncestorTrace[] = [];
   // `displayAnchor` is the element that actually MATCHED (the label/legend/aria-owner/leaf text
   // node itself) -- reported in diagnostics as `anchorTag`. `climbStart` is where the ancestor
@@ -366,6 +414,7 @@ export function extractFieldScopedDomEvidence(
     }
     const result = findFieldScope(climbStart, capture ? ancestorTrace : undefined);
     if (result.ambiguous) scopeAmbiguous = true;
+    if (result.unrelatedOwner) scopeUnrelatedOwner = true;
     return result.scope;
   };
 
@@ -489,7 +538,11 @@ export function extractFieldScopedDomEvidence(
         ancestorsInspected,
         ancestorTrace,
         containerAccepted: false,
-        rejectReason: scopeAmbiguous ? "scope_ambiguous" : anchorFound ? "climb_exhausted" : "no_anchor_found",
+        rejectReason: scopeAmbiguous
+          ? "scope_ambiguous"
+          : scopeUnrelatedOwner
+            ? "unrelated_owner"
+            : anchorFound ? "climb_exhausted" : "no_anchor_found",
       },
     };
   }
@@ -523,7 +576,9 @@ export function extractFieldScopedDomEvidence(
   }
   // The accepted scope may itself be the actionable owner (the unique anchor's direct containing
   // element). That is the exact runtime target -- a self-owner, never a container+descendant pair.
-  const selfOwnerAccepted = isOwnerCandidate(scope) && isCompatibleForIntent(scope, deriveOwnerRole(scope));
+  const acceptedScope: FieldScopedDomElement = scope;
+  const selfOwnerAccepted = (isOwnerCandidate(acceptedScope) && isCompatibleForIntent(acceptedScope, deriveOwnerRole(acceptedScope)))
+    || isClickHandlerSelfOwner(acceptedScope);
 
   const containerEvidence: FieldContainerEvidence | undefined = certificationAncestor
     ? {
@@ -566,7 +621,7 @@ export function extractFieldScopedDomEvidence(
       visible: isOwnerVisible(el),
       disabled: isOwnerDisabled(el),
       editable: isOwnerEditable(el, ownerRole),
-      actionable: isOwnerActionable(el, ownerRole),
+      actionable: isOwnerActionable(el, ownerRole) || (el === acceptedScope && isClickHandlerSelfOwner(acceptedScope)),
       ...(stableDirectAttributes ? { stableDirectAttributes } : {}),
     };
   });

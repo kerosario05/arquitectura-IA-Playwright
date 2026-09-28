@@ -1,0 +1,9 @@
+{
+  "id": "0-roque-10",
+  "caseId": 0,
+  "title": "roque 10",
+  "source": "discovery",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "createdAt": "2026-09-28T18:20:26.341Z"
+}

@@ -250,6 +250,26 @@ describe("normalizeEvents", () => {
     assert.strictEqual(out.length, 1);
   });
 
+  test("drops a double-report that belongs to the same pointer gesture", () => {
+    const out = normalizeEvents([
+      ev({ kind: "tap", t: 1000, interactionId: "pointer-3", target: target("Ingresar") }),
+      ev({ kind: "tap", t: 1120, interactionId: "pointer-3", target: target("Ingresar") }),
+    ]);
+    assert.strictEqual(out.length, 1);
+  });
+
+  test("keeps fast repeated keypad presses that are separate pointer gestures", () => {
+    // Recording cd227d7b: "2 2" and "9 9 9" typed ~300ms apart on a virtual keypad.
+    const out = normalizeEvents([
+      ev({ kind: "tap", t: 238186, interactionId: "pointer-9", target: target("2") }),
+      ev({ kind: "tap", t: 238486, interactionId: "pointer-10", target: target("2") }),
+      ev({ kind: "tap", t: 238697, interactionId: "pointer-11", target: target("9") }),
+      ev({ kind: "tap", t: 239005, interactionId: "pointer-12", target: target("9") }),
+      ev({ kind: "tap", t: 239304, interactionId: "pointer-13", target: target("9") }),
+    ]);
+    assert.deepStrictEqual(out.map((event) => event.target?.label), ["2", "2", "9", "9", "9"]);
+  });
+
   test("keeps a deliberate second press outside the debounce window", () => {
     const out = normalizeEvents([
       ev({ kind: "tap", t: 1000, target: target("Ingresar") }),

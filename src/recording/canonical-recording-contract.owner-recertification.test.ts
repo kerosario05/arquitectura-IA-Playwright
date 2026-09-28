@@ -111,3 +111,75 @@ test("5. portal-comercial-shaped regression fixture: login -> surface transition
   assert.notEqual(postLoginAction.semanticField, "Iniciar sesión");
   assert.equal(postLoginAction.ownerRecertificationRequired, true);
 });
+
+/**
+ * Recording b56d2e4e (kiosko): "Generar Turno" is a card-shaped <button> (heading + description),
+ * so Capture V2 records no exact role locator, only a unique structural identity. Once the modal it
+ * lives in is registered as its own screen, the click is the first action on a new surface.
+ */
+function cardButtonTarget(extra: Partial<RecordedTarget> = {}): Partial<RecordedTarget> & { label: string } {
+  return {
+    label: "Generar Turno",
+    role: "button",
+    tag: "button",
+    attributes: {},
+    locators: [],
+    technicalTargetCandidates: [{
+      targetType: "structural",
+      locatorCandidates: [],
+      structuralContext: {
+        owner: { tag: "button" },
+        stableDirectAttributes: {},
+        stableDescendants: [],
+        semanticShape: ["div", "h3", "p"],
+        deterministicStructuralIdentity: true,
+        topologyTieBreakUnique: true,
+        structuralIdentityMatchCount: 1,
+      },
+      interactionEvidence: ["v2_click_owner"],
+      confidence: 0.85,
+      validatedByInteraction: true,
+    }],
+    ...extra,
+  } as Partial<RecordedTarget> & { label: string };
+}
+
+test("6. post-transition click on a card button with its own unique structural identity is admitted for runtime resolution", () => {
+  seq = 0;
+  const events: RecordedEvent[] = [
+    tapEvent({ screenKey: "surface-product", target: corroboratedTarget("Solicitar", "solicitar") }),
+    tapEvent({ screenKey: "surface-turn-modal", target: cardButtonTarget() }),
+  ];
+  const postTransition = buildCanonicalInteractions(events)[1];
+  assert.ok(!postTransition.ownerRecertificationRequired);
+  assert.equal(postTransition.resolutionState, "runtime_resolution_required");
+});
+
+test("7. the same structural evidence never readmits a field label inherited from the previous screen", () => {
+  seq = 0;
+  const events: RecordedEvent[] = [
+    tapEvent({ screenKey: "surface-login", target: corroboratedTarget("Iniciar sesión", "login-button") }),
+    tapEvent({ screenKey: "surface-requests", target: cardButtonTarget({ label: "Opción X", associatedField: "Iniciar sesión" }) }),
+  ];
+  const postTransition = buildCanonicalInteractions(events)[1];
+  assert.equal(postTransition.ownerRecertificationRequired, true);
+  assert.notEqual(postTransition.semanticField, "Iniciar sesión");
+});
+
+test("8. an ambiguous or non-unique structural identity is still not enough after a transition", () => {
+  for (const structural of [
+    { identityAmbiguous: true },
+    { topologyTieBreakUnique: false, structuralIdentityMatchCount: 2 },
+    { deterministicStructuralIdentity: false },
+  ]) {
+    seq = 0;
+    const base = cardButtonTarget();
+    const candidate = base.technicalTargetCandidates![0];
+    const target = { ...base, technicalTargetCandidates: [{ ...candidate, structuralContext: { ...candidate.structuralContext!, ...structural } }] };
+    const events: RecordedEvent[] = [
+      tapEvent({ screenKey: "surface-product", target: corroboratedTarget("Solicitar", "solicitar") }),
+      tapEvent({ screenKey: "surface-turn-modal", target }),
+    ];
+    assert.equal(buildCanonicalInteractions(events)[1].ownerRecertificationRequired, true, JSON.stringify(structural));
+  }
+});

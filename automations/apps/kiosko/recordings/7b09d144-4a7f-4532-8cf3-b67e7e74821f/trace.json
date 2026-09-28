@@ -1,0 +1,47 @@
+{
+  "recordingId": "7b09d144-4a7f-4532-8cf3-b67e7e74821f",
+  "projectSlug": "kiosko",
+  "appSlug": "kiosko",
+  "platform": "web",
+  "baseUrl": "https://172.27.4.50/",
+  "label": "roque 7",
+  "recordingGoal": {
+    "declaredGoal": "roque 7",
+    "normalizedGoal": "roque 7",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-09-26T01:47:29.165Z",
+  "status": "failed",
+  "events": [
+    {
+      "t": 28886,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "chrome-error://chromewebdata/",
+      "seq": 0
+    },
+    {
+      "t": 553555,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://172.27.4.50/",
+      "seq": 1
+    },
+    {
+      "t": 554210,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://172.27.4.50/",
+      "seq": 2
+    }
+  ],
+  "screens": [],
+  "errorMessage": "page.goto: net::ERR_CONNECTION_TIMED_OUT at https://172.27.4.50/\nCall log:\n\u001b[2m  - navigating to \"https://172.27.4.50/\", waiting until \"domcontentloaded\"\u001b[22m\n"
+}

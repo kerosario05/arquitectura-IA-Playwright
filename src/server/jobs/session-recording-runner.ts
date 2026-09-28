@@ -19,6 +19,8 @@ import {
   loadTrace,
   saveScenarios,
   saveTrace,
+  createCoalescedWriter,
+  type CoalescedWriter,
   saveSemanticRecording,
   toSummary,
 } from "../../recording/recording-store";
@@ -27,7 +29,6 @@ import {
   buildAlternativePathScenarios,
   buildGateNegatives,
   buildHappyPathScenario,
-  buildSegmentScenarios,
   capTitle,
   evaluateRecordingSuggestionQuality,
   filterGoalScopedSuggestions,
@@ -43,6 +44,13 @@ import {
 import { applyStory, enrichFromTrace } from "../../recording/trace-ai-enricher";
 import { createScenarioAiProvider } from "../../ai/ai-provider-factory";
 import type { RecordedEvent, RecordingDataPolicy, RecordingPlatform, RecordingSummary, SessionTrace } from "../../recording/session-trace.types";
+import {
+  getDerivationProgress,
+  startBackgroundDerivation,
+  type DerivationProgress,
+  type DerivationStage,
+  type DerivationStageUpdate,
+} from "./recording-derivation-progress";
 import {
   attachScenarioSuggestions,
   buildSemanticRecordingModel,
@@ -117,6 +125,7 @@ type ActiveRecording = {
   trace: SessionTrace;
   recorder: AndroidSessionRecorder | WebSessionRecorder;
   liveProjection?: LiveSemanticProjection;
+  traceWriter?: CoalescedWriter;
 };
 
 const active = new Map<string, ActiveRecording>();
@@ -312,6 +321,7 @@ export async function startRecording(params: StartRecordingParams): Promise<{
   onLog(`[recording:goal-lineage] backendRequestGoal=${JSON.stringify(params.recordingGoal)} jobGoal=${JSON.stringify(trace.recordingGoal?.declaredGoal)} traceGoal=${JSON.stringify(trace.recordingGoal?.normalizedGoal)}`);
 
   const framesDir = ensureFramesDir(recordingId);
+  const traceWriter = createCoalescedWriter(() => saveTrace(trace));
 
   try {
     let recorder: AndroidSessionRecorder | WebSessionRecorder;
@@ -340,13 +350,13 @@ export async function startRecording(params: StartRecordingParams): Promise<{
         sensitiveLabels: params.sensitiveLabels,
         onEvent: (event) => {
           trace.events.push(event);
-          saveTrace(trace);
+          traceWriter.schedule();
         },
         onScreen: (screen) => {
           const existingIndex = trace.screens.findIndex((item) => item.screenKey === screen.screenKey);
           if (existingIndex >= 0) trace.screens[existingIndex] = screen;
           else trace.screens.push(screen);
-          saveTrace(trace);
+          traceWriter.schedule();
         },
         onLog,
       });
@@ -360,13 +370,13 @@ export async function startRecording(params: StartRecordingParams): Promise<{
         sensitiveLabels: params.sensitiveLabels,
         onEvent: (event) => {
           trace.events.push(event);
-          saveTrace(trace);
+          traceWriter.schedule();
         },
         onScreen: (screen) => {
           const existingIndex = trace.screens.findIndex((item) => item.screenKey === screen.screenKey);
           if (existingIndex >= 0) trace.screens[existingIndex] = screen;
           else trace.screens.push(screen);
-          saveTrace(trace);
+          traceWriter.schedule();
         },
         onLog,
       });
@@ -385,7 +395,7 @@ export async function startRecording(params: StartRecordingParams): Promise<{
     trace.status = "recording";
     saveTrace(trace);
     onLog(`[recording:goal-lineage] persistedGoal=${JSON.stringify(loadTrace(trace.appSlug, trace.recordingId)?.recordingGoal?.declaredGoal)}`);
-    active.set(recordingId, { recordingId, jobId: job.id, trace, recorder });
+    active.set(recordingId, { recordingId, jobId: job.id, trace, recorder, traceWriter });
     onLog(`[recording] grabación ${recordingId} iniciada sobre ${target.appSlug} (${platform})`);
 
     return { recordingId, jobId: job.id, summary: toSummary(trace) };
@@ -393,6 +403,7 @@ export async function startRecording(params: StartRecordingParams): Promise<{
     const message = err instanceof Error ? err.message : String(err);
     trace.status = "failed";
     trace.errorMessage = message;
+    traceWriter.cancel();
     saveTrace(trace);
     jobStore.update(job.id, { status: "failed", errorMessage: message, completedAt: new Date().toISOString() });
     onLog(`[recording] fallo al iniciar: ${message}`);
@@ -402,12 +413,29 @@ export async function startRecording(params: StartRecordingParams): Promise<{
 
 export function recordingProgress(recordingId: string): {
   summary: RecordingSummary;
-  live: { events: number; screens: number; currentScreen: string; semanticRefreshCount: number; noiseRefreshSkipped: number };
+  live: { events: number; screens: number; currentScreen: string; semanticRefreshCount: number; noiseRefreshSkipped: number; stopping?: boolean; pendingCaptures?: number };
   scenarios: RecordedScenario[];
   semanticModel: SemanticRecordingModel;
 } | null {
   const entry = active.get(recordingId);
   if (!entry) return null;
+  // While Stop drains the capture queue, answer with the last projection plus how many captures
+  // are still pending -- never rebuild the whole semantic model on the event loop Stop needs.
+  if (entry.trace.status === "stopping") {
+    const pendingCaptures = entry.recorder instanceof WebSessionRecorder ? entry.recorder.pendingCaptures() : 0;
+    return {
+      summary: toSummary(entry.trace),
+      live: {
+        ...entry.recorder.snapshotProgress(),
+        semanticRefreshCount: entry.liveProjection?.refreshCount ?? 0,
+        noiseRefreshSkipped: entry.liveProjection?.noiseRefreshSkipped ?? 0,
+        stopping: true,
+        pendingCaptures,
+      },
+      scenarios: entry.liveProjection?.scenarios ?? [],
+      semanticModel: entry.liveProjection?.semanticModel ?? buildSemanticRecordingModel(entry.trace, []),
+    };
+  }
   const source = { events: [...entry.trace.events], screens: [...entry.trace.screens] };
   if (entry.liveProjection && !hasSignificantSemanticChange(entry.liveProjection.source, source)) {
     entry.liveProjection.noiseRefreshSkipped += 1;
@@ -483,6 +511,8 @@ export async function stopRecording(recordingId: string): Promise<RecordingSumma
 
   entry.trace.status = "stopping";
   const { events, screens } = await entry.recorder.stop();
+  // The final state is written just below; a pending live write would only race it.
+  entry.traceWriter?.cancel();
   const endedAt = new Date();
 
   entry.trace.events = events;
@@ -546,8 +576,14 @@ export type DeriveResult = {
 export async function deriveScenarios(
   appSlug: string,
   recordingId: string,
-  options: { title?: string } = {},
+  options: { title?: string; onProgress?: (update: DerivationStageUpdate) => void } = {},
 ): Promise<DeriveResult> {
+  const reportStage = (stage: DerivationStage, counts: { actionCount?: number; stepCount?: number } = {}) => {
+    try { options.onProgress?.({ stage, ...counts }); } catch { /* progress is observational only */ }
+  };
+  // Stages are CPU-bound; yielding between them lets progress polls (and every other request the
+  // server is handling) be answered while a long recording is being generated.
+  const yieldToEventLoop = () => new Promise<void>((resolve) => setImmediate(resolve));
   console.info("[recording-materialization]", { recordingId, appSlug, phase: "derive_start" });
   const trace = loadTrace(appSlug, recordingId);
   if (!trace) {
@@ -567,9 +603,17 @@ export async function deriveScenarios(
   };
 
   try {
+    reportStage("normalizing");
+    await yieldToEventLoop();
     const events = normalizeEvents(trace.events);
+    const actionCount = countFunctionalActions(events);
+    reportStage("building_steps", { actionCount });
+    await yieldToEventLoop();
     const segments = segmentTrace(events, trace);
     const happyPath = buildHappyPathScenario(trace, events, { title: options.title });
+    const stepCount = happyPath.testRailSteps.length;
+    reportStage("ai_enrichment", { actionCount, stepCount });
+    await yieldToEventLoop();
 
     let ai;
     try {
@@ -654,7 +698,9 @@ export async function deriveScenarios(
     // everything the recording only justifies.
     // Segments remain derivation evidence only. A recording goal has one observed primary;
     // top-level suggestions are filtered and deduplicated separately.
-    const segmentScenarios = buildSegmentScenarios(trace, events, segments, canonicalPrimary);
+    // buildSegmentScenarios used to run here (a full happy-path build per screen segment) only to
+    // print its count below; the segment count itself is the same evidence at no cost.
+    const internalSegmentCount = segments.length;
     const alternatives = buildAlternativePathScenarios(trace, events, canonicalPrimary);
     const scoped = filterGoalScopedSuggestions(
       trace.recordingGoal?.normalizedGoal ?? trace.label,
@@ -770,13 +816,14 @@ export async function deriveScenarios(
     // (recording-store.ts returns 0 when the scenarios file doesn't exist yet), which is exactly
     // the "appears then hides" flicker the frontend showed. Saving scenarios FIRST closes that
     // window: no reader can ever observe the semantic model as ready before its scenarios exist.
+    reportStage("saving", { actionCount, stepCount });
     console.info("[recording-materialization]", { recordingId, appSlug, phase: "save_start", scenarioCount: scenarios.length });
     saveScenarios(appSlug, recordingId, scenarios);
     console.info("[recording-materialization]", { recordingId, appSlug, phase: "save_done", scenarioCount: scenarios.length });
     saveSemanticRecording(semantic);
     onLog(
       `[recording] escenarios: 1 principal observado, ${scoped.suggestions.length} sugerencias relevantes; ` +
-        `segmentos internos=${segmentScenarios.length}, candidatos_rechazados=${scoped.irrelevantCandidatesRejected}, ` +
+        `segmentos internos=${internalSegmentCount}, candidatos_rechazados=${scoped.irrelevantCandidatesRejected}, ` +
         `duplicados_eliminados=${scoped.duplicatesRemoved}`,
     );
 
@@ -796,6 +843,49 @@ export async function deriveScenarios(
       saveTrace(discardFrames(current));
     }
   }
+}
+
+const FUNCTIONAL_ACTION_KINDS = new Set(["tap", "fill", "select", "press"]);
+
+function countFunctionalActions(events: readonly RecordedEvent[]): number {
+  return events.filter((event) => FUNCTIONAL_ACTION_KINDS.has(event.kind)).length;
+}
+
+/**
+ * Background variant of `deriveScenarios` for the QA Lab panel: validates synchronously (so a
+ * missing recording/goal is still an immediate 4xx), then returns at once and reports progress
+ * through `getRecordingDerivation`. A derivation already running is returned, never duplicated.
+ */
+export function startDeriveScenarios(
+  appSlug: string,
+  recordingId: string,
+  options: { title?: string } = {},
+): DerivationProgress {
+  const running = getDerivationProgress(recordingId);
+  if (running?.status === "deriving") return running;
+  const trace = loadTrace(appSlug, recordingId);
+  if (!trace) throw new RecordingError("RECORDING_NOT_FOUND", `No se encontró la grabación ${recordingId}`);
+  if (trace.status === "recording" || trace.status === "starting") {
+    throw new RecordingError("RECORDING_IN_PROGRESS", "Detén la grabación antes de generar escenarios");
+  }
+  if (!(trace.recordingGoal?.declaredGoal?.trim() || trace.recordingGoal?.normalizedGoal?.trim())) {
+    throw new RecordingError("MISSING_RECORDING_GOAL", "No se puede generar escenarios sin un objetivo de grabación declarado");
+  }
+  return startBackgroundDerivation(recordingId, async (onProgress) => {
+    const result = await deriveScenarios(appSlug, recordingId, { ...options, onProgress });
+    return { scenarioCount: result.scenarios.length };
+  });
+}
+
+/**
+ * Progress of the step generation. Falls back to the persisted trace when this process has no
+ * in-memory record (e.g. after a restart): "derived" is durable, anything else reads as idle.
+ */
+export function getRecordingDerivation(appSlug: string, recordingId: string): DerivationProgress | { recordingId: string; status: "idle" | "derived" } {
+  const live = getDerivationProgress(recordingId);
+  if (live) return live;
+  const trace = loadTrace(appSlug, recordingId);
+  return { recordingId, status: trace?.status === "derived" ? "derived" : "idle" };
 }
 
 export function getRecordingScenarios(appSlug: string, recordingId: string): RecordedScenario[] {

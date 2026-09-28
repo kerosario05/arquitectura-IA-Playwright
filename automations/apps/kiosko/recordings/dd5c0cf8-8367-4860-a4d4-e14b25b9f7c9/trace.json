@@ -1,0 +1,1145 @@
+{
+  "recordingId": "dd5c0cf8-8367-4860-a4d4-e14b25b9f7c9",
+  "projectSlug": "kiosko",
+  "appSlug": "kiosko",
+  "platform": "web",
+  "baseUrl": "https://172.27.4.50/",
+  "label": "roque 3",
+  "recordingGoal": {
+    "declaredGoal": "roque 3",
+    "normalizedGoal": "roque 3",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-09-25T20:36:37.420Z",
+  "status": "stopped",
+  "events": [
+    {
+      "t": 16052,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://172.27.4.50/",
+      "seq": 0
+    },
+    {
+      "t": 17678,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://172.27.4.50/",
+      "seq": 1
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "9f12e61beacd",
+      "url": "https://172.27.4.50/",
+      "framePath": ".artifacts\\tmp\\recordings\\dd5c0cf8-8367-4860-a4d4-e14b25b9f7c9\\0002-launch.png",
+      "seq": 2
+    },
+    {
+      "t": 22720,
+      "interactionId": "pointer-1",
+      "kind": "note",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "target": {
+        "label": "Explora nuestros productos",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Explora nuestros productos\"",
+      "observationType": "pointer",
+      "seq": 3
+    },
+    {
+      "t": 25601,
+      "interactionId": "pointer-1",
+      "kind": "tap",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "target": {
+        "label": "Explora nuestros productos",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Explora nuestros productos",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Explora nuestros productos",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Explora nuestros productos"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"circle\",1],[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 4
+    },
+    {
+      "t": 25633,
+      "kind": "navigate",
+      "screenKey": "9f12e61beacd",
+      "url": "https://172.27.4.50/product-catalog",
+      "seq": 5
+    },
+    {
+      "t": 29108,
+      "kind": "navigate",
+      "screenKey": "9f12e61beacd",
+      "url": "https://172.27.4.50/product-subcategory?category=cards",
+      "seq": 6
+    },
+    {
+      "t": 31642,
+      "kind": "navigate",
+      "screenKey": "9f12e61beacd",
+      "url": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+      "seq": 7
+    },
+    {
+      "t": 34999,
+      "kind": "navigate",
+      "screenKey": "9f12e61beacd",
+      "url": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+      "seq": 8
+    },
+    {
+      "t": 115176,
+      "interactionId": "pointer-2",
+      "kind": "note",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8d614ab9cdba519d46ff88c50a65f8eac7b8ef79f97220a4bf05adc5fc32c518",
+      "url": "https://172.27.4.50/product-catalog",
+      "target": {
+        "label": "Tarjetas",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Tarjetas\"",
+      "observationType": "pointer",
+      "seq": 9
+    },
+    {
+      "t": 115182,
+      "interactionId": "pointer-2",
+      "kind": "tap",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8d614ab9cdba519d46ff88c50a65f8eac7b8ef79f97220a4bf05adc5fc32c518",
+      "url": "https://172.27.4.50/product-catalog",
+      "target": {
+        "label": "Tarjetas",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Tarjetas",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Tarjetas",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"line\",1],[\"path\",1],[\"rect\",1],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"line\\\",1],[\\\"path\\\",1],[\\\"rect\\\",1],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 10
+    },
+    {
+      "t": 115263,
+      "kind": "navigate",
+      "screenKey": "9f12e61beacd",
+      "url": "https://172.27.4.50/",
+      "seq": 11
+    },
+    {
+      "t": 115803,
+      "interactionId": "pointer-3",
+      "kind": "note",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/product-subcategory?category=cards",
+      "target": {
+        "label": "Tarjeta de Crédito",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Tarjeta de Crédito\"",
+      "observationType": "pointer",
+      "seq": 12
+    },
+    {
+      "t": 115812,
+      "interactionId": "pointer-3",
+      "kind": "tap",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/product-subcategory?category=cards",
+      "target": {
+        "label": "Tarjeta de Crédito",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Tarjeta de Crédito",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Tarjeta de Crédito",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"line\",1],[\"path\",1],[\"rect\",1],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"line\\\",1],[\\\"path\\\",1],[\\\"rect\\\",1],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 13
+    },
+    {
+      "t": 116301,
+      "interactionId": "pointer-4",
+      "kind": "note",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+      "target": {
+        "label": "Tarjeta Crédito Visa Clásica",
+        "tag": "div",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Tarjeta Crédito Visa Clásica\"",
+      "observationType": "pointer",
+      "seq": 14
+    },
+    {
+      "t": 116309,
+      "interactionId": "pointer-4",
+      "kind": "tap",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+      "target": {
+        "label": "Tarjeta Crédito Visa Clásica",
+        "tag": "div",
+        "locators": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "div"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "img",
+                  "stableAttributes": {
+                    "alt": "Tarjeta Crédito Visa Clásica",
+                    "src": "/assets/images/tarjetas-de-credito-visa-clasica.png"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "div",
+                "h3"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",3],[\"h3\",1]],\"descendantEntries\":[[\"div\",11],[\"h3\",1],[\"img\",1],[\"path\",4],[\"span\",4],[\"svg\",4]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"div\"},\"stableDirectAttributes\":{},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"img\",\"stableAttributes\":{\"src\":\"/assets/images/tarjetas-de-credito-visa-clasica.png\"}}],\"semanticShape\":[\"div\",\"h3\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",3],[\\\"h3\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",11],[\\\"h3\\\",1],[\\\"img\\\",1],[\\\"path\\\",4],[\\\"span\\\",4],[\\\"svg\\\",4]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner",
+              "v2_framework_actionable_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 15
+    },
+    {
+      "t": 116777,
+      "interactionId": "pointer-5",
+      "kind": "note",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+      "target": {
+        "label": "Solicitar",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Solicitar\"",
+      "observationType": "pointer",
+      "seq": 16
+    },
+    {
+      "t": 116785,
+      "interactionId": "pointer-5",
+      "kind": "tap",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+      "target": {
+        "label": "Solicitar",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Solicitar",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Solicitar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 3,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 3
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 17
+    },
+    {
+      "t": 117284,
+      "interactionId": "pointer-6",
+      "kind": "note",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+      "target": {
+        "label": "Generar Turno",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Generar Turno",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Generar Turno\"",
+      "observationType": "pointer",
+      "seq": 18
+    },
+    {
+      "t": 117293,
+      "interactionId": "pointer-6",
+      "kind": "tap",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+      "target": {
+        "label": "Generar Turno",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div",
+                "h3",
+                "p"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1],[\"h3\",1],[\"p\",1]],\"descendantEntries\":[[\"div\",2],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\",\"h3\",\"p\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1],[\\\"h3\\\",1],[\\\"p\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",2],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Generar Turno",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 19
+    },
+    {
+      "t": 117773,
+      "interactionId": "pointer-7",
+      "kind": "note",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+      "target": {
+        "label": "4",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "4",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"4\"",
+      "observationType": "pointer",
+      "seq": 20
+    },
+    {
+      "t": 117781,
+      "interactionId": "pointer-7",
+      "kind": "tap",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+      "target": {
+        "label": "4",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|4",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "4",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 21
+    },
+    {
+      "t": 118251,
+      "interactionId": "pointer-8",
+      "kind": "note",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+      "target": {
+        "label": "0",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "0",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"0\"",
+      "observationType": "pointer",
+      "seq": 22
+    },
+    {
+      "t": 118261,
+      "interactionId": "pointer-8",
+      "kind": "tap",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+      "target": {
+        "label": "0",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|0",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|0",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "0",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 23
+    },
+    {
+      "t": 118763,
+      "interactionId": "pointer-9",
+      "kind": "note",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+      "target": {
+        "label": "2",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "2",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"2\"",
+      "observationType": "pointer",
+      "seq": 24
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "9f12e61beacd",
+      "title": "¡Hola!",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "firstSeenAt": 17860,
+      "controls": [
+        {
+          "label": "Estados de cuenta",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Estados de cuenta"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Estados de cuenta",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Consulta de balance",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Consulta de balance"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Consulta de balance",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cartas y certificaciones",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Cartas y certificaciones"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cartas y certificaciones",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Canje de Puntos",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Canje de Puntos"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Canje de Puntos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Explora nuestros productos",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Explora nuestros productos"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Explora nuestros productos",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "¡Hola!",
+        "Estados de cuenta",
+        "Consulta de balance"
+      ],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "d36b9b70befb",
+      "title": "Más detalles del producto",
+      "fingerprint": "8d614ab9cdba519d46ff88c50a65f8eac7b8ef79f97220a4bf05adc5fc32c518",
+      "url": "https://172.27.4.50/product-extended",
+      "firstSeenAt": 58892,
+      "controls": [
+        {
+          "label": "Finalizar sesión",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Finalizar sesión ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Volver",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Volver ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Solicitar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Solicitar ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "← Borrar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "← Borrar",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Espacio",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Espacio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Limpiar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Limpiar",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Atrás",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Atrás ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Generar Turno",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Generar Turno",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Más detalles del producto",
+        "Tarjeta Crédito Visa Clásica",
+        "Beneficios"
+      ],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "a55a1c9d0381",
+      "title": "Más detalles del producto",
+      "fingerprint": "8d614ab9cdba519d46ff88c50a65f8eac7b8ef79f97220a4bf05adc5fc32c518",
+      "url": "https://172.27.4.50/product-extended",
+      "firstSeenAt": 115167,
+      "controls": [
+        {
+          "label": "Finalizar sesión",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Finalizar sesión ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Volver",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Volver ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Solicitar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Solicitar ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "← Borrar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "← Borrar",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Espacio",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Espacio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Limpiar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Limpiar",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Atrás",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Atrás ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Generar Turno",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Generar Turno ",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Más detalles del producto",
+        "Tarjeta Crédito Visa Clásica",
+        "Beneficios"
+      ],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    }
+  ],
+  "endedAt": "2026-09-25T20:38:39.013Z",
+  "durationMs": 121593
+}

@@ -737,6 +737,32 @@ function hasStructuralIdentityCorroboration(target: RecordedTarget | undefined):
   return isTechnicalIdentityAdmissible(target);
 }
 
+/**
+ * Post-transition corroboration for a CLICK whose identity is its own content, never an
+ * ancestor-walk field label: a deterministic, unambiguous, capture-unique structural identity
+ * recorded on THIS click's own target.
+ *
+ * FIRST_LOSS fix (recording b56d2e4e, kiosko "Generar Turno"): the button is a card (heading +
+ * description), so Capture V2 deliberately emits no exact role locator for it and records a unique
+ * structural identity instead. Once the modal it lives in was registered as its own screen, the
+ * click became "first action on a new screen" and was rejected as uncorroborated -- although the
+ * structural evidence was captured on this very target, which is exactly what recertification asks
+ * for. Scoped to clicks without associatedField/headerContext so a field name inherited from the
+ * previous screen is never readmitted through this path; the live resolver still re-counts and
+ * fails closed on 0 or >1 matches.
+ */
+function hasOwnClickStructuralIdentity(event: RecordedEvent, target: RecordedTarget | undefined): boolean {
+  if (event.kind !== "tap" || !target || target.associatedField || target.headerContext) return false;
+  return (target.technicalTargetCandidates ?? []).some((candidate) => {
+    const structural = candidate.structuralContext;
+    return structural?.deterministicStructuralIdentity === true
+      && structural.identityAmbiguous !== true
+      && (structural.structuralIdentityMatchCount === 1
+        || structural.captureTargetMatchCount === 1
+        || structural.topologyTieBreakUnique === true);
+  });
+}
+
 function stableControlOf(event: RecordedEvent): string {
   const target = event.target;
   return [event.screenKey, target?.gridRef, scopeOf(target), target?.cellRef, fieldOf(target), target?.locators?.[0]?.strategy, target?.locators?.[0]?.value]
@@ -1104,7 +1130,7 @@ export function buildCanonicalInteractions(
     // reused, and the check itself never compares label text.
     const isPostTransition = lastFunctionalScreenKey !== undefined && lastFunctionalScreenKey !== event.screenKey;
     const structurallyCorroborated = hasStructuralIdentityCorroboration(target);
-    const ownerRecertificationRequired = isPostTransition && !structurallyCorroborated;
+    const ownerRecertificationRequired = isPostTransition && !structurallyCorroborated && !hasOwnClickStructuralIdentity(event, target);
     // Independent of transitions: a generic fallback label ("control", "campo", ...) with no
     // technical identity of its own is never admitted as executable authority either — this is
     // the same admission decision "control"/"Campo pendiente de identificar" must fail.

@@ -55,6 +55,47 @@ function semanticPath(appSlug: string, recordingId: string): string {
   return path.join(recordingDir(appSlug, recordingId), "semantic-recording.json");
 }
 
+export type CoalescedWriter = {
+  /** Marks the data dirty; the write happens at most once per interval. */
+  schedule(): void;
+  /** Writes now if anything is pending. */
+  flush(): void;
+  /** Drops a pending write (the caller is about to write the final state itself). */
+  cancel(): void;
+};
+
+/**
+ * Coalesces live-recording trace writes. Each captured event or screen used to rewrite the whole
+ * trace.json synchronously (6-7 full rewrites per click), which grows with the trace and blocks the
+ * event loop that also serves the capture bindings. At most one write per interval now; at worst
+ * the last `intervalMs` of a crashed live session is missing from disk.
+ */
+export function createCoalescedWriter(write: () => void, intervalMs = 1_000): CoalescedWriter {
+  let timer: NodeJS.Timeout | undefined;
+  let dirty = false;
+  const run = () => {
+    timer = undefined;
+    if (!dirty) return;
+    dirty = false;
+    write();
+  };
+  return {
+    schedule() {
+      dirty = true;
+      if (!timer) timer = setTimeout(run, intervalMs);
+    },
+    flush() {
+      if (timer) clearTimeout(timer);
+      run();
+    },
+    cancel() {
+      if (timer) clearTimeout(timer);
+      timer = undefined;
+      dirty = false;
+    },
+  };
+}
+
 export function saveTrace(trace: SessionTrace): void {
   const dir = recordingDir(trace.appSlug, trace.recordingId);
   fs.mkdirSync(dir, { recursive: true });

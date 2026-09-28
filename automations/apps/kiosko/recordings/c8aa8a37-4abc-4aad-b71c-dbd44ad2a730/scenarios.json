@@ -1,0 +1,326 @@
+[
+  {
+    "scenarioId": "REC-C8AA8A37-01",
+    "title": "roque 6",
+    "description": "Recorrido observado para completar \"roque 6\". Se registraron 2 acciones funcionales.",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://172.27.4.50/",
+        "description": "Navegar a https://172.27.4.50/"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Estados de cuenta"
+        },
+        "description": "Presionar \"Estados de cuenta\"",
+        "interactionId": "interaction-6"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|← Borrar"
+        },
+        "description": "Presionar \"← Borrar\"",
+        "interactionId": "interaction-8"
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Presionar \"Estados de cuenta\"",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "renderedStep": "Presionar \"Estados de cuenta\"",
+        "interactionId": "interaction-6",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "routeAfter": "https://172.27.4.50/client-identification",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 2
+      },
+      {
+        "content": "Presionar \"← Borrar\"",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "renderedStep": "Presionar \"← Borrar\"",
+        "interactionId": "interaction-8",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/client-identification",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 3
+      }
+    ],
+    "requiredData": [],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"Estados de cuenta\"",
+        "strategy": "role",
+        "value": "button|Estados de cuenta"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Presionar \"← Borrar\"",
+        "strategy": "role",
+        "value": "button|← Borrar"
+      }
+    ],
+    "sourceRecordingId": "c8aa8a37-4abc-4aad-b71c-dbd44ad2a730",
+    "hasUncertainSteps": false,
+    "primary": true,
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7",
+      "event-8"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": false,
+    "functionalReadiness": true,
+    "technicalReadiness": true,
+    "expectedResultCandidate": "La aplicación carga su pantalla inicial",
+    "oracleAuthority": "observed_only",
+    "confidence": 0.95,
+    "scenarioStepCount": 3,
+    "functionalActionCount": 2,
+    "nonUserSetupSteps": 1,
+    "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
+    "scenarioGoal": "roque 6",
+    "stateSequenceValid": true,
+    "stateSequenceIssues": [],
+    "postGoalObservations": [],
+    "goalContract": {
+      "nonGeneric": true,
+      "goalCoherent": true,
+      "mutationIntentExpressed": true
+    },
+    "replayEligible": true,
+    "canonicalInteractions": [
+      {
+        "id": "interaction-1",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-1"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-2",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-2"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-6",
+        "controlIdentity": "9f12e61beacd|Estados de cuenta|role|button|Estados de cuenta",
+        "semanticField": "Estados de cuenta",
+        "action": "click",
+        "valueKey": "estados_de_cuenta",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Estados de cuenta"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Estados de cuenta",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Estados de cuenta"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",5],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",5],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Estados de cuenta\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "routeAfter": "https://172.27.4.50/client-identification",
+        "stateScope": "9f12e61beacd",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-8",
+        "controlIdentity": "9f12e61beacd|← Borrar|role|button|← Borrar",
+        "semanticField": "← Borrar",
+        "action": "click",
+        "valueKey": "borrar",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "technicalTargetRefs": [
+          "role:button|← Borrar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|← Borrar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "← Borrar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"← Borrar\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/client-identification",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      }
+    ],
+    "entityActionBlocks": [],
+    "readiness": {
+      "functionalReadiness": true,
+      "dataReadiness": true,
+      "technicalReadiness": true,
+      "oracleReadiness": true,
+      "reviewReadiness": true,
+      "publicationContentReadiness": true,
+      "executionReadiness": true,
+      "publicationReadiness": true,
+      "missingInputs": [],
+      "datasetAuthorityMismatches": [],
+      "dataReadinessReasons": []
+    },
+    "technicalKnowledgeRefs": [],
+    "runtimeInputRequirements": [],
+    "runtimeDataset": {
+      "scenarioId": "REC-C8AA8A37-01",
+      "requirements": [],
+      "resolvedValues": {},
+      "missingValues": []
+    },
+    "mutationOpportunities": []
+  }
+]

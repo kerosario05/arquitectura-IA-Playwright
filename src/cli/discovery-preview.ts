@@ -12,6 +12,8 @@ import type { TestScenario } from "../types/testrail.types";
 import { RunEvidenceRecorder } from "../evidence/run-evidence-recorder";
 import { loadEvidenceConfig } from "../evidence/evidence-types";
 import { MAX_SCENARIO_ATTEMPTS, shouldRetryScenario } from "../discovery/pre-business-retry-policy";
+import { APPLICATION_HTTP_FAILURE_REASON } from "../discovery/application-http-failure";
+import { parseStepIntent } from "../discovery/step-intent-parser";
 
 export type PreviewCliArgs = {
   input: string;
@@ -74,6 +76,7 @@ type PreviewCaseResult = PreviewResult["cases"][number] & {
   model?: string | null;
   failedTargets?: string[];
   failedAssertions?: string[];
+  failedReason?: string;
   failureType?: string;
   phase?: string;
   appSlug?: string;
@@ -244,6 +247,10 @@ export function resolvePreviewCompletion(
   };
 }
 
+export function isApplicationFailureReason(failedReason: unknown): boolean {
+  return failedReason === APPLICATION_HTTP_FAILURE_REASON || failedReason === "application_error_visible";
+}
+
 export function classifyPreviewFailure(caseRes: PreviewCaseResult): {
   failureType: string;
   phase: string;
@@ -251,6 +258,12 @@ export function classifyPreviewFailure(caseRes: PreviewCaseResult): {
   const errorMsg = String(caseRes.error ?? "").toLowerCase();
   const promotionReason = String(caseRes.promotionReason ?? "").toLowerCase();
   const joined = `${errorMsg} ${promotionReason}`;
+
+  // The application under test rejected the action (HTTP error or a visible error): a defect of
+  // the application, never an automation/locator problem.
+  if (isApplicationFailureReason(caseRes.failedReason)) {
+    return { failureType: "application_error", phase: "application_response" };
+  }
 
   // Check for conditional assertion without data requirement first
   if (joined.includes("conditional_assertion_without_data") || (caseRes as any).conditionalAssertion && (caseRes as any).conditionalRisk === "high") {
@@ -387,7 +400,8 @@ export function buildPreviewFailureGroups(results: PreviewResult["cases"]) {
     promotion_failed: 0,
     automation_not_ready: 0,
     route_profile_missing: 0,
-    promotion_not_applicable: 0
+    promotion_not_applicable: 0,
+    application_error: 0
   };
 
   for (const caseRes of results as Array<any>) {
@@ -587,6 +601,30 @@ async function loadVirtualCases(inputPath: string): Promise<VirtualCase[]> {
   return data as VirtualCase[];
 }
 
+/**
+ * Recording replay: the executable steps are the recording contract's actions only, so the
+ * scenario's observable outcome ("Se muestra \"¡Hola!\"") was never checked live. The promotion
+ * gate then found it unbacked (oracleType=unsupported_or_unresolved) and failed a run whose every
+ * action had passed (run c47711b8, recording d4a2af4d). An expected result that states visible
+ * text becomes one final assertion step after the last action, so discovery verifies it.
+ * Anything that is not a concrete, quoted observable (free prose, multi-line criteria) is left as
+ * it was.
+ */
+export function buildRecordingOutcomeAssertionStep(expectedResult: string | undefined, index: number) {
+  const text = expectedResult?.trim();
+  if (!text || text.includes("\n")) return undefined;
+  const assertion = parseStepIntent(text).find((intent) => intent.type === "assertion" && intent.actionTarget && !intent.isOptional);
+  if (!assertion) return undefined;
+  // Positive by construction: the recording observed this text on screen.
+  return { index, action: text, description: text, expected: "", dataHints: [] as string[], polarity: "positive" as const, recordingOutcomeAssertion: true as const };
+}
+
+function withRecordingOutcomeAssertion<T extends { index: number }>(steps: T[], expectedResult: string | undefined): Array<T | NonNullable<ReturnType<typeof buildRecordingOutcomeAssertionStep>>> {
+  const lastIndex = steps.reduce((max, step) => Math.max(max, step.index), 0);
+  const outcome = buildRecordingOutcomeAssertionStep(expectedResult, lastIndex + 1);
+  return outcome ? [...steps, outcome] : steps;
+}
+
 export function virtualCaseToTestScenario(vc: VirtualCase, routeProfile?: McpRouteProfile): TestScenario {
   const embeddedCaseId = typeof vc.testRailCaseId === "number" && Number.isInteger(vc.testRailCaseId) && vc.testRailCaseId > 0
     ? vc.testRailCaseId
@@ -639,7 +677,7 @@ export function virtualCaseToTestScenario(vc: VirtualCase, routeProfile?: McpRou
     preconditions: vc.preconditions.join("\n"),
     authIntent: vc.authIntent,
     negativeOracle: vc.negativeOracle,
-    steps: recordingActions.length > 0 ? recordingActions.map(({ action: contractAction, stepIndex }) => {
+    steps: recordingActions.length > 0 ? withRecordingOutcomeAssertion(recordingActions.map(({ action: contractAction, stepIndex }) => {
       const requirementRefs = refsByStep.get(stepIndex) ?? refsByStep.get(stepIndex - 1);
       const canonicalPolarities = (requirementRefs ?? [])
         .map((requirementId) => vc.canonicalRequirements?.find((requirement) => requirement.requirementId === requirementId)?.polarity)
@@ -667,7 +705,7 @@ export function virtualCaseToTestScenario(vc: VirtualCase, routeProfile?: McpRou
       ...(contractAction?.controlIdentity ? { controlIdentity: contractAction.controlIdentity } : {}),
       ...(contractAction?.actionType ? { recordingActionType: contractAction.actionType } : {}),
       };
-    }) : vc.steps.map((step, index) => ({
+    }), vc.expectedResult) : vc.steps.map((step, index) => ({
       index,
       action: step,
       expected: "",
@@ -721,7 +759,7 @@ function getPreBusinessFailureSignals(workflowResult: any) {
   const authRejected = authenticationOutcome?.classification === "AUTH_REJECTED"
     || authStatus === 401
     || authStatus === 403;
-  const applicationError = failedReason === "application_error_visible"
+  const applicationError = isApplicationFailureReason(failedReason)
     || (caseResult.steps ?? []).some((step: any) => step?.postActionOutcomeStatus === "application_error");
   const boundaryStepIndex = typeof caseResult.failedAtStep === "number" ? caseResult.failedAtStep : undefined;
   const functionalBusinessExecutionStarted = (caseResult.steps ?? []).some((step: any) =>
@@ -908,6 +946,10 @@ async function runPreviewCase(
       failedAtStep: cr.failedAtStep,
       failedTarget: cr.failedTarget,
       failedReason: cr.failedReason,
+      ...(isApplicationFailureReason(cr.failedReason) ? {
+        failureOrigin: "application",
+        rawError: (cr.steps || []).find((s: { postActionOutcomeStatus?: string }) => s.postActionOutcomeStatus === "application_error")?.error,
+      } : {}),
       evidenceDir: cr.evidenceDir,
       stepResults,
     }));
@@ -953,6 +995,7 @@ async function runPreviewCase(
       recordedScenarioId: vc.recordedScenarioId,
       status: eventStatus,
       discoveryStatus: workflowResult.caseResult.status,
+      failedReason: workflowResult.caseResult.failedReason,
       promotionStatus: workflowResult.promotionStatus,
       promotionReason: (workflowResult as any).promotionReason || (isPassed ? "" : completion.reason),
       specGenerationStatus: completion.specGenerationStatus,

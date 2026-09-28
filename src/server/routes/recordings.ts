@@ -15,6 +15,8 @@ import {
 import {
   RecordingError,
   deriveScenarios,
+  getRecordingDerivation,
+  startDeriveScenarios,
   getActiveRecording,
   executeRecordingAction,
   recordingProgress,
@@ -359,10 +361,31 @@ recordingsRouter.post("/:recordingId/derive", async (req, res) => {
       return;
     }
     const appSlug = await appSlugFor(projectSlug);
-    const result = await deriveScenarios(appSlug, req.params.recordingId, {
-      title: typeof body.title === "string" ? body.title : undefined,
-    });
+    const title = typeof body.title === "string" ? body.title : undefined;
+    // async=true: generation runs in the background and the caller polls
+    // GET /:recordingId/derivation -- a long recording no longer outlives the HTTP request.
+    if (body.async === true || req.query.async === "true") {
+      const derivation = startDeriveScenarios(appSlug, req.params.recordingId, { title });
+      res.status(202).json({ ok: true, derivation });
+      return;
+    }
+    const result = await deriveScenarios(appSlug, req.params.recordingId, { title });
     res.json({ ok: true, ...result });
+  } catch (err) {
+    handle(res, err);
+  }
+});
+
+// GET /api/recordings/:recordingId/derivation — progress of the step generation.
+recordingsRouter.get("/:recordingId/derivation", async (req, res) => {
+  try {
+    const projectSlug = String(req.query.projectSlug ?? "").trim();
+    if (!projectSlug) {
+      sendError(res, 400, "MISSING_PROJECT_SLUG", "projectSlug es obligatorio");
+      return;
+    }
+    const appSlug = await appSlugFor(projectSlug);
+    res.json({ ok: true, derivation: getRecordingDerivation(appSlug, req.params.recordingId) });
   } catch (err) {
     handle(res, err);
   }
@@ -388,6 +411,9 @@ recordingsRouter.get("/:recordingId/scenarios", async (req, res) => {
         semanticReady: Boolean(loadSemanticRecording(appSlug, req.params.recordingId)),
         scenariosReady: scenarios.length > 0,
       },
+      // scenariosReady is already true with the provisional scenario saved at Stop; this says
+      // whether step generation is still running, finished or failed.
+      derivation: getRecordingDerivation(appSlug, req.params.recordingId),
     });
   } catch (err) {
     handle(res, err);

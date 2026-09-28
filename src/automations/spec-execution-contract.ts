@@ -658,7 +658,9 @@ function classifyScenarioAction(action: string, canonicalAssertion?: ScenarioSte
   if (/^(wait|esperar)\b/.test(lower)) return "wait";
   if (/^(asserturl|validar\s+url)\b/.test(lower)) return "assertUrl";
   if (/^(asserttext)\b/.test(lower)) return "assertText";
-  if (/^(assert|assertvisible|validar|validate|verificar|verify|comprobar|confirmar|expect|mostrar|muestra|visible|se\s+muestr|aparezc|existe|existan)\b/.test(lower)) return "assertVisible";
+  // Verb stems carry \w* so the trailing \b can match: "se\s+muestr\b" never matched "se muestra",
+  // which left every recorded `Se muestra "..."` outcome as a noop (run verify-20260928134856).
+  if (/^(assert|assertvisible|validar|validate|verificar|verify|comprobar|confirmar|expect|mostrar|muestra|visible|se\s+muestr\w*|aparezc\w*|existe|existan)\b/.test(lower)) return "assertVisible";
   return "noop";
 }
 
@@ -1127,6 +1129,9 @@ export function buildSpecExecutionContract(
         childExpectations: scenarioStep.canonicalAssertion.childExpectations,
         requirementRefs: canonicalIds,
       } : canonicalIds.length > 0 ? { requirementRefs: canonicalIds } : {}),
+      // A plain scenario assertion (no canonical assertion) keeps its own explicit polarity, so a
+      // compiler can tell "se muestra" from "no se muestra" without guessing from text.
+      ...(isAssertion && !scenarioStep.canonicalAssertion && scenarioStep.polarity ? { polarity: scenarioStep.polarity } : {}),
       sourceActionStepIndex: oracle?.sourceActionStepIndex,
       resolvedExecutionTarget,
       evidenceRefs: oracleResult.evidenceRefs

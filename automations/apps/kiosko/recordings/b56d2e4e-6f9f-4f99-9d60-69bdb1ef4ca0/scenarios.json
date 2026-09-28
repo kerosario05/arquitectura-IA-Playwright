@@ -1,0 +1,3515 @@
+[
+  {
+    "scenarioId": "REC-B56D2E4E-01",
+    "title": "roque9",
+    "description": "Recorrido observado para completar \"roque9\". Se registraron 32 acciones funcionales.",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://172.27.4.50/",
+        "description": "Navegar a https://172.27.4.50/"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Explora nuestros productos"
+        },
+        "description": "Presionar \"Explora nuestros productos\"",
+        "interactionId": "interaction-6"
+      },
+      {
+        "action": "assert",
+        "target": {
+          "strategy": "text",
+          "value": "Selecciona un producto"
+        },
+        "description": "Verificar que se muestra \"Selecciona un producto\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Tarjetas"
+        },
+        "description": "Presionar \"Tarjetas\"",
+        "interactionId": "interaction-11"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Tarjeta de Crédito"
+        },
+        "description": "Presionar \"Tarjeta de Crédito\"",
+        "interactionId": "interaction-13"
+      },
+      {
+        "action": "assert",
+        "target": {
+          "strategy": "text",
+          "value": "Más detalles del producto"
+        },
+        "description": "Verificar que se muestra \"Más detalles del producto\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Solicitar"
+        },
+        "description": "Presionar \"Solicitar\"",
+        "interactionId": "interaction-19"
+      },
+      {
+        "action": "assert",
+        "target": {
+          "strategy": "text",
+          "value": "Más detalles del producto"
+        },
+        "description": "Verificar que se muestra \"Más detalles del producto\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|4"
+        },
+        "description": "Presionar \"4\"",
+        "interactionId": "interaction-24"
+      },
+      {
+        "action": "assert",
+        "target": {
+          "strategy": "text",
+          "value": "Selecciona un producto"
+        },
+        "description": "Verificar que se muestra \"Selecciona un producto\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|0"
+        },
+        "description": "Presionar \"0\"",
+        "interactionId": "interaction-37"
+      },
+      {
+        "action": "assert",
+        "target": {
+          "strategy": "text",
+          "value": "Más detalles del producto"
+        },
+        "description": "Verificar que se muestra \"Más detalles del producto\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|2"
+        },
+        "description": "Presionar \"2\"",
+        "interactionId": "interaction-40"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|2"
+        },
+        "description": "Presionar \"2\"",
+        "interactionId": "interaction-42"
+      },
+      {
+        "action": "assert",
+        "target": {
+          "strategy": "text",
+          "value": "¡Hola!"
+        },
+        "description": "Verificar que se muestra \"¡Hola!\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|9"
+        },
+        "description": "Presionar \"9\"",
+        "interactionId": "interaction-46"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|9"
+        },
+        "description": "Presionar \"9\"",
+        "interactionId": "interaction-48"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|9"
+        },
+        "description": "Presionar \"9\"",
+        "interactionId": "interaction-50"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|3"
+        },
+        "description": "Presionar \"3\"",
+        "interactionId": "interaction-53"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|7"
+        },
+        "description": "Presionar \"7\"",
+        "interactionId": "interaction-55"
+      },
+      {
+        "action": "assert",
+        "target": {
+          "strategy": "text",
+          "value": "Selecciona un producto"
+        },
+        "description": "Verificar que se muestra \"Selecciona un producto\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|4"
+        },
+        "description": "Presionar \"4\"",
+        "interactionId": "interaction-59"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Atrás"
+        },
+        "description": "Presionar \"Atrás\"",
+        "interactionId": "interaction-61"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Cancelar"
+        },
+        "description": "Presionar \"Cancelar\"",
+        "interactionId": "interaction-65"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Finalizar sesión"
+        },
+        "description": "Presionar \"Finalizar sesión\"",
+        "interactionId": "interaction-67"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Explora nuestros productos"
+        },
+        "description": "Presionar \"Explora nuestros productos\"",
+        "interactionId": "interaction-69"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Cuentas"
+        },
+        "description": "Presionar \"Cuentas\"",
+        "interactionId": "interaction-71"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Cuenta de Ahorro"
+        },
+        "description": "Presionar \"Cuenta de Ahorro\"",
+        "interactionId": "interaction-73"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Finalizar sesión"
+        },
+        "description": "Presionar \"Finalizar sesión\"",
+        "interactionId": "interaction-77"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Explora nuestros productos"
+        },
+        "description": "Presionar \"Explora nuestros productos\"",
+        "interactionId": "interaction-79"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Préstamos"
+        },
+        "description": "Presionar \"Préstamos\"",
+        "interactionId": "interaction-81"
+      },
+      {
+        "action": "assert",
+        "target": {
+          "strategy": "text",
+          "value": "¡Hola!"
+        },
+        "description": "Verificar que se muestra \"¡Hola!\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Préstamo Personal"
+        },
+        "description": "Presionar \"Préstamo Personal\"",
+        "interactionId": "interaction-85"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Finalizar sesión"
+        },
+        "description": "Presionar \"Finalizar sesión\"",
+        "interactionId": "interaction-87"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Explora nuestros productos"
+        },
+        "description": "Presionar \"Explora nuestros productos\"",
+        "interactionId": "interaction-89"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Depósitos a plazo"
+        },
+        "description": "Presionar \"Depósitos a plazo\"",
+        "interactionId": "interaction-91"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Depósitos a plazo en Pesos"
+        },
+        "description": "Presionar \"Depósitos a plazo en Pesos\"",
+        "interactionId": "interaction-93"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Finalizar sesión"
+        },
+        "description": "Presionar \"Finalizar sesión\"",
+        "interactionId": "interaction-95"
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Presionar \"Explora nuestros productos\"",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "renderedStep": "Presionar \"Explora nuestros productos\"",
+        "interactionId": "interaction-6",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 2
+      },
+      {
+        "content": "El sistema muestra \"Selecciona un producto\"",
+        "expected": "Se muestra \"Selecciona un producto\"",
+        "classification": "FUNCTIONAL_ASSERTION",
+        "stepNumber": 3
+      },
+      {
+        "content": "Presionar \"Tarjetas\"",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "renderedStep": "Presionar \"Tarjetas\"",
+        "interactionId": "interaction-11",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "ed2f7440b633",
+        "screenAfterRef": "ed2f7440b633",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+        "stateScope": "ed2f7440b633",
+        "stepNumber": 4
+      },
+      {
+        "content": "Presionar \"Tarjeta de Crédito\"",
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "renderedStep": "Presionar \"Tarjeta de Crédito\"",
+        "interactionId": "interaction-13",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "ed2f7440b633",
+        "screenAfterRef": "ed2f7440b633",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+        "stateScope": "ed2f7440b633",
+        "stepNumber": 5
+      },
+      {
+        "content": "Presionar \"Tarjeta de Crédito Visa Platinum\"",
+        "sourceEventRefs": [
+          "event-16"
+        ],
+        "renderedStep": "Presionar \"Tarjeta de Crédito Visa Platinum\"",
+        "interactionId": "interaction-16",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "ed2f7440b633",
+        "screenAfterRef": "ed2f7440b633",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+        "routeAfter": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "stateScope": "ed2f7440b633",
+        "stepNumber": 6
+      },
+      {
+        "content": "El sistema muestra \"Más detalles del producto\"",
+        "expected": "Se muestra \"Más detalles del producto\"",
+        "classification": "FUNCTIONAL_ASSERTION",
+        "stepNumber": 7
+      },
+      {
+        "content": "Presionar \"Solicitar\"",
+        "sourceEventRefs": [
+          "event-19"
+        ],
+        "renderedStep": "Presionar \"Solicitar\"",
+        "interactionId": "interaction-19",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "5004cea6b230",
+        "screenAfterRef": "f0e39dba7a91",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "routeAfter": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "stateScope": "5004cea6b230",
+        "stepNumber": 8
+      },
+      {
+        "content": "El sistema muestra \"Más detalles del producto\"",
+        "expected": "Se muestra \"Más detalles del producto\"",
+        "classification": "FUNCTIONAL_ASSERTION",
+        "stepNumber": 9
+      },
+      {
+        "content": "Presionar \"Generar Turno\"",
+        "sourceEventRefs": [
+          "event-22"
+        ],
+        "renderedStep": "Presionar \"Generar Turno\"",
+        "interactionId": "interaction-22",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "f0e39dba7a91",
+        "screenAfterRef": "f0e39dba7a91",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "stateScope": "f0e39dba7a91",
+        "stepNumber": 10
+      },
+      {
+        "content": "Presionar \"4\"",
+        "sourceEventRefs": [
+          "event-24"
+        ],
+        "renderedStep": "Presionar \"4\"",
+        "interactionId": "interaction-24",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "f0e39dba7a91",
+        "screenAfterRef": "c166167939fb",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "routeAfter": "https://172.27.4.50/product-extended?product=prestamo-personal",
+        "stateScope": "f0e39dba7a91",
+        "stepNumber": 11
+      },
+      {
+        "content": "El sistema muestra \"Selecciona un producto\"",
+        "expected": "Se muestra \"Selecciona un producto\"",
+        "classification": "FUNCTIONAL_ASSERTION",
+        "stepNumber": 12
+      },
+      {
+        "content": "Presionar \"0\"",
+        "sourceEventRefs": [
+          "event-37"
+        ],
+        "renderedStep": "Presionar \"0\"",
+        "interactionId": "interaction-37",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "c166167939fb",
+        "screenAfterRef": "5004cea6b230",
+        "routeBefore": "https://172.27.4.50/product-extended?product=prestamo-personal",
+        "routeAfter": "https://172.27.4.50/product-extended?product=prestamo-personal",
+        "stateScope": "c166167939fb",
+        "stepNumber": 13
+      },
+      {
+        "content": "El sistema muestra \"Más detalles del producto\"",
+        "expected": "Se muestra \"Más detalles del producto\"",
+        "classification": "FUNCTIONAL_ASSERTION",
+        "stepNumber": 14
+      },
+      {
+        "content": "Presionar \"2\"",
+        "sourceEventRefs": [
+          "event-40"
+        ],
+        "renderedStep": "Presionar \"2\"",
+        "interactionId": "interaction-40",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "5004cea6b230",
+        "screenAfterRef": "5004cea6b230",
+        "routeBefore": "https://172.27.4.50/product-extended?product=prestamo-personal",
+        "stateScope": "5004cea6b230",
+        "stepNumber": 15
+      },
+      {
+        "content": "Presionar \"2\"",
+        "sourceEventRefs": [
+          "event-42"
+        ],
+        "renderedStep": "Presionar \"2\"",
+        "interactionId": "interaction-42",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "5004cea6b230",
+        "screenAfterRef": "5004cea6b230",
+        "routeBefore": "https://172.27.4.50/product-extended?product=prestamo-personal",
+        "routeAfter": "https://172.27.4.50/",
+        "stateScope": "5004cea6b230",
+        "stepNumber": 16
+      },
+      {
+        "content": "El sistema muestra \"¡Hola!\"",
+        "expected": "Se muestra \"¡Hola!\"",
+        "classification": "FUNCTIONAL_ASSERTION",
+        "stepNumber": 17
+      },
+      {
+        "content": "Presionar \"9\"",
+        "sourceEventRefs": [
+          "event-46"
+        ],
+        "renderedStep": "Presionar \"9\"",
+        "interactionId": "interaction-46",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 18
+      },
+      {
+        "content": "Presionar \"9\"",
+        "sourceEventRefs": [
+          "event-48"
+        ],
+        "renderedStep": "Presionar \"9\"",
+        "interactionId": "interaction-48",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 19
+      },
+      {
+        "content": "Presionar \"9\"",
+        "sourceEventRefs": [
+          "event-50"
+        ],
+        "renderedStep": "Presionar \"9\"",
+        "interactionId": "interaction-50",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "routeAfter": "https://172.27.4.50/product-catalog",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 20
+      },
+      {
+        "content": "Presionar \"3\"",
+        "sourceEventRefs": [
+          "event-53"
+        ],
+        "renderedStep": "Presionar \"3\"",
+        "interactionId": "interaction-53",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-catalog",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 21
+      },
+      {
+        "content": "Presionar \"7\"",
+        "sourceEventRefs": [
+          "event-55"
+        ],
+        "renderedStep": "Presionar \"7\"",
+        "interactionId": "interaction-55",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-catalog",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=certificates",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 22
+      },
+      {
+        "content": "El sistema muestra \"Selecciona un producto\"",
+        "expected": "Se muestra \"Selecciona un producto\"",
+        "classification": "FUNCTIONAL_ASSERTION",
+        "stepNumber": 23
+      },
+      {
+        "content": "Presionar \"4\"",
+        "sourceEventRefs": [
+          "event-59"
+        ],
+        "renderedStep": "Presionar \"4\"",
+        "interactionId": "interaction-59",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "7999d3aff78e",
+        "screenAfterRef": "7999d3aff78e",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=certificates",
+        "stateScope": "7999d3aff78e",
+        "stepNumber": 24
+      },
+      {
+        "content": "Presionar \"Atrás\"",
+        "sourceEventRefs": [
+          "event-61"
+        ],
+        "renderedStep": "Presionar \"Atrás\"",
+        "interactionId": "interaction-61",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "7999d3aff78e",
+        "screenAfterRef": "7999d3aff78e",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=certificates",
+        "routeAfter": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+        "stateScope": "7999d3aff78e",
+        "stepNumber": 25
+      },
+      {
+        "content": "Presionar \"Cancelar\"",
+        "sourceEventRefs": [
+          "event-65"
+        ],
+        "renderedStep": "Presionar \"Cancelar\"",
+        "interactionId": "interaction-65",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "7999d3aff78e",
+        "screenAfterRef": "7999d3aff78e",
+        "routeBefore": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+        "stateScope": "7999d3aff78e",
+        "stepNumber": 26
+      },
+      {
+        "content": "Presionar \"Finalizar sesión\"",
+        "sourceEventRefs": [
+          "event-67"
+        ],
+        "renderedStep": "Presionar \"Finalizar sesión\"",
+        "interactionId": "interaction-67",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "7999d3aff78e",
+        "screenAfterRef": "7999d3aff78e",
+        "routeBefore": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+        "stateScope": "7999d3aff78e",
+        "stepNumber": 27
+      },
+      {
+        "content": "Presionar \"Explora nuestros productos\"",
+        "sourceEventRefs": [
+          "event-69"
+        ],
+        "renderedStep": "Presionar \"Explora nuestros productos\"",
+        "interactionId": "interaction-69",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "7999d3aff78e",
+        "screenAfterRef": "7999d3aff78e",
+        "routeBefore": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+        "stateScope": "7999d3aff78e",
+        "stepNumber": 28
+      },
+      {
+        "content": "Presionar \"Cuentas\"",
+        "sourceEventRefs": [
+          "event-71"
+        ],
+        "renderedStep": "Presionar \"Cuentas\"",
+        "interactionId": "interaction-71",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "7999d3aff78e",
+        "screenAfterRef": "7999d3aff78e",
+        "routeBefore": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+        "stateScope": "7999d3aff78e",
+        "stepNumber": 29
+      },
+      {
+        "content": "Presionar \"Cuenta de Ahorro\"",
+        "sourceEventRefs": [
+          "event-73"
+        ],
+        "renderedStep": "Presionar \"Cuenta de Ahorro\"",
+        "interactionId": "interaction-73",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "7999d3aff78e",
+        "screenAfterRef": "7999d3aff78e",
+        "routeBefore": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+        "stateScope": "7999d3aff78e",
+        "stepNumber": 30
+      },
+      {
+        "content": "Presionar \"Cuenta de Ahorros Personal en Euros\"",
+        "sourceEventRefs": [
+          "event-75"
+        ],
+        "renderedStep": "Presionar \"Cuenta de Ahorros Personal en Euros\"",
+        "interactionId": "interaction-75",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "7999d3aff78e",
+        "screenAfterRef": "7999d3aff78e",
+        "routeBefore": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+        "stateScope": "7999d3aff78e",
+        "stepNumber": 31
+      },
+      {
+        "content": "Presionar \"Finalizar sesión\"",
+        "sourceEventRefs": [
+          "event-77"
+        ],
+        "renderedStep": "Presionar \"Finalizar sesión\"",
+        "interactionId": "interaction-77",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "7999d3aff78e",
+        "screenAfterRef": "7999d3aff78e",
+        "routeBefore": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+        "stateScope": "7999d3aff78e",
+        "stepNumber": 32
+      },
+      {
+        "content": "Presionar \"Explora nuestros productos\"",
+        "sourceEventRefs": [
+          "event-79"
+        ],
+        "renderedStep": "Presionar \"Explora nuestros productos\"",
+        "interactionId": "interaction-79",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "7999d3aff78e",
+        "screenAfterRef": "7999d3aff78e",
+        "routeBefore": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+        "stateScope": "7999d3aff78e",
+        "stepNumber": 33
+      },
+      {
+        "content": "Presionar \"Préstamos\"",
+        "sourceEventRefs": [
+          "event-81"
+        ],
+        "renderedStep": "Presionar \"Préstamos\"",
+        "interactionId": "interaction-81",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "7999d3aff78e",
+        "screenAfterRef": "7999d3aff78e",
+        "routeBefore": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+        "routeAfter": "https://172.27.4.50/",
+        "stateScope": "7999d3aff78e",
+        "stepNumber": 34
+      },
+      {
+        "content": "El sistema muestra \"¡Hola!\"",
+        "expected": "Se muestra \"¡Hola!\"",
+        "classification": "FUNCTIONAL_ASSERTION",
+        "stepNumber": 35
+      },
+      {
+        "content": "Presionar \"Préstamo Personal\"",
+        "sourceEventRefs": [
+          "event-85"
+        ],
+        "renderedStep": "Presionar \"Préstamo Personal\"",
+        "interactionId": "interaction-85",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 36
+      },
+      {
+        "content": "Presionar \"Finalizar sesión\"",
+        "sourceEventRefs": [
+          "event-87"
+        ],
+        "renderedStep": "Presionar \"Finalizar sesión\"",
+        "interactionId": "interaction-87",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 37
+      },
+      {
+        "content": "Presionar \"Explora nuestros productos\"",
+        "sourceEventRefs": [
+          "event-89"
+        ],
+        "renderedStep": "Presionar \"Explora nuestros productos\"",
+        "interactionId": "interaction-89",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 38
+      },
+      {
+        "content": "Presionar \"Depósitos a plazo\"",
+        "sourceEventRefs": [
+          "event-91"
+        ],
+        "renderedStep": "Presionar \"Depósitos a plazo\"",
+        "interactionId": "interaction-91",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 39
+      },
+      {
+        "content": "Presionar \"Depósitos a plazo en Pesos\"",
+        "sourceEventRefs": [
+          "event-93"
+        ],
+        "renderedStep": "Presionar \"Depósitos a plazo en Pesos\"",
+        "interactionId": "interaction-93",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 40
+      },
+      {
+        "content": "Presionar \"Finalizar sesión\"",
+        "sourceEventRefs": [
+          "event-95"
+        ],
+        "renderedStep": "Presionar \"Finalizar sesión\"",
+        "interactionId": "interaction-95",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 41
+      }
+    ],
+    "requiredData": [],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"Explora nuestros productos\"",
+        "strategy": "role",
+        "value": "button|Explora nuestros productos"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Tarjetas\"",
+        "strategy": "role",
+        "value": "button|Tarjetas"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Presionar \"Tarjeta de Crédito\"",
+        "strategy": "role",
+        "value": "button|Tarjeta de Crédito"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Presionar \"Solicitar\"",
+        "strategy": "role",
+        "value": "button|Solicitar"
+      },
+      {
+        "stepIndex": 8,
+        "description": "Presionar \"4\"",
+        "strategy": "role",
+        "value": "button|4"
+      },
+      {
+        "stepIndex": 10,
+        "description": "Presionar \"0\"",
+        "strategy": "role",
+        "value": "button|0"
+      },
+      {
+        "stepIndex": 12,
+        "description": "Presionar \"2\"",
+        "strategy": "role",
+        "value": "button|2"
+      },
+      {
+        "stepIndex": 13,
+        "description": "Presionar \"2\"",
+        "strategy": "role",
+        "value": "button|2"
+      },
+      {
+        "stepIndex": 15,
+        "description": "Presionar \"9\"",
+        "strategy": "role",
+        "value": "button|9"
+      },
+      {
+        "stepIndex": 16,
+        "description": "Presionar \"9\"",
+        "strategy": "role",
+        "value": "button|9"
+      },
+      {
+        "stepIndex": 17,
+        "description": "Presionar \"9\"",
+        "strategy": "role",
+        "value": "button|9"
+      },
+      {
+        "stepIndex": 18,
+        "description": "Presionar \"3\"",
+        "strategy": "role",
+        "value": "button|3"
+      },
+      {
+        "stepIndex": 19,
+        "description": "Presionar \"7\"",
+        "strategy": "role",
+        "value": "button|7"
+      },
+      {
+        "stepIndex": 21,
+        "description": "Presionar \"4\"",
+        "strategy": "role",
+        "value": "button|4"
+      },
+      {
+        "stepIndex": 22,
+        "description": "Presionar \"Atrás\"",
+        "strategy": "role",
+        "value": "button|Atrás"
+      },
+      {
+        "stepIndex": 23,
+        "description": "Presionar \"Cancelar\"",
+        "strategy": "role",
+        "value": "button|Cancelar"
+      },
+      {
+        "stepIndex": 24,
+        "description": "Presionar \"Finalizar sesión\"",
+        "strategy": "role",
+        "value": "button|Finalizar sesión"
+      },
+      {
+        "stepIndex": 25,
+        "description": "Presionar \"Explora nuestros productos\"",
+        "strategy": "role",
+        "value": "button|Explora nuestros productos"
+      },
+      {
+        "stepIndex": 26,
+        "description": "Presionar \"Cuentas\"",
+        "strategy": "role",
+        "value": "button|Cuentas"
+      },
+      {
+        "stepIndex": 27,
+        "description": "Presionar \"Cuenta de Ahorro\"",
+        "strategy": "role",
+        "value": "button|Cuenta de Ahorro"
+      },
+      {
+        "stepIndex": 28,
+        "description": "Presionar \"Finalizar sesión\"",
+        "strategy": "role",
+        "value": "button|Finalizar sesión"
+      },
+      {
+        "stepIndex": 29,
+        "description": "Presionar \"Explora nuestros productos\"",
+        "strategy": "role",
+        "value": "button|Explora nuestros productos"
+      },
+      {
+        "stepIndex": 30,
+        "description": "Presionar \"Préstamos\"",
+        "strategy": "role",
+        "value": "button|Préstamos"
+      },
+      {
+        "stepIndex": 32,
+        "description": "Presionar \"Préstamo Personal\"",
+        "strategy": "role",
+        "value": "button|Préstamo Personal"
+      },
+      {
+        "stepIndex": 33,
+        "description": "Presionar \"Finalizar sesión\"",
+        "strategy": "role",
+        "value": "button|Finalizar sesión"
+      },
+      {
+        "stepIndex": 34,
+        "description": "Presionar \"Explora nuestros productos\"",
+        "strategy": "role",
+        "value": "button|Explora nuestros productos"
+      },
+      {
+        "stepIndex": 35,
+        "description": "Presionar \"Depósitos a plazo\"",
+        "strategy": "role",
+        "value": "button|Depósitos a plazo"
+      },
+      {
+        "stepIndex": 36,
+        "description": "Presionar \"Depósitos a plazo en Pesos\"",
+        "strategy": "role",
+        "value": "button|Depósitos a plazo en Pesos"
+      },
+      {
+        "stepIndex": 37,
+        "description": "Presionar \"Finalizar sesión\"",
+        "strategy": "role",
+        "value": "button|Finalizar sesión"
+      }
+    ],
+    "sourceRecordingId": "b56d2e4e-6f9f-4f99-9d60-69bdb1ef4ca0",
+    "hasUncertainSteps": true,
+    "primary": true,
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7",
+      "event-8",
+      "event-9",
+      "event-10",
+      "event-11",
+      "event-12",
+      "event-13",
+      "event-14",
+      "event-15",
+      "event-16",
+      "event-17",
+      "event-18",
+      "event-19",
+      "event-20",
+      "event-21",
+      "event-22",
+      "event-23",
+      "event-24",
+      "event-25",
+      "event-26",
+      "event-27",
+      "event-28",
+      "event-29",
+      "event-30",
+      "event-31",
+      "event-32",
+      "event-33",
+      "event-34",
+      "event-35",
+      "event-36",
+      "event-37",
+      "event-38",
+      "event-39",
+      "event-40",
+      "event-41",
+      "event-42",
+      "event-43",
+      "event-44",
+      "event-45",
+      "event-46",
+      "event-47",
+      "event-48",
+      "event-49",
+      "event-50",
+      "event-51",
+      "event-52",
+      "event-53",
+      "event-54",
+      "event-55",
+      "event-56",
+      "event-57",
+      "event-58",
+      "event-59",
+      "event-60",
+      "event-61",
+      "event-62",
+      "event-63",
+      "event-64",
+      "event-65",
+      "event-66",
+      "event-67",
+      "event-68",
+      "event-69",
+      "event-70",
+      "event-71",
+      "event-72",
+      "event-73",
+      "event-74",
+      "event-75",
+      "event-76",
+      "event-77",
+      "event-78",
+      "event-79",
+      "event-80",
+      "event-81",
+      "event-82",
+      "event-83",
+      "event-84",
+      "event-85",
+      "event-86",
+      "event-87",
+      "event-88",
+      "event-89",
+      "event-90",
+      "event-91",
+      "event-92",
+      "event-93",
+      "event-94",
+      "event-95"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": false,
+    "functionalReadiness": true,
+    "technicalReadiness": false,
+    "expectedResultCandidate": "Se muestra \"¡Hola!\"",
+    "oracleAuthority": "observed_only",
+    "confidence": 0.95,
+    "scenarioStepCount": 41,
+    "functionalActionCount": 32,
+    "nonUserSetupSteps": 1,
+    "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
+    "scenarioGoal": "roque9",
+    "stateSequenceValid": true,
+    "stateSequenceIssues": [],
+    "postGoalObservations": [],
+    "goalContract": {
+      "nonGeneric": true,
+      "goalCoherent": true,
+      "mutationIntentExpressed": true
+    },
+    "replayEligible": true,
+    "canonicalInteractions": [
+      {
+        "id": "interaction-1",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-1"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-2",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-2"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-6",
+        "controlIdentity": "9f12e61beacd|Explora nuestros productos|role|button|Explora nuestros productos",
+        "semanticField": "Explora nuestros productos",
+        "action": "click",
+        "valueKey": "explora_nuestros_productos",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Explora nuestros productos"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Explora nuestros productos",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Explora nuestros productos"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"circle\",1],[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Explora nuestros productos\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+        "stateScope": "9f12e61beacd",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-11",
+        "controlIdentity": "ed2f7440b633|Tarjetas|role|button|Tarjetas",
+        "semanticField": "Tarjetas",
+        "action": "click",
+        "valueKey": "tarjetas",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Tarjetas"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Tarjetas",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"line\",1],[\"path\",1],[\"rect\",1],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"line\\\",1],[\\\"path\\\",1],[\\\"rect\\\",1],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Tarjetas\"",
+        "screenBeforeRef": "ed2f7440b633",
+        "screenAfterRef": "ed2f7440b633",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+        "stateScope": "ed2f7440b633",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-13",
+        "controlIdentity": "ed2f7440b633|Tarjeta de Crédito|role|button|Tarjeta de Crédito",
+        "semanticField": "Tarjeta de Crédito",
+        "action": "click",
+        "valueKey": "tarjeta_de_credito",
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Tarjeta de Crédito"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Tarjeta de Crédito",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"line\",1],[\"path\",1],[\"rect\",1],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"line\\\",1],[\\\"path\\\",1],[\\\"rect\\\",1],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Tarjeta de Crédito\"",
+        "screenBeforeRef": "ed2f7440b633",
+        "screenAfterRef": "ed2f7440b633",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+        "stateScope": "ed2f7440b633",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-16",
+        "controlIdentity": "ed2f7440b633|Tarjeta de Crédito Visa Platinum",
+        "semanticField": "Tarjeta de Crédito Visa Platinum",
+        "action": "click",
+        "valueKey": "tarjeta_de_credito_visa_platinum",
+        "sourceEventRefs": [
+          "event-16"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "div"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "img",
+                  "stableAttributes": {
+                    "alt": "Tarjeta de Crédito Visa Platinum",
+                    "src": "/assets/images/tarjetas-de-credito-visa-platinum.png"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "div",
+                "h3"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",3],[\"h3\",1]],\"descendantEntries\":[[\"div\",11],[\"h3\",1],[\"img\",1],[\"path\",4],[\"span\",4],[\"svg\",4]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"div\"},\"stableDirectAttributes\":{},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"img\",\"stableAttributes\":{\"src\":\"/assets/images/tarjetas-de-credito-visa-platinum.png\"}}],\"semanticShape\":[\"div\",\"h3\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",3],[\\\"h3\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",11],[\\\"h3\\\",1],[\\\"img\\\",1],[\\\"path\\\",4],[\\\"span\\\",4],[\\\"svg\\\",4]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner",
+              "v2_framework_actionable_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Tarjeta de Crédito Visa Platinum\"",
+        "screenBeforeRef": "ed2f7440b633",
+        "screenAfterRef": "ed2f7440b633",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+        "routeAfter": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "stateScope": "ed2f7440b633",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-19",
+        "controlIdentity": "5004cea6b230|Solicitar|role|button|Solicitar",
+        "semanticField": "Solicitar",
+        "action": "click",
+        "valueKey": "solicitar",
+        "sourceEventRefs": [
+          "event-19"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Solicitar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Solicitar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 3,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 3
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Solicitar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Solicitar\"",
+        "screenBeforeRef": "5004cea6b230",
+        "screenAfterRef": "f0e39dba7a91",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "routeAfter": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "stateScope": "5004cea6b230",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-22",
+        "controlIdentity": "f0e39dba7a91|Generar Turno",
+        "semanticField": "Generar Turno",
+        "action": "click",
+        "valueKey": "generar_turno",
+        "sourceEventRefs": [
+          "event-22"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div",
+                "h3",
+                "p"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1],[\"h3\",1],[\"p\",1]],\"descendantEntries\":[[\"div\",2],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\",\"h3\",\"p\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1],[\\\"h3\\\",1],[\\\"p\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",2],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Generar Turno",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Generar Turno\"",
+        "screenBeforeRef": "f0e39dba7a91",
+        "screenAfterRef": "f0e39dba7a91",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "stateScope": "f0e39dba7a91",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-24",
+        "controlIdentity": "f0e39dba7a91|4|role|button|4",
+        "semanticField": "4",
+        "action": "click",
+        "valueKey": "4",
+        "sourceEventRefs": [
+          "event-24"
+        ],
+        "technicalTargetRefs": [
+          "role:button|4"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "4",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"4\"",
+        "screenBeforeRef": "f0e39dba7a91",
+        "screenAfterRef": "c166167939fb",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "routeAfter": "https://172.27.4.50/product-extended?product=prestamo-personal",
+        "stateScope": "f0e39dba7a91",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-37",
+        "controlIdentity": "c166167939fb|0|role|button|0",
+        "semanticField": "0",
+        "action": "click",
+        "valueKey": "0",
+        "sourceEventRefs": [
+          "event-37"
+        ],
+        "technicalTargetRefs": [
+          "role:button|0"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|0",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "0",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"0\"",
+        "screenBeforeRef": "c166167939fb",
+        "screenAfterRef": "5004cea6b230",
+        "routeBefore": "https://172.27.4.50/product-extended?product=prestamo-personal",
+        "routeAfter": "https://172.27.4.50/product-extended?product=prestamo-personal",
+        "stateScope": "c166167939fb",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-40",
+        "controlIdentity": "5004cea6b230|2|role|button|2",
+        "semanticField": "2",
+        "action": "click",
+        "valueKey": "2",
+        "sourceEventRefs": [
+          "event-40"
+        ],
+        "technicalTargetRefs": [
+          "role:button|2"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|2",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "2",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"2\"",
+        "screenBeforeRef": "5004cea6b230",
+        "screenAfterRef": "5004cea6b230",
+        "routeBefore": "https://172.27.4.50/product-extended?product=prestamo-personal",
+        "stateScope": "5004cea6b230",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-42",
+        "controlIdentity": "5004cea6b230|2|role|button|2",
+        "semanticField": "2",
+        "action": "click",
+        "valueKey": "2",
+        "sourceEventRefs": [
+          "event-42"
+        ],
+        "technicalTargetRefs": [
+          "role:button|2"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|2",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "2",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"2\"",
+        "screenBeforeRef": "5004cea6b230",
+        "screenAfterRef": "5004cea6b230",
+        "routeBefore": "https://172.27.4.50/product-extended?product=prestamo-personal",
+        "routeAfter": "https://172.27.4.50/",
+        "stateScope": "5004cea6b230",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-46",
+        "controlIdentity": "9f12e61beacd|9|role|button|9",
+        "semanticField": "9",
+        "action": "click",
+        "valueKey": "9",
+        "sourceEventRefs": [
+          "event-46"
+        ],
+        "technicalTargetRefs": [
+          "role:button|9"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|9",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "9",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"9\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-48",
+        "controlIdentity": "9f12e61beacd|9|role|button|9",
+        "semanticField": "9",
+        "action": "click",
+        "valueKey": "9",
+        "sourceEventRefs": [
+          "event-48"
+        ],
+        "technicalTargetRefs": [
+          "role:button|9"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|9",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "9",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"9\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-50",
+        "controlIdentity": "9f12e61beacd|9|role|button|9",
+        "semanticField": "9",
+        "action": "click",
+        "valueKey": "9",
+        "sourceEventRefs": [
+          "event-50"
+        ],
+        "technicalTargetRefs": [
+          "role:button|9"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|9",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "9",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"9\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "routeAfter": "https://172.27.4.50/product-catalog",
+        "stateScope": "9f12e61beacd",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-53",
+        "controlIdentity": "9f12e61beacd|3|role|button|3",
+        "semanticField": "3",
+        "action": "click",
+        "valueKey": "3",
+        "sourceEventRefs": [
+          "event-53"
+        ],
+        "technicalTargetRefs": [
+          "role:button|3"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|3",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "3",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"3\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-catalog",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-55",
+        "controlIdentity": "9f12e61beacd|7|role|button|7",
+        "semanticField": "7",
+        "action": "click",
+        "valueKey": "7",
+        "sourceEventRefs": [
+          "event-55"
+        ],
+        "technicalTargetRefs": [
+          "role:button|7"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|7",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "7",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"7\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-catalog",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=certificates",
+        "stateScope": "9f12e61beacd",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-59",
+        "controlIdentity": "7999d3aff78e|4|role|button|4",
+        "semanticField": "4",
+        "action": "click",
+        "valueKey": "4",
+        "sourceEventRefs": [
+          "event-59"
+        ],
+        "technicalTargetRefs": [
+          "role:button|4"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "4",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"4\"",
+        "screenBeforeRef": "7999d3aff78e",
+        "screenAfterRef": "7999d3aff78e",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=certificates",
+        "stateScope": "7999d3aff78e",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-61",
+        "controlIdentity": "7999d3aff78e|Atrás|role|button|Atrás",
+        "semanticField": "Atrás",
+        "action": "click",
+        "valueKey": "atras",
+        "sourceEventRefs": [
+          "event-61"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Atrás"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Atrás",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 5,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 5
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Atrás",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Atrás\"",
+        "screenBeforeRef": "7999d3aff78e",
+        "screenAfterRef": "7999d3aff78e",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=certificates",
+        "routeAfter": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+        "stateScope": "7999d3aff78e",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-65",
+        "controlIdentity": "7999d3aff78e|Cancelar|role|button|Cancelar",
+        "semanticField": "Cancelar",
+        "action": "click",
+        "valueKey": "cancelar",
+        "sourceEventRefs": [
+          "event-65"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Cancelar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Cancelar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 4,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 4
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Cancelar\"",
+        "screenBeforeRef": "7999d3aff78e",
+        "screenAfterRef": "7999d3aff78e",
+        "routeBefore": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+        "stateScope": "7999d3aff78e",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-67",
+        "controlIdentity": "7999d3aff78e|Finalizar sesión|role|button|Finalizar sesión",
+        "semanticField": "Finalizar sesión",
+        "action": "click",
+        "valueKey": "finalizar_sesion",
+        "sourceEventRefs": [
+          "event-67"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Finalizar sesión"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Finalizar sesión",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 3,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 3
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Finalizar sesión",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Finalizar sesión\"",
+        "screenBeforeRef": "7999d3aff78e",
+        "screenAfterRef": "7999d3aff78e",
+        "routeBefore": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+        "stateScope": "7999d3aff78e",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-69",
+        "controlIdentity": "7999d3aff78e|Explora nuestros productos|role|button|Explora nuestros productos",
+        "semanticField": "Explora nuestros productos",
+        "action": "click",
+        "valueKey": "explora_nuestros_productos",
+        "sourceEventRefs": [
+          "event-69"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Explora nuestros productos"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Explora nuestros productos",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Explora nuestros productos"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"circle\",1],[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Explora nuestros productos\"",
+        "screenBeforeRef": "7999d3aff78e",
+        "screenAfterRef": "7999d3aff78e",
+        "routeBefore": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+        "stateScope": "7999d3aff78e",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-71",
+        "controlIdentity": "7999d3aff78e|Cuentas|role|button|Cuentas",
+        "semanticField": "Cuentas",
+        "action": "click",
+        "valueKey": "cuentas",
+        "sourceEventRefs": [
+          "event-71"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Cuentas"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Cuentas",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"path\",3],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"path\\\",3],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Cuentas\"",
+        "screenBeforeRef": "7999d3aff78e",
+        "screenAfterRef": "7999d3aff78e",
+        "routeBefore": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+        "stateScope": "7999d3aff78e",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-73",
+        "controlIdentity": "7999d3aff78e|Cuenta de Ahorro|role|button|Cuenta de Ahorro",
+        "semanticField": "Cuenta de Ahorro",
+        "action": "click",
+        "valueKey": "cuenta_de_ahorro",
+        "sourceEventRefs": [
+          "event-73"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Cuenta de Ahorro"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Cuenta de Ahorro",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"path\",4],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"path\\\",4],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Cuenta de Ahorro\"",
+        "screenBeforeRef": "7999d3aff78e",
+        "screenAfterRef": "7999d3aff78e",
+        "routeBefore": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+        "stateScope": "7999d3aff78e",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-75",
+        "controlIdentity": "7999d3aff78e|Cuenta de Ahorros Personal en Euros",
+        "semanticField": "Cuenta de Ahorros Personal en Euros",
+        "action": "click",
+        "valueKey": "cuenta_de_ahorros_personal_en_euros",
+        "sourceEventRefs": [
+          "event-75"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "div"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "img",
+                  "stableAttributes": {
+                    "alt": "Cuenta de Ahorros Personal en Euros",
+                    "src": "/assets/images/cuenta-ahorro-euro.svg"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "div",
+                "h3"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",3],[\"h3\",1]],\"descendantEntries\":[[\"div\",11],[\"h3\",1],[\"img\",1],[\"path\",4],[\"span\",4],[\"svg\",4]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"div\"},\"stableDirectAttributes\":{},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"img\",\"stableAttributes\":{\"src\":\"/assets/images/cuenta-ahorro-euro.svg\"}}],\"semanticShape\":[\"div\",\"h3\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",3],[\\\"h3\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",11],[\\\"h3\\\",1],[\\\"img\\\",1],[\\\"path\\\",4],[\\\"span\\\",4],[\\\"svg\\\",4]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner",
+              "v2_framework_actionable_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Cuenta de Ahorros Personal en Euros",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Cuenta de Ahorros Personal en Euros\"",
+        "screenBeforeRef": "7999d3aff78e",
+        "screenAfterRef": "7999d3aff78e",
+        "routeBefore": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+        "stateScope": "7999d3aff78e",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-77",
+        "controlIdentity": "7999d3aff78e|Finalizar sesión|role|button|Finalizar sesión",
+        "semanticField": "Finalizar sesión",
+        "action": "click",
+        "valueKey": "finalizar_sesion",
+        "sourceEventRefs": [
+          "event-77"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Finalizar sesión"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Finalizar sesión",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 3,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 3
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Finalizar sesión\"",
+        "screenBeforeRef": "7999d3aff78e",
+        "screenAfterRef": "7999d3aff78e",
+        "routeBefore": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+        "stateScope": "7999d3aff78e",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-79",
+        "controlIdentity": "7999d3aff78e|Explora nuestros productos|role|button|Explora nuestros productos",
+        "semanticField": "Explora nuestros productos",
+        "action": "click",
+        "valueKey": "explora_nuestros_productos",
+        "sourceEventRefs": [
+          "event-79"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Explora nuestros productos"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Explora nuestros productos",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Explora nuestros productos"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"circle\",1],[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Explora nuestros productos\"",
+        "screenBeforeRef": "7999d3aff78e",
+        "screenAfterRef": "7999d3aff78e",
+        "routeBefore": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+        "stateScope": "7999d3aff78e",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-81",
+        "controlIdentity": "7999d3aff78e|Préstamos|role|button|Préstamos",
+        "semanticField": "Préstamos",
+        "action": "click",
+        "valueKey": "prestamos",
+        "sourceEventRefs": [
+          "event-81"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Préstamos"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Préstamos",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"circle\",2],[\"div\",6],[\"h3\",1],[\"path\",4],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"circle\\\",2],[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"path\\\",4],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Préstamos\"",
+        "screenBeforeRef": "7999d3aff78e",
+        "screenAfterRef": "7999d3aff78e",
+        "routeBefore": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+        "routeAfter": "https://172.27.4.50/",
+        "stateScope": "7999d3aff78e",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-85",
+        "controlIdentity": "9f12e61beacd|Préstamo Personal|role|button|Préstamo Personal",
+        "semanticField": "Préstamo Personal",
+        "action": "click",
+        "valueKey": "prestamo_personal",
+        "sourceEventRefs": [
+          "event-85"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Préstamo Personal"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Préstamo Personal",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"circle\",1],[\"div\",6],[\"h3\",1],[\"path\",2],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"path\\\",2],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Préstamo Personal\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-87",
+        "controlIdentity": "9f12e61beacd|Finalizar sesión|role|button|Finalizar sesión",
+        "semanticField": "Finalizar sesión",
+        "action": "click",
+        "valueKey": "finalizar_sesion",
+        "sourceEventRefs": [
+          "event-87"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Finalizar sesión"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Finalizar sesión",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 3,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 3
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Finalizar sesión\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-89",
+        "controlIdentity": "9f12e61beacd|Explora nuestros productos|role|button|Explora nuestros productos",
+        "semanticField": "Explora nuestros productos",
+        "action": "click",
+        "valueKey": "explora_nuestros_productos",
+        "sourceEventRefs": [
+          "event-89"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Explora nuestros productos"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Explora nuestros productos",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Explora nuestros productos"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"circle\",1],[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Explora nuestros productos\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-91",
+        "controlIdentity": "9f12e61beacd|Depósitos a plazo|role|button|Depósitos a plazo",
+        "semanticField": "Depósitos a plazo",
+        "action": "click",
+        "valueKey": "depositos_a_plazo",
+        "sourceEventRefs": [
+          "event-91"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Depósitos a plazo"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Depósitos a plazo",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"path\",4],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"path\\\",4],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Depósitos a plazo\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-93",
+        "controlIdentity": "9f12e61beacd|Depósitos a plazo en Pesos|role|button|Depósitos a plazo en Pesos",
+        "semanticField": "Depósitos a plazo en Pesos",
+        "action": "click",
+        "valueKey": "depositos_a_plazo_en_pesos",
+        "sourceEventRefs": [
+          "event-93"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Depósitos a plazo en Pesos"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Depósitos a plazo en Pesos",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"line\",1],[\"path\",2],[\"svg\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 2,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"line\\\",1],[\\\"path\\\",2],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 2
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Depósitos a plazo en Pesos\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-95",
+        "controlIdentity": "9f12e61beacd|Finalizar sesión|role|button|Finalizar sesión",
+        "semanticField": "Finalizar sesión",
+        "action": "click",
+        "valueKey": "finalizar_sesion",
+        "sourceEventRefs": [
+          "event-95"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Finalizar sesión"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Finalizar sesión",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 3,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 3
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Finalizar sesión",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Finalizar sesión\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      }
+    ],
+    "entityActionBlocks": [],
+    "readiness": {
+      "functionalReadiness": true,
+      "dataReadiness": true,
+      "technicalReadiness": false,
+      "oracleReadiness": true,
+      "reviewReadiness": true,
+      "publicationContentReadiness": true,
+      "executionReadiness": false,
+      "publicationReadiness": true,
+      "missingInputs": [],
+      "datasetAuthorityMismatches": [],
+      "dataReadinessReasons": []
+    },
+    "technicalKnowledgeRefs": [
+      "obs-6",
+      "obs-11",
+      "obs-13",
+      "obs-16",
+      "obs-19",
+      "obs-22",
+      "obs-24",
+      "obs-37",
+      "obs-40",
+      "obs-42",
+      "obs-46",
+      "obs-48",
+      "obs-50",
+      "obs-53",
+      "obs-55",
+      "obs-59",
+      "obs-61",
+      "obs-65",
+      "obs-67",
+      "obs-69",
+      "obs-71",
+      "obs-73",
+      "obs-75",
+      "obs-77",
+      "obs-79",
+      "obs-81",
+      "obs-85",
+      "obs-87",
+      "obs-89",
+      "obs-91",
+      "obs-93",
+      "obs-95"
+    ],
+    "runtimeInputRequirements": [],
+    "runtimeDataset": {
+      "scenarioId": "REC-B56D2E4E-01",
+      "requirements": [],
+      "resolvedValues": {},
+      "missingValues": []
+    },
+    "mutationOpportunities": []
+  }
+]

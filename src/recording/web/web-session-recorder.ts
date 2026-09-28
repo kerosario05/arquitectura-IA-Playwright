@@ -23,6 +23,26 @@ import { buildCaptureScriptV2Content } from "./capture-engine-v2.browser-instrum
 import { adaptCaptureActionToRawInteraction } from "../capture-engine-v2.raw-interaction-adapter";
 import { isGenericUnresolvedLabel } from "../trace-normalizer";
 import { executeRecordingControlAction, type RecordingControlAction, type RecordingControlResult } from "../recording-control";
+import { drainIngestionUntilQuiet, type IngestionDrainResult } from "./ingestion-drain";
+
+/** Upper bound for finishing in-flight captures on Stop (override: RECORDING_STOP_DRAIN_TIMEOUT_MS). */
+const STOP_DRAIN_TIMEOUT_MS = 15_000;
+/** Quiet window that lets a browser message already in flight land before the drain is declared done. */
+const STOP_DRAIN_SETTLE_MS = 300;
+const STOP_BLUR_TIMEOUT_MS = 2_000;
+/** Per-capture bounds: a slow page may lose a frame or a snapshot, never block the queue. */
+const CAPTURE_SCREENSHOT_TIMEOUT_MS = 5_000;
+const CAPTURE_SNAPSHOT_TIMEOUT_MS = 5_000;
+const CAPTURE_PROBE_TIMEOUT_MS = 1_000;
+/** A single capture slower than this is logged to the job so a building backlog is visible. */
+const CAPTURE_SLOW_WARNING_MS = 3_000;
+
+/** Resolves to undefined when `promise` does not settle in time (the underlying work is not cancelled). */
+function withCaptureTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T | undefined> {
+  let timer: NodeJS.Timeout | undefined;
+  const timeout = new Promise<undefined>((resolve) => { timer = setTimeout(() => resolve(undefined), timeoutMs); });
+  return Promise.race([promise.catch(() => undefined), timeout]).finally(() => clearTimeout(timer));
+}
 export { preserveCapturedTechnicalTargetLocators } from "../technical-target-transport";
 
 /**
@@ -1349,6 +1369,29 @@ export class WebSessionRecorder {
    */
   private v2IngestionQueue: Promise<void> = Promise.resolve();
 
+  /** Arrival time/URL of the queued capture currently being applied (see `now()`). */
+  private activeArrival: { t: number; url?: string } | null = null;
+
+  /** Ingestion work accepted into `v2IngestionQueue` and not yet applied -- read by the Stop drain. */
+  private v2PendingIngestion = 0;
+
+  /** Legacy-authority `onInteraction` calls still running (that path is not serialized through the queue). */
+  private readonly legacyInflight = new Set<Promise<unknown>>();
+
+  private enqueueV2Ingestion(work: () => unknown): void {
+    const arrival = { t: Date.now() - this.startedAt, url: this.page?.url() };
+    this.v2PendingIngestion += 1;
+    this.v2IngestionQueue = (this.v2IngestionQueue.then(async () => {
+      this.activeArrival = arrival;
+      try {
+        return await work();
+      } finally {
+        this.activeArrival = null;
+      }
+    }) as Promise<unknown>)
+      .finally(() => { this.v2PendingIngestion -= 1; }) as Promise<void>;
+  }
+
   /**
    * ShadowBridge's OWN seq -> the RecordedEvent it produced, for CLICK technical actions only.
    * Lets a later functional `select` projection (`onV2FunctionalAction`) find and flag the exact
@@ -1365,8 +1408,20 @@ export class WebSessionRecorder {
     this.options.onLog?.(line);
   }
 
+  /**
+   * Event time. While a queued capture is being applied it is the time the capture ARRIVED, not
+   * the time it was processed: the queue can lag the user by seconds, and derivation binds each
+   * navigation to the action whose pointer window contains it (t-based). Processing-time stamps
+   * let navigations overtake the clicks that caused them (recording b56d2e4e: "Explora nuestros
+   * productos" was credited with the navigations of the next two clicks).
+   */
   private now(): number {
-    return Date.now() - this.startedAt;
+    return this.activeArrival?.t ?? Date.now() - this.startedAt;
+  }
+
+  /** URL where the action happened: the URL at arrival for a queued capture, never a later page. */
+  private eventUrl(): string | undefined {
+    return this.activeArrival ? this.activeArrival.url : this.page?.url();
   }
 
   private pushEvent(event: Omit<RecordedEvent, "seq">): RecordedEvent {
@@ -1380,9 +1435,13 @@ export class WebSessionRecorder {
     if (!this.page) return undefined;
     const file = path.join(this.options.framesDir, `${String(this.seq).padStart(4, "0")}-${tag}.png`);
     try {
-      await this.page.screenshot({ path: file });
+      // Bounded: Playwright's screenshot waits for web fonts/stable frames and could hold the
+      // serialized capture queue for tens of seconds (recording 3db40782: one capture took 132s).
+      // A missing frame is only lost evidence; a blocked queue loses the user's next actions.
+      await this.page.screenshot({ path: file, timeout: CAPTURE_SCREENSHOT_TIMEOUT_MS });
       return file;
     } catch {
+      console.log(`[capture-latency] screenshot_skipped tag=${tag} reason=timeout_or_error limitMs=${CAPTURE_SCREENSHOT_TIMEOUT_MS}`);
       return undefined;
     }
   }
@@ -1394,12 +1453,17 @@ export class WebSessionRecorder {
    * navigating, and a paginated list changes URL without being a different screen. The
    * structural fingerprint is what actually distinguishes states.
    */
-  private async absorbScreen(): Promise<{ changed: boolean; screenKey: string }> {
+  private async absorbScreen(changedSince: string = this.lastFingerprint): Promise<{ changed: boolean; screenKey: string }> {
     if (!this.page) return { changed: false, screenKey: this.lastScreenKey };
-    const snapshot = await extractRuntimeUiSnapshot(this.page);
+    // Bounded full-DOM scan: on a heavy page it must never hold the capture queue indefinitely.
+    const snapshot = await withCaptureTimeout(extractRuntimeUiSnapshot(this.page), CAPTURE_SNAPSHOT_TIMEOUT_MS);
+    if (!snapshot) {
+      console.log(`[capture-latency] snapshot_skipped reason=timeout limitMs=${CAPTURE_SNAPSHOT_TIMEOUT_MS}`);
+      return { changed: false, screenKey: this.lastScreenKey };
+    }
     const fingerprint = fingerprintSnapshot(snapshot);
     const screenKey = snapshot.screenKey || fingerprint.slice(0, 16);
-    const changed = fingerprint !== this.lastFingerprint;
+    const changed = fingerprint !== changedSince;
 
     const controls: RecordedControl[] = snapshot.observedControls.map((c) => ({
         label: c.businessLabel ?? c.label,
@@ -1451,7 +1515,7 @@ export class WebSessionRecorder {
     if (record.action.interactionId && record.action.sourceRefs?.eventTargetRef) {
       this.v2InteractionIdToEventTargetRef.set(record.action.interactionId, record.action.sourceRefs.eventTargetRef);
     }
-    this.v2IngestionQueue = this.v2IngestionQueue.then(() => {
+    this.enqueueV2Ingestion(() => {
       const raw = adaptCaptureActionToRawInteraction(record.action) as unknown as RawInteraction;
       // TEMPORARY DIAGNOSTIC (this ticket only): traces every V2 technical action's
       // CaptureAction -> RawInteraction -> RecordedEvent boundary explicitly, so a physical
@@ -1477,7 +1541,7 @@ export class WebSessionRecorder {
 
   private onV2PointerObservation(record: ShadowActionRecord): void {
     if (this.captureAuthority !== "v2") return;
-    this.v2IngestionQueue = this.v2IngestionQueue.then(() => {
+    this.enqueueV2Ingestion(() => {
       const raw = adaptCaptureActionToRawInteraction(record.action) as unknown as RawInteraction;
       return this.onInteraction(raw).catch((err) => {
         this.log(`[capture-v2] pointer observation ingestion error: ${err instanceof Error ? err.message : String(err)}`);
@@ -1513,7 +1577,7 @@ export class WebSessionRecorder {
       this.log("[capture-v2] diagnostic post_action observation dropped -- no known V2 action for its interactionId");
       return;
     }
-    this.v2IngestionQueue = this.v2IngestionQueue.then(() => {
+    this.enqueueV2Ingestion(() => {
       const eventsBefore = this.events.length;
       return this.onInteraction({
         kind: "observation",
@@ -1554,7 +1618,10 @@ export class WebSessionRecorder {
   private onV2FunctionalAction(record: ShadowFunctionalActionRecord): void {
     if (this.captureAuthority !== "v2") return;
     if (record.action.functionalActionType !== "select") return;
-    this.v2IngestionQueue = this.v2IngestionQueue.then(() => {
+    this.enqueueV2Ingestion(() => {
+      // Same guard onInteraction applies: after stop() returned its copy of `events`, anything
+      // pushed here would be silently absent from the trace.
+      if (this.stopped) return;
       const sourceEvents: RecordedEvent[] = [];
       for (const shadowSeq of record.action.sourceTechnicalActionSeqs) {
         const event = this.v2SeqToClickEvent.get(shadowSeq);
@@ -1614,7 +1681,7 @@ export class WebSessionRecorder {
         observationType: "pointer",
         screenKey: this.lastScreenKey,
         fingerprint: this.lastFingerprint,
-        url: this.page?.url(),
+        url: this.eventUrl(),
         target: {
           label: selectedValue,
           // "option" -- not the combobox's own role -- matching the existing compound-selection
@@ -1633,7 +1700,25 @@ export class WebSessionRecorder {
     });
   }
 
+  /**
+   * Times every capture so a building backlog is visible while recording, not only after Stop.
+   * `queued` is how much other work is waiting behind this capture.
+   */
   private async onInteraction(raw: RawInteraction): Promise<RecordedEvent | undefined> {
+    const startedAt = Date.now();
+    try {
+      return await this.ingestInteraction(raw);
+    } finally {
+      const elapsedMs = Date.now() - startedAt;
+      const queued = Math.max(0, this.v2PendingIngestion - 1) + this.legacyInflight.size;
+      console.log(`[capture-latency] kind=${raw.kind} ms=${elapsedMs} queued=${queued}`);
+      if (elapsedMs >= CAPTURE_SLOW_WARNING_MS) {
+        this.log(`[recording] aviso: la captura de "${raw.label || raw.text || raw.kind}" tardó ${elapsedMs} ms (${queued} acción(es) en espera)`);
+      }
+    }
+  }
+
+  private async ingestInteraction(raw: RawInteraction): Promise<RecordedEvent | undefined> {
     if (this.stopped) return;
     const sensitive = isSensitiveField(raw, this.options.sensitiveLabels);
     const locators = raw.kind === "observation" ? [] : buildWebLocators(raw);
@@ -1718,7 +1803,7 @@ export class WebSessionRecorder {
         kind: "note",
         screenKey: this.lastScreenKey,
         fingerprint: this.lastFingerprint,
-        url: this.page?.url(),
+        url: this.eventUrl(),
         target: commonTarget,
         note: `Observación técnica (${raw.observationType ?? "post_action"}) sobre "${commonTarget.label}"`,
         observationType: raw.observationType ?? "post_action",
@@ -1732,7 +1817,7 @@ export class WebSessionRecorder {
         kind: "fill",
         screenKey: this.lastScreenKey,
         fingerprint: this.lastFingerprint,
-        url: this.page?.url(),
+        url: this.eventUrl(),
         target: {
           ...commonTarget,
           label: raw.label || raw.name || "campo",
@@ -1761,7 +1846,7 @@ export class WebSessionRecorder {
         kind: "press",
         screenKey: this.lastScreenKey,
         fingerprint: this.lastFingerprint,
-        url: this.page?.url(),
+        url: this.eventUrl(),
         target: commonTarget,
         note: raw.key,
         framePath,
@@ -1775,21 +1860,28 @@ export class WebSessionRecorder {
       kind: "tap",
       screenKey: this.lastScreenKey,
       fingerprint: this.lastFingerprint,
-      url: this.page?.url(),
+      url: this.eventUrl(),
       target: commonTarget,
       framePath,
     });
     this.log(`[recording] clic -> "${raw.label || raw.text || "(sin etiqueta)"}"`);
 
     // Bounded post-action observation: dynamic editors get a short chance to materialize,
-    // without imposing a long fixed sleep on every click.
+    // without imposing a long fixed sleep on every click. The wait loop uses a cheap page probe;
+    // the full-DOM snapshot runs ONCE afterwards (it used to run up to 4 times per click).
+    //
+    // FIRST_LOSS fix: each loop snapshot overwrote `lastFingerprint`, so the final comparison
+    // ran against the just-absorbed new screen and reported `changed=false` -- in-place screen
+    // transitions were almost never emitted. The change is now measured against the fingerprint
+    // from BEFORE the click.
+    const fingerprintBeforeClick = this.lastFingerprint;
+    const probeBefore = await this.probeScreen();
     for (const delay of [60, 120, 180]) {
       await this.page?.waitForTimeout(delay).catch(() => undefined);
-      const current = await this.absorbScreen();
-      if (current.screenKey !== this.lastScreenKey) break;
+      if (await this.probeScreen() !== probeBefore) break;
     }
     const from = this.lastScreenKey;
-    const { changed, screenKey } = await this.absorbScreen();
+    const { changed, screenKey } = await this.absorbScreen(fingerprintBeforeClick);
     if (changed && screenKey !== from) {
       this.lastScreenKey = screenKey;
       this.pushEvent({
@@ -1839,9 +1931,15 @@ export class WebSessionRecorder {
         this.log(`[recording] legacy event ignored (captureAuthority=${this.captureAuthority})`);
         return;
       }
-      await this.onInteraction(payload).catch((err) =>
+      const work = this.onInteraction(payload).catch((err) =>
         this.log(`[recording] error procesando interacción: ${err instanceof Error ? err.message : String(err)}`),
       );
+      this.legacyInflight.add(work);
+      try {
+        await work;
+      } finally {
+        this.legacyInflight.delete(work);
+      }
     });
     const captureScriptContent = `window.__qaRecorderPersistQaCredentials = true;\n${CAPTURE_SCRIPT}`;
     await this.context.addInitScript({
@@ -1904,12 +2002,7 @@ export class WebSessionRecorder {
     });
     this.page.on("framenavigated", (frame) => {
       if (frame !== this.page?.mainFrame() || this.stopped) return;
-      this.pushEvent({
-        t: this.now(),
-        kind: "navigate",
-        screenKey: this.lastScreenKey,
-        url: frame.url(),
-      });
+      this.recordMainFrameNavigation(frame.url());
       // context.addInitScript already reinstalls CAPTURE_SCRIPT on every new document, but a
       // fast redirect/full navigation can occasionally race ahead of that registration reaching
       // the new document before the app's own bootstrap script runs. Re-evaluating here is a
@@ -1938,13 +2031,39 @@ export class WebSessionRecorder {
     return true;
   }
 
-  async stop(): Promise<{ events: RecordedEvent[]; screens: RecordedScreen[] }> {
-    // Drain any V2-authority ingestion still in flight BEFORE marking the recorder stopped --
-    // onInteraction's own `if (this.stopped) return;` guard would otherwise silently swallow a
-    // technical action that was queued but hadn't reached onInteraction yet. No fixed sleep:
-    // this awaits the exact promise chain onV2TechnicalAction already serializes ingestion
-    // through, so it resolves the instant everything already queued has actually been applied.
-    await this.v2IngestionQueue.catch(() => undefined);
+  async stop(): Promise<{ events: RecordedEvent[]; screens: RecordedScreen[]; drain: IngestionDrainResult }> {
+    const eventsAtStop = this.events.length;
+    const pendingAtStop = this.v2PendingIngestion + this.legacyInflight.size;
+
+    // The last field typed before Stop is still an open editing session: closing the context
+    // fires no blur, so it was never committed. Blur the focused element through the page first
+    // -- the normal browser path (focusout/blur messages) commits it for both capture engines.
+    await this.blurFocusedElementForStop();
+
+    // Drain until quiet, never just the queue as it was when Stop was pressed: anything the
+    // browser sent meanwhile chains a new tail that would otherwise run after `stopped = true`
+    // and be dropped. Bounded, so a hung capture can no longer hold the Stop request forever.
+    const drainSource = {
+      tail: () => Promise.all([this.v2IngestionQueue, ...this.legacyInflight]),
+      pending: () => this.v2PendingIngestion + this.legacyInflight.size,
+    };
+    const drainOptions = { timeoutMs: this.stopDrainTimeoutMs(), settleMs: STOP_DRAIN_SETTLE_MS };
+    let drain = await drainIngestionUntilQuiet(drainSource, drainOptions);
+
+    // Fallback for an edit whose blur never reached Node (page gone, evaluate failed): commit the
+    // still-open V2 session directly, then drain the edit it produced.
+    if (this.v2Shadow?.commitOpenEditingSessionOnStop()) {
+      drain = await drainIngestionUntilQuiet(drainSource, drainOptions);
+    }
+
+    const summary =
+      `[recording-stop] drained=${drain.drained} waitedMs=${drain.waitedMs} pendingAtStop=${pendingAtStop} ` +
+      `extraRounds=${drain.extraRounds} eventsAtStop=${eventsAtStop} eventsFinal=${this.events.length} ` +
+      `pendingDropped=${drain.pendingAtDeadline}`;
+    console.log(summary);
+    if (!drain.drained) {
+      this.log(`[recording] aviso: ${drain.pendingAtDeadline} acción(es) seguían procesándose al detener y no se incluyeron (límite ${drainOptions.timeoutMs} ms)`);
+    }
     this.stopped = true;
     // Shadow-only visibility: bounded counts, never field values, never connected to
     // SessionTrace -- printed even when zero V2 messages were ever received, so "V2 produced
@@ -1962,7 +2081,57 @@ export class WebSessionRecorder {
     this.context = null;
     this.browser = null;
     this.page = null;
-    return { events: [...this.events], screens: [...this.screens.values()] };
+    return { events: [...this.events], screens: [...this.screens.values()], drain };
+  }
+
+  /**
+   * Records a main-frame navigation. Under V2 authority it goes through the same queue as the
+   * captures, so it is recorded AFTER the clicks that arrived before it (and caused it) instead of
+   * overtaking them while the queue lags.
+   */
+  private recordMainFrameNavigation(url: string): void {
+    const recordNavigation = () => {
+      if (this.stopped) return;
+      this.pushEvent({
+        t: this.now(),
+        kind: "navigate",
+        screenKey: this.lastScreenKey,
+        url,
+      });
+    };
+    if (this.captureAuthority === "v2") this.enqueueV2Ingestion(recordNavigation);
+    else recordNavigation();
+  }
+
+  /** Captures accepted but not yet applied -- what Stop is still waiting for. */
+  pendingCaptures(): number {
+    return this.v2PendingIngestion + this.legacyInflight.size;
+  }
+
+  /** Cheap change signal for the post-click wait -- never a full-DOM style/layout scan. */
+  private async probeScreen(): Promise<string> {
+    const page = this.page;
+    if (!page || page.isClosed()) return "";
+    const probe = page.evaluate(() => {
+      const heading = document.querySelector("h1, h2, [role=heading], [role=dialog]");
+      return `${location.href}|${document.title}|${document.getElementsByTagName("*").length}|${heading?.textContent?.trim().slice(0, 80) ?? ""}`;
+    }).catch(() => "");
+    return (await withCaptureTimeout(probe, CAPTURE_PROBE_TIMEOUT_MS)) ?? "";
+  }
+
+  private stopDrainTimeoutMs(): number {
+    const configured = Number(process.env.RECORDING_STOP_DRAIN_TIMEOUT_MS);
+    return Number.isFinite(configured) && configured > 0 ? configured : STOP_DRAIN_TIMEOUT_MS;
+  }
+
+  private async blurFocusedElementForStop(): Promise<void> {
+    const page = this.page;
+    if (!page || page.isClosed()) return;
+    const blur = page.evaluate(() => {
+      const active = document.activeElement as HTMLElement | null;
+      if (active && active !== document.body && typeof active.blur === "function") active.blur();
+    }).catch(() => undefined);
+    await Promise.race([blur, new Promise((resolve) => setTimeout(resolve, STOP_BLUR_TIMEOUT_MS))]);
   }
 
   snapshotProgress(): { events: number; screens: number; currentScreen: string } {

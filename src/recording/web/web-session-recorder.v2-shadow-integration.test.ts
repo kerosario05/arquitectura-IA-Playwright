@@ -153,13 +153,20 @@ test("21. stop() drains v2IngestionQueue BEFORE setting stopped=true, so no queu
   const stopMethodMatch = SOURCE.match(/async stop\(\)[\s\S]*?\n {2}\}/);
   assert.ok(stopMethodMatch);
   const stopBody = stopMethodMatch![0];
-  const drainIndex = stopBody.indexOf("await this.v2IngestionQueue");
+  // The drain waits until quiet (re-reading the queue tail each round), not just the queue as it
+  // was when Stop was pressed -- work arriving during the drain must not be dropped either.
+  const drainIndex = stopBody.indexOf("await drainIngestionUntilQuiet(");
   const stoppedIndex = stopBody.indexOf("this.stopped = true;");
   assert.ok(drainIndex >= 0 && stoppedIndex >= 0 && drainIndex < stoppedIndex, "draining v2IngestionQueue must happen before this.stopped is set");
+  assert.match(stopBody, /tail: \(\) => Promise\.all\(\[this\.v2IngestionQueue/, "the drain must read the live v2IngestionQueue tail");
 });
 
 test("22. onV2TechnicalAction serializes ingestion through a single promise chain (v2IngestionQueue), never firing onInteraction calls out of order", () => {
   const onV2TechnicalActionMatch = SOURCE.match(/private onV2TechnicalAction\([\s\S]*?\n {2}\}/);
   assert.ok(onV2TechnicalActionMatch);
-  assert.match(onV2TechnicalActionMatch![0], /this\.v2IngestionQueue = this\.v2IngestionQueue\.then\(/, "each technical action must chain off the SAME queue, not fire independently");
+  assert.match(onV2TechnicalActionMatch![0], /this\.enqueueV2Ingestion\(/, "each technical action must chain off the SAME queue, not fire independently");
+  const enqueueMatch = SOURCE.match(/private enqueueV2Ingestion\([\s\S]*?\n {2}\}/);
+  assert.ok(enqueueMatch);
+  assert.match(enqueueMatch![0], /this\.v2IngestionQueue = \(this\.v2IngestionQueue\.then\(/, "enqueueV2Ingestion must chain off the single v2IngestionQueue");
+  assert.match(enqueueMatch![0], /await work\(\)/, "the queued work itself must run inside that chain");
 });

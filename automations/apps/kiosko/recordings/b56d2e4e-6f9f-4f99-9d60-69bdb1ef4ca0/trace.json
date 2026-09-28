@@ -1,0 +1,3604 @@
+{
+  "recordingId": "b56d2e4e-6f9f-4f99-9d60-69bdb1ef4ca0",
+  "projectSlug": "kiosko",
+  "appSlug": "kiosko",
+  "platform": "web",
+  "baseUrl": "https://172.27.4.50/",
+  "label": "roque9",
+  "recordingGoal": {
+    "declaredGoal": "roque9",
+    "normalizedGoal": "roque9",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-09-28T15:44:30.388Z",
+  "status": "derived",
+  "events": [
+    {
+      "t": 13907,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://172.27.4.50/",
+      "seq": 0
+    },
+    {
+      "t": 14942,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://172.27.4.50/",
+      "seq": 1
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "9f12e61beacd",
+      "url": "https://172.27.4.50/",
+      "seq": 2
+    },
+    {
+      "t": 19699,
+      "interactionId": "pointer-1",
+      "kind": "note",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "target": {
+        "label": "Explora nuestros productos",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Explora nuestros productos\"",
+      "observationType": "pointer",
+      "seq": 3
+    },
+    {
+      "t": 20104,
+      "kind": "navigate",
+      "screenKey": "9f12e61beacd",
+      "url": "https://172.27.4.50/product-catalog",
+      "seq": 4
+    },
+    {
+      "t": 20444,
+      "interactionId": "pointer-1",
+      "kind": "tap",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/product-catalog",
+      "target": {
+        "label": "Explora nuestros productos",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Explora nuestros productos",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Explora nuestros productos",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Explora nuestros productos"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"circle\",1],[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 5
+    },
+    {
+      "t": 21534,
+      "kind": "navigate",
+      "screenKey": "9f12e61beacd",
+      "url": "https://172.27.4.50/product-subcategory?category=cards",
+      "seq": 6
+    },
+    {
+      "t": 22485,
+      "kind": "navigate",
+      "screenKey": "9f12e61beacd",
+      "url": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+      "seq": 7
+    },
+    {
+      "t": 22549,
+      "kind": "screen_change",
+      "screenKey": "9f12e61beacd",
+      "toScreenKey": "ed2f7440b633",
+      "fingerprint": "f4c9cffac7df68107acbe8bcb95ac9ef750ea3f90516d7b6a834eeeb66aea405",
+      "url": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+      "seq": 8
+    },
+    {
+      "t": 22697,
+      "interactionId": "pointer-2",
+      "kind": "note",
+      "screenKey": "ed2f7440b633",
+      "fingerprint": "f4c9cffac7df68107acbe8bcb95ac9ef750ea3f90516d7b6a834eeeb66aea405",
+      "url": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+      "target": {
+        "label": "Tarjetas",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Tarjetas\"",
+      "observationType": "pointer",
+      "seq": 9
+    },
+    {
+      "t": 22860,
+      "interactionId": "pointer-2",
+      "kind": "tap",
+      "screenKey": "ed2f7440b633",
+      "fingerprint": "f4c9cffac7df68107acbe8bcb95ac9ef750ea3f90516d7b6a834eeeb66aea405",
+      "url": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+      "target": {
+        "label": "Tarjetas",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Tarjetas",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Tarjetas",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"line\",1],[\"path\",1],[\"rect\",1],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"line\\\",1],[\\\"path\\\",1],[\\\"rect\\\",1],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 10
+    },
+    {
+      "t": 23301,
+      "interactionId": "pointer-3",
+      "kind": "note",
+      "screenKey": "ed2f7440b633",
+      "fingerprint": "f4c9cffac7df68107acbe8bcb95ac9ef750ea3f90516d7b6a834eeeb66aea405",
+      "url": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+      "target": {
+        "label": "Tarjeta de Crédito",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Tarjeta de Crédito\"",
+      "observationType": "pointer",
+      "seq": 11
+    },
+    {
+      "t": 23475,
+      "interactionId": "pointer-3",
+      "kind": "tap",
+      "screenKey": "ed2f7440b633",
+      "fingerprint": "f4c9cffac7df68107acbe8bcb95ac9ef750ea3f90516d7b6a834eeeb66aea405",
+      "url": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+      "target": {
+        "label": "Tarjeta de Crédito",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Tarjeta de Crédito",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Tarjeta de Crédito",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"line\",1],[\"path\",1],[\"rect\",1],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"line\\\",1],[\\\"path\\\",1],[\\\"rect\\\",1],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 12
+    },
+    {
+      "t": 24709,
+      "interactionId": "pointer-4",
+      "kind": "note",
+      "screenKey": "ed2f7440b633",
+      "fingerprint": "f4c9cffac7df68107acbe8bcb95ac9ef750ea3f90516d7b6a834eeeb66aea405",
+      "url": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+      "target": {
+        "label": "Tarjeta de Crédito Visa Platinum",
+        "tag": "div",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Tarjeta de Crédito Visa Platinum\"",
+      "observationType": "pointer",
+      "seq": 13
+    },
+    {
+      "t": 25046,
+      "kind": "navigate",
+      "screenKey": "ed2f7440b633",
+      "url": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+      "seq": 14
+    },
+    {
+      "t": 25171,
+      "interactionId": "pointer-4",
+      "kind": "tap",
+      "screenKey": "ed2f7440b633",
+      "fingerprint": "f4c9cffac7df68107acbe8bcb95ac9ef750ea3f90516d7b6a834eeeb66aea405",
+      "url": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+      "target": {
+        "label": "Tarjeta de Crédito Visa Platinum",
+        "tag": "div",
+        "locators": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "div"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "img",
+                  "stableAttributes": {
+                    "alt": "Tarjeta de Crédito Visa Platinum",
+                    "src": "/assets/images/tarjetas-de-credito-visa-platinum.png"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "div",
+                "h3"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",3],[\"h3\",1]],\"descendantEntries\":[[\"div\",11],[\"h3\",1],[\"img\",1],[\"path\",4],[\"span\",4],[\"svg\",4]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"div\"},\"stableDirectAttributes\":{},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"img\",\"stableAttributes\":{\"src\":\"/assets/images/tarjetas-de-credito-visa-platinum.png\"}}],\"semanticShape\":[\"div\",\"h3\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",3],[\\\"h3\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",11],[\\\"h3\\\",1],[\\\"img\\\",1],[\\\"path\\\",4],[\\\"span\\\",4],[\\\"svg\\\",4]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner",
+              "v2_framework_actionable_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 15
+    },
+    {
+      "t": 25579,
+      "kind": "screen_change",
+      "screenKey": "ed2f7440b633",
+      "toScreenKey": "5004cea6b230",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+      "seq": 16
+    },
+    {
+      "t": 28380,
+      "interactionId": "pointer-5",
+      "kind": "note",
+      "screenKey": "5004cea6b230",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+      "target": {
+        "label": "Solicitar",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Solicitar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Solicitar\"",
+      "observationType": "pointer",
+      "seq": 17
+    },
+    {
+      "t": 28879,
+      "interactionId": "pointer-5",
+      "kind": "tap",
+      "screenKey": "5004cea6b230",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+      "target": {
+        "label": "Solicitar",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Solicitar",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Solicitar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 3,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 3
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Solicitar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 18
+    },
+    {
+      "t": 29337,
+      "kind": "screen_change",
+      "screenKey": "5004cea6b230",
+      "toScreenKey": "f0e39dba7a91",
+      "fingerprint": "2caa201e4ba775cc34192d19d3301ef807149a1c2ee42e1aa7fb0725b8a10d76",
+      "url": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+      "seq": 19
+    },
+    {
+      "t": 30207,
+      "interactionId": "pointer-6",
+      "kind": "note",
+      "screenKey": "f0e39dba7a91",
+      "fingerprint": "2caa201e4ba775cc34192d19d3301ef807149a1c2ee42e1aa7fb0725b8a10d76",
+      "url": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+      "target": {
+        "label": "Generar Turno",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Generar Turno",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Generar Turno\"",
+      "observationType": "pointer",
+      "seq": 20
+    },
+    {
+      "t": 30790,
+      "interactionId": "pointer-6",
+      "kind": "tap",
+      "screenKey": "f0e39dba7a91",
+      "fingerprint": "2caa201e4ba775cc34192d19d3301ef807149a1c2ee42e1aa7fb0725b8a10d76",
+      "url": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+      "target": {
+        "label": "Generar Turno",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div",
+                "h3",
+                "p"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1],[\"h3\",1],[\"p\",1]],\"descendantEntries\":[[\"div\",2],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\",\"h3\",\"p\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1],[\\\"h3\\\",1],[\\\"p\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",2],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Generar Turno",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 21
+    },
+    {
+      "t": 42259,
+      "interactionId": "pointer-7",
+      "kind": "note",
+      "screenKey": "f0e39dba7a91",
+      "fingerprint": "2caa201e4ba775cc34192d19d3301ef807149a1c2ee42e1aa7fb0725b8a10d76",
+      "url": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+      "target": {
+        "label": "4",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "4",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"4\"",
+      "observationType": "pointer",
+      "seq": 22
+    },
+    {
+      "t": 47831,
+      "interactionId": "pointer-7",
+      "kind": "tap",
+      "screenKey": "f0e39dba7a91",
+      "fingerprint": "2caa201e4ba775cc34192d19d3301ef807149a1c2ee42e1aa7fb0725b8a10d76",
+      "url": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+      "target": {
+        "label": "4",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|4",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "4",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 23
+    },
+    {
+      "t": 50941,
+      "kind": "navigate",
+      "screenKey": "f0e39dba7a91",
+      "url": "https://172.27.4.50/",
+      "seq": 24
+    },
+    {
+      "t": 51299,
+      "kind": "navigate",
+      "screenKey": "f0e39dba7a91",
+      "url": "https://172.27.4.50/product-catalog",
+      "seq": 25
+    },
+    {
+      "t": 52202,
+      "kind": "navigate",
+      "screenKey": "f0e39dba7a91",
+      "url": "https://172.27.4.50/product-subcategory?category=accounts",
+      "seq": 26
+    },
+    {
+      "t": 52631,
+      "kind": "navigate",
+      "screenKey": "f0e39dba7a91",
+      "url": "https://172.27.4.50/product-subcategory?category=accounts&subcategory=savings",
+      "seq": 27
+    },
+    {
+      "t": 53010,
+      "kind": "navigate",
+      "screenKey": "f0e39dba7a91",
+      "url": "https://172.27.4.50/product-extended?product=cuenta-de-ahorros-personal-en-euros",
+      "seq": 28
+    },
+    {
+      "t": 53864,
+      "kind": "navigate",
+      "screenKey": "f0e39dba7a91",
+      "url": "https://172.27.4.50/",
+      "seq": 29
+    },
+    {
+      "t": 54615,
+      "kind": "navigate",
+      "screenKey": "f0e39dba7a91",
+      "url": "https://172.27.4.50/product-catalog",
+      "seq": 30
+    },
+    {
+      "t": 55122,
+      "kind": "navigate",
+      "screenKey": "f0e39dba7a91",
+      "url": "https://172.27.4.50/product-subcategory?category=loans",
+      "seq": 31
+    },
+    {
+      "t": 55792,
+      "kind": "navigate",
+      "screenKey": "c166167939fb",
+      "url": "https://172.27.4.50/product-subcategory?category=loans&subcategory=personal",
+      "seq": 32
+    },
+    {
+      "t": 55820,
+      "kind": "navigate",
+      "screenKey": "c166167939fb",
+      "url": "https://172.27.4.50/product-extended?product=prestamo-personal",
+      "seq": 33
+    },
+    {
+      "t": 55195,
+      "kind": "screen_change",
+      "screenKey": "f0e39dba7a91",
+      "toScreenKey": "c166167939fb",
+      "fingerprint": "78e6b70b6f96546e81585f52784daec0be6e66c140c34a75c1cd7c5ab807b3dd",
+      "url": "https://172.27.4.50/product-subcategory?category=loans",
+      "seq": 34
+    },
+    {
+      "t": 55946,
+      "interactionId": "pointer-8",
+      "kind": "note",
+      "screenKey": "c166167939fb",
+      "fingerprint": "78e6b70b6f96546e81585f52784daec0be6e66c140c34a75c1cd7c5ab807b3dd",
+      "url": "https://172.27.4.50/product-extended?product=prestamo-personal",
+      "target": {
+        "label": "0",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "0",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"0\"",
+      "observationType": "pointer",
+      "seq": 35
+    },
+    {
+      "t": 56042,
+      "interactionId": "pointer-8",
+      "kind": "tap",
+      "screenKey": "c166167939fb",
+      "fingerprint": "78e6b70b6f96546e81585f52784daec0be6e66c140c34a75c1cd7c5ab807b3dd",
+      "url": "https://172.27.4.50/product-extended?product=prestamo-personal",
+      "target": {
+        "label": "0",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|0",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|0",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "0",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 36
+    },
+    {
+      "t": 56464,
+      "kind": "screen_change",
+      "screenKey": "c166167939fb",
+      "toScreenKey": "5004cea6b230",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=prestamo-personal",
+      "seq": 37
+    },
+    {
+      "t": 56581,
+      "interactionId": "pointer-9",
+      "kind": "note",
+      "screenKey": "5004cea6b230",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=prestamo-personal",
+      "target": {
+        "label": "2",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "2",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"2\"",
+      "observationType": "pointer",
+      "seq": 38
+    },
+    {
+      "t": 56725,
+      "interactionId": "pointer-9",
+      "kind": "tap",
+      "screenKey": "5004cea6b230",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=prestamo-personal",
+      "target": {
+        "label": "2",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|2",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|2",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "2",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 39
+    },
+    {
+      "t": 57150,
+      "interactionId": "pointer-10",
+      "kind": "note",
+      "screenKey": "5004cea6b230",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=prestamo-personal",
+      "target": {
+        "label": "2",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "2",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"2\"",
+      "observationType": "pointer",
+      "seq": 40
+    },
+    {
+      "t": 57263,
+      "interactionId": "pointer-10",
+      "kind": "tap",
+      "screenKey": "5004cea6b230",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=prestamo-personal",
+      "target": {
+        "label": "2",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|2",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|2",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "2",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 41
+    },
+    {
+      "t": 58352,
+      "kind": "navigate",
+      "screenKey": "5004cea6b230",
+      "url": "https://172.27.4.50/",
+      "seq": 42
+    },
+    {
+      "t": 58383,
+      "kind": "screen_change",
+      "screenKey": "5004cea6b230",
+      "toScreenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "seq": 43
+    },
+    {
+      "t": 58474,
+      "interactionId": "pointer-11",
+      "kind": "note",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "target": {
+        "label": "9",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "9",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"9\"",
+      "observationType": "pointer",
+      "seq": 44
+    },
+    {
+      "t": 58563,
+      "interactionId": "pointer-11",
+      "kind": "tap",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "target": {
+        "label": "9",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|9",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|9",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "9",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 45
+    },
+    {
+      "t": 58979,
+      "interactionId": "pointer-12",
+      "kind": "note",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "target": {
+        "label": "9",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "9",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"9\"",
+      "observationType": "pointer",
+      "seq": 46
+    },
+    {
+      "t": 59121,
+      "interactionId": "pointer-12",
+      "kind": "tap",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "target": {
+        "label": "9",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|9",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|9",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "9",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 47
+    },
+    {
+      "t": 59547,
+      "interactionId": "pointer-13",
+      "kind": "note",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "target": {
+        "label": "9",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "9",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"9\"",
+      "observationType": "pointer",
+      "seq": 48
+    },
+    {
+      "t": 59646,
+      "interactionId": "pointer-13",
+      "kind": "tap",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "target": {
+        "label": "9",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|9",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|9",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "9",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 49
+    },
+    {
+      "t": 60847,
+      "kind": "navigate",
+      "screenKey": "9f12e61beacd",
+      "url": "https://172.27.4.50/product-catalog",
+      "seq": 50
+    },
+    {
+      "t": 60884,
+      "interactionId": "pointer-14",
+      "kind": "note",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/product-catalog",
+      "target": {
+        "label": "3",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "3",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"3\"",
+      "observationType": "pointer",
+      "seq": 51
+    },
+    {
+      "t": 61069,
+      "interactionId": "pointer-14",
+      "kind": "tap",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/product-catalog",
+      "target": {
+        "label": "3",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|3",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|3",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "3",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 52
+    },
+    {
+      "t": 61510,
+      "interactionId": "pointer-15",
+      "kind": "note",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/product-catalog",
+      "target": {
+        "label": "7",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "7",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"7\"",
+      "observationType": "pointer",
+      "seq": 53
+    },
+    {
+      "t": 61632,
+      "interactionId": "pointer-15",
+      "kind": "tap",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/product-catalog",
+      "target": {
+        "label": "7",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|7",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|7",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "7",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 54
+    },
+    {
+      "t": 62448,
+      "kind": "navigate",
+      "screenKey": "9f12e61beacd",
+      "url": "https://172.27.4.50/product-subcategory?category=certificates",
+      "seq": 55
+    },
+    {
+      "t": 62562,
+      "kind": "screen_change",
+      "screenKey": "9f12e61beacd",
+      "toScreenKey": "7999d3aff78e",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-subcategory?category=certificates",
+      "seq": 56
+    },
+    {
+      "t": 62720,
+      "interactionId": "pointer-16",
+      "kind": "note",
+      "screenKey": "7999d3aff78e",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-subcategory?category=certificates",
+      "target": {
+        "label": "4",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "4",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"4\"",
+      "observationType": "pointer",
+      "seq": 57
+    },
+    {
+      "t": 62831,
+      "interactionId": "pointer-16",
+      "kind": "tap",
+      "screenKey": "7999d3aff78e",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-subcategory?category=certificates",
+      "target": {
+        "label": "4",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|4",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "4",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 58
+    },
+    {
+      "t": 63276,
+      "interactionId": "pointer-17",
+      "kind": "note",
+      "screenKey": "7999d3aff78e",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-subcategory?category=certificates",
+      "target": {
+        "label": "Atrás",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Atrás",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Atrás\"",
+      "observationType": "pointer",
+      "seq": 59
+    },
+    {
+      "t": 63382,
+      "interactionId": "pointer-17",
+      "kind": "tap",
+      "screenKey": "7999d3aff78e",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-subcategory?category=certificates",
+      "target": {
+        "label": "Atrás",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Atrás",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Atrás",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 5,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 5
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Atrás",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 60
+    },
+    {
+      "t": 64263,
+      "kind": "navigate",
+      "screenKey": "7999d3aff78e",
+      "url": "https://172.27.4.50/product-subcategory?category=certificates&subcategory=peso",
+      "seq": 61
+    },
+    {
+      "t": 64280,
+      "kind": "navigate",
+      "screenKey": "7999d3aff78e",
+      "url": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+      "seq": 62
+    },
+    {
+      "t": 64343,
+      "interactionId": "pointer-18",
+      "kind": "note",
+      "screenKey": "7999d3aff78e",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+      "target": {
+        "label": "Cancelar",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Cancelar\"",
+      "observationType": "pointer",
+      "seq": 63
+    },
+    {
+      "t": 64423,
+      "interactionId": "pointer-18",
+      "kind": "tap",
+      "screenKey": "7999d3aff78e",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+      "target": {
+        "label": "Cancelar",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Cancelar",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Cancelar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 4,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 4
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 64
+    },
+    {
+      "t": 64851,
+      "interactionId": "pointer-19",
+      "kind": "note",
+      "screenKey": "7999d3aff78e",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+      "target": {
+        "label": "Finalizar sesión",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Finalizar sesión",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Finalizar sesión\"",
+      "observationType": "pointer",
+      "seq": 65
+    },
+    {
+      "t": 64943,
+      "interactionId": "pointer-19",
+      "kind": "tap",
+      "screenKey": "7999d3aff78e",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+      "target": {
+        "label": "Finalizar sesión",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Finalizar sesión",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Finalizar sesión",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 3,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 3
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Finalizar sesión",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 66
+    },
+    {
+      "t": 65371,
+      "interactionId": "pointer-20",
+      "kind": "note",
+      "screenKey": "7999d3aff78e",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+      "target": {
+        "label": "Explora nuestros productos",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Explora nuestros productos\"",
+      "observationType": "pointer",
+      "seq": 67
+    },
+    {
+      "t": 65479,
+      "interactionId": "pointer-20",
+      "kind": "tap",
+      "screenKey": "7999d3aff78e",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+      "target": {
+        "label": "Explora nuestros productos",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Explora nuestros productos",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Explora nuestros productos",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Explora nuestros productos"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"circle\",1],[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 68
+    },
+    {
+      "t": 65909,
+      "interactionId": "pointer-21",
+      "kind": "note",
+      "screenKey": "7999d3aff78e",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+      "target": {
+        "label": "Cuentas",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Cuentas\"",
+      "observationType": "pointer",
+      "seq": 69
+    },
+    {
+      "t": 66180,
+      "interactionId": "pointer-21",
+      "kind": "tap",
+      "screenKey": "7999d3aff78e",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+      "target": {
+        "label": "Cuentas",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Cuentas",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Cuentas",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"path\",3],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"path\\\",3],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 70
+    },
+    {
+      "t": 66630,
+      "interactionId": "pointer-22",
+      "kind": "note",
+      "screenKey": "7999d3aff78e",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+      "target": {
+        "label": "Cuenta de Ahorro",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Cuenta de Ahorro\"",
+      "observationType": "pointer",
+      "seq": 71
+    },
+    {
+      "t": 66717,
+      "interactionId": "pointer-22",
+      "kind": "tap",
+      "screenKey": "7999d3aff78e",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+      "target": {
+        "label": "Cuenta de Ahorro",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Cuenta de Ahorro",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Cuenta de Ahorro",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"path\",4],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"path\\\",4],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 72
+    },
+    {
+      "t": 67132,
+      "interactionId": "pointer-23",
+      "kind": "note",
+      "screenKey": "7999d3aff78e",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+      "target": {
+        "label": "Cuenta de Ahorros Personal en Euros",
+        "tag": "div",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Cuenta de Ahorros Personal en Euros",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Cuenta de Ahorros Personal en Euros\"",
+      "observationType": "pointer",
+      "seq": 73
+    },
+    {
+      "t": 67268,
+      "interactionId": "pointer-23",
+      "kind": "tap",
+      "screenKey": "7999d3aff78e",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+      "target": {
+        "label": "Cuenta de Ahorros Personal en Euros",
+        "tag": "div",
+        "locators": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "div"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "img",
+                  "stableAttributes": {
+                    "alt": "Cuenta de Ahorros Personal en Euros",
+                    "src": "/assets/images/cuenta-ahorro-euro.svg"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "div",
+                "h3"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",3],[\"h3\",1]],\"descendantEntries\":[[\"div\",11],[\"h3\",1],[\"img\",1],[\"path\",4],[\"span\",4],[\"svg\",4]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"div\"},\"stableDirectAttributes\":{},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"img\",\"stableAttributes\":{\"src\":\"/assets/images/cuenta-ahorro-euro.svg\"}}],\"semanticShape\":[\"div\",\"h3\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",3],[\\\"h3\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",11],[\\\"h3\\\",1],[\\\"img\\\",1],[\\\"path\\\",4],[\\\"span\\\",4],[\\\"svg\\\",4]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner",
+              "v2_framework_actionable_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Cuenta de Ahorros Personal en Euros",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 74
+    },
+    {
+      "t": 67692,
+      "interactionId": "pointer-24",
+      "kind": "note",
+      "screenKey": "7999d3aff78e",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+      "target": {
+        "label": "Finalizar sesión",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Finalizar sesión\"",
+      "observationType": "pointer",
+      "seq": 75
+    },
+    {
+      "t": 67824,
+      "interactionId": "pointer-24",
+      "kind": "tap",
+      "screenKey": "7999d3aff78e",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+      "target": {
+        "label": "Finalizar sesión",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Finalizar sesión",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Finalizar sesión",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 3,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 3
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 76
+    },
+    {
+      "t": 68364,
+      "interactionId": "pointer-25",
+      "kind": "note",
+      "screenKey": "7999d3aff78e",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+      "target": {
+        "label": "Explora nuestros productos",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Explora nuestros productos\"",
+      "observationType": "pointer",
+      "seq": 77
+    },
+    {
+      "t": 68482,
+      "interactionId": "pointer-25",
+      "kind": "tap",
+      "screenKey": "7999d3aff78e",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+      "target": {
+        "label": "Explora nuestros productos",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Explora nuestros productos",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Explora nuestros productos",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Explora nuestros productos"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"circle\",1],[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 78
+    },
+    {
+      "t": 68917,
+      "interactionId": "pointer-26",
+      "kind": "note",
+      "screenKey": "7999d3aff78e",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+      "target": {
+        "label": "Préstamos",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Préstamos\"",
+      "observationType": "pointer",
+      "seq": 79
+    },
+    {
+      "t": 69010,
+      "interactionId": "pointer-26",
+      "kind": "tap",
+      "screenKey": "7999d3aff78e",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+      "target": {
+        "label": "Préstamos",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Préstamos",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Préstamos",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"circle\",2],[\"div\",6],[\"h3\",1],[\"path\",4],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"circle\\\",2],[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"path\\\",4],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 80
+    },
+    {
+      "t": 69397,
+      "kind": "navigate",
+      "screenKey": "7999d3aff78e",
+      "url": "https://172.27.4.50/",
+      "seq": 81
+    },
+    {
+      "t": 69410,
+      "kind": "screen_change",
+      "screenKey": "7999d3aff78e",
+      "toScreenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "seq": 82
+    },
+    {
+      "t": 69487,
+      "interactionId": "pointer-27",
+      "kind": "note",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "target": {
+        "label": "Préstamo Personal",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Préstamo Personal\"",
+      "observationType": "pointer",
+      "seq": 83
+    },
+    {
+      "t": 69593,
+      "interactionId": "pointer-27",
+      "kind": "tap",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "target": {
+        "label": "Préstamo Personal",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Préstamo Personal",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Préstamo Personal",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"circle\",1],[\"div\",6],[\"h3\",1],[\"path\",2],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"path\\\",2],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 84
+    },
+    {
+      "t": 70105,
+      "interactionId": "pointer-28",
+      "kind": "note",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "target": {
+        "label": "Finalizar sesión",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Finalizar sesión\"",
+      "observationType": "pointer",
+      "seq": 85
+    },
+    {
+      "t": 70201,
+      "interactionId": "pointer-28",
+      "kind": "tap",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "target": {
+        "label": "Finalizar sesión",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Finalizar sesión",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Finalizar sesión",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 3,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 3
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 86
+    },
+    {
+      "t": 70615,
+      "interactionId": "pointer-29",
+      "kind": "note",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "target": {
+        "label": "Explora nuestros productos",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Explora nuestros productos\"",
+      "observationType": "pointer",
+      "seq": 87
+    },
+    {
+      "t": 70736,
+      "interactionId": "pointer-29",
+      "kind": "tap",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "target": {
+        "label": "Explora nuestros productos",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Explora nuestros productos",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Explora nuestros productos",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Explora nuestros productos"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"circle\",1],[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 88
+    },
+    {
+      "t": 71156,
+      "interactionId": "pointer-30",
+      "kind": "note",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "target": {
+        "label": "Depósitos a plazo",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Depósitos a plazo\"",
+      "observationType": "pointer",
+      "seq": 89
+    },
+    {
+      "t": 71269,
+      "interactionId": "pointer-30",
+      "kind": "tap",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "target": {
+        "label": "Depósitos a plazo",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Depósitos a plazo",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Depósitos a plazo",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"path\",4],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"path\\\",4],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 90
+    },
+    {
+      "t": 71685,
+      "interactionId": "pointer-31",
+      "kind": "note",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "target": {
+        "label": "Depósitos a plazo en Pesos",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Depósitos a plazo en Pesos\"",
+      "observationType": "pointer",
+      "seq": 91
+    },
+    {
+      "t": 71798,
+      "interactionId": "pointer-31",
+      "kind": "tap",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "target": {
+        "label": "Depósitos a plazo en Pesos",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Depósitos a plazo en Pesos",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Depósitos a plazo en Pesos",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"line\",1],[\"path\",2],[\"svg\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 2,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"line\\\",1],[\\\"path\\\",2],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 2
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 92
+    },
+    {
+      "t": 72432,
+      "interactionId": "pointer-32",
+      "kind": "note",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "target": {
+        "label": "Finalizar sesión",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Finalizar sesión",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Finalizar sesión\"",
+      "observationType": "pointer",
+      "seq": 93
+    },
+    {
+      "t": 72516,
+      "interactionId": "pointer-32",
+      "kind": "tap",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "target": {
+        "label": "Finalizar sesión",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Finalizar sesión",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Finalizar sesión",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 3,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 3
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Finalizar sesión",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 94
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "9f12e61beacd",
+      "title": "¡Hola!",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "firstSeenAt": 15127,
+      "controls": [
+        {
+          "label": "Estados de cuenta",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Estados de cuenta"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Estados de cuenta",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Consulta de balance",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Consulta de balance"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Consulta de balance",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cartas y certificaciones",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Cartas y certificaciones"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cartas y certificaciones",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Canje de Puntos",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Canje de Puntos"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Canje de Puntos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Explora nuestros productos",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Explora nuestros productos"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Explora nuestros productos",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "¡Hola!",
+        "Estados de cuenta",
+        "Consulta de balance"
+      ],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "ed2f7440b633",
+      "title": "Selecciona un producto",
+      "fingerprint": "f4c9cffac7df68107acbe8bcb95ac9ef750ea3f90516d7b6a834eeeb66aea405",
+      "url": "https://172.27.4.50/product-subcategory",
+      "firstSeenAt": 22549,
+      "controls": [
+        {
+          "label": "Volver",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Volver ",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Selecciona un producto",
+        "Tarjeta Crédito Visa Clásica",
+        "Tarjeta Crédito Visa Gold"
+      ],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "5004cea6b230",
+      "title": "Más detalles del producto",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-extended",
+      "firstSeenAt": 25579,
+      "controls": [
+        {
+          "label": "Finalizar sesión",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Finalizar sesión ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Volver",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Volver ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Solicitar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Solicitar ",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Más detalles del producto",
+        "Depósito a Plazo Digital en Pesos",
+        "Detalles"
+      ],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "f0e39dba7a91",
+      "title": "Más detalles del producto",
+      "fingerprint": "2caa201e4ba775cc34192d19d3301ef807149a1c2ee42e1aa7fb0725b8a10d76",
+      "url": "https://172.27.4.50/product-extended",
+      "firstSeenAt": 29337,
+      "controls": [
+        {
+          "label": "Finalizar sesión",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Finalizar sesión ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Volver",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Volver ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Solicitar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Solicitar ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Generar Turno",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Generar Turno Atiéndete con un representante de nuestro banco",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Solicitud Digital",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Solicitud Digital Continúa tu solicitud desde nuestra plataforma digital",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cancelar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cancelar ",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Más detalles del producto",
+        "Tarjeta de Crédito Visa Platinum",
+        "Beneficios"
+      ],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "c166167939fb",
+      "title": "Selecciona un producto",
+      "fingerprint": "78e6b70b6f96546e81585f52784daec0be6e66c140c34a75c1cd7c5ab807b3dd",
+      "url": "https://172.27.4.50/product-subcategory",
+      "firstSeenAt": 55195,
+      "controls": [
+        {
+          "label": "Préstamo Personal",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Préstamo\nPersonal    ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Volver",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Volver ",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Selecciona un producto",
+        "Préstamo Personal"
+      ],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "962b4393ca35",
+      "title": "Conoce nuestros productos",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/product-catalog",
+      "firstSeenAt": 60884,
+      "controls": [
+        {
+          "label": "Tarjetas",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Tarjetas    ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cuentas",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cuentas    ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Préstamos",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Préstamos    ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Depósitos a plazo",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Depósitos\na plazo    ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Salir",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Salir ",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Conoce nuestros productos",
+        "Tarjetas",
+        "Cuentas"
+      ],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "7999d3aff78e",
+      "title": "Selecciona un producto",
+      "fingerprint": "fe635eb0ea0b0ef505305e6a7513ff6e0ce3de6960daf763b6f1e1dd8b059a77",
+      "url": "https://172.27.4.50/product-subcategory",
+      "firstSeenAt": 62562,
+      "controls": [
+        {
+          "label": "Depósitos a plazo en Pesos",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Depósitos a plazo\nen Pesos    ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Depósitos a plazo en Dólares",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Depósitos a plazo\nen Dólares    ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Volver",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Volver ",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Selecciona un producto",
+        "Depósitos a plazo en Pesos",
+        "Depósitos a plazo en Dólares"
+      ],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    }
+  ],
+  "endedAt": "2026-09-28T15:46:00.749Z",
+  "durationMs": 90361,
+  "narrative": "Recorrido grabado en aplicación web: kiosko\nEtiqueta del recorrido: roque9\n\nPantalla 1: inicio\n\nPantalla 2: ¡Hola!\n  - (Observación técnica (pointer) sobre \"Explora nuestros productos\")\n  - El usuario presionó \"Explora nuestros productos\"\n  - La aplicación navegó a otra pantalla\n  Textos visibles: ¡Hola! | Estados de cuenta | Consulta de balance\n\nPantalla 3: Selecciona un producto\n  - (Observación técnica (pointer) sobre \"Tarjetas\")\n  - El usuario presionó \"Tarjetas\"\n  - (Observación técnica (pointer) sobre \"Tarjeta de Crédito\")\n  - El usuario presionó \"Tarjeta de Crédito\"\n  - (Observación técnica (pointer) sobre \"Tarjeta de Crédito Visa Platinum\")\n  - El usuario presionó \"Tarjeta de Crédito Visa Platinum\"\n  - La aplicación navegó a otra pantalla\n  Textos visibles: Selecciona un producto | Tarjeta Crédito Visa Clásica | Tarjeta Crédito Visa Gold\n\nPantalla 4: Más detalles del producto\n  - (Observación técnica (pointer) sobre \"Solicitar\")\n  - El usuario presionó \"Solicitar\"\n  - La aplicación navegó a otra pantalla\n  Textos visibles: Más detalles del producto | Depósito a Plazo Digital en Pesos | Detalles\n\nPantalla 5: Más detalles del producto\n  - (Observación técnica (pointer) sobre \"Generar Turno\")\n  - El usuario presionó \"Generar Turno\"\n  - (Observación técnica (pointer) sobre \"4\")\n  - El usuario presionó \"4\"\n  Textos visibles: Más detalles del producto | Tarjeta de Crédito Visa Platinum | Beneficios\n\nPantalla 6: Selecciona un producto\n  Textos visibles: Selecciona un producto | Préstamo Personal\n\nPantalla 7: Más detalles del producto\n  - La aplicación navegó a otra pantalla\n  Textos visibles: Más detalles del producto | Tarjeta de Crédito Visa Platinum | Beneficios\n\nPantalla 8: Selecciona un producto\n  - (Observación técnica (pointer) sobre \"0\")\n  - El usuario presionó \"0\"\n  - La aplicación navegó a otra pantalla\n  Textos visibles: Selecciona un producto | Préstamo Personal\n\nPantalla 9: Más detalles del producto\n  - (Observación técnica (pointer) sobre \"2\")\n  - El usuario presionó \"2\"\n  - (Observación técnica (pointer) sobre \"2\")\n  - El usuario presionó \"2\"\n  - La aplicación navegó a otra pantalla\n  Textos visibles: Más detalles del producto | Depósito a Plazo Digital en Pesos | Detalles\n\nPantalla 10: ¡Hola!\n  - (Observación técnica (pointer) sobre \"9\")\n  - El usuario presionó \"9\"\n  - (Observación técnica (pointer) sobre \"9\")\n  - El usuario presionó \"9\"\n  - (Observación técnica (pointer) sobre \"9\")\n  - El usuario presionó \"9\"\n  - (Observación técnica (pointer) sobre \"3\")\n  - El usuario presionó \"3\"\n  - (Observación técnica (pointer) sobre \"7\")\n  - El usuario presionó \"7\"\n  - La aplicación navegó a otra pantalla\n  Textos visibles: ¡Hola! | Estados de cuenta | Consulta de balance\n\nPantalla 11: Selecciona un producto\n  - (Observación técnica (pointer) sobre \"4\")\n  - El usuario presionó \"4\"\n  - (Observación técnica (pointer) sobre \"Atrás\")\n  - El usuario presionó \"Atrás\"\n  - (Observación técnica (pointer) sobre \"Cancelar\")\n  - El usuario presionó \"Cancelar\"\n  - (Observación técnica (pointer) sobre \"Finalizar sesión\")\n  - El usuario presionó \"Finalizar sesión\"\n  - (Observación técnica (pointer) sobre \"Explora nuestros productos\")\n  - El usuario presionó \"Explora nuestros productos\"\n  - (Observación técnica (pointer) sobre \"Cuentas\")\n  - El usuario presionó \"Cuentas\"\n  - (Observación técnica (pointer) sobre \"Cuenta de Ahorro\")\n  - El usuario presionó \"Cuenta de Ahorro\"\n  - (Observación técnica (pointer) sobre \"Cuenta de Ahorros Personal en Euros\")\n  - El usuario presionó \"Cuenta de Ahorros Personal en Euros\"\n  - (Observación técnica (pointer) sobre \"Finalizar sesión\")\n  - El usuario presionó \"Finalizar sesión\"\n  - (Observación técnica (pointer) sobre \"Explora nuestros productos\")\n  - El usuario presionó \"Explora nuestros productos\"\n  - (Observación técnica (pointer) sobre \"Préstamos\")\n  - El usuario presionó \"Préstamos\"\n  - La aplicación navegó a otra pantalla\n  Textos visibles: Selecciona un producto | Depósitos a plazo en Pesos | Depósitos a plazo en Dólares\n\nPantalla 12: ¡Hola!\n  - (Observación técnica (pointer) sobre \"Préstamo Personal\")\n  - El usuario presionó \"Préstamo Personal\"\n  - (Observación técnica (pointer) sobre \"Finalizar sesión\")\n  - El usuario presionó \"Finalizar sesión\"\n  - (Observación técnica (pointer) sobre \"Explora nuestros productos\")\n  - El usuario presionó \"Explora nuestros productos\"\n  - (Observación técnica (pointer) sobre \"Depósitos a plazo\")\n  - El usuario presionó \"Depósitos a plazo\"\n  - (Observación técnica (pointer) sobre \"Depósitos a plazo en Pesos\")\n  - El usuario presionó \"Depósitos a plazo en Pesos\"\n  - (Observación técnica (pointer) sobre \"Finalizar sesión\")\n  - El usuario presionó \"Finalizar sesión\"\n  Textos visibles: ¡Hola! | Estados de cuenta | Consulta de balance"
+}

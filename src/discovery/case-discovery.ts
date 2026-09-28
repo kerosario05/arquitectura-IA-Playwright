@@ -117,6 +117,7 @@ import type { AssertionPolarity } from "../scenarios/canonical-scenario";
 import { extractTestRailInputRequirements } from "../testrail/testrail-input-requirements-adapter";
 import { isPendingOracleAuthority } from "./oracle-authority";
 import { resolvePostActionSynchronization } from "./post-action-synchronization";
+import { APPLICATION_HTTP_FAILURE_REASON, describeApplicationHttpFailure, detectApplicationHttpFailure } from "./application-http-failure";
 import { deduplicateActionTargetsBySource } from "./action-target-equivalence";
 import { verifySelectionState, hasCausalSelectionTransition, type InteractiveState } from "./selection-state-verification";
 import { resolveClickRetryPolicy } from "./click-retry-policy";
@@ -2192,6 +2193,37 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
         ...(structuredAction.interactionId ? { sourceInteractionId: structuredAction.interactionId } : {}),
       } as ExecutableStep);
       executableActionOrder += 1;
+    }
+    // The contract owns the ACTIONS; an observable outcome step appended after them (the
+    // recording's expected result, see buildRecordingOutcomeAssertionStep) is still a real
+    // assertion and must be verified live -- this branch used to return with no assertion at all,
+    // so a recorded "Se muestra \"¡Hola!\"" was never checked and the promotion gate failed an
+    // otherwise passing replay as an unbacked oracle. Only steps that are NOT contract actions are
+    // considered, and only a concrete, non-optional assertion intent -- never inferred from prose.
+    for (const step of scenario.steps) {
+      if ((step as { recordingActionType?: string }).recordingActionType) continue;
+      const intent = parseStepIntent(step.action).find((candidate) =>
+        candidate.type === "assertion" && candidate.actionTarget && !candidate.isOptional);
+      if (!intent?.actionTarget) continue;
+      const requirementRefs = step.requirementRefs ?? scenarioRequirementRefs
+        .filter((ref) => ref.stepIndex === step.index)
+        .map((ref) => ref.requirementId);
+      orderedSteps.push({
+        stepIndex: step.index,
+        originalText: step.action,
+        type: "assertion",
+        target: intent.actionTarget,
+        source: "action",
+        ...(requirementRefs.length > 0 ? { requirementRefs: [...requirementRefs] } : {}),
+      });
+      assertionTargets.push({
+        index: step.index,
+        action: step.action,
+        target: intent.actionTarget,
+        source: "action",
+        ...(requirementRefs.length > 0 ? { requirementRefs: [...requirementRefs] } : {}),
+      });
+      console.log(`[recording-replay] outcomeAssertionParsed=true stepIndex=${step.index} target="${intent.actionTarget}"`);
     }
     return { actionTargets, assertionTargets, skippedActions, setupIntents, orderedSteps };
   }
@@ -11008,6 +11040,38 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         pendingObjectsPath, pendingPlansPath, evidenceDir,
         failedAtStep, failedTarget, failedReason, allDiscoveredObjects,
         authFailure
+      );
+    }
+    const applicationHttpFailure = detectApplicationHttpFailure({
+      events: relevantNetworkEvents,
+      routeChanged: finalPath !== preClickPathname,
+      nextTargetVisible: postActionNextTargetVisible,
+    });
+    if (applicationHttpFailure) {
+      failedAtStep = actionTarget.index;
+      failedTarget = actionTarget.target;
+      failedReason = APPLICATION_HTTP_FAILURE_REASON;
+      const applicationFailureMessage = describeApplicationHttpFailure(applicationHttpFailure);
+      steps.push({
+        index: actionTarget.index,
+        action: actionTarget.action,
+        status: "found" as const,
+        targetText: actionTarget.target,
+        snapshotUrl: finalPath,
+        actionExecutionStatus: "executed" as const,
+        postActionOutcomeStatus: "application_error" as const,
+        error: applicationFailureMessage,
+        evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+      } satisfies DiscoveryStepResult);
+      console.log(
+        `[discovery:case] Application rejected the action; stopping reason=${failedReason} ` +
+        `method=${applicationHttpFailure.method} path=${applicationHttpFailure.path} status=${applicationHttpFailure.status}`,
+      );
+      await captureEvStep(actionTarget.action, "failed", applicationFailureMessage);
+      return buildFailureResult(
+        scenario, steps, allDiscoveredObjects, planSteps,
+        pendingObjectsPath, pendingPlansPath, evidenceDir,
+        failedAtStep, failedTarget, failedReason, allDiscoveredObjects
       );
     }
     if (postActionSyncSignal === "application_error") {

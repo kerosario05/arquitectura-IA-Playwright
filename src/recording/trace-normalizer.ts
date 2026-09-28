@@ -615,8 +615,16 @@ export function normalizeEvents(
         continue;
       }
       const previousTap = lastFunctionalAction?.kind === "tap" ? lastFunctionalAction : undefined;
+      // FIRST_LOSS fix (recording cd227d7b, kiosko virtual keypad): a fast typist's repeated key
+      // ("2 2", "9 9 9", ~300ms apart) was collapsed by the debounce, so the scenario lost digits
+      // and the 11-digit cedula never enabled "Generar Turno". The debounce exists for one
+      // physical gesture reported twice; two taps carrying different pointer interaction ids are
+      // two real gestures and are never merged.
+      const distinctGestures = Boolean(previousTap?.interactionId && event.interactionId)
+        && previousTap?.interactionId !== event.interactionId;
       if (
         previousTap
+        && !distinctGestures
         && targetKey(previousTap) === targetKey(event)
         && targetKey(event) !== ""
         && event.t - previousTap.t < debounce

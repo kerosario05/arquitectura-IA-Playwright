@@ -141,6 +141,9 @@ export class CaptureEngineV2ShadowBridge {
    */
   private activeEditingSessionId: string | null = null;
 
+  /** Document the active editing session was opened in -- lets `commitOpenEditingSessionOnStop` commit it with no browser message. */
+  private activeEditingDocument: { captureInstanceId: string; documentId: string } | null = null;
+
   /**
    * One-shot correlation token: set right after a `keypress` technical action is pushed, and
    * ALWAYS consumed (cleared) by the very next `click` message, whether or not it actually
@@ -391,6 +394,22 @@ export class CaptureEngineV2ShadowBridge {
       playwrightRecorderEvidence: resolution.owner.playwrightRecorderEvidence,
     });
     this.activeEditingSessionId = message.sessionId;
+    this.activeEditingDocument = documentHandleOf(message);
+  }
+
+  /**
+   * Stop boundary: commits the editing session still open when the recording is stopped.
+   *
+   * FIRST_LOSS fix: an edit is only committed on blur/submit/focus change/keypress/click, and
+   * closing the browser context fires none of them -- so the last field typed right before
+   * pressing Stop was silently lost. Uses the session's OWN document (never a guess): the
+   * `EditingSessionManager` still refuses a session with no edit evidence or no value change.
+   */
+  commitOpenEditingSessionOnStop(): boolean {
+    if (!this.activeEditingSessionId || !this.activeEditingDocument) return false;
+    const before = this.technicalActions.length;
+    this.commitEditingSession(this.activeEditingSessionId, this.activeEditingDocument, "blur");
+    return this.technicalActions.length > before;
   }
 
   private onPointer(message: Extract<ShadowBrowserMessage, { type: "pointer" }>): void {
@@ -426,7 +445,10 @@ export class CaptureEngineV2ShadowBridge {
    * duplicate action (no separate dedup logic is added here).
    */
   private commitEditingSession(sessionId: string, handle: { captureInstanceId: string; documentId: string }, messageType: ShadowBrowserMessage["type"]): void {
-    if (this.activeEditingSessionId === sessionId) this.activeEditingSessionId = null;
+    if (this.activeEditingSessionId === sessionId) {
+      this.activeEditingSessionId = null;
+      this.activeEditingDocument = null;
+    }
     const result = this.editingSessions.commitEditingSession(sessionId, handle);
     if (result.status === "committed") {
       this.pushAction(result.action);

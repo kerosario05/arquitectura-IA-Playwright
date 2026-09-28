@@ -68,6 +68,44 @@ test("3. editable focus + edit evidence + blur -> exactly one shadow edit action
   assert.equal(bridge.technicalActions[0].action.value?.literal, "qauser");
 });
 
+test("3b. Stop commits the field still being typed (no blur ever arrives)", () => {
+  const bridge = new CaptureEngineV2ShadowBridge();
+  bridge.handleMessage({ type: "document_ready", ...doc });
+  bridge.handleMessage({
+    type: "focus",
+    ...doc,
+    sessionId: "session-last",
+    composedPath: [candidate({ tag: "input", editable: true, pathDepth: 0 })],
+    identity: { label: "Correo", tagName: "input", domId: "email" },
+    initialValue: { present: false },
+  });
+  bridge.handleMessage({ type: "edit_evidence", sessionId: "session-last", kind: "input", valueState: { present: true, literal: "qa@bsc.com" } });
+
+  assert.equal(bridge.commitOpenEditingSessionOnStop(), true);
+  assert.equal(bridge.technicalActions.length, 1);
+  assert.equal(bridge.technicalActions[0].action.value?.literal, "qa@bsc.com");
+  // Idempotent: a blur arriving afterwards (or a second Stop call) never duplicates the edit.
+  assert.equal(bridge.commitOpenEditingSessionOnStop(), false);
+  bridge.handleMessage({ type: "blur", ...doc, sessionId: "session-last" });
+  assert.equal(bridge.technicalActions.length, 1);
+});
+
+test("3c. Stop commits nothing when the open field was focused but never edited", () => {
+  const bridge = new CaptureEngineV2ShadowBridge();
+  bridge.handleMessage({ type: "document_ready", ...doc });
+  bridge.handleMessage({
+    type: "focus",
+    ...doc,
+    sessionId: "session-untouched",
+    composedPath: [candidate({ tag: "input", editable: true, pathDepth: 0 })],
+    identity: { label: "Correo", tagName: "input", domId: "email" },
+    initialValue: { present: false },
+  });
+
+  assert.equal(bridge.commitOpenEditingSessionOnStop(), false);
+  assert.equal(bridge.technicalActions.length, 0);
+});
+
 test("4. multiple input/change edit_evidence messages on the same session still coalesce into one action", () => {
   const bridge = new CaptureEngineV2ShadowBridge();
   bridge.handleMessage({ type: "document_ready", ...doc });

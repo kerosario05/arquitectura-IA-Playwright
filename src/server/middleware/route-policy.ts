@@ -110,6 +110,7 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   R("POST", "/api/recordings/:recordingId/stop", ["recordings.create"], "required"),
   R("POST", "/api/recordings/:recordingId/control", ["recordings.create"], "required"),
   R("POST", "/api/recordings/:recordingId/derive", ["recordings.derive"], "required"),
+  R("GET", "/api/recordings/:recordingId/derivation", ["recordings.view"], "required"),
   R("POST", "/api/recordings/:recordingId/execute", ["tests.launch"], "required"),
   R("POST", "/api/recordings/:recordingId/testrail", ["recordings.promote"], "required"),
   R("DELETE", "/api/recordings/:recordingId", ["recordings.create"], "required"),

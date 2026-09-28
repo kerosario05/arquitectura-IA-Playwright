@@ -79,6 +79,8 @@ type CaseOutcomeEntry = {
   evidenceDir?: string;
   stepResults?: Array<{ stepIndex: number; action?: string; target?: string; status?: string; reason?: string; evidencePath?: string }>;
   rawError?: string;
+  /** "application" when the application under test rejected the action (a defect of the app, not of the automation). */
+  failureOrigin?: "application";
 };
 
 /** Non-undefined only when evidence was actually consolidated onto disk for this run. */
@@ -2382,6 +2384,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
                 evidenceDir: typeof json.evidenceDir === "string" ? json.evidenceDir : undefined,
                 stepResults: Array.isArray(json.stepResults) ? json.stepResults : undefined,
                 rawError: typeof json.rawError === "string" ? json.rawError : undefined,
+                failureOrigin: json.failureOrigin === "application" ? "application" : undefined,
               };
               caseOutcomeMap.set(json.caseId, entry);
             }
@@ -2787,6 +2790,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
             discoveryStatus?: string; failedAtStep?: number; failedTarget?: string;
             failedReason?: string; evidenceDir?: string;
             stepResults?: CaseOutcomeEntry["stepResults"]; rawError?: string;
+            failureOrigin?: CaseOutcomeEntry["failureOrigin"];
           }> = [];
           const mapSize = caseOutcomeMap.size;
           jobStore.appendLog(jobId, `[defect-checklist] caseOutcomeMap size=${mapSize}`);
@@ -2801,6 +2805,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
                 evidenceDir: outcome.evidenceDir,
                 stepResults: outcome.stepResults,
                 rawError: outcome.rawError,
+                failureOrigin: outcome.failureOrigin,
               });
             }
           }
@@ -2854,6 +2859,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
                 failedTarget: fc.failedTarget ?? undefined,
                 expectedResult: expectedResult || undefined,
                 rawError: fc.rawError ?? undefined,
+                failureOrigin: fc.failureOrigin ?? undefined,
                 evidenceDir: fc.evidenceDir ?? undefined,
                 evidencePath: lastSuccessful?.evidencePath ?? undefined,
                 lastSuccessfulStep: lastSuccessful

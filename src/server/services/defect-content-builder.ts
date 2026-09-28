@@ -58,6 +58,14 @@ export function sanitizeRawError(raw?: string): string {
 export function mapReasonCodeToHuman(reasonCode?: string, rawError?: string): string {
   if (!reasonCode && !rawError) return "";
   const code = (reasonCode ?? "").toLowerCase();
+  if (code === "application_http_error") {
+    // rawError already reads "Falla del aplicativo: <METHOD> <path> respondió HTTP <status>".
+    const err = sanitizeRawError(rawError).replace(/[.]+$/, "");
+    return `${err || "Falla del aplicativo: el servidor rechazó la acción"}. La automatización ejecutó el paso correctamente; el error lo devolvió la aplicación.`;
+  }
+  if (code === "application_error_visible") {
+    return "Falla del aplicativo: la pantalla mostró un mensaje de error después de la acción.";
+  }
   if (code.includes("assertion_not_found") || code.includes("assertion") && !code.includes("assertion")) {
     return "La validación esperada no fue encontrada en la pantalla.";
   }
@@ -231,7 +239,13 @@ export function buildDefectTitle(params: {
 
   // (A) Lead with the most defect-specific signal available.
   let core: string;
-  if (failedTarget) {
+  if (reasonCode === "application_http_error" || reasonCode === "application_error_visible") {
+    // The target WAS found and actioned; the application rejected it. Never "No se encontró".
+    const detail = reasonCode === "application_http_error" && rawError
+      ? sanitizeRawError(rawError).replace(/^Falla del aplicativo:\s*/i, "")
+      : "mostró un error";
+    core = `Falla del aplicativo${failedTarget ? ` al accionar "${clip(failedTarget, 60)}"` : ""}: ${detail}`;
+  } else if (failedTarget) {
     core = `No se encontró "${clip(failedTarget, 60)}"`;
   } else if (expected) {
     core = `No se cumplió: ${clip(expected, 90)}`;

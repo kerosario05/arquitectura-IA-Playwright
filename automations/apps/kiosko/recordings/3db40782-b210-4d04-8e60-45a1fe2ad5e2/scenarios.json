@@ -1,0 +1,1768 @@
+[
+  {
+    "scenarioId": "REC-3DB40782-01",
+    "title": "roque 8",
+    "description": "Recorrido observado para completar \"roque 8\". Se registraron 16 acciones funcionales.",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://172.27.4.50/",
+        "description": "Navegar a https://172.27.4.50/"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Explora nuestros productos"
+        },
+        "description": "Presionar \"Explora nuestros productos\"",
+        "interactionId": "interaction-7"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Préstamos"
+        },
+        "description": "Presionar \"Préstamos\"",
+        "interactionId": "interaction-9"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Préstamo Personal"
+        },
+        "description": "Presionar \"Préstamo Personal\"",
+        "interactionId": "interaction-13"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Solicitar"
+        },
+        "description": "Presionar \"Solicitar\"",
+        "interactionId": "interaction-15"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|4"
+        },
+        "description": "Presionar \"4\"",
+        "interactionId": "interaction-35"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|0"
+        },
+        "description": "Presionar \"0\"",
+        "interactionId": "interaction-37"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|2"
+        },
+        "description": "Presionar \"2\"",
+        "interactionId": "interaction-39"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|2"
+        },
+        "description": "Presionar \"2\"",
+        "interactionId": "interaction-41"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|9"
+        },
+        "description": "Presionar \"9\"",
+        "interactionId": "interaction-43"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|9"
+        },
+        "description": "Presionar \"9\"",
+        "interactionId": "interaction-45"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|9"
+        },
+        "description": "Presionar \"9\"",
+        "interactionId": "interaction-47"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|3"
+        },
+        "description": "Presionar \"3\"",
+        "interactionId": "interaction-49"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|7"
+        },
+        "description": "Presionar \"7\"",
+        "interactionId": "interaction-51"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|3"
+        },
+        "description": "Presionar \"3\"",
+        "interactionId": "interaction-53"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|4"
+        },
+        "description": "Presionar \"4\"",
+        "interactionId": "interaction-55"
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Presionar \"Explora nuestros productos\"",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "renderedStep": "Presionar \"Explora nuestros productos\"",
+        "interactionId": "interaction-7",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=loans",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 2
+      },
+      {
+        "content": "Presionar \"Préstamos\"",
+        "sourceEventRefs": [
+          "event-9"
+        ],
+        "renderedStep": "Presionar \"Préstamos\"",
+        "interactionId": "interaction-9",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=loans",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 3
+      },
+      {
+        "content": "Presionar \"Préstamo Personal\"",
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "renderedStep": "Presionar \"Préstamo Personal\"",
+        "interactionId": "interaction-13",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=loans",
+        "routeAfter": "https://172.27.4.50/product-extended?product=prestamo-personal",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 4
+      },
+      {
+        "content": "Presionar \"Solicitar\"",
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "renderedStep": "Presionar \"Solicitar\"",
+        "interactionId": "interaction-15",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=prestamo-personal",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 5
+      },
+      {
+        "content": "Presionar \"Generar Turno\"",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "renderedStep": "Presionar \"Generar Turno\"",
+        "interactionId": "interaction-17",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=prestamo-personal",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 6
+      },
+      {
+        "content": "Presionar \"4\"",
+        "sourceEventRefs": [
+          "event-35"
+        ],
+        "renderedStep": "Presionar \"4\"",
+        "interactionId": "interaction-35",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=prestamo-personal",
+        "routeAfter": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 7
+      },
+      {
+        "content": "Presionar \"0\"",
+        "sourceEventRefs": [
+          "event-37"
+        ],
+        "renderedStep": "Presionar \"0\"",
+        "interactionId": "interaction-37",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 8
+      },
+      {
+        "content": "Presionar \"2\"",
+        "sourceEventRefs": [
+          "event-39"
+        ],
+        "renderedStep": "Presionar \"2\"",
+        "interactionId": "interaction-39",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 9
+      },
+      {
+        "content": "Presionar \"2\"",
+        "sourceEventRefs": [
+          "event-41"
+        ],
+        "renderedStep": "Presionar \"2\"",
+        "interactionId": "interaction-41",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 10
+      },
+      {
+        "content": "Presionar \"9\"",
+        "sourceEventRefs": [
+          "event-43"
+        ],
+        "renderedStep": "Presionar \"9\"",
+        "interactionId": "interaction-43",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 11
+      },
+      {
+        "content": "Presionar \"9\"",
+        "sourceEventRefs": [
+          "event-45"
+        ],
+        "renderedStep": "Presionar \"9\"",
+        "interactionId": "interaction-45",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 12
+      },
+      {
+        "content": "Presionar \"9\"",
+        "sourceEventRefs": [
+          "event-47"
+        ],
+        "renderedStep": "Presionar \"9\"",
+        "interactionId": "interaction-47",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 13
+      },
+      {
+        "content": "Presionar \"3\"",
+        "sourceEventRefs": [
+          "event-49"
+        ],
+        "renderedStep": "Presionar \"3\"",
+        "interactionId": "interaction-49",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 14
+      },
+      {
+        "content": "Presionar \"7\"",
+        "sourceEventRefs": [
+          "event-51"
+        ],
+        "renderedStep": "Presionar \"7\"",
+        "interactionId": "interaction-51",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 15
+      },
+      {
+        "content": "Presionar \"3\"",
+        "sourceEventRefs": [
+          "event-53"
+        ],
+        "renderedStep": "Presionar \"3\"",
+        "interactionId": "interaction-53",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 16
+      },
+      {
+        "content": "Presionar \"4\"",
+        "sourceEventRefs": [
+          "event-55"
+        ],
+        "renderedStep": "Presionar \"4\"",
+        "interactionId": "interaction-55",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 17
+      }
+    ],
+    "requiredData": [],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"Explora nuestros productos\"",
+        "strategy": "role",
+        "value": "button|Explora nuestros productos"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Presionar \"Préstamos\"",
+        "strategy": "role",
+        "value": "button|Préstamos"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Préstamo Personal\"",
+        "strategy": "role",
+        "value": "button|Préstamo Personal"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Presionar \"Solicitar\"",
+        "strategy": "role",
+        "value": "button|Solicitar"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"4\"",
+        "strategy": "role",
+        "value": "button|4"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Presionar \"0\"",
+        "strategy": "role",
+        "value": "button|0"
+      },
+      {
+        "stepIndex": 7,
+        "description": "Presionar \"2\"",
+        "strategy": "role",
+        "value": "button|2"
+      },
+      {
+        "stepIndex": 8,
+        "description": "Presionar \"2\"",
+        "strategy": "role",
+        "value": "button|2"
+      },
+      {
+        "stepIndex": 9,
+        "description": "Presionar \"9\"",
+        "strategy": "role",
+        "value": "button|9"
+      },
+      {
+        "stepIndex": 10,
+        "description": "Presionar \"9\"",
+        "strategy": "role",
+        "value": "button|9"
+      },
+      {
+        "stepIndex": 11,
+        "description": "Presionar \"9\"",
+        "strategy": "role",
+        "value": "button|9"
+      },
+      {
+        "stepIndex": 12,
+        "description": "Presionar \"3\"",
+        "strategy": "role",
+        "value": "button|3"
+      },
+      {
+        "stepIndex": 13,
+        "description": "Presionar \"7\"",
+        "strategy": "role",
+        "value": "button|7"
+      },
+      {
+        "stepIndex": 14,
+        "description": "Presionar \"3\"",
+        "strategy": "role",
+        "value": "button|3"
+      },
+      {
+        "stepIndex": 15,
+        "description": "Presionar \"4\"",
+        "strategy": "role",
+        "value": "button|4"
+      }
+    ],
+    "sourceRecordingId": "3db40782-b210-4d04-8e60-45a1fe2ad5e2",
+    "hasUncertainSteps": true,
+    "primary": true,
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7",
+      "event-8",
+      "event-9",
+      "event-10",
+      "event-11",
+      "event-12",
+      "event-13",
+      "event-14",
+      "event-15",
+      "event-16",
+      "event-17",
+      "event-18",
+      "event-19",
+      "event-20",
+      "event-21",
+      "event-22",
+      "event-23",
+      "event-24",
+      "event-25",
+      "event-26",
+      "event-27",
+      "event-28",
+      "event-29",
+      "event-30",
+      "event-31",
+      "event-32",
+      "event-33",
+      "event-34",
+      "event-35",
+      "event-36",
+      "event-37",
+      "event-38",
+      "event-39",
+      "event-40",
+      "event-41",
+      "event-42",
+      "event-43",
+      "event-44",
+      "event-45",
+      "event-46",
+      "event-47",
+      "event-48",
+      "event-49",
+      "event-50",
+      "event-51",
+      "event-52",
+      "event-53",
+      "event-54",
+      "event-55",
+      "event-56"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": false,
+    "functionalReadiness": true,
+    "technicalReadiness": false,
+    "expectedResultCandidate": "La aplicación carga su pantalla inicial",
+    "oracleAuthority": "observed_only",
+    "confidence": 0.95,
+    "scenarioStepCount": 17,
+    "functionalActionCount": 16,
+    "nonUserSetupSteps": 1,
+    "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
+    "scenarioGoal": "roque 8",
+    "stateSequenceValid": true,
+    "stateSequenceIssues": [],
+    "postGoalObservations": [],
+    "goalContract": {
+      "nonGeneric": true,
+      "goalCoherent": true,
+      "mutationIntentExpressed": true
+    },
+    "replayEligible": true,
+    "canonicalInteractions": [
+      {
+        "id": "interaction-1",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-1"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-2",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-2"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-7",
+        "controlIdentity": "9f12e61beacd|Explora nuestros productos|role|button|Explora nuestros productos",
+        "semanticField": "Explora nuestros productos",
+        "action": "click",
+        "valueKey": "explora_nuestros_productos",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Explora nuestros productos"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Explora nuestros productos",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Explora nuestros productos"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"circle\",1],[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Explora nuestros productos\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=loans",
+        "stateScope": "9f12e61beacd",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-9",
+        "controlIdentity": "9f12e61beacd|Préstamos|role|button|Préstamos",
+        "semanticField": "Préstamos",
+        "action": "click",
+        "valueKey": "prestamos",
+        "sourceEventRefs": [
+          "event-9"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Préstamos"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Préstamos",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"circle\",2],[\"div\",6],[\"h3\",1],[\"path\",4],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"circle\\\",2],[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"path\\\",4],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Préstamos\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=loans",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-13",
+        "controlIdentity": "9f12e61beacd|Préstamo Personal|role|button|Préstamo Personal",
+        "semanticField": "Préstamo Personal",
+        "action": "click",
+        "valueKey": "prestamo_personal",
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Préstamo Personal"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Préstamo Personal",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"circle\",1],[\"div\",6],[\"h3\",1],[\"path\",2],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"path\\\",2],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Préstamo Personal\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=loans",
+        "routeAfter": "https://172.27.4.50/product-extended?product=prestamo-personal",
+        "stateScope": "9f12e61beacd",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-15",
+        "controlIdentity": "9f12e61beacd|Solicitar|role|button|Solicitar",
+        "semanticField": "Solicitar",
+        "action": "click",
+        "valueKey": "solicitar",
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Solicitar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Solicitar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 3,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 3
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Solicitar\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=prestamo-personal",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-17",
+        "controlIdentity": "9f12e61beacd|Generar Turno",
+        "semanticField": "Generar Turno",
+        "action": "click",
+        "valueKey": "generar_turno",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div",
+                "h3",
+                "p"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1],[\"h3\",1],[\"p\",1]],\"descendantEntries\":[[\"div\",2],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\",\"h3\",\"p\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1],[\\\"h3\\\",1],[\\\"p\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",2],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Generar Turno",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Generar Turno\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=prestamo-personal",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-35",
+        "controlIdentity": "9f12e61beacd|4|role|button|4",
+        "semanticField": "4",
+        "action": "click",
+        "valueKey": "4",
+        "sourceEventRefs": [
+          "event-35"
+        ],
+        "technicalTargetRefs": [
+          "role:button|4"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "4",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"4\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=prestamo-personal",
+        "routeAfter": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-37",
+        "controlIdentity": "9f12e61beacd|0|role|button|0",
+        "semanticField": "0",
+        "action": "click",
+        "valueKey": "0",
+        "sourceEventRefs": [
+          "event-37"
+        ],
+        "technicalTargetRefs": [
+          "role:button|0"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|0",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "0",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"0\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-39",
+        "controlIdentity": "9f12e61beacd|2|role|button|2",
+        "semanticField": "2",
+        "action": "click",
+        "valueKey": "2",
+        "sourceEventRefs": [
+          "event-39"
+        ],
+        "technicalTargetRefs": [
+          "role:button|2"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|2",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "2",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"2\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-41",
+        "controlIdentity": "9f12e61beacd|2|role|button|2",
+        "semanticField": "2",
+        "action": "click",
+        "valueKey": "2",
+        "sourceEventRefs": [
+          "event-41"
+        ],
+        "technicalTargetRefs": [
+          "role:button|2"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|2",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "2",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"2\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-43",
+        "controlIdentity": "9f12e61beacd|9|role|button|9",
+        "semanticField": "9",
+        "action": "click",
+        "valueKey": "9",
+        "sourceEventRefs": [
+          "event-43"
+        ],
+        "technicalTargetRefs": [
+          "role:button|9"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|9",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "9",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"9\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-45",
+        "controlIdentity": "9f12e61beacd|9|role|button|9",
+        "semanticField": "9",
+        "action": "click",
+        "valueKey": "9",
+        "sourceEventRefs": [
+          "event-45"
+        ],
+        "technicalTargetRefs": [
+          "role:button|9"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|9",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "9",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"9\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-47",
+        "controlIdentity": "9f12e61beacd|9|role|button|9",
+        "semanticField": "9",
+        "action": "click",
+        "valueKey": "9",
+        "sourceEventRefs": [
+          "event-47"
+        ],
+        "technicalTargetRefs": [
+          "role:button|9"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|9",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "9",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"9\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-49",
+        "controlIdentity": "9f12e61beacd|3|role|button|3",
+        "semanticField": "3",
+        "action": "click",
+        "valueKey": "3",
+        "sourceEventRefs": [
+          "event-49"
+        ],
+        "technicalTargetRefs": [
+          "role:button|3"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|3",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "3",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"3\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-51",
+        "controlIdentity": "9f12e61beacd|7|role|button|7",
+        "semanticField": "7",
+        "action": "click",
+        "valueKey": "7",
+        "sourceEventRefs": [
+          "event-51"
+        ],
+        "technicalTargetRefs": [
+          "role:button|7"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|7",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "7",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"7\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-53",
+        "controlIdentity": "9f12e61beacd|3|role|button|3",
+        "semanticField": "3",
+        "action": "click",
+        "valueKey": "3",
+        "sourceEventRefs": [
+          "event-53"
+        ],
+        "technicalTargetRefs": [
+          "role:button|3"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|3",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "3",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"3\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-55",
+        "controlIdentity": "9f12e61beacd|4|role|button|4",
+        "semanticField": "4",
+        "action": "click",
+        "valueKey": "4",
+        "sourceEventRefs": [
+          "event-55"
+        ],
+        "technicalTargetRefs": [
+          "role:button|4"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "4",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"4\"",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      }
+    ],
+    "entityActionBlocks": [],
+    "readiness": {
+      "functionalReadiness": true,
+      "dataReadiness": true,
+      "technicalReadiness": false,
+      "oracleReadiness": true,
+      "reviewReadiness": true,
+      "publicationContentReadiness": true,
+      "executionReadiness": false,
+      "publicationReadiness": true,
+      "missingInputs": [],
+      "datasetAuthorityMismatches": [],
+      "dataReadinessReasons": []
+    },
+    "technicalKnowledgeRefs": [],
+    "runtimeInputRequirements": [],
+    "runtimeDataset": {
+      "scenarioId": "REC-3DB40782-01",
+      "requirements": [],
+      "resolvedValues": {},
+      "missingValues": []
+    },
+    "mutationOpportunities": []
+  }
+]

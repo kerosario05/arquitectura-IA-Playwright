@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-09-22T01:46:10.169Z",
+  "updatedAt": "2026-09-28T18:20:26.391Z",
   "automations": [
     {
       "id": "preview-001-kiosko2",
@@ -867,6 +867,253 @@
       "promotionPersisted": true,
       "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\kiosko\\sections\\default-section\\cases\\preview-001-prueba\\case.spec.ts",
       "promotedSpecHash": "272ada265eb19a5aa93314e84529c6c60e3f632e0b860e21fcd2ba84ddcc8f9c"
+    },
+    {
+      "id": "preview-001-roque-10",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "roque 10",
+      "planPath": "automations\\apps\\kiosko\\sections\\default-section\\cases\\preview-001-roque-10\\plan.json",
+      "specPath": "automations\\apps\\kiosko\\sections\\default-section\\cases\\preview-001-roque-10\\case.spec.ts",
+      "appSlug": "kiosko",
+      "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+      "status": "spec_failed",
+      "source": "discovery",
+      "appProfile": "kiosko",
+      "createdAt": "2026-09-28T18:10:06.332Z",
+      "updatedAt": "2026-09-28T18:10:06.333Z",
+      "lastPromotedFrom": "C:\\Users\\kerosario\\Documents\\arquitectura-IA-Playwright\\.artifacts\\preview\\PREVIEW-001\\2026-09-28T18-08-47-127Z\\discovered-plans.pending.json",
+      "pomStatus": "needs_manual_review",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "failed",
+      "metadata": {
+        "discoveryDir": "C:\\Users\\kerosario\\Documents\\arquitectura-IA-Playwright\\.artifacts\\preview\\PREVIEW-001\\2026-09-28T18-08-47-127Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 9425,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "skipped"
+          },
+          "promotionAllowed": false,
+          "specsRequested": 1,
+          "specsValidated": 0,
+          "specsRejected": 1,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": false,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "literal_visible_text"
+          ],
+          "errors": [],
+          "warnings": [
+            "runtime_gate:deferred:runtime_unavailable_promotion_deferred: candidate runtime did not execute, so no required step was proven to pass — promotion is neither allowed nor denied until it does."
+          ],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "defer",
+            "promotionStatus": "deferred",
+            "reason": "runtime_unavailable_promotion_deferred: candidate runtime did not execute, so no required step was proven to pass — promotion is neither allowed nor denied until it does."
+          },
+          "specWritten": false,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "spec_generation_validation_failed",
+          "blockers": [
+            "spec_generation_validation_failed"
+          ],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage",
+            "CategoryPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\kiosko\\sections\\default-section\\cases\\preview-001-roque-10\\case.spec.ts",
+          "specHash": "eea345a2d9522fa6a19f91d3bab0c27f30a5c26094fd890d75f85e16c456c5af",
+          "specSource": "ai_candidate"
+        }
+      }
+    },
+    {
+      "id": "0-roque-10",
+      "caseId": 0,
+      "title": "roque 10",
+      "planPath": "automations\\apps\\kiosko\\sections\\default-section\\cases\\0-roque-10\\plan.json",
+      "specPath": "automations\\apps\\kiosko\\sections\\default-section\\cases\\0-roque-10\\case.spec.ts",
+      "appSlug": "kiosko",
+      "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+      "status": "spec_failed",
+      "source": "discovery",
+      "appProfile": "kiosko",
+      "createdAt": "2026-09-28T18:20:26.391Z",
+      "updatedAt": "2026-09-28T18:20:26.391Z",
+      "lastPromotedFrom": "C:\\Users\\kerosario\\Documents\\arquitectura-IA-Playwright\\.artifacts\\preview\\undefined\\2026-09-28T18-19-15-638Z\\discovered-plans.pending.json",
+      "pomStatus": "needs_manual_review",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "failed",
+      "metadata": {
+        "discoveryDir": "C:\\Users\\kerosario\\Documents\\arquitectura-IA-Playwright\\.artifacts\\preview\\undefined\\2026-09-28T18-19-15-638Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 31099,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "skipped"
+          },
+          "promotionAllowed": false,
+          "specsRequested": 1,
+          "specsValidated": 0,
+          "specsRejected": 1,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": false,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "literal_visible_text"
+          ],
+          "errors": [],
+          "warnings": [
+            "runtime_gate:deferred:runtime_unavailable_promotion_deferred: candidate runtime did not execute, so no required step was proven to pass — promotion is neither allowed nor denied until it does."
+          ],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "defer",
+            "promotionStatus": "deferred",
+            "reason": "runtime_unavailable_promotion_deferred: candidate runtime did not execute, so no required step was proven to pass — promotion is neither allowed nor denied until it does."
+          },
+          "specWritten": false,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "spec_generation_validation_failed",
+          "blockers": [
+            "spec_generation_validation_failed"
+          ],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage",
+            "CategoryPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\kiosko\\sections\\default-section\\cases\\0-roque-10\\case.spec.ts",
+          "specHash": "e845f8a750bd7fc3680327b2c1f098f400c8f0f5f1e7e78facc77e22486b3f2f",
+          "specSource": "ai_candidate"
+        }
+      }
     }
   ]
 }

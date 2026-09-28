@@ -2,14 +2,14 @@
   "appProfile": {
     "appSlug": "kiosko",
     "source": "default",
-    "name": "0",
-    "baseUrl": "http://127.0.0.1:8088/QA_Field_Lab.html",
-    "baseUrlHash": "10a04850f834",
-    "createdAt": "2026-09-22T01:46:10.155Z",
-    "updatedAt": "2026-09-22T01:46:10.156Z",
+    "name": "4",
+    "baseUrl": "https://172.27.4.50/",
+    "baseUrlHash": "74df3c0e992c",
+    "createdAt": "2026-09-28T18:20:26.364Z",
+    "updatedAt": "2026-09-28T18:20:26.365Z",
     "ignoreHTTPSErrors": false
   },
-  "baseUrl": "http://127.0.0.1:8088/QA_Field_Lab.html",
+  "baseUrl": "https://172.27.4.50/",
   "loginMode": "password",
   "testData": {},
   "testDataAliases": {},
@@ -20,5 +20,5 @@
   "passwordRef": "APP_PASSWORD",
   "missingInputBehavior": "auto_generate",
   "ignoreHTTPSErrors": false,
-  "updatedAt": "2026-09-22T01:46:10.156Z"
+  "updatedAt": "2026-09-28T18:20:26.365Z"
 }
