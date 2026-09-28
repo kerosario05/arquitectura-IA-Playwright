@@ -1,0 +1,25 @@
+{
+  "recordingId": "aaac905b-c224-4a15-90d8-1898a6c81fdc",
+  "projectSlug": "portal-empresarial",
+  "appSlug": "portal-empresarial",
+  "platform": "web",
+  "baseUrl": "https://172.27.4.31/login",
+  "label": "Grabar el recorrido",
+  "recordingGoal": {
+    "declaredGoal": "Grabar el recorrido",
+    "normalizedGoal": "Grabar el recorrido",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-09-25T20:12:50.544Z",
+  "status": "failed",
+  "events": [],
+  "screens": [],
+  "errorMessage": "page.goto: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://172.27.4.31/login\", waiting until \"domcontentloaded\"\u001b[22m\n"
+}

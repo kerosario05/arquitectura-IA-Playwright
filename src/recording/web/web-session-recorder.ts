@@ -2056,6 +2056,13 @@ export class WebSessionRecorder {
       drain = await drainIngestionUntilQuiet(drainSource, drainOptions);
     }
 
+    // A binding callback can still enqueue one final action while the drain above resolves: close
+    // the context BEFORE marking the recorder stopped, so those callbacks quiesce, then drain
+    // whatever they enqueued. Still bounded by the same drain options.
+    await this.context?.close().catch(() => undefined);
+    const afterClose = await drainIngestionUntilQuiet(drainSource, drainOptions);
+    if (!afterClose.drained) drain = afterClose;
+
     const summary =
       `[recording-stop] drained=${drain.drained} waitedMs=${drain.waitedMs} pendingAtStop=${pendingAtStop} ` +
       `extraRounds=${drain.extraRounds} eventsAtStop=${eventsAtStop} eventsFinal=${this.events.length} ` +
@@ -2076,7 +2083,6 @@ export class WebSessionRecorder {
         `[capture-v2] summary messages=${summary.messages} actions=${summary.actions} diagnostics=${summary.diagnostics} documents=${summary.documents} edits=${edits} clicks=${clicks}`,
       );
     }
-    await this.context?.close().catch(() => undefined);
     await this.browser?.close().catch(() => undefined);
     this.context = null;
     this.browser = null;

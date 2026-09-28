@@ -1,0 +1,310 @@
+{
+  "recordingId": "2ef02e0e-fbbb-43e2-9349-7bd9c3d230d8",
+  "projectSlug": "qa",
+  "appSlug": "qa",
+  "platform": "web",
+  "baseUrl": "https://172.27.4.31/login",
+  "label": "fresh-physical-login-flow",
+  "recordingGoal": {
+    "declaredGoal": "abrir app, ingresar RNC de la empresa, ingresar Nombre de usuario, ingresar Contrase�a, Presionar Continuar, Presionar Salir",
+    "normalizedGoal": "abrir app, ingresar RNC de la empresa, ingresar Nombre de usuario, ingresar Contrase�a, Presionar Continuar, Presionar Salir",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-09-25T20:06:03.197Z",
+  "status": "stopped",
+  "events": [
+    {
+      "t": 3356,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://172.27.4.31/login",
+      "seq": 0
+    },
+    {
+      "t": 4262,
+      "kind": "navigate",
+      "screenKey": "3e7b2674871e",
+      "url": "https://172.27.4.31/login",
+      "seq": 1
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "3e7b2674871e",
+      "url": "https://172.27.4.31/login",
+      "framePath": ".artifacts\\tmp\\recordings\\2ef02e0e-fbbb-43e2-9349-7bd9c3d230d8\\0001-launch.png",
+      "seq": 2
+    },
+    {
+      "t": 101363,
+      "interactionId": "pointer-1",
+      "kind": "note",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://172.27.4.31/login",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Continuar\"",
+      "observationType": "pointer",
+      "seq": 3
+    },
+    {
+      "t": 101623,
+      "interactionId": "pointer-1",
+      "kind": "tap",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://172.27.4.31/login",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Continuar",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Continuar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"div\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        }
+      },
+      "framePath": ".artifacts\\tmp\\recordings\\2ef02e0e-fbbb-43e2-9349-7bd9c3d230d8\\0004-click.png",
+      "seq": 4
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "3e7b2674871e",
+      "title": "3e7b2674871e",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://172.27.4.31/login",
+      "firstSeenAt": 3636,
+      "controls": [],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "943b3d6d7412",
+      "title": "943b3d6d7412",
+      "fingerprint": "92202ed4bfe848e901e4274c4520db69e60b5760dc338f470635cfce018475fc",
+      "url": "https://172.27.4.31/login",
+      "firstSeenAt": 101713,
+      "controls": [
+        {
+          "label": "RNC de la empresa*",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Escribir aquí el RNC",
+          "attributes": {
+            "id": "rnc",
+            "name": "userRnc",
+            "type": "text",
+            "placeholder": "Escribir aquí el RNC"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "rnc",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Nombre de usuario*",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Usuario",
+          "attributes": {
+            "id": "email",
+            "name": "userName",
+            "type": "text",
+            "placeholder": "Usuario"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "email",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Contraseña*",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Clave",
+          "attributes": {
+            "id": "password",
+            "name": "password",
+            "type": "password",
+            "placeholder": "Clave"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "password",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Registro Digital Nuevos Colaboradores",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Registro Digital Nuevos Colaboradores",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Continuar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "submit"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Continuar",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Quiénes Somos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Quiénes Somos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Productos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Productos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Contactos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Contactos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Pasos Reclamación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Pasos Reclamación",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    }
+  ],
+  "endedAt": "2026-09-25T20:07:52.480Z",
+  "durationMs": 109283
+}

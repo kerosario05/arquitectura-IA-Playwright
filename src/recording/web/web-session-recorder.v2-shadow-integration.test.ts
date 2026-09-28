@@ -117,10 +117,14 @@ test("17. stop() logs a bounded [capture-v2] summary via direct console.log, onl
   assert.match(stopBody, /if \(this\.v2Shadow\)/);
   assert.match(stopBody, /getShadowSummary\(\)/);
   assert.match(stopBody, /console\.log\(\s*\n?\s*`\[capture-v2\] summary messages=\$\{summary\.messages\} actions=\$\{summary\.actions\} diagnostics=\$\{summary\.diagnostics\} documents=\$\{summary\.documents\} edits=\$\{edits\} clicks=\$\{clicks\}`/);
-  // The summary log must precede context/browser teardown, so it still reflects the completed session.
+  // The context is now closed BEFORE `stopped` (late binding callbacks must quiesce and be drained,
+  // see authority-switch test 7b), so the summary comes after that final drain -- it reflects the
+  // completed session -- and still precedes the browser teardown.
   const summaryIndex = stopBody.indexOf("[capture-v2] summary");
-  const closeIndex = stopBody.indexOf("this.context?.close()");
-  assert.ok(summaryIndex >= 0 && closeIndex >= 0 && summaryIndex < closeIndex, "summary must be logged before context teardown");
+  const contextCloseIndex = stopBody.indexOf("this.context?.close()");
+  const browserCloseIndex = stopBody.indexOf("this.browser?.close()");
+  assert.ok(contextCloseIndex >= 0 && summaryIndex > contextCloseIndex, "summary must reflect the session after the context-close drain");
+  assert.ok(browserCloseIndex >= 0 && summaryIndex < browserCloseIndex, "summary must be logged before browser teardown");
 });
 
 test("18. the stop() summary block never references pushEvent/onInteraction/SessionTrace persistence", () => {

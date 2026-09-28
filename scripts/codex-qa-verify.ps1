@@ -49,7 +49,7 @@
 #>
 param(
   [Parameter(Mandatory = $true)][string]$Prompt,
-  [ValidateSet("low", "medium")][string]$Effort = "low",
+  [ValidateSet("low", "medium")][string]$Effort = "medium",
   [ValidateSet("discovery", "recording", "other")][string]$Mode = "other",
   [string]$Model = "gpt-5.6-luna"
 )

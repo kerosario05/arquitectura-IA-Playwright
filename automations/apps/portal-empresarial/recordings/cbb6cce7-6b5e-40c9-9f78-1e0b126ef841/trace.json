@@ -1,0 +1,709 @@
+{
+  "recordingId": "cbb6cce7-6b5e-40c9-9f78-1e0b126ef841",
+  "projectSlug": "portal-empresarial",
+  "appSlug": "portal-empresarial",
+  "platform": "web",
+  "baseUrl": "https://172.27.4.31/login",
+  "label": "Grabar el recorrido",
+  "recordingGoal": {
+    "declaredGoal": "Grabar el recorrido",
+    "normalizedGoal": "Grabar el recorrido",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-09-25T19:54:28.930Z",
+  "status": "recording",
+  "events": [
+    {
+      "t": 14515,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://172.27.4.31/login",
+      "seq": 0
+    },
+    {
+      "t": 15059,
+      "kind": "navigate",
+      "screenKey": "3e7b2674871e",
+      "url": "https://172.27.4.31/login",
+      "seq": 1
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "3e7b2674871e",
+      "url": "https://172.27.4.31/login",
+      "framePath": ".artifacts\\tmp\\recordings\\cbb6cce7-6b5e-40c9-9f78-1e0b126ef841\\0001-launch.png",
+      "seq": 2
+    },
+    {
+      "t": 25176,
+      "interactionId": "pointer-1",
+      "kind": "note",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://172.27.4.31/login",
+      "target": {
+        "label": "RNC de la empresa*",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"RNC de la empresa*\"",
+      "observationType": "pointer",
+      "seq": 3
+    },
+    {
+      "t": 29435,
+      "interactionId": "pointer-2",
+      "kind": "note",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://172.27.4.31/login",
+      "target": {
+        "label": "Nombre de usuario*",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Nombre de usuario*\"",
+      "observationType": "pointer",
+      "seq": 4
+    },
+    {
+      "t": 30016,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://172.27.4.31/login",
+      "target": {
+        "label": "RNC de la empresa*",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|RNC de la empresa*",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#rnc",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "rnc",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": false
+      },
+      "value": "130598983",
+      "valueSource": "user",
+      "framePath": ".artifacts\\tmp\\recordings\\cbb6cce7-6b5e-40c9-9f78-1e0b126ef841\\0005-input.png",
+      "seq": 5
+    },
+    {
+      "t": 32137,
+      "interactionId": "pointer-3",
+      "kind": "note",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://172.27.4.31/login",
+      "target": {
+        "label": "Contraseña*",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Contraseña*\"",
+      "observationType": "pointer",
+      "seq": 6
+    },
+    {
+      "t": 32580,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://172.27.4.31/login",
+      "target": {
+        "label": "Nombre de usuario*",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Nombre de usuario*",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#email",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "email",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": false
+      },
+      "value": "olivam",
+      "valueSource": "user",
+      "framePath": ".artifacts\\tmp\\recordings\\cbb6cce7-6b5e-40c9-9f78-1e0b126ef841\\0007-input.png",
+      "seq": 7
+    },
+    {
+      "t": 33267,
+      "interactionId": "pointer-4",
+      "kind": "note",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://172.27.4.31/login",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Continuar\"",
+      "observationType": "pointer",
+      "seq": 8
+    },
+    {
+      "t": 33768,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://172.27.4.31/login",
+      "target": {
+        "label": "Contraseña*",
+        "role": "input",
+        "tag": "input",
+        "inputType": "password",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Contraseña*",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#password",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "password",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": true
+      },
+      "redactedKey": "contrasena*",
+      "valueSource": "user",
+      "framePath": ".artifacts\\tmp\\recordings\\cbb6cce7-6b5e-40c9-9f78-1e0b126ef841\\0009-input.png",
+      "seq": 9
+    },
+    {
+      "t": 33917,
+      "interactionId": "pointer-4",
+      "kind": "tap",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://172.27.4.31/login",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Continuar",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Continuar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"div\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        }
+      },
+      "framePath": ".artifacts\\tmp\\recordings\\cbb6cce7-6b5e-40c9-9f78-1e0b126ef841\\0010-click.png",
+      "seq": 10
+    },
+    {
+      "t": 46337,
+      "kind": "navigate",
+      "screenKey": "3e7b2674871e",
+      "url": "https://172.27.4.31/dashboard",
+      "seq": 11
+    },
+    {
+      "t": 49285,
+      "interactionId": "pointer-5",
+      "kind": "note",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "92202ed4bfe848e901e4274c4520db69e60b5760dc338f470635cfce018475fc",
+      "url": "https://172.27.4.31/dashboard",
+      "target": {
+        "label": "Salir",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Salir",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "radix-_r_c_"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Salir\"",
+      "observationType": "pointer",
+      "seq": 12
+    },
+    {
+      "t": 49520,
+      "interactionId": "pointer-5",
+      "kind": "tap",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "92202ed4bfe848e901e4274c4520db69e60b5760dc338f470635cfce018475fc",
+      "url": "https://172.27.4.31/dashboard",
+      "target": {
+        "label": "Salir",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Salir",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Salir",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "radix-_r_c_"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Salir",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "radix-_r_c_"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "framePath": ".artifacts\\tmp\\recordings\\cbb6cce7-6b5e-40c9-9f78-1e0b126ef841\\0013-click.png",
+      "seq": 13
+    },
+    {
+      "t": 53646,
+      "interactionId": "pointer-6",
+      "kind": "note",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "02313ba323b5e9a76af7fa248c341cf731e13c208975e2da49d0f300a26f3513",
+      "url": "https://172.27.4.31/dashboard",
+      "target": {
+        "label": "Gestión de Nóminas",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Gestión de Nóminas",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Gestión de Nóminas\"",
+      "observationType": "pointer",
+      "seq": 14
+    },
+    {
+      "t": 189670,
+      "kind": "navigate",
+      "screenKey": "3e7b2674871e",
+      "url": "https://172.27.4.31/payroll/electronicPayroll",
+      "seq": 15
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "3e7b2674871e",
+      "title": "3e7b2674871e",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://172.27.4.31/login",
+      "firstSeenAt": 14900,
+      "controls": [],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "220acbf65cf8",
+      "title": "220acbf65cf8",
+      "fingerprint": "92202ed4bfe848e901e4274c4520db69e60b5760dc338f470635cfce018475fc",
+      "url": "https://172.27.4.31/login",
+      "firstSeenAt": 34034,
+      "controls": [
+        {
+          "label": "RNC de la empresa*",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Escribir aquí el RNC",
+          "attributes": {
+            "id": "rnc",
+            "name": "userRnc",
+            "type": "text",
+            "placeholder": "Escribir aquí el RNC"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "rnc",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Nombre de usuario*",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Usuario",
+          "attributes": {
+            "id": "email",
+            "name": "userName",
+            "type": "text",
+            "placeholder": "Usuario"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "email",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Contraseña*",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Clave",
+          "attributes": {
+            "id": "password",
+            "name": "password",
+            "type": "password",
+            "placeholder": "Clave"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "password",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Registro Digital Nuevos Colaboradores",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Registro Digital Nuevos Colaboradores",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Iniciando sesión...",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "submit"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Iniciando sesión...",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Quiénes Somos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Quiénes Somos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Productos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Productos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Contactos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Contactos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Pasos Reclamación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Pasos Reclamación",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "d2ea73d6014a",
+      "title": "d2ea73d6014a",
+      "fingerprint": "02313ba323b5e9a76af7fa248c341cf731e13c208975e2da49d0f300a26f3513",
+      "url": "https://172.27.4.31/dashboard",
+      "firstSeenAt": 49612,
+      "controls": [
+        {
+          "label": "Gestión de Nóminas",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Gestión de Nóminas",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Depósito Identificado",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Depósito Identificado",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cartas y Certificaciones",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cartas y Certificaciones",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Quiénes Somos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Quiénes Somos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Productos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Productos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Contactos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Contactos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Pasos Reclamación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Pasos Reclamación",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    }
+  ]
+}

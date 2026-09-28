@@ -1,8 +1,8 @@
 [
   {
-    "scenarioId": "REC-20DF7BD6-01",
-    "title": "Generar Turno",
-    "description": "Recorrido observado para completar \"Generar Turno\". Se registraron 18 acciones funcionales.",
+    "scenarioId": "REC-BEEAC4DD-01",
+    "title": "recorrido",
+    "description": "Recorrido observado para completar \"recorrido\". Se registraron 18 acciones funcionales.",
     "preconditions": [
       "Acceso a la aplicación configurada del proyecto",
       "Datos de prueba válidos disponibles para el proyecto"
@@ -224,10 +224,10 @@
       {
         "content": "Presionar \"Tarjeta Crédito Visa Clásica\"",
         "sourceEventRefs": [
-          "event-14"
+          "event-15"
         ],
         "renderedStep": "Presionar \"Tarjeta Crédito Visa Clásica\"",
-        "interactionId": "interaction-14",
+        "interactionId": "interaction-15",
         "expected": "",
         "classification": "FUNCTIONAL_ACTION",
         "screenBeforeRef": "9f12e61beacd",
@@ -560,7 +560,7 @@
         "value": "button|Generar Turno"
       }
     ],
-    "sourceRecordingId": "20df7bd6-6898-40f5-bc2b-4b50bb82d098",
+    "sourceRecordingId": "beeac4dd-6a93-4ce8-8dae-afa1e6e006bc",
     "hasUncertainSteps": true,
     "primary": true,
     "sourceEventRefs": [
@@ -619,7 +619,7 @@
     "functionalActionCount": 18,
     "nonUserSetupSteps": 1,
     "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
-    "scenarioGoal": "Generar Turno",
+    "scenarioGoal": "recorrido",
     "stateSequenceValid": true,
     "stateSequenceIssues": [],
     "postGoalObservations": [],
@@ -698,7 +698,14 @@
               },
               "deterministicStructuralIdentity": true,
               "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"circle\",1],[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
-              "structuralIdentityMatchCount": 1
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
             },
             "interactionEvidence": [
               "v2_click_owner"
@@ -758,7 +765,14 @@
               "deterministicStructuralIdentity": true,
               "topologyTieBreakUnique": true,
               "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"line\",1],[\"path\",1],[\"rect\",1],[\"svg\",2]]}",
-              "structuralIdentityMatchCount": 1
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"line\\\",1],[\\\"path\\\",1],[\\\"rect\\\",1],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
             },
             "interactionEvidence": [
               "v2_click_owner"
@@ -817,7 +831,14 @@
               },
               "deterministicStructuralIdentity": false,
               "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"line\",1],[\"path\",1],[\"rect\",1],[\"svg\",2]]}",
-              "structuralIdentityMatchCount": 1
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"line\\\",1],[\\\"path\\\",1],[\\\"rect\\\",1],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
             },
             "interactionEvidence": [
               "v2_click_owner"
@@ -841,13 +862,13 @@
         "confidence": 0.85
       },
       {
-        "id": "interaction-14",
+        "id": "interaction-15",
         "controlIdentity": "9f12e61beacd|Tarjeta Crédito Visa Clásica",
         "semanticField": "Tarjeta Crédito Visa Clásica",
         "action": "click",
         "valueKey": "tarjeta_credito_visa_clasica",
         "sourceEventRefs": [
-          "event-14"
+          "event-15"
         ],
         "technicalTargetRefs": [],
         "technicalTargetCandidates": [
@@ -878,7 +899,14 @@
               },
               "deterministicStructuralIdentity": true,
               "topologySignature": "{\"childEntries\":[[\"div\",3],[\"h3\",1]],\"descendantEntries\":[[\"div\",11],[\"h3\",1],[\"img\",1],[\"path\",4],[\"span\",4],[\"svg\",4]]}",
-              "structuralIdentityMatchCount": 1
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"div\"},\"stableDirectAttributes\":{},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"img\",\"stableAttributes\":{\"src\":\"/assets/images/tarjetas-de-credito-visa-clasica.png\"}}],\"semanticShape\":[\"div\",\"h3\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",3],[\\\"h3\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",11],[\\\"h3\\\",1],[\\\"img\\\",1],[\\\"path\\\",4],[\\\"span\\\",4],[\\\"svg\\\",4]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
             },
             "interactionEvidence": [
               "v2_click_owner",
@@ -939,7 +967,14 @@
               "deterministicStructuralIdentity": false,
               "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
               "identityAmbiguous": true,
-              "structuralIdentityMatchCount": 3
+              "structuralIdentityMatchCount": 3,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 3
             },
             "interactionEvidence": [
               "v2_click_owner"
@@ -989,7 +1024,14 @@
               "deterministicStructuralIdentity": true,
               "topologyTieBreakUnique": true,
               "topologySignature": "{\"childEntries\":[[\"div\",1],[\"h3\",1],[\"p\",1]],\"descendantEntries\":[[\"div\",2],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
-              "structuralIdentityMatchCount": 1
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\",\"h3\",\"p\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1],[\\\"h3\\\",1],[\\\"p\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",2],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
             },
             "interactionEvidence": [
               "v2_click_owner"
@@ -1042,7 +1084,14 @@
               },
               "deterministicStructuralIdentity": false,
               "identityAmbiguous": true,
-              "structuralIdentityMatchCount": 43
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
             },
             "interactionEvidence": [
               "v2_click_owner"
@@ -1052,6 +1101,17 @@
           }
         ],
         "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "4",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
         "description": "Ingresar en \"4\"",
         "screenBeforeRef": "9f12e61beacd",
         "screenAfterRef": "9f12e61beacd",
@@ -1095,7 +1155,14 @@
               },
               "deterministicStructuralIdentity": false,
               "identityAmbiguous": true,
-              "structuralIdentityMatchCount": 43
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
             },
             "interactionEvidence": [
               "v2_click_owner"
@@ -1105,6 +1172,17 @@
           }
         ],
         "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "0",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
         "description": "Ingresar en \"0\"",
         "screenBeforeRef": "9f12e61beacd",
         "screenAfterRef": "9f12e61beacd",
@@ -1148,7 +1226,14 @@
               },
               "deterministicStructuralIdentity": false,
               "identityAmbiguous": true,
-              "structuralIdentityMatchCount": 43
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
             },
             "interactionEvidence": [
               "v2_click_owner"
@@ -1158,6 +1243,17 @@
           }
         ],
         "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "2",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
         "description": "Ingresar en \"2\"",
         "screenBeforeRef": "9f12e61beacd",
         "screenAfterRef": "9f12e61beacd",
@@ -1201,7 +1297,14 @@
               },
               "deterministicStructuralIdentity": false,
               "identityAmbiguous": true,
-              "structuralIdentityMatchCount": 43
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
             },
             "interactionEvidence": [
               "v2_click_owner"
@@ -1211,6 +1314,17 @@
           }
         ],
         "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "2",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
         "description": "Ingresar en \"2\"",
         "screenBeforeRef": "9f12e61beacd",
         "screenAfterRef": "9f12e61beacd",
@@ -1254,7 +1368,14 @@
               },
               "deterministicStructuralIdentity": false,
               "identityAmbiguous": true,
-              "structuralIdentityMatchCount": 43
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
             },
             "interactionEvidence": [
               "v2_click_owner"
@@ -1264,6 +1385,17 @@
           }
         ],
         "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "4",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
         "description": "Ingresar en \"4\"",
         "screenBeforeRef": "9f12e61beacd",
         "screenAfterRef": "9f12e61beacd",
@@ -1307,7 +1439,14 @@
               },
               "deterministicStructuralIdentity": false,
               "identityAmbiguous": true,
-              "structuralIdentityMatchCount": 43
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
             },
             "interactionEvidence": [
               "v2_click_owner"
@@ -1317,6 +1456,17 @@
           }
         ],
         "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "6",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
         "description": "Ingresar en \"6\"",
         "screenBeforeRef": "9f12e61beacd",
         "screenAfterRef": "9f12e61beacd",
@@ -1360,7 +1510,14 @@
               },
               "deterministicStructuralIdentity": false,
               "identityAmbiguous": true,
-              "structuralIdentityMatchCount": 43
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
             },
             "interactionEvidence": [
               "v2_click_owner"
@@ -1370,6 +1527,17 @@
           }
         ],
         "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "7",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
         "description": "Ingresar en \"7\"",
         "screenBeforeRef": "9f12e61beacd",
         "screenAfterRef": "9f12e61beacd",
@@ -1413,7 +1581,14 @@
               },
               "deterministicStructuralIdentity": false,
               "identityAmbiguous": true,
-              "structuralIdentityMatchCount": 43
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
             },
             "interactionEvidence": [
               "v2_click_owner"
@@ -1423,6 +1598,17 @@
           }
         ],
         "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "9",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
         "description": "Ingresar en \"9\"",
         "screenBeforeRef": "9f12e61beacd",
         "screenAfterRef": "9f12e61beacd",
@@ -1466,7 +1652,14 @@
               },
               "deterministicStructuralIdentity": false,
               "identityAmbiguous": true,
-              "structuralIdentityMatchCount": 43
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
             },
             "interactionEvidence": [
               "v2_click_owner"
@@ -1476,6 +1669,17 @@
           }
         ],
         "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "5",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
         "description": "Ingresar en \"5\"",
         "screenBeforeRef": "9f12e61beacd",
         "screenAfterRef": "9f12e61beacd",
@@ -1519,7 +1723,14 @@
               },
               "deterministicStructuralIdentity": false,
               "identityAmbiguous": true,
-              "structuralIdentityMatchCount": 43
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
             },
             "interactionEvidence": [
               "v2_click_owner"
@@ -1529,6 +1740,17 @@
           }
         ],
         "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "5",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
         "description": "Ingresar en \"5\"",
         "screenBeforeRef": "9f12e61beacd",
         "screenAfterRef": "9f12e61beacd",
@@ -1572,7 +1794,14 @@
               },
               "deterministicStructuralIdentity": false,
               "identityAmbiguous": true,
-              "structuralIdentityMatchCount": 43
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
             },
             "interactionEvidence": [
               "v2_click_owner"
@@ -1582,6 +1811,17 @@
           }
         ],
         "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "1",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "root"
+          },
+          "runtimeResolutionRequired": true
+        },
         "description": "Ingresar en \"1\"",
         "screenBeforeRef": "9f12e61beacd",
         "screenAfterRef": "9f12e61beacd",
@@ -1628,7 +1868,14 @@
               "deterministicStructuralIdentity": false,
               "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
               "identityAmbiguous": true,
-              "structuralIdentityMatchCount": 5
+              "structuralIdentityMatchCount": 5,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 5
             },
             "interactionEvidence": [
               "v2_click_owner"
@@ -1665,7 +1912,7 @@
     "technicalKnowledgeRefs": [],
     "runtimeInputRequirements": [],
     "runtimeDataset": {
-      "scenarioId": "REC-20DF7BD6-01",
+      "scenarioId": "REC-BEEAC4DD-01",
       "requirements": [],
       "resolvedValues": {},
       "missingValues": []

@@ -1,0 +1,350 @@
+{
+  "recordingId": "df8805b3-3b34-4d62-97ec-ed38ec84b23a",
+  "projectSlug": "portal-comercial",
+  "appSlug": "portal-comercial",
+  "platform": "web",
+  "baseUrl": "https://srvqacgowb01.local.bsc.com:5000/",
+  "label": "fresh-short-physical",
+  "recordingGoal": {
+    "declaredGoal": "Validar navegaci�n corta",
+    "normalizedGoal": "Validar navegaci�n corta",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-09-25T20:27:40.808Z",
+  "status": "stopped",
+  "events": [
+    {
+      "t": 6442,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 0
+    },
+    {
+      "t": 8069,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 1
+    },
+    {
+      "t": 8728,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 2
+    },
+    {
+      "t": 8919,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 3
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "fbf08c6ecee9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/",
+      "framePath": ".artifacts\\tmp\\recordings\\df8805b3-3b34-4d62-97ec-ed38ec84b23a\\0004-launch.png",
+      "seq": 4
+    },
+    {
+      "t": 57279,
+      "kind": "navigate",
+      "screenKey": "fbf08c6ecee9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 5
+    },
+    {
+      "t": 57364,
+      "kind": "navigate",
+      "screenKey": "fbf08c6ecee9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 6
+    },
+    {
+      "t": 58309,
+      "kind": "navigate",
+      "screenKey": "fbf08c6ecee9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 7
+    },
+    {
+      "t": 58396,
+      "kind": "navigate",
+      "screenKey": "fbf08c6ecee9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 8
+    },
+    {
+      "t": 58589,
+      "kind": "navigate",
+      "screenKey": "fbf08c6ecee9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 9
+    },
+    {
+      "t": 67996,
+      "interactionId": "pointer-1",
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "77080fb3ce69141cbca23d05b1cebb6be9b05d61fbd10f1e39f7ce07031141a4",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "UsuarioContraseñaRecordarmeIniciar sesión",
+        "tag": "form",
+        "locators": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "form"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "button",
+                  "stableAttributes": {
+                    "aria-label": "Iniciar sesión"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "password"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "remember-me"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "username"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "button",
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "__nuxt"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"form\"},\"stableDirectAttributes\":{},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"password\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"remember-me\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"username\"}}],\"semanticShape\":[\"button\",\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"button\\\",1],[\\\"div\\\",3]],\\\"descendantEntries\\\":[[\\\"button\\\",1],[\\\"div\\\",5],[\\\"input\\\",3],[\\\"label\\\",3],[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner",
+              "v2_scoped_structural_runtime_evidence"
+            ],
+            "confidence": 0.6,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "framePath": ".artifacts\\tmp\\recordings\\df8805b3-3b34-4d62-97ec-ed38ec84b23a\\0010-click.png",
+      "seq": 10
+    },
+    {
+      "t": 82644,
+      "interactionId": "pointer-2",
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "77080fb3ce69141cbca23d05b1cebb6be9b05d61fbd10f1e39f7ce07031141a4",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "UsuarioContraseñaRecordarmeIniciar sesión",
+        "tag": "form",
+        "locators": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "form"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "button",
+                  "stableAttributes": {
+                    "aria-label": "Iniciar sesión"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "password"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "remember-me"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "username"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "button",
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "__nuxt"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"form\"},\"stableDirectAttributes\":{},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"password\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"remember-me\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"username\"}}],\"semanticShape\":[\"button\",\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"button\\\",1],[\\\"div\\\",3]],\\\"descendantEntries\\\":[[\\\"button\\\",1],[\\\"div\\\",5],[\\\"input\\\",3],[\\\"label\\\",3],[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner",
+              "v2_scoped_structural_runtime_evidence"
+            ],
+            "confidence": 0.6,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "framePath": ".artifacts\\tmp\\recordings\\df8805b3-3b34-4d62-97ec-ed38ec84b23a\\0011-click.png",
+      "seq": 11
+    },
+    {
+      "t": 92540,
+      "kind": "navigate",
+      "screenKey": "fbf08c6ecee9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 12
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "fbf08c6ecee9",
+      "title": "fbf08c6ecee9",
+      "fingerprint": "77080fb3ce69141cbca23d05b1cebb6be9b05d61fbd10f1e39f7ce07031141a4",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "firstSeenAt": 9020,
+      "controls": [
+        {
+          "label": "Usuario",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingresa tu usuario",
+          "attributes": {
+            "id": "username",
+            "placeholder": "Ingresa tu usuario"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "username",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Contraseña",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingresa tu contraseña",
+          "attributes": {
+            "id": "password",
+            "type": "password",
+            "placeholder": "Ingresa tu contraseña"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "password",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Recordarme",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "id": "remember-me",
+            "type": "checkbox"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "remember-me",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Iniciar sesión",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "submit",
+            "aria-label": "Iniciar sesión"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Iniciar sesión",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 1,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    }
+  ],
+  "endedAt": "2026-09-25T20:31:48.407Z",
+  "durationMs": 247599
+}

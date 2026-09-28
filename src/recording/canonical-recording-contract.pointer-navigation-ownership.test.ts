@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildCanonicalInteractions, validateInteractionStateSequence } from "./canonical-recording-contract";
+import { buildCanonicalInteractions, deriveExpectedRouteBefore, validateInteractionStateSequence } from "./canonical-recording-contract";
 
 /**
  * FIRST_LOSS (recordingId=ba0dec1c-7db8-4793-9ef6-676c9fad98c8):
@@ -206,4 +206,28 @@ test("10/noTemporalHeuristic. ownership is determined by pointer note boundary, 
   const tap = interactions.find((i) => i.action === "click");
   assert.equal(fill?.causedTransition, undefined, "fill never owns navigation regardless of timing");
   assert.equal(tap?.causedTransition, true);
+});
+
+// ─── Test 11: delayed tap delivery keeps the first transition with its action ─
+
+test("11/delayedTapDelivery. first transition after pointer belongs to that action, later transitions await their own pointer", () => {
+  const events = [
+    ev({ seq: 0, t: 1, kind: "note", observationType: "pointer", interactionId: "gesture-A", screenKey: "s", url: "/start" }),
+    // The browser emits the first transition before the recorder flushes the tap.
+    ev({ seq: 1, t: 2, kind: "navigate", screenKey: "s", url: "/middle-1" }),
+    // Additional browser transitions arrive before the delayed tap, but are not owned by A.
+    ev({ seq: 2, t: 3, kind: "navigate", screenKey: "s", url: "/middle-2" }),
+    ev({ seq: 3, t: 4, kind: "navigate", screenKey: "s", url: "/final" }),
+    ev({ seq: 4, t: 5, kind: "tap", interactionId: "gesture-A", screenKey: "s", url: "/final", target: { role: "button", associatedField: "A", locators: [{ strategy: "role", value: "button[name=A]" }] } }),
+    ev({ seq: 5, t: 6, kind: "note", observationType: "pointer", interactionId: "gesture-B", screenKey: "s", url: "/final" }),
+    ev({ seq: 6, t: 7, kind: "tap", interactionId: "gesture-B", screenKey: "s", url: "/final", target: { role: "button", associatedField: "B", locators: [{ strategy: "role", value: "button[name=B]" }] } }),
+  ];
+  const interactions = buildCanonicalInteractions(events);
+  const [actionA, actionB] = interactions;
+  assert.equal(actionA?.routeBefore, "/start");
+  assert.equal(actionA?.routeAfter, "/middle-1");
+  assert.equal(actionB?.routeBefore, "/final");
+  assert.equal(actionB?.routeAfter, undefined);
+  assert.equal(deriveExpectedRouteBefore(actionB!, actionA!), "/middle-1");
+  assert.equal(validateInteractionStateSequence(interactions).stateSequenceValid, false, "raw delayed-delivery evidence remains auditable; replay uses the preceding owned transition");
 });

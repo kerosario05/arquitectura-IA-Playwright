@@ -301,6 +301,28 @@ test("7. stop() drains any technical actions still queued before returning, even
   assert.equal(result.events.length, 2);
 });
 
+test("7b. stop() drains a final V2 action enqueued while the browser context closes", async () => {
+  const { recorder, events } = newRecorder("v2");
+  recorder.onV2TechnicalAction(technicalRecord(usuarioEdit));
+  const internals = recorder as unknown as {
+    context: { close: () => Promise<void> } | null;
+    v2IngestionQueue: Promise<void>;
+  };
+  internals.context = {
+    close: async () => {
+      // Models the late Playwright binding callback observed in the physical recording: it
+      // arrives after the first queue drain but before the browser context is fully closed.
+      recorder.onV2TechnicalAction(technicalRecord(loginClick));
+    },
+  };
+
+  const result = await recorder.stop();
+
+  assert.equal(events.length, 2, "the late binding action must survive the close barrier");
+  assert.equal(result.events.length, 2);
+  assert.deepEqual(events.map((event) => event.kind), ["fill", "tap"]);
+});
+
 test("8. a sensitive V2 edit without a literal reaches SessionTrace as a sensitive fill, no literal fabricated or logged", async () => {
   const { recorder, events } = newRecorder("v2");
   recorder.onV2TechnicalAction(technicalRecord(contrasenaEdit));
