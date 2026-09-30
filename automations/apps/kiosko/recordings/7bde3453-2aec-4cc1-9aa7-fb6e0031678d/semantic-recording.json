@@ -1,0 +1,832 @@
+{
+  "version": "1.0",
+  "recordingId": "7bde3453-2aec-4cc1-9aa7-fb6e0031678d",
+  "projectSlug": "kiosko",
+  "appSlug": "kiosko",
+  "platform": "web",
+  "recordingGoal": {
+    "declaredGoal": "roque 98",
+    "normalizedGoal": "roque 98",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "selectorOptionInventories": [],
+  "semanticScreens": [
+    {
+      "screenIdentity": "3a1c6dc6ce96",
+      "title": "¡Hola!",
+      "url": "https://172.27.4.50/",
+      "classification": "ROUTE_NAVIGATION",
+      "sourceScreenKey": "3a1c6dc6ce96"
+    }
+  ],
+  "semanticComponents": [
+    {
+      "componentId": "3a1c6dc6ce96:control:3a1c6dc6ce96|Estados de cuenta|button",
+      "componentType": "button",
+      "screenIdentity": "3a1c6dc6ce96",
+      "label": "Estados de cuenta",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-5"
+      ]
+    },
+    {
+      "componentId": "3a1c6dc6ce96:control:3a1c6dc6ce96|T|button",
+      "componentType": "button",
+      "screenIdentity": "3a1c6dc6ce96",
+      "label": "T",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-8"
+      ]
+    },
+    {
+      "componentId": "3a1c6dc6ce96:control:3a1c6dc6ce96|Cancelar|button",
+      "componentType": "button",
+      "screenIdentity": "3a1c6dc6ce96",
+      "label": "Cancelar",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-10"
+      ]
+    }
+  ],
+  "semanticEvents": [
+    {
+      "eventRef": "event-1",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-2",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-3",
+      "action": "observe",
+      "screenIdentity": "3a1c6dc6ce96",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-4",
+      "action": "observe",
+      "screenIdentity": "3a1c6dc6ce96",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "3a1c6dc6ce96:control:3a1c6dc6ce96|Estados de cuenta|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-5",
+      "action": "click",
+      "screenIdentity": "3a1c6dc6ce96",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "3a1c6dc6ce96:control:role:button|Estados de cuenta",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-6",
+      "action": "navigate",
+      "screenIdentity": "3a1c6dc6ce96",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-7",
+      "action": "observe",
+      "screenIdentity": "3a1c6dc6ce96",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "3a1c6dc6ce96:control:3a1c6dc6ce96|T|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-8",
+      "action": "click",
+      "screenIdentity": "3a1c6dc6ce96",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "3a1c6dc6ce96:control:role:button|T",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-9",
+      "action": "observe",
+      "screenIdentity": "3a1c6dc6ce96",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "3a1c6dc6ce96:control:3a1c6dc6ce96|Cancelar|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-10",
+      "action": "click",
+      "screenIdentity": "3a1c6dc6ce96",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "3a1c6dc6ce96:control:role:button|Cancelar",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-11",
+      "action": "navigate",
+      "screenIdentity": "3a1c6dc6ce96",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    }
+  ],
+  "datasets": [],
+  "technicalObservations": [
+    {
+      "observationId": "obs-4",
+      "status": "OBSERVED",
+      "screenIdentity": "3a1c6dc6ce96",
+      "componentType": "button",
+      "label": "Estados de cuenta",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "3a1c6dc6ce96:control:3a1c6dc6ce96|Estados de cuenta|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-5",
+      "status": "VALIDATED",
+      "screenIdentity": "3a1c6dc6ce96",
+      "componentType": "button",
+      "label": "Estados de cuenta",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Estados de cuenta",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Estados de cuenta",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Estados de cuenta"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "div"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",5],[\"svg\",1]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",5],[\\\"svg\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "3a1c6dc6ce96:control:role:button|Estados de cuenta",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-7",
+      "status": "OBSERVED",
+      "screenIdentity": "3a1c6dc6ce96",
+      "componentType": "button",
+      "label": "T",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "3a1c6dc6ce96:control:3a1c6dc6ce96|T|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-8",
+      "status": "VALIDATED",
+      "screenIdentity": "3a1c6dc6ce96",
+      "componentType": "button",
+      "label": "T",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|T",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|T",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "3a1c6dc6ce96:control:role:button|T",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-9",
+      "status": "OBSERVED",
+      "screenIdentity": "3a1c6dc6ce96",
+      "componentType": "button",
+      "label": "Cancelar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "3a1c6dc6ce96:control:3a1c6dc6ce96|Cancelar|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-10",
+      "status": "VALIDATED",
+      "screenIdentity": "3a1c6dc6ce96",
+      "componentType": "button",
+      "label": "Cancelar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Cancelar",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Cancelar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "topologyTieBreakUnique": true,
+            "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "3a1c6dc6ce96:control:role:button|Cancelar",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-3a1c6dc6ce96-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "3a1c6dc6ce96",
+      "componentType": "button",
+      "label": "Estados de cuenta",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Estados de cuenta"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Estados de cuenta",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "3a1c6dc6ce96:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-3a1c6dc6ce96-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "3a1c6dc6ce96",
+      "componentType": "button",
+      "label": "Consulta de balance",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Consulta de balance"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Consulta de balance",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "3a1c6dc6ce96:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-3a1c6dc6ce96-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "3a1c6dc6ce96",
+      "componentType": "button",
+      "label": "Cartas y certificaciones",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Cartas y certificaciones"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Cartas y certificaciones",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "3a1c6dc6ce96:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-3a1c6dc6ce96-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "3a1c6dc6ce96",
+      "componentType": "button",
+      "label": "Canje de Puntos",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Canje de Puntos"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Canje de Puntos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "3a1c6dc6ce96:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-3a1c6dc6ce96-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "3a1c6dc6ce96",
+      "componentType": "button",
+      "label": "Cambio de Fecha de Corte",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Cambio de Fecha de Corte"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Cambio de Fecha de Corte",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "3a1c6dc6ce96:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-3a1c6dc6ce96-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "3a1c6dc6ce96",
+      "componentType": "button",
+      "label": "Desactivar seguro de TC",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Desactivar seguro de TC"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Desactivar seguro de TC",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "3a1c6dc6ce96:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-3a1c6dc6ce96-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "3a1c6dc6ce96",
+      "componentType": "button",
+      "label": "Explora nuestros productos",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Explora nuestros productos"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Explora nuestros productos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "3a1c6dc6ce96:control:7",
+      "selectable": false,
+      "editable": false
+    }
+  ],
+  "editingSessions": [],
+  "scenarioSuggestions": [],
+  "canonicalInteractions": [
+    {
+      "id": "interaction-1",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-1"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "https://172.27.4.50/",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-2",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-2"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "https://172.27.4.50/",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-5",
+      "controlIdentity": "3a1c6dc6ce96|Estados de cuenta|role|button|Estados de cuenta",
+      "semanticField": "Estados de cuenta",
+      "action": "click",
+      "valueKey": "estados_de_cuenta",
+      "sourceEventRefs": [
+        "event-5"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Estados de cuenta"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Estados de cuenta",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Estados de cuenta"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "div"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",5],[\"svg\",1]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",5],[\\\"svg\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Estados de cuenta\"",
+      "screenBeforeRef": "3a1c6dc6ce96",
+      "screenAfterRef": "3a1c6dc6ce96",
+      "routeBefore": "https://172.27.4.50/",
+      "routeAfter": "https://172.27.4.50/client-identification",
+      "stateScope": "3a1c6dc6ce96",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-8",
+      "controlIdentity": "3a1c6dc6ce96|T|role|button|T",
+      "semanticField": "T",
+      "action": "click",
+      "valueKey": "t",
+      "sourceEventRefs": [
+        "event-8"
+      ],
+      "technicalTargetRefs": [
+        "role:button|T"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|T",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "playwrightRecorderEvidence": {
+        "kind": "role",
+        "role": "button",
+        "normalizedName": "T",
+        "targetTag": "button",
+        "scopeIdentity": {
+          "strategy": "id",
+          "value": "root"
+        },
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true
+      },
+      "description": "Ingresar en \"T\"",
+      "screenBeforeRef": "3a1c6dc6ce96",
+      "screenAfterRef": "3a1c6dc6ce96",
+      "routeBefore": "https://172.27.4.50/client-identification",
+      "stateScope": "3a1c6dc6ce96",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-10",
+      "controlIdentity": "3a1c6dc6ce96|Cancelar|role|button|Cancelar",
+      "semanticField": "Cancelar",
+      "action": "click",
+      "valueKey": "cancelar",
+      "sourceEventRefs": [
+        "event-10"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Cancelar"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Cancelar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "topologyTieBreakUnique": true,
+            "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Cancelar\"",
+      "screenBeforeRef": "3a1c6dc6ce96",
+      "screenAfterRef": "3a1c6dc6ce96",
+      "routeBefore": "https://172.27.4.50/client-identification",
+      "routeAfter": "https://172.27.4.50/",
+      "stateScope": "3a1c6dc6ce96",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    }
+  ],
+  "gridMetadata": {
+    "detected": false,
+    "grids": 0,
+    "rows": 0,
+    "cells": 0,
+    "headers": [],
+    "headerRelationships": []
+  },
+  "source": "SessionTrace"
+}

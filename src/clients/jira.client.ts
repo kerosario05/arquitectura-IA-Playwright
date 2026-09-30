@@ -26,6 +26,12 @@ type JiraSprintsResponse = {
 
 const DEFAULT_FIELDS = ["summary", "description", "status", "issuetype", "priority"];
 
+/** Evidence documents the client may attach: the PDF, or the DOCX where Word generated one. */
+const ATTACHMENT_CONTENT_TYPES: Record<string, string> = {
+  ".pdf": "application/pdf",
+  ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+};
+
 export class JiraClient {
   private readonly baseApiUrl: string;
   private readonly agileApiUrl: string;
@@ -200,7 +206,8 @@ export class JiraClient {
         return { ok: false, error: `Invalid file: ${resolved}` };
       }
       const ext = path.extname(resolved).toLowerCase();
-      if (ext !== ".docx") {
+      const contentType = ATTACHMENT_CONTENT_TYPES[ext];
+      if (!contentType) {
         return { ok: false, error: `Unsupported file type: ${ext}` };
       }
 
@@ -208,7 +215,7 @@ export class JiraClient {
       const buffer = fs.readFileSync(resolved);
 
       const formData = new FormData();
-      formData.append("file", new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" }), name);
+      formData.append("file", new Blob([buffer], { type: contentType }), name);
 
       const url = `${this.baseApiUrl}/issue/${encodeURIComponent(issueKey)}/attachments`;
       const response = await globalThis.fetch(url, {

@@ -224,11 +224,14 @@ JOB_RETENTION_DAYS=30
 
 PLAYWRIGHT_BROWSERS_PATH=$estado\ms-playwright
 EVIDENCE_DIR=$estado\.artifacts\evidence
+EVIDENCE_FORMAT=pdf
 HEADLESS=true
 BROWSER=chromium
 DEFAULT_TIMEOUT_MS=30000
 
-RECORDING_ENABLED=false
+RECORDING_ENABLED=true
+RECORDING_PRESENTATION=remote
+RECORDING_VIEWPORT=1280x1024
 
 MAX_CONCURRENT_EXECUTIONS=3
 MAX_CONCURRENT_RECORDINGS=2
@@ -426,15 +429,48 @@ con estado `queued` y arranca sola cuando se libera un espacio; ninguna se pierd
 Las grabaciones no se encolan: se rechazan con 503 y un mensaje claro, porque hay
 una persona esperando ver un navegador.
 
-### Grabación: no funciona en el servidor, y es correcto
+### Documento de evidencia: PDF, sin Office
 
-Grabar abre un navegador **visible** que alguien conduce a mano. Un servicio de
-Windows corre en la Sesión 0, que no tiene escritorio; y aunque lo tuviera, la
-ventana estaría en el servidor y no delante de quien graba.
+El documento de evidencia se genera en **PDF con el mismo Chromium** que ya usa el
+motor: no hace falta instalar Word ni licenciar Office en el servidor.
 
-Por eso `RECORDING_ENABLED=false`: el motor responde 503 con la explicación y el
-front oculta el módulo. **Se graba desde la máquina de cada QA**, y lo promovido
-se lleva al servidor.
+- Reproduce la plantilla `templates\evidence\execution-evidence-template.docx`
+  (portada, encabezado, pie, tabla *Caso de prueba / Fecha / Estado*, capturas). El
+  logo se lee de ese `.docx`.
+- Las fuentes de la plantilla (Aptos, Aptos Display, Calibri) viajan en
+  `templates\evidence\fonts`. Si faltan, el PDF sale con otra tipografía y el log
+  del motor avisa: `[evidence:pdf] warning fonts not loaded`.
+- `EVIDENCE_FORMAT=pdf` en el servidor. En una máquina con Word, `auto` (por
+  defecto) genera además el `.docx`.
+- El botón de descarga del panel baja el PDF. `GET /api/runs/<job>/evidence-docx?format=docx`
+  sigue sirviendo el Word donde exista.
+- A Jira se adjunta el PDF.
+
+### Grabación: el navegador se ve en el panel (modo remoto)
+
+Un servicio de Windows corre en la Sesión 0, sin escritorio: una ventana de
+Chromium en el servidor no la vería nadie. Con `RECORDING_PRESENTATION=remote`
+Chromium corre **sin ventana** en el servidor y el panel lo muestra en vivo:
+
+```
+navegador del QA ── ws /api/recordings/:id/live ──► BFF :3001 ──► motor :3002 ──► Chromium (sin ventana)
+       ▲  imagen (JPEG solo cuando la página cambia)                       │
+       └────────────── clics, rueda, teclas, pegar ──────────────────────────┘
+```
+
+- Va por el **mismo puerto 3001**: el BFF hace de túnel. No hace falta IIS ni abrir otro puerto.
+- El primer mensaje del WebSocket lleva la sesión del usuario. **Solo quien inició la
+  grabación (o un administrador) puede hacer clic**; el resto la ve en modo lectura.
+- Los clics llegan a la página como clics reales, así que la captura de pasos es la
+  misma que en una grabación local.
+- Cada grabación ocupa ~300-500 MB: respeta `MAX_CONCURRENT_RECORDINGS` y se detiene
+  sola tras `RECORDING_IDLE_TIMEOUT_MS` sin actividad.
+
+Variables: `RECORDING_ENABLED=true`, `RECORDING_PRESENTATION=remote`,
+`RECORDING_VIEWPORT=1280x1024` (ancho x alto de la página), `RECORDING_IDLE_TIMEOUT_MS`.
+
+Para volver al modo anterior (se graba desde la máquina de cada QA y lo promovido se
+lleva al servidor): `RECORDING_ENABLED=false`.
 
 ---
 

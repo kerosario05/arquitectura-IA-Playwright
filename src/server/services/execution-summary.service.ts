@@ -114,7 +114,7 @@ function buildTestRailRunUrl(runId?: number | string): string | undefined {
   return `${base.replace(/\/+$/, "")}/index.php?/runs/view/${runId}`;
 }
 
-/** True when a consolidated evidence docx exists for this run's jobId. */
+/** True when a consolidated evidence document (PDF or DOCX) exists for this run's jobId. */
 function hasEvidenceDocx(jobId?: string): boolean {
   if (!jobId) return false;
   try {
@@ -134,7 +134,7 @@ function hasEvidenceDocx(jobId?: string): boolean {
         if (e.isDirectory()) {
           // Only descend where the jobId could live to keep the scan cheap.
           if (e.name === jobId) {
-            if (fs.existsSync(path.join(full, "evidencia.docx"))) return true;
+            if (fs.existsSync(path.join(full, "evidencia.pdf")) || fs.existsSync(path.join(full, "evidencia.docx"))) return true;
           }
           stack.push(full);
         }

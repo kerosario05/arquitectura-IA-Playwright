@@ -4,7 +4,7 @@ import { JiraClient } from "../../clients/jira.client";
 import { defectChecklistStore } from "../services/defect-checklist-store";
 import * as path from "path";
 import * as fs from "fs";
-import { generateEvidenceDocx } from "../../evidence/evidence-docx-generator";
+import { generateEvidencePdf } from "../../evidence/evidence-pdf-generator";
 
 export const jiraRouter = Router();
 
@@ -253,7 +253,7 @@ async function resolveAndAttachEvidence(params: {
   attachmentDiagnosticCode?: string;
 }> {
   const { jira, defectId, scenarioId, jiraIssueKey, evidenceRoot, templatePath, sourceIssueKey } = params;
-  const attachmentName = `evidencia-${scenarioId.replace(/[^a-zA-Z0-9_-]/g, "")}.docx`;
+  const attachmentBaseName = `evidencia-${scenarioId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const stored = defectChecklistStore.findDefect(sourceIssueKey, defectId);
   const jobId = stored?.jobId;
   const legacyEvidenceDir = stored?.technicalContext?.evidenceDir;
@@ -289,8 +289,8 @@ async function resolveAndAttachEvidence(params: {
   // 2. Fallback: legacy evidenceDir from technicalContext
   if (!docxPath && legacyEvidenceDir) {
     legacyDirPresent = true;
-    const candidate = path.resolve(legacyEvidenceDir, "evidencia.docx");
-    if (fs.existsSync(candidate) && fs.statSync(candidate).isFile() && fs.statSync(candidate).size > 0) {
+    const candidate = findEvidenceDocument(path.resolve(legacyEvidenceDir));
+    if (candidate) {
       docxPath = candidate;
       sourceLog = "legacy_evidence_dir";
     }
@@ -306,6 +306,7 @@ async function resolveAndAttachEvidence(params: {
   }
 
   // Attach
+  const attachmentName = `${attachmentBaseName}${path.extname(docxPath)}`;
   try {
     const attachResult = await jira.attachFileToIssue(jiraIssueKey, docxPath, attachmentName);
     if (attachResult.ok) {
@@ -382,6 +383,17 @@ function isSafePath(filePath: string, allowedRoot: string): boolean {
   }
 }
 
+/** The scenario's evidence document: the PDF, or a DOCX left by an earlier run. */
+function findEvidenceDocument(dir: string): string | undefined {
+  for (const fileName of ["evidencia.pdf", "evidencia.docx"]) {
+    const candidate = path.join(dir, fileName);
+    if (fs.existsSync(candidate) && fs.statSync(candidate).isFile() && fs.statSync(candidate).size > 0) {
+      return candidate;
+    }
+  }
+  return undefined;
+}
+
 function isImageFile(filepath: string): boolean {
   const ext = path.extname(filepath).toLowerCase();
   return ext === ".png" || ext === ".jpg" || ext === ".jpeg";
@@ -412,11 +424,11 @@ async function tryGenerateScenarioDocx(
         const scenarioDir = path.join(jobDir, "scenarios", scenarioId);
         if (!fs.existsSync(scenarioDir)) continue;
 
-        // Check for existing DOCX first
-        const existingDocx = path.join(scenarioDir, "evidencia.docx");
-        if (fs.existsSync(existingDocx) && fs.statSync(existingDocx).isFile() && fs.statSync(existingDocx).size > 0) {
-          console.log(`[jira-evidence-resolve] defectId=${defectId} scenarioId=${scenarioId} documentExists=true screenshots=n/a source=existing_docx`);
-          return { docxPath: existingDocx, screenshots: -1, source: "existing_docx" };
+        // Check for an existing evidence document first
+        const existingDocument = findEvidenceDocument(scenarioDir);
+        if (existingDocument) {
+          console.log(`[jira-evidence-resolve] defectId=${defectId} scenarioId=${scenarioId} documentExists=true screenshots=n/a source=existing_document`);
+          return { docxPath: existingDocument, screenshots: -1, source: "existing_document" };
         }
 
         // Try evidence.json for on-demand generation
@@ -501,16 +513,16 @@ async function tryGenerateScenarioDocx(
             return { screenshots: imagesExisting, source: "none" };
           }
 
-          // Generate DOCX
-          const docxOut = path.join(scenarioDir, "evidencia.docx");
+          // Generate the evidence PDF (no Office needed on the server)
+          const docxOut = path.join(scenarioDir, "evidencia.pdf");
           try {
-            const result = await generateEvidenceDocx(normalizedRecord, resolvedTemplate, docxOut);
+            const result = await generateEvidencePdf(normalizedRecord, resolvedTemplate, docxOut);
             const outputExists = fs.existsSync(docxOut);
             const outputSize = outputExists ? fs.statSync(docxOut).size : 0;
 
             if (result.success && outputExists && outputSize > 0) {
               console.log(`[jira-evidence-generation] scenarioId=${scenarioId} source=canonical_evidence_json screenshots=${imagesExisting} generated=true validated=true outputSize=${outputSize}`);
-              return { docxPath: docxOut, screenshots: imagesExisting, source: "generated_docx" };
+              return { docxPath: docxOut, screenshots: imagesExisting, source: "generated_pdf" };
             }
 
             console.log(`[jira-evidence-generation-error] scenarioId=${scenarioId} errorName=GeneratorFailed errorMessage="${result.error || "unknown"}" templateResolved=${templateExists} recordLoaded=true imagesDeclared=${imagesDeclared} imagesExisting=${imagesExisting} outputCreated=${outputExists} outputSize=${outputSize}`);

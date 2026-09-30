@@ -3,7 +3,7 @@ import * as path from "node:path";
 import type { Page } from "@playwright/test";
 import { loadEvidenceConfig, type EvidenceConfig, type EvidenceScenarioContext, type EvidenceStepRecord, type EvidenceScenarioRecord, type DetailEvidenceMetadata, type InitialScreenEvidence, deriveScenarioStatus, type EvidenceCaptureStatus, type EvidenceFunctionalStatus } from "./evidence-types";
 import { buildEvidencePaths, buildScreenshotFilename } from "./evidence-paths";
-import { generateEvidenceDocx } from "./evidence-docx-generator";
+import { generateEvidenceDocuments } from "./evidence-output";
 
 export class EvidenceRecorder {
   private config: EvidenceConfig;
@@ -539,16 +539,21 @@ export class EvidenceRecorder {
 
     console.log(`[evidence:scenario] finalized scenarioId=${record.scenarioId} status=${status} steps=${this.steps.length} screenshots=${realScreenshots} snapshots=${snapshotCount}`);
 
-    // Generate per-scenario DOCX only if enabled
+    // Generate per-scenario documents only if enabled
     if (this.config.docxEnabled && this.config.perScenarioDocx) {
       try {
         const templatePath = this.context.templatePath ?? this.config.templatePath;
         const resolvedTemplate = path.resolve(templatePath);
-        const result = await generateEvidenceDocx(record, resolvedTemplate, this.paths.docxPath);
-        if (result.success) {
-          console.log(`[evidence:scenario] generated per-scenario evidencia.docx path=${result.outputPath}`);
-        } else {
-          console.log(`[evidence:scenario] per-scenario docx generation skipped: ${result.error}`);
+        const results = await generateEvidenceDocuments([record], resolvedTemplate, {
+          pdfPath: this.paths.pdfPath,
+          docxPath: this.paths.docxPath,
+        });
+        for (const [format, result] of Object.entries(results)) {
+          if (result?.success) {
+            console.log(`[evidence:scenario] generated per-scenario evidencia.${format} path=${result.outputPath}`);
+          } else {
+            console.log(`[evidence:scenario] per-scenario ${format} generation skipped: ${result?.error}`);
+          }
         }
       } catch (err: any) {
         const msg = `per-scenario docx generation error: ${err.message}`;

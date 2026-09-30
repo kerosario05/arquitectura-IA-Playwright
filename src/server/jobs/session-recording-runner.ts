@@ -44,6 +44,13 @@ import {
 import { applyStory, enrichFromTrace } from "../../recording/trace-ai-enricher";
 import { createScenarioAiProvider } from "../../ai/ai-provider-factory";
 import type { RecordedEvent, RecordingDataPolicy, RecordingPlatform, RecordingSummary, SessionTrace } from "../../recording/session-trace.types";
+import { LiveViewSession } from "../../recording/web/live-view-session";
+import {
+  resolveRecordingPresentation,
+  resolveRecordingViewport,
+  resolveRemoteRecordingIdleTimeoutMs,
+  type RecordingViewport,
+} from "../../recording/web/recording-presentation";
 import {
   getDerivationProgress,
   startBackgroundDerivation,
@@ -81,6 +88,8 @@ export type CaptureAuthority = "legacy" | "v2";
 export type StartRecordingParams = {
   /** Project whose configuration decides WHICH app is recorded. */
   projectSlug: string;
+  /** Authenticated user starting it; owns control of a "remote" recording's live view. */
+  startedBy?: string;
   label?: string;
   recordingGoal?: string;
   recordingDataPolicy?: Partial<RecordingDataPolicy>;
@@ -126,6 +135,11 @@ type ActiveRecording = {
   recorder: AndroidSessionRecorder | WebSessionRecorder;
   liveProjection?: LiveSemanticProjection;
   traceWriter?: CoalescedWriter;
+  /** "remote" web recordings only: the stream the QA Lab panel shows. */
+  liveView?: LiveViewSession;
+  /** User who started the recording: the only non-admin allowed to control its live view. */
+  startedBy?: string;
+  idleTimer?: NodeJS.Timeout;
 };
 
 const active = new Map<string, ActiveRecording>();
@@ -322,6 +336,8 @@ export async function startRecording(params: StartRecordingParams): Promise<{
 
   const framesDir = ensureFramesDir(recordingId);
   const traceWriter = createCoalescedWriter(() => saveTrace(trace));
+  const presentation = resolveRecordingPresentation();
+  const viewport = resolveRecordingViewport();
 
   try {
     let recorder: AndroidSessionRecorder | WebSessionRecorder;
@@ -366,6 +382,8 @@ export async function startRecording(params: StartRecordingParams): Promise<{
         ignoreHTTPSErrors: target.ignoreHTTPSErrors,
         framesDir,
         captureAuthority,
+        presentation,
+        viewport,
         persistQaCredentials: true,
         sensitiveLabels: params.sensitiveLabels,
         onEvent: (event) => {
@@ -395,7 +413,11 @@ export async function startRecording(params: StartRecordingParams): Promise<{
     trace.status = "recording";
     saveTrace(trace);
     onLog(`[recording:goal-lineage] persistedGoal=${JSON.stringify(loadTrace(trace.appSlug, trace.recordingId)?.recordingGoal?.declaredGoal)}`);
-    active.set(recordingId, { recordingId, jobId: job.id, trace, recorder, traceWriter });
+    const liveView = recorder instanceof WebSessionRecorder && presentation === "remote"
+      ? createLiveViewFor(recorder, viewport, onLog)
+      : undefined;
+    active.set(recordingId, { recordingId, jobId: job.id, trace, recorder, traceWriter, liveView, startedBy: params.startedBy });
+    if (liveView) scheduleIdleStop(recordingId, liveView, onLog);
     onLog(`[recording] grabación ${recordingId} iniciada sobre ${target.appSlug} (${platform})`);
 
     return { recordingId, jobId: job.id, summary: toSummary(trace) };
@@ -510,6 +532,8 @@ export async function stopRecording(recordingId: string): Promise<RecordingSumma
   const onLog = (line: string) => jobStore.appendLog(entry.jobId, line);
 
   entry.trace.status = "stopping";
+  if (entry.idleTimer) clearInterval(entry.idleTimer);
+  await entry.liveView?.close();
   const { events, screens } = await entry.recorder.stop();
   // The final state is written just below; a pending live write would only race it.
   entry.traceWriter?.cancel();
@@ -886,6 +910,38 @@ export function getRecordingDerivation(appSlug: string, recordingId: string): De
   if (live) return live;
   const trace = loadTrace(appSlug, recordingId);
   return { recordingId, status: trace?.status === "derived" ? "derived" : "idle" };
+}
+
+function createLiveViewFor(recorder: WebSessionRecorder, viewport: RecordingViewport, onLog: (line: string) => void): LiveViewSession | undefined {
+  const target = recorder.liveViewTarget();
+  if (!target) return undefined;
+  return new LiveViewSession({ cdp: target.createCdp, page: target.page, viewport, log: onLog });
+}
+
+/**
+ * A remote recording holds a server browser (hundreds of MB) for a person who may have closed
+ * the tab: with no input or viewer activity for RECORDING_IDLE_TIMEOUT_MS it is stopped (its
+ * trace is kept, exactly like pressing Stop).
+ */
+function scheduleIdleStop(recordingId: string, liveView: LiveViewSession, onLog: (line: string) => void): void {
+  const entry = active.get(recordingId);
+  if (!entry) return;
+  const timeoutMs = resolveRemoteRecordingIdleTimeoutMs();
+  entry.idleTimer = setInterval(() => {
+    if (Date.now() - liveView.lastActivityAt < timeoutMs) return;
+    const current = active.get(recordingId);
+    if (current?.idleTimer) clearInterval(current.idleTimer);
+    onLog(`[recording] grabación remota inactiva ${Math.round(timeoutMs / 60_000)} min: se detiene automáticamente`);
+    stopRecording(recordingId).catch((err) => onLog(`[recording] no se pudo detener por inactividad: ${err instanceof Error ? err.message : String(err)}`));
+  }, Math.min(30_000, timeoutMs));
+  entry.idleTimer.unref?.();
+}
+
+/** What the live-view endpoint needs to admit a viewer. Undefined when there is no remote stream. */
+export function getLiveViewAccess(recordingId: string): { session: LiveViewSession; startedBy?: string; projectSlug: string } | undefined {
+  const entry = active.get(recordingId);
+  if (!entry?.liveView) return undefined;
+  return { session: entry.liveView, startedBy: entry.startedBy, projectSlug: entry.trace.projectSlug };
 }
 
 export function getRecordingScenarios(appSlug: string, recordingId: string): RecordedScenario[] {

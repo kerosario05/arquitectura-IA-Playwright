@@ -12,6 +12,7 @@ import {
   saveSemanticRecording,
   loadSemanticRecording,
 } from "../../recording/recording-store";
+import { resolveRecordingPresentation, resolveRecordingViewport } from "../../recording/web/recording-presentation";
 import {
   RecordingError,
   deriveScenarios,
@@ -239,6 +240,9 @@ recordingsRouter.get("/capabilities", (_req, res) => {
     ok: true,
     recording: availability,
     maxConcurrent: limitFor("recording"),
+    // "remote": the browser runs on the server and the panel streams it (live view).
+    presentation: resolveRecordingPresentation(),
+    viewport: resolveRecordingViewport(),
   });
 });
 
@@ -273,6 +277,7 @@ recordingsRouter.post("/start", async (req, res) => {
     // API-INTERNAL override for tests/regression/rollback, never through this public route.
     const result = await startRecording({
       projectSlug,
+      startedBy: req.principal?.userId ?? undefined,
       label: typeof body.label === "string" ? body.label.trim() || undefined : undefined,
       recordingGoal: typeof body.recordingGoal === "string" ? body.recordingGoal.trim() || undefined : undefined,
       recordingDataPolicy: body.recordingDataPolicy && typeof body.recordingDataPolicy === "object"

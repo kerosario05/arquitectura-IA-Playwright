@@ -77,7 +77,8 @@
     "multer": "^2.3.0",
     "odbc": "^2.5.0",
     "oracledb": "^7.0.1",
-    "webdriverio": "^9.30.0"
+    "webdriverio": "^9.30.0",
+    "ws": "^8.21.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

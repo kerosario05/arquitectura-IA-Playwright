@@ -176,5 +176,6 @@ export interface EvidenceRunRecord {
   failedScenarios: number;
   partialScenarios: number;
   docxPath?: string;
+  pdfPath?: string;
   evidenceJsonPath?: string;
 }

@@ -6,10 +6,12 @@ import { drainIngestionUntilQuiet, type IngestionDrainSource } from "./ingestion
 class FakeQueue implements IngestionDrainSource {
   private queue: Promise<unknown> = Promise.resolve();
   private count = 0;
+  private accepted = 0;
   applied: string[] = [];
 
   enqueue(name: string, durationMs: number): void {
     this.count += 1;
+    this.accepted += 1;
     this.queue = this.queue
       .then(() => new Promise((resolve) => setTimeout(resolve, durationMs)))
       .then(() => { this.applied.push(name); })
@@ -18,6 +20,7 @@ class FakeQueue implements IngestionDrainSource {
 
   tail(): Promise<unknown> { return this.queue; }
   pending(): number { return this.count; }
+  generation(): number { return this.accepted; }
 }
 
 test("work that arrives WHILE draining is also applied (the lost 'Atrás' click)", async () => {
@@ -59,8 +62,22 @@ test("a rejected link in the queue still counts as settled", async () => {
   const failing = Promise.reject(new Error("screenshot failed")).finally(() => { pending = 0; });
   failing.catch(() => undefined);
   const result = await drainIngestionUntilQuiet(
-    { tail: () => failing, pending: () => pending },
+    { tail: () => failing, pending: () => pending, generation: () => 1 },
     { timeoutMs: 500, settleMs: 20 },
   );
   assert.equal(result.drained, true);
+});
+
+test("a tail rebuilt on every call (Promise.all) still drains as soon as it is quiet", async () => {
+  // The recorder passes tail: () => Promise.all([queue, ...inflight]) -- a new object each call.
+  // Judging "nothing new" by promise identity made every Stop wait out the whole budget.
+  const queue = new FakeQueue();
+  queue.enqueue("last-click", 30);
+  const result = await drainIngestionUntilQuiet(
+    { tail: () => Promise.all([queue.tail()]), pending: () => queue.pending(), generation: () => queue.generation() },
+    { timeoutMs: 5_000, settleMs: 50 },
+  );
+  assert.equal(result.drained, true);
+  assert.ok(result.waitedMs < 1_000, `waited ${result.waitedMs} ms`);
+  assert.equal(result.extraRounds, 0);
 });

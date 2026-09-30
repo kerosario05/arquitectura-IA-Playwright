@@ -24,6 +24,7 @@ import { runtimeInputsRouter } from "./routes/runtime-inputs";
 import { attachPrincipal, isPublicPath, requireFullScope } from "./middleware/auth";
 import { enforceRoutePolicy } from "./middleware/route-policy";
 import { resolveAuthConfig } from "../auth/config";
+import { attachLiveViewEndpoint } from "./live-view-endpoint";
 
 const PORT = resolveServerPort(process.env as Record<string, string | undefined>);
 const HOST = process.env.API_HOST || "0.0.0.0";
@@ -140,6 +141,7 @@ for (const signal of ["SIGINT", "SIGTERM"] as const) {
 }
 
 const server = app.listen(PORT, HOST, () => {
+  console.log(`[server] Live view   : ws /api/recordings/:recordingId/live`);
   console.log(`\n[server] Automation Engine API → http://${HOST === "0.0.0.0" ? "localhost" : HOST}:${PORT}`);
   console.log(`[server] CORS origin : ${CORS_ORIGIN}`);
   console.log(`[server] Auth        : ${AUTH_ENABLED ? "sesiones de usuario (Bearer)" : "sesiones opcionales"}` +
@@ -216,6 +218,9 @@ const server = app.listen(PORT, HOST, () => {
   }
   console.log("");
 });
+
+// Streams "remote" recordings into the QA Lab panel (RECORDING_PRESENTATION=remote).
+attachLiveViewEndpoint(server);
 
 server.on("error", (err: NodeJS.ErrnoException) => {
   if (err.code === "EADDRINUSE") {

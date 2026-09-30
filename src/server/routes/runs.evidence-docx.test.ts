@@ -107,6 +107,46 @@ async function main(): Promise<void> {
     });
   });
 
+  const bothJobId = `pdf-ready-${Date.now()}`;
+  const bothPreviewDir = writePreviewJobMetadata(bothJobId, { appSlug, sectionSlug, status: "done" });
+  const bothDocxPath = writeEvidenceDocx(bothJobId, appSlug, sectionSlug, "DOCX BOTH");
+  const bothPdfPath = path.join(path.dirname(bothDocxPath), "evidencia.pdf");
+  fs.writeFileSync(bothPdfPath, "PDF BOTH", "utf-8");
+
+  await test("resolver prefers the PDF when both documents exist", () => {
+    const resolved = resolveEvidenceDocxForJob(bothJobId);
+    assert.strictEqual(resolved.documentPath, bothPdfPath);
+    assert.strictEqual(resolved.documentFormat, "pdf");
+  });
+
+  await test("download serves the PDF by default and the DOCX with ?format=docx", async () => {
+    await withServer(async (baseUrl) => {
+      const pdfRes = await fetch(`${baseUrl}/api/runs/${bothJobId}/evidence-docx`);
+      assert.strictEqual(pdfRes.status, 200);
+      assert.strictEqual(pdfRes.headers.get("content-type"), "application/pdf");
+      assert.match(pdfRes.headers.get("content-disposition") ?? "", /evidencia-.*\.pdf"/);
+      assert.strictEqual(await pdfRes.text(), "PDF BOTH");
+
+      const docxRes = await fetch(`${baseUrl}/api/runs/${bothJobId}/evidence-docx?format=docx`);
+      assert.strictEqual(docxRes.status, 200);
+      assert.match(docxRes.headers.get("content-disposition") ?? "", /evidencia-.*\.docx"/);
+      assert.strictEqual(await docxRes.text(), "DOCX BOTH");
+
+      const badRes = await fetch(`${baseUrl}/api/runs/${bothJobId}/evidence-docx?format=odt`);
+      assert.strictEqual(badRes.status, 400);
+      await badRes.text();
+    });
+  });
+
+  await test("docx-only run still downloads its DOCX", async () => {
+    await withServer(async (baseUrl) => {
+      const res = await fetch(`${baseUrl}/api/runs/${readyJobId}/evidence-docx`);
+      assert.strictEqual(res.status, 200);
+      assert.match(res.headers.get("content-disposition") ?? "", /\.docx"/);
+      await res.text();
+    });
+  });
+
   const runningJob = jobStore.create("scenario-preview", {
     appSlug: `run-app-${Date.now()}`,
     sectionSlug: "run-section",
@@ -252,6 +292,7 @@ async function main(): Promise<void> {
   });
 
   removeIfExists(previewDir);
+  removeIfExists(bothPreviewDir);
   removeIfExists(path.join(EVIDENCE_ROOT, appSlug));
 }
 

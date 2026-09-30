@@ -1,7 +1,8 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { createHash, randomUUID } from "node:crypto";
-import { chromium, firefox, webkit, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { chromium, firefox, webkit, type Browser, type BrowserContext, type CDPSession, type Page } from "@playwright/test";
+import type { RecordingPresentation, RecordingViewport } from "./recording-presentation";
 import { extractRuntimeUiSnapshot, type RuntimeUiSnapshot } from "../../knowledge/runtime-knowledge-extractor";
 import type {
   FieldOwnerDiagnostic,
@@ -94,13 +95,23 @@ export type WebRecorderOptions = {
    * `captureAuthority` field doc on `WebSessionRecorder` for the full contract.
    */
   captureAuthority?: "legacy" | "v2";
+  /**
+   * "headed" (default) opens a visible Chromium where the engine runs. "remote" runs it headless
+   * with a fixed viewport so it can be streamed into the QA Lab panel (live-view-session.ts).
+   */
+  presentation?: RecordingPresentation;
+  /** Fixed page size for "remote" recordings; ignored when headed (the window sizes itself). */
+  viewport?: RecordingViewport;
   onLog?: (line: string) => void;
   onEvent?: (event: RecordedEvent) => void;
   onScreen?: (screen: RecordedScreen) => void;
 };
 
-export function buildWebRecorderContextOptions(ignoreHTTPSErrors?: boolean): { ignoreHTTPSErrors: boolean } {
-  return { ignoreHTTPSErrors: ignoreHTTPSErrors === true };
+export function buildWebRecorderContextOptions(
+  ignoreHTTPSErrors?: boolean,
+  viewport?: RecordingViewport,
+): { ignoreHTTPSErrors: boolean; viewport?: RecordingViewport } {
+  return { ignoreHTTPSErrors: ignoreHTTPSErrors === true, ...(viewport ? { viewport } : {}) };
 }
 
 /** How many elements one identity matched in the page, and where the clicked one sat. */
@@ -1375,12 +1386,16 @@ export class WebSessionRecorder {
   /** Ingestion work accepted into `v2IngestionQueue` and not yet applied -- read by the Stop drain. */
   private v2PendingIngestion = 0;
 
+  /** Every capture ever accepted (V2 queue + legacy): lets the Stop drain see new arrivals. */
+  private ingestionGeneration = 0;
+
   /** Legacy-authority `onInteraction` calls still running (that path is not serialized through the queue). */
   private readonly legacyInflight = new Set<Promise<unknown>>();
 
   private enqueueV2Ingestion(work: () => unknown): void {
     const arrival = { t: Date.now() - this.startedAt, url: this.page?.url() };
     this.v2PendingIngestion += 1;
+    this.ingestionGeneration += 1;
     this.v2IngestionQueue = (this.v2IngestionQueue.then(async () => {
       this.activeArrival = arrival;
       try {
@@ -1903,9 +1918,10 @@ export class WebSessionRecorder {
     const engine =
       this.options.browserName === "firefox" ? firefox : this.options.browserName === "webkit" ? webkit : chromium;
 
-    this.browser = await engine.launch({ headless: false });
+    const remote = this.options.presentation === "remote";
+    this.browser = await engine.launch({ headless: remote });
     this.context = await this.browser.newContext(
-      buildWebRecorderContextOptions(this.options.ignoreHTTPSErrors),
+      buildWebRecorderContextOptions(this.options.ignoreHTTPSErrors, remote ? this.options.viewport : undefined),
     );
     await this.context.exposeBinding("__qaRecord", async (_source, payload: RawInteraction) => {
       const isPostAction = payload.kind === "observation" && payload.observationType === "post_action";
@@ -1935,6 +1951,7 @@ export class WebSessionRecorder {
         this.log(`[recording] error procesando interacción: ${err instanceof Error ? err.message : String(err)}`),
       );
       this.legacyInflight.add(work);
+      this.ingestionGeneration += 1;
       try {
         await work;
       } finally {
@@ -2046,6 +2063,7 @@ export class WebSessionRecorder {
     const drainSource = {
       tail: () => Promise.all([this.v2IngestionQueue, ...this.legacyInflight]),
       pending: () => this.v2PendingIngestion + this.legacyInflight.size,
+      generation: () => this.ingestionGeneration,
     };
     const drainOptions = { timeoutMs: this.stopDrainTimeoutMs(), settleMs: STOP_DRAIN_SETTLE_MS };
     let drain = await drainIngestionUntilQuiet(drainSource, drainOptions);
@@ -2107,6 +2125,17 @@ export class WebSessionRecorder {
     };
     if (this.captureAuthority === "v2") this.enqueueV2Ingestion(recordNavigation);
     else recordNavigation();
+  }
+
+  /**
+   * The recorder-owned page and a way to open a CDP session on it, for streaming a "remote"
+   * recording (live-view-session.ts). Undefined until start() has opened the page.
+   */
+  liveViewTarget(): { page: Page; createCdp: () => Promise<CDPSession> } | undefined {
+    const page = this.page;
+    const context = this.context;
+    if (!page || !context) return undefined;
+    return { page, createCdp: () => context.newCDPSession(page) };
   }
 
   /** Captures accepted but not yet applied -- what Stop is still waiting for. */
