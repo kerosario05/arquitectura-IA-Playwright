@@ -8,7 +8,7 @@ import {
   type EvidenceScenarioRecord,
 } from "./evidence-types";
 import { buildEvidenceRunPaths } from "./evidence-paths";
-import { generateConsolidatedEvidenceDocx } from "./evidence-docx-generator";
+import { generateEvidenceDocuments } from "./evidence-output";
 
 export class RunEvidenceRecorder {
   private config: EvidenceConfig;
@@ -149,7 +149,8 @@ export class RunEvidenceRecorder {
   }
 
   /**
-   * Finalize the run: generate evidence-run.json and consolidated evidencia.docx.
+   * Finalize the run: generate evidence-run.json and the consolidated evidence documents
+   * (evidencia.pdf and/or evidencia.docx, per EVIDENCE_FORMAT).
    */
   async finish(): Promise<EvidenceRunRecord> {
     if (!this.config.enabled) {
@@ -174,32 +175,39 @@ export class RunEvidenceRecorder {
       console.log(`[evidence:run] ${msg}`);
     }
 
-    // Generate consolidated DOCX
+    // Generate consolidated evidence documents
     if (this.config.docxEnabled && this.scenarios.length > 0) {
       try {
         const templatePath = this.context.templatePath ?? this.config.templatePath;
         const resolvedTemplate = path.resolve(templatePath);
 
-        const result = await generateConsolidatedEvidenceDocx(
-          this.scenarios,
-          resolvedTemplate,
-          this.paths.docxPath,
-        );
+        const results = await generateEvidenceDocuments(this.scenarios, resolvedTemplate, {
+          pdfPath: this.paths.pdfPath,
+          docxPath: this.paths.docxPath,
+        });
 
-        if (result.success) {
+        if (results.pdf?.success) {
           console.log(
-            `[evidence:run] generated evidencia.docx path=${result.outputPath} scenarios=${this.scenarios.length}`,
+            `[evidence:run] generated evidencia.pdf path=${results.pdf.outputPath} scenarios=${this.scenarios.length}`,
+          );
+        } else if (results.pdf) {
+          console.log(`[evidence:run] consolidated pdf generation failed: ${results.pdf.error}`);
+        }
+
+        if (results.docx?.success) {
+          console.log(
+            `[evidence:run] generated evidencia.docx path=${results.docx.outputPath} scenarios=${this.scenarios.length}`,
           );
 
           // Validate DOCX
           if (await this.validateDocx(this.paths.docxPath)) {
             console.log(`[evidence:docx] validation passed path=${this.paths.docxPath}`);
           }
-        } else {
-          console.log(`[evidence:run] consolidated docx generation failed: ${result.error}`);
+        } else if (results.docx) {
+          console.log(`[evidence:run] consolidated docx generation failed: ${results.docx.error}`);
         }
       } catch (err: any) {
-        const msg = `consolidated docx generation error: ${err.message}`;
+        const msg = `consolidated evidence document generation error: ${err.message}`;
         if (this.config.failOnError) throw new Error(msg);
         console.log(`[evidence:run] ${msg}`);
       }
@@ -234,6 +242,7 @@ export class RunEvidenceRecorder {
       failedScenarios,
       partialScenarios,
       docxPath: this.config.docxEnabled ? this.paths.docxPath : undefined,
+      pdfPath: this.config.docxEnabled ? this.paths.pdfPath : undefined,
       evidenceJsonPath: this.paths.evidenceJsonPath,
     };
   }

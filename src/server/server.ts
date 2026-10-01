@@ -1,3 +1,4 @@
+import { attachLiveViewEndpoint } from "./live-view-endpoint";
 import "../config/env"; // Load .env before anything else
 import express from "express";
 import cors from "cors";
@@ -17,11 +18,18 @@ import { sweepOrphanFrames } from "../recording/recording-store";
 import { resolveServerPort } from "./config";
 import { captureRawJsonBody, mobileUtf8JsonReconciler } from "./middleware/mobile-utf8-json";
 import { runtimeInputsRouter } from "./routes/runtime-inputs";
+import { authRouter } from "./routes/auth";
+import { usersRouter } from "./routes/users";
+import { rolesRouter, permissionsRouter } from "./routes/roles";
+import { attachPrincipal, isPublicPath, requireFullScope } from "./middleware/auth";
+import { enforceRoutePolicy } from "./middleware/route-policy";
+import { resolveAuthConfig } from "../auth/config";
 
 const PORT = resolveServerPort(process.env as Record<string, string | undefined>);
 const HOST = process.env.API_HOST || "0.0.0.0";
 const CORS_ORIGIN = process.env.API_CORS_ORIGIN || "*";
 const API_KEY = process.env.API_KEY || "";
+const AUTH_ENABLED = resolveAuthConfig().enabled;
 
 const app = express();
 const JSON_LIMIT = process.env.RECORDING_JSON_LIMIT ?? "2mb";
@@ -49,18 +57,23 @@ app.use((req, res, next) => {
   next();
 });
 
-if (API_KEY) {
-  app.use((req, res, next) => {
-    if (req.path === "/health") return next();
-    if (req.headers["x-api-key"] !== API_KEY) {
-      res.status(401).json({ error: "Unauthorized — missing or invalid X-Api-Key header" });
-      return;
-    }
-    next();
-  });
-}
+app.use(attachPrincipal());
+app.use((req, res, next) => {
+  if (isPublicPath(req.path) || req.principal) return next();
+  if (API_KEY && !AUTH_ENABLED) {
+    res.status(401).json({ error: "Unauthorized — missing or invalid X-Api-Key header" });
+    return;
+  }
+  res.status(401).json({ ok: false, error: "missing_token", message: "Se requiere iniciar sesión" });
+});
+app.use(requireFullScope());
+app.use(enforceRoutePolicy());
 
 app.use(healthRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/users", usersRouter);
+app.use("/api/roles", rolesRouter);
+app.use("/api/permissions", permissionsRouter);
 app.use("/api/jira", jiraRouter);
 app.use("/api/testrail", testrailRouter);
 app.use("/api/runs", runsRouter);
@@ -146,6 +159,8 @@ const server = app.listen(PORT, HOST, () => {
   }
   console.log("");
 });
+
+attachLiveViewEndpoint(server);
 
 server.on("error", (err: NodeJS.ErrnoException) => {
   if (err.code === "EADDRINUSE") {

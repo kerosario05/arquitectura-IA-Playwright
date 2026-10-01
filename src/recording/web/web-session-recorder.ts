@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { createHash, randomUUID } from "node:crypto";
-import { chromium, firefox, webkit, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { chromium, firefox, webkit, type Browser, type BrowserContext, type CDPSession, type Page } from "@playwright/test";
 import { extractRuntimeUiSnapshot, type RuntimeUiSnapshot } from "../../knowledge/runtime-knowledge-extractor";
 import type {
   FieldOwnerDiagnostic,
@@ -1382,6 +1382,7 @@ export class WebSessionRecorder {
   private context: BrowserContext | null = null;
 
   private page: Page | null = null;
+  private initialNavigationPromise: Promise<void> | null = null;
 
   private readonly startedAt = Date.now();
 
@@ -1926,6 +1927,35 @@ export class WebSessionRecorder {
     return tapEvent;
   }
 
+  /** Transport access to the recorder-owned page; capture bindings and ingestion stay unchanged. */
+  liveViewTarget(): { page: Page; createCdp: () => Promise<CDPSession> } | undefined {
+    const page = this.page;
+    const context = this.context;
+    if (!page || !context) return undefined;
+    return { page, createCdp: () => context.newCDPSession(page) };
+  }
+
+  /** Navigate after the recording session and live-view transport have been published. */
+  navigateToInitialPage(): Promise<void> {
+    if (this.initialNavigationPromise) return this.initialNavigationPromise;
+    const page = this.page;
+    if (!page) return Promise.reject(new Error("El navegador de grabación todavía no está disponible"));
+    this.initialNavigationPromise = (async () => {
+      await page.goto(this.options.baseUrl, { waitUntil: "domcontentloaded" });
+      const { screenKey } = await this.absorbScreen();
+      this.lastScreenKey = screenKey;
+      this.pushEvent({
+        t: 0,
+        kind: "launch",
+        screenKey,
+        url: this.options.baseUrl,
+        framePath: await this.captureFrame("launch"),
+      });
+      this.log("[recording] navegador abierto: realiza el recorrido y pulsa Detener cuando termines");
+    })();
+    return this.initialNavigationPromise;
+  }
+
   async start(): Promise<boolean> {
     if (this.options.captureScreenshots === true) {
       fs.mkdirSync(this.options.framesDir, { recursive: true });
@@ -1933,7 +1963,7 @@ export class WebSessionRecorder {
     const engine =
       this.options.browserName === "firefox" ? firefox : this.options.browserName === "webkit" ? webkit : chromium;
 
-    this.browser = await engine.launch({ headless: false });
+    this.browser = await engine.launch({ headless: true });
     this.context = await this.browser.newContext(
       buildWebRecorderContextOptions(this.options.ignoreHTTPSErrors),
     );
@@ -2046,18 +2076,6 @@ export class WebSessionRecorder {
       if (captureScriptV2Content) frame.evaluate(captureScriptV2Content).catch(() => undefined);
     });
 
-    await this.page.goto(this.options.baseUrl, { waitUntil: "domcontentloaded" });
-    const { screenKey } = await this.absorbScreen();
-    this.lastScreenKey = screenKey;
-    this.pushEvent({
-      t: 0,
-      kind: "launch",
-      screenKey,
-      url: this.options.baseUrl,
-      framePath: await this.captureFrame("launch"),
-    });
-
-    this.log("[recording] navegador abierto: realiza el recorrido y pulsa Detener cuando termines");
     return true;
   }
 

@@ -5,6 +5,7 @@ import type { RecordedScenario } from "./trace-to-scenario";
 import type { SemanticRecordingModel } from "./semantic-recording";
 import { normalizeEvents, summarizeTrace } from "./trace-normalizer";
 import { reconcileOptionOwnerLineage } from "./canonical-recording-contract";
+import { writeRecordingJson } from "./atomic-json-store";
 
 /**
  * On-disk home of recorded sessions.
@@ -58,7 +59,7 @@ function semanticPath(appSlug: string, recordingId: string): string {
 export function saveTrace(trace: SessionTrace): void {
   const dir = recordingDir(trace.appSlug, trace.recordingId);
   fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(tracePath(trace.appSlug, trace.recordingId), JSON.stringify(trace, null, 2), "utf8");
+  writeRecordingJson(tracePath(trace.appSlug, trace.recordingId), trace);
 }
 
 export function loadTrace(appSlug: string, recordingId: string): SessionTrace | null {
@@ -93,7 +94,7 @@ export function saveScenarios(appSlug: string, recordingId: string, scenarios: R
   const dir = recordingDir(appSlug, recordingId);
   fs.mkdirSync(dir, { recursive: true });
   const file = scenariosPath(appSlug, recordingId);
-  fs.writeFileSync(file, JSON.stringify(scenarios, null, 2), "utf8");
+  writeRecordingJson(file, scenarios);
   // TEMPORARY DIAGNOSTIC (this ticket only): no dataset value/secret is logged -- only ids,
   // counts and the store path, so a historical recording found with scenarios=[] can be traced
   // back to whichever write (or lack of one) actually produced that state.
@@ -103,7 +104,7 @@ export function saveScenarios(appSlug: string, recordingId: string, scenarios: R
 export function saveSemanticRecording(model: SemanticRecordingModel): void {
   const dir = recordingDir(model.appSlug, model.recordingId);
   fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(semanticPath(model.appSlug, model.recordingId), JSON.stringify(model, null, 2), "utf8");
+  writeRecordingJson(semanticPath(model.appSlug, model.recordingId), model);
 }
 
 export function loadSemanticRecording(appSlug: string, recordingId: string): SemanticRecordingModel | null {

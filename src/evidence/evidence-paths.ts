@@ -26,6 +26,7 @@ export function buildEvidenceRunPaths(context: EvidenceRunContext): {
   scenariosDir: string;
   evidenceJsonPath: string;
   docxPath: string;
+  pdfPath: string;
 } {
   const runDir = buildEvidenceRunDir(context);
   const scenariosDir = path.join(runDir, "scenarios");
@@ -34,6 +35,7 @@ export function buildEvidenceRunPaths(context: EvidenceRunContext): {
     scenariosDir,
     evidenceJsonPath: path.join(runDir, "evidence-run.json"),
     docxPath: path.join(runDir, "evidencia.docx"),
+    pdfPath: path.join(runDir, "evidencia.pdf"),
   };
 }
 
@@ -63,6 +65,7 @@ export function buildEvidencePaths(context: EvidenceScenarioContext): {
   snapshotsDir: string;
   evidenceJsonPath: string;
   docxPath: string;
+  pdfPath: string;
 } {
   const scenarioDir = buildEvidenceScenarioDir(context);
   const screenshotsDir = path.join(scenarioDir, "screenshots");
@@ -73,6 +76,7 @@ export function buildEvidencePaths(context: EvidenceScenarioContext): {
     snapshotsDir,
     evidenceJsonPath: path.join(scenarioDir, "evidence.json"),
     docxPath: path.join(scenarioDir, "evidencia.docx"),
+    pdfPath: path.join(scenarioDir, "evidencia.pdf"),
   };
 }
 

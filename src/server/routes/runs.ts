@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { filterByProjectAccess } from "../middleware/route-policy";
 import fs from "fs";
 import path from "path";
 import { jobStore } from "../jobs/job-store";
@@ -523,8 +524,13 @@ runsRouter.post("/sprint", (req, res) => {
   res.status(202).json({ jobId: job.id, status: job.status });
 });
 
-runsRouter.get("/", (_req, res) => {
-  res.json({ jobs: jobStore.list() });
+runsRouter.get("/", (req, res) => {
+  const jobs = filterByProjectAccess(req.principal, jobStore.list(), (job) => {
+    const params = (job.params ?? {}) as Record<string, unknown>;
+    const value = params.appSlug ?? params.projectSlug;
+    return typeof value === "string" ? value : null;
+  });
+  res.json({ jobs });
 });
 
 runsRouter.get("/:jobId", (req, res) => {
@@ -1067,12 +1073,23 @@ type EvidenceDocxReasonCode =
   | "document_generation_failed"
   | "document_not_found_after_completion";
 
+type EvidenceDocumentFormat = "pdf" | "docx";
+
+const EVIDENCE_DOCUMENT_FILES: Record<EvidenceDocumentFormat, { fileName: string; contentType: string }> = {
+  pdf: { fileName: "evidencia.pdf", contentType: "application/pdf" },
+  docx: {
+    fileName: "evidencia.docx",
+    contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  },
+};
+
 type EvidenceDocxResolution = {
   jobId: string;
   status: EvidenceDocxStatus;
   reasonCode: EvidenceDocxReasonCode;
   documentReady: boolean;
   documentPath?: string;
+  documentFormat?: EvidenceDocumentFormat;
   jobExists: boolean;
   jobStatus?: string;
   appSlug?: string;
@@ -1125,7 +1142,7 @@ function readPreviewJobMetadata(jobId: string): Record<string, unknown> | undefi
   }
 }
 
-function findEvidenceDocxByJobId(rootDir: string, jobId: string): string | undefined {
+function findEvidenceDocxByJobId(rootDir: string, jobId: string, fileName: string): string | undefined {
   if (!fs.existsSync(rootDir)) return undefined;
 
   const stack = [rootDir];
@@ -1140,7 +1157,7 @@ function findEvidenceDocxByJobId(rootDir: string, jobId: string): string | undef
         continue;
       }
       if (
-        entry.name === "evidencia.docx"
+        entry.name === fileName
         && fullPath.includes(path.sep + "runs" + path.sep + jobId + path.sep)
       ) {
         return fullPath;
@@ -1150,7 +1167,14 @@ function findEvidenceDocxByJobId(rootDir: string, jobId: string): string | undef
   return undefined;
 }
 
-export function resolveEvidenceDocxForJob(jobId: string): EvidenceDocxResolution {
+/**
+ * Locate a run's evidence document. `formats` is the order of preference: by default the PDF
+ * (generated everywhere) and, failing that, the DOCX (only where Word is installed).
+ */
+export function resolveEvidenceDocxForJob(
+  jobId: string,
+  formats: EvidenceDocumentFormat[] = ["pdf", "docx"],
+): EvidenceDocxResolution {
   const job = jobStore.get(jobId);
   const params = (job?.params ?? {}) as Record<string, unknown>;
   const summary = (job?.summary ?? {}) as Record<string, unknown>;
@@ -1165,41 +1189,30 @@ export function resolveEvidenceDocxForJob(jobId: string): EvidenceDocxResolution
   const previewJobDir = path.join(PREVIEW_ARTIFACTS_DIR, jobId);
   const jobExists = Boolean(job || fs.existsSync(previewJobDir));
 
-  const candidatePaths: string[] = [];
+  const candidateDirs: string[] = [];
   if (appSlug && sectionSlug) {
-    candidatePaths.push(path.join(EVIDENCE_ROOT_DIR, appSlug, sectionSlug, "runs", jobId, "evidencia.docx"));
+    candidateDirs.push(path.join(EVIDENCE_ROOT_DIR, appSlug, sectionSlug, "runs", jobId));
   }
-  candidatePaths.push(path.join(PREVIEW_ARTIFACTS_DIR, jobId, "evidencia.docx"));
+  candidateDirs.push(path.join(PREVIEW_ARTIFACTS_DIR, jobId));
 
-  for (const candidate of candidatePaths) {
-    if (fs.existsSync(candidate)) {
+  for (const format of formats) {
+    const { fileName } = EVIDENCE_DOCUMENT_FILES[format];
+    const found = candidateDirs.map(dir => path.join(dir, fileName)).find(candidate => fs.existsSync(candidate))
+      ?? findEvidenceDocxByJobId(EVIDENCE_ROOT_DIR, jobId, fileName);
+    if (found) {
       return {
         jobId,
         status: "ready",
         reasonCode: "ready",
         documentReady: true,
-        documentPath: candidate,
+        documentPath: found,
+        documentFormat: format,
         jobExists: true,
         jobStatus,
         appSlug,
         sectionSlug,
       };
     }
-  }
-
-  const foundInEvidenceTree = findEvidenceDocxByJobId(EVIDENCE_ROOT_DIR, jobId);
-  if (foundInEvidenceTree) {
-    return {
-      jobId,
-      status: "ready",
-      reasonCode: "ready",
-      documentReady: true,
-      documentPath: foundInEvidenceTree,
-      jobExists: true,
-      jobStatus,
-      appSlug,
-      sectionSlug,
-    };
   }
 
   if (!jobExists) {
@@ -1602,10 +1615,21 @@ runsRouter.get("/:jobId/evidence-docx/status", (req, res) => {
   });
 });
 
-// ── Download evidence DOCX ──
+// ── Download evidence document ──
+// Serves the PDF when there is one, else the DOCX; `?format=pdf|docx` asks for one explicitly.
+// The route keeps its historical name: the panel and the BFF already call it and take the file
+// name and type from the response headers.
 runsRouter.get("/:jobId/evidence-docx", (req, res) => {
   const jobId = req.params.jobId;
-  const resolution = resolveEvidenceDocxForJob(jobId);
+  const requested = typeof req.query.format === "string" ? req.query.format.toLowerCase() : "";
+  if (requested && requested !== "pdf" && requested !== "docx") {
+    res.status(400).json({ error: "Invalid format", jobId, message: "format debe ser pdf o docx." });
+    return;
+  }
+  const resolution = resolveEvidenceDocxForJob(
+    jobId,
+    requested ? [requested as EvidenceDocumentFormat] : undefined,
+  );
   const docxPath = resolution.documentPath;
 
   if (!docxPath) {
@@ -1637,8 +1661,9 @@ runsRouter.get("/:jobId/evidence-docx", (req, res) => {
     return;
   }
 
-  const filename = `evidencia-${jobId}.docx`;
-  res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+  const format = resolution.documentFormat ?? "docx";
+  const filename = `evidencia-${jobId}.${format}`;
+  res.setHeader("Content-Type", EVIDENCE_DOCUMENT_FILES[format].contentType);
   res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
 
   const stream = fs.createReadStream(docxPath);

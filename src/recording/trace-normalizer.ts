@@ -47,12 +47,41 @@ export function isNonActionableContainerTap(event: Pick<RecordedEvent, "kind" | 
   const target = event.target;
   const role = event.target?.role?.trim().toLowerCase();
   if (role === "dialog" || role === "alertdialog") return true;
+  // A pointer event on descriptive copy or a container is not a replayable action by itself.
+  // Capture V2 can preserve the nearest form/page scope as a locator while recording the text
+  // underneath; neither proves that the text/container owns a click handler. Keep these taps out
+  // of the functional contract unless capture also observed an actionable role/owner or a locator
+  // that identifies the target itself. This is tag/interaction evidence only: no app wording,
+  // route, recording, or project assumptions.
+  const tag = target?.tag?.trim().toLowerCase();
+  const passiveCopyTags = new Set(["p", "h1", "h2", "h3", "h4", "h5", "h6", "span", "form"]);
+  if (tag && passiveCopyTags.has(tag) && !role) {
+    const hasActionOwner = target?.actionOwner === true
+      || target?.interactionType === "click"
+      || target?.actionability === "NATIVE_ACTIONABLE"
+      || target?.actionability === "SEMANTIC_ACTIONABLE"
+      || target?.actionability === "FRAMEWORK_ACTIONABLE"
+      || (target?.technicalTargetCandidates ?? []).some((candidate) => {
+        return candidate.validatedByInteraction === true
+          && (candidate.interactionEvidence ?? []).includes("v2_click_owner");
+      });
+    const semanticScopes = new Set([
+      ...(target?.semanticRuntimeEvidence?.scopeAlternatives ?? [])
+        .map((alternative) => `${alternative.scopeIdentity.strategy}:${alternative.scopeIdentity.value}`),
+      ...(target?.playwrightRecorderEvidence?.scopeIdentity
+        ? [`${target.playwrightRecorderEvidence.scopeIdentity.strategy}:${target.playwrightRecorderEvidence.scopeIdentity.value}`]
+        : []),
+    ]);
+    const hasTargetLocator = (target?.locators ?? []).some((locator) =>
+      !semanticScopes.has(`${locator.strategy}:${locator.value}`)
+      && isTechnicalIdentityAdmissible(target));
+    if (!hasActionOwner && !hasTargetLocator) return true;
+  }
   // A bare image's alt text describes the image, not an action. Capture V2 can report a trusted
   // pointer on a decorative image with a plausible name but no actionable owner or replay target;
   // admitting that name as a click leaves discovery resolving arbitrary page text (for example,
   // an icon alt repeated across several controls). Keep it as technical noise unless the capture
   // also found an actionable role, locator, or owner candidate.
-  const tag = target?.tag?.trim().toLowerCase();
   if (tag !== "img" || role) return false;
   const hasReplayEvidence = (target?.locators?.length ?? 0) > 0
     || (target?.technicalTargetCandidates ?? []).some((candidate) => {

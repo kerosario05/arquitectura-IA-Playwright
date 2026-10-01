@@ -1,4 +1,8 @@
 import { Router } from "express";
+import {
+  beginDerivation, completeDerivation, failDerivation,
+  getDerivationProgress, startBackgroundDerivation,
+} from "../services/recording-derivation-progress";
 import { config, requireTestRailConfig } from "../../config/env";
 import { TestRailClient } from "../../clients/testrail.client";
 import { getProjectConfigurationBySlug } from "../../db/project-reader";
@@ -490,6 +494,7 @@ recordingsRouter.post("/start", async (req, res) => {
     // API-INTERNAL override for tests/regression/rollback, never through this public route.
     const result = await startRecording({
       projectSlug,
+      startedBy: req.principal?.userId ?? undefined,
       label: typeof body.label === "string" ? body.label.trim() || undefined : undefined,
       recordingGoal: typeof body.recordingGoal === "string" ? body.recordingGoal.trim() || undefined : undefined,
       recordingDataPolicy: body.recordingDataPolicy && typeof body.recordingDataPolicy === "object"
@@ -578,10 +583,41 @@ recordingsRouter.post("/:recordingId/derive", async (req, res) => {
       return;
     }
     const appSlug = await appSlugFor(projectSlug);
-    const result = await deriveScenarios(appSlug, req.params.recordingId, {
-      title: typeof body.title === "string" ? body.title : undefined,
-    });
+    const title = typeof body.title === "string" ? body.title : undefined;
+    if (body.async === true || req.query.async === "true") {
+      const derivation = startBackgroundDerivation(req.params.recordingId, async () => {
+        const result = await deriveScenarios(appSlug, req.params.recordingId, { title });
+        return { scenarioCount: result.scenarios.length };
+      });
+      res.status(202).json({ ok: true, derivation });
+      return;
+    }
+    beginDerivation(req.params.recordingId);
+    const result = await deriveScenarios(appSlug, req.params.recordingId, { title });
+    completeDerivation(req.params.recordingId, result.scenarios.length);
     res.json({ ok: true, ...result });
+  } catch (err) {
+    failDerivation(req.params.recordingId, err);
+    handle(res, err);
+  }
+});
+
+recordingsRouter.get("/:recordingId/derivation", async (req, res) => {
+  try {
+    const projectSlug = String(req.query.projectSlug ?? "").trim();
+    if (!projectSlug) {
+      sendError(res, 400, "MISSING_PROJECT_SLUG", "projectSlug es obligatorio");
+      return;
+    }
+    const appSlug = await appSlugFor(projectSlug);
+    const trace = loadTrace(appSlug, req.params.recordingId);
+    if (!trace) {
+      sendError(res, 404, "RECORDING_NOT_FOUND", "No se encontró la grabación");
+      return;
+    }
+    const derivation = getDerivationProgress(req.params.recordingId)
+      ?? { recordingId: req.params.recordingId, status: trace.status === "derived" ? "derived" : "idle" };
+    res.json({ ok: true, derivation });
   } catch (err) {
     handle(res, err);
   }

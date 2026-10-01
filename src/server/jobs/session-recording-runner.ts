@@ -1,3 +1,5 @@
+import { LiveViewSession } from "../../recording/web/live-view-session";
+import { DEFAULT_RECORDING_VIEWPORT } from "../../recording/web/recording-presentation";
 import { randomUUID } from "node:crypto";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
@@ -69,6 +71,8 @@ const execFileAsync = promisify(execFile);
 export type CaptureAuthority = "legacy" | "v2";
 
 export type StartRecordingParams = {
+  /** User who owns the embedded browser controls. */
+  startedBy?: string;
   /** Project whose configuration decides WHICH app is recorded. */
   projectSlug: string;
   label?: string;
@@ -115,9 +119,17 @@ type ActiveRecording = {
   trace: SessionTrace;
   recorder: AndroidSessionRecorder | WebSessionRecorder;
   liveProjection?: LiveSemanticProjection;
+  liveView?: LiveViewSession;
+  startedBy?: string;
 };
 
 const active = new Map<string, ActiveRecording>();
+
+export function getLiveViewAccess(recordingId: string) {
+  const entry = active.get(recordingId);
+  if (!entry?.liveView || entry.trace.status !== "recording") return undefined;
+  return { session: entry.liveView, startedBy: entry.startedBy, projectSlug: entry.trace.projectSlug };
+}
 
 /** Index from app slug to recording id, so a caller only holding the slug can find it. */
 export function activeRecordingFor(projectSlug: string): ActiveRecording | undefined {
@@ -365,8 +377,38 @@ export async function startRecording(params: StartRecordingParams): Promise<{
     trace.status = "recording";
     saveTrace(trace);
     onLog(`[recording:goal-lineage] persistedGoal=${JSON.stringify(loadTrace(trace.appSlug, trace.recordingId)?.recordingGoal?.declaredGoal)}`);
-    active.set(recordingId, { recordingId, jobId: job.id, trace, recorder });
+    const liveTarget = recorder instanceof WebSessionRecorder ? recorder.liveViewTarget() : undefined;
+    const liveView = liveTarget ? new LiveViewSession({
+      cdp: liveTarget.createCdp,
+      page: liveTarget.page,
+      viewport: liveTarget.page.viewportSize() ?? DEFAULT_RECORDING_VIEWPORT,
+      ready: false,
+      log: onLog,
+    }) : undefined;
+    active.set(recordingId, { recordingId, jobId: job.id, trace, recorder, liveView, startedBy: params.startedBy });
     onLog(`[recording] grabación ${recordingId} iniciada sobre ${target.appSlug} (${platform})`);
+
+    if (recorder instanceof WebSessionRecorder) {
+      // Publish the recording ID and live-view session before waiting for the app's first load.
+      // This lets the UI connect to Chromium while the initial navigation is still in progress.
+      void recorder.navigateToInitialPage().then(() => {
+        liveView?.markReady();
+      }).catch(async (err) => {
+        const current = active.get(recordingId);
+        // A user may have stopped the session while the initial navigation was still pending.
+        if (!current || current.trace.status !== "recording") return;
+        const message = err instanceof Error ? err.message : String(err);
+        trace.status = "failed";
+        trace.errorMessage = message;
+        trace.endedAt = new Date().toISOString();
+        saveTrace(trace);
+        active.delete(recordingId);
+        jobStore.update(job.id, { status: "failed", errorMessage: message, completedAt: trace.endedAt });
+        onLog(`[recording] fallo al cargar la aplicación inicial: ${message}`);
+        await liveView?.fail("initial_navigation_failed");
+        await recorder.stop().catch(() => undefined);
+      });
+    }
 
     return { recordingId, jobId: job.id, summary: toSummary(trace) };
   } catch (err) {
@@ -462,6 +504,8 @@ export async function stopRecording(recordingId: string): Promise<RecordingSumma
   const onLog = (line: string) => jobStore.appendLog(entry.jobId, line);
 
   entry.trace.status = "stopping";
+  // Drain already accepted remote input before the existing recorder flushes capture.
+  await entry.liveView?.close();
   const { events, screens } = await entry.recorder.stop();
   const endedAt = new Date();
 

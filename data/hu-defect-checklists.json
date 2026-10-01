@@ -14390,5 +14390,39 @@
     "defects": [],
     "createdAt": "2026-10-01T15:34:47.075Z",
     "updatedAt": "2026-10-01T15:34:47.075Z"
+  },
+  {
+    "id": "1790889096161-c64cqs2",
+    "issueKey": "REC-627C48C6",
+    "urlSlug": "REC-627C48C6",
+    "defects": [
+      {
+        "id": "1790889348220-dsb7ljg",
+        "description": "Resultado esperado:\nLa aplicación carga su pantalla inicial\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "74294a47-c455-4f20-ac52-82bceb801074",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "QA13",
+        "title": "[Media] No se cumplió: La aplicación carga su pantalla inicial — QA13",
+        "technicalContext": {
+          "discoveryStatus": "discovered_passed",
+          "expectedResult": "La aplicación carga su pantalla inicial",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-01T21-11-54-222Z\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-01T21-11-54-222Z\\evidence\\step-19-snapshot.json",
+          "lastSuccessfulStep": {
+            "stepIndex": 19,
+            "action": "Presionar \"Generar Turno\"",
+            "target": "Generar Turno",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-01T21-11-54-222Z\\evidence\\step-19-snapshot.json"
+          }
+        },
+        "createdAt": "2026-10-01T21:15:48.220Z",
+        "updatedAt": "2026-10-01T21:15:48.220Z"
+      }
+    ],
+    "createdAt": "2026-10-01T21:11:36.161Z",
+    "updatedAt": "2026-10-01T21:15:48.220Z"
   }
 ]
