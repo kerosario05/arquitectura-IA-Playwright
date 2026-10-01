@@ -5,6 +5,7 @@ import { findMethodBySemanticIntent } from "./page-object-registry";
 import { getPreferredOwnerForIntent, METHOD_INTENT_NAME_MAP, ACTION_RUNTIME_METHOD_BY_OPERATION } from "../types/pom-ownership";
 import { decodeJsStringLiteralBody, normalizeSemanticText, semanticallyEqualText } from "./semantic-text-normalization";
 import { detectCredentialRole } from "../data/data-key-resolver";
+import { parseStepIntent } from "../discovery/step-intent-parser";
 import type { AssertionPolarity } from "../scenarios/canonical-scenario";
 import {
   materializeTechnicalTarget,
@@ -121,6 +122,8 @@ export type SpecStepOracle = {
   mechanism?: SpecOracleMechanism;
   sourceActionStepIndex?: number;
   requirement?: string;
+  /** Exact, observed UI text used to compile a backed visible-text oracle. */
+  target?: string;
 };
 
 export type SpecExecutionContractStep = {
@@ -136,6 +139,8 @@ export type SpecExecutionContractStep = {
   entityScope?: string;
   rowRelation?: "next" | "added";
   selectionField?: string;
+  /** Recorded trigger field for an option click, when its control lineage was captured. */
+  selectionActivationField?: string;
   /**
    * The field-relation hint the scenario/plan already carries (e.g. "asociado a X" -- see
    * step-intent-parser.ts / testrail.types.ts), transported verbatim -- never re-derived here.
@@ -416,7 +421,8 @@ function resolveStepOracle(
         implementationKind: resolveOracleImplementationKind(direct),
         mechanism: buildOracleMechanism(direct),
         sourceActionStepIndex: findSourceActionStepIndex(direct, planSteps),
-        requirement: direct.requirement
+        requirement: direct.requirement,
+        target: direct.target,
       },
       evidenceRefs
     };
@@ -545,6 +551,24 @@ function resolveAuthContext(
   const authValuePlanSteps = plan.steps.filter((step) =>
     typeof step.valueKey === "string" && step.valueKey.startsWith("auth.")
   );
+  const credentialRolesByPlanStep = plan.steps
+    .filter((step) => step.action === "fill" && typeof step.valueKey === "string")
+    .map((step) => ({ step, role: detectCredentialRole(step.valueKey!) }))
+    .filter((entry): entry is { step: ExecutionPlanStep; role: NonNullable<typeof entry.role> } => entry.role !== undefined);
+  const lastCredentialStepIndex = Math.max(...credentialRolesByPlanStep.map(({ step }) => step.index), -1);
+  const hasPasswordCredential = credentialRolesByPlanStep.some(({ role }) => role === "password");
+  const hasIdentityCredential = credentialRolesByPlanStep.some(({ role }) => role === "username" || role === "company_identifier");
+  const hasRecordedCredentialSubmit = credentialRolesByPlanStep.length > 0
+    && plan.steps.some((step) => step.action === "click" && step.index > lastCredentialStepIndex);
+  // A fully represented username/password or company-identifier/password login followed by its
+  // recorded submit is already an executable auth sequence. Keep its exact recorded actions and
+  // do not inject a second, potentially incompatible AuthFlow. Auth-flow aggregates sourced from
+  // auth.* bindings remain authoritative and continue to use the helper.
+  const hasExplicitCredentialLogin = gateDetected
+    && authValuePlanSteps.length === 0
+    && hasPasswordCredential
+    && hasIdentityCredential
+    && hasRecordedCredentialSubmit;
   const authValueScenarioIndexes = new Set<number>();
   for (const planStep of authValuePlanSteps) {
     const compatible = scenarioSteps.find((scenarioStep) =>
@@ -570,7 +594,7 @@ function resolveAuthContext(
   const coveredScenarioStepIndices = [...authValueScenarioIndexes].sort((a, b) => a - b);
   return {
     gateDetected,
-    required: authRequired,
+    required: authRequired && !hasExplicitCredentialLogin,
     stage: sourceScenario?.auth?.detectedStage ?? metadata.authGateStage,
     insertionAfterStepIndex: sourceScenario?.auth?.insertionAfterStepIndex ?? metadata.authFlowInsertionAfterStepIndex,
     flowAlias: sourceScenario?.auth?.flowAlias ?? metadata.authFlowAlias,
@@ -609,11 +633,19 @@ export function resolveAuthGateFillScenarioStepIndices(
 ): Set<number> {
   const result = new Set<number>();
   if (!auth || auth.gateDetected !== true) return result;
+  const isFillStep = (step: ScenarioStepLike): boolean => {
+    if (step.recordingActionType !== undefined) return step.recordingActionType === "fill";
+    // Discovery/preview scenarios may carry natural-language action rows without recordingActionType.
+    // Reuse the shared intent parser to recognize a fill; never infer ownership from step order.
+    return [step.action, step.description]
+      .filter((candidate): candidate is string => typeof candidate === "string" && candidate.trim().length > 0)
+      .some((candidate) => parseStepIntent(candidate).some((intent) => intent.type === "action_fill"));
+  };
   const covered = auth.aggregate?.coveredScenarioStepIndices ?? [];
   if (covered.length > 0) {
     const coveredSet = new Set(covered);
     for (const step of scenarioSteps) {
-      if (coveredSet.has(step.index) && step.recordingActionType === "fill") result.add(step.index);
+      if (coveredSet.has(step.index) && isFillStep(step)) result.add(step.index);
     }
     return result;
   }
@@ -624,7 +656,7 @@ export function resolveAuthGateFillScenarioStepIndices(
     }
   }
   for (const step of scenarioSteps) {
-    if (step.recordingActionType !== "fill") continue;
+    if (!isFillStep(step)) continue;
     const valueKey = planValueKeyByIndex.get(step.index) ?? step.valueKey;
     if (typeof valueKey === "string" && detectCredentialRole(valueKey) !== undefined) {
       result.add(step.index);
@@ -633,7 +665,38 @@ export function resolveAuthGateFillScenarioStepIndices(
   return result;
 }
 
-export type ScenarioStepLike = { index: number; action: string; description?: string; expected?: string; valueKey?: string; entityScope?: string; rowRelation?: "next" | "added"; selectionField?: string; associatedField?: string; technicalTargetRef?: string; technicalTargetRefs?: string[]; technicalTargetCandidates?: Array<Record<string, unknown>>; semanticRuntimeEvidence?: import("../recording/structural-owner-identity").SemanticRuntimeEvidence; playwrightRecorderEvidence?: import("../recording/structural-owner-identity").PlaywrightRecorderEvidence; resolutionState?: "certified" | "runtime_resolution_required" | "unresolved_unrecoverable"; assertionImportance?: "blocking" | "contextual" | "optional"; canonicalAssertion?: import("../scenarios/canonical-scenario").CanonicalAssertion; conditionalAction?: import("../scenarios/canonical-scenario").CanonicalConditionalAction; controlIdentity?: string; recordingActionType?: "fill" | "select" | "click" | "check" | "uncheck" | "press" | "navigation" | "system_observation" };
+export type ScenarioStepLike = { index: number; action: string; description?: string; expected?: string; valueKey?: string; entityScope?: string; rowRelation?: "next" | "added"; selectionField?: string; selectionActivationField?: string; associatedField?: string; technicalTargetRef?: string; technicalTargetRefs?: string[]; technicalTargetCandidates?: Array<Record<string, unknown>>; semanticRuntimeEvidence?: import("../recording/structural-owner-identity").SemanticRuntimeEvidence; playwrightRecorderEvidence?: import("../recording/structural-owner-identity").PlaywrightRecorderEvidence; resolutionState?: "certified" | "runtime_resolution_required" | "unresolved_unrecoverable"; assertionImportance?: "blocking" | "contextual" | "optional"; canonicalAssertion?: import("../scenarios/canonical-scenario").CanonicalAssertion; conditionalAction?: import("../scenarios/canonical-scenario").CanonicalConditionalAction; controlIdentity?: string; recordingActionType?: "fill" | "select" | "click" | "check" | "uncheck" | "press" | "navigation" | "system_observation" };
+
+function deriveRecordedSelectionActivationField(
+  scenarioStep: ScenarioStepLike,
+  scenarioSteps: readonly ScenarioStepLike[],
+): string | undefined {
+  const isRecordedOption = scenarioStep.technicalTargetRefs?.some((ref) => /^role:option\|/i.test(ref.trim()))
+    || scenarioStep.technicalTargetCandidates?.some((candidate) =>
+      Array.isArray(candidate.locatorCandidates)
+      && candidate.locatorCandidates.some((locator) => locator && typeof locator === "object"
+        && (locator as Record<string, unknown>).strategy === "role"
+        && typeof (locator as Record<string, unknown>).value === "string"
+        && /^option\|/i.test((locator as Record<string, unknown>).value as string))
+    );
+  const identity = scenarioStep.controlIdentity?.trim();
+  if (!isRecordedOption || !identity) return undefined;
+  const identityNamespace = identity.split("|")[0];
+  if (!identityNamespace) return undefined;
+
+  // Use only a preceding recorded click from the same control-identity namespace. This is
+  // capture lineage, not a target-text guess or DOM position. Ambiguous owners fail closed.
+  const owners = scenarioSteps.filter((candidate) =>
+    candidate.index < scenarioStep.index
+    && classifyScenarioAction(candidate.action, candidate.canonicalAssertion, candidate.conditionalAction) === "click"
+    && candidate.recordingActionType === "click"
+    && candidate.controlIdentity?.trim().split("|")[0] === identityNamespace
+    && Boolean(candidate.associatedField?.trim())
+  );
+  const latestIndex = Math.max(...owners.map((owner) => owner.index), Number.NEGATIVE_INFINITY);
+  const latestOwners = owners.filter((owner) => owner.index === latestIndex);
+  return latestOwners.length === 1 ? latestOwners[0].associatedField?.trim() : undefined;
+}
 
 function extractQuotedText(value: string | undefined): string | undefined {
   if (!value) return undefined;
@@ -659,6 +722,7 @@ function classifyScenarioAction(action: string, canonicalAssertion?: ScenarioSte
   if (/^(asserturl|validar\s+url)\b/.test(lower)) return "assertUrl";
   if (/^(asserttext)\b/.test(lower)) return "assertText";
   if (/^(assert|assertvisible|validar|validate|verificar|verify|comprobar|confirmar|expect|mostrar|muestra|visible|se\s+muestr|aparezc|existe|existan)\b/.test(lower)) return "assertVisible";
+  if (/^(el sistema|la aplicaci[oó]n|la app)\s+(muestra|presenta|indica|confirma|despliega)\b/.test(lower)) return "assertVisible";
   return "noop";
 }
 
@@ -684,6 +748,21 @@ function buildScenarioStepTarget(scenarioStep: ScenarioStepLike, operation: Spec
   // planStep?.value, the same generic field a press action's key already used in the raw
   // execution-plan-executor.
   if (operation === "press") return undefined;
+  if (operation === "fill") {
+    // In instructions like "enter X in Y", X is the data value, never the field locator or
+    // screen-context identity. Prefer an upstream structured field relation; otherwise reuse
+    // the shared step-intent parser to carry the resolved field label into the promoted runtime.
+    const associatedField = scenarioStep.associatedField?.trim();
+    if (associatedField) return { strategy: "label", value: associatedField };
+    const fillText = [scenarioStep.description, scenarioStep.action]
+      .filter((candidate): candidate is string => typeof candidate === "string" && candidate.trim().length > 0);
+    for (const candidate of fillText) {
+      const parsedField = parseStepIntent(candidate).find((intent) =>
+        intent.type === "action_fill" && typeof intent.actionTarget === "string" && intent.actionTarget.trim().length > 0,
+      )?.actionTarget?.trim();
+      if (parsedField) return { strategy: "label", value: parsedField };
+    }
+  }
   const text = extractQuotedText(scenarioStep.expected) ?? extractQuotedText(scenarioStep.description);
   if (!text) return undefined;
   const value = operation === "select" ? extractSelectSemanticTarget(text) : text;
@@ -711,7 +790,8 @@ function oracleToStepOracle(
       implementationKind: resolveOracleImplementationKind(oracle),
       mechanism: buildOracleMechanism(oracle),
       sourceActionStepIndex: findSourceActionStepIndex(oracle, planSteps),
-      requirement: oracle.requirement
+      requirement: oracle.requirement,
+      target: oracle.target,
     },
     evidenceRefs: [`oracle:${oracle.id}`]
   };
@@ -759,7 +839,20 @@ function findCompatiblePlanStep(
   operation: SpecStepOperation,
   planSteps: ExecutionPlanStep[]
 ): ExecutionPlanStep | undefined {
-  const scenarioTarget = extractQuotedText(scenarioStep.expected) ?? extractQuotedText(scenarioStep.description);
+  // For fill instructions, the first quoted value is the data to type (for example a single OTP
+  // character), not the control target. Resolve the field target from the shared step-intent
+  // parser before comparing against plan targets so per-character fills can bind to their one
+  // recorded segmented-input action. Other operations keep their existing target extraction.
+  const parsedFillTarget = operation === "fill"
+    ? [scenarioStep.description, scenarioStep.action]
+        .filter((candidate): candidate is string => typeof candidate === "string" && candidate.trim().length > 0)
+        .flatMap((candidate) => parseStepIntent(candidate))
+        .find((intent) => intent.type === "action_fill" && typeof intent.actionTarget === "string" && intent.actionTarget.trim().length > 0)
+        ?.actionTarget?.trim()
+    : undefined;
+  const scenarioTarget = parsedFillTarget
+    ?? extractQuotedText(scenarioStep.expected)
+    ?? extractQuotedText(scenarioStep.description);
   const normalizedScenarioTarget = scenarioTarget ? normalizeOracleMatch(scenarioTarget) : "";
 
   // 1. Explicit scenarioStepIndex + same operation (traceable plan step).
@@ -840,10 +933,82 @@ function findCompatiblePlanStep(
   return undefined;
 }
 
+/**
+ * Recording/Discovery can expose one human fill per character for a segmented input even though
+ * the validated plan already represents that input as one valueKey-bound action. Collapse only
+ * when all of the recorder's declared segments map to the same unique plan action and each source
+ * action contributes one character. This keeps the runtime contract aligned with the action that
+ * Discovery actually executed and does not merge ordinary repeated field fills.
+ */
+function collapseSegmentedScenarioFills(
+  scenarioSteps: readonly ScenarioStepLike[],
+  planSteps: ExecutionPlanStep[],
+): ScenarioStepLike[] {
+  const output: ScenarioStepLike[] = [];
+  for (let index = 0; index < scenarioSteps.length;) {
+    const first = scenarioSteps[index];
+    if (classifyScenarioAction(first.action, first.canonicalAssertion, first.conditionalAction) !== "fill") {
+      output.push(first);
+      index += 1;
+      continue;
+    }
+    const planStep = findCompatiblePlanStep(first, "fill", planSteps);
+    const evidence = first.playwrightRecorderEvidence ?? planStep?.playwrightRecorderEvidence;
+    const segmentCount = evidence?.segmentCount;
+    if (evidence?.kind !== "segmented_input"
+      || evidence.runtimeResolutionRequired !== true
+      || !Number.isInteger(segmentCount)
+      || (segmentCount ?? 0) < 2
+      || !evidence.scopeIdentity
+      || !planStep) {
+      output.push(first);
+      index += 1;
+      continue;
+    }
+
+    const group: ScenarioStepLike[] = [];
+    let cursor = index;
+    while (cursor < scenarioSteps.length && group.length < segmentCount!) {
+      const candidate = scenarioSteps[cursor];
+      const candidatePlanStep = classifyScenarioAction(candidate.action, candidate.canonicalAssertion, candidate.conditionalAction) === "fill"
+        ? findCompatiblePlanStep(candidate, "fill", planSteps)
+        : undefined;
+      const candidateEvidence = candidate.playwrightRecorderEvidence ?? candidatePlanStep?.playwrightRecorderEvidence;
+      const recordedValue = extractQuotedText(candidate.action);
+      const sameRecordedGroup = candidatePlanStep?.index === planStep.index
+        && candidateEvidence?.kind === "segmented_input"
+        && candidateEvidence.segmentCount === segmentCount
+        && JSON.stringify(candidateEvidence.scopeIdentity) === JSON.stringify(evidence.scopeIdentity)
+        && typeof recordedValue === "string"
+        && Array.from(recordedValue).length === 1;
+      if (!sameRecordedGroup) break;
+      group.push(candidate);
+      cursor += 1;
+    }
+
+    if (group.length !== segmentCount) {
+      output.push(first);
+      index += 1;
+      continue;
+    }
+    output.push({
+      ...first,
+      valueKey: planStep.valueKey ?? first.valueKey,
+      playwrightRecorderEvidence: evidence,
+      resolutionState: "runtime_resolution_required",
+      recordingActionType: "fill",
+    });
+    console.log(`[spec-execution-contract] segmentedFillProjection=true segmentCount=${segmentCount} sourceSteps=${group.length} planStepIndex=${planStep.index}`);
+    index = cursor;
+  }
+  return output;
+}
+
 function resolveResolvedExecutionTarget(
   scenarioStep: ScenarioStepLike,
   operation: SpecStepOperation,
-  observableOracles: ContractObservableOracle[]
+  observableOracles: ContractObservableOracle[],
+  planStep?: ExecutionPlanStep,
 ): string | undefined {
   if (operation !== "select") return undefined;
   for (const oracle of observableOracles) {
@@ -856,6 +1021,21 @@ function resolveResolvedExecutionTarget(
       ? oracle.target.trim()
       : undefined;
     if (target) return target;
+  }
+  // Some recorded select steps are represented in the validated execution plan
+  // as a keyboard/typeahead action rather than as a backed oracle. In that
+  // shape, the plan's value is the observed selected option itself; carry it as
+  // execution-target authority instead of losing it while projecting the
+  // scenario step's descriptive text into `target`.
+  if (
+    planStep?.action === "click"
+    && planStep.target
+    && typeof planStep.target === "object"
+    && planStep.target.strategy === "selection_keyboard_typeahead"
+    && typeof planStep.target.value === "string"
+    && planStep.target.value.trim()
+  ) {
+    return planStep.target.value.trim();
   }
   return undefined;
 }
@@ -908,7 +1088,7 @@ export function buildSpecExecutionContract(
   // Scenario steps are authoritative for WHICH steps exist. The validated plan only
   // enriches (target/implementation/evidence). Fall back to plan steps when the source
   // scenario carries no steps.
-  const scenarioSteps: ScenarioStepLike[] = sourceScenario?.steps && sourceScenario.steps.length > 0
+  const sourceScenarioSteps: ScenarioStepLike[] = sourceScenario?.steps && sourceScenario.steps.length > 0
     ? sourceScenario.steps
     : plan.steps.map((step) => ({
         index: step.index,
@@ -916,6 +1096,7 @@ export function buildSpecExecutionContract(
         description: step.description,
         expected: step.expected
       }));
+  const scenarioSteps = collapseSegmentedScenarioFills(sourceScenarioSteps, plan.steps);
 
   const requiredScenarioSteps = scenarioSteps.filter((s) => {
     const action = (s.action ?? "").trim().toLowerCase();
@@ -928,6 +1109,8 @@ export function buildSpecExecutionContract(
   const steps: SpecExecutionContractStep[] = requiredScenarioSteps.map((scenarioStep, index) => {
     // Operation always comes from the scenario step intent, never from the validated plan.
     let operation = classifyScenarioAction(scenarioStep.action, scenarioStep.canonicalAssertion, scenarioStep.conditionalAction);
+    const selectionActivationField = scenarioStep.selectionActivationField?.trim()
+      || deriveRecordedSelectionActivationField(scenarioStep, scenarioSteps);
     const isAssertion = operation.startsWith("assert");
 
     // Assertions are never enriched from the validated plan (never substituted with
@@ -935,6 +1118,21 @@ export function buildSpecExecutionContract(
     let planStep = isAssertion
       ? undefined
       : findCompatiblePlanStep(scenarioStep, operation, plan.steps);
+
+    // A natural-language setup row can describe opening the configured application without
+    // carrying a locator. When the validated plan has a navigate operation at the same semantic
+    // step index, that typed plan action is authoritative over the broad "abrir" text heuristic.
+    // Preserve the navigation as navigation so the technical-target gate remains reserved for
+    // real interactive controls; never turn the setup description into a display-text locator.
+    const indexedPlanStep = plan.steps.find((step) => step.index === scenarioStep.index);
+    const planBackedNavigation = !isAssertion
+      && !scenarioStep.conditionalAction
+      && operation === "click"
+      && indexedPlanStep?.action === "navigate";
+    if (planBackedNavigation) {
+      operation = "navigate";
+      planStep = indexedPlanStep;
+    }
 
     // FIRST_LOSS fix: "presionar"/"pulsar" (Spanish) are genuinely ambiguous between a pointer
     // click and a keyboard key press -- classifyScenarioAction cannot and must not guess from
@@ -971,10 +1169,14 @@ export function buildSpecExecutionContract(
       ? resolveImplementationDescriptor(planStep, options.pageObjectRegistry)
       : undefined;
 
-    const target = buildScenarioStepTarget(scenarioStep, operation)
-      ?? (planStep ? buildSpecStepTarget(planStep.target) : undefined);
+    const target = planBackedNavigation
+      ? planStep?.target === "APP_BASE_URL"
+        ? { strategy: "url", value: "APP_BASE_URL" }
+        : buildSpecStepTarget(planStep?.target)
+      : buildScenarioStepTarget(scenarioStep, operation)
+        ?? (planStep ? buildSpecStepTarget(planStep.target) : undefined);
 
-    const resolvedExecutionTarget = resolveResolvedExecutionTarget(scenarioStep, operation, observableOracles);
+    const resolvedExecutionTarget = resolveResolvedExecutionTarget(scenarioStep, operation, observableOracles, planStep);
 
     // Priority for assertion steps:
     // 1. backed oracle/evidence -> required=true, executed (never downgraded by an
@@ -993,10 +1195,13 @@ export function buildSpecExecutionContract(
       sourceScenario
       && (
         Boolean(sourceScenario.expectedResult?.trim())
-        || (sourceScenario.observedAssertions?.length ?? 0) > 0
-        || (sourceScenario.requirements?.length ?? 0) > 0
-        || (sourceScenario.stepRequirementRefs?.length ?? 0) > 0
-        || (sourceScenario.stepClaims?.length ?? 0) > 0
+        || (sourceScenario.observedAssertions ?? []).some((observed) => {
+          const assertedTarget = normalizeSemanticText(extractQuotedText(scenarioStep.action) ?? scenarioStep.action);
+          const observedTarget = normalizeSemanticText(extractQuotedText(observed) ?? observed);
+          return Boolean(assertedTarget && observedTarget && (assertedTarget === observedTarget || assertedTarget.includes(observedTarget)));
+        })
+        || (sourceScenario.stepRequirementRefs ?? []).some((ref) => ref.stepIndex === scenarioStep.index)
+        || (sourceScenario.stepClaims ?? []).some((claim) => claim.stepIndex === scenarioStep.index)
         || observableOracles.some((candidate) => candidate.stepIndex === scenarioStep.index)
       )
     );
@@ -1056,17 +1261,17 @@ export function buildSpecExecutionContract(
       console.log(`[technical-target-materializer] scenarioStepIndex=${scenarioStep.index} source=${normalizedEvidence.source} result=uncertified`);
     }
 
-    // The validated plan already records, via the existing `recorded:<strategy>` marker
-    // (target-resolver.ts's recorded-target consumption path, e.g. field-scoped-fallback),
-    // that this step's physical target was successfully re-resolved live and uniquely during
+    // The validated plan already records, via a resolver-owned strategy marker
+    // (`recorded:<strategy>` or a grid-editor resolver strategy), that this step's physical
+    // target was successfully re-resolved live and uniquely during
     // discovery. But `recorded:*` alone is NOT sufficient evidence of "defer to runtime" --
     // real steps 4 and 7 also carry a `recorded:*` plan marker while already having an
     // authoritative technicalTargetRef AND a non-ambiguous tier-1 certified structural target;
     // for those, `recorded:*` reflects nothing more than how the plan happened to be produced,
     // and must never downgrade already-strong, already-certified authority. Only when NEITHER
     // a technicalTargetRef NOR a non-ambiguous certified structural target already exists does
-    // the `recorded:*` marker mean "physically resolved but still deferred/ambiguous, hand off
-    // to the existing runtime resolver" (real step6's exact case). This never recalculates or
+    // such a resolver marker mean "physically resolved but still deferred/ambiguous, hand off
+    // to the existing runtime resolver". This never recalculates or
     // re-resolves anything: it only transports an already-persisted marker into the SAME
     // resolutionState field an explicit upstream scenarioStep.resolutionState already
     // populates, and never overrides an explicit upstream value or downgrades stronger
@@ -1080,10 +1285,19 @@ export function buildSpecExecutionContract(
     const planTargetStrategy = planStep?.target && typeof planStep.target === "object"
       ? (planStep.target as { strategy?: unknown }).strategy
       : undefined;
+    const runtimeResolvedPlanTargetStrategies = new Set([
+      "grid_cell_editor",
+      "grid_cell_editor_after_activation",
+      "grid_cell_selection_control",
+      "grid_cell_selection_control_after_activation",
+    ]);
+    const wasResolvedByRuntimePlanStrategy = typeof planTargetStrategy === "string"
+      && (planTargetStrategy.startsWith("recorded:") || runtimeResolvedPlanTargetStrategies.has(planTargetStrategy));
     const inferredFromValidatedPlan = !hasAuthoritativeTechnicalTargetRef
       && !certifiedNonAmbiguousStructural
-      && typeof planTargetStrategy === "string"
-      && planTargetStrategy.startsWith("recorded:")
+      && (wasResolvedByRuntimePlanStrategy
+        || planStep?.playwrightRecorderEvidence?.kind === "segmented_input"
+        || scenarioStep.playwrightRecorderEvidence?.runtimeResolutionRequired === true)
       ? "runtime_resolution_required" as const
       : undefined;
     const resolutionState = scenarioStep.resolutionState ?? inferredFromValidatedPlan;
@@ -1103,6 +1317,7 @@ export function buildSpecExecutionContract(
       ...(scenarioStep.entityScope ? { entityScope: scenarioStep.entityScope } : {}),
       ...(scenarioStep.rowRelation ? { rowRelation: scenarioStep.rowRelation } : {}),
       ...(scenarioStep.selectionField ? { selectionField: scenarioStep.selectionField } : {}),
+      ...(selectionActivationField ? { selectionActivationField } : {}),
       ...(scenarioStep.associatedField ? { associatedField: scenarioStep.associatedField } : {}),
       ...(scenarioStep.technicalTargetRef ? { technicalTargetRef: scenarioStep.technicalTargetRef } : {}),
       ...(scenarioStep.technicalTargetRefs ? { technicalTargetRefs: [...scenarioStep.technicalTargetRefs] } : {}),
@@ -1111,7 +1326,9 @@ export function buildSpecExecutionContract(
       ...(operation === "fill" && authGateFillScenarioStepIndices.has(scenarioStep.index) ? { authGateExpected: true } : {}),
       ...(certifiedTechnicalTarget ? { certifiedTechnicalTarget } : {}),
       ...(scenarioStep.semanticRuntimeEvidence ? { semanticRuntimeEvidence: scenarioStep.semanticRuntimeEvidence } : {}),
-      ...(scenarioStep.playwrightRecorderEvidence ? { playwrightRecorderEvidence: scenarioStep.playwrightRecorderEvidence } : {}),
+      ...(scenarioStep.playwrightRecorderEvidence ?? planStep?.playwrightRecorderEvidence
+        ? { playwrightRecorderEvidence: scenarioStep.playwrightRecorderEvidence ?? planStep?.playwrightRecorderEvidence }
+        : {}),
       ...(resolutionState ? { resolutionState } : {}),
       required,
       executionStatus,

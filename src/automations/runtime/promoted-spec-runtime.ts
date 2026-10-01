@@ -74,27 +74,47 @@ export type PromotedExpectedEffect =
  *  (checked/aria-checked/selected/aria-pressed/value) from an already-resolved promoted locator.
  *  Never re-derives the causal comparison itself -- `hasCausalSelectionTransition` (imported) is
  *  the single shared CORE both Discovery and promoted runtime compare against. */
-async function readPromotedInteractiveState(locator: any): Promise<InteractiveState | undefined> {
+async function readPromotedInteractiveState(
+  locator: any,
+  options: { includeRenderedText?: boolean } = {},
+): Promise<InteractiveState | undefined> {
   if (!locator) return undefined;
-  return locator.evaluate((element: any) => ({
-    ...(typeof element.checked === "boolean" ? { checked: element.checked } : {}),
-    ariaChecked: element.getAttribute("aria-checked"),
-    ...(typeof element.selected === "boolean" ? { selected: element.selected } : {}),
-    ariaPressed: element.getAttribute("aria-pressed"),
-    ...(typeof element.value === "string" ? { value: element.value } : {}),
-  })).catch(() => undefined);
+  return locator.evaluate((element: any, includeRenderedText: boolean) => {
+    const ariaSelected = element.getAttribute("aria-selected");
+    const role = element.getAttribute("role")?.toLowerCase();
+    const selectionTrigger = role === "combobox" || element.getAttribute("aria-haspopup") === "listbox";
+    const nativeValue = typeof element.value === "string" ? element.value.trim() : "";
+    const ariaValue = (element.getAttribute("aria-valuetext") ?? "").trim();
+    const renderedValue = (element.innerText || element.textContent || "").trim();
+    const selectionValue = nativeValue || ariaValue || (selectionTrigger || includeRenderedText
+      ? renderedValue
+      : undefined);
+    return {
+      ...(typeof element.checked === "boolean" ? { checked: element.checked } : {}),
+      ariaChecked: element.getAttribute("aria-checked"),
+      ...(typeof element.selected === "boolean"
+        ? { selected: element.selected }
+        : /^(true|false)$/i.test(ariaSelected ?? "") ? { selected: ariaSelected.toLowerCase() === "true" } : {}),
+      ariaPressed: element.getAttribute("aria-pressed"),
+      ...(typeof selectionValue === "string" ? { value: selectionValue } : {}),
+    };
+  }, options.includeRenderedText === true).catch(() => undefined);
 }
 
 type PromotedSelectionStateProbe = {
   locator: any;
   before: InteractiveState | undefined;
   strategy: string;
+  expectedValue?: string;
+  optionAlreadySelected?: boolean;
+  exactTargetLocator?: any;
 };
 
 function selectionRuntimeSnapshot(state: InteractiveState | undefined): string {
   return [
     `checked=${state?.checked ?? "absent"}`,
     `selected=${state?.selected ?? "absent"}`,
+    `valuePresent=${Boolean(state?.value)}`,
     `ariaSelected=not_observed`,
     `ariaChecked=${state?.ariaChecked ?? "absent"}`,
     `dataState=not_observed`,
@@ -102,11 +122,78 @@ function selectionRuntimeSnapshot(state: InteractiveState | undefined): string {
   ].join(" ");
 }
 
+async function applyPromotedNativeSelection(locator: any, selectionValue: string): Promise<boolean> {
+  const match = await locator.evaluate((element: Element, requestedValue: string) => {
+    if (element.tagName.toLowerCase() !== "select") return undefined;
+    const normalize = (value: string) => value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim();
+    const requested = normalize(requestedValue);
+    const matches = Array.from((element as HTMLSelectElement).options)
+      .filter((option) => normalize(option.value) === requested || normalize(option.label) === requested)
+      .map((option) => ({ value: option.value, label: option.label }));
+    return matches.length === 1 ? matches[0] : undefined;
+  }, selectionValue).catch(() => undefined);
+  if (!match) return false;
+  await locator.selectOption(match.value).catch(() => undefined);
+  return locator.evaluate((element: Element, expected: { value: string; label: string }) => {
+    if (element.tagName.toLowerCase() !== "select") return false;
+    const normalize = (value: string) => value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim();
+    const selected = Array.from((element as HTMLSelectElement).selectedOptions);
+    return selected.length === 1
+      && normalize(selected[0].value) === normalize(expected.value)
+      && normalize(selected[0].label) === normalize(expected.label);
+  }, match).catch(() => false);
+}
+
 async function capturePromotedSelectionStateProbe(
   page: Page,
   target: string,
   targetIdentity: PromotedFieldTargetIdentity | undefined,
+  selectionActivationField?: string,
+  exactOptionLocator?: any,
 ): Promise<PromotedSelectionStateProbe | undefined> {
+  const optionRef = targetIdentity?.technicalTargetRefs.find((ref) => /^role:option\|/i.test(ref.trim()));
+  if (optionRef && selectionActivationField?.trim()) {
+    const optionResolution = exactOptionLocator
+      ? { status: "resolved", locator: exactOptionLocator }
+      : await resolveActionTarget(
+        page,
+        await scanCurrentPage(page),
+        target,
+        {
+          actionType: "action_click",
+          recordingActionType: "click",
+          recordedTechnicalTargetRefs: targetIdentity.technicalTargetRefs,
+          associatedField: selectionActivationField,
+        },
+      ).catch(() => undefined);
+    const ownerResolution = await resolveActionTarget(
+      page,
+      await scanCurrentPage(page),
+      selectionActivationField,
+      {
+        actionType: "action_click",
+        recordingActionType: "click",
+        associatedField: selectionActivationField,
+      },
+    ).catch(() => undefined);
+    if (optionResolution?.status === "resolved" && optionResolution.locator
+      && ownerResolution?.status === "resolved" && ownerResolution.locator) {
+      const optionBefore = await readPromotedInteractiveState(optionResolution.locator);
+      const ownerBefore = await readPromotedInteractiveState(ownerResolution.locator, { includeRenderedText: true });
+      console.log(
+        `[selection-runtime] phase=before_dispatch probeAvailable=true strategy=recorded-selection-owner ` +
+        `optionSelected=${optionBefore?.selected ?? "absent"} ownerValuePresent=${Boolean(ownerBefore?.value)}`,
+      );
+      return {
+        locator: ownerResolution.locator,
+        before: ownerBefore,
+        strategy: `recorded-selection-owner:${ownerResolution.locatorStrategy ?? "shared-resolver"}`,
+        expectedValue: semanticNameFromRef(optionRef),
+        optionAlreadySelected: optionBefore?.selected === true,
+        exactTargetLocator: optionResolution.locator,
+      };
+    }
+  }
   const technicalProbeCandidates = await Promise.all(
     (targetIdentity?.technicalTargetRefs ?? [])
       .map(parseSerializedTechnicalTargetString)
@@ -404,6 +491,9 @@ export type PromotedActionOptions = {
   target: string;
   actionIntent: string;
   expectedEffect?: PromotedExpectedEffect;
+  selectionValue?: string;
+  selectionField?: string;
+  associatedField?: string;
   sensitive?: boolean;
   routeProfile?: AppRouteProfile;
   action: () => Promise<void>;
@@ -1955,6 +2045,8 @@ export type PromotedClickOptions = PromotedActionOptions & {
    * tryFieldScopedStructuralFallback) Discovery's own live walk already used for this step.
    */
   associatedField?: string;
+  /** Recorded trigger field for a transient option; used only to prove owner→option causality. */
+  selectionActivationField?: string;
   /**
    * LAST-RESORT, EXECUTION-ONLY authority (see `SemanticRuntimeEvidence`'s own doc). Set only for
    * `runtime_resolution_required` clicks whose owner/structural/related-control evidence all
@@ -2529,13 +2621,15 @@ export class PromotedSpecRuntime {
         console.log("[evidence] disabled reason=config_disabled");
         return;
       }
+      const evidenceScenarioId = stringFromEnv("EVIDENCE_SCENARIO_ID", "SCENARIO_ID") ?? "unknown";
+      const evidenceScenarioTitle = stringFromEnv("EVIDENCE_SCENARIO_TITLE", "SCENARIO_TITLE") ?? "unknown";
       this.evidenceRecorder = new EvidenceRecorder(
         {
           appSlug: stringFromEnv("EVIDENCE_APP_SLUG", "APP_SLUG") ?? "default",
           sectionSlug: stringFromEnv("EVIDENCE_SECTION_SLUG", "SECTION_SLUG") ?? "default-section",
           sectionName: process.env.SECTION_NAME,
-          scenarioId: stringFromEnv("SCENARIO_ID") ?? "unknown",
-          scenarioTitle: stringFromEnv("SCENARIO_TITLE") ?? "unknown",
+          scenarioId: evidenceScenarioId,
+          scenarioTitle: evidenceScenarioTitle,
           runId: process.env.EVIDENCE_RUN_ID,
           outputRoot: cfg.outputRoot,
           analystName: cfg.analystName || process.env.EVIDENCE_ANALYST_NAME,
@@ -2545,7 +2639,7 @@ export class PromotedSpecRuntime {
       await this.evidenceRecorder.start();
       this.evidenceInitState = "initialized";
       this.evidenceInitReason = undefined;
-      console.log(`[evidence] initialized scenario=${process.env.SCENARIO_ID || "unknown"}`);
+      console.log(`[evidence] initialized scenario=${evidenceScenarioId}`);
     } catch (err: any) {
       this.evidenceInitState = "failed";
       this.evidenceInitReason = err?.message ?? "unknown_error";
@@ -2987,24 +3081,96 @@ export class PromotedSpecRuntime {
       ? await capturePromotedActionSurfaceSnapshot(this.page, options.target).catch(() => undefined)
       : undefined;
 
-    const resolution = await resolveRecordedStructuralOwner(this.page, options.structuralTarget);
-    if (!resolution) {
+    let structuralFailureReason: string | undefined;
+    let structuralFailureMatchCount: number | undefined;
+    const resolution = await resolveRecordedStructuralOwner(this.page, options.structuralTarget, (reason, details) => {
+      structuralFailureReason = reason;
+      structuralFailureMatchCount = details?.matchCount;
+    });
+    // A captured option can carry an ephemeral scope ID even though its exact role/name ref and
+    // recorded trigger field remain valid. Resolve the recorded owner→option lineage through the
+    // shared resolver even when the structural certificate also resolves: the structural locator
+    // can identify the option without giving the post-action verifier the owner whose value must
+    // change. The shared resolver proves a unique live owner, exact visible option, same
+    // app/surface, and owner→option sequence. All other certified structural targets remain
+    // fail-closed here.
+    const recordedOptionRef = options.technicalTargetRefs?.some((ref) => /^role:option\|/i.test(ref.trim())) === true;
+    const causalOptionResolution = recordedOptionRef && options.selectionActivationField
+      ? await resolveActionTarget(
+        this.page,
+        await scanCurrentPage(this.page),
+        options.target,
+        {
+          actionType: "action_click",
+          recordingActionType: "click",
+          recordedTechnicalTargetRefs: options.technicalTargetRefs,
+          associatedField: options.selectionActivationField,
+        },
+      ).catch(() => undefined)
+      : undefined;
+    const resolvedLocator = (causalOptionResolution?.status === "resolved" ? causalOptionResolution.locator : undefined)
+      ?? resolution?.locator;
+    const resolvedStrategy = (causalOptionResolution?.status === "resolved" ? causalOptionResolution.locatorStrategy : undefined)
+      ?? resolution?.strategy;
+    if (!resolvedLocator) {
       throw new Error(
         `Promoted click failed at step ${options.stepIndex} target="${options.target}". ` +
         `reason=structural_authority_not_unique_or_unresolved ` +
+        `structuralFailureReason=${structuralFailureReason ?? "unknown"} ` +
+        `structuralFailureMatchCount=${structuralFailureMatchCount ?? "n/a"} ` +
         `suggestedFix="Certified structural authority did not resolve to exactly one visible, enabled element -- never falls back to a weaker locator, text match, or position."`
       );
     }
     console.log(
-      `[promoted-click-structural] stepIndex=${options.stepIndex} strategy=${resolution.strategy} ` +
-      `matchCount=${resolution.currentMatchCount}`
+      `[promoted-click-structural] stepIndex=${options.stepIndex} strategy=${resolvedStrategy ?? "recorded:structural-owner"} ` +
+      `matchCount=${resolution?.currentMatchCount ?? 1} causalOptionFallback=${Boolean(causalOptionResolution?.status === "resolved")}`
     );
     const selectionStateProbe = resolvedExpectedEffect === "selection_state_change"
-      ? { locator: resolution.locator, before: await readPromotedInteractiveState(resolution.locator), strategy: resolution.strategy }
+      ? await capturePromotedSelectionStateProbe(
+        this.page,
+        options.target,
+        targetIdentity,
+        options.selectionActivationField,
+        causalOptionResolution?.status === "resolved" ? resolvedLocator : undefined,
+      )
       : undefined;
-    await resolution.locator.click();
-    await this.postActionStability(previousUrl, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe);
+    await resolvedLocator.click();
+    await this.postActionStabilityWithRecordedOptionRetry(previousUrl, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe, options.selectionActivationField);
     if (expectedEffect !== "none") await this.refreshActiveContainer();
+  }
+
+  private async postActionStabilityWithRecordedOptionRetry(
+    previousUrl: string,
+    expectedEffect: PromotedExpectedEffect,
+    targetIdentity: PromotedFieldTargetIdentity | undefined,
+    beforeActionSnapshot: PromotedActionSurfaceSnapshot | undefined,
+    target: string,
+    selectionStateProbe: PromotedSelectionStateProbe | undefined,
+    selectionActivationField?: string,
+  ): Promise<void> {
+    try {
+      await this.postActionStability(previousUrl, expectedEffect, targetIdentity, beforeActionSnapshot, target, selectionStateProbe);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      const recordedOption = targetIdentity?.technicalTargetRefs.some((ref) => /^role:option\|/i.test(ref.trim())) === true;
+      const exactOption = selectionStateProbe?.exactTargetLocator;
+      if (expectedEffect !== "selection_state_change"
+        || !recordedOption
+        || !selectionActivationField?.trim()
+        || !selectionStateProbe?.strategy.startsWith("recorded-selection-owner:")
+        || !exactOption
+        || !message.includes("reason=no_observable_post_action_outcome")
+        || await exactOption.count().catch(() => 0) !== 1
+        || !await exactOption.isVisible().catch(() => false)) {
+        throw error;
+      }
+      // Some accessible custom listboxes focus an option on pointer click but commit the
+      // selection only on its semantic keyboard activation. Retry Enter on that same exact,
+      // uniquely resolved recorded option while its recorded owner remains the active context.
+      console.log("[runtime:post-action] expectedEffect=selection_state_change signal=recorded_option_keyboard_activation_retry");
+      await exactOption.press("Enter", { timeout: this.config.actionTimeoutMs });
+      await this.postActionStability(previousUrl, expectedEffect, targetIdentity, beforeActionSnapshot, target, selectionStateProbe);
+    }
   }
 
   async clickPromotedTarget(options: PromotedClickOptions): Promise<void> {
@@ -3270,8 +3436,8 @@ export class PromotedSpecRuntime {
       }
     }
 
-    const selectionStateProbe = resolvedExpectedEffect === "selection_state_change"
-      ? await capturePromotedSelectionStateProbe(this.page, options.target, targetIdentity)
+  let selectionStateProbe = resolvedExpectedEffect === "selection_state_change"
+      ? await capturePromotedSelectionStateProbe(this.page, options.target, targetIdentity, options.selectionActivationField)
       : undefined;
 
     // Step 1: Try native runtime click with resolved locator. A selection
@@ -3391,7 +3557,7 @@ export class PromotedSpecRuntime {
       // didn't resolve. Never certifies/upgrades resolutionState -- a plain retry hint.
       const associatedFieldResolution = !recordedStructuralResolution?.locator
         && !structuredCheckboxResolution?.locator
-        && options.associatedField
+        && (options.associatedField || options.selectionActivationField)
         ? await resolveActionTarget(
           this.page,
           await scanCurrentPage(this.page),
@@ -3399,7 +3565,8 @@ export class PromotedSpecRuntime {
           {
             actionType: "action_click",
             recordingActionType: "click",
-            associatedField: options.associatedField,
+            associatedField: options.selectionActivationField ?? options.associatedField,
+            recordedTechnicalTargetRefs: options.technicalTargetRefs,
           },
         ).catch(() => undefined)
         : undefined;
@@ -3516,7 +3683,7 @@ export class PromotedSpecRuntime {
         fallbackUsed = resolved.scope === "container" ? "active_container" : "page";
         
         // Handle expected effects
-        await this.postActionStability(previousUrl, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe);
+        await this.postActionStabilityWithRecordedOptionRetry(previousUrl, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe, options.selectionActivationField);
         
         // Refresh active container if modal/form/dialog expected
         if (expectedEffect === "modal_or_form_or_navigation" || expectedEffect === "ui_change") {
@@ -3544,7 +3711,7 @@ export class PromotedSpecRuntime {
             clickPath = "native_runtime";
             fallbackUsed = resolved.scope === "container" ? "active_container" : "page";
             matchedLocatorStrategy = `${resolved.strategy}:safe_force_click`;
-            await this.postActionStability(previousUrl, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe);
+            await this.postActionStabilityWithRecordedOptionRetry(previousUrl, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe, options.selectionActivationField);
             if (expectedEffect === "modal_or_form_or_navigation" || expectedEffect === "ui_change") {
               await this.refreshActiveContainer();
             }
@@ -3566,7 +3733,7 @@ export class PromotedSpecRuntime {
       callbackAttempted = true;
       try {
         if (resolvedExpectedEffect === "selection_state_change") {
-          console.log(`[selection-runtime] phase=before_callback snapshot="${selectionRuntimeSnapshot(selectionStateProbe ? await readPromotedInteractiveState(selectionStateProbe.locator) : undefined)}"`);
+          console.log(`[selection-runtime] phase=before_callback snapshot="${selectionRuntimeSnapshot(selectionStateProbe ? await readPromotedInteractiveState(selectionStateProbe.locator, { includeRenderedText: selectionStateProbe.strategy.startsWith("recorded-selection-owner:") }) : undefined)}"`);
         }
         await withTimeout(options.action(), this.config.actionTimeoutMs, "click callback");
         clickPath = "pom_callback";
@@ -3574,7 +3741,7 @@ export class PromotedSpecRuntime {
         matchedLocatorStrategy = matchedLocatorStrategy === "unknown" ? "callback" : matchedLocatorStrategy;
         
         // Handle expected effects
-        await this.postActionStability(previousUrl, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe);
+        await this.postActionStabilityWithRecordedOptionRetry(previousUrl, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe, options.selectionActivationField);
         if (expectedEffect !== "none") await this.refreshActiveContainer();
         callbackSucceeded = true;
         effectDetected = true;
@@ -3587,11 +3754,11 @@ export class PromotedSpecRuntime {
           retryAttempted = true;
           try {
             if (resolvedExpectedEffect === "selection_state_change") {
-              console.log(`[selection-runtime] phase=before_retry snapshot="${selectionRuntimeSnapshot(selectionStateProbe ? await readPromotedInteractiveState(selectionStateProbe.locator) : undefined)}"`);
+              console.log(`[selection-runtime] phase=before_retry snapshot="${selectionRuntimeSnapshot(selectionStateProbe ? await readPromotedInteractiveState(selectionStateProbe.locator, { includeRenderedText: selectionStateProbe.strategy.startsWith("recorded-selection-owner:") }) : undefined)}"`);
             }
             await withTimeout(options.action(), this.config.actionTimeoutMs, "click retry");
             clickPath = "pom_callback";
-            await this.postActionStability(previousUrl, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe);
+            await this.postActionStabilityWithRecordedOptionRetry(previousUrl, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe, options.selectionActivationField);
             if (expectedEffect !== "none") await this.refreshActiveContainer();
             callbackSucceeded = true;
             effectDetected = true;
@@ -3782,6 +3949,20 @@ export class PromotedSpecRuntime {
         { actionType: "action_fill", recordingActionType: "fill", playwrightRecorderEvidence: options.playwrightRecorderEvidence },
       ).catch(() => undefined)
       : undefined;
+    // A recorded fill can target an editable cell in a dynamic table even when its capture
+    // omitted a usable technical ref. Reuse Discovery's shared header/row/cell resolver only
+    // after direct recorder evidence, field matching, and technical identity are unavailable.
+    // It requires a unique matching header and row; ambiguous tables/rows remain unresolved.
+    const unboundGridFieldResolution = !recorderRuntimeResolution
+      && !(refresh.best && refresh.best.matchingFieldFound)
+      && targetIdentity.technicalTargetRefs.length === 0
+      ? await resolveActionTarget(
+        this.page,
+        await scanCurrentPage(this.page),
+        resolvedField,
+        { actionType: "action_fill", recordingActionType: "fill" },
+      ).catch(() => undefined)
+      : undefined;
     
     // New diagnostics for native fill tracking
     let fillPath: PromotedRuntimeDiagnostics["fillPath"] = "failed";
@@ -3799,7 +3980,10 @@ export class PromotedSpecRuntime {
     let matchedLocatorStrategy = "unknown";
 
     // Step 1: Try native runtime fill with resolved locator
-    if (recorderRuntimeResolution?.status === "resolved" || (refresh.best && refresh.best.matchingFieldFound) || targetIdentity.technicalTargetRefs.length > 0) {
+    if (recorderRuntimeResolution?.status === "resolved"
+      || unboundGridFieldResolution?.status === "resolved"
+      || (refresh.best && refresh.best.matchingFieldFound)
+      || targetIdentity.technicalTargetRefs.length > 0) {
       nativeFillAttempted = true;
       const containerSelector = refresh.best?.selector;
       
@@ -3825,6 +4009,15 @@ export class PromotedSpecRuntime {
             ? {
               locator: recorderRuntimeResolution.locator,
               strategy: recorderRuntimeResolution.locatorStrategy ?? "recorded:playwright-recorder",
+              scope: "page" as const,
+              visible: true,
+              enabled: true,
+              editable: true,
+            }
+            : unboundGridFieldResolution?.status === "resolved" && unboundGridFieldResolution.locator
+            ? {
+              locator: unboundGridFieldResolution.locator,
+              strategy: unboundGridFieldResolution.locatorStrategy ?? "grid_cell_editor",
               scope: "page" as const,
               visible: true,
               enabled: true,
@@ -4047,9 +4240,24 @@ export class PromotedSpecRuntime {
       }
     }
     for (let index = 0; index < segments.length; index += 1) {
-      await segments[index].fill(options.value[index]);
+      const segment = segments[index];
+      const expectedCharacter = options.value[index];
+      // OTP widgets often keep their real form state in key handlers. A direct fill can
+      // change the visible input value without committing the digit to that state, leaving
+      // Continue enabled but submitting an empty token. Replay the user's per-box typing
+      // interaction, then verify the character is present before moving on.
+      await segment.click();
+      await segment.press("ControlOrMeta+A").catch(() => undefined);
+      await segment.pressSequentially(expectedCharacter);
+      const actualCharacter = await segment.evaluate((element) => {
+        if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) return element.value;
+        return element.isContentEditable ? element.textContent ?? "" : "";
+      }).catch(() => "");
+      if (actualCharacter !== expectedCharacter) {
+        throw new Error(`segmented_input_value_not_committed: stepIndex=${options.stepIndex} segmentIndex=${index}`);
+      }
     }
-    console.log(`[promoted-segmented-input] stepIndex=${options.stepIndex} segmentCount=${segmentCount} valueKey=${options.valueKey ?? "none"}`);
+    console.log(`[promoted-segmented-input] stepIndex=${options.stepIndex} segmentCount=${segmentCount} inputReadback=verified valueKey=${options.valueKey ?? "none"}`);
   }
 
   /**
@@ -4214,9 +4422,55 @@ export class PromotedSpecRuntime {
       valueKey: options.valueKey,
       technicalTargetRefs: options.technicalTargetRefs,
     });
-    const runtimeValue = resolvePromotedRuntimeValue(targetIdentity?.valueKey ?? options.valueKey);
+    const runtimeValue = options.selectionValue?.trim()
+      || resolvePromotedRuntimeValue(targetIdentity?.valueKey ?? options.valueKey);
     const targetRefs = targetIdentity?.technicalTargetRefs ?? [];
     const parsedTargetRefs = parseTechnicalTargetRefs(targetRefs);
+    const selectionField = options.selectionField?.trim()
+      || semanticNameFromRef(parsedTargetRefs.headerRef)
+      || semanticNameFromRef(parsedTargetRefs.cellRef)
+      || options.associatedField?.trim()
+      || "";
+    if (runtimeValue && selectionField && (options.associatedField || options.selectionField)) {
+      const previousUrl = this.page.url();
+      const structuredResolution = await resolveActionTarget(
+        this.page,
+        await scanCurrentPage(this.page),
+        options.target,
+        {
+          actionType: "action_select",
+          recordingActionType: "select",
+          selectionField,
+          selectionValue: runtimeValue,
+          rowScope: rowScopeFromPromotedRef(parsedTargetRefs.rowRef),
+          rowRef: parsedTargetRefs.rowRef,
+          entityScope: targetIdentity?.entityScope,
+          associatedField: options.associatedField?.trim() || selectionField,
+        },
+      ).catch(() => undefined);
+      const nativeSelectionApplied = structuredResolution?.status === "resolved" && structuredResolution.locator
+        ? await applyPromotedNativeSelection(structuredResolution.locator, runtimeValue)
+        : false;
+      if (structuredResolution?.status === "resolved"
+        && (structuredResolution.selectionApplied || nativeSelectionApplied)) {
+        await this.postActionStability(previousUrl, "none");
+        console.log(
+          `[runtime:selection-resolution] step=${options.stepIndex} target="${options.target}" `
+          + `valueKey="${targetIdentity?.valueKey ?? options.valueKey ?? "none"}" `
+          + `fieldContextPresent=true selectionApplied=${Boolean(structuredResolution.selectionApplied)} `
+          + `nativeSelectionApplied=${nativeSelectionApplied} optionStrategy="${structuredResolution.locatorStrategy ?? "shared_selection_field_resolver"}" `
+          + `callbackSuppressed=true`,
+        );
+        await this.captureClickStep(options.target, "passed", undefined, options.stepIndex);
+        return;
+      }
+      console.log(
+        `[runtime:selection-resolution] phase=field-context status=${structuredResolution?.status ?? "unresolved"} `
+        + `selectionApplied=${Boolean(structuredResolution?.selectionApplied)} `
+        + `nativeSelectionApplied=${nativeSelectionApplied} locatorPresent=${Boolean(structuredResolution?.locator)} `
+        + `fieldContextPresent=true`,
+      );
+    }
     if (
       targetIdentity
       && runtimeValue
@@ -4253,9 +4507,7 @@ export class PromotedSpecRuntime {
         // Reuse the canonical structured resolver for keyboard/typeahead
         // selections whose option surface is not present in the DOM. The
         // generated callback remains out of authority for this path.
-        const selectionField = semanticNameFromRef(parsedTargetRefs.headerRef)
-          ?? semanticNameFromRef(parsedTargetRefs.cellRef)
-          ?? options.target;
+        const effectiveSelectionField = selectionField || options.target;
         const structuredResolution = await resolveActionTarget(
           this.page,
           await scanCurrentPage(this.page),
@@ -4263,12 +4515,12 @@ export class PromotedSpecRuntime {
           {
             actionType: "action_select",
             recordingActionType: "select",
-            selectionField,
+            selectionField: effectiveSelectionField,
             selectionValue: runtimeValue,
             rowScope: rowScopeFromPromotedRef(parsedTargetRefs.rowRef),
             rowRef: parsedTargetRefs.rowRef,
             entityScope: targetIdentity.entityScope,
-            associatedField: selectionField,
+            associatedField: options.associatedField?.trim() || effectiveSelectionField,
           },
         ).catch(() => undefined);
         if (structuredResolution?.status === "resolved" && structuredResolution.selectionApplied) {
@@ -4486,7 +4738,33 @@ export class PromotedSpecRuntime {
     let selectionObservationLogged = false;
     while (Date.now() - startedAt < this.config.stabilityTimeoutMs) {
       if (expectedEffect === "selection_state_change") {
-        const selectionAfter = selectionProbe ? await readPromotedInteractiveState(selectionProbe.locator) : undefined;
+        const selectionAfter = selectionProbe
+          ? await readPromotedInteractiveState(selectionProbe.locator, {
+              includeRenderedText: selectionProbe.strategy.startsWith("recorded-selection-owner:"),
+            })
+          : undefined;
+        const expectedSelectionValue = normalizeSemanticText(selectionProbe?.expectedValue ?? "");
+        const observedSelectionValue = normalizeSemanticText(selectionAfter?.value ?? "");
+        const exactOptionNoLongerVisible = expectedSelectionValue
+          && selectionProbe?.exactTargetLocator
+          && this.page.url() === previousUrl
+          && !await selectionProbe.exactTargetLocator.isVisible().catch(() => false);
+        if (exactOptionNoLongerVisible) {
+          console.log("[runtime:post-action] expectedEffect=selection_state_change signal=recorded_option_surface_closed");
+          return;
+        }
+        if (expectedSelectionValue && selectionProbe?.optionAlreadySelected === true) {
+          console.log("[runtime:post-action] expectedEffect=selection_state_change signal=recorded_option_already_selected");
+          return;
+        }
+        if (expectedSelectionValue && (
+          observedSelectionValue.includes(expectedSelectionValue)
+          || (selectionAfter?.selected === true && selectionProbe?.strategy !== undefined
+            && !selectionProbe.strategy.startsWith("recorded-selection-owner:"))
+        )) {
+          console.log("[runtime:post-action] expectedEffect=selection_state_change signal=recorded_option_value_satisfied");
+          return;
+        }
         const transitionDetected = hasCausalSelectionTransition(selectionBefore, selectionAfter);
         if (!selectionObservationLogged) {
           selectionObservationLogged = true;

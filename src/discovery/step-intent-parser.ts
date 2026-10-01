@@ -55,6 +55,8 @@ export type ParsedStepIntent = {
   expectedValueKey?: string;
   associatedEntity?: string;
   selectionField?: string;
+  /** Recorded editable field that materializes a selection owner when the owner is inside a lazy grid editor. */
+  selectionActivationField?: string;
   semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "first_visible_item" | "unknown";
   relationContext?: string;
   canonicalAssertion?: CanonicalAssertion;
@@ -87,8 +89,11 @@ export type ActionTargetItem = {
   expectedValueKey?: string;
   associatedEntity?: string;
   selectionField?: string;
+  /** Recorded editable field that materializes a selection owner inside a lazy grid editor. */
+  selectionActivationField?: string;
   actionType?: StepIntentType;
   recordingActionType?: "fill" | "select" | "click" | "check" | "uncheck" | "press" | "navigation" | "system_observation";
+  technicalTargetRef?: string;
   /** The discrete command key a `"press"` action sends (e.g. "Enter"). Absent for every other action type. */
   key?: string;
   semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "first_visible_item" | "unknown";
@@ -113,6 +118,8 @@ export type ActionTargetItem = {
    *  route-family authority lookups -- distinct from the `controlIdentity` field above, which is
    *  an unrelated runtime DOM fingerprint used for live target matching. */
   recordedControlIdentity?: string;
+  /** The recorded label is dynamic data; only its current semantic option meaning may be reused. */
+  dynamicTargetLabel?: boolean;
   /**
    * Structured SOURCE-INTERACTION lineage (e.g. `RecordingExecutionAction.interactionId`). Lets the
    * scenario normalizer distinguish two independent actions on the same control from two pipeline
@@ -697,6 +704,13 @@ function tryParsePreconditionContext(text: string, normalized: string): ParsedSt
 }
 
 function tryParseNavigationPath(text: string, normalized: string): ParsedStepIntent | null {
+  // A slash is common inside recorded control labels (for example, a field label plus its
+  // account context). An explicit action verb owns the step: keep `/` inside the target instead
+  // of reclassifying the click as a navigation path and silently omitting it from execution.
+  if (/^(?:hacer\s+clic\s+en|clic\s+en|click\s+en|click|presionar|tocar|seleccionar|escoger|elegir)\b/i.test(text)) {
+    return null;
+  }
+
   const navVerbs = [
     "abrir", "ir a", "navegar a", "navegar hacia",
     "acceder a", "ingresar a", "dirigirse a", "entrar a"
@@ -995,6 +1009,44 @@ function tryParseSelectAction(text: string, normalized: string): ParsedStepInten
     };
   }
 
+  const literalSelectionInField = afterVerb.match(
+    /^(?:["']([^"']+)["'])\s+en\s+(?:(?:el\s+)?campo\s+)?["']([^"']+)["']\.?$/i
+  );
+  if (literalSelectionInField) {
+    const selectionField = cleanActionTarget(literalSelectionInField[2]).replace(/^de\s+/i, "");
+    return {
+      type: "action_select",
+      originalText: text,
+      normalizedText: normalized,
+      actionTarget: selectionField,
+      selectionField,
+      value: literalSelectionInField[1].trim(),
+      valueSource: "unknown",
+      actionVerb: verbMatch[0].trim().toLowerCase(),
+      priority: 5
+    };
+  }
+
+  const bracketedRuntimeSelectionInField = afterVerb.match(
+    /^\[([^\]\r\n]+)\]\s+en\s+(?:(?:el\s+)?campo\s+)?(?:["']([^"']+)["']|([^\.\r\n]+?))\.?$/i
+  );
+  if (bracketedRuntimeSelectionInField) {
+    const selectionField = cleanActionTarget(
+      bracketedRuntimeSelectionInField[2] ?? bracketedRuntimeSelectionInField[3] ?? ""
+    ).replace(/^de\s+/i, "");
+    return {
+      type: "action_select",
+      originalText: text,
+      normalizedText: normalized,
+      actionTarget: selectionField,
+      ...(selectionField ? { selectionField } : {}),
+      valueKey: bracketedRuntimeSelectionInField[1].trim(),
+      valueSource: "test_data",
+      actionVerb: verbMatch[0].trim().toLowerCase(),
+      priority: 5
+    };
+  }
+
   // Preserve the field relationship for option selections. Many applications
   // render the option only after opening the field control (for example, a
   // table cell or a combobox), so resolving the option text alone is unsafe.
@@ -1224,8 +1276,23 @@ function tryParseFillAction(text: string, normalized: string): ParsedStepIntent 
   }
 
   const bracketDataToField = text.match(
-    /^(?:ingresar|digitar|escribir|completar|llenar|type|enter|fill)\s+(?:(?:el\s+)?valor(?:\s+secreto)?\s+)?\[([^\]\r\n]+)\]\s+en\s+(?:el\s+)?campo\s+(?:["']([^"']+)["']|([^\.\r\n]+?))\.?$/i
+    /^(?:ingresar|digitar|escribir|completar|llenar|type|enter|fill)\s+(?:(?:el\s+)?valor(?:\s+secreto)?\s+)?\[([^\]\r\n]+)\]\s+en\s+(?:(?:el\s+)?campo\s+)?(?:["']([^"']+)["']|([^\.\r\n]+?))\.?$/i
   );
+  const literalDataToField = text.match(
+    /^(?:ingresar|digitar|escribir|completar|llenar|type|enter|fill)\s+["']([^"']+)["']\s+en\s+(?:(?:el\s+)?campo\s+)?["']([^"']+)["']\.?$/i
+  );
+  if (literalDataToField) {
+    return {
+      type: "action_fill",
+      originalText: text,
+      normalizedText: normalized,
+      actionTarget: cleanActionTarget(literalDataToField[2]).replace(/^de\s+/i, ""),
+      actionVerb: verb,
+      value: literalDataToField[1].trim(),
+      valueSource: "unknown",
+      priority: 5,
+    };
+  }
   if (bracketDataToField) {
     return {
       type: "action_fill",

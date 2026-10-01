@@ -1,4 +1,5 @@
-import { withConnection, type odbc } from "./sql-connection";
+import { withConnection } from "./sql-connection";
+import type { DbConnection } from "./db-connection";
 import {
   normalizeLegacyGenerationConfig,
   toCanonicalProjectGenerationConfig,
@@ -6,7 +7,7 @@ import {
   type ProjectGenerationConfig,
 } from "../data/project-generation-config";
 
-type ConnectionLike = Pick<odbc.Connection, "query">;
+type ConnectionLike = Pick<DbConnection, "query">;
 type Dependencies = {
   withConnection?: <T>(fn: (connection: ConnectionLike) => Promise<T>) => Promise<T>;
   logger?: (message: string) => void;

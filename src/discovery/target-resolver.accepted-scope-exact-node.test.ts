@@ -28,7 +28,17 @@ class FakeLocator {
   async count(): Promise<number> { return this.countValue; }
   async isVisible(): Promise<boolean> { return this.countValue === 1; }
   async isEnabled(): Promise<boolean> { return true; }
-  async evaluate(): Promise<boolean> { this.evaluateCalls += 1; return this.opts.eligible ?? true; }
+  async evaluate(): Promise<boolean | string> {
+    this.evaluateCalls += 1;
+    // FIRST_LOSS fix regression fixture gap: `tryFieldScopedStructuralFallback` now issues a
+    // SECOND `evaluate()` call on this same node -- the final identity-text gate
+    // (`elementTextMatchesAssociatedField`) -- after the first (CORE eligibility) call. Real
+    // `innerText`/`textContent` would carry the associated field's own text; the 1st call must
+    // stay the eligibility boolean so `disconnectedOrHiddenRejected` (which asserts on it) is
+    // unaffected.
+    if (this.evaluateCalls > 1) return ASSOCIATED_FIELD;
+    return this.opts.eligible ?? true;
+  }
 }
 
 class FakePage {
@@ -153,10 +163,20 @@ test("releaseAcceptedScopeMarkerCleans. the exported release helper removes the 
 
 test("clickResolvedTargetDoesNotClean. the click helper never releases the marker, so it survives the force retry", async () => {
   const { clickResolvedTarget } = await import("./target-resolver");
-  const locator = { click: async () => undefined } as any;
+  const calls: string[] = [];
+  const locator = {
+    boundingBox: async () => ({ x: 0, y: 0, width: 100, height: 40 }),
+    hover: async (options?: { position?: { x: number; y: number } }) => {
+      calls.push(`hover:${options?.position?.x ?? "center"}`);
+    },
+    click: async (options?: { force?: boolean; noWaitAfter?: boolean }) => {
+      calls.push(`${options?.force ? "force-click" : "click"}:noWaitAfter=${options?.noWaitAfter === true}`);
+    },
+  } as any;
   await clickResolvedTarget(locator, false);
   await clickResolvedTarget(locator, true);
-  assert.equal(true, true, "clickResolvedTarget has no marker side effect (cleanup is the caller's finally)");
+  assert.deepEqual(calls, ["hover:25", "hover:75", "click:noWaitAfter=true", "force-click:noWaitAfter=true"],
+    "a normal click emits target-relative pointer movement first, then returns control to Discovery's post-click probes");
 });
 
 test("extractorMarksAcceptedScope. extractFieldScopedDomEvidence marks the exact accepted scope node and transports the marker", async () => {

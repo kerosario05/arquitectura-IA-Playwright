@@ -76,6 +76,36 @@ test("1/contract+actionTarget. a press RecordingExecutionAction's technicalTarge
   assert.deepEqual(pressStep!.technicalTargetRefs, ["role:textbox|Contraseña"]);
 });
 
+test("dynamic display text does not replace a deterministic structural click target", () => {
+  const displayName = "User One user.one@example.test";
+  const step = `Presionar \"${displayName}\"`;
+  const scenario = scenarioWithRecordingActions([{
+    actionType: "click",
+    humanStep: step,
+    targetRef: `surface|${displayName}`,
+    technicalTargetCandidates: [{
+      targetType: "structural",
+      locatorCandidates: [],
+      structuralContext: {
+        owner: { tag: "div" },
+        stableDirectAttributes: { id: "profile-dropdown" },
+        stableDescendants: [{ relation: "descendant", tag: "div", stableAttributes: { id: "customer-name" } }],
+        deterministicStructuralIdentity: true,
+        identityAmbiguous: false,
+      },
+    }],
+    stepIndex: 1,
+  }]);
+  scenario.steps = [{ index: 1, action: step, dataHints: [] }] as any;
+
+  const parsed = parseScenarioStepsForDiscovery(scenario);
+  const click = parsed.actionTargets.find((item) => item.actionType === "action_click");
+  assert.ok(click, "recorded click remains in the executable sequence");
+  assert.equal(click!.target, "recorded control");
+  assert.equal(click!.technicalTargetRefs, undefined);
+  assert.equal((click!.technicalTargetCandidates as any)?.[0]?.structuralContext?.stableDirectAttributes?.id, "profile-dropdown");
+});
+
 test("3/sameOwner. fill and press sharing the same recorded technical identity both carry it unchanged, never re-derived from display text", () => {
   const sharedRef = "role:textbox|Campo Compartido";
   const parsed = parseScenarioStepsForDiscovery(scenarioWithRecordingActions([

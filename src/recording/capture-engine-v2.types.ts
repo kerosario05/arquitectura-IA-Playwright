@@ -179,6 +179,8 @@ export type CaptureValueState = {
   present: boolean;
   changed?: boolean;
   literal?: string;
+  /** Logical text reconstructed from trusted beforeinput/input events, separate from a mask/display value. */
+  rawTypedValue?: string;
 };
 
 export type CaptureSourceRefs = {

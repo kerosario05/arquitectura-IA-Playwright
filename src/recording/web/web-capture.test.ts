@@ -91,6 +91,41 @@ describe("buildWebLocators", () => {
     assert.strictEqual(locators[0].confidence, 0.9);
     assert.ok(locators.every((l) => l.ambiguous === undefined));
   });
+
+  // Nameless framework-actionable owner (e.g. a clickable div with no id/testid/role/text of
+  // its own) previously left `locators` empty even when the browser already proved a unique
+  // scope identity for it -- the exact gap physically observed on a real product-card click.
+  test("reuses the capture-proven scope identity when no direct locator exists", () => {
+    const locators = buildWebLocators({
+      kind: "click",
+      label: "control",
+      playwrightRecorderEvidence: {
+        kind: "text",
+        normalizedName: "Tarjeta Crédito Visa Clásica",
+        runtimeResolutionRequired: true,
+        scopeIdentity: { strategy: "css", value: "div:has(img)" },
+        captureMatchCount: 1,
+      },
+    } as never);
+    assert.deepStrictEqual(locators, [{ strategy: "css", value: "div:has(img)", confidence: 0.55 }]);
+  });
+
+  test("never overrides a direct locator with the scope-identity fallback", () => {
+    const locators = buildWebLocators({
+      kind: "click",
+      label: "Continuar",
+      testId: "continue-btn",
+      ranks: { testId: { count: 1, index: 0 } },
+      playwrightRecorderEvidence: {
+        kind: "text",
+        normalizedName: "Continuar",
+        runtimeResolutionRequired: true,
+        scopeIdentity: { strategy: "css", value: "div:has(img)" },
+        captureMatchCount: 1,
+      },
+    } as never);
+    assert.deepStrictEqual(locators, [{ strategy: "data-testid", value: "continue-btn", confidence: 0.98 }]);
+  });
 });
 
 describe("isSensitiveField", () => {

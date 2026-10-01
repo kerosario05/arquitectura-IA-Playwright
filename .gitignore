@@ -92,3 +92,5 @@ docs/ai/.obsidian/
 data/*.db
 data/*.db-wal
 data/*.db-shm
+# Playwright CLI output (may contain credentials)
+.playwright-cli/

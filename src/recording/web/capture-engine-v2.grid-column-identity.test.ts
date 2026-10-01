@@ -223,6 +223,17 @@ test("3/controlSentinel. an editor with no name at all still resolves the certif
   assert.equal(candidate.associatedField, "Departamento");
 });
 
+test("generic native button captions defer to the certified column header", () => {
+  const trigger = fakeEl({ tag: "button", textContent: "Indicar..." });
+  const cell = fakeEl({ tag: "td" });
+  append(cell, trigger);
+  buildGrid(["Tipo de identificación"], [[cell]]);
+
+  const candidate = cellCandidate(evalCaptureScriptAndFireClick(trigger));
+  assert.equal(candidate.associatedField, "Tipo de identificación");
+  assert.notEqual(candidate.accessibleName, "Indicar...");
+});
+
 test("5/postActivation. an editor created only after cell activation (appended to the cell just before the event fires) still resolves the certified column identity -- toCandidate inspects the live DOM at event time, never a stale pre-activation snapshot", () => {
   const cell = fakeEl({ tag: "td" });
   const { rows } = buildGrid(["Cargo"], [[cell]]);

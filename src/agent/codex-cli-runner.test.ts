@@ -4,7 +4,7 @@ import path from "node:path";
 import os from "node:os";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { spawn as nodeSpawn } from "node:child_process";
-import { __setSpawnForTesting, runCodexCli } from "./codex-cli-runner";
+import { __getLastRunnerInputForTesting, __setSpawnForTesting, buildCommandArgs, resolveSpawnCommand, runCodexCli } from "./codex-cli-runner";
 
 const tests: Array<{ label: string; fn: () => Promise<void> | void }> = [];
 
@@ -18,6 +18,10 @@ function describe(name: string, fn: () => void): void {
 class FakeChildProcess extends EventEmitter {
   public readonly stdout = new EventEmitter();
   public readonly stderr = new EventEmitter();
+  public stdinText = "";
+  public readonly stdin = Object.assign(new EventEmitter(), {
+    end: (text?: string) => { this.stdinText = text ?? ""; }
+  });
 
   kill(_signal?: NodeJS.Signals): boolean {
     this.emit("close", null, "SIGTERM");
@@ -32,9 +36,12 @@ type SpawnPlan = {
   signal?: NodeJS.Signals | null;
 };
 
+let lastSpawn: { command: string; args: string[]; options: unknown; child: FakeChildProcess } | undefined;
+
 function installSpawnPlan(plan: SpawnPlan): void {
-  __setSpawnForTesting((() => {
+  __setSpawnForTesting(((command: string, args: string[], options: unknown) => {
     const child = new FakeChildProcess() as any;
+    lastSpawn = { command, args, options, child };
     setTimeout(() => {
       for (const line of plan.stdoutLines) {
         child.stdout.emit("data", `${line}\n`);
@@ -67,6 +74,35 @@ function readLastJsonlLine(content: string): Record<string, unknown> {
 }
 
 describe("runCodexCli usage instrumentation", () => {
+  test("long intake prompt uses bounded Windows argv and is written to stdin", async () => {
+    await withTempCwd(async (cwd) => {
+      installSpawnPlan({ stdoutLines: [] });
+      const prompt = `long intake prompt ${"evidence ".repeat(5000)}`;
+      const input = {
+        command: "C:\\resolved\\codex.cmd",
+        extraArgs: ["-m", "gpt-6-luna", "-s", "read-only"],
+        prompt,
+        promptAsStdin: true,
+        cwd,
+        timeoutMs: 5000,
+      };
+      const oldArgs = buildCommandArgs({ ...input, promptAsStdin: false }).args;
+      const args = buildCommandArgs(input).args;
+      const windowsSpawn = resolveSpawnCommand(input, "win32");
+      assert.ok(oldArgs.some((arg) => arg === prompt), "regression fixture models the previous giant argv prompt");
+      assert.deepStrictEqual(args.at(-1), "-");
+      assert.ok(args.join(" ").length < 200);
+      assert.strictEqual(windowsSpawn.spawnCommand, "cmd.exe");
+      assert.ok(!windowsSpawn.spawnArgs.some((arg) => arg.includes(prompt)));
+
+      await runCodexCli(input);
+      assert.strictEqual(lastSpawn?.command, "cmd.exe");
+      assert.ok(!lastSpawn?.args.some((arg) => arg.includes(prompt)));
+      assert.strictEqual(lastSpawn?.child.stdinText, prompt);
+      assert.deepStrictEqual((lastSpawn?.options as { stdio: string[] }).stdio, ["pipe", "pipe", "pipe"]);
+    });
+  });
+
   test("parses turn.completed usage, keeps last agent_message, and persists JSONL", async () => {
     await withTempCwd(async (cwd) => {
       installSpawnPlan({
@@ -180,6 +216,23 @@ describe("runCodexCli usage instrumentation", () => {
       } finally {
         console.log = originalLog;
       }
+    });
+  });
+
+  test("agent run without timeout waits for natural process completion", async () => {
+    await withTempCwd(async (cwd) => {
+      installSpawnPlan({ stdoutLines: [JSON.stringify({ type: "item.completed", item: { type: "agent_message", content: [{ text: "completed" }] } })] });
+      const result = await runCodexCli({
+        command: "codex",
+        extraArgs: ["--model", "gpt-6-luna"],
+        prompt: "long-running repair",
+        cwd,
+        taskType: "repair",
+      });
+      assert.equal(__getLastRunnerInputForTesting()?.timeoutMs, undefined);
+      assert.equal(result.exitCode, 0);
+      assert.equal(result.timedOut, false);
+      assert.equal(result.stdout, "completed");
     });
   });
 });

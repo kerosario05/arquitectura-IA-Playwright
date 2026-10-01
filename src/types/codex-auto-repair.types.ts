@@ -2,8 +2,11 @@ export type CodexCliRunnerInput = {
   command: string;
   extraArgs: string[];
   prompt: string;
+  /** Send the prompt on stdin and pass `-` as the Codex CLI prompt positional. */
+  promptAsStdin?: boolean;
   cwd: string;
-  timeoutMs: number;
+  /** Omit for an agent run that must continue until its process exits naturally. */
+  timeoutMs?: number;
   taskType?: "generation" | "repair" | "unknown";
   purpose?: string;
   showAgentLog?: boolean;

@@ -21,7 +21,7 @@ type RuntimeEntryInput = { key: string; value: string; source?: string; generate
 
 const SENSITIVE_KEYS = [
   "password", "contrasena", "contraseña", "clave", "pin", "token", "otp", "secret",
-  "document", "documento", "cedula", "cédula", "identificacion", "identificación",
+  "document", "documento", "cedula", "cédula", "identificacion", "identificación", "rnc",
   "username", "usuario", "company_identifier", "identification_number", "identity_provider",
 ];
 
@@ -48,7 +48,7 @@ const CREDENTIAL_ROLE_SOURCES: Record<string, { testDataKey: string; envVar: str
 const CREDENTIAL_ROLE_PATTERNS: Record<string, string[]> = {
   password: ["password", "contrasena", "clave", "pin"],
   username: ["username", "usuario"],
-  company_identifier: ["company_identifier", "identification_number"],
+  company_identifier: ["company_identifier", "identification_number", "rnc", "tax_id", "tax_identifier", "business_registration"],
 };
 
 export function detectCredentialRole(key: string): keyof typeof CREDENTIAL_ROLE_SOURCES | undefined {

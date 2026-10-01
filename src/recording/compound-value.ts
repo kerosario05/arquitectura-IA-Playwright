@@ -12,7 +12,14 @@ export function logicalCompoundChildValue(value: string | undefined, selectionVa
   const prefix = `${selection} `;
   if (!candidate.startsWith(prefix)) return undefined;
   const child = candidate.slice(prefix.length).trim();
-  return child || undefined;
+  if (!child) return undefined;
+  // A compound amount editor may expose the currency prefix and an intermediate mask value
+  // together (for example, a separator placed before the final digit group). The selected
+  // option is already represented by its own interaction; keep only the numeric child and
+  // remove separators that cannot be a valid thousands group. This is deliberately based on
+  // the observed numeric shape, never on a specific currency or business value.
+  if (/^[-+]?\d[\d,]*$/.test(child) && /,\d{4,}$/.test(child)) return child.replace(/,/g, "");
+  return child;
 }
 
 function sameCompoundContext(source: RecordedTarget, target: RecordedTarget): boolean {

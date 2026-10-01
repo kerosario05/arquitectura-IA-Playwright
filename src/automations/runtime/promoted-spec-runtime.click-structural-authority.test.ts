@@ -103,6 +103,22 @@ test("2/AMBIGUOUS_STRUCTURAL_FAIL_CLOSED: when the shared resolver cannot produc
   assert.equal(clicks.length, 0, "no click may be dispatched when the structural authority does not resolve uniquely");
 });
 
+test("2b/STRUCTURAL_FAILURE_REASON_TRANSPORT: the resolver's own specific reason (action_owner_ambiguous for a >1 final count) is carried into the thrown error, not just the umbrella code", async () => {
+  const { page } = buildStructuralStubPage({ finalCount: 2 });
+  const runtime = createPromotedSpecRuntime(page, { enabled: false });
+
+  await assert.rejects(
+    (runtime as any).clickPromotedTargetViaStructuralAuthority({
+      stepIndex: 4,
+      target: '[href="/synthetic/target"]',
+      actionIntent: "click",
+      expectedEffect: "none",
+      structuralTarget: STRUCTURAL_TARGET,
+    }),
+    /structuralFailureReason=action_owner_ambiguous/,
+  );
+});
+
 test("3/AMBIGUOUS_STRUCTURAL_FAIL_CLOSED: zero matches also fails closed, never silently no-ops", async () => {
   const { page, clicks } = buildStructuralStubPage({ finalCount: 0 });
   const runtime = createPromotedSpecRuntime(page, { enabled: false });
@@ -118,6 +134,22 @@ test("3/AMBIGUOUS_STRUCTURAL_FAIL_CLOSED: zero matches also fails closed, never 
     /structural_authority_not_unique_or_unresolved/,
   );
   assert.equal(clicks.length, 0);
+});
+
+test("3b/STRUCTURAL_FAILURE_REASON_TRANSPORT: zero matches carries structural_match_not_unique as the specific reason", async () => {
+  const { page } = buildStructuralStubPage({ finalCount: 0 });
+  const runtime = createPromotedSpecRuntime(page, { enabled: false });
+
+  await assert.rejects(
+    (runtime as any).clickPromotedTargetViaStructuralAuthority({
+      stepIndex: 4,
+      target: '[href="/synthetic/target"]',
+      actionIntent: "click",
+      expectedEffect: "none",
+      structuralTarget: STRUCTURAL_TARGET,
+    }),
+    /structuralFailureReason=structural_match_not_unique/,
+  );
 });
 
 test("4/dispatch: clickPromotedTarget's own source routes options.structuralTarget to the structural-authority path BEFORE the legacy native/callback machinery, and only when present", () => {

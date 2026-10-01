@@ -172,6 +172,10 @@ export function extractFieldScopedDomEvidence(
     if (role && (ACTIONABLE_ROLES.has(role) || EDITABLE_ROLES.has(role))) return true;
     if (el.getAttribute("contenteditable") === "true") return true;
     if (isAriaDisclosureOwner(el)) return true;
+    // FIRST_LOSS fix: this candidate gate runs BEFORE isOwnerActionable is ever consulted -- a
+    // role-less, non-native interactive owner (see isNonNativeInteractiveOwner) must pass here
+    // too, or it never becomes a candidate at all regardless of isOwnerActionable's own logic.
+    if (isNonNativeInteractiveOwner(el)) return true;
     return false;
   }
 
@@ -210,7 +214,32 @@ export function extractFieldScopedDomEvidence(
       if (type === "button" || type === "submit" || type === "reset") return true;
     }
     if (role === "button") return true;
-    return isAriaDisclosureOwner(el);
+    if (isAriaDisclosureOwner(el)) return true;
+    // FIRST_LOSS fix: a real click owner is often a role-less, attribute-less container div whose
+    // click handler is attached via a framework's synthetic event system (e.g. React's onClick),
+    // which never sets `el.onclick`, an "onclick" DOM attribute, or an ARIA role. Same discipline
+    // already used by `frameworkActionable`/`isActionableNode` in the browser-instrumentation
+    // capture script: `cursor:pointer` styling ALONE is never sufficient authority (a whole page
+    // section can carry that style incidentally) -- only accepted together with a real,
+    // same-node click-provenance signal (an inline `onclick` handler/attribute, a native
+    // tabIndex making it keyboard-focusable, or a stable technical identity of its own).
+    return isNonNativeInteractiveOwner(el);
+  }
+
+  function isNonNativeInteractiveOwner(el: FieldScopedDomElement): boolean {
+    const node = el as unknown as Element & { onclick?: unknown; tabIndex?: number };
+    const hasInlineClickHandler = typeof node.onclick === "function" || Boolean(el.getAttribute("onclick"));
+    const isFocusable = typeof node.tabIndex === "number" && node.tabIndex >= 0;
+    const hasTechnicalRef = Boolean(el.id) || Boolean(el.getAttribute("data-testid"));
+    if (!hasInlineClickHandler && !isFocusable && !hasTechnicalRef) return false;
+    try {
+      const style = typeof window !== "undefined" && window.getComputedStyle
+        ? window.getComputedStyle(node as unknown as Element)
+        : undefined;
+      return Boolean(style && style.cursor === "pointer");
+    } catch {
+      return false;
+    }
   }
 
   function isOwnerVisible(el: FieldScopedDomElement): boolean {

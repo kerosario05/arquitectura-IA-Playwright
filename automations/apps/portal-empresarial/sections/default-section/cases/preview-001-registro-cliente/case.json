@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-registro-cliente",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Registro Cliente",
+  "source": "discovery",
+  "appSlug": "portal-empresarial",
+  "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
+  "createdAt": "2026-10-01T12:56:08.506Z"
+}

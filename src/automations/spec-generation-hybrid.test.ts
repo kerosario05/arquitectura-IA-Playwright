@@ -11,6 +11,7 @@ import type { PageObjectRegistry } from "../types/page-object.types";
 import { readFileSync } from "node:fs";
 import {
   CANDIDATE_NAVIGATION_HEADROOM_MS,
+  buildPlaywrightCommandEnv,
   classifyPreBusinessFailure,
   computeRuntimeGateDecision,
   extractChildRuntimeTelemetry,
@@ -21,9 +22,11 @@ import {
   isUnresolvedRuntimeTimeout,
   normalizeMojibakeUtf8,
   resolveCandidateFunctionalExecutionTimeoutMs,
+  resolvePlaywrightLaunchContext,
   repairMissingExpectImport,
   rewritePromotedRuntimeImport,
   runHybridSpecGeneration,
+  structuralValidation,
   summarizePlaywrightDiscoveryError,
   validatePromotedSpecInternalImports,
 } from "./spec-generation-hybrid";
@@ -31,6 +34,58 @@ import {
 test("T1: repairs a missing expect binding in a compatible Playwright import", () => {
   const source = "import { test } from '@playwright/test';\nawait expect(page).toBeVisible();";
   assert.strictEqual(repairMissingExpectImport(source), "import { test, expect } from '@playwright/test';\nawait expect(page).toBeVisible();");
+});
+
+test("candidate Playwright execution inherits the app profile TLS setting", () => {
+  for (const ignoreHTTPSErrors of [true, false]) {
+    const launchContext = resolvePlaywrightLaunchContext({
+      headed: true,
+      appProfile: { ...buildProfile(), ignoreHTTPSErrors },
+    } as Parameters<typeof resolvePlaywrightLaunchContext>[0]);
+
+    assert.strictEqual(launchContext.ignoreHTTPSErrors, ignoreHTTPSErrors);
+    assert.strictEqual(buildPlaywrightCommandEnv(launchContext)?.APP_IGNORE_HTTPS_ERRORS, String(ignoreHTTPSErrors));
+  }
+});
+
+test("observed gate with explicit recorded login does not require a second AuthFlow", () => {
+  const result = structuralValidation({
+    specContent: "test('recorded login', async ({ page }) => { await page.getByLabel('User').fill('runtime'); });",
+    expectedAppSlug: "sample-app",
+    expectedSectionSlug: "default-section",
+    expectedScenarioId: "CASE-1",
+    expectedScenarioTitle: "Recorded login",
+    sourceExpectedResultPresent: false,
+    expectedResultText: "",
+    scenarioSteps: [],
+    requiredAssertions: [],
+    observableOracles: [],
+    executableStepIndexes: [],
+    planStepActions: new Map(),
+    response: {
+      coveredStepIndexes: [],
+      coveredAssertions: [],
+      usedPageObjects: [],
+      declaredIdentifiers: [],
+      unresolvedRequirements: [],
+      warnings: [],
+    },
+    availablePageObjects: [],
+    observedEvidencePhrases: [],
+    authFlowContext: {
+      required: false,
+      gateDetected: true,
+      authOutcomeMode: "complete_authentication",
+      importPath: "../../flows/auth.flow",
+    } as any,
+    promotedRuntimeMethodsAllowlist: [],
+    mode: "deterministic",
+  });
+
+  assert.deepStrictEqual(
+    result.structureErrors.filter((error) => error.startsWith("missing_auth_flow_")),
+    [],
+  );
 });
 
 test("T2: does not change an existing expect import", () => {

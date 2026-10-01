@@ -1,6 +1,6 @@
 import assert from "node:assert";
 import test from "node:test";
-import { attachObservableOracleRequirementRefs, buildPromotionSourceScenario, buildRuntimeEvidenceTrace, collectLocalPendingAssertionDiagnostics, reconcileWorkflowAssertionsBeforeFinalStatus, resolveCanonicalRequirementById, resolveObservableOraclePolarity } from "./case-discovery-workflow";
+import { attachObservableOracleRequirementRefs, buildPromotionSourceScenario, buildRuntimeEvidenceTrace, collectLocalPendingAssertionDiagnostics, isAssertionLikeStep, reconcileWorkflowAssertionsBeforeFinalStatus, resolveCanonicalRequirementById, resolveObservableOraclePolarity } from "./case-discovery-workflow";
 import { calculateUnresolvedBlockingFailures, reconcilePendingAssertionsWithBackedOracles } from "./case-discovery";
 import type { CaseDiscoveryResult } from "../types/discovery.types";
 import type { TestScenario } from "../types/testrail.types";
@@ -33,6 +33,11 @@ function buildCaseResult(overrides: Partial<CaseDiscoveryResult>): CaseDiscovery
     ...overrides,
   };
 }
+
+test("recorded imperative click on a control named Validar is not promoted to an assertion", () => {
+  assert.equal(isAssertionLikeStep({ index: 20, action: 'Presionar "Validar"', status: "found" }), false);
+  assert.equal(isAssertionLikeStep({ index: 20, action: "Validar que el registro se haya guardado", status: "found" }), true);
+});
 
 test("backed consumed oracle reconciles its pending assertion before blocking calculation", () => {
   const steps = [{
@@ -78,6 +83,51 @@ test("observable oracle without requirementRefs remains undefined and never borr
     { index: 2, requirementRefs: ["REQ-B"] },
   ]);
   assert.equal(linked[0].requirementRefs, undefined);
+});
+
+test("completed terminal recording feedback does not require an unrelated narrative expected result", () => {
+  const scenario = {
+    ...buildScenario("Se muestra ¡Hola!"),
+    recordingExecutionContract: {
+      actions: [{ actionType: "click", stepIndex: 17, humanStep: "Presionar Generar Turno", semanticField: "Generar Turno", expectedRouteAfter: "/" }],
+      runtimeInputRequirements: [],
+    },
+  } as unknown as TestScenario;
+  const result = buildPromotionSourceScenario(scenario, buildCaseResult({
+    status: "discovered_passed",
+    steps: [{
+      index: 2,
+      action: "click",
+      status: "found",
+      targetText: "Generar Turno",
+      assertionDiagnostics: { postActionSyncSignal: "terminal_feedback" },
+    } as any],
+  }));
+  assert.equal(result.expectedResult, undefined);
+  assert.deepEqual(result.observableOracles, []);
+});
+
+test("terminal recorded feedback keeps canonical expected result requirements blocking", () => {
+  const scenario = {
+    ...buildScenario("Se muestra ¡Hola!"),
+    expectedResultRequirementRefs: ["REQ-EXPECTED"],
+    recordingExecutionContract: {
+      actions: [{ actionType: "click", stepIndex: 17, humanStep: "Presionar Generar Turno", semanticField: "Generar Turno" }],
+      runtimeInputRequirements: [],
+    },
+  } as unknown as TestScenario;
+  const result = buildPromotionSourceScenario(scenario, buildCaseResult({
+    status: "discovered_passed",
+    steps: [{
+      index: 2,
+      action: "click",
+      status: "found",
+      targetText: "Generar Turno",
+      assertionDiagnostics: { postActionSyncSignal: "terminal_feedback" },
+    } as any],
+  }));
+  assert.equal(result.expectedResult, "Se muestra ¡Hola!");
+  assert.equal(result.observableOracles?.some((oracle) => oracle.type === "unsupported_or_unresolved"), true);
 });
 
 test("canonical requirements remain case-scoped and resolve only by exact requirementId", () => {
@@ -719,6 +769,32 @@ test("satisfied_by_previous_assertion bookkeeping matchedText does not imply bac
     ),
     "matchedText carried by status bookkeeping must not synthesize literal_visible_text backed=true"
   );
+});
+
+test("quoted narrative outcome is backed only by exact visible text in the final runtime snapshot", () => {
+  const scenario = buildScenario('Se muestra "Más detalles del producto"');
+  const result = buildCaseResult({
+    status: "discovered_passed",
+    steps: [{ index: 37, action: "click", targetText: "Cancelar", status: "found" }] as any,
+  });
+  const finalSnapshot = {
+    version: "1.0",
+    url: "https://example.test/product-detail",
+    title: "Example",
+    capturedAt: "2026-09-28T23:22:00.000Z",
+    elements: [{ id: "heading-1", type: "heading", text: "Más detalles del producto", visible: true, candidateLocators: [], dataHints: [] }],
+    summary: { totalElements: 1, buttons: 0, links: 0, inputs: 0, selects: 0, tables: 0, dialogs: 0, headings: 1 },
+  } as any;
+
+  const backed = buildPromotionSourceScenario(scenario, result, finalSnapshot).observableOracles?.[0];
+  assert.equal(backed?.type, "literal_visible_text");
+  assert.equal(backed?.backed, true);
+  assert.equal(backed?.target, "Más detalles del producto");
+  assert.ok(backed?.evidence.includes("exact_visible_text_in_final_runtime_snapshot:true"));
+
+  const missing = buildPromotionSourceScenario(buildScenario('Se muestra "Mensaje inventado"'), result, finalSnapshot).observableOracles?.[0];
+  assert.equal(missing?.type, "unsupported_or_unresolved");
+  assert.equal(missing?.backed, false, "the final snapshot must not certify text that it did not show");
 });
 
 test("satisfied_by_previous_assertion navigation reconciles to navigation_transition, not literal_visible_text", () => {

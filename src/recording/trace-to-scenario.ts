@@ -14,7 +14,7 @@ import { semanticIdentityFromFrameworkOwnerEvidence } from "./framework-owner-se
 import { confirmedCompoundSelectionBefore, logicalCompoundChildValue } from "./compound-value";
 import { quoteHumanValue, renderHumanStepValue } from "./human-step-renderer";
 import type { RecordingAiScenarioProposal } from "./ai-scenario-contract";
-import { buildCanonicalInteractions, enrichRecordedScenarioContract, evaluateRecordingReadiness, hasExecutionAuthority, isMaskActivation, materializedSemanticSignature, validateInteractionStateSequence, type CanonicalInteraction, type EntityActionBlock, type MutationOpportunity, type RecordingReadiness, type RuntimeInputRequirement, type ScenarioMutationProposal } from "./canonical-recording-contract";
+import { buildCanonicalInteractions, enrichRecordedScenarioContract, evaluateRecordingReadiness, hasExecutionAuthority, hasReusableStructuralClickIdentity, isMaskActivation, materializedSemanticSignature, validateInteractionStateSequence, type CanonicalInteraction, type EntityActionBlock, type MutationOpportunity, type RecordingReadiness, type RuntimeInputRequirement, type ScenarioMutationProposal } from "./canonical-recording-contract";
 
 /**
  * Builds executable scenarios from a recorded walkthrough — deterministically.
@@ -66,6 +66,11 @@ export type RecordedScenarioStep = {
   routeBefore?: string;
   routeAfter?: string;
   stateScope?: string;
+  resolutionState?: "certified" | "runtime_resolution_required" | "unresolved_unrecoverable";
+  playwrightRecorderEvidence?: import("./structural-owner-identity").PlaywrightRecorderEvidence;
+  /** 1-based position within a segmented (OTP-style) input group; tells the renderer which
+   * character of the group's single shared value this step's placeholder stands for. */
+  segmentPosition?: number;
 };
 
 export type ScenarioStepMetrics = {
@@ -399,9 +404,9 @@ function recordedLogicalValue(
   }
   return target?.committedValue
     ?? target?.afterState?.committedValue
-    ?? target?.rawTypedValue
     ?? target?.inputValue
-    ?? event.value;
+    ?? event.value
+    ?? target?.rawTypedValue;
 }
 
 function describeFillRendered(
@@ -796,8 +801,36 @@ export function buildHappyPathScenario(
   const stepTargets: RecordedStepTarget[] = [];
   let hasUncertainSteps = false;
   const segmentGroupValueKeys = new Map<string, string>();
-  const semanticModel = buildSemanticRecordingModel(trace, events);
-  const canonicalEvents = buildCanonicalInteractions(events, semanticModel.editingSessions);
+  // Older recordings already persisted the functional selection's lineage but synthesized that
+  // event with no locators. Recover only the captured option target referenced by its source seqs;
+  // never derive a locator from the option text or from a position.
+  const eventsWithSelectionTargets = events.map((event) => {
+    const target = event.target;
+    if (!target || target.compoundRole !== "selection" || (target.locators?.length ?? 0) > 0) return event;
+    const sourceSeqs = new Set(target.sourceTechnicalEventSeqs ?? []);
+    if (sourceSeqs.size === 0) return event;
+    const optionSource = events.find((candidate) =>
+      sourceSeqs.has(candidate.seq)
+      && candidate.target?.role?.toLowerCase() === "option"
+      && (candidate.target.locators?.length ?? 0) > 0,
+    );
+    if (!optionSource?.target) return event;
+    return {
+      ...event,
+      target: {
+        ...target,
+        locators: optionSource.target.locators?.map((locator) => ({ ...locator })) ?? [],
+        ...(optionSource.target.technicalTargetCandidates
+          ? { technicalTargetCandidates: optionSource.target.technicalTargetCandidates.map((candidate) => ({ ...candidate })) }
+          : {}),
+        ...(optionSource.target.playwrightRecorderEvidence
+          ? { playwrightRecorderEvidence: optionSource.target.playwrightRecorderEvidence }
+          : {}),
+      },
+    };
+  });
+  const semanticModel = buildSemanticRecordingModel(trace, eventsWithSelectionTargets);
+  const canonicalEvents = buildCanonicalInteractions(eventsWithSelectionTargets, semanticModel.editingSessions);
   const editingSessionsByRef = new Map(semanticModel.editingSessions.map((session) => [session.editingSessionId, session]));
   const canonicalByEvent = new Map(canonicalEvents.flatMap((interaction) => interaction.sourceEventRefs.map((ref) => [ref, interaction] as const)));
 
@@ -823,7 +856,7 @@ export function buildHappyPathScenario(
     isSetup: true,
   });
 
-  for (const [eventIndex, event] of events.entries()) {
+  for (const [eventIndex, event] of eventsWithSelectionTargets.entries()) {
     if (event.kind === "note" || event.kind === "launch") continue;
     const canonical = canonicalByEvent.get(`event-${eventIndex + 1}`);
     // Recording Stop is the boundary. A state transition can end one screen and open the
@@ -833,7 +866,7 @@ export function buildHappyPathScenario(
     if (isMaskActivation(events, eventIndex)) continue;
     const nextMeaningful = events.slice(eventIndex + 1).find((candidate) => candidate.kind === "tap" || candidate.kind === "fill");
     const classification = classifySemanticEvent(event, nextMeaningful);
-    if (classification === "FOCUS_ONLY" || classification === "DYNAMIC_EDITOR_INTERNAL") continue;
+    if (classification === "FOCUS_ONLY" || classification === "DYNAMIC_EDITOR_INTERNAL" || classification === "TECHNICAL_NOISE") continue;
 
     if (event.kind === "screen_change") {
       const destination = screenById.get(event.toScreenKey ?? "");
@@ -887,76 +920,101 @@ export function buildHappyPathScenario(
 
     const target = event.target;
     if (!target) continue;
-    if (!target.locators?.length) {
-      // FIRST_LOSS fix (recordingId=efff98e2-...): canonical-recording-contract.ts's
-      // collapseSegmentedInputs already merges N sibling segment-box fills into ONE canonical
-      // interaction so the dataset/execution engine only ever holds ONE secure token value (never
-      // one leaked value per box) -- but this loop iterates the RAW per-box events, and without
-      // this branch each of the N raw fills below would independently re-enter the generic fill
-      // branch and push its OWN requiredData entry, silently splitting one token into N stored
-      // values again. Emit one narrative step per box ("dígito N de M") so the human-facing plan
-      // still shows every box the user actually filled, but bind every one of them to the SAME
-      // single valueKey and push the shared requiredData entry only once, on the first box.
-      const segmentGroup = event.kind === "fill" && canonical?.playwrightRecorderEvidence?.kind === "segmented_input" && canonical.sourceEventRefs.length > 1
-        ? canonical
-        : undefined;
-      if (segmentGroup) {
-        const segmentCount = segmentGroup.playwrightRecorderEvidence!.segmentCount!;
-        const groupKey = segmentGroup.sourceEventRefs[0];
-        const position = segmentGroup.sourceEventRefs.indexOf(`event-${eventIndex + 1}`) + 1;
-        const resolution = fieldForEvent(event, eventIndex + 1);
-        const label = resolution.displayLabel;
-        // Every box in the group must share the exact same valueKey (computed once, from the
-        // first box) so all N narrative steps bind to the ONE requiredData entry below -- never
-        // recomputed per box, which would otherwise mint a distinct key per position.
-        const valueKey = position === 1
-          ? uniqueValueKeyFor(event, resolution.valueKey, requiredData)
-          : segmentGroupValueKeys.get(groupKey)!;
-        if (position === 1) {
-          segmentGroupValueKeys.set(groupKey, valueKey);
-          requiredData.push({
-            key: valueKey,
-            label,
-            ...(entityScopeForTarget(event.target) ? { entityScope: entityScopeForTarget(event.target) } : {}),
-            stepIndex: testRailSteps.length,
-            technicalTargetRefs: [],
-            sourceEventRefs: segmentGroup.sourceEventRefs,
-            exampleValue: undefined,
-            sensitive: true,
-            valueRole: "secure_input",
-            source: "secure",
-            confidence: 0.7,
-            needsReview: false,
-            formatHint: `segmented_${segmentCount}`,
-          });
-        }
-        const description = `Ingresar dígito ${position} de ${segmentCount} en "${label}"`;
-        testRailSteps.push({
-          content: description,
+    const normalizedDynamicTargetLabel = canonical?.dynamicTargetLabel
+      ? target.label?.trim().normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase()
+      : undefined;
+    const targetLocatorsForPlan = canonical?.dynamicTargetLabel
+      ? (target.locators ?? []).filter((locator) => {
+          const normalizedLocatorValue = locator.value.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase();
+          return locator.strategy !== "text"
+            && Boolean(normalizedLocatorValue)
+            && !(normalizedDynamicTargetLabel && normalizedLocatorValue.includes(normalizedDynamicTargetLabel));
+        })
+      : (target.locators ?? []);
+    // FIRST_LOSS fix (recordingId=efff98e2-..., reconfirmed against recordingId=b9e73c33-...):
+    // canonical-recording-contract.ts's collapseSegmentedInputs already merges N sibling
+    // segment-box fills into ONE canonical interaction so the dataset/execution engine only ever
+    // holds ONE secure token value (never one leaked/duplicated value per box) -- but this loop
+    // iterates the RAW per-box events, and without this branch each of the N raw fills would
+    // independently re-enter the generic fill branch and push its OWN requiredData entry,
+    // silently splitting one token into N stored values again. This check is keyed on the
+    // canonical interaction's own grouping evidence (`playwrightRecorderEvidence.kind ===
+    // "segmented_input"`), never on whether the raw per-box target happens to carry a locator:
+    // CaptureEngine may attach the SAME low-confidence container-scope locator to every box (it
+    // has no way to tell them apart individually), which used to be gated behind `!target.locators
+    // ?.length` and so silently skipped this merge -- and every consumer/project whose segmented
+    // capture does attach that shared scope locator hit the same duplication, not just this one
+    // recording. Emit one narrative step per box ("dígito N de M") so the human-facing plan still
+    // shows every box the user actually filled, but bind every one of them to the SAME single
+    // valueKey and push the shared requiredData entry only once, on the first box.
+    const segmentGroup = event.kind === "fill" && canonical?.playwrightRecorderEvidence?.kind === "segmented_input" && canonical.sourceEventRefs.length > 1
+      ? canonical
+      : undefined;
+    if (segmentGroup) {
+      const segmentCount = segmentGroup.playwrightRecorderEvidence!.segmentCount!;
+      const groupKey = segmentGroup.sourceEventRefs[0];
+      const position = segmentGroup.sourceEventRefs.indexOf(`event-${eventIndex + 1}`) + 1;
+      const resolution = fieldForEvent(event, eventIndex + 1);
+      const label = resolution.displayLabel;
+      // Every box in the group must share the exact same valueKey (computed once, from the
+      // first box) so all N narrative steps bind to the ONE requiredData entry below -- never
+      // recomputed per box, which would otherwise mint a distinct key per position.
+      const valueKey = position === 1
+        ? uniqueValueKeyFor(event, resolution.valueKey, requiredData)
+        : segmentGroupValueKeys.get(groupKey)!;
+      if (position === 1) {
+        segmentGroupValueKeys.set(groupKey, valueKey);
+        requiredData.push({
+          key: valueKey,
+          label,
           ...(entityScopeForTarget(event.target) ? { entityScope: entityScopeForTarget(event.target) } : {}),
-          sourceEventRefs: [`event-${eventIndex + 1}`],
-          renderedStep: description,
-          valueKey,
-          interactionId: `interaction-${eventIndex + 1}`,
+          stepIndex: testRailSteps.length,
+          technicalTargetRefs: [],
+          sourceEventRefs: segmentGroup.sourceEventRefs,
+          exampleValue: undefined,
           sensitive: true,
-          expected: "",
-          classification: "FUNCTIONAL_ACTION",
-          // FIRST_LOSS fix (jobId 281a84ec-...): canonicalInteractions (used by discovery's own
-          // action-target list) already carries playwrightRecorderEvidence/resolutionState for
-          // the merged segmented group, but THIS testRailStep -- the shape spec generation reads
-          // to build its ScenarioStepLike steps -- never did, so spec-execution-contract.ts's
-          // authority resolver never saw resolutionState==="runtime_resolution_required" and fell
-          // through to a generic field-scoped text-tier materialization instead, producing a
-          // regular fillPromotedField call that could never find one editable "Campo pendiente de
-          // identificar" element (there are 6, all sharing that same generic label). Carrying the
-          // real evidence through here lets the compiler correctly emit the dedicated
-          // fillSegmentedInput dispatch instead.
-          resolutionState: "runtime_resolution_required",
-          playwrightRecorderEvidence: segmentGroup.playwrightRecorderEvidence,
+          valueRole: "secure_input",
+          source: "secure",
+          confidence: 0.7,
+          needsReview: false,
+          formatHint: `segmented_${segmentCount}`,
         });
-        hasUncertainSteps = true;
-        continue;
       }
+      const description = `Ingresar dígito ${position} de ${segmentCount} en "${label}"`;
+      testRailSteps.push({
+        content: description,
+        // Placeholder template for the review UI's live substitution (renderHumanStepValue):
+        // once the QA operator types the real token into this shared valueKey's field, this
+        // step re-renders showing ITS OWN character (via segmentPosition below), not the whole
+        // token -- same generic [valueKey] convention every other deferred-value step already
+        // uses, just resolved one character at a time instead of as a single whole value.
+        stepTemplate: `Ingresar [${valueKey}] en "${label}"`,
+        segmentPosition: position,
+        ...(entityScopeForTarget(event.target) ? { entityScope: entityScopeForTarget(event.target) } : {}),
+        sourceEventRefs: [`event-${eventIndex + 1}`],
+        renderedStep: description,
+        valueKey,
+        interactionId: `interaction-${eventIndex + 1}`,
+        sensitive: true,
+        expected: "",
+        classification: "FUNCTIONAL_ACTION",
+        // FIRST_LOSS fix (jobId 281a84ec-...): canonicalInteractions (used by discovery's own
+        // action-target list) already carries playwrightRecorderEvidence/resolutionState for
+        // the merged segmented group, but THIS testRailStep -- the shape spec generation reads
+        // to build its ScenarioStepLike steps -- never did, so spec-execution-contract.ts's
+        // authority resolver never saw resolutionState==="runtime_resolution_required" and fell
+        // through to a generic field-scoped text-tier materialization instead, producing a
+        // regular fillPromotedField call that could never find one editable "Campo pendiente de
+        // identificar" element (there are 6, all sharing that same generic label). Carrying the
+        // real evidence through here lets the compiler correctly emit the dedicated
+        // fillSegmentedInput dispatch instead.
+        resolutionState: "runtime_resolution_required",
+        playwrightRecorderEvidence: segmentGroup.playwrightRecorderEvidence,
+      });
+      hasUncertainSteps = true;
+      continue;
+    }
+    if (!targetLocatorsForPlan.length) {
       // A recorder may still have a confirmed value when the technical locator was lost during
       // a DOM replacement. Keep the human/TestRail evidence and its dataset binding, but do not
       // invent an executable web target. The missing locator remains visible through the
@@ -974,11 +1032,24 @@ export function buildHappyPathScenario(
           technicalTargetRefs: [],
           sourceEventRefs: [`event-${eventIndex + 1}`],
           exampleValue: event.target.afterValue,
+          ...(event.target.observedOptions?.length ? { allowedValues: [...new Set(event.target.observedOptions)] } : {}),
           sensitive: false,
           valueRole: "action_input",
           source: "RECORDED_CONFIRMED",
         });
         testRailSteps.push({ content: description, stepTemplate: description, renderedStep: describeSelectionRendered(event, selectionLabel, description), valueKey: selectionKey, entityScope: entityScopeForTarget(event.target), interactionId: `interaction-${eventIndex + 1}`, sourceEventRefs: [`event-${eventIndex + 1}`], expected: "", classification: "FUNCTIONAL_ACTION" });
+        // Preserve the observed action in the executable projection even when capture lost its
+        // locator. The interaction id lets the execution contract bind the canonical action to
+        // its recorded runtime evidence; no selector is inferred here.
+        if (!isMobile) {
+          webSteps.push({
+            action: "click",
+            valueKey: selectionKey,
+            description,
+            ...(entityScopeForTarget(event.target) ? { entityScope: entityScopeForTarget(event.target) } : {}),
+            interactionId: `interaction-${eventIndex + 1}`,
+          });
+        }
         hasUncertainSteps = true;
       } else if (event.kind === "tap") {
         // A plain click (never a selection, never a fill) whose target has no locator at all --
@@ -1008,10 +1079,13 @@ export function buildHappyPathScenario(
         const hasRealAccessibleName = Boolean(realLabel) && !isGenericUnresolvedLabel(realLabel!);
         const frameworkOwner = semanticIdentityFromFrameworkOwnerEvidence(event.target);
         const associatedField = event.target?.associatedField?.trim();
-        const unresolvedSemanticDisplay = !event.target?.locators?.length
+        const unresolvedSemanticDisplay = !targetLocatorsForPlan.length
           && associatedField
           && !isGenericUnresolvedLabel(associatedField);
-        const description = hasRealAccessibleName
+        const canonicalInteraction = canonicalByEvent.get(`event-${eventIndex + 1}`);
+        const description = canonicalInteraction?.dynamicTargetLabel
+          ? hasReusableStructuralClickIdentity(canonicalInteraction) ? "Presionar el control grabado" : "Presionar el control indicado"
+          : hasRealAccessibleName
           ? unresolvedSemanticDisplay
             ? `Presionar "${associatedField}"`
             : describeTap(event)
@@ -1031,6 +1105,22 @@ export function buildHappyPathScenario(
           expected: "",
           classification: "FUNCTIONAL_ACTION",
         });
+        // FIRST_LOSS fix (fresh run d3fa4d58-06b3-4053-bebb-2a8d31d7c951): this branch already
+        // pushed a testRailStep (human narrative) but never a webStep/stepTarget, so a real
+        // click with no captured locator (e.g. a framework-owned div re-resolved live by the
+        // runtime field-scoped resolver) silently had no plan.json/spec representation at all --
+        // it stayed the execution authority via `recordingExecutionContract` but disappeared
+        // from every consumer that reads `webSteps`. No locator to invent, so `target` stays
+        // absent; the interactionId is what lets downstream (discovery, spec compiler) bind this
+        // step to its canonical interaction's own technical target candidates at runtime.
+        if (!isMobile) {
+          webSteps.push({
+            action: "click",
+            description,
+            ...(entityScopeForTarget(event.target) ? { entityScope: entityScopeForTarget(event.target) } : {}),
+            interactionId: `interaction-${eventIndex + 1}`,
+          });
+        }
         hasUncertainSteps = true;
       }
       if (event.kind === "fill") {
@@ -1072,6 +1162,17 @@ export function buildHappyPathScenario(
           expected: "",
           classification: "FUNCTIONAL_ACTION",
         });
+        // Keep a locator-less fill in the web plan so the canonical interaction can be resolved
+        // at runtime. Technical readiness remains false until that resolution is certified.
+        if (!isMobile) {
+          webSteps.push({
+            action: "fill",
+            valueKey,
+            description: stepTemplate,
+            ...(entityScopeForTarget(event.target) ? { entityScope: entityScopeForTarget(event.target) } : {}),
+            interactionId: `interaction-${eventIndex + 1}`,
+          });
+        }
         hasUncertainSteps = true;
       }
       continue;
@@ -1079,7 +1180,7 @@ export function buildHappyPathScenario(
     // Ambiguous is checked on its own and not left to the confidence it carries: a locator
     // pinned to a position is executable but positional, and a reviewer has to see that even
     // if the confidence scale is ever retuned.
-    const best = target.locators[0];
+    const best = targetLocatorsForPlan[0];
     if (best.ambiguous || (best.confidence !== undefined && best.confidence < 0.7)) {
       hasUncertainSteps = true;
     }
@@ -1094,7 +1195,10 @@ export function buildHappyPathScenario(
         ? selectionResolution.semanticField
         : selection ? `${label} · selección` : label;
       const selectionKey = selection ? selectionValueKey(event, selectionResolution?.semanticField ?? label) : undefined;
-      const description = selection ? `Seleccionar [${selectionKey}] en "${selectionLabel}"` : checkbox ? `${checkboxChecked ? "Marcar" : "Desmarcar"} "${label}"` : describeTap(event);
+      const canonicalInteraction = canonicalByEvent.get(`event-${eventIndex + 1}`);
+      const description = canonicalInteraction?.dynamicTargetLabel
+        ? hasReusableStructuralClickIdentity(canonicalInteraction) ? "Presionar el control grabado" : "Presionar el control indicado"
+        : selection ? `Seleccionar [${selectionKey}] en "${selectionLabel}"` : checkbox ? `${checkboxChecked ? "Marcar" : "Desmarcar"} "${label}"` : describeTap(event);
       const renderedStep = selection ? describeSelectionRendered(event, selectionLabel, description) : description;
       if (selection && selectionKey && !requiredData.some((field) => field.key === selectionKey)) {
         requiredData.push({
@@ -1105,13 +1209,14 @@ export function buildHappyPathScenario(
           technicalTargetRefs: target.locators.map((locator) => `${locator.strategy}:${locator.value}`),
           sourceEventRefs: [`event-${eventIndex + 1}`],
           exampleValue: target.afterValue,
+          ...(target.observedOptions?.length ? { allowedValues: [...new Set(target.observedOptions)] } : {}),
           sensitive: false,
           valueRole: "action_input",
           source: "RECORDED_CONFIRMED",
         });
       }
       if (isMobile) {
-        const t = toMobileTarget(event);
+        const t = toMobileTarget({ ...event, target: { ...target, locators: targetLocatorsForPlan } });
         if (!t) continue;
         mobileSteps.push({ action: "click", target: t, description });
         stepTargets.push({ stepIndex: mobileSteps.length - 1, description, ...t, ambiguous: best.ambiguous });
@@ -1282,7 +1387,9 @@ export function buildHappyPathScenario(
  *
  * This is intentionally a separate deterministic lane from `deriveScenarios`: it builds from
  * the persisted trace/semantic authority and never calls an AI provider or creates suggestions.
- * Incomplete recordings return null instead of becoming falsely executable scenarios.
+ * The observed primary remains reviewable even when one action is unresolved. Execution
+ * readiness is evaluated separately and must stay blocked until every required action has
+ * usable runtime evidence.
  */
 export function materializeObservedPrimaryScenario(
   trace: SessionTrace,
@@ -1305,12 +1412,9 @@ export function materializeObservedPrimaryScenario(
     interaction.resolutionState === "runtime_resolution_required"
     || interaction.technicalTargetRefs.length > 0
     || (interaction.technicalTargetCandidates?.length ?? 0) > 0;
-  // Persistence records the observed path even when one action remains non-executable.
-  // Readiness is evaluated separately downstream; a certified-looking action with no
-  // technical refs is therefore retained for review but never made executable here.
-  const technicalTargetRefs = (primary.canonicalInteractions ?? [])
-    .filter((interaction) => hasExecutionAuthority(interaction) && interaction.action !== "system_observation" && interaction.action !== "navigation")
-    .every((interaction) => interaction.resolutionState === "certified" || hasSufficientTechnicalEvidence(interaction));
+  // The catalog is also the reviewer-facing record of what was captured. Do not discard the
+  // whole observed path because one action lacks a locator; the shared execution-readiness
+  // audit below the recording boundary still blocks any unresolved action from replay.
   const hasTerminalOracle = primary.oracleAuthority === "observed_only"
     && Boolean(primary.expectedResultCandidate?.trim())
     && (primary.testRailSteps.some((step) => step.classification === "FUNCTIONAL_ASSERTION" && step.expected.trim().length > 0)
@@ -1332,7 +1436,7 @@ export function materializeObservedPrimaryScenario(
   // Persistence of the path the QA actually walked must not depend on a generated
   // oracle. A directly observed terminal action/transition is sufficient authority
   // to materialize the Primary; oracle readiness remains a separate replay gate.
-  if (functionalActionCount <= 0 || !technicalTargetRefs || (!hasTerminalOracle && !hasObservedTerminalAuthority) || !hasLineage) return null;
+  if (functionalActionCount <= 0 || (!hasTerminalOracle && !hasObservedTerminalAuthority) || !hasLineage) return null;
   return materializeRecordedScenario(primary, primary.runtimeDataset?.resolvedValues ?? {});
 }
 

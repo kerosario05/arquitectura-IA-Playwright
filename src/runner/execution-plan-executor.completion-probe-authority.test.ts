@@ -197,3 +197,26 @@ test("10/multiproject. no app/business/route hardcode governs the completion-pro
   assert.doesNotMatch(region, /numero.de.identificacion/i);
   assert.doesNotMatch(region, /waitForTimeout\(\s*\d{3,}/, "no large fixed sleep introduced");
 });
+
+test("11/activityTarget. a probe-driven wait moves the pointer over its target while the result is pending", async () => {
+  const page = new QuietUntilPage(null);
+  let hoverCount = 0;
+  let mouseMoveCount = 0;
+  (page as any).mouse = { move: async () => { mouseMoveCount += 1; } };
+  const activityTarget = {
+    // Simulate the accepted-scope marker being released after click: the locator can no longer
+    // resolve, so the caller must supply the geometry captured before the click.
+    boundingBox: async () => null,
+    hover: async () => { hoverCount += 1; },
+  };
+  const result = await withEnv("LOADING_STABILITY_TIMEOUT_MS", "140", () =>
+    waitForStableInteractiveScreen(page as any, {
+      completionProbe: async () => ({ completed: false }),
+      activityTarget: activityTarget as any,
+      activityTargetBox: { x: 10, y: 20, width: 100, height: 40 },
+      absoluteDeadlineMs: 1000,
+    }));
+  assert.equal(result.stable, false);
+  assert.ok(mouseMoveCount > 0, "must emit explicit page-level pointer movement during a pending probe wait");
+  assert.equal(hoverCount, 0, "must use page-level pointer input rather than locator hover");
+});

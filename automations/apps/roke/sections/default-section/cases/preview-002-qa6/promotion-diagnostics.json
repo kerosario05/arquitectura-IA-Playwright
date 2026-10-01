@@ -1,0 +1,20 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\roke\\sections\\default-section\\cases\\preview-002-qa6\\case.spec.ts",
+  "specHash": "3e2cf9b93ac859a65dea579a16bcb725f1b5a54f3b50ac271c797d99d1fd5a27",
+  "specSource": "generatedSpec"
+}

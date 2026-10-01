@@ -208,14 +208,14 @@ test("10/noTemporalHeuristic. ownership is determined by pointer note boundary, 
   assert.equal(tap?.causedTransition, true);
 });
 
-// ─── Test 11: delayed tap delivery keeps the first transition with its action ─
+// ─── Test 11: delayed tap delivery keeps the settled transition with its action ─
 
-test("11/delayedTapDelivery. first transition after pointer belongs to that action, later transitions await their own pointer", () => {
+test("11/delayedTapDelivery. all transitions before the next pointer belong to the action and the settled route is used", () => {
   const events = [
     ev({ seq: 0, t: 1, kind: "note", observationType: "pointer", interactionId: "gesture-A", screenKey: "s", url: "/start" }),
     // The browser emits the first transition before the recorder flushes the tap.
     ev({ seq: 1, t: 2, kind: "navigate", screenKey: "s", url: "/middle-1" }),
-    // Additional browser transitions arrive before the delayed tap, but are not owned by A.
+    // Intermediate transitions arrive before the delayed tap; they remain within A's gesture.
     ev({ seq: 2, t: 3, kind: "navigate", screenKey: "s", url: "/middle-2" }),
     ev({ seq: 3, t: 4, kind: "navigate", screenKey: "s", url: "/final" }),
     ev({ seq: 4, t: 5, kind: "tap", interactionId: "gesture-A", screenKey: "s", url: "/final", target: { role: "button", associatedField: "A", locators: [{ strategy: "role", value: "button[name=A]" }] } }),
@@ -225,9 +225,9 @@ test("11/delayedTapDelivery. first transition after pointer belongs to that acti
   const interactions = buildCanonicalInteractions(events);
   const [actionA, actionB] = interactions;
   assert.equal(actionA?.routeBefore, "/start");
-  assert.equal(actionA?.routeAfter, "/middle-1");
+  assert.equal(actionA?.routeAfter, "/final");
   assert.equal(actionB?.routeBefore, "/final");
   assert.equal(actionB?.routeAfter, undefined);
-  assert.equal(deriveExpectedRouteBefore(actionB!, actionA!), "/middle-1");
-  assert.equal(validateInteractionStateSequence(interactions).stateSequenceValid, false, "raw delayed-delivery evidence remains auditable; replay uses the preceding owned transition");
+  assert.equal(deriveExpectedRouteBefore(actionB!, actionA!), "/final");
+  assert.equal(validateInteractionStateSequence(interactions).stateSequenceValid, true, "the next action starts from the settled route observed before its pointerdown");
 });

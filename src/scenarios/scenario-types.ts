@@ -141,6 +141,9 @@ export type RecordingExecutionAction = {
    * for every structured-contract-driven fill, regardless of resolution status.
    */
   associatedField?: string;
+  /** Stable recording lineage from a selected dynamic option back to its owning selector. */
+  selectorControlId?: string;
+  optionSurfaceId?: string;
   targetRef?: string;
   technicalTargetRef?: string;
   technicalTargetRefs?: string[];
@@ -173,6 +176,8 @@ export type RecordingExecutionAction = {
    *  authority (RecordingRouteObservation) can key observations by the same lineage the
    *  recording itself already uses, without inventing a second identity scheme. */
   controlIdentity?: string;
+  /** The recorded visible label describes a data object rather than a reusable control name. */
+  dynamicTargetLabel?: boolean;
   /**
    * Diagnostic/state-observation ONLY (never execution/field/readiness/promotion authority). A
    * redacted, structurally-identified related surface causally mutated by this trusted action,

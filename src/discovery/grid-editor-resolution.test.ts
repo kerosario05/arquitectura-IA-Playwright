@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { chromium, type Page } from "@playwright/test";
-import { resolveFillTarget, resolveGridEditor } from "./target-resolver";
+import { resolveActionTarget, resolveFillTarget, resolveGridEditor } from "./target-resolver";
 
 const EMPTY_SNAPSHOT = { elements: [] } as any;
 
@@ -111,6 +111,38 @@ async function main(): Promise<void> {
     const result = await resolveGridEditor(page, "Field", { rowScope: 1 }, { includeInteractiveControls: true });
     assert.ok(result.locator);
     assert.equal(await result.locator.evaluate((el) => el.tagName.toLowerCase()), "button");
+  }));
+
+  await check("GENERIC_RECORDED_BUTTON_RESOLVES_BY_ASSOCIATED_GRID_FIELD", () => withPage(async (page) => {
+    await page.setContent(`
+      ${Array.from({ length: 15 }, (_, index) => `<button type="button">Unrelated ${index}</button>`).join("")}
+      <table><thead><tr><th>Field</th></tr></thead><tbody><tr><td>
+        <button id="field-control" type="button" aria-haspopup="listbox">Choose</button>
+      </td></tr></tbody></table>
+    `);
+    const result = await resolveActionTarget(page, EMPTY_SNAPSHOT, "role:button", {
+      actionType: "action_click",
+      recordingActionType: "click",
+      associatedField: "Field",
+    });
+    assert.equal(result.status, "resolved");
+    assert.equal(result.locatorStrategy, "grid_cell_selection_control");
+    assert.equal(await result.locator!.getAttribute("id"), "field-control");
+  }));
+
+  await check("ASSOCIATED_GRID_FIELD_WITH_MULTIPLE_UNSCOPED_ROWS_FAILS_CLOSED", () => withPage(async (page) => {
+    await page.setContent(`
+      <table><thead><tr><th>Field</th></tr></thead><tbody>
+        <tr><td><button id="first" type="button">Choose</button></td></tr>
+        <tr><td><button id="second" type="button">Choose</button></td></tr>
+      </tbody></table>
+    `);
+    const result = await resolveActionTarget(page, EMPTY_SNAPSHOT, "role:button", {
+      actionType: "action_click",
+      recordingActionType: "click",
+      associatedField: "Field",
+    });
+    assert.notEqual(result.status, "resolved");
   }));
 
   await check("FILL_ACTIVATES_DISPLAY_CONTROL_THEN_RESOLVES_EDITOR", () => withPage(async (page) => {

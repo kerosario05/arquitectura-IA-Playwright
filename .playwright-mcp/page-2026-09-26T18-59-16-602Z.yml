@@ -1,0 +1,81 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - generic [ref=e150]:
+    - banner [ref=e151]:
+      - img "Banco Santa Cruz" [ref=e152]
+    - main [ref=e153]:
+      - generic [ref=e154]:
+        - button [ref=e155] [cursor=pointer]
+        - generic [ref=e158]:
+          - heading "Selecciona un producto" [level=1] [ref=e159]
+          - paragraph [ref=e160]: "Elige el tipo de producto que deseas conocer:"
+      - generic [ref=e179]:
+        - paragraph [ref=e181]: Todas nuestras tarjetas están libres de costo emisión durante el primer año, tanto para la tarjeta titular como para las adicionales.
+        - generic [ref=e182]:
+          - generic [ref=e183] [cursor=pointer]:
+            - img "Tarjeta Crédito Visa Clásica" [ref=e185]
+            - heading "Tarjeta Crédito Visa Clásica" [level=3] [ref=e186]
+            - generic [ref=e187]:
+              - generic [ref=e188]: Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz.
+              - generic [ref=e193]: Pagos en línea con disponibilidad inmediata.
+              - generic [ref=e198]: Tecnología contactless y Click to Pay.
+              - generic [ref=e203]: Opción de elegir la fecha de corte para pagos mensuales.
+          - generic [ref=e208] [cursor=pointer]:
+            - img "Tarjeta Crédito Visa Gold" [ref=e210]
+            - heading "Tarjeta Crédito Visa Gold" [level=3] [ref=e211]
+            - generic [ref=e212]:
+              - generic [ref=e213]: Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz.
+              - generic [ref=e218]: "Mayor plazo para pagar: 26 días después de la fecha de corte."
+              - generic [ref=e223]: Pagos en línea, que permiten la disponibilidad de fondos inmediatamente lo realizas.
+              - generic [ref=e228]: Tecnología contactless y Click to Pay.
+          - generic [ref=e233] [cursor=pointer]:
+            - img "Tarjeta de Crédito Visa Platinum" [ref=e235]
+            - heading "Tarjeta de Crédito Visa Platinum" [level=3] [ref=e236]
+            - generic [ref=e237]:
+              - generic [ref=e238]: 2 pases anuales a los VIP Lounges afiliados a Visa Airport Companion.
+              - generic [ref=e243]: Doble de Puntos Santa Cruz en Restaurantes y Plataforas de Streaming digitales (HBO Max, Disney Plus, Netflix, Spotify, iTunes, Google Play y App Store.
+              - generic [ref=e248]: Bono de Bienvenida de 5,000 Puntos Santa Cruz, al consumir RD$100,000.00 o su equivalente en dólares, durante los primeros 3 meses de su emisión. El bono se aplica cumplidos los 3 meses (95 días) desde la emisión. Oferta valida para Tarjetas Platinum emitidas a partir del 1 de abril 2026.
+              - generic [ref=e253]: Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz.
+          - generic [ref=e258] [cursor=pointer]:
+            - img "Tarjeta de Crédito Visa Infinite" [ref=e260]
+            - heading "Tarjeta de Crédito Visa Infinite" [level=3] [ref=e261]
+            - generic [ref=e262]:
+              - generic [ref=e263]: "Before boarding: 6 pases anuales."
+              - generic [ref=e268]: Pases ilimitados (Lounge Key) membresía del programa para el tarjetahabiente principal.
+              - generic [ref=e273]: Triple de Puntos Santa Cruz en restaurantes locales e internacionales.
+              - generic [ref=e278]: Bono de Bienvenida de 20,000 Puntos Santa Cruz, al consumir RD$250,000.00 o su equivalente en dólares, durante los primeros 3 meses de su emisión. el bono se aplica cumplidos los 3 mses (95 días) desde la emisión. Oferta valida para Tarjetas Infinite emitidas a partir del 1 de abril 2026.
+          - generic [ref=e283] [cursor=pointer]:
+            - img "Tarjeta de Crédito Visa Joven" [ref=e285]
+            - heading "Tarjeta de Crédito Visa Joven" [level=3] [ref=e286]
+            - generic [ref=e287]:
+              - generic [ref=e288]: 2% de devolución del pago en universidades, papelerías, centros de fotocopiados, librerías.
+              - generic [ref=e293]: 2% de devolución del pago en fast foods, restaurantes.
+              - generic [ref=e298]: 2% de devolución del pago en couriers, tiendas de tecnología y servicios de streaming (como Netflix).
+              - generic [ref=e303]: 2% de devolución del pago en cines.
+          - generic [ref=e308] [cursor=pointer]:
+            - img "Tarjeta Multicrédito" [ref=e310]
+            - heading "Tarjeta Multicrédito" [level=3] [ref=e311]
+            - generic [ref=e312]:
+              - generic [ref=e313]: Tecnología para pago sin contacto (contactless).
+              - generic [ref=e318]: Un saldo (Límite en pesos dominicanos RD$).
+              - generic [ref=e323]: Permite realizar pagos desde tus cuentas, a través de BSC en línea y App BSC.
+              - generic [ref=e328]: Pago vía transferencias interbancarias.
+          - generic [ref=e333] [cursor=pointer]:
+            - img "Tarjeta de Crédito Bravo Santa Cruz" [ref=e335]
+            - heading "Tarjeta de Crédito Bravo Santa Cruz" [level=3] [ref=e336]
+            - generic [ref=e337]:
+              - generic [ref=e338]: "Cashback: 7% en todas las compras realizadas dentro del ecosistema Bravo con un tope mensual de RD$10,500."
+              - generic [ref=e343]: "Cashback: 5% en servicios de streaming y taxi: Uber, Netflix, Google Play, App Store, Spotify, Disney +, iTunes, Cabify y HBO Max con un tope mensual combinado entre todos de RD$1,500 o su equivalente en dólares."
+              - generic [ref=e348]: "Cashback: 5% en todas las compras en Amazon, con un tope mensual de US$50 o su equivalente en pesos."
+              - generic [ref=e353]: "Cashback: 1% en demás categorías de comercio con un tope mensual de RD$1,500.00 o su equivalente en dólares."
+          - generic [ref=e358] [cursor=pointer]:
+            - img "Tarjeta de Crédito PriceSmart" [ref=e360]
+            - heading "Tarjeta de Crédito PriceSmart" [level=3] [ref=e361]
+            - generic [ref=e362]:
+              - generic [ref=e363]: Acumulas 6% de SmartCash en todos los clubes y página web de PriceSmart de Rep. Dom. Tope mensual RD$6,000.00. o Cada SmartCash equivale a un peso dominicano (RD$1) para redimir en los clubes de PriceSmart. Los SmartCash sólo podrán redimirse para la compra de productos y/o servicios en los Clubes de PriceSmart ubicados en la República Dominicana. Los Puntos SmartCash vencen a los 12 meses desde su fecha de generación.
+              - generic [ref=e368]: 3% de devolución en farmacias a nivel nacional. Tope mensual RD$2,000.00.
+              - generic [ref=e373]: 2% de devolución en estaciones de combustible y restaurantes a nivel local. Tope mensual RD$2,000.00 combinados entre ambas categorías.
+              - generic [ref=e378]: 1% de devolución en el resto de las categorías de comercios local e internacional. Tope mensual RD$1,500.00 o su equivalente en dólares.
+        - button "Volver" [ref=e384] [cursor=pointer]
+    - contentinfo [ref=e178]: © 2024 Banco Santa Cruz S.A. | Todos los derechos reservadosAv. Lope de Vega No.21, Ensanche Naco, Santo Domingo, Rep. Dom.

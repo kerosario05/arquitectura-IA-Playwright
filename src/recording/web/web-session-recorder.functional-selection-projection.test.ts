@@ -23,16 +23,16 @@ import type { RecordedEvent, SessionTrace } from "../session-trace.types";
  *    `onTechnicalAction`), fired right after a functional projection is pushed.
  * 2. `WebSessionRecorder.onV2FunctionalAction` consumes it: flags the already-recorded technical
  *    click events (`target.coveredByFunctionalSelection = true`, found via a seq-keyed map, so
- *    ordering never matters) and appends ONE additional, locator-less, display-only event in the
+ *    ordering never matters) and appends ONE additional selection event in the
  *    EXISTING `compoundRole: "selection"` shape trace-to-scenario/semantic-recording already
  *    understand (unchanged), carrying the option's real value and the combobox's real field name.
  * 3. `canonical-recording-contract.ts` marks a `coveredByFunctionalSelection` interaction
  *    `technicalOnly: true`, reusing the exact mechanism `trace-to-scenario.ts` already uses to
  *    skip an event from the human-facing step list -- no new skip mechanism invented.
  *
- * Technical authority is never touched: both raw clicks remain full RecordedEvents with their own
- * locators, fully preserved for replay; only the human-facing SCENARIO step count and the
- * canonical `technicalOnly` classification change.
+ * Both raw clicks remain full RecordedEvents with their own locators, fully preserved for replay.
+ * The synthesized selection carries the option click's captured locator so the functional
+ * projection retains an executable target without deriving a selector.
  */
 
 type RecorderInternals = {
@@ -96,7 +96,7 @@ async function fireSelection(recorder: RecorderInternals, selectedValue: string)
   return { comboboxSeq: comboboxRecord.seq, optionSeq: optionRecord.seq };
 }
 
-test("1/2. combobox click + option click: a functional select projection produces ONE additional selection event, both technical clicks stay unremoved", async () => {
+test("1/2. combobox click + option click: a functional select projection produces ONE additional selection event with the captured option target", async () => {
   const { recorder, events } = newRecorder();
   await fireSelection(recorder, "Cuenta A");
 
@@ -109,7 +109,8 @@ test("1/2. combobox click + option click: a functional select projection produce
   const selectionEvent = events[2];
   assert.equal(selectionEvent.target?.compoundRole, "selection");
   assert.equal(selectionEvent.target?.afterValue, "Cuenta A");
-  assert.equal(selectionEvent.target?.locators.length, 0, "the synthesized event is display-only -- never its own executable target");
+  assert.deepEqual(selectionEvent.target?.locators, events[1].target?.locators, "the selection reuses the observed option locators without deriving a selector");
+  assert.ok(selectionEvent.target?.locators?.some((locator) => locator.strategy === "role" && locator.value === "option|Cuenta A"));
 });
 
 test("3/technicalPreserved/replayAuthority. technical action count is unaffected; both raw clicks keep their own real locators for replay", async () => {

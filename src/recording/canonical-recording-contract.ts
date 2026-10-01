@@ -10,7 +10,7 @@ import type { McpScenario, RecordingExecutionAction, RecordingExecutionContract 
 import { confirmedCompoundSelectionBefore, logicalCompoundChildValue } from "./compound-value";
 import { renderHumanStepValue } from "./human-step-renderer";
 import { preserveCapturedTechnicalTargetLocators } from "./technical-target-transport";
-import { isTechnicalIdentityAdmissible, isGenericUnresolvedLabel } from "./trace-normalizer";
+import { isTechnicalIdentityAdmissible, isGenericUnresolvedLabel, isNonActionableContainerTap } from "./trace-normalizer";
 import { semanticIdentityFromFrameworkOwnerEvidence } from "./framework-owner-semantic-identity";
 
 export type CanonicalInteractionAction =
@@ -109,6 +109,10 @@ export type CanonicalInteraction = InteractionStateOwnership & {
   selectorControlId?: string;
   optionSurfaceId?: string;
   observedOptions?: string[];
+  /** True when this interaction opened/activated a dynamic selector without committing a value. */
+  selectionControlOpened?: boolean;
+  /** Explicit requiredness observed from native `required` or `aria-required=true` at capture. */
+  requiredSelection?: boolean;
   technicalTargetCandidates?: import("./session-trace.types").RecordedTechnicalTarget[];
   /** LAST-RESORT, EXECUTION-ONLY authority; never a technicalTarget/certified owner. See its own doc. */
   semanticRuntimeEvidence?: import("./structural-owner-identity").SemanticRuntimeEvidence;
@@ -126,7 +130,74 @@ export type CanonicalInteraction = InteractionStateOwnership & {
    */
   relatedStateSurfaceEvidence?: RelatedStateSurfaceEvidence;
   confidence: number;
+  /** The visible click label is a user/entity value, not a reusable control name. */
+  dynamicTargetLabel?: boolean;
 };
+
+/**
+ * A click without a semantic field can still be replayed without its captured display label
+ * when Capture V2 recorded a unique, stable structural owner. Keep this predicate shared by
+ * scenario presentation and discovery so both layers make the same decision.
+ */
+export function hasReusableStructuralClickIdentity(interaction: {
+  action?: string;
+  actionType?: string;
+  semanticField?: string;
+  dynamicTargetLabel?: boolean;
+  technicalTargetRefs?: readonly string[];
+  technicalTargetCandidates?: readonly unknown[];
+} | null | undefined): boolean {
+  if (!interaction || (interaction.action ?? interaction.actionType) !== "click") return false;
+  if (interaction.dynamicTargetLabel === true) {
+    const hasNonTextReference = (interaction.technicalTargetRefs ?? []).some((reference) => !/^text:/i.test(reference));
+    const hasStructuralCandidate = (interaction.technicalTargetCandidates ?? []).some((candidate) => {
+      const structural = (candidate as { structuralContext?: Record<string, unknown> } | null)?.structuralContext;
+      return structural?.deterministicStructuralIdentity === true && structural.identityAmbiguous !== true;
+    });
+    return hasNonTextReference || hasStructuralCandidate;
+  }
+  if (interaction.semanticField?.trim()) return false;
+  return (interaction.technicalTargetCandidates ?? []).some((candidate) => {
+    const structural = (candidate as { structuralContext?: Record<string, unknown> } | null)?.structuralContext;
+    const owner = structural?.owner as { tag?: unknown } | undefined;
+    const ownerTag = String(owner?.tag ?? "").toLowerCase();
+    const stableAttributes = structural?.stableDirectAttributes as Record<string, unknown> | undefined;
+    return structural?.deterministicStructuralIdentity === true
+      && structural.identityAmbiguous !== true
+      && Boolean(stableAttributes && Object.keys(stableAttributes).length > 0)
+      && !["input", "select", "textarea"].includes(ownerTag);
+  });
+}
+
+/** Detect data-like text accidentally captured as the name of a click target. */
+export function isDynamicObjectDisplayLabel(target: RecordedTarget | undefined): boolean {
+  const label = target?.label?.trim();
+  if (!label || !target || target.compoundRole === "selection") return false;
+  // A rendered object/card can leak an absent property into its visible text (for example
+  // "Choose item / undefined Balance"). That text is neither a reusable control name nor a
+  // stable business identity. Treat the entire container label as dynamic so replay relies on
+  // its captured structural identity and the observed option selection, never the placeholder.
+  const dataContainer = ["div", "span", "p", "strong", "small"].includes((target.tag ?? "").toLowerCase());
+  if (dataContainer && /\b(?:undefined|null)\b|\[object Object\]/i.test(label)) return true;
+  const digits = (label.match(/\d/g) ?? []).length;
+  if (digits >= 7 || /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i.test(label)) return true;
+  if (/[•*xX]{2,}.{0,8}\d{2,4}$/.test(label)
+    && /(?:card|tarjeta|account|cuenta|credit|cr[eé]dito)/i.test(label)) return true;
+
+  const locatorContext = [
+    ...(target.locators ?? []).map((locator) => `${locator.strategy}:${locator.value}`),
+    ...Object.entries(target.attributes ?? {}).map(([key, value]) => `${key}:${value}`),
+  ].join(" ");
+  const identityHint = /(?:^|[\s_:#./-])(?:profile|perfil|customer|cliente|client|person|persona|user|usuario|titular|beneficiary|beneficiario|cardholder|accountowner)(?:$|[\s_:#./-])/i.test(locatorContext);
+  const words = label.match(/[\p{L}][\p{L}'’.-]*/gu) ?? [];
+  const personShaped = words.length >= 2
+    && words.length <= 6
+    && words.every((word) => /^\p{Lu}/u.test(word))
+    && !/\b(?:de|del|la|el|los|las|of|and|for)\b/i.test(label);
+  const textEvidence = target.playwrightRecorderEvidence?.kind === "text"
+    && target.playwrightRecorderEvidence.runtimeResolutionRequired === true;
+  return personShaped && ((identityHint && dataContainer) || (words.length >= 3 && dataContainer && textEvidence));
+}
 
 /**
  * A related state-bearing surface, observed DURING recording as causally changed by a trusted
@@ -409,7 +480,39 @@ export function hydrateCanonicalInteractionsFromSemanticModel(
   const persistedInteractions = scenario.canonicalInteractions;
   if (!persistedInteractions?.length) return scenario;
   const canonicalInteractions = persistedInteractions.map((interaction) => {
-    if (interaction.action !== "fill") return interaction;
+    // Persisted scenario projections can outlive a canonical-contract fix. The trace is still
+    // the source of truth at execute time, so refresh only state-transition ownership from the
+    // freshly rebuilt semantic projection, matched by the source event and action. Keep the
+    // persisted technical target/identity (which may carry reviewer-approved enrichment).
+    const currentTraceInteraction = (model.canonicalInteractions ?? []).find((candidate) =>
+      candidate.action === interaction.action
+        && candidate.sourceEventRefs.some((eventRef) => interaction.sourceEventRefs.includes(eventRef)),
+    );
+    const refreshedInteraction: CanonicalInteraction = currentTraceInteraction
+      ? (() => {
+        const {
+          screenBeforeRef: _persistedScreenBeforeRef,
+          screenAfterRef: _persistedScreenAfterRef,
+          routeBefore: _persistedRouteBefore,
+          routeAfter: _persistedRouteAfter,
+          transitionObserved: _persistedTransitionObserved,
+          causedTransition: _persistedCausedTransition,
+          terminalForContext: _persistedTerminalForContext,
+          ...persistedIdentity
+        } = interaction;
+        return {
+          ...persistedIdentity,
+          ...(currentTraceInteraction.screenBeforeRef ? { screenBeforeRef: currentTraceInteraction.screenBeforeRef } : {}),
+          ...(currentTraceInteraction.screenAfterRef ? { screenAfterRef: currentTraceInteraction.screenAfterRef } : {}),
+          ...(currentTraceInteraction.routeBefore ? { routeBefore: currentTraceInteraction.routeBefore } : {}),
+          ...(currentTraceInteraction.routeAfter ? { routeAfter: currentTraceInteraction.routeAfter } : {}),
+          ...(currentTraceInteraction.transitionObserved ? { transitionObserved: true } : {}),
+          ...(currentTraceInteraction.causedTransition ? { causedTransition: true } : {}),
+          ...(currentTraceInteraction.terminalForContext ? { terminalForContext: true } : {}),
+        };
+      })()
+      : interaction;
+    if (interaction.action !== "fill") return refreshedInteraction;
     const session = model.editingSessions.find((candidate) => candidate.editingSessionId === interaction.editingSessionRef)
       ?? model.editingSessions.find((candidate) => candidate.semanticField === interaction.semanticField
         && candidate.compoundRole === "amount_or_text")
@@ -421,7 +524,7 @@ export function hydrateCanonicalInteractionsFromSemanticModel(
       && clean(candidate.recordedValue));
     const logicalValue = logicalCompoundChildValue(value, selection?.recordedValue)
       ?? (value === clean(selection?.recordedValue) ? undefined : value);
-    return logicalValue === undefined ? interaction : { ...interaction, recordedValue: logicalValue };
+    return logicalValue === undefined ? refreshedInteraction : { ...refreshedInteraction, recordedValue: logicalValue };
   });
   // Older persisted projections could retain the trigger click while losing a
   // portalized option note during materialization. Rehydrate only the missing
@@ -499,6 +602,10 @@ export type RecordedActionReadiness = {
   runtimeValueResolved: boolean;
   technicalTargetCount: number;
   reResolutionPossible: boolean;
+  /** A real captured locator backs this action -- distinct from `reResolutionPossible`, which
+   * also counts a locator-less structural-only re-resolution STRATEGY. `technicalReady` certifies
+   * against this narrower flag, never the broader one. */
+  hasLocatorBackedTechnicalEvidence: boolean;
   stateCompatible: boolean;
   ready: boolean;
   blockReasons: string[];
@@ -567,12 +674,39 @@ export function evaluateRecordedScenarioExecutionReadiness(
     const comparable = comparableValueKey(interaction.valueKey);
     return [...requirements.values()].find((requirement) => comparableValueKey(requirement.valueKey) === comparable);
   };
-  const actions = interactions.map((interaction): RecordedActionReadiness => {
+  const actions = interactions.map((interaction, interactionIndex): RecordedActionReadiness => {
     const targetCount = (interaction.technicalTargetCandidates?.length ?? 0) || interaction.technicalTargetRefs.length;
-    const reResolutionPossible = (interaction.technicalTargetCandidates ?? []).some((candidate) =>
-      candidate.locatorCandidates.length > 0
-      && Boolean(candidate.structuralContext || candidate.stableAttributes),
+    // FIRST_LOSS fix (fresh run 1d41f192-049a-4d64-9b62-4c2451249467, interaction-14, Visa
+    // action): a candidate carrying real, deterministic structural authority (owner tag +
+    // stableDescendants/stableDirectAttributes -- e.g. a descendant img's alt -- with
+    // deterministicStructuralIdentity===true and no capture-time ambiguity) was invisible to
+    // this check whenever no locator had been captured for it yet, EVEN THOUGH that exact same
+    // sufficiency bar is what `deterministicStructuralRuntimeEligible` below already trusts to
+    // permit live runtime resolution. Never fabricates a locator; only recognizes structural
+    // authority that was already preserved on the candidate as a genuine re-resolution strategy.
+    //
+    // FIRST_LOSS fix (fresh run 897ae0ab-310c-495f-96d2-6b2f2895294d, interaction-14): the prior
+    // fix above still gated the deterministic-identity disjunct on `identityAmbiguous !== true`.
+    // The regression proven below (see the `identityAmbiguous`/`structuralIdentityMatchCount`
+    // comment on `deterministicStructuralRuntimeEligible`) established that capture-time
+    // `identityAmbiguous` is a coarse, landmark-wide proxy taken BEFORE the live resolver's own
+    // narrower re-count ever runs, and is never a valid reason to fail closed here -- only a
+    // genuine per-LOCATOR `ambiguous` flag on an actual candidate locator still blocks eligibility.
+    // A candidate with no locators at all (this exact interaction-14 shape) trivially has none,
+    // so it was never blocked for a real reason -- `identityAmbiguous` alone was silently
+    // reintroducing the same over-cautious gate this file's own later fix rejected.
+    // Locator-BACKED evidence only -- a real captured locator, not merely a structural-authority
+    // strategy to attempt live re-resolution. This is the bar `technicalReady` (below) certifies
+    // against; a structural-only candidate is a re-resolution STRATEGY, never itself a certified
+    // technical target.
+    const hasLocatorBackedTechnicalEvidence = (interaction.technicalTargetCandidates ?? []).some((candidate) =>
+      candidate.locatorCandidates.length > 0 && Boolean(candidate.structuralContext || candidate.stableAttributes),
     ) || interaction.technicalTargetRefs.length > 0;
+    const reResolutionPossible = hasLocatorBackedTechnicalEvidence
+      || (interaction.technicalTargetCandidates ?? []).some((candidate) =>
+        candidate.structuralContext?.deterministicStructuralIdentity === true
+        && !candidate.locatorCandidates.some((locator) => locator.ambiguous === true),
+      );
     const requirement = requirementForInteraction(interaction);
     const requiresRuntimeValue = interaction.action === "fill" || interaction.action === "select";
     const runtimeValueResolved = !requiresRuntimeValue
@@ -602,6 +736,22 @@ export function evaluateRecordedScenarioExecutionReadiness(
     // would let a "control"/"Campo pendiente de identificar" action reach the browser runtime as
     // if resolved.
     if (interaction.admissionStatus === "unresolved" && !runtimeResolutionRequired) blockReasons.push("required_interaction_unresolved");
+    if (interaction.selectionControlOpened && interaction.requiredSelection) {
+      const laterActions = interactions.slice(interactionIndex + 1);
+      const attemptedContinuation = laterActions.some((candidate) =>
+        candidate.action !== "system_observation" && candidate.action !== "navigation",
+      );
+      const matchingCommits = laterActions.filter((candidate) => candidate.action === "select"
+        && Boolean(candidate.recordedValue)
+        && candidate.screenBeforeRef === interaction.screenBeforeRef
+        && (interaction.selectorControlId
+          ? candidate.selectorControlId === interaction.selectorControlId
+          : Boolean(interaction.semanticField && candidate.semanticField === interaction.semanticField)
+            && (candidate.entityScope ?? "") === (interaction.entityScope ?? "")));
+      if (attemptedContinuation && matchingCommits.length === 0) {
+        blockReasons.push("required_dynamic_selection_not_recorded");
+      }
+    }
     // TEMPORARY DIAGNOSTIC (this ticket only): no recordedValue/dataset literal/secret is logged --
     // only ids, action/role metadata, counts, and decision state, matching the ticket's redaction
     // requirement.
@@ -625,6 +775,7 @@ export function evaluateRecordedScenarioExecutionReadiness(
       runtimeValueResolved,
       technicalTargetCount: targetCount,
       reResolutionPossible,
+      hasLocatorBackedTechnicalEvidence,
       stateCompatible: stateReady,
       ready: blockReasons.length === 0,
       blockReasons,
@@ -636,7 +787,14 @@ export function evaluateRecordedScenarioExecutionReadiness(
   const mutationReady = !scenario.mutationDiagnostics?.rejectionReason;
   const functionalReady = scenario.testRailSteps.length > 0;
   const dataReady = scenario.readiness?.dataReadiness !== false && actions.every((action) => action.runtimeValueResolved);
-  const technicalReady = actions.every((action) => action.technicalTargetCount > 0 && action.reResolutionPossible);
+  // `reResolutionPossible` now honestly recognizes a locator-less, deterministic structural
+  // candidate as a genuine RE-RESOLUTION strategy (see the fix above) -- but a strategy to attempt
+  // live resolution is never itself technical CERTIFICATION. `technicalReady` must keep certifying
+  // against real captured locator evidence only (`hasLocatorBackedTechnicalEvidence`), never the
+  // broader `reResolutionPossible`, or a structural-only strategy would silently count as
+  // certified technical coverage.
+  const technicalReady = actions.every((action) =>
+    action.technicalTargetCount > 0 && action.hasLocatorBackedTechnicalEvidence);
   const blockReasons = [...new Set([
     ...actions.flatMap((action) => action.blockReasons),
     ...(!compoundReady ? [scenario.mutationDiagnostics?.rejectionReason ?? "mutation_contract_invalid"] : []),
@@ -744,12 +902,36 @@ function stableControlOf(event: RecordedEvent): string {
     .join("|") || `event-${event.seq + 1}`;
 }
 
-function selectorControlOf(event: RecordedEvent, target: RecordedTarget | undefined): string | undefined {
+function selectorControlOf(event: RecordedEvent, target: RecordedTarget | undefined, events: readonly RecordedEvent[], index: number): string | undefined {
   if (!target || target.compoundRole !== "selection") return undefined;
-  return target.eventTargetRef
-    ?? target.cellRef
-    ?? target.currentTargetRef
-    ?? `${event.screenKey}|${target.gridRef ?? ""}|${scopeOf(target) ?? ""}|${fieldOf(target) ?? target.label}`;
+  const observedTrigger = clean(target.dynamicLifecycle?.triggerTechnicalTarget);
+  if (observedTrigger) return `selector:${observedTrigger}`;
+  // Portal-rendered options often have no DOM ancestry back to their selector. Recover the
+  // selector from the nearest same-surface selection-control observation, using captured
+  // interaction lineage and owner metadata (never option text or positional authority).
+  const parent = target.role?.toLowerCase() === "option"
+    ? events.slice(Math.max(0, index - 40), index).reverse().find((candidate) => {
+      const candidateTarget = candidate.target;
+      return candidate.kind === "note"
+        && candidate.screenKey === event.screenKey
+        && candidateTarget?.compoundRole === "selection"
+        && candidateTarget.role?.toLowerCase() !== "option"
+        && Boolean(candidateTarget.eventTargetRef || candidateTarget.cellRef || candidateTarget.gridRef
+          || candidateTarget.associatedField || candidateTarget.headerContext);
+    })
+    : undefined;
+  const selectorTarget = parent?.target ?? target;
+  return selectorTarget.eventTargetRef
+    ?? selectorTarget.cellRef
+    ?? selectorTarget.currentTargetRef
+    ?? `${event.screenKey}|${selectorTarget.gridRef ?? ""}|${scopeOf(selectorTarget) ?? ""}|${fieldOf(selectorTarget) ?? selectorTarget.label}`;
+}
+
+function explicitlyRequiredSelection(target: RecordedTarget | undefined): boolean {
+  if (!target || target.compoundRole !== "selection") return false;
+  const required = target.attributes?.required;
+  const ariaRequired = target.attributes?.["aria-required"] ?? target.beforeState?.aria?.["aria-required"];
+  return required === "true" || required === "" || ariaRequired?.toLowerCase() === "true";
 }
 
 // The forward-transition boundary `transitionAfter` stops at: without `press` here, an event's
@@ -850,24 +1032,42 @@ function nextPointerBoundaryT(events: readonly RecordedEvent[], fromT: number, a
 }
 
 /**
- * A route transition belongs to the action whose pointer lifecycle caused it: the first
- * navigation that fired after this action's pointerdown and before the next pointerdown.
- * Capture delivery can lag behind the browser, so later navigations may already belong to
- * subsequent physical actions even when their tap records have not arrived yet. Taking the
- * first transition preserves the causal boundary without depending on app routes or timing.
+ * Route transitions between this action's pointerdown and the next pointerdown belong to
+ * this physical gesture. Some applications emit intermediate routes before settling, so use
+ * the last observed changed route inside that gesture boundary as the action's destination.
  * When no pointer anchor exists (legacy/other platforms) the forward-looking transition is used.
  */
 function causalTransition(events: readonly RecordedEvent[], index: number, excludeSeqs?: ReadonlySet<number>): { event?: RecordedEvent } {
   const anchor = actionablePointerAnchor(events, index);
   if (!anchor || !anchor.url) return transitionAfter(events, index, excludeSeqs);
   const end = nextPointerBoundaryT(events, anchor.t, anchor) ?? Number.POSITIVE_INFINITY;
+  let ownedTransition: RecordedEvent | undefined;
+  let ownedScreenChange: RecordedEvent | undefined;
+  const routeSurface = (value: string | undefined): string | undefined => value?.replace(/[?#].*$/, "");
   for (const candidate of events) {
-    if (candidate.kind !== "navigate" || !candidate.url) continue;
     if (typeof candidate.seq === "number" && excludeSeqs?.has(candidate.seq)) continue;
     if (candidate.t < anchor.t || candidate.t > end) continue;
+    if (candidate.kind === "screen_change" && candidate.toScreenKey && candidate.toScreenKey !== candidate.screenKey) {
+      ownedScreenChange = candidate;
+      continue;
+    }
+    if (candidate.kind !== "navigate" || !candidate.url) continue;
     if (candidate.url === anchor.url) continue;
-    return { event: candidate };
+    // A tap can first dismiss an overlay and capture the underlying screen, then a later
+    // route-only event can reflect the app's inactivity reset. When that event still carries
+    // the just-captured screen key and the captured screen shares the action's route surface,
+    // the screen change is the action's immediate outcome; the later route has no matching
+    // screen identity and must not be assigned to the click.
+    if (
+      ownedScreenChange?.toScreenKey
+      && candidate.screenKey === ownedScreenChange.toScreenKey
+      && routeSurface(ownedScreenChange.url) === routeSurface(anchor.url)
+    ) {
+      return { event: ownedScreenChange };
+    }
+    ownedTransition = candidate;
   }
+  if (ownedTransition) return { event: ownedTransition };
   return transitionAfter(events, index, excludeSeqs);
 }
 
@@ -937,9 +1137,7 @@ export function isMaskActivation(events: readonly RecordedEvent[], index: number
 
 function isSelection(event: RecordedEvent): boolean {
   return event.kind === "tap"
-    && (event.target?.interactionType === "select"
-      || event.target?.compoundRole === "selection"
-      || event.target?.afterValue !== undefined
+    && (event.target?.afterValue !== undefined
       || event.target?.dynamicLifecycle?.selectedOption !== undefined);
 }
 
@@ -975,9 +1173,9 @@ function logicalValue(
   }
   return clean(target?.committedValue)
     ?? clean(target?.afterState?.committedValue)
-    ?? clean(target?.rawTypedValue)
     ?? clean(target?.inputValue)
-    ?? clean(event.value);
+    ?? clean(event.value)
+    ?? clean(target?.rawTypedValue);
 }
 
 /** Converts normalized events to the stable interaction vocabulary used by all downstream consumers. */
@@ -1003,6 +1201,7 @@ export function buildCanonicalInteractions(
   for (let candidateIndex = 0; candidateIndex < events.length; candidateIndex += 1) {
     const candidate = events[candidateIndex];
     if (candidate.kind !== "tap" && candidate.kind !== "fill" && candidate.kind !== "press") continue;
+    if (isNonActionableContainerTap(candidate)) continue;
     const anchor = actionablePointerAnchor(events, candidateIndex);
     if (!anchor || !anchor.url) {
       const transition = causalTransition(events, candidateIndex).event;
@@ -1047,6 +1246,7 @@ export function buildCanonicalInteractions(
   for (const [index, event] of events.entries()) {
     const target = event.target;
     if (event.kind === "note" || event.kind === "launch" || event.kind === "screen_change") continue;
+    if (isNonActionableContainerTap(event)) continue;
     if (event.kind === "navigate" || event.kind === "back") {
       if (typeof event.seq === "number" && ownedTransitionSeqs.has(event.seq)) continue;
       const ownership = ownershipForEvent(events, index, ownedTransitionSeqs);
@@ -1091,6 +1291,29 @@ export function buildCanonicalInteractions(
           : target?.role?.toLowerCase() === "checkbox"
             ? checkboxAction(target)
             : "click";
+    const dynamicTargetLabel = action === "click" && isDynamicObjectDisplayLabel(target);
+    const normalizeDynamicLabel = (value: string): string => value
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "")
+      .toLocaleLowerCase()
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
+    const dynamicTargetLabelNormalized = clean(target?.label ?? "")
+      ? normalizeDynamicLabel(clean(target?.label ?? "")!)
+      : undefined;
+    const targetLocatorsForReplay = (target?.locators ?? []).filter((locator) => {
+      if (!dynamicTargetLabel) return true;
+      const locatorValue = locator.value.trim().toLocaleLowerCase();
+      return locator.strategy !== "text"
+        && Boolean(locatorValue)
+        && !(dynamicTargetLabelNormalized && locatorValue.includes(dynamicTargetLabelNormalized));
+    });
+    const dynamicTargetHasStableEvidence = targetLocatorsForReplay.some((locator) => locator.strategy !== "text")
+      || (target?.technicalTargetCandidates ?? []).some((candidate) =>
+        candidate.structuralContext?.deterministicStructuralIdentity === true
+        && candidate.structuralContext.identityAmbiguous !== true,
+      );
+    const dynamicTargetNeedsRuntimeResolution = dynamicTargetLabel && !dynamicTargetHasStableEvidence;
     const value = event.kind === "press"
       ? undefined
       : selection
@@ -1131,9 +1354,11 @@ export function buildCanonicalInteractions(
     // A press with no captured key is never executable authority -- there is no key to send, and
     // no runtime re-verification can recover one that was simply never recorded.
     const missingPressKey = action === "press" && !key;
-    const admissionRejected = ownerRecertificationRequired || genericWithoutIdentity || missingRequiredFillPrecondition || missingPressKey;
-    const admissionReason = missingPressKey
-      ? "missing_press_key"
+    const admissionRejected = ownerRecertificationRequired || genericWithoutIdentity || missingRequiredFillPrecondition || missingPressKey || dynamicTargetNeedsRuntimeResolution;
+    const admissionReason = dynamicTargetNeedsRuntimeResolution
+      ? "dynamic_label_without_stable_target"
+      : missingPressKey
+        ? "missing_press_key"
       : missingRequiredFillPrecondition
       ? "missing_required_credential_fill"
       : ownerRecertificationRequired
@@ -1147,7 +1372,7 @@ export function buildCanonicalInteractions(
     // handled concern (required_interaction_unresolved). This tracker exists only to catch the
     // "zero fill events were ever captured here" case.
     if (action === "fill" || action === "select") screensWithFillOrSelect.add(event.screenKey);
-    const technicalTargetRefsForEvent = target?.locators?.map((locator) => `${locator.strategy}:${locator.value}`) ?? [];
+    const technicalTargetRefsForEvent = targetLocatorsForReplay.map((locator) => `${locator.strategy}:${locator.value}`);
     // A real structural label source (associatedField/headerContext/columnIdentity), never the raw
     // ancestor-walk label fallback fieldOf(target) also accepts — that fallback is exactly the
     // "control"/generic-label surface the admission gate exists to reject, so it must never be
@@ -1209,17 +1434,28 @@ export function buildCanonicalInteractions(
     // as the "generic label" concern requires. Never used as field/semantic identity (no
     // semanticField/valueKey is derived from it below) -- runtime EXECUTION authority only.
     //
-    // Scoped to `check`/`uncheck` only -- the exact action shape this ticket proved the runtime
-    // structural resolver already handles safely. Never generalized to `click`/`select`: a
-    // selection/combobox OWNER click also carries a bare structural candidate indistinguishable
-    // from its own OPTION at this evidence layer, and telling them apart relies on
-    // `structuralFieldName` being real/present -- an invariant this narrower evidence path must
-    // never bypass. Widening beyond check/uncheck needs its own proven boundary, not assumed here.
+    // A stable structural owner can also be the execution identity for a click whose accessible
+    // name is volatile (for example, a profile dropdown that displays the currently signed-in
+    // user's name). Keep this narrow: option/combobox selection clicks and editable owners must
+    // continue through their existing field/selection contracts. The runtime resolver still
+    // rebuilds and re-counts the structural identity live; this capture flag only admits that
+    // bounded attempt and never certifies a locator by itself.
     const deterministicStructuralOwnerEvidence = (action === "check" || action === "uncheck")
-      && (target?.technicalTargetCandidates ?? []).some((candidate) =>
-        candidate.structuralContext?.deterministicStructuralIdentity === true
-        && candidate.structuralContext.identityAmbiguous !== true,
-      );
+      ? (target?.technicalTargetCandidates ?? []).some((candidate) =>
+          candidate.structuralContext?.deterministicStructuralIdentity === true
+          && candidate.structuralContext.identityAmbiguous !== true,
+        )
+      : action === "click"
+        && target?.compoundRole !== "selection"
+        && !technicalTargetRefsForEvent.some((ref) => /^role:(?:option|combobox)\|/i.test(ref))
+        && (target?.technicalTargetCandidates ?? []).some((candidate) => {
+          const structural = candidate.structuralContext;
+          const ownerTag = structural?.owner?.tag?.toLowerCase();
+          return structural?.deterministicStructuralIdentity === true
+            && structural.identityAmbiguous !== true
+            && Boolean(structural.stableDirectAttributes && Object.keys(structural.stableDirectAttributes).length > 0)
+            && !["input", "select", "textarea"].includes(ownerTag ?? "");
+        });
     const scopedStructuralEvidencePresent = (target?.technicalTargetCandidates ?? []).some((candidate) => {
       const context = candidate.structuralContext;
       return Boolean(
@@ -1238,13 +1474,19 @@ export function buildCanonicalInteractions(
     // to `technicalReady`/`promotionReady` (see `executionAudit` below). Scoped to the SAME
     // action types the structural runtime path supports; a target already proven ambiguous by
     // prior locator evidence is never handed to it either, exactly like the structural path.
+    // The owner's own ambiguous technicalTargetCandidates must never veto a
+    // `clickScopeElement` evidence: that shape (a click on a roleless owner borrowing a unique
+    // descendant's identity) already proves its OWN uniqueness independently, via its own
+    // scope/innermost-match discipline -- the owner's unrelated weak/ambiguous locator is exactly
+    // why that fallback exists in the first place, never a reason to reject it.
+    const semanticRuntimeIsScopeClick = target?.semanticRuntimeEvidence?.clickScopeElement === true;
     const semanticRuntimeEligible = Boolean(target?.semanticRuntimeEvidence)
       && target!.semanticRuntimeEvidence!.captureUniqueTarget === true
       && target!.semanticRuntimeEvidence!.scopeAlternatives.length > 0
       && (action === "fill" || action === "click" || action === "press")
-      && !(target?.technicalTargetCandidates ?? []).some((candidate) =>
+      && (semanticRuntimeIsScopeClick || !(target?.technicalTargetCandidates ?? []).some((candidate) =>
         (candidate.locatorCandidates ?? []).some((locator) => locator.ambiguous === true),
-      );
+      ));
     const recorderRuntimeEligible = Boolean(target?.playwrightRecorderEvidence)
       && target!.playwrightRecorderEvidence!.runtimeResolutionRequired === true
       && target!.playwrightRecorderEvidence!.kind !== "segmented_input"
@@ -1287,16 +1529,20 @@ export function buildCanonicalInteractions(
     // stays completely unchanged and is the real safety net here). Only a genuine per-LOCATOR
     // `ambiguous` flag (a narrower, more specific marker on an actual candidate locator) still
     // blocks eligibility here.
-    const priorAmbiguityEvidence = (target?.technicalTargetCandidates ?? []).some((candidate) =>
+    // Same exception as `semanticRuntimeEligible` above: a `clickScopeElement` shape already
+    // proved its OWN uniqueness independently (scope/innermost-match discipline), so the owner's
+    // unrelated ambiguous locator must not veto it here either -- otherwise `structuralRuntimeEligible`
+    // silently drops the same evidence `semanticRuntimeEligible` just admitted, leaving the action
+    // "certified" with no technical target and no semanticRuntimeEvidence at all.
+    const priorAmbiguityEvidence = !semanticRuntimeIsScopeClick && (target?.technicalTargetCandidates ?? []).some((candidate) =>
       (candidate.locatorCandidates ?? []).some((locator) => locator.ambiguous === true),
     );
     const frameworkStructuralRuntimeEligible = semanticIdentityFromFrameworkOwnerEvidence(target)
       .hasDeterministicStructuralAuthority;
     // Unrestricted by action type (STRUCTURAL_RUNTIME_ELIGIBLE_ACTIONS below already scopes this
-    // to fill/click/press) -- kept as its own definition, separate from the narrower,
-    // check/uncheck-only `deterministicStructuralOwnerEvidence` above, since reusing that one
-    // here would silently exclude fill/click/press (pre-existing, unrelated behavior this ticket
-    // must not touch).
+    // to fill/click/press) -- kept separate from `deterministicStructuralOwnerEvidence` because
+    // that evidence additionally rejects selection owners and editable controls for its narrower
+    // semantic-label suppression/admission role.
     const deterministicStructuralRuntimeEligible = (target?.technicalTargetCandidates ?? []).some((candidate) =>
       candidate.structuralContext?.deterministicStructuralIdentity === true
       && candidate.structuralContext.identityAmbiguous !== true,
@@ -1362,20 +1608,49 @@ export function buildCanonicalInteractions(
     // A press's payload is its `key`, never a dataset-bound field value -- computing a
     // semanticField/valueKey for it risks creating a spurious runtime input requirement (the
     // dataset system expects a fillable value behind every valueKey) for an action that has none.
+    const isCapturedDynamicLabel = (value: string | undefined): boolean => Boolean(
+      dynamicTargetLabelNormalized
+      && value
+      && normalizeDynamicLabel(value) === dynamicTargetLabelNormalized,
+    );
+    const structuralClickHasOnlyDisplayLabel = action === "click"
+      && (deterministicStructuralOwnerEvidence || dynamicTargetLabel)
+      && (!clean(target?.associatedField) || isCapturedDynamicLabel(clean(target?.associatedField)))
+      && (!clean(target?.headerContext) || isCapturedDynamicLabel(clean(target?.headerContext)))
+      && (!clean(target?.columnIdentity) || isCapturedDynamicLabel(clean(target?.columnIdentity)));
     const semanticField = event.kind === "press"
       ? undefined
+      : structuralClickHasOnlyDisplayLabel
+        ? undefined
       : !admissionRejected
         ? fieldOf(target)
         : (resolutionState === "runtime_resolution_required" ? structuralFieldName : undefined);
     const scope = scopeOf(target);
-    const valueKey = semanticField
+    const selectorControlId = selectorControlOf(event, target, events, index);
+    // Opening a selector is a click/navigation action; only the committed option is a
+    // value-bearing select action. Keeping these separate prevents an empty opener from
+    // becoming an unresolved dataset field while still allowing required-selection gates.
+    const selectionControlOpened = event.kind === "tap"
+      && target?.compoundRole === "selection"
+      && value === undefined
+      && target?.role?.toLowerCase() !== "option";
+    const valueKey = semanticField && !selectionControlOpened
       ? `${scope ? `${scope}.` : ""}${keyPart(semanticField)}${selection ? "_seleccion" : target?.compoundRole === "amount_or_text" ? "_valor" : ""}`
       : undefined;
     const ownership = ownershipForEvent(events, index);
-    const technicalTargetCandidates = preserveCapturedTechnicalTargetLocators(
+    const preservedTechnicalTargetCandidates = preserveCapturedTechnicalTargetLocators(
       target?.technicalTargetCandidates,
-      target?.locators ?? [],
+      targetLocatorsForReplay,
     );
+    const technicalTargetCandidates = dynamicTargetLabel
+      ? preservedTechnicalTargetCandidates?.map((candidate) => ({
+          ...candidate,
+          locatorCandidates: (candidate.locatorCandidates ?? []).filter((locator) => {
+            if (locator.strategy === "text") return false;
+            return !(dynamicTargetLabelNormalized && locator.value.trim().toLocaleLowerCase().includes(dynamicTargetLabelNormalized));
+          }),
+        }))
+      : preservedTechnicalTargetCandidates;
     // Diagnostic/state-observation authority only: derive a related state surface from the recorder's
     // causal mutation observation. Never affects action/field/readiness/execution decisions.
     const relatedStateSurfaceEvidence = target?.eventTargetRef
@@ -1393,6 +1668,7 @@ export function buildCanonicalInteractions(
       ...(semanticField ? { semanticField } : {}),
       ...(scope ? { entityScope: scope } : {}),
       action,
+      ...(dynamicTargetLabel ? { dynamicTargetLabel: true } : {}),
       ...(valueKey ? { valueKey } : {}),
       ...(value ? { recordedValue: value } : {}),
       ...(key ? { key } : {}),
@@ -1402,24 +1678,26 @@ export function buildCanonicalInteractions(
       sourceEventRefs: [`event-${index + 1}`],
       technicalTargetRefs: technicalTargetRefsForEvent,
       ...(target?.editingSessionRef ? { editingSessionRef: target.editingSessionRef } : {}),
-      ...(selectorControlOf(event, target) ? {
-        selectorControlId: selectorControlOf(event, target),
-        optionSurfaceId: `${event.screenKey}|${selectorControlOf(event, target)}|option-surface`,
+      ...(selectorControlId ? {
+        selectorControlId,
+        optionSurfaceId: `${event.screenKey}|${selectorControlId}|option-surface`,
       } : {}),
       ...(target?.observedOptions?.length ? { observedOptions: [...new Set(target.observedOptions)] } : {}),
+      ...(selectionControlOpened ? { selectionControlOpened: true } : {}),
+      ...(selectionControlOpened && explicitlyRequiredSelection(target) ? { requiredSelection: true } : {}),
       ...(technicalTargetCandidates?.length ? { technicalTargetCandidates } : {}),
       ...(technicalTargetCandidates?.some((candidate) => candidate.validatedByInteraction) ? { validatedByInteraction: true } : {}),
       // LAST-RESORT, EXECUTION-ONLY authority; never a technicalTarget/certified owner. Only
       // transported when the eligibility gate above accepted it for THIS action.
-      ...(semanticRuntimeEligible && target?.semanticRuntimeEvidence ? { semanticRuntimeEvidence: target.semanticRuntimeEvidence } : {}),
-      ...(target?.playwrightRecorderEvidence ? { playwrightRecorderEvidence: target.playwrightRecorderEvidence } : {}),
+      ...(!dynamicTargetLabel && semanticRuntimeEligible && target?.semanticRuntimeEvidence ? { semanticRuntimeEvidence: target.semanticRuntimeEvidence } : {}),
+      ...(!dynamicTargetLabel && target?.playwrightRecorderEvidence ? { playwrightRecorderEvidence: target.playwrightRecorderEvidence } : {}),
       // target.label itself is withheld here too when uncertified — it is exactly the
       // ancestor-walk signal that can still reflect the previous screen for a brief window after
       // a transition, so falling back to raw label text would silently reintroduce the stale
       // owner this gate exists to prevent. The human-facing description is only ever built from
       // a resolved semanticField (real structural evidence), never a rejected fallback label —
       // true both when fully accepted and when only runtime-resolution evidence exists.
-      ...(semanticField && target?.label ? { description: action === "select" ? `Seleccionar en "${semanticField}"` : `Ingresar en "${semanticField}"` } : {}),
+      ...(semanticField && target?.label && !dynamicTargetLabel ? { description: action === "select" ? `Seleccionar en "${semanticField}"` : `Ingresar en "${semanticField}"` } : {}),
       ...ownership,
       ...(ownerRecertificationRequired ? { ownerRecertificationRequired: true } : {}),
       ...(admissionRejected ? { admissionStatus: "unresolved" as const, admissionReason } : { admissionStatus: "accepted" as const }),
@@ -1922,10 +2200,16 @@ export function applyRuntimeDatasetValues(
     const value = valuesByKey.get(step.valueKey);
     if (value === undefined) return step;
     const template = step.stepTemplate ?? step.content;
-    return { ...step, renderedStep: renderHumanStepValue(template, step.valueKey, value) };
+    // A segmented (OTP-style) step's valueKey holds the ONE full token shared by every box in
+    // its group; segmentPosition (1-based) says which character of that token this particular
+    // box's own placeholder resolves to, so each box re-renders its own digit, not the whole
+    // token. Generic on segmentPosition/segmentCount, never on any field name.
+    const stepValue = step.segmentPosition ? value[step.segmentPosition - 1] : value;
+    if (stepValue === undefined) return step;
+    return { ...step, renderedStep: renderHumanStepValue(template, step.valueKey, stepValue) };
   });
   const existingDiagnostics = scenario.mutationDiagnostics;
-  const mutationDiagnostics = scenario.mutation?.mutationType === "REPEAT_ENTITY"
+  const mutationDiagnostics = scenario.mutation?.mutationType === "REPEAT_ENTITY" && existingDiagnostics
     ? {
       ...existingDiagnostics,
       ...(uniqueConstraintResolutions.valid && existingDiagnostics?.rejectionReason === "RUNTIME_DATA_CONSTRAINT_VIOLATION"
@@ -1935,7 +2219,7 @@ export function applyRuntimeDatasetValues(
           : {}),
     }
     : existingDiagnostics;
-  const mutationRejected = Boolean(mutationDiagnostics?.rejectionReason);
+  const mutationRejected = !uniqueConstraintResolutions.valid || Boolean(mutationDiagnostics?.rejectionReason);
   const effectfulReadiness = mutationRejected
     ? { ...readiness, publicationContentReadiness: false, publicationReadiness: false }
     : readiness;
@@ -1973,14 +2257,17 @@ function revalidateRepeatUniqueConstraints(
   const updated = requirements.map((requirement) => {
     const constraint = (requirement.constraints ?? []).find(isUniqueWithinCollection);
     if (!constraint) return requirement;
-    const current = clean(requirement.value);
+    const current = clean(requirement.value ?? undefined);
     const logicalKey = logicalFieldKey(requirement.valueKey);
     const activeValues = new Set(requirements
       .filter((candidate) => candidate.valueKey !== requirement.valueKey && logicalFieldKey(candidate.valueKey) === logicalKey)
-      .map((candidate) => clean(candidate.value))
+      .map((candidate) => clean(candidate.value ?? undefined))
       .filter((value): value is string => Boolean(value))
       .map((value) => value.toLocaleLowerCase()));
-    const distinct = Boolean(current) && !activeValues.has(current.toLocaleLowerCase());
+    const normalizedCurrent = current?.toLocaleLowerCase();
+    const distinct = typeof normalizedCurrent === "string"
+      && normalizedCurrent.length > 0
+      && !activeValues.has(normalizedCurrent);
     const previous = resolutions.find((resolution) => resolution.valueKey === requirement.valueKey);
     const nextResolution: ConstraintResolution = {
       valueKey: requirement.valueKey,
@@ -2922,7 +3209,11 @@ export function toSharedMcpScenario(
           // labels) forwarded under the name case-discovery.ts's existing target-scoped fill
           // readiness retry gate reads. This is the SAME value, not a re-derivation.
           ...(interaction.semanticField ? { associatedField: interaction.semanticField } : {}),
-          targetRef: interaction.controlIdentity,
+          ...(interaction.selectorControlId ? { selectorControlId: interaction.selectorControlId } : {}),
+          ...(interaction.optionSurfaceId ? { optionSurfaceId: interaction.optionSurfaceId } : {}),
+          targetRef: interaction.dynamicTargetLabel === true || hasReusableStructuralClickIdentity(interaction)
+            ? "recorded control"
+            : interaction.controlIdentity,
           ...(interaction.technicalTargetRefs[0] ? { technicalTargetRef: interaction.technicalTargetRefs[0] } : {}),
           ...(interaction.technicalTargetRefs.length > 0 ? { technicalTargetRefs: [...interaction.technicalTargetRefs] } : {}),
           ...(interaction.technicalTargetCandidates?.length ? { technicalTargetCandidates: interaction.technicalTargetCandidates as Array<Record<string, unknown>> } : {}),
@@ -2957,6 +3248,7 @@ export function toSharedMcpScenario(
             ? { expectedRouteAfter: interaction.routeAfter }
             : {}),
           ...(interaction.controlIdentity ? { controlIdentity: interaction.controlIdentity } : {}),
+          ...(interaction.dynamicTargetLabel === true ? { dynamicTargetLabel: true } : {}),
           ...(interaction.relatedStateSurfaceEvidence
             ? { relatedStateSurfaceEvidence: interaction.relatedStateSurfaceEvidence }
             : {}),

@@ -258,3 +258,40 @@ test("15/scopedStructuralEvidence. unique scoped fingerprint permits runtime res
   assert.equal(readiness.technicalReady, false);
   assert.equal(readiness.promotionReady, false);
 });
+
+// FIRST_LOSS (fresh run 897ae0ab-310c-495f-96d2-6b2f2895294d, interaction-14): a candidate with
+// NO locators at all and a deterministic `structuralContext` still carried capture-time
+// `identityAmbiguous: true` (a coarse, landmark-wide match count taken before the live resolver's
+// own narrower re-count ever runs -- see the regression note on `deterministicStructuralRuntimeEligible`
+// below, which already stopped trusting this same flag for `structuralRuntimeEligible`).
+// `reResolutionPossible` still gated on it directly, so it stayed false even though the exact same
+// sufficiency bar was already trusted elsewhere. Never fabricates a locator: only a genuine
+// per-LOCATOR `ambiguous` flag on an actual candidate locator still blocks eligibility here.
+test("16/ambiguousIdentityStillEligible. capture-time identityAmbiguous alone never blocks reResolutionPossible for a deterministic, locator-less candidate", async () => {
+  const { recorder, events } = newRecorder();
+  await recorder.onInteraction({
+    kind: "click",
+    role: "div",
+    technicalTargetCandidates: [{
+      targetType: "structural",
+      locatorCandidates: [],
+      structuralContext: {
+        owner: { tag: "div" },
+        stableDirectAttributes: { "data-role": "visa-control" },
+        stableDescendants: [],
+        semanticShape: [],
+        deterministicStructuralIdentity: true,
+        identityAmbiguous: true,
+        structuralIdentityMatchCount: 2,
+      },
+      interactionEvidence: ["v2_click_owner"],
+      confidence: 0.8,
+      validatedByInteraction: true,
+    }],
+  });
+  const { readiness } = buildReadiness(events);
+  assert.equal(readiness.actions[0].reResolutionPossible, true);
+  // A re-resolution STRATEGY is never itself technical certification: no real locator backs
+  // this candidate, so technicalReady must stay honestly false regardless.
+  assert.equal(readiness.technicalReady, false);
+});

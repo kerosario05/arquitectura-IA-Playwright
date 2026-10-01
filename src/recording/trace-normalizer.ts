@@ -41,6 +41,30 @@ export function isGenericUnresolvedLabel(value: string | undefined): boolean {
   return !normalized || GENERIC_UNRESOLVED_LABELS.has(normalized);
 }
 
+/** A dialog is an observation container, not an actionable control. */
+export function isNonActionableContainerTap(event: Pick<RecordedEvent, "kind" | "target">): boolean {
+  if (event.kind !== "tap") return false;
+  const target = event.target;
+  const role = event.target?.role?.trim().toLowerCase();
+  if (role === "dialog" || role === "alertdialog") return true;
+  // A bare image's alt text describes the image, not an action. Capture V2 can report a trusted
+  // pointer on a decorative image with a plausible name but no actionable owner or replay target;
+  // admitting that name as a click leaves discovery resolving arbitrary page text (for example,
+  // an icon alt repeated across several controls). Keep it as technical noise unless the capture
+  // also found an actionable role, locator, or owner candidate.
+  const tag = target?.tag?.trim().toLowerCase();
+  if (tag !== "img" || role) return false;
+  const hasReplayEvidence = (target?.locators?.length ?? 0) > 0
+    || (target?.technicalTargetCandidates ?? []).some((candidate) => {
+      const owner = candidate.structuralContext?.owner as { tag?: unknown } | undefined;
+      const ownerTag = String(owner?.tag ?? "").toLowerCase();
+      return candidate.validatedByInteraction === true
+        && (["button", "a", "input", "select", "textarea"].includes(ownerTag)
+          || ["button", "link", "option", "checkbox", "radio", "switch"].includes(role ?? ""));
+    });
+  return !hasReplayEvidence;
+}
+
 /** Locator strategies that identify an element by something other than its own live DOM text. */
 const ADMISSIBLE_LOCATOR_STRATEGIES = new Set([
   "data-testid", "data-test-id", "data-qa", "id", "name", "aria-label", "structural", "role",
@@ -156,6 +180,7 @@ export function stableControlIdentity(event: RecordedEvent): string {
   // concatenate every signal: a locator can legitimately change after a DOM replacement while
   // the id, grid cell, or associated field remains the same control.
   const primary = explicit || (cell && header ? `${cell}:${header}` : undefined) || field || locator || role;
+  const entityScope = stableRef(target.entityScope);
   // FIRST_LOSS fix: a segmented OTP/token box (recordingId=efff98e2-...) has no id/name/testid,
   // no certified locator, and a generic label -- every box in the same 6-box group computes the
   // EXACT SAME identity here, so buildEditingSessions (and normalizeEvents' own fill
@@ -166,13 +191,115 @@ export function stableControlIdentity(event: RecordedEvent): string {
   // sibling boxes even when every other structural signal collides, so its own event sequence
   // number is appended to force distinctness -- this never changes identity for anything else.
   const segmentDisambiguator = target.playwrightRecorderEvidence?.kind === "segmented_input" ? `segment:${event.seq}` : undefined;
-  return [event.screenKey, grid, row, cell, header, primary, role, segmentDisambiguator]
+  return [event.screenKey, entityScope, grid, row, cell, header, primary, role, segmentDisambiguator]
     .filter(Boolean)
     .join("|");
 }
 
 function targetKey(event: RecordedEvent): string {
   return stableControlIdentity(event);
+}
+
+function semanticActionKey(event: RecordedEvent): string | undefined {
+  const value = event.target?.associatedField
+    ?? event.target?.headerContext
+    ?? event.target?.label
+    ?? event.target?.beforeState?.label;
+  const normalized = value?.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLocaleLowerCase().replace(/\s+/g, " ");
+  return normalized && !isGenericUnresolvedLabel(normalized) ? normalized : undefined;
+}
+
+function routeIdentity(event: RecordedEvent): string {
+  if (event.url) {
+    try {
+      const url = new URL(event.url);
+      return `${url.origin}${url.pathname.replace(/\/$/, "") || "/"}`;
+    } catch {
+      return event.url;
+    }
+  }
+  return event.toScreenKey && event.toScreenKey !== event.screenKey ? event.toScreenKey : event.screenKey;
+}
+
+function isRepeatAffordance(event: RecordedEvent): boolean {
+  if (event.kind !== "tap") return false;
+  const label = `${event.target?.label ?? ""} ${event.target?.associatedField ?? ""} ${event.target?.headerContext ?? ""}`;
+  return /\b(?:add|add another|ajouter|añadir|anadir|agregar|another|otro|repeat|repetir|duplicate|duplicar)\b/i.test(label);
+}
+
+/**
+ * Adds entity ownership only when the recording itself proves a repeated form: an observed
+ * repeat affordance is followed, on the same route, by input fields already filled in the
+ * preceding form block. This keeps the scope generic across projects and avoids inferring rows
+ * from duplicate labels alone.
+ */
+function inferRepeatedEntityScopes(events: readonly RecordedEvent[]): RecordedEvent[] {
+  const result = events.map((event) => event);
+  const repeatIndexes = events.flatMap((event, index) => isRepeatAffordance(event) ? [index] : []);
+  let entityNumber = 1;
+  let priorRepeatIndex = -1;
+
+  for (const repeatIndex of repeatIndexes) {
+    const repeatEvent = events[repeatIndex];
+    const route = routeIdentity(repeatEvent);
+    let end = events.length;
+    for (let index = repeatIndex + 1; index < events.length; index += 1) {
+      if (routeIdentity(events[index]) !== route) {
+        end = index;
+        break;
+      }
+      if (isRepeatAffordance(events[index])) {
+        end = index;
+        break;
+      }
+    }
+    const priorStart = priorRepeatIndex + 1;
+    const preceding = events.slice(priorStart, repeatIndex).filter((event) => routeIdentity(event) === route);
+    const following = events.slice(repeatIndex + 1, end).filter((event) => routeIdentity(event) === route);
+    const precedingFields = new Set(preceding
+      .filter((event) => event.kind === "fill")
+      .map(semanticActionKey)
+      .filter((key): key is string => Boolean(key)));
+    const repeatedFields = new Set(following
+      .filter((event) => event.kind === "fill")
+      .map(semanticActionKey)
+      .filter((key): key is string => Boolean(key))
+      .filter((key) => precedingFields.has(key)));
+    if (repeatedFields.size === 0) continue;
+    // Existing recorder-owned scopes take precedence; this inference is only for traces that
+    // captured repeated form data without assigning entity ownership.
+    if ([...preceding, ...following].some((event) => Boolean(event.target?.entityScope))) continue;
+
+    const postActionKeys = new Set(following.map(semanticActionKey).filter((key): key is string => Boolean(key)));
+    const firstRepeatedAction = preceding.findIndex((event) => {
+      const key = semanticActionKey(event);
+      return Boolean(key && postActionKeys.has(key));
+    });
+    if (firstRepeatedAction < 0) continue;
+
+    const precedingStartIndex = events.findIndex((event, index) => index >= priorStart
+      && index < repeatIndex
+      && routeIdentity(event) === route
+      && semanticActionKey(event) === semanticActionKey(preceding[firstRepeatedAction]));
+    if (precedingStartIndex < 0) continue;
+
+    entityNumber += 1;
+    const firstScope = `entity_${entityNumber - 1}`;
+    const nextScope = `entity_${entityNumber}`;
+    for (let index = precedingStartIndex; index <= repeatIndex; index += 1) {
+      const event = result[index];
+      if (routeIdentity(event) !== route || !event.target || event.target.entityScope) continue;
+      result[index] = { ...event, target: { ...event.target, entityScope: firstScope } };
+    }
+    for (let index = repeatIndex + 1; index < end; index += 1) {
+      const event = result[index];
+      if (routeIdentity(event) !== route || !event.target || event.target.entityScope) continue;
+      result[index] = { ...event, target: { ...event.target, entityScope: nextScope } };
+    }
+    priorRepeatIndex = repeatIndex;
+  }
+
+  return result;
 }
 
 function incompleteTechnicalIdentity(event: RecordedEvent): boolean {
@@ -252,31 +379,125 @@ function selectionOptionEvidence(event: RecordedEvent, events: readonly Recorded
     .sort((a, b) => Math.abs(a.t - event.t) - Math.abs(b.t - event.t))[0];
 }
 
+function selectionScopeIdentity(target: RecordedEvent["target"]): string | undefined {
+  const recorderScope = target?.playwrightRecorderEvidence?.scopeIdentity;
+  if (recorderScope) return `${recorderScope.strategy}:${recorderScope.value}`;
+  for (const candidate of target?.technicalTargetCandidates ?? []) {
+    const scope = candidate.structuralContext?.scopeIdentity;
+    if (scope) return `${scope.strategy}:${scope.value}`;
+  }
+  return undefined;
+}
+
+function selectionScopeIdentities(target: RecordedEvent["target"]): string[] {
+  if (!target) return [];
+  const scopes = new Set<string>();
+  const recorderScope = target.playwrightRecorderEvidence?.scopeIdentity;
+  if (recorderScope) scopes.add(`${recorderScope.strategy}:${recorderScope.value}`);
+  for (const candidate of target.technicalTargetCandidates ?? []) {
+    const scope = candidate.structuralContext?.scopeIdentity;
+    if (scope) scopes.add(`${scope.strategy}:${scope.value}`);
+  }
+  for (const alternative of target.semanticRuntimeEvidence?.scopeAlternatives ?? []) {
+    const scope = alternative.scopeIdentity;
+    if (scope && alternative.captureMatchCount === 1) scopes.add(`${scope.strategy}:${scope.value}`);
+  }
+  return [...scopes];
+}
+
+function hasObservedSelectionOwner(target: RecordedEvent["target"]): boolean {
+  if (!target) return false;
+  const role = (target.role ?? "").toLocaleLowerCase();
+  const tag = (target.tag ?? "").toLocaleLowerCase();
+  const scope = selectionScopeIdentity(target) ?? "";
+  return target.compoundRole === "selection"
+    || target.interactionType === "select"
+    || ["select", "combobox", "listbox"].includes(tag)
+    || ["combobox", "listbox"].includes(role)
+    // A bounded, captured structural scope that explicitly contains a native select is proof
+    // of a selector owner even when the application renders the visible trigger as a plain div.
+    || /:has\([^)]*\bselect\b/i.test(scope);
+}
+
+function matchingSelectionTrigger(event: RecordedEvent, index: number, events: readonly RecordedEvent[]): RecordedEvent | undefined {
+  const optionScopes = selectionScopeIdentities(event.target);
+  const hasUniqueCapturedTarget = event.target?.playwrightRecorderEvidence?.runtimeResolutionRequired === true
+    || (event.target?.semanticRuntimeEvidence?.captureUniqueTarget === true
+      && event.target.semanticRuntimeEvidence.scopeAlternatives.some((alternative) => alternative.captureMatchCount === 1));
+  const scopeProvesSelector = (event.target?.semanticRuntimeEvidence?.scopeAlternatives ?? [])
+    .some((alternative) => alternative.captureMatchCount === 1
+      && alternative.scopeIdentity.strategy === "css"
+      && /:has\([^)]*\bselect\b/i.test(alternative.scopeIdentity.value));
+  if (optionScopes.length === 0 || !hasUniqueCapturedTarget || !scopeProvesSelector) return undefined;
+  return events.slice(0, index).reverse().find((candidate) =>
+    candidate.kind === "tap"
+    && candidate.screenKey === event.screenKey
+    && event.t - candidate.t >= 0
+    && event.t - candidate.t <= 15_000
+    && (hasObservedSelectionOwner(candidate.target)
+      || (candidate.target?.technicalTargetCandidates ?? []).some((technicalTarget) =>
+        technicalTarget.validatedByInteraction === true
+        && Boolean(technicalTarget.structuralContext?.scopeIdentity),
+      ))
+    && selectionScopeIdentities(candidate.target).some((scope) => optionScopes.includes(scope)),
+  );
+}
+
+function semanticLabelFromSelectionTrigger(trigger: RecordedEvent["target"]): string | undefined {
+  const explicit = trigger?.associatedField?.trim() || trigger?.headerContext?.trim();
+  if (explicit) return explicit;
+  const label = trigger?.label?.trim();
+  if (!label) return undefined;
+  // A control may include a dynamic placeholder/property in its visible container text. When
+  // the scoped option evidence has already tied this trigger to the selection, retain the
+  // human field prompt before the first composite separator, never the changing option text.
+  if (/\b(?:undefined|null)\b|\[object Object\]/i.test(label)) {
+    const prefix = label.split(/\s+[\/|·]\s+/, 1)[0]?.trim();
+    return prefix && !isGenericUnresolvedLabel(prefix) ? prefix : undefined;
+  }
+  return undefined;
+}
+
 function promoteDynamicSelection(event: RecordedEvent, index: number, events: readonly RecordedEvent[]): RecordedEvent {
   const evidence = selectionOptionEvidence(event, events);
+  const selectorTrigger = matchingSelectionTrigger(event, index, events);
   const lifecycle = event.target?.dynamicLifecycle;
   const hasDynamicSurface = Boolean(event.target?.observedOptions?.length || lifecycle?.options?.length || lifecycle?.selectedOption || lifecycle?.committedState);
   if (event.kind !== "tap") return event;
   if ((event.target?.interactionType === "select" || event.target?.compoundRole === "selection")
     && (event.target?.afterValue !== undefined || !hasDynamicSurface)) return event;
-  if (!evidence && !hasDynamicSurface) return event;
+  if (!evidence && !hasDynamicSurface && !selectorTrigger) return event;
   const followingEditable = events.slice(index + 1).find((candidate) => candidate.kind === "fill" && candidate.target?.associatedField && candidate.t - event.t <= 15_000);
   const optionTarget = evidence?.target;
+  const selectedValue = event.target?.afterValue
+    ?? optionTarget?.afterValue
+    ?? optionTarget?.dynamicLifecycle?.selectedOption
+    ?? lifecycle?.selectedOption
+    ?? lifecycle?.committedState
+    ?? (selectorTrigger ? event.target?.label : undefined);
+  const selectionField = event.target?.associatedField
+    || event.target?.headerContext
+    || optionTarget?.associatedField
+    || optionTarget?.headerContext
+    || semanticLabelFromSelectionTrigger(selectorTrigger?.target)
+    || followingEditable?.target?.associatedField;
   return {
     ...event,
     target: {
       ...(event.target as RecordedTarget),
+      ...(selectorTrigger && !event.target?.role ? { role: "option" } : {}),
       interactionType: "select",
       compoundRole: "selection",
-      associatedField: event.target?.associatedField || followingEditable?.target?.associatedField,
-      headerContext: event.target?.headerContext || followingEditable?.target?.headerContext,
-      afterValue: event.target?.afterValue ?? optionTarget?.afterValue ?? optionTarget?.dynamicLifecycle?.selectedOption ?? lifecycle?.selectedOption ?? lifecycle?.committedState,
-      observedOptions: event.target?.observedOptions?.length ? event.target.observedOptions : optionTarget?.observedOptions ?? lifecycle?.options,
+      associatedField: selectionField,
+      headerContext: event.target?.headerContext || selectorTrigger?.target?.headerContext || followingEditable?.target?.headerContext,
+      afterValue: selectedValue,
+      observedOptions: event.target?.observedOptions?.length ? event.target.observedOptions : optionTarget?.observedOptions ?? lifecycle?.options ?? selectorTrigger?.target?.observedOptions,
       dynamicLifecycle: {
         ...lifecycle,
         ...optionTarget?.dynamicLifecycle,
-        triggerTechnicalTarget: event.target?.containerIdentity || event.target?.label,
+        triggerTechnicalTarget: selectorTrigger ? selectionScopeIdentity(selectorTrigger.target) : event.target?.containerIdentity ?? event.target?.label,
         activatedTechnicalTarget: optionTarget?.dynamicLifecycle?.activatedTechnicalTarget || optionTarget?.label,
+        ...(selectedValue ? { selectedOption: selectedValue, committedState: selectedValue } : {}),
       },
     },
   };
@@ -374,6 +595,9 @@ export function buildEditingSessions(events: readonly RecordedEvent[]): Recorded
       ? session.rawTypedValue ?? undefined
       : session.committedValue
         ?? (session.displayValue && !aggregateDisplayValue(session.displayValue) ? session.displayValue : undefined)
+        // This is the control value observed after the action. A mask may reject or
+        // reformat keystrokes, so replay the observed value instead of rejected input.
+        ?? session.inputValue
         ?? session.rawTypedValue
         ?? (session.needsReview && aggregateDisplayValue(last) ? undefined : last));
     if (session.compoundRole === "selection") session.commitReason = "change";
@@ -567,9 +791,9 @@ export function normalizeEvents(
   const dropUnidentified = options.dropUnidentifiedTaps !== false;
 
   // Pass 1 — a screen_change that did not change the screen is a poller artifact.
-  const realTransitions = events.filter(
+  const realTransitions = inferRepeatedEntityScopes(events.filter(
     (e) => e.kind !== "screen_change" || (e.toScreenKey && e.toScreenKey !== e.screenKey),
-  );
+  ));
 
   const sessions = buildEditingSessions(realTransitions);
   const sessionByIdentity = new Map(sessions.map((session) => [session.controlIdentity, session]));
@@ -673,7 +897,16 @@ export function normalizeEvents(
     // A trusted Capture V2 pointer identity proves this was a real physical interaction even
     // when no locator was certified. Preserve the tap for observed functional projection;
     // downstream readiness still remains fail-closed because no technical authority is added.
-    if (event.interactionId && event.target?.label && !isGenericUnresolvedLabel(event.target.label)) return event;
+    if (event.interactionId && event.target?.label && !isGenericUnresolvedLabel(event.target.label)
+      && !isNonActionableContainerTap(event)) return event;
+    // A generic display label is not enough to certify a target, but a Capture V2 owner
+    // candidate validated by the trusted pointer interaction is enough to preserve the
+    // observed action for runtime re-resolution. This does not certify a locator or readiness;
+    // ambiguous owners remain unresolved in the canonical contract.
+    if (event.interactionId && (event.target?.technicalTargetCandidates ?? []).some((candidate) =>
+      candidate.validatedByInteraction === true
+      && candidate.interactionEvidence?.includes("v2_click_owner"),
+    )) return event;
     if (hasStructuralRuntimeEvidence(event.target)) return event;
     // FIRST_LOSS fix (recordingId=efff98e2-...): a tap can carry a technicalTargetCandidate that
     // Capture V2 proved was DOM-scope-unique in this exact session (captureScopeUnique +
@@ -700,7 +933,21 @@ export function normalizeEvents(
     };
   });
 
-  return promoteSelectionNotes(cleaned).map((event, index) => ({ ...event, seq: index }));
+  const promoted = promoteSelectionNotes(cleaned);
+  const normalizedSeqByRecordedSeq = new Map(promoted.map((event, index) => [event.seq, index] as const));
+  return promoted.map((event, index) => {
+    const target = event.target;
+    const sourceSeqs = target?.sourceTechnicalEventSeqs;
+    if (!target || !sourceSeqs?.length) return { ...event, seq: index };
+    return {
+      ...event,
+      seq: index,
+      target: {
+        ...target,
+        sourceTechnicalEventSeqs: sourceSeqs.map((sourceSeq) => normalizedSeqByRecordedSeq.get(sourceSeq) ?? sourceSeq),
+      },
+    };
+  });
 }
 
 /**

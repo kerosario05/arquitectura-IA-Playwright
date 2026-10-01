@@ -1,0 +1,17 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - generic [ref=e150]:
+    - banner [ref=e151]:
+      - img "Banco Santa Cruz" [ref=e152]
+    - main [ref=e153]:
+      - generic [ref=e154]:
+        - button [ref=e155] [cursor=pointer]
+        - generic [ref=e158]:
+          - heading "Selecciona un producto" [level=1] [ref=e159]
+          - paragraph [ref=e160]: "Elige el tipo de producto que deseas conocer:"
+      - generic [ref=e161]:
+        - button [ref=e163] [cursor=pointer]:
+          - heading "Tarjeta de Crédito" [level=3] [ref=e170]
+        - button "Volver" [ref=e176] [cursor=pointer]
+    - contentinfo [ref=e178]: © 2024 Banco Santa Cruz S.A. | Todos los derechos reservadosAv. Lope de Vega No.21, Ensanche Naco, Santo Domingo, Rep. Dom.

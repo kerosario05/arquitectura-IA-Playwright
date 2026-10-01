@@ -211,6 +211,30 @@ For QA Lab debugging:
 - stop at earliest unresolved boundary
 - never expose secrets
 
+### QA Lab persistent context (read before any QA Lab task)
+
+Central rule: **NO FRESH RUN → NO FUNCTIONAL DIAGNOSIS → NO FIX.** A claim about runtime
+behavior without a fresh physical Codex run backing it is not evidence.
+
+Before starting any QA Lab task:
+1. Read this `CLAUDE.md` QA Lab section.
+2. Read `AGENTS.md` (Codex's verifier contract).
+3. Read `docs/ai/00-current-state.md`.
+4. Identify `CURRENT FRONTIER` in that file.
+5. Preserve every listed `PHYSICAL GREEN` boundary — reopen one only with fresh contradicting evidence.
+6. Continue only from that file's `NEXT ACTION`; do not restart already-closed investigation.
+
+Before ending any QA Lab iteration, update `docs/ai/00-current-state.md` (compact, not
+cumulative — do not paste full logs, do not keep stale hypotheses):
+- latest fresh run/job id and its result
+- any newly-proven `PHYSICAL GREEN` boundary
+- the current open first-loss (or none, if PASS)
+- fixes applied this iteration (file, why, how validated)
+- a single `NEXT ACTION`
+
+While a Codex physical run is in flight: wait for it, do not edit source, do not investigate
+the same first-loss in parallel, do not launch a second verifier for it.
+
 ### QA Lab agent workflow (Claude = builder/fixer, Codex = verifier/tester)
 
 For every QA Lab bug, before touching source: delegate PHYSICAL reproduction to Codex via

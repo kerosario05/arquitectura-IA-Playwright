@@ -4,6 +4,7 @@ import type { Page, Locator } from "@playwright/test";
 import type { PageSnapshot, SnapshotElement } from "../types/page-snapshot.types";
 import type { RecordedTechnicalTarget, RecordedLocator } from "../recording/session-trace.types";
 import type { PlaywrightRecorderEvidence, SemanticRuntimeEvidence } from "../recording/structural-owner-identity";
+import { isGenericUnresolvedLabel } from "../recording/trace-normalizer";
 import type { AppRouteProfile } from "../types/env.types";
 import { parseProductConditionTarget, resolveProductConditionAgainstSnapshot, type ProductCondition } from "./product-condition-parser";
 import { detectOrdinalSelectionPattern, resolveOrdinalSelection, type OrdinalSelectionResult } from "./ordinal-selection-resolver";
@@ -129,6 +130,7 @@ export type ResolveActionTargetOptions = {
   semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "first_visible_item" | "unknown";
   relationContext?: string;
   selectionField?: string;
+  selectionActivationField?: string;
   selectionValue?: string;
   rowScope?: number;
   /** One-based structural row reference captured from the DOM, including header rows when present. */
@@ -136,6 +138,8 @@ export type ResolveActionTargetOptions = {
   rowRelation?: "next" | "added";
   entityScope?: string;
   associatedField?: string;
+  dynamicTargetLabel?: boolean;
+  recordedControlIdentity?: string;
   activeContainer?: ActiveContainerContext;
   routeProfile?: AppRouteProfile;
   actionText?: string;
@@ -996,6 +1000,12 @@ export async function resolveGridEditor(
 
     const structuralRowMatch = context.rowRef?.match(/(?:^|:)row:(\d+)$/) ?? context.rowRef?.match(/(\d+)$/);
     const structuralRowOrdinal = structuralRowMatch ? Number.parseInt(structuralRowMatch[1], 10) : undefined;
+    // Canonical entity scopes identify repeated members of a recorded collection
+    // (entity_1, entity_2, ...). Use that semantic identity to bind a field to its
+    // corresponding live row when the recorder did not capture a durable rowRef.
+    // This is scoped to a resolved grid and fails closed if that row is absent.
+    const entityRowMatch = context.entityScope?.match(/^entity_(\d+)$/i);
+    const entityRowOrdinal = entityRowMatch ? Number.parseInt(entityRowMatch[1], 10) : undefined;
     const rowCandidates = structuralRowOrdinal && structuralRowOrdinal > 0
       ? container.locator("tr, [role='row']")
       : container.locator("tbody tr, [role='row']");
@@ -1012,9 +1022,31 @@ export async function resolveGridEditor(
       ? structuralRowOrdinal - 1
       : context.rowRelation === "added"
       ? candidateRows.length - 1
-      : context.rowScope !== undefined ? context.rowScope - 1 : 0;
+      : context.rowScope !== undefined
+        ? context.rowScope - 1
+        : entityRowOrdinal && entityRowOrdinal > 0
+          ? entityRowOrdinal - 1
+          : 0;
+    if (
+      !structuralRowOrdinal
+      && context.rowRelation !== "added"
+      && context.rowScope === undefined
+      && entityRowOrdinal === undefined
+      && candidateRows.length !== 1
+    ) {
+      return {
+        ...empty,
+        ambiguous: true,
+        diagnostics: { ...empty.diagnostics, columnResolved: true },
+      };
+    }
     const row = candidateRows[requestedRowIndex];
-    if (!row) continue;
+    if (!row) {
+      if (entityRowOrdinal !== undefined) {
+        console.log(`[grid-selection-unresolved] reason=entity_row_missing entityScope=${JSON.stringify(context.entityScope)} requestedRow=${entityRowOrdinal} availableRows=${candidateRows.length} field=${JSON.stringify(fieldLabel)}`);
+      }
+      continue;
+    }
     const cells = row.locator("td, th, [role='gridcell']");
     const cellCount = await cells.count().catch(() => 0);
     const leadingOffset = Math.max(0, cellCount - effectiveHeaderCount);
@@ -1148,7 +1180,7 @@ export async function resolveGridEditor(
       return { locator: existingEditor.locator, cell, strategy: options.controlKind === "selection" ? "grid_cell_selection_control" : "grid_cell_editor", diagnostics };
     }
 
-    if (options.allowActivation === false) return { cell, diagnostics };
+    if (options.allowActivation === false) return { diagnostics };
 
     diagnostics.cellActivationAttempted = true;
     await cell.click().catch(() => undefined);
@@ -1735,10 +1767,11 @@ export async function isTransientSelectionOptionCausallyBound(
     if (ownerResolution?.locator) {
       const relationship = await getSelectionTriggerRelationship(ownerResolution.locator);
       const lineageIds = Array.from(new Set([...relationship.controls, ...relationship.owns]));
-      if (lineageIds.length > 0) {
-        owner.ids = lineageIds;
-        recordedFieldLineageUsed = true;
-      }
+      // A unique live owner resolved from the recorded field is itself the required lineage
+      // evidence when this widget exposes no controls/owns relationship. ARIA IDs strengthen
+      // that evidence when present, but their absence must not erase the field→option relation.
+      recordedFieldLineageUsed = true;
+      if (lineageIds.length > 0) owner.ids = lineageIds;
     }
   }
   const ownerSource = recordedFieldLineageUsed
@@ -1754,9 +1787,20 @@ export async function isTransientSelectionOptionCausallyBound(
   let exactOptionGlobalCount = 0;
   let exactOptionInsideRelatedSurfaceCount = 0;
 
+  const lineageFallbackApplicable = recordedFieldLineageUsed
+    && lineageAuthority?.runtimeExactOptionUnique === true
+    && lineageAuthority.recordedSurfaceCompatible === true
+    && lineageAuthority.applicationOwnershipMatched === true
+    && lineageAuthority.appearedAfterOwnerAction === true;
+
   if (owner.ids.length === 0) {
-    result = false;
-    reason = "owner_related_ids_empty";
+    if (lineageFallbackApplicable) {
+      result = true;
+      reason = "resolved_by_recorded_field_lineage_without_aria_ids";
+    } else {
+      result = false;
+      reason = "owner_related_ids_empty";
+    }
   } else {
     const surfaces = await inspectSelectionSurfaces(page, owner.ids);
     surfaceCount = surfaces.length;
@@ -1779,11 +1823,6 @@ export async function isTransientSelectionOptionCausallyBound(
     // caller proved the exact recorded option is runtime-unique, on the same route/surface, under
     // same-application ownership, and available after the owner action. That is sufficient
     // runtime authority WITHOUT a related ARIA surface. Any missing guarantee fails closed.
-    const lineageFallbackApplicable = recordedFieldLineageUsed
-      && lineageAuthority?.runtimeExactOptionUnique === true
-      && lineageAuthority.recordedSurfaceCompatible === true
-      && lineageAuthority.applicationOwnershipMatched === true
-      && lineageAuthority.appearedAfterOwnerAction === true;
     if (relatedVisibleSurfaceCount === 0) {
       if (lineageFallbackApplicable) {
         result = true;
@@ -2730,10 +2769,45 @@ async function tryResolveSelectionOptionViaField(
   selectionField?: string,
   context: GridTargetContext = {},
   selectionValue?: string,
+  activationField?: string,
+  recordedOwnerEvidence?: PlaywrightRecorderEvidence,
 ): Promise<TargetResolutionResult | undefined> {
   const fieldLabel = selectionField?.trim();
   if (!fieldLabel) return undefined;
   const optionTarget = selectionValue?.trim() || target;
+
+  // Some grids keep a recorded selection owner inside a lazy editor. The
+  // recording contract may identify the editable field that owns that editor
+  // through the immediately following fill action in the same state/row. Use
+  // that recorded field relation only when the selection owner is not present.
+  if (activationField?.trim() && recordedOwnerEvidence) {
+    const activation = await resolveGridEditor(page, activationField, context, {
+      includeInteractiveControls: true,
+      controlKind: "selection",
+      allowActivation: false,
+    });
+    if (activation.locator && activation.cell) {
+      const ownerBeforeActivation = await resolvePlaywrightRecorderTarget(page, recordedOwnerEvidence);
+      if (!ownerBeforeActivation) {
+        await activation.locator.click({ noWaitAfter: true }).catch(() => undefined);
+        const ownerDeadline = Date.now() + 2000;
+        while (Date.now() < ownerDeadline) {
+          const recordedOwner = await resolvePlaywrightRecorderTarget(page, recordedOwnerEvidence);
+          if (recordedOwner) {
+            return resolveAndApplySelectionSurface(
+              page,
+              recordedOwner.locator,
+              optionTarget,
+              recordedOwner.strategy,
+              undefined,
+              activation.cell,
+            );
+          }
+          await page.waitForFunction(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))).catch(() => undefined);
+        }
+      }
+    }
+  }
 
   const buildResult = (locator: Locator, strategy: string, reason: string): TargetResolutionResult => ({
     status: "resolved",
@@ -3004,6 +3078,116 @@ async function tryResolveSelectionOptionViaField(
     }
   }
 
+  if (context.rowScope !== undefined || context.entityScope || context.associatedField) {
+    const containers = page.locator("table, [role='grid']");
+    const containerCount = await containers.count().catch(() => 0);
+    const namedControls: Locator[] = [];
+    const rowScopes: Locator[] = [];
+    for (let containerIndex = 0; containerIndex < containerCount; containerIndex += 1) {
+      const container = containers.nth(containerIndex);
+      const rowCandidates = container.locator("tbody tr, [role='row']");
+      const candidateRows: Locator[] = [];
+      const rowCandidateCount = await rowCandidates.count().catch(() => 0);
+      for (let rowIndex = 0; rowIndex < rowCandidateCount; rowIndex += 1) {
+        const row = rowCandidates.nth(rowIndex);
+        if (await row.locator("td, th, [role='gridcell']").count().catch(() => 0) > 0) candidateRows.push(row);
+      }
+      const structuralRowMatch = context.rowRef?.match(/(?:^|:)row:(\d+)$/) ?? context.rowRef?.match(/(\d+)$/);
+      const structuralRowOrdinal = structuralRowMatch ? Number.parseInt(structuralRowMatch[1], 10) : undefined;
+      const requestedRowIndex = structuralRowOrdinal && structuralRowOrdinal > 0
+        ? structuralRowOrdinal - 1
+        : context.rowRelation === "added"
+          ? candidateRows.length - 1
+          : context.rowScope !== undefined ? context.rowScope - 1 : 0;
+      const row = candidateRows[requestedRowIndex];
+      if (!row) continue;
+      rowScopes.push(row);
+
+      const comboboxes = row.getByRole("combobox", { name: fieldLabel, exact: false });
+      const buttons = row.getByRole("button", { name: fieldLabel, exact: false });
+      const comboboxCount = await comboboxes.count().catch(() => 0);
+      const controls = comboboxCount > 0 ? comboboxes : buttons;
+      const controlCount = comboboxCount > 0 ? comboboxCount : await buttons.count().catch(() => 0);
+      for (let controlIndex = 0; controlIndex < controlCount; controlIndex += 1) {
+        const control = controls.nth(controlIndex);
+        if (await control.isVisible().catch(() => false)) namedControls.push(control);
+      }
+    }
+    if (namedControls.length > 1) {
+      return {
+        status: "ambiguous",
+        target,
+        confidence: 0.5,
+        matchReason: "ambiguous_grid_selection_control_by_accessible_name",
+        candidateText: fieldLabel,
+        candidates: [],
+      };
+    }
+    if (namedControls.length === 1) {
+      const control = namedControls[0];
+      const cell = control.locator("xpath=ancestor::*[self::td or self::th or @role='gridcell'][1]");
+      const resolved = await resolveAndApplySelectionSurface(
+        page,
+        control,
+        optionTarget,
+        "grid_row_control_accessible_name",
+        undefined,
+        cell,
+      );
+      console.log(`[target-resolver] selection_field_resolved target="${optionTarget}" field="${fieldLabel}" strategy=grid_row_control_accessible_name`);
+      return resolved;
+    }
+    if (namedControls.length === 0) {
+      const selectionControls: Locator[] = [];
+      for (const row of rowScopes) {
+        const controls = row.locator(GRID_INTERACTIVE_CONTROL_SELECTOR);
+        const controlCount = await controls.count().catch(() => 0);
+        for (let controlIndex = 0; controlIndex < controlCount; controlIndex += 1) {
+          const control = controls.nth(controlIndex);
+          const details = await control.evaluate((element) => {
+            const el = element as HTMLElement;
+            return {
+              tag: el.tagName.toLowerCase(),
+              role: el.getAttribute("role"),
+              hasPopup: el.getAttribute("aria-haspopup"),
+              expanded: el.getAttribute("aria-expanded"),
+              enabled: !("disabled" in el && Boolean((el as HTMLInputElement).disabled))
+                && el.getAttribute("aria-disabled") !== "true",
+            };
+          }).catch(() => ({ tag: "", role: null, hasPopup: null, expanded: null, enabled: false }));
+          const selectionCapable = details.tag === "select"
+            || details.role === "combobox"
+            || Boolean(details.hasPopup)
+            || details.expanded !== null;
+          if (selectionCapable && details.enabled && await control.isVisible().catch(() => false)) {
+            selectionControls.push(control);
+          }
+        }
+      }
+      for (const control of selectionControls) {
+        const cell = control.locator("xpath=ancestor::*[self::td or self::th or @role='gridcell'][1]");
+        const resolved = await resolveAndApplySelectionSurface(
+          page,
+          control,
+          optionTarget,
+          "grid_row_causal_option_scan",
+          undefined,
+          cell,
+        );
+        if (resolved.status === "resolved") {
+          console.log(`[target-resolver] selection_field_resolved target="${optionTarget}" field="${fieldLabel}" strategy=grid_row_causal_option_scan`);
+          return resolved;
+        }
+        const failureReason = resolved.selectionDiagnostics?.failureReason ?? resolved.matchReason;
+        const unrelatedOptionSurface = failureReason === "option_not_supported"
+          && resolved.selectionDiagnostics?.surfaceCausallyBound === true
+          && resolved.selectionDiagnostics.desiredOptionFound === false;
+        if (failureReason === "selection_surface_not_observed" || unrelatedOptionSurface) continue;
+        return resolved;
+      }
+    }
+  }
+
   const alreadyVisible = await resolveVisibleSelectionOption(page, optionTarget);
   if (alreadyVisible) return buildResult(alreadyVisible, "selection_option", "option_already_visible");
 
@@ -3085,12 +3269,21 @@ async function tryResolveTableFieldControl(
   target: string,
   context: GridTargetContext = {},
 ): Promise<TargetResolutionResult | undefined> {
-  let grid = await resolveGridEditor(page, target, context);
+  const fieldTarget = context.associatedField?.trim() || target;
+  let grid = context.associatedField
+    ? await resolveGridEditor(page, fieldTarget, context, {
+      includeInteractiveControls: true,
+      controlKind: "selection",
+      allowActivation: false,
+    })
+    : await resolveGridEditor(page, fieldTarget, context);
   // A recorded click can be the prerequisite that turns a display-only cell
   // into an editor. Include interactive display controls for that action path
-  // while retaining the same structural row/column authority.
-  if (!grid.locator && (context.rowScope !== undefined || context.entityScope || context.associatedField)) {
-    grid = await resolveGridEditor(page, target, context, { includeInteractiveControls: true });
+  // while retaining the same structural row/column authority. Associated-field
+  // clicks already query the live selection control above and must not activate
+  // a cell editor before the click action is dispatched.
+  if (!grid.locator && !context.associatedField && (context.rowScope !== undefined || context.entityScope)) {
+    grid = await resolveGridEditor(page, fieldTarget, context, { includeInteractiveControls: true });
   }
   if (grid.locator) {
     return {
@@ -3160,46 +3353,153 @@ async function tryResolveGridRowSelectionControl(
   page: Page,
   target: string,
   context: GridTargetContext = {},
+  desiredChecked?: boolean,
 ): Promise<TargetResolutionResult | undefined> {
   const containers = page.locator("table, [role='grid']");
   const containerCount = await containers.count().catch(() => 0);
+  const candidates: Array<{ control: Locator; checked?: boolean; rowHasOnlyEmptyFields: boolean; populatedCellCount: number }> = [];
   for (let containerIndex = 0; containerIndex < containerCount; containerIndex += 1) {
     const container = containers.nth(containerIndex);
     const rowCandidates = container.locator("tbody tr, [role='row']");
-    const rows: Locator[] = [];
     const rowCount = await rowCandidates.count().catch(() => 0);
+    console.log(`[recording-replay] structuredGridRowCandidates containerIndex=${containerIndex} rowCount=${rowCount}`);
     for (let rowIndex = 0; rowIndex < rowCount; rowIndex += 1) {
       const row = rowCandidates.nth(rowIndex);
-      if (await row.locator("td, th, [role='gridcell']").count().catch(() => 0) > 0) rows.push(row);
-    }
-    if (rows.length === 0) continue;
-
-    const requestedRowIndex = context.rowRelation === "added"
-      ? rows.length - 1
-      : context.rowScope !== undefined ? context.rowScope - 1 : 0;
-    const row = rows[requestedRowIndex];
-    if (!row) continue;
-
-    const controls = row.getByRole("checkbox", { name: target, exact: false });
-    const controlCount = await controls.count().catch(() => 0);
-    for (let controlIndex = 0; controlIndex < controlCount; controlIndex += 1) {
-      const control = controls.nth(controlIndex);
-      if (!(await control.isVisible().catch(() => false))) continue;
-      if (!(await control.isEnabled().catch(() => true))) continue;
-      console.log(`[recording-replay] structuredGridRowControlResolved=true target=${JSON.stringify(target)} rowRelation=${context.rowRelation ?? "current"} rowIndex=${requestedRowIndex} strategy=grid_row_checkbox`);
-      return {
-        status: "resolved",
-        target,
-        locator: control,
-        locatorStrategy: "grid_row_checkbox",
-        confidence: 0.96,
-        matchReason: "grid_structural_row_checkbox",
-        candidateText: target,
-        candidates: [],
-      };
+      const controls = row.getByRole("checkbox", { name: target, exact: true });
+      const controlCount = await controls.count().catch(() => 0);
+      for (let controlIndex = 0; controlIndex < controlCount; controlIndex += 1) {
+        const control = controls.nth(controlIndex);
+        if (!(await control.isVisible().catch(() => false))) continue;
+        if (!(await control.isEnabled().catch(() => true))) continue;
+        const ariaChecked = await control.getAttribute("aria-checked").catch(() => null);
+        const dataState = await control.getAttribute("data-state").catch(() => null);
+        const inputChecked = await control.evaluate((element) => {
+          const candidate = element as HTMLInputElement;
+          return typeof candidate.checked === "boolean" ? candidate.checked : null;
+        }).catch(() => null);
+        const checked = ariaChecked === "true" || dataState === "checked" || inputChecked === true
+          ? true
+          : ariaChecked === "false" || dataState === "unchecked" || inputChecked === false
+            ? false
+            : undefined;
+        const rowState = await row.evaluate((element) => {
+          const fields = Array.from(element.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | HTMLElement>(
+            "input:not([type='checkbox']):not([type='radio']), textarea, select, [contenteditable='true']",
+          )).filter((field) => !("disabled" in field && field.disabled) && field.getClientRects().length > 0);
+          if (fields.length > 0) {
+            const populatedFieldCount = fields.filter((field) => {
+              if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement || field instanceof HTMLSelectElement) {
+                return field.value.trim().length > 0;
+              }
+              return (field.textContent ?? "").trim().length > 0;
+            }).length;
+            return { empty: populatedFieldCount === 0, populatedCellCount: populatedFieldCount };
+          }
+          // Editable grid cells often expose their editor only after activation. In that
+          // state an added entity row has no inputs yet, but its data cells are still empty.
+          // Recognize that live row shape while excluding the checkbox/action cells.
+          const dataCells = Array.from(element.querySelectorAll<HTMLElement>("td, [role='gridcell']"))
+            .filter((cell) => !cell.querySelector("[role='checkbox'], input[type='checkbox'], button[aria-label*='Seleccionar fila']"));
+          if (dataCells.length < 2) return { empty: false, populatedCellCount: Number.MAX_SAFE_INTEGER };
+          const visibleDataCells = dataCells.filter((cell) => cell.getClientRects().length > 0);
+          if (visibleDataCells.length < 2) return { empty: false, populatedCellCount: Number.MAX_SAFE_INTEGER };
+          const nonEmptyCellCount = visibleDataCells.filter((cell) => {
+            const text = (cell.innerText ?? cell.textContent ?? "").replace(/\s+/g, " ").trim();
+            return text.length > 0 && !["—", "-", "..."].includes(text);
+          }).length;
+          return { empty: nonEmptyCellCount === 0, populatedCellCount: nonEmptyCellCount };
+        }).catch(() => false);
+        candidates.push({
+          control,
+          checked,
+          rowHasOnlyEmptyFields: typeof rowState === "object" && rowState !== null && rowState.empty,
+          populatedCellCount: typeof rowState === "object" && rowState !== null ? rowState.populatedCellCount : Number.MAX_SAFE_INTEGER,
+        });
+      }
     }
   }
-  return undefined;
+
+  // Some table implementations expose semantic rows to Playwright's table locator
+  // while rendering each checkbox in a sibling control layer. In that case preserve
+  // the same exact checkbox name and use its live checked state, scoped to this table.
+  if (candidates.length === 0) {
+    const pageCheckboxes = page.getByRole("checkbox", { name: target, exact: true });
+    const checkboxCount = await pageCheckboxes.count().catch(() => 0);
+    console.log(`[recording-replay] structuredGridRowDetachedCheckboxProbe checkboxCount=${checkboxCount}`);
+    for (let checkboxIndex = 0; checkboxIndex < checkboxCount; checkboxIndex += 1) {
+      const control = pageCheckboxes.nth(checkboxIndex);
+      if (!(await control.isVisible().catch(() => false)) || !(await control.isEnabled().catch(() => true))) continue;
+      const belongsToDataTable = await control.evaluate((element) => Boolean(element.closest("table") && !element.closest("thead"))).catch(() => false);
+      if (!belongsToDataTable) continue;
+      const ariaChecked = await control.getAttribute("aria-checked").catch(() => null);
+      const dataState = await control.getAttribute("data-state").catch(() => null);
+      const inputChecked = await control.evaluate((element) => {
+        const candidate = element as HTMLInputElement;
+        return typeof candidate.checked === "boolean" ? candidate.checked : null;
+      }).catch(() => null);
+      const checked = ariaChecked === "true" || dataState === "checked" || inputChecked === true
+        ? true
+        : ariaChecked === "false" || dataState === "unchecked" || inputChecked === false
+          ? false
+          : undefined;
+      candidates.push({ control, checked, rowHasOnlyEmptyFields: false, populatedCellCount: Number.MAX_SAFE_INTEGER });
+    }
+    if (candidates.length === 0) {
+      const recordedAttributeCheckboxes = page.locator(`[role="checkbox"][aria-label=${JSON.stringify(target)}]`);
+      const attributeCheckboxCount = await recordedAttributeCheckboxes.count().catch(() => 0);
+      console.log(`[recording-replay] structuredGridRecordedAttributeCheckboxProbe checkboxCount=${attributeCheckboxCount}`);
+      for (let checkboxIndex = 0; checkboxIndex < attributeCheckboxCount; checkboxIndex += 1) {
+        const control = recordedAttributeCheckboxes.nth(checkboxIndex);
+        if (!(await control.isVisible().catch(() => false)) || !(await control.isEnabled().catch(() => true))) continue;
+        if (await control.evaluate((element) => Boolean(element.closest("thead"))).catch(() => false)) continue;
+        const ariaChecked = await control.getAttribute("aria-checked").catch(() => null);
+        const dataState = await control.getAttribute("data-state").catch(() => null);
+        const inputChecked = await control.evaluate((element) => {
+          const candidate = element as HTMLInputElement;
+          return typeof candidate.checked === "boolean" ? candidate.checked : null;
+        }).catch(() => null);
+        const checked = ariaChecked === "true" || dataState === "checked" || inputChecked === true
+          ? true
+          : ariaChecked === "false" || dataState === "unchecked" || inputChecked === false
+            ? false
+            : undefined;
+        candidates.push({ control, checked, rowHasOnlyEmptyFields: false, populatedCellCount: Number.MAX_SAFE_INTEGER });
+      }
+    }
+  }
+
+  if (candidates.length === 0) return undefined;
+  const stateChangingCandidates = desiredChecked === undefined
+    ? []
+    : candidates.filter((candidate) => candidate.checked !== undefined && candidate.checked !== desiredChecked);
+  const emptyEntityCandidates = candidates.filter((candidate) => candidate.rowHasOnlyEmptyFields);
+  const leastPopulatedCount = candidates.length > 0 ? Math.min(...candidates.map((candidate) => candidate.populatedCellCount)) : Number.MAX_SAFE_INTEGER;
+  const leastPopulatedCandidates = candidates.filter((candidate) => candidate.populatedCellCount === leastPopulatedCount);
+  console.log(`[recording-replay] structuredGridRowControlProbe target=${JSON.stringify(target)} entityScopePresent=${Boolean(context.entityScope)} candidateCount=${candidates.length} stateChangingCount=${stateChangingCandidates.length} emptyRowCount=${emptyEntityCandidates.length} leastPopulatedRowCount=${leastPopulatedCandidates.length === 1 ? leastPopulatedCount : "ambiguous"} observedStates=${candidates.map((candidate) => candidate.checked === undefined ? "unknown" : String(candidate.checked)).join(",") || "none"}`);
+  const selectedCandidate = stateChangingCandidates.length === 1
+    ? stateChangingCandidates[0]
+    : stateChangingCandidates.length > 1 && emptyEntityCandidates.length === 1
+      ? emptyEntityCandidates[0]
+      : candidates.length === 1
+        ? candidates[0]
+        : stateChangingCandidates.length === 0 && emptyEntityCandidates.length === 1
+          ? emptyEntityCandidates[0]
+          : stateChangingCandidates.length === 0 && Boolean(context.entityScope) && leastPopulatedCandidates.length === 1
+            ? leastPopulatedCandidates[0]
+          : undefined;
+  if (!selectedCandidate) return undefined;
+
+  console.log(`[recording-replay] structuredGridRowControlResolved=true target=${JSON.stringify(target)} entityScopePresent=${Boolean(context.entityScope)} rowRelation=${context.rowRelation ?? "current"} candidateCount=${candidates.length} checkedStateObserved=${selectedCandidate.checked !== undefined} strategy=grid_row_checkbox_state`);
+  return {
+    status: "resolved",
+    target,
+    locator: selectedCandidate.control,
+    locatorStrategy: "grid_row_checkbox_state",
+    confidence: 0.96,
+    matchReason: "grid_structural_row_checkbox_state",
+    candidateText: target,
+    candidates: [],
+  };
 }
 
 async function resolveActionTargetCore(
@@ -3238,8 +3538,61 @@ async function resolveActionTargetCore(
   console.log(
     `[recorded-target-lineage] candidateRole=${lineageCandidateRoles.join(",") || "(none)"} ` +
     `associatedFieldPresent=${Boolean(opts.associatedField)} associatedFieldNormalizedPresent=${Boolean(opts.associatedField?.trim())} ` +
-    `recordedRefsPresent=${(opts.recordedTechnicalTargetRefs?.length ?? 0) > 0} recordedTargetsPresent=${(opts.recordedTechnicalTargets?.length ?? 0) > 0}`
+    `recordedRefsPresent=${(opts.recordedTechnicalTargetRefs?.length ?? 0) > 0} recordedTargetsPresent=${(opts.recordedTechnicalTargets?.length ?? 0) > 0} ` +
+    `semanticRuntimeEvidencePresent=${Boolean(opts.semanticRuntimeEvidence)} recorderEvidencePresent=${Boolean(opts.playwrightRecorderEvidence)}`
   );
+  // A recorded menu option in a repeated entity row belongs to the selection
+  // control opened by the immediately preceding field action. Resolve that
+  // control inside the same entity row, then apply the option through the
+  // causal selection state machine so a page-wide option match cannot silently
+  // select another row or count as success without changing this cell.
+  const recordedScopedOption = opts.playwrightRecorderEvidence?.kind === "role"
+    && opts.playwrightRecorderEvidence.role === "option"
+    && Boolean(
+      (gridContext.entityScope && /^entity_(\d+)$/i.test(gridContext.entityScope)
+        && Number.parseInt(gridContext.entityScope.match(/^entity_(\d+)$/i)?.[1] ?? "0", 10) > 1)
+      || (gridContext.rowScope !== undefined && gridContext.rowScope > 1)
+      || gridContext.rowRelation === "added"
+    );
+  const priorSelectionField = opts.previousTarget?.trim();
+  if (recordedScopedOption && priorSelectionField) {
+    const scopedTrigger = await resolveGridEditor(page, priorSelectionField, gridContext, {
+      includeInteractiveControls: true,
+      controlKind: "selection",
+      allowActivation: false,
+    });
+    if (scopedTrigger.locator && scopedTrigger.cell) {
+      const optionName = opts.playwrightRecorderEvidence?.normalizedName?.trim() || target;
+      console.log("[recording-replay] scopedRecordedOptionOwnerResolved=true entityScopePresent=" + Boolean(gridContext.entityScope) + " triggerField=" + JSON.stringify(priorSelectionField) + " optionRole=option");
+      const appliedOption = await resolveAndApplySelectionSurface(
+        page,
+        scopedTrigger.locator,
+        optionName,
+        scopedTrigger.strategy ?? "grid_cell_selection_control",
+        scopedTrigger.diagnostics,
+        scopedTrigger.cell,
+      );
+      console.log("[recording-replay] scopedRecordedOptionApplied=" + Boolean(appliedOption.selectionApplied) + " stateVerified=" + Boolean(appliedOption.selectionDiagnostics?.stateVerified) + " entityScopePresent=" + Boolean(gridContext.entityScope));
+      return appliedOption;
+    }
+    console.log("[recording-replay] scopedRecordedOptionOwnerResolved=false entityScopePresent=" + Boolean(gridContext.entityScope) + " triggerFieldPresent=true");
+  }
+  // A recorded owner locator (combobox/button) proves where the selection lives,
+  // but clicking it only opens the menu. Resolve and apply the requested option
+  // through the field-scoped selection contract before returning any generic
+  // recorded/semantic locator. The selection helper verifies the resulting state.
+  if (opts.actionType === "action_select") {
+    const fieldSelectionResult = await tryResolveSelectionOptionViaField(
+      page,
+      target,
+      opts.selectionField,
+      gridContext,
+      opts.selectionValue,
+      opts.selectionActivationField,
+      opts.playwrightRecorderEvidence,
+    );
+    if (fieldSelectionResult) return fieldSelectionResult;
+  }
   const recorded = surfaceCompatibility.hardIncompatibility
     ? undefined
     : await resolveRecordedTechnicalTarget(
@@ -3288,6 +3641,28 @@ async function resolveActionTargetCore(
       structuralDiagnostics: recorded.structuralDiagnostics,
     };
   }
+  // Repeated entity checkboxes can share one accessible name across a table. Resolve the
+  // recorded check/uncheck action from the row's live checkbox state (or unique empty entity
+  // row) before recorder/semantic fallbacks widen back to the page-level control set.
+  const recorderCheckboxEvidence = opts.playwrightRecorderEvidence?.role === "checkbox"
+    || opts.recordedTechnicalTargets?.some((candidate) => candidate.structuralContext?.owner?.role === "checkbox") === true;
+  const structuredEntityCheckbox = Boolean(gridContext.entityScope) && recorderCheckboxEvidence;
+  console.log(`[recording-replay] structuredGridRowControlEligibility target=${JSON.stringify(target)} entityScopePresent=${Boolean(gridContext.entityScope)} recordingActionType=${opts.recordingActionType ?? "none"} checkboxEvidence=${recorderCheckboxEvidence} rowScopePresent=${gridContext.rowScope !== undefined} rowRelation=${gridContext.rowRelation ?? "none"}`);
+  if (!expectedSurfaceMismatch
+    && (opts.recordingActionType === "check" || opts.recordingActionType === "uncheck" || structuredEntityCheckbox)
+    && (gridContext.rowScope !== undefined || gridContext.entityScope || gridContext.rowRelation)) {
+    const recordedCheckboxName = opts.playwrightRecorderEvidence?.normalizedName?.trim();
+    const rowSelectionTarget = (structuredEntityCheckbox || isGenericUnresolvedLabel(target)) && recordedCheckboxName
+      ? recordedCheckboxName
+      : target;
+    const gridRowControl = await tryResolveGridRowSelectionControl(
+      page,
+      rowSelectionTarget,
+      gridContext,
+      opts.recordingActionType === "uncheck" ? false : true,
+    );
+    if (gridRowControl) return gridRowControl;
+  }
   // LAST-RESORT, EXECUTION-ONLY: certified target -> structural runtime evidence (both above) ->
   // semantic runtime evidence -> fail closed (falls through to the remaining fallbacks below,
   // none of which may use this evidence). Reuses the SAME shared resolver, never a parallel one.
@@ -3324,20 +3699,6 @@ async function resolveActionTargetCore(
       };
     }
   }
-  // Runtime-backed custom selections must resolve their causal option surface
-  // before the generic grid activation fallback. Otherwise a display trigger
-  // can be returned as the action target and the selected value never reaches
-  // the current editor state.
-  if (opts.actionType === "action_select") {
-    const fieldSelectionResult = await tryResolveSelectionOptionViaField(
-      page,
-      target,
-      opts.selectionField,
-      gridContext,
-      opts.selectionValue,
-    );
-    if (fieldSelectionResult) return fieldSelectionResult;
-  }
   // A recorded grid activation may point at a display control that the current
   // editor materializes as an input/combobox. Preserve the structured target
   // authority by resolving only the recorded row/column cell before declaring
@@ -3348,10 +3709,6 @@ async function resolveActionTargetCore(
       console.log(`[recording-replay] structuredGridTargetResolved=true target="${target}" strategy=${gridTarget.locatorStrategy ?? "grid_cell_editor"}`);
       return gridTarget;
     }
-  }
-  if (!expectedSurfaceMismatch && opts.actionType === "action_click" && opts.recordingActionType === "check" && (gridContext.rowScope !== undefined || gridContext.entityScope || gridContext.rowRelation)) {
-    const gridRowControl = await tryResolveGridRowSelectionControl(page, target, gridContext);
-    if (gridRowControl) return gridRowControl;
   }
   if ((opts.recordedTechnicalTargetRefs?.length ?? 0) > 0 || (opts.recordedTechnicalTargets?.length ?? 0) > 0) {
     const candidateDetails = snapshot.elements
@@ -3434,6 +3791,22 @@ async function resolveActionTargetCore(
     } as TargetResolutionResult & { structuredTargetDiagnostics?: unknown };
   }
 
+  // Recorder evidence remains target authority even when its container alias was
+  // removed. A failed scoped resolution must reach the shared field recovery,
+  // rather than selecting an unrelated page-wide semantic/product candidate.
+  if (opts.playwrightRecorderEvidence?.runtimeResolutionRequired === true
+    || opts.semanticRuntimeEvidence) {
+    console.log("[recording-replay] scopedRuntimeTargetUnresolved=true semanticFallbackSuppressed=true");
+    return {
+      status: "not_found",
+      target,
+      confidence: 0,
+      matchReason: "recorded_target_not_present_or_unique_on_current_surface",
+      candidateText: "",
+      candidates: [],
+    };
+  }
+
   const fieldSelectionResult = opts.actionType === "action_select"
     ? undefined
     : await tryResolveSelectionOptionViaField(
@@ -3442,6 +3815,8 @@ async function resolveActionTargetCore(
       opts.selectionField,
       gridContext,
       opts.selectionValue,
+      opts.selectionActivationField,
+      opts.playwrightRecorderEvidence,
     );
   if (fieldSelectionResult) return fieldSelectionResult;
   const tableFieldResult = await tryResolveTableFieldControl(page, target, gridContext);
@@ -4393,6 +4768,22 @@ async function resolveActionTargetCore(
 // -- only the first occurrence and any actual change are logged.
 const lastFieldScopeDiagnosticFingerprint = new Map<string, string>();
 
+// FIRST_LOSS fix: final identity gate for the Tier-3 field-scoped recovery paths below. Those
+// paths certify from structural container/scope uniqueness alone, which is not enough to
+// distinguish N structurally identical siblings (e.g. repeated product cards) -- only the
+// checked node's own text carries the field identity here. Deliberately does NOT climb
+// ancestors: an unbounded climb would eventually reach a shared list wrapper whose aggregate
+// text contains every sibling's name, silently defeating the check. Fails OPEN (true) only when
+// there is nothing to check against (blank field); never fabricates a match otherwise.
+async function elementTextMatchesAssociatedField(locator: Locator, associatedField: string): Promise<boolean> {
+  const wanted = normalizeText(associatedField);
+  if (!wanted) return true;
+  const text = await locator
+    .evaluate((el) => (el as HTMLElement).innerText || el.textContent || "")
+    .catch(() => "");
+  return normalizeText(text).includes(wanted);
+}
+
 export async function tryFieldScopedStructuralFallback(
   page: Page,
   associatedField: string | undefined,
@@ -4467,6 +4858,12 @@ export async function tryFieldScopedStructuralFallback(
   };
   const withMarker = <T extends object>(resolution: T): T =>
     acceptedScopeRuntimeMarker ? { ...resolution, acceptedScopeRuntimeMarker } : resolution;
+  if (evidence && evidence.diagnostics.leafAnchorMatchCount > 1
+    && evidence.diagnostics.semanticLabelMatchCount !== 1
+    && evidence.diagnostics.ariaRelationMatchCount !== 1) {
+    console.log("[field-scoped-fallback] status=ambiguous_field_anchor");
+    return failClosed();
+  }
   if (!evidence?.diagnostics.containerAccepted) {
     console.log(`[field-scoped-fallback] status=field_container_not_resolved associatedField=${JSON.stringify(associatedField)}`);
     return failClosed();
@@ -4531,8 +4928,20 @@ export async function tryFieldScopedStructuralFallback(
       if (containerScoped.status === "certified") {
         const reconfirmedScoped = await resolveRecordedTechnicalTarget(page, [containerScoped.target], recordedMode, undefined);
         if (reconfirmedScoped) {
-          console.log(`[field-scoped-fallback] status=certified tier=${containerScoped.target.certificationTier} strategy=${reconfirmedScoped.strategy} associatedField=${JSON.stringify(associatedField)} recoveredFromAmbiguousTier1=true`);
-          return withMarker({ ...reconfirmedScoped, certifiedTechnicalTarget: containerScoped.target });
+          // FIRST_LOSS fix: Tier-3 recovery certifies purely on structural container/scope
+          // uniqueness -- it never checked the resolved element's own text/accessible-name
+          // against the recorded field it was supposed to be scoped to. Among N structurally
+          // identical siblings (e.g. product cards), this could certify and click the WRONG
+          // one. This is the last gate before certification: reject (fail-closed, never widen)
+          // when the final resolved node's own text does not contain the associated field's
+          // recorded anchor text. This retry has no separate proven-unique container locator
+          // (unlike the accepted-scope retry below), so the resolved element itself is checked.
+          const identityMatches = await elementTextMatchesAssociatedField(reconfirmedScoped.locator, associatedField);
+          if (identityMatches) {
+            console.log(`[field-scoped-fallback] status=certified tier=${containerScoped.target.certificationTier} strategy=${reconfirmedScoped.strategy} associatedField=${JSON.stringify(associatedField)} recoveredFromAmbiguousTier1=true`);
+            return withMarker({ ...reconfirmedScoped, certifiedTechnicalTarget: containerScoped.target });
+          }
+          console.log(`[field-scoped-fallback] status=identity_mismatch_rejected tier=${containerScoped.target.certificationTier} associatedField=${JSON.stringify(associatedField)}`);
         }
       }
     }
@@ -4603,8 +5012,35 @@ export async function tryFieldScopedStructuralFallback(
             )
           : undefined;
         if (reconfirmedScope) {
-          console.log(`[field-scoped-fallback] status=certified tier=${scopeScoped.target.certificationTier} strategy=${reconfirmedScope.strategy} associatedField=${JSON.stringify(associatedField)} recoveredFromAmbiguousTier1=true acceptedScopeActuallyUsed=true`);
-          return withMarker({ ...reconfirmedScope, certifiedTechnicalTarget: scopeScoped.target });
+          // FIRST_LOSS fix: same final identity gate as the container-scoped retry above --
+          // required here too since this path also certifies from structural scope uniqueness
+          // alone, and is the exact recovery path a wrong-sibling click was observed through
+          // (job 7af1bdaf: tier=3, recoveredFromAmbiguousTier1=true, acceptedScopeActuallyUsed=true
+          // certified, then the click's actual post-condition (`/product-extended`) was never
+          // reached -- the certified node was not the recorded field's own element).
+          // Checked against `containerRoot` itself, not the final descendant: `containerRoot`
+          // was already proven unique above (containerCount===1) and IS the field-scope-climbed
+          // node, so its own text carries the field identity reliably even when the actual click
+          // target inside it is a bare icon/button with no product-name text of its own -- the
+          // false-reject this replaced (checking the descendant's own text) rejected every
+          // legitimate certification whose click target has no visible label. When there is no
+          // separate container (self-owner scope), the resolved element IS the container.
+          const identityCheckTarget = scopeScoped.selfOwner ? reconfirmedScope.locator : (containerRoot ?? reconfirmedScope.locator);
+          const identityMatches = await elementTextMatchesAssociatedField(identityCheckTarget, associatedField);
+          if (identityMatches) {
+            console.log(`[field-scoped-fallback] status=certified tier=${scopeScoped.target.certificationTier} strategy=${reconfirmedScope.strategy} associatedField=${JSON.stringify(associatedField)} recoveredFromAmbiguousTier1=true acceptedScopeActuallyUsed=true`);
+            // FIRST_LOSS fix (this ticket): `scopedDescendantLocator` was resolved only to PROVE
+            // the container's identity/uniqueness -- it was never the recorded field's own click
+            // target. Clicking it instead of the container reproduces the exact gate #3
+            // `clickScopeElement` bug this session already fixed elsewhere (browser-
+            // instrumentation.ts/target-resolver.ts): the descendant's own click handler (if any)
+            // is not the owner's, so the app's real handler never fires. When there IS a separate
+            // container (non-self-owner scope), the certified click target is the container
+            // itself, already proven unique above (`containerCount===1`) -- never the descendant.
+            const clickTarget = scopeScoped.selfOwner ? reconfirmedScope.locator : (containerRoot ?? reconfirmedScope.locator);
+            return withMarker({ ...reconfirmedScope, locator: clickTarget, certifiedTechnicalTarget: scopeScoped.target });
+          }
+          console.log(`[field-scoped-fallback] status=identity_mismatch_rejected tier=${scopeScoped.target.certificationTier} associatedField=${JSON.stringify(associatedField)} acceptedScopeActuallyUsed=true`);
         }
       }
     }
@@ -4710,7 +5146,47 @@ export async function resolveActionTarget(
   target: string,
   options?: ResolveActionTargetOptions
 ): Promise<TargetResolutionResult> {
-  const result = await resolveActionTargetCore(page, snapshot, target, options);
+  // Recorder scope identities describe the container in which a control was captured; they are
+  // not the control locator. Older recordings can also persist that same scope as the click's
+  // technical target (for example, `id:IdentifyUserForm` for the recorded control named `SMS`).
+  // In that exact-alias case, discard only the container reference so the existing recorder
+  // resolver can re-prove the named control within its captured scope. All independent recorded
+  // target refs and structural certificates keep their normal precedence.
+  const recorderEvidence = options?.playwrightRecorderEvidence;
+  const recorderScope = recorderEvidence?.scopeIdentity;
+  const hasScopedSemanticRecorderEvidence = recorderEvidence?.runtimeResolutionRequired === true
+    && recorderEvidence.kind !== "segmented_input"
+    && Boolean(recorderEvidence.normalizedName?.trim())
+    && Boolean(recorderScope?.strategy && recorderScope.value);
+  const recorderScopeRef = hasScopedSemanticRecorderEvidence && recorderScope
+    ? `${recorderScope.strategy}:${recorderScope.value}`
+    : undefined;
+  const scopeAliasedRefs = recorderScopeRef
+    ? (options?.recordedTechnicalTargetRefs ?? []).filter((ref) => ref.trim() === recorderScopeRef)
+    : [];
+  const scopeAliasedTargets = recorderScopeRef
+    ? (options?.recordedTechnicalTargets ?? []).filter((recordedTarget) => {
+      const candidates = recordedTarget.locatorCandidates ?? [];
+      return candidates.length > 0
+        && candidates.every((candidate) => `${candidate.strategy}:${candidate.value}` === recorderScopeRef);
+    })
+    : [];
+  const effectiveOptions = scopeAliasedRefs.length > 0 || scopeAliasedTargets.length > 0
+    ? {
+      ...options,
+      recordedTechnicalTargetRefs: (options?.recordedTechnicalTargetRefs ?? [])
+        .filter((ref) => ref.trim() !== recorderScopeRef),
+      recordedTechnicalTargets: (options?.recordedTechnicalTargets ?? [])
+        .filter((recordedTarget) => !scopeAliasedTargets.includes(recordedTarget)),
+    }
+    : options;
+  if (scopeAliasedRefs.length > 0 || scopeAliasedTargets.length > 0) {
+    console.log(
+      `[recording-replay] recorderScopeAliasRejected=true refCount=${scopeAliasedRefs.length} ` +
+      `targetCount=${scopeAliasedTargets.length} recorderKind=${recorderEvidence?.kind ?? "none"}`
+    );
+  }
+  const result = await resolveActionTargetCore(page, snapshot, target, effectiveOptions);
   if (result.status !== "not_found") {
     // FIRST_LOSS fix (jobId 64b4bb67): an exact recorded target (recorded:role, matchCount=1)
     // short-circuits here WITHOUT producing the accepted field-scope marker, so the click boundary's
@@ -5036,9 +5512,26 @@ export async function releaseAcceptedScopeMarker(page: Page, marker: string | un
 
 export async function clickResolvedTarget(locator: Locator, force: boolean = false): Promise<void> {
   if (force) {
-    await locator.click({ force: true });
+    await locator.click({ force: true, noWaitAfter: true });
   } else {
-    await locator.click();
+    // A recorded physical interaction includes pointer movement before the tap. `Locator.click()`
+    // may start with the cursor already at the target (for example, a dialog opened over the
+    // control that was just clicked), in which case it can emit no movement event. Some apps use
+    // pointer movement as their activity signal and only arm hover-driven controls after it.
+    // Move across the resolved control itself, then perform the ordinary actionability-checked
+    // click. This is target-relative and shared by every app; it adds no locator/route authority.
+    const box = await locator.boundingBox().catch(() => null);
+    if (box && box.width >= 4 && box.height >= 2) {
+      await locator.hover({ position: { x: box.width * 0.25, y: box.height * 0.5 } });
+      await locator.hover({ position: { x: box.width * 0.75, y: box.height * 0.5 } });
+    } else {
+      await locator.hover();
+    }
+    // Discovery owns post-click synchronization (recorded next-target, route, network and
+    // screen completion probes). Letting Locator.click wait for a navigation here can consume
+    // its full action timeout on SPAs or long-lived pages, even after the click handler already
+    // moved to the next screen. That blocks the recorded sequence and can trigger app inactivity.
+    await locator.click({ noWaitAfter: true });
   }
 }
 
@@ -5366,7 +5859,7 @@ export function landmarkSelectorPrefix(landmarkAncestor: { tag: string; role?: s
  * Exactly one match is tagged with a marker attribute (the same marker idiom already used by
  * `inspectSelectionSurfaces`); 0 or >1 matches fail closed. Never text, position, nth or index.
  */
-export function disambiguateStructuralCandidatesByTopology(input: { selector: string; recordedSignature: string }): { matched: boolean; matchCount: number; marker?: string } {
+export function disambiguateStructuralCandidatesByTopology(input: { selector: string; recordedSignature: string; scopeSelector?: string }): { matched: boolean; matchCount: number; marker?: string } {
   const topologySignatureOf = (node: Element): string => {
     const childTagCounts: Record<string, number> = {};
     const directChildren = node && node.children ? node.children : [];
@@ -5390,7 +5883,12 @@ export function disambiguateStructuralCandidatesByTopology(input: { selector: st
   // another :has() (Playwright's own locator engine tolerates it, which is why the caller's count()
   // via scopeRoot.locator() succeeded while this native evaluate previously threw a SyntaxError).
   // "Nearest owner" (no qualifying descendant among the other matches) is filtered here in JS instead.
-  const allMatches = Array.from(document.querySelectorAll(input.selector));
+  // input.scopeSelector, when set, bounds the search to the caller's already-verified-unique scope
+  // container -- never the whole document -- so a scoped owner is never tiebroken against a
+  // structurally-identical element living outside its scope. If the scope can't be re-resolved
+  // here, fail closed (empty candidate set) rather than silently widening to the whole document.
+  const root: ParentNode | null = input.scopeSelector ? document.querySelector(input.scopeSelector) : document;
+  const allMatches = root ? Array.from(root.querySelectorAll(input.selector)) : [];
   const candidates = allMatches.filter((el) => !allMatches.some((other) => other !== el && el.contains(other)));
   const liveSignatures = candidates.map((candidate) => topologySignatureOf(candidate));
   const matching = candidates.filter((_candidate, i) => liveSignatures[i] === input.recordedSignature);
@@ -5406,6 +5904,14 @@ export function disambiguateStructuralCandidatesByTopology(input: { selector: st
 export async function resolveRecordedStructuralOwner(
   page: Page,
   technicalTarget: RecordedTechnicalTarget | undefined,
+  /**
+   * FIRST_LOSS fix: every branch below already logs its own specific reason (console.log), but
+   * that reason never reached the generic Error a caller (e.g. promoted-spec-runtime.ts) throws
+   * on `undefined` -- the compiled spec runtime's failure message carried only the umbrella code
+   * "structural_authority_not_unique_or_unresolved", never WHICH precondition actually failed.
+   * Purely additive/optional: existing callers that omit this param see zero behavior change.
+   */
+  onFailureReason?: (reason: string, details?: { matchCount?: number }) => void,
 ): Promise<RecordedLocatorResolution | undefined> {
   const context = technicalTarget?.structuralContext;
   const owner = context?.owner;
@@ -5419,15 +5925,53 @@ export async function resolveRecordedStructuralOwner(
   // [recording-replay][structural-match] line at all appeared between step start and the thrown
   // error, meaning resolution failed before ever reaching the existing "invoked=true" log.
   if (!owner) {
+    // FIRST_LOSS fix (jobId 9f4f305e-...): a Tier-1 certified target built from stable direct
+    // attributes alone (technical-target-materializer.ts, owner-less branch) carries no
+    // `structuralContext.owner`, so it always hit this fail-closed branch even though its own
+    // `locatorCandidates[0]` (the exact css:[attr="value"] selector CERTIFIED unique at capture
+    // time) is a perfectly resolvable, already-trusted locator -- the SAME strategy
+    // `recordedLocatorFactory`/field-scoped-fallback already use elsewhere for this exact shape,
+    // never a weaker/positional fallback. Multiproject: keyed only on certificationTier===1 and
+    // absence of an owner, never on any app/business-specific value. Same fail-closed discipline
+    // as the owner path below: count!==1, not visible, or not enabled all return undefined.
+    const tier1Locator = technicalTarget?.locatorCandidates?.[0];
+    const certificationTier = (technicalTarget as { certificationTier?: number } | undefined)?.certificationTier;
+    if (certificationTier === 1 && tier1Locator?.strategy === "css") {
+      const locator = recordedLocatorFactory(page, tier1Locator);
+      const count = locator ? await locator.count().catch(() => 0) : 0;
+      if (locator && count === 1) {
+        const visible = await locator.isVisible().catch(() => false);
+        const enabled = visible && await locator.isEnabled().catch(() => true);
+        if (visible && enabled) {
+          console.log(`[recording-replay][structural-match] reason=tier1_direct_css_admitted final=1`);
+          return {
+            locator,
+            strategy: "recorded:css",
+            confidence: technicalTarget?.confidence ?? 0.95,
+            currentMatchCount: 1,
+            structuralCompatibility: true,
+          };
+        }
+        console.log(`[recording-replay][structural-match] reason=tier1_direct_css_not_visible_or_enabled visible=${visible} enabled=${enabled}`);
+        onFailureReason?.("tier1_direct_css_not_visible_or_enabled");
+        return undefined;
+      }
+      console.log(`[recording-replay][structural-match] reason=tier1_direct_css_not_unique matchCount=${count}`);
+      onFailureReason?.("tier1_direct_css_not_unique", { matchCount: count });
+      return undefined;
+    }
     console.log(`[recording-replay][structural-match] reason=no_owner_in_certified_target`);
+    onFailureReason?.("no_owner_in_certified_target");
     return undefined;
   }
   if (context?.deterministicStructuralIdentity !== true) {
     console.log(`[recording-replay][structural-match] reason=owner_not_deterministic ownerTag=${owner.tag}`);
+    onFailureReason?.("owner_not_deterministic");
     return undefined;
   }
   if (context.identityAmbiguous === true) {
     console.log(`[recording-replay][structural-match] reason=owner_identity_ambiguous_at_capture ownerTag=${owner.tag}`);
+    onFailureReason?.("owner_identity_ambiguous_at_capture");
     return undefined;
   }
   const scopeIdentity = context.scopeIdentity;
@@ -5440,6 +5984,7 @@ export async function resolveRecordedStructuralOwner(
   );
   if (scopeIdentity && !scopedEvidence) {
     console.log(`[recording-replay][structural-match] reason=scope_evidence_incomplete_at_capture ownerTag=${owner.tag} scopeStrategy=${scopeIdentity.strategy ?? "none"} captureScopeUnique=${context.captureScopeUnique} captureTargetMatchCount=${context.captureTargetMatchCount}`);
+    onFailureReason?.("scope_evidence_incomplete_at_capture");
     return undefined;
   }
   // A topology-tiebroken owner may have no durable attribute/descendant anchor: its bounded
@@ -5450,10 +5995,12 @@ export async function resolveRecordedStructuralOwner(
     && (context.semanticShape?.length ?? 0) > 0;
   if (Object.keys(stableDirectAttributes).length === 0 && stableDescendants.length === 0 && !topologyAuthority) {
     console.log(`[recording-replay][structural-match] reason=no_stable_anchor_or_topology_authority ownerTag=${owner.tag} stableDirectAttributes=${Object.keys(stableDirectAttributes).length} stableDescendants=${stableDescendants.length} topologyTieBreakUnique=${context.topologyTieBreakUnique} structuralIdentityMatchCount=${context.structuralIdentityMatchCount} semanticShape=${context.semanticShape?.length ?? 0}`);
+    onFailureReason?.("no_stable_anchor_or_topology_authority");
     return undefined;
   }
   if (!/^[a-z][a-z0-9-]*$/i.test(owner.tag)) {
     console.log(`[recording-replay][structural-match] reason=owner_tag_invalid ownerTag=${JSON.stringify(owner.tag)}`);
+    onFailureReason?.("owner_tag_invalid");
     return undefined;
   }
 
@@ -5466,9 +6013,14 @@ export async function resolveRecordedStructuralOwner(
   const landmarkPrefix = landmarkSelectorPrefix(landmarkAncestor);
 
   let scopeRoot: Page | Locator = page;
+  let scopeCssSelectorForTopology: string | undefined;
   if (scopedEvidence) {
     const scopeCandidate: RecordedLocator = {
-      strategy: scopeIdentity!.strategy,
+      // Always "css": an id/data-testid scope is converted into a CSS attribute selector below,
+      // and `recordedLocatorFactory` only knows how to build a Locator from strategy "css" for
+      // that already-converted attribute-selector shape (it has no separate "id" dispatch) --
+      // same fix already applied in `resolveSemanticRuntimeTarget` above.
+      strategy: "css",
       value: scopeIdentity!.strategy === "css"
         ? scopeIdentity!.value
         : scopeIdentity!.strategy === "id"
@@ -5476,12 +6028,60 @@ export async function resolveRecordedStructuralOwner(
           : `[data-testid="${cssAttributeValue(scopeIdentity!.value)}"]`,
       confidence: 1,
     };
+    scopeCssSelectorForTopology = scopeCandidate.value;
     const scopeLocator = recordedLocatorFactory(page, scopeCandidate, true);
-    if (!scopeLocator || await scopeLocator.count().catch(() => 0) !== 1) {
-      console.log(`[recording-replay][structural-match] reason=scoped_scope_not_unique strategy=${scopeIdentity!.strategy}`);
-      return undefined;
+    if (scopeLocator) {
+      // The recorded scope (e.g. an app root container) may not be attached yet if this
+      // resolver runs immediately after navigation/domcontentloaded -- Playwright's own
+      // auto-waiting `.waitFor()` (same idiom already used elsewhere in this file, e.g. the
+      // preparatory-owner-activation path above) lets it attach within a bounded window
+      // instead of counting 0 on the first synchronous check. Still fails closed below if it
+      // never attaches. `waitFor` alone (no positional narrowing call) already waits for a
+      // match to reach the state -- the strict count===1 check right after this is what
+      // actually enforces uniqueness, not this attachment wait.
+      await scopeLocator.waitFor({ state: "attached", timeout: 5000 }).catch(() => undefined);
     }
-    scopeRoot = scopeLocator;
+    const scopeMatchCount = scopeLocator ? await scopeLocator.count().catch(() => 0) : 0;
+    if (!scopeLocator || scopeMatchCount !== 1) {
+      // Some application views replace or omit a capture-time container while preserving the
+      // certified target itself (for example, a profile menu with a stable id rendered outside
+      // its original wrapper). Widen only when the same certificate carries an exact global
+      // id/data-testid locator candidate that is unique on the current page. The normal structural
+      // owner, descendant, topology, visibility, and enabled checks still run below; otherwise
+      // preserve the original fail-closed scope behavior.
+      const directStableAnchors = ["id", "data-testid"]
+        .filter((attribute) => typeof stableDirectAttributes[attribute] === "string" && stableDirectAttributes[attribute].trim())
+        .map((attribute) => ({
+          strategy: "css" as const,
+          value: structuralAttributeSelector({ [attribute]: stableDirectAttributes[attribute] }),
+          confidence: 1,
+        }))
+        .filter((candidate) => candidate.value && technicalTarget?.locatorCandidates?.some((locatorCandidate) =>
+          locatorCandidate.strategy === candidate.strategy && locatorCandidate.value === candidate.value,
+        ));
+      let globallyAnchored = false;
+      for (const candidate of directStableAnchors) {
+        const locator = recordedLocatorFactory(page, candidate, true);
+        if (locator && await locator.count().catch(() => 0) === 1) {
+          globallyAnchored = true;
+          break;
+        }
+      }
+      if (globallyAnchored) {
+        console.log(
+          `[recording-replay][structural-match] reason=scope_unavailable_using_certified_global_anchor ` +
+          `strategy=${scopeIdentity!.strategy} scopeMatchCount=${scopeMatchCount}`
+        );
+        scopeRoot = page;
+        scopeCssSelectorForTopology = undefined;
+      } else {
+        console.log(`[recording-replay][structural-match] reason=scoped_scope_not_unique strategy=${scopeIdentity!.strategy} scopeMatchCount=${scopeMatchCount}`);
+        onFailureReason?.("scoped_scope_not_unique", { matchCount: scopeMatchCount });
+        return undefined;
+      }
+    } else {
+      scopeRoot = scopeLocator;
+    }
   }
 
   console.log(
@@ -5495,6 +6095,7 @@ export async function resolveRecordedStructuralOwner(
   const structuralCandidateCountAfterOwnerTag = await scopeRoot.locator(`${landmarkPrefix}${owner.tag}`).count().catch(() => 0);
   if (structuralCandidateCountAfterOwnerTag === 0) {
     console.log(`[recording-replay][structural-match] reason=owner_tag_not_present ownerTag=${owner.tag} landmarkAncestor=${landmarkAncestor?.tag ?? "none"} before=${structuralCandidateCountBeforeFilter} afterOwnerTag=0`);
+    onFailureReason?.("owner_tag_not_present");
     return undefined;
   }
 
@@ -5503,6 +6104,47 @@ export async function resolveRecordedStructuralOwner(
   if (ownerAttributes) baseSelector += ownerAttributes;
   if (owner.role && !stableDirectAttributes.role) baseSelector += `[role="${cssAttributeValue(owner.role)}"]`;
   const structuralCandidateCountAfterStableAttributes = await scopeRoot.locator(baseSelector).count().catch(() => 0);
+
+  // Older recordings sometimes certify a unique owner by a stable id/test id and then also
+  // capture a very large descendant fingerprint for the whole form. Dynamic forms can add or
+  // remove fields between recording and replay, invalidating that descendant list while the
+  // unique owner itself remains the same. In that case the capture-time structural identity
+  // plus the live unique id/test id is sufficient; keep visibility/actionability checks and do
+  // not relax owners identified only by text, class, or position.
+  const hasStableOwnerAnchor = Boolean(
+    (stableDirectAttributes.id || stableDirectAttributes["data-testid"])
+    && context.deterministicStructuralIdentity === true
+    && context.structuralIdentityMatchCount === 1
+    && context.captureTargetMatchCount === 1,
+  );
+  if (hasStableOwnerAnchor && structuralCandidateCountAfterStableAttributes === 1) {
+    const anchoredOwner = scopeRoot.locator(baseSelector);
+    const anchoredVisible = await anchoredOwner.isVisible().catch(() => false);
+    const anchoredEnabled = anchoredVisible && await anchoredOwner.isEnabled().catch(() => true);
+    if (anchoredVisible && anchoredEnabled) {
+      console.log(
+        `[recording-replay][structural-match] reason=stable_owner_anchor_admitted ownerTag=${owner.tag} ` +
+        `anchor=id_or_testid afterStableAttributes=1 final=1 descendantsIgnored=true`,
+      );
+      return {
+        locator: anchoredOwner,
+        strategy: "recorded:structural-owner",
+        confidence: technicalTarget?.confidence ?? 1,
+        currentMatchCount: 1,
+        structuralCompatibility: true,
+        structuralDiagnostics: {
+          structuralCandidateCountBeforeFilter,
+          structuralCandidateCountAfterOwnerTag,
+          structuralCandidateCountAfterStableAttributes,
+          structuralCandidateCountAfterStableDescendants: 0,
+          structuralCandidateCountAfterSemanticShape: 0,
+          structuralCandidateCountAfterVisibility: 1,
+          finalStructuralMatchCount: 1,
+          reasonCode: "stable_owner_anchor_admitted",
+        },
+      };
+    }
+  }
 
   const descendantClauses: string[] = [];
   for (const descendant of stableDescendants) {
@@ -5520,18 +6162,21 @@ export async function resolveRecordedStructuralOwner(
   const structuralCandidateCountAfterStableDescendants = await scopeRoot.locator(ownerWithDescendantsSelector).count().catch(() => 0);
   if (structuralCandidateCountAfterStableDescendants === 0) {
     console.log(`[recording-replay][structural-match] reason=stable_descendant_not_present ownerTag=${owner.tag} afterOwnerTag=${structuralCandidateCountAfterOwnerTag} afterStableAttributes=${structuralCandidateCountAfterStableAttributes} afterStableDescendants=0`);
+    onFailureReason?.("stable_descendant_not_present");
     return undefined;
   }
 
   const semanticShapeClauses = structuralSemanticShapeClauses(context.semanticShape ?? []);
   if (semanticShapeClauses === undefined) {
     console.log(`[recording-replay][structural-match] reason=semantic_shape_invalid ownerTag=${owner.tag}`);
+    onFailureReason?.("semantic_shape_invalid");
     return undefined;
   }
   const ownerFullSelector = `${ownerWithDescendantsSelector}${semanticShapeClauses.join("")}`;
   const structuralCandidateCountAfterSemanticShape = await scopeRoot.locator(ownerFullSelector).count().catch(() => 0);
   if (structuralCandidateCountAfterSemanticShape === 0) {
     console.log(`[recording-replay][structural-match] reason=semantic_shape_mismatch ownerTag=${owner.tag} afterStableDescendants=${structuralCandidateCountAfterStableDescendants} afterSemanticShape=0`);
+    onFailureReason?.("semantic_shape_mismatch");
     return undefined;
   }
 
@@ -5546,15 +6191,21 @@ export async function resolveRecordedStructuralOwner(
   // When the base structural fingerprint still collides (count > 1), the recorded TOPOLOGY
   // signature is the authority that told the owners apart at capture. Compare it against each
   // live candidate and keep the ONE whose bounded, content-blind tag-count signature matches;
-  // 0 or >1 matches fail closed -- never nth/first/position/text.
+  // 0 or >1 matches fail closed -- never nth/first/position/text. Runs for scoped owners too
+  // (bounded to the already-verified-unique scope container via scopeCssSelectorForTopology) --
+  // a scope narrowing the search space does not itself guarantee the fingerprint is unique
+  // inside it, and skipping the tiebreak here previously left recorded topology evidence unused,
+  // misreporting a resolvable collision as action_owner_ambiguous.
   const recordedTopologySignature = context.topologySignature;
-  if (count > 1 && recordedTopologySignature && !scopedEvidence) {
+  if (count > 1 && recordedTopologySignature) {
     // Pass ownerFullSelector (single-level :has(), native-CSS-safe), not nearestOwnerSelector --
     // see disambiguateStructuralCandidatesByTopology's own comment for why the ":not(:has(...))"
     // wrapper cannot cross into a native page.evaluate context.
-    const disambiguation = await page.evaluate(disambiguateStructuralCandidatesByTopology, { selector: ownerFullSelector, recordedSignature: recordedTopologySignature }).catch(() => ({ matched: false, matchCount: 0, marker: undefined as string | undefined }));
+    const disambiguation = await page.evaluate(disambiguateStructuralCandidatesByTopology, { selector: ownerFullSelector, recordedSignature: recordedTopologySignature, scopeSelector: scopeCssSelectorForTopology }).catch(() => ({ matched: false, matchCount: 0, marker: undefined as string | undefined }));
     if (!disambiguation.matched || !disambiguation.marker) {
-      console.log(`[recording-replay][structural-match] reason=${disambiguation.matchCount > 1 ? "action_owner_ambiguous" : "structural_match_not_unique"} ownerTag=${owner.tag} topologySignatureCompared=true topologyMatchCount=${disambiguation.matchCount} final=0`);
+      const topologyFailReason = disambiguation.matchCount > 1 ? "action_owner_ambiguous" : "structural_match_not_unique";
+      console.log(`[recording-replay][structural-match] reason=${topologyFailReason} ownerTag=${owner.tag} topologySignatureCompared=true topologyMatchCount=${disambiguation.matchCount} final=0`);
+      onFailureReason?.(topologyFailReason);
       return undefined;
     }
     locator = scopeRoot.locator(`[data-codex-structural-owner="${disambiguation.marker}"]`);
@@ -5566,15 +6217,19 @@ export async function resolveRecordedStructuralOwner(
   const enabled = visible && await locator.isEnabled().catch(() => true);
   const structuralCandidateCountAfterVisibility = visible ? 1 : 0;
   if (count !== 1) {
-    console.log(`[recording-replay][structural-match] reason=${count > 1 ? "action_owner_ambiguous" : "structural_match_not_unique"} ownerTag=${owner.tag} afterSemanticShape=${structuralCandidateCountAfterSemanticShape} afterVisibility=0 final=${count}`);
+    const cardinalityFailReason = count > 1 ? "action_owner_ambiguous" : "structural_match_not_unique";
+    console.log(`[recording-replay][structural-match] reason=${cardinalityFailReason} ownerTag=${owner.tag} afterSemanticShape=${structuralCandidateCountAfterSemanticShape} afterVisibility=0 final=${count}`);
+    onFailureReason?.(cardinalityFailReason);
     return undefined;
   }
   if (!visible) {
     console.log(`[recording-replay][structural-match] reason=structural_match_not_visible ownerTag=${owner.tag} afterSemanticShape=${structuralCandidateCountAfterSemanticShape} afterVisibility=0 final=0`);
+    onFailureReason?.("structural_match_not_visible");
     return undefined;
   }
   if (!enabled) {
     console.log(`[recording-replay][structural-match] reason=structural_match_not_enabled ownerTag=${owner.tag} afterVisibility=${structuralCandidateCountAfterVisibility} final=0`);
+    onFailureReason?.("structural_match_not_enabled");
     return undefined;
   }
   console.log(
@@ -5731,8 +6386,24 @@ export async function attemptSegmentedInputFill(
     }
   }
   for (let index = 0; index < segments.length; index += 1) {
-    await segments[index].fill(value[index]);
+    const segment = segments[index];
+    const expectedCharacter = value[index];
+    // These controls can mirror their value in the DOM without committing it to the form's
+    // backing state. `fill()` plus inputValue readback therefore is not enough: the latest
+    // physical replay showed the page submit with the segmented code still empty. Reproduce the
+    // user's actual keystroke path for every segment before allowing the next recorded action.
+    await segment.click();
+    await segment.press("ControlOrMeta+A").catch(() => undefined);
+    await segment.pressSequentially(expectedCharacter);
+    const actualCharacter = await segment.evaluate((element) => {
+      if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) return element.value;
+      return element.isContentEditable ? element.textContent ?? "" : "";
+    }).catch(() => "");
+    if (actualCharacter !== expectedCharacter) {
+      return { ok: false, reason: "segment_value_not_committed" };
+    }
   }
+  console.log(`[recording-replay] segmentedInputReadback=verified segmentCount=${segments.length}`);
   return { ok: true, segmentCount };
 }
 
@@ -5759,8 +6430,10 @@ export async function resolveSemanticRuntimeTarget(
   const marker = "codex-semantic-runtime-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
   const markerSelector = `[data-codex-semantic-runtime-target="${marker}"]`;
   let anyAlternativeResolved = false;
+  let resolvedScopeLocator: Locator | undefined;
 
   for (const alternative of semanticRuntimeEvidence.scopeAlternatives) {
+    let globalSemanticTargetResolved = false;
     const scopeCandidate: RecordedLocator = {
       // Always "css": an id/data-testid scope is converted into a CSS attribute selector below,
       // and `recordedLocatorFactory` only knows how to build a Locator from strategy "css" for
@@ -5774,22 +6447,238 @@ export async function resolveSemanticRuntimeTarget(
       confidence: 1,
     };
     const scopeLocator = recordedLocatorFactory(page, scopeCandidate, true);
-    if (!scopeLocator || (await scopeLocator.count().catch(() => 0)) !== 1) {
+    let scopeCount = scopeLocator ? await scopeLocator.count().catch(() => 0) : 0;
+    let semanticMatchCount = scopeCount === 1 && scopeLocator
+      ? await scopeLocator.evaluate(
+          matchSemanticRuntimeCandidate,
+          { tag: semanticRuntimeEvidence.targetTag, role: semanticRuntimeEvidence.role, value: normalizedValue, attributeName: "data-codex-semantic-runtime-target", markerValue: marker },
+        ).catch(() => -1)
+      : -1;
+
+    // The recorded container itself may have a generated ID that changed while its exact
+    // semantic target remains present on the live surface (for example, a close control inside
+    // a freshly rendered dialog). Re-prove the captured role/name globally before attempting to
+    // activate any possible popup trigger.
+    if (scopeCount !== 1 || semanticMatchCount !== 1) {
+      const roleTarget = semanticRuntimeEvidence.role
+        ? page.getByRole(semanticRuntimeEvidence.role as any, { name: normalizedValue, exact: true })
+        : semanticRuntimeEvidence.targetTag
+          ? page.locator(semanticRuntimeEvidence.targetTag).getByText(normalizedValue, { exact: true })
+          : page.getByText(normalizedValue, { exact: true });
+      let currentTarget = roleTarget;
+      let currentTargetCount = await currentTarget.count().catch(() => 0);
+      // Some recorders expose an accessible name but report the implicit role (for example,
+      // `button`) while the live control has an explicit role (`checkbox`). If the recorded
+      // container is stale/non-unique, recover only through the exact accessible label and only
+      // when it identifies one live control. This keeps row and form actions portable without
+      // selecting among repeated labels by position or text similarity.
+      if (currentTargetCount !== 1 && semanticRuntimeEvidence.targetTag) {
+        const exactLabelTarget = page.getByLabel(normalizedValue, { exact: true });
+        const exactLabelCount = await exactLabelTarget.count().catch(() => 0);
+        if (exactLabelCount === 1) {
+          currentTarget = exactLabelTarget;
+          currentTargetCount = exactLabelCount;
+        }
+      }
+      const currentTargetVisible = currentTargetCount === 1 && await currentTarget.isVisible().catch(() => false);
+      const currentTargetEnabled = currentTargetVisible && await currentTarget.isEnabled().catch(() => true);
+      if (currentTargetCount === 1 && currentTargetVisible && currentTargetEnabled) {
+        await currentTarget.evaluate((element, args) => element.setAttribute(args.attributeName, args.markerValue), {
+          attributeName: "data-codex-semantic-runtime-target",
+          markerValue: marker,
+        }).catch(() => undefined);
+        const markedCount = await page.locator(markerSelector).count().catch(() => 0);
+        globalSemanticTargetResolved = markedCount === 1;
+        semanticMatchCount = globalSemanticTargetResolved ? 1 : 0;
+        if (globalSemanticTargetResolved) {
+          console.log(`[recording-replay][semantic-runtime-match] exactGlobalTargetResolved=true matchCount=${currentTargetCount}`);
+        }
+      }
+    }
+
+    // A popup/menu target can be recorded under a unique capture-time container ID that is
+    // absent until its trigger is activated. Reopen it only through an exact, live ARIA
+    // relationship to that recorded scope; never guess among page buttons or use a position.
+    // This also handles ephemeral IDs when the relationship remains valid in the current DOM.
+    if ((scopeCount !== 1 || semanticMatchCount !== 1) && !globalSemanticTargetResolved && alternative.scopeIdentity.strategy === "id") {
+      const scopeId = cssAttributeValue(alternative.scopeIdentity.value);
+      const activator = page.locator(`[aria-controls~="${scopeId}"], [aria-owns~="${scopeId}"]`);
+      const activatorCount = await activator.count().catch(() => 0);
+      const expanded = activatorCount === 1
+        ? await activator.getAttribute("aria-expanded").catch(() => null)
+        : null;
+      const activatorVisible = activatorCount === 1 && await activator.isVisible().catch(() => false);
+      const activatorEnabled = activatorVisible && await activator.isEnabled().catch(() => true);
+      if (activatorCount === 1 && activatorVisible && activatorEnabled && expanded !== "true") {
+        await activator.click().catch(() => undefined);
+        await scopeLocator?.waitFor({ state: "visible", timeout: 3000 }).catch(() => undefined);
+        scopeCount = scopeLocator ? await scopeLocator.count().catch(() => 0) : 0;
+        semanticMatchCount = scopeCount === 1 && scopeLocator
+          ? await scopeLocator.evaluate(
+              matchSemanticRuntimeCandidate,
+              { tag: semanticRuntimeEvidence.targetTag, role: semanticRuntimeEvidence.role, value: normalizedValue, attributeName: "data-codex-semantic-runtime-target", markerValue: marker },
+            ).catch(() => -1)
+          : -1;
+        console.log(
+          `[recording-replay][semantic-runtime-match] popupActivationAttempted=true ` +
+          `scopeStrategy=id activatorCount=${activatorCount} scopeCount=${scopeCount} targetMatchCount=${semanticMatchCount}`
+        );
+      }
+
+      // Some component libraries render menu content in a portal with a generated scope ID,
+      // but do not expose aria-controls/aria-owns on the visible trigger. When the captured
+      // scope is a Radix-generated ID, allow activation only if the live page has exactly one
+      // visible, pointer-actionable Radix ID element. After opening, first retry the captured
+      // scope; if its generated ID changed, re-prove the same recorded semantic target globally
+      // with exact role/tag/name uniqueness. This is execution-only and never certifies a
+      // locator. Ambiguity, missing target, or non-actionable trigger still fails closed.
+      if (
+        (scopeCount !== 1 || semanticMatchCount !== 1) &&
+        alternative.scopeIdentity.value.startsWith("radix-") &&
+        activatorCount !== 1
+      ) {
+        const triggerMarker = `codex-semantic-runtime-trigger-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+        const triggerSelector = `[data-codex-semantic-runtime-trigger="${triggerMarker}"]`;
+        const triggerCount = await page.locator('[id^="radix-"]').evaluateAll((elements, args) => {
+          const visibleAndActionable = elements.filter((element) => {
+            const style = window.getComputedStyle(element);
+            const rect = element.getBoundingClientRect();
+            const disabled = element instanceof HTMLButtonElement && element.disabled;
+            return rect.width > 0 && rect.height > 0 && style.visibility !== "hidden" &&
+              style.display !== "none" && style.pointerEvents !== "none" && style.cursor === "pointer" && !disabled;
+          });
+          if (visibleAndActionable.length !== 1) return visibleAndActionable.length;
+          visibleAndActionable[0].setAttribute("data-codex-semantic-runtime-trigger", args.marker);
+          return 1;
+        }, { marker: triggerMarker }).catch(() => 0);
+        const trigger = page.locator(triggerSelector);
+        const triggerVisible = triggerCount === 1 && await trigger.isVisible().catch(() => false);
+        const triggerEnabled = triggerVisible && await trigger.isEnabled().catch(() => true);
+        if (triggerCount === 1 && triggerVisible && triggerEnabled) {
+          await trigger.click().catch(() => undefined);
+          await scopeLocator?.waitFor({ state: "visible", timeout: 3000 }).catch(() => undefined);
+          scopeCount = scopeLocator ? await scopeLocator.count().catch(() => 0) : 0;
+          semanticMatchCount = scopeCount === 1 && scopeLocator
+            ? await scopeLocator.evaluate(
+                matchSemanticRuntimeCandidate,
+                { tag: semanticRuntimeEvidence.targetTag, role: semanticRuntimeEvidence.role, value: normalizedValue, attributeName: "data-codex-semantic-runtime-target", markerValue: marker },
+              ).catch(() => -1)
+            : -1;
+          if (scopeCount !== 1 || semanticMatchCount !== 1) {
+            const globalTarget = semanticRuntimeEvidence.role
+              ? page.getByRole(semanticRuntimeEvidence.role as any, { name: normalizedValue, exact: true })
+              : semanticRuntimeEvidence.targetTag
+                ? page.locator(semanticRuntimeEvidence.targetTag).getByText(normalizedValue, { exact: true })
+                : page.getByText(normalizedValue, { exact: true });
+            await globalTarget.waitFor({ state: "visible", timeout: 3000 }).catch(() => undefined);
+            semanticMatchCount = await globalTarget.count().catch(() => -1);
+            globalSemanticTargetResolved = semanticMatchCount === 1;
+            if (globalSemanticTargetResolved) {
+              await globalTarget.evaluate((element, args) => element.setAttribute(args.attributeName, args.markerValue), {
+                attributeName: "data-codex-semantic-runtime-target",
+                markerValue: marker,
+              }).catch(() => { globalSemanticTargetResolved = false; });
+              const targetVisible = globalSemanticTargetResolved && await globalTarget.isVisible().catch(() => false);
+              const targetEnabled = targetVisible && await globalTarget.isEnabled().catch(() => true);
+              globalSemanticTargetResolved = Boolean(targetVisible && targetEnabled);
+            } else if (semanticMatchCount === 0 && semanticRuntimeEvidence.role === "button") {
+              // A live popup may expose its sole recorded button as a semantic menuitem and
+              // with a localized/updated label. Reuse it only inside one visible menu that
+              // contains exactly one visible, enabled menuitem; never match by text similarity
+              // or position. The recorded target's captured popup scope and unique target proof
+              // remain the authority for entering this narrowly scoped recovery.
+              const menus = page.getByRole("menu");
+              const menuCount = await menus.count().catch(() => 0);
+              const menuVisible = menuCount === 1 && await menus.isVisible().catch(() => false);
+              const menuItems = menuVisible ? menus.getByRole("menuitem") : undefined;
+              const menuItemCount = menuItems ? await menuItems.count().catch(() => 0) : 0;
+              const menuItemVisible = menuItemCount === 1 && await menuItems!.isVisible().catch(() => false);
+              const menuItemEnabled = menuItemVisible && await menuItems!.isEnabled().catch(() => true);
+              if (menuItemCount === 1 && menuItemVisible && menuItemEnabled) {
+                await menuItems!.evaluate((element, args) => element.setAttribute(args.attributeName, args.markerValue), {
+                  attributeName: "data-codex-semantic-runtime-target",
+                  markerValue: marker,
+                }).catch(() => { globalSemanticTargetResolved = false; });
+                globalSemanticTargetResolved = true;
+                semanticMatchCount = 1;
+                console.log(`[recording-replay][semantic-runtime-match] generatedPopupTargetResolved=true menuCount=${menuCount} menuItemCount=${menuItemCount}`);
+              }
+            }
+          }
+          console.log(
+            `[recording-replay][semantic-runtime-match] generatedPopupActivationAttempted=true ` +
+            `triggerCount=${triggerCount} scopeCount=${scopeCount} targetMatchCount=${semanticMatchCount}`
+          );
+        } else {
+          console.log(
+            `[recording-replay][semantic-runtime-match] generatedPopupActivationSkipped=true ` +
+            `triggerCount=${triggerCount} reason=${triggerCount !== 1 ? "trigger_not_unique" : "trigger_not_actionable"}`
+          );
+        }
+      }
+    }
+
+    if (globalSemanticTargetResolved) {
+      anyAlternativeResolved = true;
+      continue;
+    }
+
+    if (!scopeLocator || scopeCount !== 1) {
       console.log(`[recording-replay][semantic-runtime-match] reason=scope_not_unique strategy=${alternative.scopeIdentity.strategy}`);
       continue;
     }
-    const matchCount = await scopeLocator.evaluate(
-      matchSemanticRuntimeCandidate,
-      { tag: semanticRuntimeEvidence.targetTag, role: semanticRuntimeEvidence.role, value: normalizedValue, attributeName: "data-codex-semantic-runtime-target", markerValue: marker },
-    ).catch(() => -1);
-    if (matchCount !== 1) {
-      console.log(`[recording-replay][semantic-runtime-match] reason=${matchCount === 0 ? "semantic_match_not_found" : "semantic_match_ambiguous"} strategy=${alternative.scopeIdentity.strategy} matchCount=${matchCount}`);
+    if (semanticMatchCount !== 1) {
+      console.log(`[recording-replay][semantic-runtime-match] reason=${semanticMatchCount === 0 ? "semantic_match_not_found" : "semantic_match_ambiguous"} strategy=${alternative.scopeIdentity.strategy} matchCount=${semanticMatchCount}`);
       continue;
     }
     anyAlternativeResolved = true;
+    resolvedScopeLocator = scopeLocator;
   }
 
   if (!anyAlternativeResolved) return undefined;
+  // clickScopeElement=true: the physical click landed on the SCOPE element itself, not on the
+  // matched descendant used only to prove identity uniqueness -- replay must click the scope,
+  // never the descendant. Requires exactly one alternative (fail closed otherwise, same as the
+  // marker-based path below).
+  if (semanticRuntimeEvidence.clickScopeElement === true) {
+    if (semanticRuntimeEvidence.scopeAlternatives.length !== 1) return undefined;
+    if (resolvedScopeLocator) {
+      const visible = await resolvedScopeLocator.isVisible().catch(() => false);
+      const enabled = visible && await resolvedScopeLocator.isEnabled().catch(() => true);
+      if (!visible || !enabled) {
+        console.log(`[recording-replay][semantic-runtime-match] reason=${!visible ? "semantic_match_not_visible" : "semantic_match_not_enabled"} final=0 clickScopeElement=true`);
+        return undefined;
+      }
+      console.log(`[recording-replay][semantic-runtime-match] reason=semantic_match_admitted clickScopeElement=true final=1`);
+      return {
+        locator: resolvedScopeLocator,
+        strategy: "recorded:semantic-runtime",
+        confidence: 0.6,
+        currentMatchCount: 1,
+        structuralCompatibility: false,
+        acceptedScopeRuntimeMarker: marker,
+      };
+    }
+    // The captured scope itself no longer resolves uniquely, but the exact accessible control
+    // did. Return that marked control only after the same one-visible-enabled-element proof.
+    const exactTarget = page.locator(markerSelector);
+    const exactTargetCount = await exactTarget.count().catch(() => 0);
+    const exactTargetVisible = exactTargetCount === 1 && await exactTarget.isVisible().catch(() => false);
+    const exactTargetEnabled = exactTargetVisible && await exactTarget.isEnabled().catch(() => true);
+    if (!exactTargetEnabled) {
+      console.log(`[recording-replay][semantic-runtime-match] reason=${exactTargetCount !== 1 ? "semantic_match_not_unique" : !exactTargetVisible ? "semantic_match_not_visible" : "semantic_match_not_enabled"} final=0 clickScopeElement=true`);
+      return undefined;
+    }
+    console.log(`[recording-replay][semantic-runtime-match] reason=exact_accessible_target_admitted clickScopeElement=true final=1`);
+    return {
+      locator: exactTarget,
+      strategy: "recorded:semantic-runtime",
+      confidence: 0.6,
+      currentMatchCount: 1,
+      structuralCompatibility: false,
+      acceptedScopeRuntimeMarker: marker,
+    };
+  }
   const locator = page.locator(markerSelector);
   const count = await locator.count().catch(() => 0);
   if (count !== 1) {
@@ -5927,9 +6816,33 @@ async function resolveRecordedTechnicalTarget(
       if (candidate.ambiguous) continue;
       const structuralOwner = scopeRoot ? undefined : await resolveRecordedStructuralOwner(page, technicalTarget);
       if (structuralOwner) return structuralOwner;
-      const locator = recordedLocatorFactory(scopeRoot ?? page, candidate, exact);
+      let locator = recordedLocatorFactory(scopeRoot ?? page, candidate, exact);
       if (!locator) continue;
-      const count = await locator.count().catch(() => 0);
+      let count = await locator.count().catch(() => 0);
+      // A recorded CSS ref may intentionally identify an owner through a stable descendant,
+      // e.g. `div:has(select[id="..."])`. That selector also matches every ancestor wrapper.
+      // When the ref is anchored by a stable id/test id and has this simple owner:has(anchor)
+      // shape, resolve the nearest matching owner with a relational CSS exclusion and still
+      // require exactly one live result. No nth/first/position or text matching is involved.
+      const cssOwnerAnchor = candidate.strategy.trim().toLowerCase() === "css"
+        ? /^([a-z][a-z0-9-]*):has\(([^()]*(?:\[[^\]]*\])?[^()]*)\)$/i.exec(candidate.value.trim())
+        : null;
+      const cssHasStableAnchor = cssOwnerAnchor
+        && /(?:#[A-Za-z_][A-Za-z0-9_-]*|\[(?:id|data-testid)\s*=\s*["'][^"']+["']\])/i.test(cssOwnerAnchor[2]);
+      if (count > 1 && cssHasStableAnchor && !/:nth-(?:child|of-type)|:first-child|:last-child/i.test(candidate.value)) {
+        const [, ownerTag, anchorSelector] = cssOwnerAnchor!;
+        const nearestCandidate = {
+          ...candidate,
+          value: `${ownerTag}:has(${anchorSelector}):not(:has(${ownerTag} ${anchorSelector}))`,
+        };
+        const nearestLocator = recordedLocatorFactory(scopeRoot ?? page, nearestCandidate, exact);
+        const nearestCount = nearestLocator ? await nearestLocator.count().catch(() => 0) : 0;
+        if (nearestLocator && nearestCount === 1) {
+          locator = nearestLocator;
+          count = nearestCount;
+          console.log(`[recorded-target-nearest-owner] strategy=css anchor=id_or_testid originalMatchCount>1 finalMatchCount=1`);
+        }
+      }
       const visible = count === 1 && await locator.isVisible().catch(() => false);
       const enabled = visible && await locator.isEnabled().catch(() => true);
       if (!visible || !enabled) {
@@ -5972,6 +6885,30 @@ async function resolveRecordedTechnicalTarget(
             || element.getAttribute("contenteditable") === "true";
         }).catch(() => false);
       if (!compatible) continue;
+      const stableRecordedCssIdentity = candidate.strategy === "css"
+        && !/:nth-(?:child|of-type)|:first-child|:last-child/i.test(candidate.value)
+        && /(?:#[A-Za-z_][A-Za-z0-9_-]*|\[(?:id|data-testid)\s*=\s*["'][^"']+["']\])/i.test(candidate.value);
+      const structuralCompatibility = actionIntent === "press"
+        ? true
+        : Boolean(technicalTarget?.structuralContext || technicalTarget?.stableAttributes)
+          || transientSelectionOptionBound
+          // A recorded CSS locator anchored by a stable id/test id is structural evidence even
+          // when the older recording format carries refs without a full structural fingerprint.
+          // The candidate is already required to resolve uniquely and pass runtime visibility
+          // and actionability checks above; positional CSS remains excluded.
+          || stableRecordedCssIdentity;
+      // A unique role/name ref is only a locator match; it does not certify that the
+      // current control is the recorded control. Keep searching the same recorded authority
+      // list for a persisted structural locator (for example, CSS/ID) before failing closed.
+      // Returning the first unbacked role match here caused the caller to reject the whole
+      // resolution and never examine a later, structurally certified candidate.
+      if (!structuralCompatibility) {
+        console.log(
+          `[recorded-target-winner-rejected] strategy=${candidate.strategy} origin=${origin} candidateIndex=${candidateIndex} ` +
+          `reason=missing_structural_authority currentUrl=${page.url()}`
+        );
+        continue;
+      }
       // Diagnostic instrumentation only (jobId 33801843-af28-41fd-85c2-a5edcffbfbba): compares
       // the exact winning candidate/resolution shape Recording used against what
       // pressPromotedTarget receives, to demonstrate rather than assume the divergence. No
@@ -5989,9 +6926,7 @@ async function resolveRecordedTechnicalTarget(
         // compatibility signal -- a click-era proxy (did the RECORDED METADATA happen to carry
         // structuralContext/stableAttributes) has no bearing on whether locator.press(key) is a
         // valid action against this exact, unique, visible, enabled owner.
-        structuralCompatibility: actionIntent === "press"
-          ? true
-          : Boolean(technicalTarget?.structuralContext || technicalTarget?.stableAttributes) || transientSelectionOptionBound,
+        structuralCompatibility,
       };
   }
   return undefined;
@@ -6656,19 +7591,33 @@ async function resolveFillTargetCore(
       includeInteractiveControls: true,
       allowActivation: false,
     });
-    if (interactiveCellControl.locator) {
-      const beforeActivation = await resolveGridEditor(page, target, gridContext, {
-        controlKind: "fill",
-        allowActivation: false,
-      });
-      if (!beforeActivation.locator) {
-        const activationStrategy = interactiveCellControl.strategy ?? "grid_cell_interactive_control";
-        console.log(`[grid-editor-activation] field="${target}" strategy=${activationStrategy}`);
-        const interactiveControlEnabled = await interactiveCellControl.locator.isEnabled().catch(() => false);
-        const activationTarget = interactiveControlEnabled
-          ? interactiveCellControl.locator
-          : interactiveCellControl.cell;
-        if (activationTarget) await activationTarget.click().catch(() => undefined);
+    const beforeActivation = await resolveGridEditor(page, target, gridContext, {
+      controlKind: "fill",
+      allowActivation: false,
+    });
+    if (!beforeActivation.locator) {
+      const activationStrategy = interactiveCellControl.strategy ?? "grid_cell_structural_activation";
+      const interactiveControlEnabled = interactiveCellControl.locator
+        ? await interactiveCellControl.locator.isEnabled().catch(() => false)
+        : false;
+      // A cell can expose several controls while its actual editor is disabled or
+      // not yet mounted. If no single interactive child is authoritative, activate
+      // the structurally resolved cell itself; this lets delegated grid handlers
+      // enter edit mode without guessing among sibling controls.
+      const activationTarget = interactiveControlEnabled
+        ? interactiveCellControl.locator
+        : beforeActivation.cell ?? interactiveCellControl.cell;
+      if (activationTarget) {
+        const activationKind = interactiveControlEnabled ? "unique_control" : "structural_cell";
+        console.log(`[grid-editor-activation] field="${target}" strategy=${activationStrategy} target=${activationKind}`);
+        if (interactiveControlEnabled) {
+          await activationTarget.click().catch(() => undefined);
+        } else {
+          // Child controls can cover a cell's hit target while the grid listens
+          // for the cell's delegated click event. Dispatch that event on the
+          // already certified field cell so edit mode can materialize safely.
+          await activationTarget.evaluate((element) => (element as HTMLElement).click()).catch(() => undefined);
+        }
         const deadline = Date.now() + 2000;
         while (Date.now() < deadline) {
           const materializedEditor = await resolveGridEditor(page, target, gridContext, {

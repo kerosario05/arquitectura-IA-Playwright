@@ -221,6 +221,7 @@ export type PlaywrightLaunchContext = {
   headless: boolean | null;
   appBaseUrl?: string;
   appSlug?: string;
+  ignoreHTTPSErrors?: boolean;
   // Already-resolved runtime input values (valueKey -> value), never re-resolved here. Threaded
   // through to the functionalExecution child so the deterministic candidate's
   // process.env['PROMOTED_<KEY>'] reads (and the legacy resolvePromotedRuntimeValue fallback)
@@ -1775,7 +1776,8 @@ function buildScenarioRequiredRequirements(input: {
 
 function buildSourceScenarioContext(
   plan: ExecutionPlan,
-  sourceScenario: SpecGenerationSourceScenario | undefined
+  sourceScenario: SpecGenerationSourceScenario | undefined,
+  authRequiredOverride?: boolean,
 ): {
   scenarioTitle: string;
   scenarioSteps: SpecGenerationScenarioStep[];
@@ -1814,10 +1816,12 @@ function buildSourceScenarioContext(
   // login mode, credentials or app profile. A login step in the plan only backs
   // an auth requirement when it traces to explicit discovery signals.
   const auth: SpecGenerationSourceScenarioAuth = {
-    required: sourceScenario?.auth?.required === true
+    required: authRequiredOverride ?? (
+      sourceScenario?.auth?.required === true
       || plan.metadata?.authFlowRequired === true
       || (hasLoginStep && plan.metadata?.authGateDetectedDuringDiscovery === true)
-      || (hasLoginStep && backedAuthGateOracle),
+      || (hasLoginStep && backedAuthGateOracle)
+    ),
     gateDetected: sourceScenario?.auth?.gateDetected === true
       || plan.metadata?.authGateDetectedDuringDiscovery === true
       || backedAuthGateOracle,
@@ -3512,7 +3516,11 @@ export function structuralValidation(input: {
     }
   }
 
-  if (input.authFlowContext && (input.authFlowContext.required || input.authFlowContext.gateDetected)) {
+  // An observed auth gate authorizes recorded credential steps, but it does not
+  // require a second AuthFlow when those steps already perform authentication.
+  // `required` is the contract decision about inserting the helper; `gateDetected`
+  // remains evidence for the individual credential actions above.
+  if (input.authFlowContext?.required) {
     const authMode = input.authFlowContext.authOutcomeMode;
     if (authMode === "complete_authentication") {
       if (!content.includes("new AuthFlow(page)")) errors.push("missing_auth_flow_instance");
@@ -3700,12 +3708,13 @@ function parseEnvBoolean(value: string | undefined): boolean | null {
 export function resolvePlaywrightLaunchContext(input: HybridSpecGenerationInput): PlaywrightLaunchContext {
   const appBaseUrl = input.appProfile?.baseUrl?.trim() || undefined;
   const appSlug = input.appProfile?.appSlug;
+  const ignoreHTTPSErrors = input.appProfile?.ignoreHTTPSErrors;
   const runtimeInputValues = input.runtimeInputValues;
   if (input.headed === true) {
-    return { source: input.executionSource ?? "explicit_headed", headless: false, appBaseUrl, appSlug, runtimeInputValues };
+    return { source: input.executionSource ?? "explicit_headed", headless: false, appBaseUrl, appSlug, ignoreHTTPSErrors, runtimeInputValues };
   }
   if (input.headed === false) {
-    return { source: input.executionSource ?? "explicit_headless_default", headless: true, appBaseUrl, appSlug, runtimeInputValues };
+    return { source: input.executionSource ?? "explicit_headless_default", headless: true, appBaseUrl, appSlug, ignoreHTTPSErrors, runtimeInputValues };
   }
   const automationHeadless = parseEnvBoolean(process.env.AUTOMATION_HEADLESS);
   if (automationHeadless !== null) {
@@ -3714,6 +3723,7 @@ export function resolvePlaywrightLaunchContext(input: HybridSpecGenerationInput)
       headless: automationHeadless,
       appBaseUrl,
       appSlug,
+      ignoreHTTPSErrors,
       runtimeInputValues,
     };
   }
@@ -3723,6 +3733,7 @@ export function resolvePlaywrightLaunchContext(input: HybridSpecGenerationInput)
     headless: envHeadless,
     appBaseUrl,
     appSlug,
+    ignoreHTTPSErrors,
     runtimeInputValues,
   };
 }
@@ -3763,6 +3774,9 @@ export function buildPlaywrightCommandEnv(launchContext?: PlaywrightLaunchContex
   }
   if (launchContext?.appSlug) {
     envPatch.APP_SLUG = launchContext.appSlug;
+  }
+  if (launchContext?.ignoreHTTPSErrors !== undefined) {
+    envPatch.APP_IGNORE_HTTPS_ERRORS = String(launchContext.ignoreHTTPSErrors);
   }
   // Already-resolved runtime input authority (valueKey -> value), never re-resolved here --
   // reuses the same PROMOTED_<KEY> / PROMOTED_RUNTIME_DATA_OVERRIDES_JSON convention
@@ -4320,7 +4334,19 @@ const TARGET_REQUIRING_OPERATIONS = new Set<SpecStepOperation>(["click", "fill",
  */
 export function findUncertifiedRequiredTargetSteps(executionContract: SpecExecutionContract): SpecExecutionContractStep[] {
   return executionContract.steps.filter(
-    (step) => step.required && TARGET_REQUIRING_OPERATIONS.has(step.operation) && !step.certifiedTechnicalTarget
+    (step) => step.required
+      && TARGET_REQUIRING_OPERATIONS.has(step.operation)
+      && !step.certifiedTechnicalTarget
+      // A segmented input is not one locator that can be certified at promotion time. Its
+      // captured unique scope + exact segment count are actionable authority; runtime rechecks
+      // both before typing. All other uncertified required targets remain behind this gate.
+      && !(step.operation === "fill"
+        && step.playwrightRecorderEvidence?.kind === "segmented_input"
+        && step.playwrightRecorderEvidence.runtimeResolutionRequired === true
+        && Number.isInteger(step.playwrightRecorderEvidence.segmentCount)
+        && (step.playwrightRecorderEvidence.segmentCount ?? 0) >= 2
+        && Boolean(step.playwrightRecorderEvidence.scopeIdentity))
+      && !(typeof step.technicalTargetRef === "string" && step.technicalTargetRef.trim().length > 0)
   );
 }
 
@@ -4374,12 +4400,19 @@ async function runHybridSpecGenerationInternal(
   let specInputMode: "execution_contract" | "legacy" = "legacy";
   const scenarioId = getScenarioId(input.plan, input.scenarioId);
   const sectionSlug = getSectionSlug(input.sectionSlug);
-  const sourceScenario = buildSourceScenarioContext(input.plan, input.sourceScenario);
   const executionContract = buildSpecExecutionContract(input.plan, input.sourceScenario, {
     appSlug: input.appProfile.appSlug,
     sectionSlug,
     pageObjectRegistry: input.pageObjectRegistry
   });
+  // Keep the auth helper decision aligned with the canonical execution contract.
+  // Plan metadata may record that a gate was observed, while the contract can
+  // establish that the recorded credential and submit steps already own login.
+  const sourceScenario = buildSourceScenarioContext(
+    input.plan,
+    input.sourceScenario,
+    executionContract.auth ? executionContract.auth.required : undefined,
+  );
   const contractValidation = validateSpecExecutionContract(executionContract);
   const contractMetrics = computeExecutionContractMetrics(executionContract);
   console.log(`[execution-contract] valid=${contractValidation.valid} steps=${contractMetrics.stepCount} chars=${contractMetrics.chars}`);

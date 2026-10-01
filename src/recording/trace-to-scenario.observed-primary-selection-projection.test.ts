@@ -69,6 +69,9 @@ test("2/observedPrimaryMaterializes. the Observed Primary is persisted once the 
   const events = [optionClickEvent(), derivedSelectEvent([0])];
   const scenario = materializeObservedPrimaryScenario(trace(events), events);
   assert.ok(scenario, "the Observed Primary must materialize when every executable action has authority");
+  const selectionStep = scenario.webSteps.find((step) => step.valueKey === "field_x_seleccion");
+  assert.equal(selectionStep?.target?.strategy, "role");
+  assert.equal(selectionStep?.target?.value, "option|Option A", "the selection reuses the source option's captured locator");
   const audit = evaluateRecordedScenarioExecutionReadiness(scenario as any);
   assert.deepEqual(audit.actions.map((action) => action.actionId), ["interaction-1"], "only the authoritative click is executable-required; the projection is not");
   assert.equal(audit.actions[0].technicalTargetCount > 0, true);

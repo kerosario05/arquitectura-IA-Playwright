@@ -9,6 +9,7 @@ import {
 } from "./scenario-preview-runner";
 import type { McpScenario } from "../../scenarios/scenario-types";
 import type { JobStatus } from "./job-store";
+import type { EvidenceScenarioRecord } from "../../evidence/evidence-types";
 
 /**
  * A mixed rerun batch (some scenarios have a fresh promoted spec, some don't) previously fell
@@ -34,14 +35,201 @@ export type MixedRerunInput = {
   fallbackScenarios: McpScenario[];
 };
 
-function relayCaseEvents(parentJobId: string) {
-  return (line: string) => {
-    // Only case_started/case_finished are forwarded — every other log line is internal to the
-    // child's own run and would just be noise (or, worse, a misleading duplicate) on the parent.
-    if (line.includes('"type":"case_started"') || line.includes('"type":"case_finished"')) {
-      jobStore.appendLog(parentJobId, line);
-    }
+type CaseProgress = {
+  completed: number;
+  executed: number;
+  passed: number;
+  failed: number;
+  skipped: number;
+  notExecutable: number;
+  finishedIds: Set<string>;
+  finishedIndexes: Set<number>;
+  indexByCaseId: Map<string, number>;
+};
+
+function scenarioIdentity(scenario: ReuseExistingPromotedSpecScenario | McpScenario): string | undefined {
+  if ("scenarioId" in scenario && scenario.scenarioId) return scenario.scenarioId;
+  if ("sourceIssueKey" in scenario && scenario.sourceIssueKey) return scenario.sourceIssueKey;
+  return "title" in scenario && typeof scenario.title === "string" ? scenario.title : undefined;
+}
+
+function writeParentProgress(parentJobId: string, total: number, progress: CaseProgress, current?: {
+  caseId?: string | null;
+  title?: string | null;
+  index?: number;
+} | null) {
+  const previous = jobStore.get(parentJobId)?.summary;
+  const executedResults = progress.passed + progress.failed;
+  jobStore.update(parentJobId, {
+    ...(current !== undefined ? {
+      currentCase: current?.title ?? current?.caseId ?? null,
+      currentCaseId: current?.caseId ?? null,
+      currentCaseTitle: current?.title ?? null,
+    } : {}),
+    summary: {
+      ...previous,
+      totalStories: total,
+      scenarioCount: total,
+      requested: total,
+      requestedCases: total,
+      totalCases: total,
+      completed: progress.completed,
+      executed: progress.executed,
+      executedCases: progress.executed,
+      passed: progress.passed,
+      failed: progress.failed,
+      skipped: progress.skipped,
+      notExecutableCases: progress.notExecutable,
+      currentCaseIndex: current?.index ?? progress.completed,
+      progressPercent: total > 0 ? Math.round((progress.completed / total) * 100) : 100,
+      passRate: executedResults > 0 ? Math.round((progress.passed / executedResults) * 100) : null,
+    },
+  });
+}
+
+function makeNotExecutedEvidence(
+  scenario: ReuseExistingPromotedSpecScenario | McpScenario,
+  appSlug: string,
+  sectionSlug: string | undefined,
+  sectionName: string | undefined,
+  reason: string,
+): EvidenceScenarioRecord {
+  const scenarioId = scenarioIdentity(scenario);
+  const title = "title" in scenario && typeof scenario.title === "string" ? scenario.title : undefined;
+  const date = new Date().toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" });
+  return {
+    scenarioId: scenarioId || title || "Escenario sin identificador",
+    scenarioTitle: title || scenarioId || "Escenario sin título",
+    requirement: `Automatización - ${sectionName || sectionSlug || "Ejecución"}`,
+    analyst: "Automatización",
+    date,
+    status: "No ejecutado",
+    appSlug,
+    sectionSlug: sectionSlug || "default-section",
+    sectionName,
+    steps: [{
+      index: 1,
+      stepText: "El escenario no recibió un resultado de ejecución.",
+      status: "failed",
+      timestamp: new Date().toISOString(),
+      errorMessage: reason,
+    }],
   };
+}
+
+function relayCaseEvents(
+  parentJobId: string,
+  subset: "reuse" | "fallback",
+  indexOffset: number,
+  total: number,
+  progress: CaseProgress,
+  expected: Array<ReuseExistingPromotedSpecScenario | McpScenario>,
+) {
+  expected.forEach((scenario, localIndex) => {
+    const scenarioId = scenarioIdentity(scenario);
+    if (scenarioId) progress.indexByCaseId.set(scenarioId, indexOffset + localIndex + 1);
+  });
+
+  return (line: string) => {
+    // Relay the case events plus the runner's own lifecycle/output lines. The latter are needed
+    // to explain a fallback child that exits before it can emit case_started.
+    if (!line.includes('"type":"case_started"') && !line.includes('"type":"case_finished"')) {
+      if (/^\[(?:reuse-existing|promoted-spec-reuse|promoted-child(?::stderr)?|run:scenario-preview|scenario-preview|discovery:preview)\]/.test(line)) {
+        jobStore.appendLog(parentJobId, `[mixed-rerun:${subset}] ${line}`);
+      }
+      return;
+    }
+    try {
+      const event = JSON.parse(line) as {
+        type?: string;
+        index?: number;
+        total?: number;
+        caseId?: string;
+        title?: string;
+        status?: string;
+      };
+      if (event.type === "case_started") {
+        event.index = indexOffset + (event.index ?? 1);
+        event.total = total;
+        if (event.caseId && event.index) progress.indexByCaseId.set(event.caseId, event.index);
+        writeParentProgress(parentJobId, total, progress, {
+          caseId: event.caseId,
+          title: event.title,
+          index: event.index,
+        });
+        jobStore.appendLog(parentJobId, JSON.stringify(event));
+        return;
+      }
+      if (event.type === "case_finished") {
+        const caseId = event.caseId || `case-${indexOffset + progress.completed + 1}`;
+        const index = progress.indexByCaseId.get(caseId);
+        event.index = index ?? event.index;
+        event.total = total;
+        if (!progress.finishedIds.has(caseId) && !(index && progress.finishedIndexes.has(index))) {
+          progress.finishedIds.add(caseId);
+          if (index) progress.finishedIndexes.add(index);
+          progress.completed += 1;
+          if (event.status === "skipped") {
+            progress.skipped += 1;
+          } else {
+            progress.executed += 1;
+            if (event.status === "passed") progress.passed += 1;
+            else progress.failed += 1;
+          }
+          writeParentProgress(parentJobId, total, progress, null);
+        }
+        jobStore.appendLog(parentJobId, JSON.stringify(event));
+        return;
+      }
+    } catch {
+      // Keep the child event verbatim if a future runner adds non-JSON case events.
+    }
+    jobStore.appendLog(parentJobId, line);
+  };
+}
+
+function reconcileMissingSubsetResults(input: {
+  parentJobId: string;
+  subset: "reuse" | "fallback";
+  indexOffset: number;
+  total: number;
+  expected: Array<ReuseExistingPromotedSpecScenario | McpScenario>;
+  childJobId: string;
+  progress: CaseProgress;
+  appSlug: string;
+  sectionSlug?: string;
+  sectionName?: string;
+  missingEvidence: EvidenceScenarioRecord[];
+}): void {
+  const child = jobStore.get(input.childJobId);
+  const rawReason = child?.errorMessage
+    ?? (typeof child?.summary?.errorMessage === "string" ? child.summary.errorMessage : undefined)
+    ?? (child?.status === "failed" ? "El proceso hijo terminó con error antes de informar el resultado del escenario." : "El proceso hijo terminó sin informar el resultado del escenario.");
+  const reason = rawReason.replace(/[\r\n\t]+/g, " ").slice(0, 500);
+
+  input.expected.forEach((scenario, localIndex) => {
+    const index = input.indexOffset + localIndex + 1;
+    const scenarioId = scenarioIdentity(scenario);
+    const alreadyFinished = (scenarioId && input.progress.finishedIds.has(scenarioId))
+      || input.progress.finishedIndexes.has(index);
+    if (alreadyFinished) return;
+
+    const title = "title" in scenario && typeof scenario.title === "string" ? scenario.title : scenarioId;
+    input.progress.failed += 1;
+    input.progress.completed += 1;
+    input.progress.notExecutable += 1;
+    input.progress.finishedIndexes.add(index);
+    if (scenarioId) input.progress.finishedIds.add(scenarioId);
+    jobStore.appendLog(input.parentJobId, `[mixed-rerun:${input.subset}] scenario_without_result index=${index}/${input.total} scenarioId=${scenarioId ?? "unknown"} title=${JSON.stringify(title ?? "Escenario sin título")} childStatus=${child?.status ?? "missing"} reason=${reason}`);
+    writeParentProgress(input.parentJobId, input.total, input.progress, null);
+    input.missingEvidence.push(makeNotExecutedEvidence(
+      scenario,
+      input.appSlug,
+      input.sectionSlug,
+      input.sectionName,
+      reason,
+    ));
+  });
 }
 
 export type MixedRerunRunners = {
@@ -63,11 +251,40 @@ export async function startMixedRerun(
 ): Promise<void> {
   const { parentJobId, appSlug, sectionName, sectionSlug, reuseScenarios, fallbackScenarios } = input;
   const total = reuseScenarios.length + fallbackScenarios.length;
+  const progress: CaseProgress = {
+    completed: 0,
+    executed: 0,
+    passed: 0,
+    failed: 0,
+    skipped: 0,
+    notExecutable: 0,
+    finishedIds: new Set(),
+    finishedIndexes: new Set(),
+    indexByCaseId: new Map(),
+  };
+  const missingEvidence: EvidenceScenarioRecord[] = [];
 
   jobStore.update(parentJobId, {
     status: "running",
     startedAt: new Date().toISOString(),
-    summary: { totalStories: total, synced: 0, passed: 0, failed: 0, completed: 0, scenarioCount: total },
+    currentCase: null,
+    currentCaseId: null,
+    currentCaseTitle: null,
+    summary: {
+      totalStories: total,
+      synced: 0,
+      passed: 0,
+      failed: 0,
+      skipped: 0,
+      completed: 0,
+      executed: 0,
+      requested: total,
+      requestedCases: total,
+      totalCases: total,
+      scenarioCount: total,
+      progressPercent: total === 0 ? 100 : 0,
+      passRate: null,
+    },
   });
   jobStore.appendLog(
     parentJobId,
@@ -92,9 +309,22 @@ export async function startMixedRerun(
     { parentJobId },
   );
   if (reuseScenarios.length > 0) {
-    const unsubscribe = jobStore.subscribe(reuseChild.id, { onLog: relayCaseEvents(parentJobId), onUpdate: () => {} });
-    await runners.runReuse(reuseChild.id);
-    unsubscribe();
+    const unsubscribe = jobStore.subscribe(reuseChild.id, {
+      onLog: relayCaseEvents(parentJobId, "reuse", 0, total, progress, reuseScenarios),
+      onUpdate: () => {},
+    });
+    try {
+      await runners.runReuse(reuseChild.id);
+    } catch (error) {
+      jobStore.appendLog(parentJobId, `[mixed-rerun:reuse] child_runner_error=${error instanceof Error ? error.message : String(error)}`);
+      jobStore.update(reuseChild.id, { status: "failed", errorMessage: error instanceof Error ? error.message : String(error) });
+    } finally {
+      unsubscribe();
+    }
+    reconcileMissingSubsetResults({
+      parentJobId, subset: "reuse", indexOffset: 0, total, expected: reuseScenarios,
+      childJobId: reuseChild.id, progress, appSlug, sectionSlug, sectionName, missingEvidence,
+    });
   } else {
     jobStore.update(reuseChild.id, { status: "done", completedAt: new Date().toISOString(), summary: { totalStories: 0, synced: 0, passed: 0, failed: 0, completed: 0 } });
   }
@@ -120,17 +350,28 @@ export async function startMixedRerun(
     { parentJobId },
   );
   if (fallbackScenarios.length > 0) {
-    const unsubscribe = jobStore.subscribe(fallbackChild.id, { onLog: relayCaseEvents(parentJobId), onUpdate: () => {} });
-    await runners.runFallback(fallbackChild.id);
-    unsubscribe();
+    const unsubscribe = jobStore.subscribe(fallbackChild.id, {
+      onLog: relayCaseEvents(parentJobId, "fallback", reuseScenarios.length, total, progress, fallbackScenarios),
+      onUpdate: () => {},
+    });
+    try {
+      await runners.runFallback(fallbackChild.id);
+    } catch (error) {
+      jobStore.appendLog(parentJobId, `[mixed-rerun:fallback] child_runner_error=${error instanceof Error ? error.message : String(error)}`);
+      jobStore.update(fallbackChild.id, { status: "failed", errorMessage: error instanceof Error ? error.message : String(error) });
+    } finally {
+      unsubscribe();
+    }
+    reconcileMissingSubsetResults({
+      parentJobId, subset: "fallback", indexOffset: reuseScenarios.length, total, expected: fallbackScenarios,
+      childJobId: fallbackChild.id, progress, appSlug, sectionSlug, sectionName, missingEvidence,
+    });
   } else {
     jobStore.update(fallbackChild.id, { status: "done", completedAt: new Date().toISOString(), summary: { totalStories: 0, synced: 0, passed: 0, failed: 0, completed: 0 } });
   }
 
-  const reuseFinal = jobStore.get(reuseChild.id);
-  const fallbackFinal = jobStore.get(fallbackChild.id);
-  const passed = (reuseFinal?.summary?.passed ?? 0) + (fallbackFinal?.summary?.passed ?? 0);
-  const failed = (reuseFinal?.summary?.failed ?? 0) + (fallbackFinal?.summary?.failed ?? 0);
+  const passed = progress.passed;
+  const failed = progress.failed;
   // Any failure in either subset fails the whole mixed rerun — never "PASS because the fresh
   // subset passed", and never just whichever child happened to finish last.
   const finalStatus: JobStatus = failed === 0 ? "done" : "failed";
@@ -141,7 +382,7 @@ export async function startMixedRerun(
   // passed: with reuse/fallback scenarios mutually exclusive by construction (prepareRerun never
   // puts the same scenario in both subsets), each scenario's own freshly-captured runtime
   // evidence status is already authoritative — there is nothing to reconcile across subsets.
-  const consolidation = await consolidateRunEvidence(parentJobId, appSlug, sectionSlug, sectionName, undefined);
+  const consolidation = await consolidateRunEvidence(parentJobId, appSlug, sectionSlug, sectionName, undefined, missingEvidence);
   const evidenceDir = consolidation?.docxPath && fs.existsSync(consolidation.docxPath)
     ? path.dirname(consolidation.docxPath)
     : undefined;
@@ -150,20 +391,32 @@ export async function startMixedRerun(
   jobStore.update(parentJobId, {
     status: finalStatus,
     completedAt: new Date().toISOString(),
+    currentCase: null,
+    currentCaseId: null,
+    currentCaseTitle: null,
     summary: {
       totalStories: total,
       synced: priorSummary?.synced ?? 0,
       passed,
       failed,
-      completed: total,
+      skipped: progress.skipped,
+      completed: progress.completed,
+      executed: progress.executed,
+      requested: total,
+      requestedCases: total,
+      executedCases: progress.executed,
+      notExecutableCases: progress.notExecutable,
       scenarioCount: total,
+      totalCases: total,
+      progressPercent: total > 0 ? Math.round((progress.completed / total) * 100) : 100,
+      passRate: passed + failed > 0 ? Math.round((passed / (passed + failed)) * 100) : null,
       evidenceDir,
     },
   });
   jobStore.appendLog(
     parentJobId,
     `[mixed-rerun] finished parentJobId=${parentJobId} reuseChild=${reuseChild.id} fallbackChild=${fallbackChild.id} `
-    + `passed=${passed} failed=${failed} status=${finalStatus} evidenceRunConsolidated=${Boolean(consolidation)} `
+    + `completed=${progress.completed}/${total} executed=${progress.executed} passed=${passed} failed=${failed} skipped=${progress.skipped} notExecutable=${progress.notExecutable} status=${finalStatus} evidenceRunConsolidated=${Boolean(consolidation)} `
     + `evidenceDir=${evidenceDir ?? "none"} publishToTestRailInvoked=false`,
   );
 }

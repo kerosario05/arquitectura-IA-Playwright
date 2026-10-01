@@ -308,6 +308,16 @@ describe("normalizeEvents", () => {
     ]);
     assert.deepStrictEqual(out.map((e) => e.seq), [0, 1]);
   });
+
+  test("rewrites functional-selection lineage when source events are renumbered", () => {
+    const out = normalizeEvents([
+      ev({ seq: 43, kind: "tap", t: 100, target: { label: "Moneda", role: "combobox", locators: [{ strategy: "id", value: "currency" }], coveredByFunctionalSelection: true } }),
+      ev({ seq: 45, kind: "tap", t: 200, target: { label: "DOP", role: "option", locators: [{ strategy: "role", value: "option|DOP" }], coveredByFunctionalSelection: true } }),
+      ev({ seq: 46, kind: "tap", t: 210, observationType: "pointer", target: { label: "DOP", role: "option", compoundRole: "selection", associatedField: "Moneda", afterValue: "DOP", locators: [], sourceTechnicalEventSeqs: [43, 45] } }),
+    ]);
+    const selection = out.find((event) => event.target?.compoundRole === "selection");
+    assert.deepStrictEqual(selection?.target?.sourceTechnicalEventSeqs, [0, 1]);
+  });
 });
 
 describe("segmentTrace", () => {
@@ -371,6 +381,25 @@ describe("buildHappyPathScenario", () => {
     assert.strictEqual(scenario.requiredData[0].exampleValue, "juan");
     assert.strictEqual(scenario.requiredData[0].sensitive, false);
     assert.strictEqual(scenario.requiredData[0].valueRole, "action_input");
+  });
+
+  test("uses the value observed in a masked field instead of rejected raw keystrokes", () => {
+    const maskedFill = ev({
+      kind: "fill",
+      t: 100,
+      screenKey: "login",
+      target: {
+        ...target("000-000-0000"),
+        role: "input",
+        associatedField: "Teléfono",
+        rawTypedValue: "12345678901",
+      },
+      value: "123-456-7890",
+    });
+    const normalized = normalizeEvents([maskedFill]);
+    const maskedScenario = buildHappyPathScenario(TRACE, normalized);
+    assert.equal(maskedScenario.requiredData[0]?.exampleValue, "123-456-7890");
+    assert.equal(maskedScenario.canonicalInteractions?.find((interaction) => interaction.action === "fill")?.recordedValue, "123-456-7890");
   });
 
   test("never puts a redacted value in the TestRail step text", () => {
@@ -452,12 +481,38 @@ describe("buildHappyPathScenario", () => {
     ]);
     const field = s.requiredData[0];
     const humanStep = s.testRailSteps.at(-1);
-    assert.equal(s.webSteps.length, 1);
+    assert.equal(s.webSteps.length, 2);
+    assert.equal(s.webSteps[1].action, "fill");
+    assert.equal(s.webSteps[1].target, undefined);
+    assert.equal(s.webSteps[1].interactionId, "interaction-1");
     assert.equal(field.key, "documento");
     assert.equal(field.exampleValue, "ABC123");
     assert.equal(field.sensitive, false);
     assert.equal(humanStep?.stepTemplate, 'Ingresar [documento] en "Documento"');
     assert.equal(humanStep?.renderedStep, 'Ingresar "ABC123" en "Documento"');
+    assert.equal(s.technicalReadiness, false);
+  });
+
+  test("keeps locator-less currency selection and amount entry in the web execution projection", () => {
+    const webTrace: SessionTrace = { ...TRACE, platform: "web", baseUrl: "https://app.test", appPackage: undefined };
+    const s = buildHappyPathScenario(webTrace, [
+      ev({
+        kind: "tap",
+        t: 100,
+        target: { label: "DOP", role: "option", associatedField: "Moneda", compoundRole: "selection", afterValue: "DOP", locators: [] },
+      }),
+      ev({
+        kind: "fill",
+        t: 200,
+        target: { label: "Ingresos", role: "input", associatedField: "Ingresos", locators: [] },
+        value: "5000",
+      }),
+    ]);
+
+    assert.deepEqual(s.webSteps.slice(1).map((step) => ({ action: step.action, valueKey: step.valueKey, interactionId: step.interactionId, target: step.target })), [
+      { action: "click", valueKey: "moneda_seleccion", interactionId: "interaction-1", target: undefined },
+      { action: "fill", valueKey: "ingresos", interactionId: "interaction-2", target: undefined },
+    ]);
     assert.equal(s.technicalReadiness, false);
   });
 });

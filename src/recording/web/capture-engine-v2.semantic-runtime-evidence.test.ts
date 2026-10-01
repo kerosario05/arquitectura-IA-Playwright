@@ -39,6 +39,22 @@ type FakeEl = {
 function matchesSimple(el: FakeEl, simple: string): boolean {
   const trimmed = simple.trim();
   if (trimmed === "*") return true;
+  // Minimal test-harness support for `TAG:has(inner)` (used by the browser-side css scope
+  // fallback under test): matches when el's own tag matches TAG and ANY descendant matches
+  // `inner`. Test-only mock, never production selector-matching logic.
+  const hasMatch = trimmed.match(/^([a-z0-9-]*):has\((.+)\)$/i);
+  if (hasMatch) {
+    const [, tagPart, innerSelector] = hasMatch;
+    if (tagPart && el.tagName.toLowerCase() !== tagPart.toLowerCase()) return false;
+    return collectAll(el).some((descendant) => matches(descendant, innerSelector));
+  }
+  // Minimal test-harness support for a compound `tag[attr=val]` (also used by the css scope
+  // fallback under test, e.g. inside :has()). Test-only mock.
+  const compoundMatch = trimmed.match(/^([a-z0-9-]+)(\[.+\])$/i);
+  if (compoundMatch) {
+    const [, tagPart, attrPart] = compoundMatch;
+    return el.tagName.toLowerCase() === tagPart.toLowerCase() && matchesSimple(el, attrPart);
+  }
   const attrMatch = trimmed.match(/^\[([a-z-]+)(?:([*^$])?=("([^"]*)"|'([^']*)'))?\]$/i);
   if (attrMatch) {
     const [, name, op, , dq, sq] = attrMatch;
@@ -358,4 +374,121 @@ test("10. owner remains unresolved and no technicalTarget is fabricated by this 
   const message = clickMessage(sent);
   assert.equal(message.owner, undefined);
   assert.equal((message as any).technicalTarget, undefined);
+});
+
+/**
+ * FIRST_LOSS fix (browser-side gate #1, physical evidence: a clickable product-card img inside a
+ * plain framework div with NO id/data-testid never got any scope identity at all, so
+ * computeSemanticRuntimeAlternative was never even attempted -- the div's own already-computed
+ * structural identity, which already scans its descendants for stable attributes (e.g. an img's
+ * `src`), is reused to build a verified-unique `css` scope selector instead. Never a new identity
+ * kind: `css` was already a fully supported scope strategy end-to-end at replay.
+ */
+test("11/cssScopeFallbackFromStableDescendant. an owner div with NO id/data-testid but a stable descendant (img[src]) still produces a semanticRuntimeAlternative, scoped via a verified-unique css selector", () => {
+  const targetImg = fakeEl({ tag: "img", attrs: { src: "/products/visa-clasica.png", alt: "Producto Ejemplo" } });
+  // A real, framework-actionable click owner (marked here via an explicit role, the same
+  // signal `isActionableNode` already treats as sufficient) with NO id/data-testid -- the exact
+  // real-world gap this fix closes.
+  const ownerDiv = fakeEl({ tag: "div", attrs: { role: "button" } });
+  append(ownerDiv, targetImg);
+  const root = fakeEl({ tag: "div" });
+  append(root, ownerDiv);
+
+  const { sent } = evalCaptureScriptAndFireClick(root, targetImg);
+  const candidate = candidateAt(clickMessage(sent), 0);
+  assert.ok(candidate.semanticRuntimeEvidence, "a css-based scope fallback must let the semantic search run and succeed");
+  assert.equal(candidate.semanticRuntimeEvidence.normalizedValue, "Producto Ejemplo");
+  const strategies = candidate.semanticRuntimeEvidence.scopeAlternatives.map((a: any) => a.scopeIdentity.strategy);
+  assert.ok(strategies.includes("css"), "must reuse the existing css scope kind, never a new identity kind: " + JSON.stringify(strategies));
+});
+
+test("12/cssScopeFallbackAmbiguousDescendantRejected. two owner divs share the exact same stable descendant shape -- the css scope candidate is not page-unique, so it is rejected rather than fabricated", () => {
+  const targetImg = fakeEl({ tag: "img", attrs: { src: "/products/visa-clasica.png", alt: "Producto Ejemplo" } });
+  const ownerDiv = fakeEl({ tag: "div", attrs: { role: "button" } });
+  append(ownerDiv, targetImg);
+  const duplicateImg = fakeEl({ tag: "img", attrs: { src: "/products/visa-clasica.png", alt: "Producto Ejemplo" } });
+  const duplicateOwnerDiv = fakeEl({ tag: "div", attrs: { role: "button" } });
+  append(duplicateOwnerDiv, duplicateImg);
+  const root = fakeEl({ tag: "div" });
+  append(root, ownerDiv, duplicateOwnerDiv);
+
+  const { sent } = evalCaptureScriptAndFireClick(root, targetImg);
+  const candidate = candidateAt(clickMessage(sent), 0);
+  assert.equal(candidate.semanticRuntimeEvidence, undefined, "a non-unique css scope candidate must never be accepted as authority");
+});
+
+test("13/existingIdTestidOwnersUnaffected. an owner with a real id still resolves via the id strategy, never the new css fallback", () => {
+  const { root, target } = buildPhysicalShape();
+  const { sent } = evalCaptureScriptAndFireClick(root, target);
+  const candidate = candidateAt(clickMessage(sent), 0);
+  assert.equal(candidate.semanticRuntimeEvidence.scopeAlternatives[0].scopeIdentity.strategy, "id", "existing id-based scope resolution is completely unchanged");
+});
+
+test("14/gate3SelfSemanticFromOwnDescendant. click lands directly on a roleless, id/testid-less owner div (originalTarget === el) that contains exactly one strong semantic descendant -- that descendant lends its identity, without ever renaming the owner", () => {
+  const targetImg = fakeEl({ tag: "img", attrs: { src: "/products/visa-clasica.png", alt: "Producto Ejemplo" } });
+  const ownerDiv = fakeEl({ tag: "div", attrs: { role: "button" } });
+  append(ownerDiv, targetImg);
+  const root = fakeEl({ tag: "div" });
+  append(root, ownerDiv);
+
+  // The click's raw target IS the owner div itself, not the descendant img.
+  const { sent } = evalCaptureScriptAndFireClick(root, ownerDiv);
+  const candidate = candidateAt(clickMessage(sent), 0);
+  assert.ok(candidate.semanticRuntimeEvidence, "a unique semantic descendant must let the owner's own click gain semantic authority");
+  assert.equal(candidate.semanticRuntimeEvidence.normalizedValue, "Producto Ejemplo");
+  assert.equal(candidate.semanticRuntimeEvidence.targetTag, "img");
+  const strategies = candidate.semanticRuntimeEvidence.scopeAlternatives.map((a: any) => a.scopeIdentity.strategy);
+  assert.ok(strategies.includes("css"), "must reuse the existing css scope kind: " + JSON.stringify(strategies));
+  assert.equal(candidate.tag, "div", "functionalOwner must stay the div -- never rewritten to the descendant's tag");
+});
+
+test("15/gate3AmbiguousDescendantsRejected. owner div roleless click with TWO qualifying semantic descendants -- fail closed, no fabricated identity", () => {
+  const imgOne = fakeEl({ tag: "img", attrs: { src: "/a.png", alt: "Producto A" } });
+  const imgTwo = fakeEl({ tag: "img", attrs: { src: "/b.png", alt: "Producto B" } });
+  const ownerDiv = fakeEl({ tag: "div", attrs: { role: "button" } });
+  append(ownerDiv, imgOne, imgTwo);
+  const root = fakeEl({ tag: "div" });
+  append(root, ownerDiv);
+
+  const { sent } = evalCaptureScriptAndFireClick(root, ownerDiv);
+  const candidate = candidateAt(clickMessage(sent), 0);
+  assert.equal(candidate.semanticRuntimeEvidence, undefined, "two equally-valid semantic descendants must never be collapsed into one guessed identity");
+});
+
+test("16/gate3OwnerWithOwnRoleUnaffected. owner div click that already has its own strong accessible name never triggers the descendant-borrowing path", () => {
+  const targetImg = fakeEl({ tag: "img", attrs: { src: "/products/visa-clasica.png", alt: "Producto Ejemplo" } });
+  const ownerDiv = fakeEl({ tag: "div", attrs: { role: "button", "aria-label": "Tarjeta Oro" } });
+  append(ownerDiv, targetImg);
+  const root = fakeEl({ tag: "div" });
+  append(root, ownerDiv);
+
+  const { sent } = evalCaptureScriptAndFireClick(root, ownerDiv);
+  const candidate = candidateAt(clickMessage(sent), 0);
+  assert.equal(candidate.semanticRuntimeEvidence, undefined, "an owner with its own strong name must use that name, never borrow a descendant's");
+  assert.equal(candidate.accessibleName, "Tarjeta Oro");
+});
+
+/**
+ * REAL-BUG regression (found via a physical Codex-driven QA Lab run, backend capture_trace
+ * diagnostics): the previous tests 14-16 all marked ownerDiv with `role="button"`, which makes
+ * `isActionableNode` return true, which was ENOUGH to make `shouldCaptureStructuralEvidence`
+ * true independent of gate #3. A real production React card has NO role attribute, no onclick
+ * attribute (React's synthetic click handler never sets `el.onclick` or an "onclick" attribute),
+ * no tabIndex, and no id/data-testid -- `actionable` and `frameworkActionable` are BOTH false for
+ * this shape, so `structuralIdentity` (and its `stableDescendants`) was never computed at all,
+ * and gate #3's own `buildOwnScopeIdentity` css-fallback had nothing to work with. Fixed by
+ * adding gate #3's own trigger condition into `shouldCaptureStructuralEvidence` directly.
+ */
+test("17/gate3RealWorldRolelessOwnerNoHandlerAttribute. a plain roleless card div with NO role/onclick attribute/tabIndex/id/data-testid (the real production shape) still borrows its unique descendant's identity", () => {
+  const targetImg = fakeEl({ tag: "img", attrs: { src: "/products/visa-clasica.png", alt: "Producto Ejemplo" } });
+  const ownerDiv = fakeEl({ tag: "div" });
+  append(ownerDiv, targetImg);
+  const root = fakeEl({ tag: "div" });
+  append(root, ownerDiv);
+
+  const { sent } = evalCaptureScriptAndFireClick(root, ownerDiv);
+  const candidate = candidateAt(clickMessage(sent), 0);
+  assert.ok(candidate.semanticRuntimeEvidence, "a roleless, handler-attribute-less real-world card div must still get gate #3 evidence");
+  assert.equal(candidate.semanticRuntimeEvidence.normalizedValue, "Producto Ejemplo");
+  assert.equal(candidate.tag, "div", "functionalOwner must stay the div");
 });

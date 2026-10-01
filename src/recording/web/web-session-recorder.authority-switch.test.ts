@@ -305,10 +305,11 @@ test("7b. stop() drains a final V2 action enqueued while the browser context clo
   const { recorder, events } = newRecorder("v2");
   recorder.onV2TechnicalAction(technicalRecord(usuarioEdit));
   const internals = recorder as unknown as {
-    context: { close: () => Promise<void> } | null;
+    context: { pages: () => unknown[]; close: () => Promise<void> } | null;
     v2IngestionQueue: Promise<void>;
   };
   internals.context = {
+    pages: () => [],
     close: async () => {
       // Models the late Playwright binding callback observed in the physical recording: it
       // arrives after the first queue drain but before the browser context is fully closed.
@@ -321,6 +322,58 @@ test("7b. stop() drains a final V2 action enqueued while the browser context clo
   assert.equal(events.length, 2, "the late binding action must survive the close barrier");
   assert.equal(result.events.length, 2);
   assert.deepEqual(events.map((event) => event.kind), ["fill", "tap"]);
+});
+
+test("7c. stop() flushes recorder-frame binding calls before draining ingestion and closing the context", async () => {
+  const { recorder, events } = newRecorder("v2");
+  recorder.onV2TechnicalAction(technicalRecord(loginClick));
+  const order: string[] = [];
+  const internals = recorder as unknown as {
+    context: {
+      pages: () => Array<{ frames: () => Array<{ evaluate: (fn: () => Promise<void>) => Promise<void> }> }>;
+      close: () => Promise<void>;
+    } | null;
+  };
+  internals.context = {
+    pages: () => [{ frames: () => [{ evaluate: async () => { order.push("browser_binding_flush"); } }] }],
+    close: async () => {
+      order.push("context_close");
+      assert.equal(events.length, 1, "queued browser actions are ingested before the recorder context closes");
+    },
+  };
+
+  const result = await recorder.stop();
+
+  assert.deepEqual(order, ["browser_binding_flush", "context_close"]);
+  assert.equal(result.events.length, 1);
+});
+
+test("7d. stop() closes the context before joining a pending non-authoritative screen observation", async () => {
+  const { recorder, events } = newRecorder("v2");
+  recorder.onV2TechnicalAction(technicalRecord(usuarioEdit));
+  let releaseObservation!: () => void;
+  const pendingObservation = new Promise<void>((resolve) => { releaseObservation = resolve; });
+  const order: string[] = [];
+  const internals = recorder as unknown as {
+    context: {
+      pages: () => unknown[];
+      close: () => Promise<void>;
+    } | null;
+    postActionObservationQueue: Promise<void>;
+  };
+  internals.postActionObservationQueue = pendingObservation;
+  internals.context = {
+    pages: () => [],
+    close: async () => {
+      order.push("context_close");
+      assert.equal(events.length, 1, "the user action is persisted before optional observation work is cancelled");
+      releaseObservation();
+    },
+  };
+
+  await recorder.stop();
+
+  assert.deepEqual(order, ["context_close"]);
 });
 
 test("8. a sensitive V2 edit without a literal reaches SessionTrace as a sensitive fill, no literal fabricated or logged", async () => {

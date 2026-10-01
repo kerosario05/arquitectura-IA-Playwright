@@ -118,3 +118,95 @@ test("captureUniqueTarget=false is never treated as eligible", async () => {
   const { canonical } = buildReadiness(events);
   assert.equal(canonical[0].resolutionState, "unresolved_unrecoverable");
 });
+
+/**
+ * GATE #3 fix: a click whose own technicalTargetCandidates are ambiguous (the owner has no
+ * strong/deterministic identity of its own -- exactly why gate #3's clickScopeElement fallback
+ * exists) must still become eligible when its semanticRuntimeEvidence.clickScopeElement is true.
+ * That evidence already independently proves its own uniqueness (scope + innermost-match), so the
+ * owner's unrelated ambiguous locator must never veto it.
+ */
+test("GATE #3: clickScopeElement=true stays eligible even when the owner's own technicalTargetCandidates are ambiguous", async () => {
+  const { recorder, events } = newRecorder();
+  await recorder.onInteraction({
+    kind: "click",
+    role: "button",
+    associatedField: "control",
+    semanticRuntimeEvidence: { ...validSemanticRuntimeEvidence(), clickScopeElement: true },
+    technicalTargetCandidates: [{
+      targetType: "structural",
+      interactionEvidence: [],
+      locatorCandidates: [{ strategy: "css", value: ".owner", confidence: 0.3, ambiguous: true }],
+    }],
+  } as any);
+  const { canonical, readiness } = buildReadiness(events);
+  assert.equal(canonical[0].resolutionState, "runtime_resolution_required", "clickScopeElement evidence must survive an ambiguous owner locator");
+  assert.equal(readiness.executionReady, true);
+});
+
+test("negative control: the SAME ambiguous owner locator, WITHOUT clickScopeElement, is still rejected (existing behavior unaffected)", async () => {
+  const { recorder, events } = newRecorder();
+  await recorder.onInteraction({
+    kind: "click",
+    role: "button",
+    associatedField: "control",
+    semanticRuntimeEvidence: validSemanticRuntimeEvidence(),
+    technicalTargetCandidates: [{
+      targetType: "structural",
+      interactionEvidence: [],
+      locatorCandidates: [{ strategy: "css", value: ".owner", confidence: 0.3, ambiguous: true }],
+    }],
+  } as any);
+  const { canonical } = buildReadiness(events);
+  assert.equal(canonical[0].resolutionState, "unresolved_unrecoverable", "a non-clickScopeElement evidence must still be vetoed by an ambiguous owner locator, unchanged");
+});
+
+/**
+ * GATE #3, ACCEPTED-ADMISSION branch (distinct from the two tests above, which both use a
+ * generic associatedField and so exercise the `admissionRejected` path): a REAL, non-generic
+ * associatedField (e.g. a product card title resolved by the field-scoped structural walk) makes
+ * admission ACCEPTED, routing eligibility through `structuralRuntimeEligible` instead of
+ * `sufficientRuntimeEvidence`. `structuralRuntimeEligible`'s own `priorAmbiguityEvidence` gate
+ * lacked the same clickScopeElement exception already applied to `semanticRuntimeEligible`, so an
+ * accepted-admission clickScopeElement action with an ambiguous owner locator fell through to
+ * "certified" with no technicalTargetRefs and no semanticRuntimeEvidence transported at all --
+ * exactly the fresh-run shape (interaction-15, Visa Clásica card) this fixes.
+ */
+test("GATE #3, accepted admission: clickScopeElement=true stays eligible even when the owner's own technicalTargetCandidates are ambiguous and associatedField is real (non-generic)", async () => {
+  const { recorder, events } = newRecorder();
+  await recorder.onInteraction({
+    kind: "click",
+    role: "button",
+    associatedField: "Tarjeta Crédito Visa Clásica",
+    semanticRuntimeEvidence: { ...validSemanticRuntimeEvidence(), clickScopeElement: true },
+    technicalTargetCandidates: [{
+      targetType: "structural",
+      interactionEvidence: [],
+      locatorCandidates: [{ strategy: "css", value: ".owner", confidence: 0.3, ambiguous: true }],
+    }],
+  } as any);
+  const { canonical, readiness } = buildReadiness(events);
+  assert.equal(canonical[0].admissionStatus, "accepted", "a real associatedField must be accepted, not rejected");
+  assert.equal(canonical[0].resolutionState, "runtime_resolution_required", "clickScopeElement evidence must survive an ambiguous owner locator on the accepted-admission path too");
+  assert.deepEqual(canonical[0].semanticRuntimeEvidence, { ...validSemanticRuntimeEvidence(), clickScopeElement: true }, "semanticRuntimeEvidence must be transported, not silently dropped");
+  assert.equal(readiness.executionReady, true);
+});
+
+test("negative control: the SAME accepted-admission ambiguous owner locator, WITHOUT clickScopeElement, is still rejected (existing behavior unaffected)", async () => {
+  const { recorder, events } = newRecorder();
+  await recorder.onInteraction({
+    kind: "click",
+    role: "button",
+    associatedField: "Tarjeta Crédito Visa Clásica",
+    semanticRuntimeEvidence: validSemanticRuntimeEvidence(),
+    technicalTargetCandidates: [{
+      targetType: "structural",
+      interactionEvidence: [],
+      locatorCandidates: [{ strategy: "css", value: ".owner", confidence: 0.3, ambiguous: true }],
+    }],
+  } as any);
+  const { canonical } = buildReadiness(events);
+  assert.equal(canonical[0].admissionStatus, "accepted");
+  assert.equal(canonical[0].resolutionState, "certified", "without clickScopeElement, an accepted-admission action with an ambiguous owner locator stays certified with no semanticRuntimeEvidence transported (existing behavior unaffected)");
+  assert.equal(canonical[0].semanticRuntimeEvidence, undefined);
+});

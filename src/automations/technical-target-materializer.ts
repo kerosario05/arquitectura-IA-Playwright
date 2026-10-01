@@ -57,6 +57,23 @@ export type TechnicalTargetEvidenceInput = {
   topologyTieBreakUnique?: boolean;
   topologySignature?: string;
   surfaceIdentity?: string;
+  /**
+   * FIRST_LOSS fix (ROKE recording 48d9bd8b-..., interaction-14 "Tarjeta Crédito Visa Clásica"):
+   * a capture-time-unique SCOPE (this owner is the only match inside a specific ancestor
+   * container, e.g. one product card among several repeated-structure siblings) is a distinct
+   * authority from `topologyTieBreakUnique`/`deterministicStructuralIdentity` above — it narrows
+   * WHERE resolveRecordedStructuralOwner searches, it never substitutes for an owner/anchor. Like
+   * topologyTieBreakUnique before it, these four were captured (see RecordedTechnicalTarget
+   * .structuralContext, session-trace.types.ts) but never reached this normalized input, so a
+   * genuinely scoped-unique owner recorded inside a repeated card grid silently lost its scope
+   * and fell back to a global (unscoped) query at runtime — ambiguous/wrong-match against
+   * sibling cards sharing the same structural shape. Passed through verbatim, never derived from
+   * shape here.
+   */
+  scopeIdentity?: { strategy: "id" | "data-testid" | "css"; value: string };
+  targetFingerprint?: string;
+  captureScopeUnique?: boolean;
+  captureTargetMatchCount?: number;
   /** Legacy flattened "strategy:value" refs — lowest-priority corroboration only. */
   existingTechnicalRefs?: string[];
   confidence?: number;
@@ -184,6 +201,10 @@ export function materializeTechnicalTarget(input: TechnicalTargetEvidenceInput):
               deterministicStructuralIdentity: input.deterministicStructuralIdentity,
               identityAmbiguous: input.identityAmbiguous,
               structuralIdentityMatchCount: input.structuralIdentityMatchCount,
+              ...(input.scopeIdentity ? { scopeIdentity: input.scopeIdentity } : {}),
+              ...(input.targetFingerprint !== undefined ? { targetFingerprint: input.targetFingerprint } : {}),
+              ...(input.captureScopeUnique !== undefined ? { captureScopeUnique: input.captureScopeUnique } : {}),
+              ...(input.captureTargetMatchCount !== undefined ? { captureTargetMatchCount: input.captureTargetMatchCount } : {}),
             };
           })()
         : { stableDirectAttributes: sanitizeAttributeMap(input.stableDirectAttributes) };
@@ -243,6 +264,10 @@ export function materializeTechnicalTarget(input: TechnicalTargetEvidenceInput):
           deterministicStructuralIdentity: input.deterministicStructuralIdentity,
           identityAmbiguous: input.identityAmbiguous,
           structuralIdentityMatchCount: input.structuralIdentityMatchCount,
+          ...(input.scopeIdentity ? { scopeIdentity: input.scopeIdentity } : {}),
+          ...(input.targetFingerprint !== undefined ? { targetFingerprint: input.targetFingerprint } : {}),
+          ...(input.captureScopeUnique !== undefined ? { captureScopeUnique: input.captureScopeUnique } : {}),
+          ...(input.captureTargetMatchCount !== undefined ? { captureTargetMatchCount: input.captureTargetMatchCount } : {}),
         },
         confidence: confidence ?? 0.8,
         certificationTier: 3,
@@ -272,6 +297,10 @@ export function materializeTechnicalTarget(input: TechnicalTargetEvidenceInput):
         // silently dropped and leaving this owner-alone shape with no anchor at all.
         ...(input.topologyTieBreakUnique !== undefined ? { topologyTieBreakUnique: input.topologyTieBreakUnique } : {}),
         ...(input.topologySignature !== undefined ? { topologySignature: input.topologySignature } : {}),
+        ...(input.scopeIdentity ? { scopeIdentity: input.scopeIdentity } : {}),
+        ...(input.targetFingerprint !== undefined ? { targetFingerprint: input.targetFingerprint } : {}),
+        ...(input.captureScopeUnique !== undefined ? { captureScopeUnique: input.captureScopeUnique } : {}),
+        ...(input.captureTargetMatchCount !== undefined ? { captureTargetMatchCount: input.captureTargetMatchCount } : {}),
       },
       confidence: confidence ?? 0.6,
       certificationTier: 4,
@@ -321,6 +350,10 @@ export function normalizeRecordingEvidence(
     structuralIdentityMatchCount: structuralContext?.structuralIdentityMatchCount,
     topologyTieBreakUnique: structuralContext?.topologyTieBreakUnique,
     topologySignature: structuralContext?.topologySignature,
+    scopeIdentity: structuralContext?.scopeIdentity,
+    targetFingerprint: structuralContext?.targetFingerprint,
+    captureScopeUnique: structuralContext?.captureScopeUnique,
+    captureTargetMatchCount: structuralContext?.captureTargetMatchCount,
     existingTechnicalRefs: Array.isArray(rec.locatorCandidates)
       ? (rec.locatorCandidates as RecordedLocator[]).map((l) => `${l.strategy}:${l.value}`)
       : undefined,

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { aggregateTextUsedAsValue, buildSemanticRecordingModel, detectFormatMask, resolveRecordedField } from "./semantic-recording";
+import { aggregateTextUsedAsValue, buildSemanticRecordingModel, classifySemanticEvent, detectFormatMask, resolveRecordedField } from "./semantic-recording";
 import { buildHappyPathScenario, materializeRecordedScenario } from "./trace-to-scenario";
 import type { SessionTrace } from "./session-trace.types";
 
@@ -120,6 +120,68 @@ test("structural header association outranks a format placeholder", () => {
   assert.equal(resolution.semanticField, "Teléfono del colaborador");
   assert.equal(resolution.needsReview, false);
   assert.equal(resolution.formatHint, "000-000-0000");
+});
+
+test("keeps recorded selection-opening and row-checkbox taps as functional actions", () => {
+  const ownerTap = {
+    seq: 0,
+    t: 1,
+    kind: "tap" as const,
+    screenKey: "screen-a",
+    target: { label: "Open selector", role: "button", locators: [] },
+  };
+  const optionTap = {
+    seq: 1,
+    t: 2,
+    kind: "tap" as const,
+    screenKey: "screen-a",
+    target: { label: "Choice", role: "option", locators: [{ strategy: "role" as const, value: "option|Choice" }] },
+  };
+  const rowCheckboxTap = {
+    seq: 2,
+    t: 3,
+    kind: "tap" as const,
+    screenKey: "screen-a",
+    target: { label: "Select row", role: "checkbox", locators: [] },
+  };
+
+  assert.equal(classifySemanticEvent(ownerTap, optionTap), "FUNCTIONAL_ACTION");
+  assert.equal(classifySemanticEvent(rowCheckboxTap), "FUNCTIONAL_ACTION");
+  assert.equal(classifySemanticEvent({ ...ownerTap, target: { ...ownerTap.target, label: "Indicar..." } }), "DYNAMIC_EDITOR_INTERNAL");
+
+  const input = trace({ events: [rowCheckboxTap, ownerTap, optionTap] });
+  const scenario = buildHappyPathScenario(input, input.events);
+  for (const interactionId of ["interaction-1", "interaction-2"]) {
+    const step = scenario.webSteps.find((candidate) => candidate.interactionId === interactionId);
+    assert.equal(step?.action, "click");
+    assert.equal(step?.target, undefined, "uncertified controls stay locator-free");
+  }
+});
+
+test("dialog surface taps stay technical noise while the dialog close button remains actionable", () => {
+  const dialogTap = {
+    seq: 0,
+    t: 1,
+    kind: "tap" as const,
+    screenKey: "screen-a",
+    target: { label: "¡Atención!", role: "dialog", locators: [{ strategy: "role" as const, value: "dialog|¡Atención!" }] },
+  };
+  const closeTap = {
+    seq: 1,
+    t: 2,
+    kind: "tap" as const,
+    screenKey: "screen-a",
+    target: { label: "Close", role: "button", locators: [{ strategy: "role" as const, value: "button|Close" }] },
+  };
+  const input = trace({ events: [dialogTap, closeTap] });
+  const semantic = buildSemanticRecordingModel(input);
+  const scenario = buildHappyPathScenario(input, input.events);
+
+  assert.equal(classifySemanticEvent(dialogTap), "TECHNICAL_NOISE");
+  assert.equal(semantic.semanticEvents[0].classification, "TECHNICAL_NOISE");
+  assert.equal(scenario.canonicalInteractions?.some((interaction) => interaction.id === "interaction-1"), false);
+  assert.equal(scenario.webSteps.some((step) => step.interactionId === "interaction-1"), false);
+  assert.equal(scenario.webSteps.find((step) => step.interactionId === "interaction-2")?.action, "click");
 });
 
 test("unresolved values remain preserved and primary wording stays functional", () => {

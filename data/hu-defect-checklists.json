@@ -14163,5 +14163,232 @@
     ],
     "createdAt": "2026-09-25T11:39:38.337Z",
     "updatedAt": "2026-09-25T11:41:48.725Z"
+  },
+  {
+    "id": "1790371493678-pry2q87",
+    "issueKey": "REC-1D99F79F",
+    "urlSlug": "REC-1D99F79F",
+    "defects": [
+      {
+        "id": "1790371585738-hhnnh5l",
+        "description": "Paso fallido:\nPaso 12: 1\n\nQué pasó:\nLa navegación o acción esperada no completó dentro del tiempo límite.\n\nResultado esperado:\nLa aplicación carga su pantalla inicial\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "e7353fbd-e378-4501-b61f-542273e26528",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Kevin2",
+        "title": "[Media] No se encontró \"1\" (paso 12) — Kevin2",
+        "technicalContext": {
+          "reasonCode": "loading_timeout",
+          "discoveryStatus": "exploration_failed",
+          "failedAtStep": 12,
+          "failedTarget": "1",
+          "expectedResult": "La aplicación carga su pantalla inicial",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-25T21-25-05-734Z\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-25T21-25-05-734Z\\evidence\\step-11-snapshot.json",
+          "lastSuccessfulStep": {
+            "stepIndex": 11,
+            "action": "Presionar \"5\"",
+            "target": "5",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-25T21-25-05-734Z\\evidence\\step-11-snapshot.json"
+          }
+        },
+        "createdAt": "2026-09-25T21:26:25.738Z",
+        "updatedAt": "2026-09-25T21:26:25.738Z"
+      }
+    ],
+    "createdAt": "2026-09-25T21:24:53.678Z",
+    "updatedAt": "2026-09-25T21:26:25.738Z"
+  },
+  {
+    "id": "1790383581528-zlx66op",
+    "issueKey": "REC-3F3935CC",
+    "urlSlug": "REC-3F3935CC",
+    "defects": [
+      {
+        "id": "1790383696837-yxbffw5",
+        "description": "Paso fallido:\nPaso 4: Tarjeta Crédito Visa Clásica\n\nQué pasó:\nLa ejecución falló con código: app_session_reset_to_root_detected\n\nResultado esperado:\nLa aplicación carga su pantalla inicial\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "af2c403c-3f03-4ee1-9894-86ad73b58964",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "ajemplo",
+        "title": "[Media] No se encontró \"Tarjeta Crédito Visa Clásica\" (paso 4) — ajemplo",
+        "technicalContext": {
+          "reasonCode": "APP_SESSION_RESET_TO_ROOT_DETECTED",
+          "discoveryStatus": "exploration_failed",
+          "failedAtStep": 4,
+          "failedTarget": "Tarjeta Crédito Visa Clásica",
+          "expectedResult": "La aplicación carga su pantalla inicial",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-26T00-46-27-846Z\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-26T00-46-27-846Z\\evidence\\step-3-snapshot.json",
+          "lastSuccessfulStep": {
+            "stepIndex": 3,
+            "action": "Presionar \"Tarjeta de Crédito\"",
+            "target": "Tarjeta de Crédito",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-26T00-46-27-846Z\\evidence\\step-3-snapshot.json"
+          }
+        },
+        "createdAt": "2026-09-26T00:48:16.837Z",
+        "updatedAt": "2026-09-26T00:48:16.837Z"
+      }
+    ],
+    "createdAt": "2026-09-26T00:46:21.528Z",
+    "updatedAt": "2026-09-26T00:48:16.837Z"
+  },
+  {
+    "id": "1790567620575-vsxvtij",
+    "issueKey": "REC-48D9BD8B",
+    "urlSlug": "REC-48D9BD8B",
+    "defects": [
+      {
+        "id": "1790567813210-761d3ve",
+        "description": "Resultado esperado:\nLa aplicación carga su pantalla inicial\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "9f12b9cf-0a66-4fd6-9a9b-544e3db5faf4",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "QA",
+        "title": "[Media] No se cumplió: La aplicación carga su pantalla inicial — QA",
+        "technicalContext": {
+          "discoveryStatus": "discovered_passed",
+          "expectedResult": "La aplicación carga su pantalla inicial",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-28T03-53-55-632Z\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-28T03-53-55-632Z\\evidence\\step-18-snapshot.json",
+          "lastSuccessfulStep": {
+            "stepIndex": 18,
+            "action": "Presionar \"Generar Turno\"",
+            "target": "Generar Turno",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-28T03-53-55-632Z\\evidence\\step-18-snapshot.json"
+          }
+        },
+        "createdAt": "2026-09-28T03:56:53.210Z",
+        "updatedAt": "2026-09-28T03:56:53.210Z"
+      }
+    ],
+    "createdAt": "2026-09-28T03:53:40.575Z",
+    "updatedAt": "2026-09-28T03:56:53.210Z"
+  },
+  {
+    "id": "1790623771478-h95oz6m",
+    "issueKey": "REC-4F7C41BD",
+    "urlSlug": "REC-4F7C41BD",
+    "defects": [
+      {
+        "id": "1790623998511-bax6ot7",
+        "description": "Paso fallido:\nPaso 37: Cancelar\n\nQué pasó:\nLa ejecución falló con código: click_no_causal_effect_detected\n\nResultado esperado:\nSe muestra \"Más detalles del producto\"\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "f310a999-1b02-4b35-94c9-fdb6abc004a6",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "QA",
+        "title": "[Media] No se encontró \"Cancelar\" (paso 37) — QA",
+        "technicalContext": {
+          "reasonCode": "CLICK_NO_CAUSAL_EFFECT_DETECTED",
+          "discoveryStatus": "exploration_failed",
+          "failedAtStep": 37,
+          "failedTarget": "Cancelar",
+          "expectedResult": "Se muestra \"Más detalles del producto\"",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-28T19-29-46-887Z\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-28T19-29-46-887Z\\evidence\\step-36-snapshot.json",
+          "lastSuccessfulStep": {
+            "stepIndex": 36,
+            "action": "Presionar \"Solicitar\"",
+            "target": "Solicitar",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-28T19-29-46-887Z\\evidence\\step-36-snapshot.json"
+          }
+        },
+        "createdAt": "2026-09-28T19:33:18.511Z",
+        "updatedAt": "2026-09-28T19:33:18.511Z"
+      }
+    ],
+    "createdAt": "2026-09-28T19:29:31.477Z",
+    "updatedAt": "2026-09-28T19:33:18.511Z"
+  },
+  {
+    "id": "1790790824685-vubcms6",
+    "issueKey": "REC-B0E4A0B7",
+    "urlSlug": "REC-B0E4A0B7",
+    "defects": [
+      {
+        "id": "1790790936207-36e5sh7",
+        "description": "Paso fallido:\nPaso 8: SMS\n\nQué pasó:\nLa navegación o acción esperada no completó dentro del tiempo límite.\n\nResultado esperado:\nLa aplicación carga su pantalla inicial\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "89114202-26ce-4453-a059-a603159b3e74",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Login",
+        "title": "[Media] No se encontró \"SMS\" (paso 8) — Login",
+        "technicalContext": {
+          "reasonCode": "loading_timeout",
+          "discoveryStatus": "exploration_failed",
+          "failedAtStep": 8,
+          "failedTarget": "SMS",
+          "expectedResult": "La aplicación carga su pantalla inicial",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-30T17-54-02-718Z\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-30T17-54-02-718Z\\evidence\\step-7-snapshot.json",
+          "lastSuccessfulStep": {
+            "stepIndex": 7,
+            "action": "Presionar \"SMS\"",
+            "target": "SMS",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-30T17-54-02-718Z\\evidence\\step-7-snapshot.json"
+          }
+        },
+        "createdAt": "2026-09-30T17:55:36.207Z",
+        "updatedAt": "2026-09-30T17:55:36.207Z"
+      }
+    ],
+    "createdAt": "2026-09-30T17:53:44.685Z",
+    "updatedAt": "2026-09-30T17:55:36.207Z"
+  },
+  {
+    "id": "1790815039472-31yyphu",
+    "issueKey": "REC-2F71E563",
+    "urlSlug": "REC-2F71E563",
+    "defects": [
+      {
+        "id": "1790815107002-g3qih7l",
+        "description": "Paso fallido:\nPaso 10: Presionar Seleccione una Cuenta\n\nQué pasó:\nNo se encontró el elemento necesario para continuar la ejecución.\n\nResultado esperado:\nLa aplicación carga su pantalla inicial\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "278128c8-23a5-462a-b1ae-d7332d906374",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Transferencias Cuentas Propias",
+        "title": "[Media] No se encontró \"Presionar Seleccione una Cuenta\" (paso 10) — Transferencias Cuentas Propias",
+        "technicalContext": {
+          "reasonCode": "target_not_found",
+          "discoveryStatus": "exploration_failed",
+          "failedAtStep": 10,
+          "failedTarget": "Presionar Seleccione una Cuenta",
+          "expectedResult": "La aplicación carga su pantalla inicial",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-01T00-37-23-413Z\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-01T00-37-23-413Z\\evidence\\step-8-snapshot.json",
+          "lastSuccessfulStep": {
+            "stepIndex": 8,
+            "action": "Ingresar [sms] en \"SMS\"",
+            "target": "SMS",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-01T00-37-23-413Z\\evidence\\step-8-snapshot.json"
+          }
+        },
+        "createdAt": "2026-10-01T00:38:27.002Z",
+        "updatedAt": "2026-10-01T00:38:27.002Z"
+      }
+    ],
+    "createdAt": "2026-10-01T00:37:19.472Z",
+    "updatedAt": "2026-10-01T00:38:27.002Z"
+  },
+  {
+    "id": "1790868887075-kfzryj1",
+    "issueKey": "REC-B6067113",
+    "urlSlug": "REC-B6067113",
+    "defects": [],
+    "createdAt": "2026-10-01T15:34:47.075Z",
+    "updatedAt": "2026-10-01T15:34:47.075Z"
   }
 ]

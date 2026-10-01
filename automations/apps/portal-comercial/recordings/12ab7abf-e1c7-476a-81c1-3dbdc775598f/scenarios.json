@@ -267,7 +267,7 @@
           "event-25"
         ],
         "stepTemplate": "Ingresar [plazo] en \"Plazo\"",
-        "renderedStep": "Ingresar \"6 mes/es\" en \"Plazo\"",
+        "renderedStep": "Ingresar \"6\" en \"Plazo\"",
         "valueKey": "plazo",
         "interactionId": "interaction-25",
         "sensitive": false,
@@ -520,12 +520,12 @@
           "event-1"
         ],
         "technicalTargetRefs": [],
-        "screenBeforeRef": "inicio",
-        "screenAfterRef": "inicio",
-        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
         "stateScope": "inicio",
         "technicalOnly": true,
-        "confidence": 0.9
+        "confidence": 0.9,
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login"
       },
       {
         "id": "interaction-2",
@@ -535,12 +535,12 @@
           "event-2"
         ],
         "technicalTargetRefs": [],
-        "screenBeforeRef": "inicio",
-        "screenAfterRef": "inicio",
-        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
         "stateScope": "inicio",
         "technicalOnly": true,
-        "confidence": 0.9
+        "confidence": 0.9,
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login"
       },
       {
         "id": "interaction-3",
@@ -550,12 +550,12 @@
           "event-3"
         ],
         "technicalTargetRefs": [],
-        "screenBeforeRef": "inicio",
-        "screenAfterRef": "inicio",
-        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
         "stateScope": "inicio",
         "technicalOnly": true,
-        "confidence": 0.9
+        "confidence": 0.9,
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login"
       },
       {
         "id": "interaction-4",
@@ -565,12 +565,12 @@
           "event-4"
         ],
         "technicalTargetRefs": [],
-        "screenBeforeRef": "inicio",
-        "screenAfterRef": "inicio",
-        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
         "stateScope": "inicio",
         "technicalOnly": true,
-        "confidence": 0.9
+        "confidence": 0.9,
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login"
       },
       {
         "id": "interaction-6",
@@ -589,13 +589,13 @@
         ],
         "editingSessionRef": "edit-1",
         "description": "Ingresar en \"Usuario\"",
-        "screenBeforeRef": "fbf08c6ecee9",
-        "screenAfterRef": "fbf08c6ecee9",
-        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
         "stateScope": "fbf08c6ecee9",
         "admissionStatus": "accepted",
         "resolutionState": "certified",
-        "confidence": 0.85
+        "confidence": 0.85,
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login"
       },
       {
         "id": "interaction-7",
@@ -613,13 +613,13 @@
         ],
         "editingSessionRef": "edit-2",
         "description": "Ingresar en \"Contraseña\"",
-        "screenBeforeRef": "fbf08c6ecee9",
-        "screenAfterRef": "fbf08c6ecee9",
-        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
         "stateScope": "fbf08c6ecee9",
         "admissionStatus": "accepted",
         "resolutionState": "certified",
-        "confidence": 0.85
+        "confidence": 0.85,
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login"
       },
       {
         "id": "interaction-8",
@@ -634,17 +634,17 @@
           "css:#password",
           "id:password"
         ],
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
         "screenBeforeRef": "fbf08c6ecee9",
         "screenAfterRef": "fbf08c6ecee9",
         "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
         "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/",
-        "stateScope": "fbf08c6ecee9",
         "transitionObserved": true,
         "causedTransition": true,
-        "terminalForContext": true,
-        "admissionStatus": "accepted",
-        "resolutionState": "certified",
-        "confidence": 0.85
+        "terminalForContext": true
       },
       {
         "id": "interaction-10",
@@ -654,16 +654,16 @@
           "event-10"
         ],
         "technicalTargetRefs": [],
+        "stateScope": "fbf08c6ecee9",
+        "technicalOnly": true,
+        "confidence": 0.9,
         "screenBeforeRef": "fbf08c6ecee9",
         "screenAfterRef": "fbf08c6ecee9",
         "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/",
         "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
-        "stateScope": "fbf08c6ecee9",
         "transitionObserved": true,
         "causedTransition": true,
-        "terminalForContext": true,
-        "technicalOnly": true,
-        "confidence": 0.9
+        "terminalForContext": true
       },
       {
         "id": "interaction-11",
@@ -673,12 +673,12 @@
           "event-11"
         ],
         "technicalTargetRefs": [],
-        "screenBeforeRef": "fbf08c6ecee9",
-        "screenAfterRef": "fbf08c6ecee9",
-        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
         "stateScope": "fbf08c6ecee9",
         "technicalOnly": true,
-        "confidence": 0.9
+        "confidence": 0.9,
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct"
       },
       {
         "id": "interaction-12",
@@ -728,13 +728,13 @@
         ],
         "validatedByInteraction": true,
         "description": "Ingresar en \"Solicitud multiproducto\"",
-        "screenBeforeRef": "fbf08c6ecee9",
-        "screenAfterRef": "fbf08c6ecee9",
-        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
         "stateScope": "fbf08c6ecee9",
         "admissionStatus": "accepted",
         "resolutionState": "certified",
-        "confidence": 0.85
+        "confidence": 0.85,
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct"
       },
       {
         "id": "interaction-13",
@@ -749,13 +749,13 @@
         "technicalTargetRefs": [],
         "editingSessionRef": "edit-3",
         "description": "Ingresar en \"Número de identificación\"",
-        "screenBeforeRef": "fbf08c6ecee9",
-        "screenAfterRef": "fbf08c6ecee9",
-        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
         "stateScope": "fbf08c6ecee9",
         "admissionStatus": "accepted",
         "resolutionState": "runtime_resolution_required",
-        "confidence": 0.7
+        "confidence": 0.7,
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct"
       },
       {
         "id": "interaction-14",
@@ -797,13 +797,13 @@
         ],
         "validatedByInteraction": true,
         "description": "Ingresar en \"Número de identificación\"",
-        "screenBeforeRef": "fbf08c6ecee9",
-        "screenAfterRef": "fbf08c6ecee9",
-        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
         "stateScope": "fbf08c6ecee9",
         "admissionStatus": "accepted",
         "resolutionState": "runtime_resolution_required",
-        "confidence": 0.7
+        "confidence": 0.7,
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct"
       },
       {
         "id": "interaction-15",
@@ -853,17 +853,17 @@
         ],
         "validatedByInteraction": true,
         "description": "Ingresar en \"Depurar\"",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
         "screenBeforeRef": "fbf08c6ecee9",
         "screenAfterRef": "fbf08c6ecee9",
         "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
         "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/requests/10260/edit",
-        "stateScope": "fbf08c6ecee9",
         "transitionObserved": true,
         "causedTransition": true,
-        "terminalForContext": true,
-        "admissionStatus": "accepted",
-        "resolutionState": "certified",
-        "confidence": 0.85
+        "terminalForContext": true
       },
       {
         "id": "interaction-17",
@@ -913,13 +913,13 @@
         ],
         "validatedByInteraction": true,
         "description": "Ingresar en \"Continuar\"",
-        "screenBeforeRef": "fbf08c6ecee9",
-        "screenAfterRef": "fbf08c6ecee9",
-        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10260/edit",
         "stateScope": "fbf08c6ecee9",
         "admissionStatus": "accepted",
         "resolutionState": "certified",
-        "confidence": 0.85
+        "confidence": 0.85,
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10260/edit"
       },
       {
         "id": "interaction-18",
@@ -960,15 +960,15 @@
         ],
         "validatedByInteraction": true,
         "description": "Ingresar en \"Categoría de producto\"",
-        "screenBeforeRef": "fbf08c6ecee9",
-        "screenAfterRef": "fbf08c6ecee9",
-        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10260/edit",
         "stateScope": "fbf08c6ecee9",
         "admissionStatus": "accepted",
         "resolutionState": "runtime_resolution_required",
         "technicalOnly": true,
         "executionAuthority": true,
-        "confidence": 0.7
+        "confidence": 0.7,
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10260/edit"
       },
       {
         "id": "interaction-19",
@@ -1020,15 +1020,15 @@
         ],
         "validatedByInteraction": true,
         "description": "Ingresar en \"Certificados de Deposito\"",
-        "screenBeforeRef": "fbf08c6ecee9",
-        "screenAfterRef": "fbf08c6ecee9",
-        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10260/edit",
         "stateScope": "fbf08c6ecee9",
         "admissionStatus": "accepted",
         "resolutionState": "certified",
         "technicalOnly": true,
         "executionAuthority": true,
-        "confidence": 0.85
+        "confidence": 0.85,
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10260/edit"
       },
       {
         "id": "interaction-20",
@@ -1044,14 +1044,14 @@
         "selectorControlId": "fbf08c6ecee9|||Categoría de producto",
         "optionSurfaceId": "fbf08c6ecee9|fbf08c6ecee9|||Categoría de producto|option-surface",
         "description": "Seleccionar en \"Categoría de producto\"",
-        "screenBeforeRef": "fbf08c6ecee9",
-        "screenAfterRef": "fbf08c6ecee9",
-        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10260/edit",
         "stateScope": "fbf08c6ecee9",
         "admissionStatus": "accepted",
         "resolutionState": "certified",
         "executionAuthority": false,
-        "confidence": 0.7
+        "confidence": 0.7,
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10260/edit"
       },
       {
         "id": "interaction-21",
@@ -1092,15 +1092,15 @@
         ],
         "validatedByInteraction": true,
         "description": "Ingresar en \"Producto\"",
-        "screenBeforeRef": "fbf08c6ecee9",
-        "screenAfterRef": "fbf08c6ecee9",
-        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10260/edit",
         "stateScope": "fbf08c6ecee9",
         "admissionStatus": "accepted",
         "resolutionState": "runtime_resolution_required",
         "technicalOnly": true,
         "executionAuthority": true,
-        "confidence": 0.7
+        "confidence": 0.7,
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10260/edit"
       },
       {
         "id": "interaction-22",
@@ -1152,15 +1152,15 @@
         ],
         "validatedByInteraction": true,
         "description": "Ingresar en \"300 - Depósito a plazo Financiero Personal Capitalizable DOP\"",
-        "screenBeforeRef": "fbf08c6ecee9",
-        "screenAfterRef": "fbf08c6ecee9",
-        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10260/edit",
         "stateScope": "fbf08c6ecee9",
         "admissionStatus": "accepted",
         "resolutionState": "certified",
         "technicalOnly": true,
         "executionAuthority": true,
-        "confidence": 0.85
+        "confidence": 0.85,
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10260/edit"
       },
       {
         "id": "interaction-23",
@@ -1176,14 +1176,14 @@
         "selectorControlId": "fbf08c6ecee9|||Producto",
         "optionSurfaceId": "fbf08c6ecee9|fbf08c6ecee9|||Producto|option-surface",
         "description": "Seleccionar en \"Producto\"",
-        "screenBeforeRef": "fbf08c6ecee9",
-        "screenAfterRef": "fbf08c6ecee9",
-        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10260/edit",
         "stateScope": "fbf08c6ecee9",
         "admissionStatus": "accepted",
         "resolutionState": "certified",
         "executionAuthority": false,
-        "confidence": 0.7
+        "confidence": 0.7,
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10260/edit"
       },
       {
         "id": "interaction-24",
@@ -1198,13 +1198,13 @@
         "technicalTargetRefs": [],
         "editingSessionRef": "edit-6",
         "description": "Ingresar en \"Monto\"",
-        "screenBeforeRef": "fbf08c6ecee9",
-        "screenAfterRef": "fbf08c6ecee9",
-        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10260/edit",
         "stateScope": "fbf08c6ecee9",
         "admissionStatus": "accepted",
         "resolutionState": "runtime_resolution_required",
-        "confidence": 0.7
+        "confidence": 0.7,
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10260/edit"
       },
       {
         "id": "interaction-25",
@@ -1219,13 +1219,13 @@
         "technicalTargetRefs": [],
         "editingSessionRef": "edit-7",
         "description": "Ingresar en \"Plazo\"",
-        "screenBeforeRef": "fbf08c6ecee9",
-        "screenAfterRef": "fbf08c6ecee9",
-        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10260/edit",
         "stateScope": "fbf08c6ecee9",
         "admissionStatus": "accepted",
         "resolutionState": "runtime_resolution_required",
-        "confidence": 0.7
+        "confidence": 0.7,
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10260/edit"
       },
       {
         "id": "interaction-26",
@@ -1275,13 +1275,13 @@
         ],
         "validatedByInteraction": true,
         "description": "Ingresar en \"Aceptar\"",
-        "screenBeforeRef": "fbf08c6ecee9",
-        "screenAfterRef": "fbf08c6ecee9",
-        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10260/edit",
         "stateScope": "fbf08c6ecee9",
         "admissionStatus": "accepted",
         "resolutionState": "certified",
-        "confidence": 0.85
+        "confidence": 0.85,
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10260/edit"
       }
     ],
     "entityActionBlocks": [],
@@ -1419,7 +1419,7 @@
         "semanticField": "Plazo",
         "valueRole": "action_input",
         "required": true,
-        "value": "6 mes/es",
+        "value": "6",
         "source": "CURRENT_QA_EDIT",
         "resolved": true,
         "sensitive": false,
@@ -1430,7 +1430,7 @@
         "masked": false,
         "editable": true,
         "authority": "explicit_qa_edit",
-        "authorityValue": "6 mes/es",
+        "authorityValue": "6",
         "datasetAuthorityMismatch": false
       }
     ],
@@ -1556,7 +1556,7 @@
           "semanticField": "Plazo",
           "valueRole": "action_input",
           "required": true,
-          "value": "6 mes/es",
+          "value": "6",
           "source": "CURRENT_QA_EDIT",
           "resolved": true,
           "sensitive": false,
@@ -1567,7 +1567,7 @@
           "masked": false,
           "editable": true,
           "authority": "explicit_qa_edit",
-          "authorityValue": "6 mes/es",
+          "authorityValue": "6",
           "datasetAuthorityMismatch": false
         }
       ],
@@ -1578,7 +1578,7 @@
         "categoria_de_producto_seleccion": "Certificados de Deposito",
         "producto_seleccion": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
         "monto": "DOP 15,000.00",
-        "plazo": "6 mes/es"
+        "plazo": "6"
       },
       "missingValues": []
     },

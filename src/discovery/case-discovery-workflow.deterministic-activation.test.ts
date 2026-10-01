@@ -53,6 +53,17 @@ test("A/real QA Lab workflow caller: useDeterministicSpecCompiler=true is presen
   );
 });
 
+test("the effective Discovery TLS policy is passed to promoted candidate validation", async () => {
+  const source = await fs.readFile(WORKFLOW_PATH, "utf8");
+  const callBlock = extractPromoteCallBlock(source);
+
+  assert.match(
+    callBlock,
+    /ignoreHTTPSErrors:\s*activeConfig\.app\.ignoreHTTPSErrors/,
+    "the same effective project/app TLS setting used by Discovery must reach promoteExecutionPlan",
+  );
+});
+
 test("B/the value is a bare literal, not derived from appSlug/case/text/URL or any conditional expression", async () => {
   const source = await fs.readFile(WORKFLOW_PATH, "utf8");
   const callBlock = extractPromoteCallBlock(source);

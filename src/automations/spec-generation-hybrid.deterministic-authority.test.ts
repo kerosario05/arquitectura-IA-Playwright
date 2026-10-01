@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { runHybridSpecGeneration } from "./spec-generation-hybrid";
+import { findUncertifiedRequiredTargetSteps, runHybridSpecGeneration } from "./spec-generation-hybrid";
 import { buildSpecExecutionContract } from "./spec-execution-contract";
 import { compileDeterministicSpec } from "./spec-compiler/deterministic-spec-compiler";
 import type { AppAutomationPaths, AppProfile } from "./app-profile";
@@ -149,6 +149,27 @@ function buildProviderSpy() {
   };
   return { calls, createProvider };
 }
+
+test("a durable technicalTargetRef satisfies the pre-generation materialization gate", () => {
+  const executionContract = {
+    steps: [
+      {
+        required: true,
+        operation: "click",
+        technicalTargetRef: "role:button|Continue",
+      },
+    ],
+  } as any;
+
+  assert.deepEqual(findUncertifiedRequiredTargetSteps(executionContract), []);
+  assert.equal(
+    findUncertifiedRequiredTargetSteps({
+      steps: [{ required: true, operation: "click" }],
+    } as any).length,
+    1,
+    "a missing target certificate and missing recorded ref must still fail closed",
+  );
+});
 
 test("A/deterministic candidate + AI_SPEC_GENERATION_ENABLED=true (real QA Lab config): initial AI generator is not called", async () => {
   const appPaths = await createTmpPaths();

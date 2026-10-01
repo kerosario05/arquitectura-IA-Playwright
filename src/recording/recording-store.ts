@@ -71,6 +71,24 @@ export function loadTrace(appSlug: string, recordingId: string): SessionTrace | 
   }
 }
 
+/**
+ * A recordingId is only unique within its own app. A caller that only knows a projectSlug's
+ * appSlug (e.g. a batch spanning scenarios recorded under different apps) can miss a recording
+ * that is genuinely stopped, just filed under a sibling app folder. Scans every app profile for
+ * this recordingId instead of trusting the caller's assumed appSlug.
+ */
+export function findOwningAppSlug(recordingId: string): string | null {
+  const safeId = sanitize(recordingId);
+  if (!fs.existsSync(RECORDINGS_ROOT)) return null;
+  for (const entry of fs.readdirSync(RECORDINGS_ROOT, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    if (fs.existsSync(path.join(RECORDINGS_ROOT, entry.name, "recordings", safeId, "trace.json"))) {
+      return entry.name;
+    }
+  }
+  return null;
+}
+
 export function saveScenarios(appSlug: string, recordingId: string, scenarios: RecordedScenario[]): void {
   const dir = recordingDir(appSlug, recordingId);
   fs.mkdirSync(dir, { recursive: true });

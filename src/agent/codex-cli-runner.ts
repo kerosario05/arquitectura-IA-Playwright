@@ -102,10 +102,10 @@ export function buildCommandArgs(input: CodexCliRunnerInput): { command: string;
   const contextIsolationArgs = input.purpose === "spec_generation" || input.purpose === "scenario_generation"
     ? ["-c", "project_doc_max_bytes=0"]
     : [];
-  // codex.cmd / codex -> "exec" "<prompt>"
+  // Codex CLI accepts `-` as the prompt positional and reads the prompt from stdin.
   return {
     command: input.command,
-    args: ["exec", ...contextIsolationArgs, ...extraArgs, input.prompt]
+    args: ["exec", ...contextIsolationArgs, ...extraArgs, input.promptAsStdin ? "-" : input.prompt]
   };
 }
 
@@ -357,7 +357,7 @@ export async function runCodexCli(input: CodexCliRunnerInput): Promise<CodexCliR
     console.log(`[codex-cli] displayCommand: ${resolved.displayCommand}`);
     console.log(`[codex-cli] spawnCommand: ${resolved.spawnCommand} ${resolved.spawnArgs.join(" ")}`);
     console.log(`[codex-cli] cwd: ${cwd}`);
-    console.log(`[codex-cli] timeoutMs: ${timeoutMs}`);
+    console.log(`[codex-cli] timeoutMs: ${timeoutMs ?? "disabled"}`);
     if (stdoutLogPath) console.log(`[codex-cli] stdoutLog: ${stdoutLogPath}`);
     if (stderrLogPath) console.log(`[codex-cli] stderrLog: ${stderrLogPath}`);
   }
@@ -368,7 +368,14 @@ export async function runCodexCli(input: CodexCliRunnerInput): Promise<CodexCliR
       env: buildSafeEnv()
     };
 
-    const child = spawnFn(resolved.spawnCommand, resolved.spawnArgs, { ...spawnOptions, stdio: ["ignore", "pipe", "pipe"] }) as any;
+    const child = spawnFn(resolved.spawnCommand, resolved.spawnArgs, {
+      ...spawnOptions,
+      stdio: [input.promptAsStdin ? "pipe" : "ignore", "pipe", "pipe"]
+    }) as any;
+    if (input.promptAsStdin) {
+      child.stdin.on("error", () => { /* The CLI may exit before consuming all prompt input. */ });
+      child.stdin.end(input.prompt, "utf-8");
+    }
 
     let stdoutBuf = "";
     let stderrBuf = "";
@@ -385,12 +392,12 @@ export async function runCodexCli(input: CodexCliRunnerInput): Promise<CodexCliR
         const prefix = attempt ? `[codex-cli] attempt ${attempt}` : "[codex-cli]";
         const out = stdoutLogPath ? ` stdoutLog=${stdoutLogPath}` : "";
         const err = stderrLogPath ? ` stderrLog=${stderrLogPath}` : "";
-        console.log(`${prefix} Codex still running... elapsedMs=${elapsedMs} timeoutMs=${timeoutMs}${out}${err}`);
+        console.log(`${prefix} Codex still running... elapsedMs=${elapsedMs} timeoutMs=${timeoutMs ?? "disabled"}${out}${err}`);
         lastOutputAt = now; // avoid spamming in case of totally quiet process
       }
     }, Math.max(50, Math.min(heartbeatMs, 1000)));
 
-    const timeoutTimer = setTimeout(() => {
+    const timeoutTimer = timeoutMs && timeoutMs > 0 ? setTimeout(() => {
       if (!settled) {
         settled = true;
         child.kill("SIGTERM");
@@ -406,10 +413,10 @@ export async function runCodexCli(input: CodexCliRunnerInput): Promise<CodexCliR
           stderrLogPath
         });
       }
-    }, timeoutMs);
+    }, timeoutMs) : undefined;
 
     const cleanup = () => {
-      clearTimeout(timeoutTimer);
+      if (timeoutTimer) clearTimeout(timeoutTimer);
       clearInterval(heartbeatTimer);
       try { stdoutStream?.end(); } catch { }
       try { stderrStream?.end(); } catch { }
@@ -530,12 +537,13 @@ export function formatCodexCliError(result: CodexCliRunnerResult, input: CodexCl
 }
 
 export function formatCodexTimeoutError(input: CodexCliRunnerInput, handoffDir: string, responsePath: string): string {
-  const timeoutMinutes = (input.timeoutMs / 60000).toFixed(1);
-  const recommendedMs = Math.max(input.timeoutMs * 2, 1800000);
+  const configuredTimeoutMs = input.timeoutMs ?? 0;
+  const timeoutMinutes = configuredTimeoutMs ? (configuredTimeoutMs / 60000).toFixed(1) : "disabled";
+  const recommendedMs = Math.max(configuredTimeoutMs * 2, 1800000);
   const recommendedMinutes = (recommendedMs / 60000).toFixed(0);
 
   const parts: string[] = [];
-  parts.push(`Codex CLI timed out after ${timeoutMinutes} minutes (timeoutMs: ${input.timeoutMs}).`);
+  parts.push(`Codex CLI timed out after ${timeoutMinutes} minutes (timeoutMs: ${input.timeoutMs ?? "disabled"}).`);
   parts.push(`Cwd: ${input.cwd}`);
   parts.push(`Handoff directory: ${handoffDir}`);
   parts.push(`Expected response path: ${responsePath}`);

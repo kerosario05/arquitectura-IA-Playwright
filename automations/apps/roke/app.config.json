@@ -1,0 +1,24 @@
+{
+  "appProfile": {
+    "appSlug": "roke",
+    "source": "default",
+    "name": "4",
+    "baseUrl": "https://172.27.4.50/",
+    "baseUrlHash": "74df3c0e992c",
+    "createdAt": "2026-10-01T13:06:13.395Z",
+    "updatedAt": "2026-10-01T13:06:13.396Z",
+    "ignoreHTTPSErrors": false
+  },
+  "baseUrl": "https://172.27.4.50/",
+  "loginMode": "password",
+  "testData": {},
+  "testDataAliases": {},
+  "testDataRefs": {},
+  "username": "adminr",
+  "password": "admin123",
+  "usernameRef": "APP_USERNAME",
+  "passwordRef": "APP_PASSWORD",
+  "missingInputBehavior": "auto_generate",
+  "ignoreHTTPSErrors": false,
+  "updatedAt": "2026-10-01T13:06:13.396Z"
+}

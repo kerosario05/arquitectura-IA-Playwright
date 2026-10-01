@@ -1,0 +1,22 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "spec_generation_validation_failed",
+  "blockers": [
+    "spec_generation_validation_failed"
+  ],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\roke\\sections\\default-section\\cases\\preview-001-recorrer-productos-hasta-tarjeta-credito-visa-clasica-y-solicitar\\case.spec.ts",
+  "specHash": "8240436141654ec4906d77bf5a7ee4a332ec6f73da545da97451edf4d2ae9266",
+  "specSource": "ai_candidate"
+}

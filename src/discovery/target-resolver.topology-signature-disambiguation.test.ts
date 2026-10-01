@@ -26,6 +26,10 @@ function domNode(childTags: string[], descendantTags: string[]) {
     querySelectorAll: (selector: string) => (selector === "*" ? descendantTags.map((tag) => ({ tagName: tag.toUpperCase() })) : []),
     attributes: {} as Record<string, string>,
     setAttribute(name: string, value: string) { this.attributes[name] = value; },
+    // Mirrors real Element.prototype.contains: true for self, false for any other node.
+    // These fixture nodes are flat siblings (no fake parent/child DOM pointers), so no
+    // fixture pair is ever a genuine ancestor/descendant of another.
+    contains(other: unknown) { return other === node; },
   };
   return node;
 }
@@ -156,6 +160,7 @@ function fakeScopedPage(options: { scopeCount: number; targetCount: number }) {
     isVisible: async () => true,
     isEnabled: async () => true,
     locator: () => targetLocator,
+    waitFor: async () => undefined,
   } as any;
   return {
     locator: (selector: string) => selector === "#scope" ? scopeLocator : targetLocator,
@@ -177,6 +182,25 @@ test("scoped runtime evidence fails closed when the scope is ambiguous", async (
 test("scoped runtime evidence fails closed when the local target fingerprint is ambiguous", async () => {
   const result = await resolveRecordedStructuralOwner(fakeScopedPage({ scopeCount: 1, targetCount: 2 }), scopedStructuralTarget({ strategy: "css", value: "#scope" }, 2));
   assert.equal(result, undefined);
+});
+
+test("9/scopedTopologyTieBreak. scoped owner collides inside its own scope -> recorded topology signature still disambiguates it, bounded to the scope", async () => {
+  let evaluateArgs: { selector: string; recordedSignature: string; scopeSelector?: string } | undefined;
+  const markerLocator = { count: async () => 1, isVisible: async () => true, isEnabled: async () => true, locator: () => markerLocator } as any;
+  const collidingLocator = { count: async () => 2, isVisible: async () => true, isEnabled: async () => true, locator: (sel: string) => (sel.includes("data-codex-structural-owner") ? markerLocator : collidingLocator) } as any;
+  const scopeLocator = { count: async () => 1, isVisible: async () => true, isEnabled: async () => true, locator: (sel: string) => (sel.includes("data-codex-structural-owner") ? markerLocator : (sel === "#scope" ? scopeLocator : collidingLocator)), waitFor: async () => undefined } as any;
+  const page = {
+    locator: (selector: string) => (selector === "#scope" ? scopeLocator : collidingLocator),
+    evaluate: async (_fn: unknown, args: { selector: string; recordedSignature: string; scopeSelector?: string }) => {
+      evaluateArgs = args;
+      return { matched: true, matchCount: 1, marker: "marker-1" };
+    },
+  } as any;
+  const target = scopedStructuralTarget({ strategy: "css", value: "#scope" });
+  (target.structuralContext as any).topologySignature = "sig-scoped";
+  const result = await resolveRecordedStructuralOwner(page, target);
+  assert.ok(result, "topology signature resolves the in-scope collision instead of failing action_owner_ambiguous");
+  assert.equal(evaluateArgs?.scopeSelector, "#scope", "the tiebreak is bounded to the verified-unique scope, never the whole document");
 });
 
 test("1/baseUnique. a unique base structural match resolves exactly as before (no topology evaluation)", async () => {

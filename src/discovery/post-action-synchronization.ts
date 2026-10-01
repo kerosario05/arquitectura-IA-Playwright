@@ -3,6 +3,8 @@ export type PostActionSynchronizationInput = {
   actionNetworkResponse?: boolean;
   applicationError?: boolean;
   authGateChanged?: boolean;
+  /** A detected auth gate is still present after its submit action; generic progress is not completion. */
+  authenticationBoundaryStillActive?: boolean;
   domMutation?: boolean;
   loadingSettled?: boolean;
   navigationMutation?: boolean;
@@ -39,6 +41,8 @@ export type PostActionSynchronizationInput = {
    * DOM. Only meaningful when `nextTargetRequiresRuntimeResolution` is true.
    */
   nextTargetReady?: boolean;
+  /** The already-observed mutation belongs to the current action's clicked owner. */
+  causalClickEffect?: boolean;
   screenFingerprintChanged?: boolean;
   /** The page's route changed across the action — DOM-only signals are then progress, not readiness. */
   routeChanged?: boolean;
@@ -51,14 +55,28 @@ export type PostActionSynchronizationInput = {
   /** The observed surface has reached the recorded post-action authority. */
   recordedPostActionSurfaceReached?: boolean;
   /**
+   * A final, recording-owned click has settled and produced action-scoped terminal feedback
+   * (a completed relevant response or a confirmed causal mutation). This can complete the
+   * click when its recorded route is not reached; callers must keep it false for intermediate
+   * actions, pending/failed requests, and explicitly-authored authentication flows.
+   */
+  recordedTerminalActionFeedback?: boolean;
+  /**
    * A causal, structured selection-state transition (e.g. false->true) was observed on the
    * CURRENT action's own already-resolved technical target -- the SAME locator, re-read, never a
    * new resolver. Only meaningful for actions with recorded/structured select|check|uncheck|
    * radio|toggle authority (`recordingInteractionKind`), never inferred from target text. A
    * same-surface selection action with no network/DOM/next-target signal at all (e.g. toggling an
    * aria-pressed/aria-checked control) otherwise has no way to ever complete.
-   */
+  */
   targetSelectionStateChanged?: boolean;
+  /**
+   * The shared resolver already applied and verified the requested option before
+   * the post-action observer was armed. This is direct outcome evidence from the
+   * same structured selection action, so it must not wait for a second DOM/network
+   * signal that can no longer observe the transition.
+   */
+  selectionApplied?: boolean;
   /**
    * A causal, same-surface structured-state mutation: exactly one redacted state candidate that
    * existed before the action changed a functional property (text/ARIA value/state) after it. This
@@ -67,11 +85,23 @@ export type PostActionSynchronizationInput = {
    * and newly-appeared-only candidates never set it).
    */
   structuredStateMutation?: boolean;
+  /**
+   * A causal, owner-scoped childList mutation (a brand-new subtree, e.g. a modal, mounting under
+   * the clicked owner) observed by the SAME scoped MutationObserver already installed for
+   * `structuredStateMutation`/diagnostics -- never a new observer. Distinct from
+   * `structuredStateMutation` (a property change on a pre-existing state candidate) and from
+   * `domMutation` (`diffAssertionObservation`'s tracked-candidate diff, which cannot see an
+   * entirely new subtree appear). Only meaningful, and only ever checked, for a terminal action
+   * with no known next target -- a mid-flow action with a known next target already has stronger,
+   * more specific signals (`nextTargetBecameVisible`/`nextTargetReady`) and must keep requiring
+   * them, never falling back to a bare owner-subtree mutation.
+   */
+  ownerSubtreeMutation?: boolean;
 };
 
 export type PostActionSynchronizationResult = {
   completed: boolean;
-  signal?: "application_error" | "network_response" | "auth_gate_changed" | "next_target_visible" | "next_target_resolver_ready" | "dom_navigation_mutation" | "dom_validation_mutation" | "target_selection_state_changed" | "structured_state_mutation";
+  signal?: "application_error" | "network_response" | "auth_gate_changed" | "next_target_visible" | "next_target_resolver_ready" | "dom_navigation_mutation" | "dom_validation_mutation" | "target_selection_state_changed" | "structured_state_mutation" | "click_effect_next_target_visible" | "owner_subtree_mutation" | "terminal_feedback";
 };
 
 /**
@@ -83,6 +113,9 @@ export function resolvePostActionSynchronization(
   input: PostActionSynchronizationInput,
 ): PostActionSynchronizationResult {
   if (input.applicationError) return { completed: true, signal: "application_error" };
+  if (input.recordedPostActionSurfaceRequired && !input.recordedPostActionSurfaceReached && input.recordedTerminalActionFeedback) {
+    return { completed: true, signal: "terminal_feedback" };
+  }
   // A recorded post-action surface is execution authority. Until the observed surface
   // reaches it, a DOM mutation, a 2xx response, an auth-gate flip, or a visible next target
   // are all progress signals — never the recorded functional outcome. No generic signal may
@@ -93,6 +126,10 @@ export function resolvePostActionSynchronization(
   if (input.recordedPostActionSurfaceRequired && !input.recordedPostActionSurfaceReached) {
     return { completed: false };
   }
+  // A successful HTTP response can arrive while an SPA is still processing authentication.
+  // Keep observing the same auth gate until it changes, the recorded next target appears, or
+  // an application error is shown; the network response alone is only progress at this boundary.
+  if (input.authenticationBoundaryStillActive) return { completed: false };
   const recordedSurfaceConfirmed = Boolean(input.recordedPostActionSurfaceRequired && input.recordedPostActionSurfaceReached);
   // FIRST_LOSS fix: a generic network_response/dom_validation_mutation was accepted as completion
   // even though the recording's next structured action (a selection owner/combobox with real
@@ -109,7 +146,7 @@ export function resolvePostActionSynchronization(
   // next_target_visible/auth_gate_changed all require signals this kind of action simply never
   // produces. This is about the CURRENT action's own target, never the next action's readiness,
   // so it is not subject to `nextOwnerBlocking` (an unrelated concern).
-  if (input.targetSelectionStateChanged) {
+  if (input.targetSelectionStateChanged || input.selectionApplied) {
     return { completed: true, signal: "target_selection_state_changed" };
   }
 
@@ -163,6 +200,15 @@ export function resolvePostActionSynchronization(
   if (!nextOwnerBlocking && input.nextTargetRequiresRuntimeResolution && input.nextTargetReady) {
     return { completed: true, signal: "next_target_resolver_ready" };
   }
+  // Some same-surface controls (tabs, disclosures) change their own DOM state while exposing a
+  // next target whose label was already present elsewhere in the page. In that case the
+  // visibility edge can be missed, but the current owner's scoped mutation plus the visible next
+  // target proves this action advanced the interface. Require settled loading and preserve the
+  // next-owner readiness guard; the next action still resolves its own target.
+  if (!nextOwnerBlocking && input.causalClickEffect && input.nextTargetAvailable
+    && !input.routeChanged && input.loadingSettled) {
+    return { completed: true, signal: "click_effect_next_target_visible" };
+  }
   // FIRST_LOSS fix (jobId 085dc21f): a same-surface click that mutates a related display/control's
   // functional state (keypad, stepper, +/- counter, custom toggle, selection-updates-display) with
   // no navigation, no network, and no newly-visible next target had no completion signal at all --
@@ -173,6 +219,15 @@ export function resolvePostActionSynchronization(
   // known-not-ready next owner still blocks it, exactly like the other generic signals.
   if (!nextOwnerBlocking && input.structuredStateMutation && !input.routeChanged && input.loadingSettled) {
     return { completed: true, signal: "structured_state_mutation" };
+  }
+  // FIRST_LOSS fix (task-20260927222226-69ef2ab2): a terminal action (no known next target) whose
+  // only observable effect is a brand-new subtree mounting (e.g. a modal) had no completion
+  // signal at all -- `domMutation` (tracked-candidate diff) cannot see a wholly new subtree,
+  // `structuredStateMutation` requires a pre-existing candidate, and no next target exists to
+  // become visible/ready. Gated strictly to `!nextTargetKnown` so a mid-flow action with a known
+  // next target keeps requiring its own stronger signal, unaffected.
+  if (!nextOwnerBlocking && input.ownerSubtreeMutation && !input.nextTargetKnown && !input.routeChanged && input.loadingSettled) {
+    return { completed: true, signal: "owner_subtree_mutation" };
   }
   // A navigation-shaped DOM mutation is a progress signal, never readiness. It can
   // fire before the new route's fetch is even registered, so it must not declare an

@@ -332,6 +332,9 @@ export async function startRecording(params: StartRecordingParams): Promise<{
         baseUrl: target.baseUrl!,
         ignoreHTTPSErrors: target.ignoreHTTPSErrors,
         framesDir,
+        // Web recording is live interaction capture; screenshots add latency to the
+        // ingestion path and do not contribute to the captured action sequence.
+        captureScreenshots: false,
         captureAuthority,
         persistQaCredentials: true,
         sensitiveLabels: params.sensitiveLabels,

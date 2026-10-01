@@ -72,3 +72,20 @@ test("8/multiproject. no app/business hardcode in the retry logic", () => {
   assert.doesNotMatch(fn, /portal-comercial/i);
   assert.doesNotMatch(fn, /numero.de.identificacion/i);
 });
+
+test("9/acceptedScopeClicksContainerNotDescendant. once the accepted-scope retry certifies via its scoped descendant, the RETURNED click target is the container root (non-self-owner), never the descendant used only to prove uniqueness -- the exact wrong-owner regression from job 7af1bdaf", () => {
+  const fn = fallbackFunctionSource();
+  const certifiedIndex = fn.indexOf("acceptedScopeActuallyUsed=true`);", fn.indexOf("recoveredFromAmbiguousTier1=true acceptedScopeActuallyUsed=true"));
+  assert.ok(certifiedIndex > 0, "expected the acceptedScopeActuallyUsed certified log line");
+  const afterCertified = fn.slice(certifiedIndex, certifiedIndex + 1300);
+  assert.match(
+    afterCertified,
+    /const clickTarget = scopeScoped\.selfOwner \? reconfirmedScope\.locator : \(containerRoot \?\? reconfirmedScope\.locator\);/,
+    "self-owner scopes click their own resolved node; non-self-owner scopes must click the proven-unique container, not the scoped descendant",
+  );
+  assert.match(
+    afterCertified,
+    /return withMarker\(\{ \.\.\.reconfirmedScope, locator: clickTarget, certifiedTechnicalTarget: scopeScoped\.target \}\);/,
+    "the returned locator must be clickTarget, never reconfirmedScope.locator directly",
+  );
+});

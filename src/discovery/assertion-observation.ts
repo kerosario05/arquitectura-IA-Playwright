@@ -69,6 +69,10 @@ export type ObservationStateCandidate = {
   contentEditable: boolean;
   /** Stable redacted structural identity used to pair the same node across before/after snapshots. */
   identity?: string;
+  /** Local structural owner used only to group related text carriers from the same field region. */
+  scopeIdentity?: string;
+  /** Stable nearest-ancestor signatures; used only when adjacent text carriers split across nodes. */
+  scopeIdentities?: string[];
   propertyFingerprints: Record<string, string>;
 };
 
@@ -77,6 +81,9 @@ export type StateCandidateMutation = {
   role?: string;
   inputType?: string;
   contentEditable: boolean;
+  identity?: string;
+  scopeIdentity?: string;
+  scopeIdentities?: string[];
   changedProperties: string[];
   fingerprintBefore: string;
   fingerprintAfter: string;
@@ -184,14 +191,37 @@ export async function captureAssertionObservationSnapshot(
       if (id) validationIds.add(id);
     }
     const controls: ObservationControlState[] = [];
-    const fingerprintValue = (value: string) => {
-      let hash = 2166136261;
-      for (let index = 0; index < value.length; index++) {
-        hash ^= value.charCodeAt(index);
-        hash = Math.imul(hash, 16777619);
-      }
-      return `${value.length}:${hash >>> 0}`;
-    };
+    // Use named object methods instead of const-bound functions here: tsx/esbuild's
+    // keepNames transform injects its module-local `__name` helper into closures, but
+    // Playwright serializes this evaluator into the page where that helper does not exist.
+    const fingerprintValue = {
+      hash(value: string) {
+        let hash = 2166136261;
+        for (let index = 0; index < value.length; index++) {
+          hash ^= value.charCodeAt(index);
+          hash = Math.imul(hash, 16777619);
+        }
+        return `${value.length}:${hash >>> 0}`;
+      },
+    }.hash;
+    // Playwright's semantic locators can resolve controls inside open shadow roots, while
+    // document.querySelectorAll cannot. Walk those roots for observation too, so a state change
+    // visible to the resolver is not invisible to the shared post-action observer.
+    const queryAllOpenShadowRoots = {
+      query(selector: string): Element[] {
+        const matches: Element[] = [];
+        const roots: Array<Document | ShadowRoot> = [document];
+        for (let rootIndex = 0; rootIndex < roots.length; rootIndex++) {
+          const root = roots[rootIndex];
+          matches.push(...Array.from(root.querySelectorAll(selector)));
+          for (const host of Array.from(root.querySelectorAll("*"))) {
+            const shadowRoot = (host as HTMLElement).shadowRoot;
+            if (shadowRoot) roots.push(shadowRoot);
+          }
+        }
+        return matches;
+      },
+    }.query;
     for (const element of Array.from(document.querySelectorAll("input, select, textarea, button, [role=button], [role=combobox], [role=checkbox], [role=radio]")).slice(0, 120)) {
         const tag = element.tagName.toLowerCase();
         const elementId = element.getAttribute("id");
@@ -295,7 +325,9 @@ export async function captureAssertionObservationSnapshot(
     // carriers OUTSIDE the `controls` selector, so a physical run can name which node kind/property
     // actually changed without serializing anything. Excluded from the snapshot fingerprint.
     const stateCandidates: ObservationStateCandidate[] = [];
-    const stateCandidateSelector = "[role=textbox], [role=spinbutton], [role=slider], [role=progressbar], [contenteditable=''], [contenteditable=true], [aria-valuetext], [aria-valuenow], [data-display-value], output";
+    // Include native form controls even when their implicit accessibility role is not reflected
+    // by a `role` attribute. Their values are fingerprinted below and never serialized.
+    const stateCandidateSelector = "input, select, textarea, [role=textbox], [role=spinbutton], [role=slider], [role=progressbar], [contenteditable=''], [contenteditable=true], [aria-valuetext], [aria-valuenow], [data-display-value], output";
     const statePropertyReaders: Array<[string, (element: Element) => string | null]> = [
       ["value", (element) => ("value" in element ? String((element as HTMLInputElement).value ?? "") : null)],
       ["textContent", (element) => (element.textContent ?? "").trim() || null],
@@ -309,7 +341,7 @@ export async function captureAssertionObservationSnapshot(
       ["ariaPressed", (element) => element.getAttribute("aria-pressed")],
       ["ariaExpanded", (element) => element.getAttribute("aria-expanded")],
     ];
-    for (const element of Array.from(document.querySelectorAll(stateCandidateSelector)).slice(0, 40)) {
+    for (const element of queryAllOpenShadowRoots(stateCandidateSelector).slice(0, 40)) {
       const propertyFingerprints: Record<string, string> = {};
       for (const [propertyName, read] of statePropertyReaders) {
         let observed: string | null = null;
@@ -330,6 +362,12 @@ export async function captureAssertionObservationSnapshot(
           element.getAttribute("role") ? `role=${element.getAttribute("role")}` : "",
           element.getAttribute("type") ? `type=${element.getAttribute("type")}` : "",
         ].filter(Boolean).join("|"),
+        scopeIdentity: [
+          element.tagName.toLowerCase(),
+          element.getAttribute("id") ? `id=${element.getAttribute("id")}` : "",
+          element.getAttribute("data-testid") ? `testid=${element.getAttribute("data-testid")}` : "",
+          element.getAttribute("role") ? `role=${element.getAttribute("role")}` : "",
+        ].filter(Boolean).join("|"),
         propertyFingerprints,
       });
     }
@@ -340,27 +378,89 @@ export async function captureAssertionObservationSnapshot(
     // never participate in the snapshot fingerprint (only in `stateMutation`/`diffStateCandidates`).
     const textCarrierSelector = "div, span, p, b, strong, em, i, small, h1, h2, h3, h4, h5, h6, td, th, output, [data-testid], [id]";
     const interactiveSelector = "input, select, textarea, button, [role=button], [role=combobox], [role=checkbox], [role=radio], [role=link], a, [contenteditable=''], [contenteditable=true]";
-    for (const element of Array.from(document.querySelectorAll(textCarrierSelector)).slice(0, 80)) {
+    const isInteractiveInComposedTree = {
+      check(element: Element): boolean {
+        let current: Element | null = element;
+        while (current) {
+          if (current.matches(interactiveSelector)) return true;
+          const root = current.getRootNode() as ShadowRoot;
+          current = current.parentElement ?? root.host ?? null;
+        }
+        return false;
+      },
+    }.check;
+    let textCarrierCandidateCount = 0;
+    for (const element of queryAllOpenShadowRoots(textCarrierSelector)) {
+      if (textCarrierCandidateCount >= 80 || stateCandidates.length >= 120) break;
+      // Observe a non-interactive display nested inside an interactive composite (for example, a
+      // button-based keypad with a separate text readout). The display itself is not the clicked
+      // control; its redacted leaf-state change remains subject to the single-candidate diff gate.
       if (element.matches(interactiveSelector)) continue;
-      if (element.closest(interactiveSelector)) continue;
       const text = (element.textContent ?? "").replace(/\s+/g, " ").trim();
       if (!text) continue;
+      // Parent containers duplicate a descendant display's textContent and would turn one real
+      // value change into several apparent mutations. Keep the deepest text-bearing carrier.
+      const hasTextBearingChild = Array.from(element.children).some((child) =>
+        (child.textContent ?? "").replace(/\s+/g, " ").trim().length > 0,
+      );
+      if (hasTextBearingChild) continue;
       // Stable identity deliberately EXCLUDES className (a class toggle is an irrelevant style
       // change and must never break the before/after pairing of the same state node).
+      const parent = element.parentElement;
+      const parentIdentity = parent
+        ? [
+            parent.tagName.toLowerCase(),
+            parent.getAttribute("id") ? `id=${parent.getAttribute("id")}` : "",
+            parent.getAttribute("data-testid") ? `testid=${parent.getAttribute("data-testid")}` : "",
+            parent.getAttribute("role") ? `role=${parent.getAttribute("role")}` : "",
+          ].filter(Boolean).join("|")
+        : "";
+      const siblingTextContext = parent
+        ? Array.from(parent.children)
+            .filter((sibling) => sibling !== element && !isInteractiveInComposedTree(sibling))
+            .map((sibling) => (sibling.textContent ?? "").replace(/\s+/g, " ").trim())
+            .filter(Boolean)
+            .map((siblingText) => fingerprintValue(siblingText))
+            .sort()
+            .join(".")
+        : "";
       const identity = [
         element.tagName.toLowerCase(),
         element.getAttribute("id") ? `id=${element.getAttribute("id")}` : "",
         element.getAttribute("data-testid") ? `testid=${element.getAttribute("data-testid")}` : "",
         element.getAttribute("role") ? `role=${element.getAttribute("role")}` : "",
-        element.getAttribute("aria-label") ? `arialabel=${element.getAttribute("aria-label")}` : "",
+        parentIdentity ? `parent=${parentIdentity}` : "",
+        siblingTextContext ? `siblings=${siblingTextContext}` : "",
       ].filter(Boolean).join("|");
-      if (stateCandidates.length >= 120) break;
+      const scopeIdentities: string[] = [];
+      let scopeNode = parent;
+      for (let depth = 0; scopeNode && depth < 8; depth++, scopeNode = scopeNode.parentElement) {
+        const childStructure = Array.from(scopeNode.children).map((child) => [
+          child.tagName.toLowerCase(),
+          child.getAttribute("id") ? `id=${child.getAttribute("id")}` : "",
+          child.getAttribute("data-testid") ? `testid=${child.getAttribute("data-testid")}` : "",
+          child.getAttribute("role") ? `role=${child.getAttribute("role")}` : "",
+        ].filter(Boolean).join("|")).sort().join(",");
+        scopeIdentities.push([
+          scopeNode.tagName.toLowerCase(),
+          scopeNode.getAttribute("id") ? `id=${scopeNode.getAttribute("id")}` : "",
+          scopeNode.getAttribute("data-testid") ? `testid=${scopeNode.getAttribute("data-testid")}` : "",
+          scopeNode.getAttribute("role") ? `role=${scopeNode.getAttribute("role")}` : "",
+          `children=${childStructure}`,
+        ].filter(Boolean).join("|"));
+      }
+      textCarrierCandidateCount++;
+      const textCarrierProperties: Record<string, string> = { textContent: fingerprintValue(text) };
+      const ariaLabel = element.getAttribute("aria-label");
+      if (ariaLabel !== null) textCarrierProperties.ariaLabel = fingerprintValue(ariaLabel);
       stateCandidates.push({
         tag: element.tagName.toLowerCase(),
         ...(element.getAttribute("role") ? { role: element.getAttribute("role")! } : {}),
         contentEditable: false,
         identity,
-        propertyFingerprints: { textContent: fingerprintValue(text) },
+        scopeIdentity: parentIdentity || identity,
+        ...(scopeIdentities.length > 0 ? { scopeIdentities } : {}),
+        propertyFingerprints: textCarrierProperties,
       });
     }
     const validationNodes: AssertionObservationSnapshot["validationNodes"] = [];
@@ -456,11 +556,18 @@ export function diffAssertionObservation(
     || before.controls.some((control) => after.controls.find((candidate) => candidate.identity === control.identity)?.ariaDescribedBy !== control.ariaDescribedBy)
     || before.validationNodes.length !== after.validationNodes.length;
   const formStateChanged = before.forms.some((form) => after.forms.find((candidate) => candidate.identity === form.identity)?.valid !== form.valid);
-  // Causal structured-state mutation: a state candidate that existed BEFORE the action and changed
-  // after it. Ambiguity fails closed -- exactly one such candidate is required, and a candidate that
-  // only appeared after the action (no before fingerprint) is never causal.
+  // Causal structured-state mutation: state candidates that existed BEFORE the action and changed
+  // after it. Multiple text carriers may represent one local display region (for example, a value
+  // and its helper text); accept them only when they share the same captured structural owner.
+  // Changes across independent owners and candidates that only appeared after the action fail closed.
   const causalStateMutations = diffStateCandidates(before, after).filter((mutation) => mutation.fingerprintBefore !== "");
-  const stateMutation = causalStateMutations.length === 1;
+  const fallbackScopes = new Set(causalStateMutations.map((mutation) => mutation.scopeIdentity ?? mutation.identity ?? `${mutation.tag}|${mutation.role ?? ""}|${mutation.inputType ?? ""}|${mutation.fingerprintBefore}`));
+  const hasSharedLocalScope = causalStateMutations.length > 1 && causalStateMutations.some((mutation) =>
+    (mutation.scopeIdentities ?? []).slice(0, 6).some((scope) => causalStateMutations.every((candidate) =>
+      (candidate.scopeIdentities ?? []).slice(0, 6).includes(scope),
+    )),
+  );
+  const stateMutation = causalStateMutations.length === 1 || fallbackScopes.size === 1 || hasSharedLocalScope;
   const stateMutationProperties = causalStateMutations.flatMap((mutation) => mutation.changedProperties);
   return {
     changed: changedPaths.length > 0,
@@ -519,6 +626,9 @@ export function diffStateCandidates(
       ...(candidate.role ? { role: candidate.role } : {}),
       ...(candidate.inputType ? { inputType: candidate.inputType } : {}),
       contentEditable: candidate.contentEditable,
+      ...(candidate.identity ? { identity: candidate.identity } : {}),
+      ...(candidate.scopeIdentity ? { scopeIdentity: candidate.scopeIdentity } : {}),
+      ...(candidate.scopeIdentities ? { scopeIdentities: candidate.scopeIdentities } : {}),
       changedProperties: changedProperties.sort(),
       fingerprintBefore: previous ? stateCandidateFingerprint(previous) : "",
       fingerprintAfter: stateCandidateFingerprint(candidate),

@@ -30,6 +30,126 @@ test("recording execution indices are unique and monotonic without changing acti
   assert.deepEqual(actions.map((action) => action.stepIndex), [1, 2, 3]);
   assert.deepEqual(actions.map((action) => action.actionType), ["click", "check", "fill"]);
 });
+
+test("dynamic labels on deterministic structural clicks are not promoted to field data", () => {
+  const interactions = buildCanonicalInteractions([{
+    seq: 0,
+    t: 1,
+    kind: "tap",
+    screenKey: "account-summary",
+    url: "/summary",
+    target: {
+      label: "User One user.one@example.test",
+      role: "div",
+      tag: "div",
+      attributes: { id: "profile-dropdown" },
+      locators: [],
+      interactionType: "click",
+      actionability: "NATIVE_ACTIONABLE",
+      actionOwner: true,
+      technicalTargetCandidates: [{
+        targetType: "structural",
+        locatorCandidates: [],
+        structuralContext: {
+          owner: { tag: "div" },
+          stableDirectAttributes: { id: "profile-dropdown" },
+          stableDescendants: [{ relation: "descendant", tag: "div", stableAttributes: { id: "customer-name" } }],
+          semanticShape: ["div"],
+          deterministicStructuralIdentity: true,
+          identityAmbiguous: false,
+        },
+        interactionEvidence: ["v2_click_owner"],
+        confidence: 0.9,
+        validatedByInteraction: true,
+      }],
+    },
+  }] as never);
+
+  const click = interactions.find((interaction) => interaction.action === "click");
+  assert.ok(click, "the recorded click remains executable");
+  assert.equal(click.semanticField, undefined, "the current user's display name is not a reusable field label");
+  assert.equal(click.valueKey, undefined, "the current user's display name does not create a runtime input requirement");
+  assert.equal(click.technicalTargetCandidates?.[0]?.structuralContext?.stableDirectAttributes?.id, "profile-dropdown");
+  const mcpScenario = toSharedMcpScenario({
+    scenarioId: "structural-click-reuse",
+    title: "Account flow",
+    description: "Recorded flow",
+    preconditions: [],
+    kind: "happy_path",
+    provenance: "observed",
+    mobileSteps: [],
+    webSteps: [{ action: "click", description: "Presionar el control grabado", interactionId: click.id }],
+    testRailSteps: [{ content: "Presionar el control grabado", interactionId: click.id, expected: "" }],
+    requiredData: [],
+    stepTargets: [],
+    sourceRecordingId: "structural-click-reuse",
+    hasUncertainSteps: true,
+    canonicalInteractions: interactions,
+    functionalReadiness: true,
+    technicalReadiness: false,
+  } as any, "app");
+  assert.equal(mcpScenario.recordingExecutionContract?.actions[0]?.targetRef, "recorded control");
+});
+
+test("dynamic person label keeps its stable locator but is not a semantic field", () => {
+  const interactions = buildCanonicalInteractions([{
+    seq: 1,
+    t: 1,
+    kind: "tap",
+    screenKey: "account-summary",
+    url: "/summary",
+    target: {
+      label: "Ana Maria Perez",
+      role: "div",
+      tag: "div",
+      attributes: { id: "profile-name" },
+      associatedField: "Ana Maria Perez",
+      locators: [{ strategy: "id", value: "profile-name", confidence: 0.55 }],
+      interactionType: "click",
+      actionability: "NATIVE_ACTIONABLE",
+      actionOwner: true,
+      semanticRuntimeEvidence: { source: "accessible_name", normalizedValue: "ana maria perez" },
+      playwrightRecorderEvidence: { kind: "text", normalizedName: "ana maria perez", runtimeResolutionRequired: true },
+    },
+  }] as never);
+
+  const click = interactions.find((interaction) => interaction.action === "click");
+  assert.ok(click);
+  assert.equal(click.dynamicTargetLabel, true);
+  assert.equal(click.semanticField, undefined);
+  assert.equal(click.valueKey, undefined);
+  assert.deepEqual(click.technicalTargetRefs, ["id:profile-name"]);
+  assert.equal(click.semanticRuntimeEvidence, undefined);
+  assert.equal(click.playwrightRecorderEvidence, undefined);
+  assert.equal(click.admissionStatus, "accepted");
+});
+
+test("dynamic numeric click label without a structural locator requires runtime resolution", () => {
+  const interactions = buildCanonicalInteractions([{
+    seq: 1,
+    t: 1,
+    kind: "tap",
+    screenKey: "accounts",
+    url: "/accounts",
+    target: {
+      label: "4111 1111 1111 1111",
+      role: "button",
+      tag: "button",
+      locators: [{ strategy: "text", value: "4111 1111 1111 1111", confidence: 0.55 }],
+      interactionType: "click",
+      actionability: "NATIVE_ACTIONABLE",
+      actionOwner: true,
+    },
+  }] as never);
+
+  const click = interactions.find((interaction) => interaction.action === "click");
+  assert.ok(click);
+  assert.equal(click.dynamicTargetLabel, true);
+  assert.deepEqual(click.technicalTargetRefs, []);
+  assert.equal(click.semanticField, undefined);
+  assert.equal(click.admissionStatus, "unresolved");
+  assert.equal(click.admissionReason, "dynamic_label_without_stable_target");
+});
 import { loadTrace } from "./recording-store";
 import { normalizeEvents } from "./trace-normalizer";
 import { buildHappyPathScenario } from "./trace-to-scenario";
@@ -648,6 +768,58 @@ test("a user-caused link transition remains functional after a preceding input",
   assert.equal(link?.technicalOnly, undefined);
   assert.equal(link?.routeAfter, "/requests/create/multiproduct");
   assert.deepEqual(validateInteractionStateSequence(interactions), { stateSequenceValid: true, stateSequenceIssues: [] });
+});
+
+test("a route-only reset after an in-place screen change is not assigned to the preceding click", () => {
+  const beforeUrl = "https://app.test/product?item=one";
+  const events = normalizeEvents([
+    { seq: 0, t: 100, kind: "note", observationType: "pointer", interactionId: "cancel", screenKey: "before", url: beforeUrl, target: { label: "Cancelar", role: "button", locators: [] } },
+    { seq: 1, t: 200, kind: "tap", interactionId: "cancel", screenKey: "before", url: beforeUrl, target: { label: "Cancelar", role: "button", locators: [{ strategy: "role", value: "button|Cancelar" }] } },
+    { seq: 2, t: 260, kind: "screen_change", screenKey: "before", toScreenKey: "product-details", url: beforeUrl },
+    // A later route-only observation retains the just-captured screen identity. It has no
+    // screen evidence of its own, so it must not replace the click's immediate screen result.
+    { seq: 3, t: 300, kind: "navigate", screenKey: "product-details", url: "https://app.test/" },
+  ] as never);
+  const interaction = buildCanonicalInteractions(events).find((candidate) => candidate.action === "click");
+  assert.equal(interaction?.screenAfterRef, "product-details");
+  assert.equal(interaction?.routeAfter, beforeUrl);
+  assert.equal(interaction?.causedTransition, true);
+});
+
+test("execution rehydrates stale persisted route ownership from the current trace", () => {
+  const beforeUrl = "https://app.test/product?item=one";
+  const traceEvents = normalizeEvents([
+    { seq: 0, t: 100, kind: "note", observationType: "pointer", interactionId: "interaction-cancel", screenKey: "before", url: beforeUrl, target: { label: "Cancelar", role: "button", locators: [] } },
+    { seq: 1, t: 200, kind: "tap", interactionId: "interaction-cancel", screenKey: "before", url: beforeUrl, target: { label: "Cancelar", role: "button", locators: [{ strategy: "role", value: "button|Cancelar" }] } },
+    { seq: 2, t: 260, kind: "screen_change", screenKey: "before", toScreenKey: "product-details", url: beforeUrl },
+    { seq: 3, t: 300, kind: "navigate", screenKey: "product-details", url: "https://app.test/" },
+  ] as never);
+  const currentTraceInteraction = buildCanonicalInteractions(traceEvents).find((interaction) => interaction.action === "click")!;
+  const stalePersistedInteraction = {
+    ...currentTraceInteraction,
+    routeAfter: "https://app.test/",
+    screenAfterRef: "home",
+    technicalTargetRefs: ["reviewed:persisted-target"],
+  };
+  const interactionWithoutTraceMatch = {
+    ...stalePersistedInteraction,
+    id: "legacy-without-source-match",
+    sourceEventRefs: ["event-unavailable"],
+    routeAfter: "https://app.test/legacy-destination",
+    screenAfterRef: "legacy-screen",
+  };
+  const hydrated = hydrateCanonicalInteractionsFromSemanticModel({
+    ...primary(),
+    canonicalInteractions: [stalePersistedInteraction, interactionWithoutTraceMatch],
+  }, {
+    editingSessions: [],
+    canonicalInteractions: [currentTraceInteraction],
+  } as never);
+  const refreshed = hydrated.canonicalInteractions?.[0];
+  assert.equal(refreshed?.routeAfter, beforeUrl);
+  assert.equal(refreshed?.screenAfterRef, "product-details");
+  assert.deepEqual(refreshed?.technicalTargetRefs, ["reviewed:persisted-target"]);
+  assert.equal(hydrated.canonicalInteractions?.[1].routeAfter, "https://app.test/legacy-destination");
 });
 
 test("technical coverage stays independent from an invalid state sequence", () => {

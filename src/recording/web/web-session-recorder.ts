@@ -59,6 +59,8 @@ export function fingerprintSnapshot(snapshot: RuntimeUiSnapshot): string {
 export type WebRecorderOptions = {
   baseUrl: string;
   framesDir: string;
+  /** Capture screenshots only when a caller explicitly needs recording evidence. */
+  captureScreenshots?: boolean;
   /** Project-scoped TLS policy; false remains the safe default. */
   ignoreHTTPSErrors?: boolean;
   /** QA-only project policy; false keeps secure values out of the trace. */
@@ -263,6 +265,20 @@ export function buildWebLocators(interaction: RawInteraction): RecordedLocator[]
     });
   }
 
+  // LAST-RESORT, EXECUTION-ONLY: a framework-actionable owner with no name/id/testid/role/text
+  // of its own (e.g. a plain clickable div) leaves `candidates` empty even though the browser
+  // already proved a unique scope identity for it (semantic-runtime / field-scoped evidence,
+  // `captureUniqueTarget: true`). Reused as-is, never recomputed or merged into a stronger
+  // locator -- runtime still re-verifies uniqueness before using it (target-resolver.ts).
+  const scopeIdentity = interaction.playwrightRecorderEvidence?.scopeIdentity
+    ?? interaction.semanticRuntimeEvidence?.scopeAlternatives?.[0]?.scopeIdentity;
+  if (candidates.length === 0 && scopeIdentity) {
+    candidates.push({
+      key: "semanticRuntimeScope" as keyof LocatorRanks,
+      locator: { strategy: scopeIdentity.strategy, value: scopeIdentity.value, confidence: 0.55 },
+    });
+  }
+
   const unique: RecordedLocator[] = [];
   const shared: RecordedLocator[] = [];
   for (const { key, locator } of candidates) {
@@ -347,9 +363,12 @@ const CAPTURE_SCRIPT_LEGACY = `
   const quote = (v) => String(v).replace(/["\\\\]/g, '\\\\$&');
   const clean = (value, max) => String(value || '').replace(/\\s+/g, ' ').trim().slice(0, max || 120);
   const attributesFor = (el) => {
-    const names = ['id','name','type','aria-label','aria-labelledby','placeholder','data-testid','data-test-id','data-field','data-column','role'];
+    const names = ['id','name','type','aria-label','aria-labelledby','placeholder','data-testid','data-test-id','data-field','data-column','role','required','aria-required'];
     const result = {};
-    names.forEach((name) => { const value = el.getAttribute && el.getAttribute(name); if (value) result[name] = value; });
+    names.forEach((name) => {
+      const value = el.getAttribute && el.getAttribute(name);
+      if (value || (name === 'required' && el.hasAttribute && el.hasAttribute('required'))) result[name] = value || 'true';
+    });
     return result;
   };
   const structuralContext = (el) => {
@@ -377,11 +396,39 @@ const CAPTURE_SCRIPT_LEGACY = `
   };
 
   const optionValues = (el) => {
-    const owner = el.closest && el.closest('select, [role="combobox"], [role="listbox"], [data-options]');
+    const owner = selectionRootOf(el);
     if (!owner) return [];
     return Array.from(owner.querySelectorAll('option, [role="option"], [data-option]'))
       .map((option) => clean(option.textContent || option.getAttribute('aria-label') || option.getAttribute('data-option') || option.value || '', 80))
       .filter(Boolean).slice(0, 20);
+  };
+
+  // Some applications render a custom option list inside a wrapper around a native select.
+  // Keep the relation structural and bounded: the wrapper must contain the actual select and
+  // be within a few ancestors of the clicked element. Never infer a selector from option text.
+  const selectionRootOf = (el) => {
+    if (!el || !el.closest) return null;
+    const semantic = el.closest('select, [role="combobox"], [role="listbox"], [aria-haspopup], [aria-controls], [data-options]');
+    if (semantic) return semantic;
+    let current = el;
+    for (let depth = 0; current && depth < 5; depth += 1, current = current.parentElement) {
+      if (current.querySelector && current.querySelector('select')) return current;
+    }
+    return null;
+  };
+
+  // Frameworks can expose a clickable div around a native select without a combobox role.
+  // Tie that click to the nearest bounded ancestor containing exactly one select. Stop at
+  // ambiguity so a form with several selectors is never treated as one selector.
+  const nativeSelectScopeFor = (el) => {
+    let current = el;
+    for (let depth = 0; current && depth < 5; depth += 1, current = current.parentElement) {
+      const isSelect = (current.tagName || '').toLowerCase() === 'select';
+      const selects = isSelect ? [current] : Array.from(current.querySelectorAll ? current.querySelectorAll('select') : []);
+      if (selects.length > 1) return null;
+      if (selects.length === 1) return { root: current, select: selects[0] };
+    }
+    return null;
   };
 
   // How many elements this identity matches, and which one was interacted with. Measured
@@ -741,8 +788,22 @@ export const CAPTURE_SCRIPT = String.raw`
     const root = controlled
       || closest(el, '[role="listbox"], [role="combobox"], [data-options], [aria-controls]')
       || (expanded && expanded.parentElement)
+      || selectionRootOf(el)
       || document.querySelector('[role="listbox"], [data-options]');
     if (!root) return [];
+    // Native <option> nodes do not have their own visible bounding boxes in Chromium, so the
+    // visibility filter below would drop every option even while the select itself is live.
+    // Read this inventory directly from the bounded selector scope.
+    const nativeSelect = (root.tagName || '').toLowerCase() === 'select'
+      ? root
+      : root.querySelector && root.querySelector('select');
+    if (nativeSelect && nativeSelect.options) {
+      return Array.from(nativeSelect.options)
+        .filter((option) => !option.disabled && clean(option.textContent || option.label || option.value, 100))
+        .map((option) => clean(option.textContent || option.label || option.value, 100))
+        .filter((item, index, all) => all.indexOf(item) === index)
+        .slice(0, 30);
+    }
     return Array.from(root.querySelectorAll('option, [role="option"], [data-option], [data-value], li[aria-selected], li'))
       .filter(visible)
       .map((item) => clean(item.textContent || attr(item, 'aria-label') || attr(item, 'data-option') || attr(item, 'data-value') || item.value, 100))
@@ -993,7 +1054,7 @@ export const CAPTURE_SCRIPT = String.raw`
       ariaLabel: attr(el, 'aria-label'),
       text: text(el),
       placeholder: attr(el, 'placeholder'),
-      attributes: Object.fromEntries(Array.from(el.attributes || []).filter((item) => ['id','name','type','aria-label','aria-labelledby','placeholder','data-testid','data-test-id','data-field','data-column','role','aria-expanded','aria-controls','aria-haspopup'].indexOf(item.name) >= 0).map((item) => [item.name, item.value])),
+      attributes: Object.fromEntries(Array.from(el.attributes || []).filter((item) => ['id','name','type','aria-label','aria-labelledby','placeholder','data-testid','data-test-id','data-field','data-column','role','aria-expanded','aria-controls','aria-haspopup','required','aria-required'].indexOf(item.name) >= 0).map((item) => [item.name, item.name === 'required' ? 'true' : item.value])),
       ...context,
       associatedField: context.headerContext || labelFor(el),
       beforeValue: beforeState && beforeState.value,
@@ -1210,15 +1271,55 @@ export const CAPTURE_SCRIPT = String.raw`
       return;
     }
     const role = attr(el, 'role') || (el.tagName || '').toLowerCase();
-    const selection = role === 'option' || role === 'combobox' || (el.tagName || '').toLowerCase() === 'select' || Boolean(attr(el, 'aria-haspopup'));
-    const payload = { ...describe(el, 'click', 'user', selection ? 'select' : 'click'), ...eventContext(event, el), userInitiated: event.isTrusted === true };
-    if (role === 'option' && lastSelectionContext) {
+    const root = selectionRootOf(el);
+    const nativeSelectScope = nativeSelectScopeFor(el);
+    const genericSelectorOwner = nativeSelectScope
+      && !/^(button|a|input|textarea|select|option)$/.test((el.tagName || '').toLowerCase())
+      && !/^(button|link|option|textbox|checkbox|radio)$/.test(role.toLowerCase());
+    const rootHasNativeSelect = root && ((root.tagName || '').toLowerCase() === 'select' || (root.querySelector && root.querySelector('select')));
+    const selectionRoot = rootHasNativeSelect ? root : (genericSelectorOwner ? nativeSelectScope.root : root);
+    const explicitSelectionControl = role === 'combobox' || role === 'listbox' || (el.tagName || '').toLowerCase() === 'select' || Boolean(attr(el, 'aria-haspopup'));
+    const visibleLabel = clean(text(el) || attr(el, 'aria-label') || '');
+    const pendingOptions = lastSelectionContext?.observedOptions || [];
+    const optionFromObservedSelector = Boolean(lastSelectionContext?.root && (
+      (selectionRoot === lastSelectionContext.root && el !== lastSelectionContext.root)
+      || (visibleLabel && pendingOptions.some((option) => clean(option).toLocaleLowerCase() === visibleLabel.toLocaleLowerCase()))
+    ));
+    const selectionOption = role === 'option' || optionFromObservedSelector;
+    const selection = role === 'option' || explicitSelectionControl
+      || (root === el && Boolean(el.querySelector && el.querySelector('select')))
+      || Boolean(genericSelectorOwner && event.isTrusted === true);
+    const payload = { ...describe(el, 'click', 'user', selectionOption || selection ? 'select' : 'click'), ...eventContext(event, el), userInitiated: event.isTrusted === true };
+    if (selectionOption && lastSelectionContext) {
       ['gridRef','rowRef','cellRef','headerRef','headerContext','rowIdentity','columnIdentity','containerIdentity','associatedField'].forEach((key) => {
         if (!payload[key] && lastSelectionContext[key]) payload[key] = lastSelectionContext[key];
       });
-      payload.dynamicLifecycle = { ...(payload.dynamicLifecycle || {}), triggerTechnicalTarget: lastSelectionContext.targetRef, activatedTechnicalTarget: payload.targetRef, selectedOption: payload.afterValue, committedState: payload.afterValue };
-    } else if (selection && role !== 'option') {
-      lastSelectionContext = payload;
+      const selectedValue = payload.afterValue || payload.label;
+      payload.afterValue = selectedValue;
+      payload.interactionType = 'select';
+      payload.compoundRole = 'selection';
+      payload.observedOptions = lastSelectionContext.observedOptions && lastSelectionContext.observedOptions.length
+        ? lastSelectionContext.observedOptions
+        : optionValues(lastSelectionContext.root || el);
+      payload.dynamicLifecycle = { ...(payload.dynamicLifecycle || {}), triggerTechnicalTarget: lastSelectionContext.targetRef, activatedTechnicalTarget: payload.targetRef, selectedOption: selectedValue, committedState: selectedValue, options: payload.observedOptions };
+      lastSelectionContext = undefined;
+    } else if (selection && !selectionOption) {
+      payload.interactionType = 'select';
+      payload.compoundRole = 'selection';
+      const selectorScope = selectionRoot || root || el;
+      payload.observedOptions = optionsFor(selectorScope);
+      if (!payload.observedOptions.length) payload.observedOptions = optionValues(selectorScope);
+      const nativeSelect = (el.tagName || '').toLowerCase() === 'select'
+        ? el
+        : nativeSelectScope?.select || (selectorScope.querySelector ? selectorScope.querySelector('select') : null);
+      if (nativeSelect && nativeSelect.required) payload.attributes = { ...(payload.attributes || {}), required: 'true' };
+      if (nativeSelect && attr(nativeSelect, 'aria-required') === 'true') payload.attributes = { ...(payload.attributes || {}), 'aria-required': 'true' };
+      payload.dynamicLifecycle = { ...(payload.dynamicLifecycle || {}), triggerTechnicalTarget: payload.targetRef, options: payload.observedOptions };
+      lastSelectionContext = { ...payload, root: selectorScope };
+    } else if (lastSelectionContext) {
+      // An unrelated action ends the pending selection observation. A later click must never
+      // inherit a stale selector owner or become a false selection commit.
+      lastSelectionContext = undefined;
     }
     send(payload);
     schedulePostAction(el, payload.beforeState, payload.activeElementBefore, payload.eventTargetRef ?? payload.targetRef);
@@ -1349,6 +1450,9 @@ export class WebSessionRecorder {
    */
   private v2IngestionQueue: Promise<void> = Promise.resolve();
 
+  /** Post-action screen evidence must never delay the next captured interaction. */
+  private postActionObservationQueue: Promise<void> = Promise.resolve();
+
   /**
    * ShadowBridge's OWN seq -> the RecordedEvent it produced, for CLICK technical actions only.
    * Lets a later functional `select` projection (`onV2FunctionalAction`) find and flag the exact
@@ -1377,6 +1481,7 @@ export class WebSessionRecorder {
   }
 
   private async captureFrame(tag: string): Promise<string | undefined> {
+    if (this.options.captureScreenshots !== true) return undefined;
     if (!this.page) return undefined;
     const file = path.join(this.options.framesDir, `${String(this.seq).padStart(4, "0")}-${tag}.png`);
     try {
@@ -1385,6 +1490,35 @@ export class WebSessionRecorder {
     } catch {
       return undefined;
     }
+  }
+
+  private schedulePostActionObservation(): void {
+    this.postActionObservationQueue = this.postActionObservationQueue.then(async () => {
+      // This work is deliberately outside v2IngestionQueue: the tap event has already been
+      // appended and published, so screenshots/surface inspection cannot delay later actions.
+      for (const delay of [60, 120, 180]) {
+        await this.page?.waitForTimeout(delay).catch(() => undefined);
+        const current = await this.absorbScreen();
+        if (current.screenKey !== this.lastScreenKey) break;
+      }
+      const from = this.lastScreenKey;
+      const { changed, screenKey } = await this.absorbScreen();
+      if (changed && screenKey !== from) {
+        this.lastScreenKey = screenKey;
+        this.pushEvent({
+          t: this.now(),
+          kind: "screen_change",
+          screenKey: from,
+          toScreenKey: screenKey,
+          fingerprint: this.lastFingerprint,
+          url: this.page?.url(),
+          framePath: await this.captureFrame("screen"),
+        });
+        this.log(`[recording] pantalla -> ${this.screens.get(screenKey)?.title ?? screenKey}`);
+      }
+    }).catch((err) => {
+      this.log(`[recording] observación posterior omitida: ${err instanceof Error ? err.message : String(err)}`);
+    });
   }
 
   /**
@@ -1477,9 +1611,9 @@ export class WebSessionRecorder {
 
   private onV2PointerObservation(record: ShadowActionRecord): void {
     if (this.captureAuthority !== "v2") return;
-    this.v2IngestionQueue = this.v2IngestionQueue.then(() => {
+    this.v2IngestionQueue = this.v2IngestionQueue.then(async () => {
       const raw = adaptCaptureActionToRawInteraction(record.action) as unknown as RawInteraction;
-      return this.onInteraction(raw).catch((err) => {
+      await this.onInteraction(raw).catch((err) => {
         this.log(`[capture-v2] pointer observation ingestion error: ${err instanceof Error ? err.message : String(err)}`);
       });
     });
@@ -1544,7 +1678,7 @@ export class WebSessionRecorder {
    * technical clicks a completed selection summarizes were already forwarded to `onInteraction`
    * by `onV2TechnicalAction` above, unchanged. This only (a) flags those already-recorded events
    * so scenario/step derivation does not ALSO render them as independent steps, and (b) appends
-   * ONE additional, locator-less, display-only event carrying the option's real selected value
+   * ONE additional selection event carrying the option's real selected value and captured target
    * and the combobox's real field identity -- reusing the exact `compoundRole: "selection"` shape
    * the scenario renderer already understands (see semantic-recording.ts/trace-to-scenario.ts).
    * Chained through `v2IngestionQueue` so both referenced technical clicks have already been
@@ -1586,6 +1720,9 @@ export class WebSessionRecorder {
         : undefined;
       const selectedValue = evidence.selectedDisplay?.trim() || evidence.selectedValue?.trim() || optionSourceLabel;
       if (!selectedValue) return; // still no real selected-value evidence anywhere -- never invent one
+      const optionSourceEvent = sourceEvents.find((event) => event.target?.role?.toLowerCase() === "option");
+      const optionLocators = optionSourceEvent?.target?.locators ?? [];
+      const optionTechnicalTargetCandidates = optionSourceEvent?.target?.technicalTargetCandidates;
       // Only mark the source technical clicks as covered (hidden from their own independent
       // step) once we know a compensating selection event is actually about to be pushed below --
       // never hide them and then silently produce nothing.
@@ -1626,7 +1763,12 @@ export class WebSessionRecorder {
           afterValue: selectedValue,
           compoundRole: "selection",
           associatedField: fieldLabel,
-          locators: [],
+          // The synthetic event summarizes the selection semantically, but its executable
+          // authority comes only from the option click already captured by the browser. Carry
+          // those exact locators/candidates forward instead of deriving a selector from the text.
+          locators: optionLocators.map((locator) => ({ ...locator })),
+          technicalTargetCandidates: optionTechnicalTargetCandidates?.map((candidate) => ({ ...candidate })),
+          playwrightRecorderEvidence: optionSourceEvent?.target?.playwrightRecorderEvidence,
           sourceTechnicalEventSeqs,
         },
       });
@@ -1780,34 +1922,14 @@ export class WebSessionRecorder {
       framePath,
     });
     this.log(`[recording] clic -> "${raw.label || raw.text || "(sin etiqueta)"}"`);
-
-    // Bounded post-action observation: dynamic editors get a short chance to materialize,
-    // without imposing a long fixed sleep on every click.
-    for (const delay of [60, 120, 180]) {
-      await this.page?.waitForTimeout(delay).catch(() => undefined);
-      const current = await this.absorbScreen();
-      if (current.screenKey !== this.lastScreenKey) break;
-    }
-    const from = this.lastScreenKey;
-    const { changed, screenKey } = await this.absorbScreen();
-    if (changed && screenKey !== from) {
-      this.lastScreenKey = screenKey;
-      this.pushEvent({
-        t: this.now(),
-        kind: "screen_change",
-        screenKey: from,
-        toScreenKey: screenKey,
-        fingerprint: this.lastFingerprint,
-        url: this.page?.url(),
-        framePath: await this.captureFrame("screen"),
-      });
-      this.log(`[recording] pantalla -> ${this.screens.get(screenKey)?.title ?? screenKey}`);
-    }
+    this.schedulePostActionObservation();
     return tapEvent;
   }
 
   async start(): Promise<boolean> {
-    fs.mkdirSync(this.options.framesDir, { recursive: true });
+    if (this.options.captureScreenshots === true) {
+      fs.mkdirSync(this.options.framesDir, { recursive: true });
+    }
     const engine =
       this.options.browserName === "firefox" ? firefox : this.options.browserName === "webkit" ? webkit : chromium;
 
@@ -1870,7 +1992,8 @@ export class WebSessionRecorder {
         return frameId;
       };
       await this.context.exposeBinding("__qaRecordV2", async (source, message: ShadowBrowserMessage) => {
-        v2Shadow.handleMessage({ ...message, frameId: frameIdFor(source.frame) });
+        const normalizedMessage = { ...message, frameId: frameIdFor(source.frame) } as ShadowBrowserMessage;
+        v2Shadow.handleMessage(normalizedMessage);
       });
       captureScriptV2Content = buildCaptureScriptV2Content(captureInstanceId);
       await this.context.addInitScript({ content: captureScriptV2Content });
@@ -1939,14 +2062,21 @@ export class WebSessionRecorder {
   }
 
   async stop(): Promise<{ events: RecordedEvent[]; screens: RecordedScreen[] }> {
-    // Drain any V2-authority ingestion still in flight before closing the browser. The binding
-    // callback can enqueue one final action while the first drain is resolving, so the recorder
-    // must remain open until the context close has quiesced those callbacks and the queue has
-    // been drained again. No fixed sleep: both waits use the exact promise chain that
-    // onV2TechnicalAction already serializes ingestion through.
+    // First ask the recorder-owned browser frames to acknowledge every exposed-binding call
+    // already sent by the instrumentation. The Node queue alone cannot see messages still
+    // crossing the browser binding when Stop arrives.
+    const frames = this.context?.pages().flatMap((page) => page.frames()) ?? [];
+    await Promise.all(frames.map((frame) => frame.evaluate(async () => {
+      const flush = (window as Window & { __qaRecorderV2Flush?: () => Promise<void> }).__qaRecorderV2Flush;
+      await flush?.();
+    }).catch(() => undefined)));
+    // Persist all actions accepted by the binding before closing its browser context.
     await this.v2IngestionQueue.catch(() => undefined);
+    // Post-action snapshots are optional enrichment, not user actions. Close the context first
+    // to cancel any page evaluation that would otherwise keep Stop blocked indefinitely.
     await this.context?.close().catch(() => undefined);
     await this.v2IngestionQueue.catch(() => undefined);
+    await this.postActionObservationQueue.catch(() => undefined);
     this.stopped = true;
     // Shadow-only visibility: bounded counts, never field values, never connected to
     // SessionTrace -- printed even when zero V2 messages were ever received, so "V2 produced

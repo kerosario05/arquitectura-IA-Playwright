@@ -249,6 +249,8 @@ export type CanonicalStep = {
   rowRelation?: "next" | "added";
   associatedField?: string;
   selectionField?: string;
+  selectorControlId?: string;
+  optionSurfaceId?: string;
   expectedValueKey?: string;
   expected?: string;
   polarity?: AssertionPolarity;

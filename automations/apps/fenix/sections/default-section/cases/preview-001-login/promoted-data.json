@@ -1,11 +1,11 @@
 {
   "version": "1.0",
-  "generatedAt": "2026-09-23T14:53:50.092Z",
+  "generatedAt": "2026-09-30T21:42:42.044Z",
   "entries": [
     {
       "key": "rnc",
       "source": "unknown",
-      "fieldName": "RNC:",
+      "fieldName": "RNC",
       "stepIndex": 3,
       "valueType": "unknown",
       "sensitive": false,
@@ -16,7 +16,7 @@
     {
       "key": "usuario",
       "source": "unknown",
-      "fieldName": "Usuario:",
+      "fieldName": "Usuario",
       "stepIndex": 4,
       "valueType": "unknown",
       "sensitive": false,
@@ -27,8 +27,19 @@
     {
       "key": "contrasena",
       "source": "unknown",
-      "fieldName": "Contraseña:",
+      "fieldName": "Contraseña",
       "stepIndex": 5,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "sms",
+      "source": "unknown",
+      "fieldName": "SMS",
+      "stepIndex": 8,
       "valueType": "unknown",
       "sensitive": false,
       "demoSafe": true,

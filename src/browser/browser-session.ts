@@ -81,6 +81,12 @@ export async function launchRuntimeBrowserSession(
     ...options.launchOptions,
     headless: options.headless,
     ...(options.channel ? { channel: options.channel } : {}),
+    // FIRST_LOSS fix: physical replay showed a click reaching the right element and
+    // registering a minor DOM mutation but never the app's own navigation, reproducibly in
+    // headless mode while the identical certified locator navigated correctly headed. Some
+    // apps branch on the automation-detectable `navigator.webdriver` flag; this flag is the
+    // standard, generic (not app-specific) Chromium mitigation and applies to every app/scenario.
+    args: [...(options.launchOptions?.args ?? []), "--disable-blink-features=AutomationControlled"],
   };
 
   if (options.profilePath) {

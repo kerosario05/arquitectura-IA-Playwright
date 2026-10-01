@@ -201,3 +201,40 @@ test("11/frontendContract. every key already present on the persisted scenario i
   }
   assert.deepEqual(Object.keys(projected[0].readiness ?? {}).sort(), Object.keys(stale.readiness ?? {}).sort(), "readiness sub-object shape is unchanged -- only executionReadiness/technicalReadiness values differ");
 });
+
+test("12/reusableStructuralClick. GET refresh removes a stale display label when the fresh trace has a stable structural click owner", () => {
+  const dynamicLabel = "Person 123@example.test";
+  const trace = traceOf([ev({
+    seq: 0,
+    kind: "tap",
+    interactionId: "pointer-1",
+    target: {
+      label: dynamicLabel,
+      tag: "div",
+      locators: [],
+      technicalTargetCandidates: [{
+        targetType: "structural",
+        locatorCandidates: [],
+        structuralContext: {
+          owner: { tag: "div" },
+          stableDirectAttributes: { id: "profile-menu" },
+          stableDescendants: [],
+          deterministicStructuralIdentity: true,
+          structuralIdentityMatchCount: 1,
+        },
+        interactionEvidence: ["v2_click_owner"],
+        confidence: 0.6,
+        validatedByInteraction: true,
+      }],
+    },
+  })]);
+  const stale = stalePersistedScenario([]);
+  stale.testRailSteps = [{ content: `Presionar "${dynamicLabel}"`, renderedStep: `Presionar "${dynamicLabel}"`, interactionId: "interaction-1" } as any];
+  stale.webSteps = [{ action: "click", description: `Presionar "${dynamicLabel}"`, interactionId: "interaction-1" }];
+
+  const projected = hydratePersistedScenarios([stale], emptySemanticModel, trace)[0];
+
+  assert.equal(projected.testRailSteps[0].content, "Presionar el control grabado");
+  assert.equal(projected.testRailSteps[0].renderedStep, "Presionar el control grabado");
+  assert.equal(projected.webSteps[0].description, "Presionar el control grabado");
+});

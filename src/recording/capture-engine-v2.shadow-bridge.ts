@@ -141,6 +141,9 @@ export class CaptureEngineV2ShadowBridge {
    */
   private activeEditingSessionId: string | null = null;
 
+  /** Trusted combobox/option pointerdowns are captured immediately if their later click is lost. */
+  private pointerPromotedInteractionId: string | null = null;
+
   /**
    * One-shot correlation token: set right after a `keypress` technical action is pushed, and
    * ALWAYS consumed (cleared) by the very next `click` message, whether or not it actually
@@ -403,6 +406,21 @@ export class CaptureEngineV2ShadowBridge {
       this.diagnose("pointer", "pointer_owner_unresolved");
       return;
     }
+    const ownerRole = resolution.owner.role?.toLowerCase();
+    if (message.interactionId && (ownerRole === "option" || (ownerRole === "combobox" && resolution.owner.tag !== "select"))) {
+      // A trusted pointerdown on a resolved selection owner can outlive its later click when a
+      // portal removes/retargets the option. Capture this interaction once and consume its click.
+      this.pointerPromotedInteractionId = message.interactionId;
+      this.onClick({
+        type: "click",
+        captureInstanceId: message.captureInstanceId,
+        documentId: message.documentId,
+        frameId: message.frameId,
+        composedPath: message.composedPath,
+        identity: message.identity,
+        interactionId: message.interactionId,
+      }, true);
+    }
     this.onPointerObservation?.({
       seq: this.nextSeq(),
       action: {
@@ -475,7 +493,12 @@ export class CaptureEngineV2ShadowBridge {
     this.pendingKeyPress = { key: message.key };
   }
 
-  private onClick(message: Extract<ShadowBrowserMessage, { type: "click" }>): void {
+  private onClick(message: Extract<ShadowBrowserMessage, { type: "click" }>, fromTrustedPointer = false): void {
+    if (!fromTrustedPointer && message.interactionId && message.interactionId === this.pointerPromotedInteractionId) {
+      this.pointerPromotedInteractionId = null;
+      this.diagnose("click", "click_already_captured_from_trusted_selection_pointer");
+      return;
+    }
     if (this.lifecycle.validateEventDocument(documentHandleOf(message)) !== "active_ready") {
       this.diagnose("click", "event_document_not_ready");
       return;
@@ -690,6 +713,23 @@ export class CaptureEngineV2ShadowBridge {
     // only ever populated on the EDIT path. Built from the SAME `resolution.owner` this click
     // already resolved, never re-derived from a display label or runtime clustering.
     const technicalEvidence = buildOwnerTechnicalEvidence(resolution.owner, resolution.reason);
+    // FIRST_LOSS fix: `buildOwnerTechnicalEvidence` returns a TRUTHY object whenever the owner
+    // merely HAS a `structuralIdentity` at all (action-owner-resolver.ts's own
+    // `locatorCandidates.length === 0 && !identity` check), even when that identity is neither
+    // deterministic nor unique and `locatorCandidates` is empty -- a real, framework-actionable
+    // `div` owner with no id/data-testid/role produced exactly this: a present-but-empty
+    // `technicalEvidence` (0 locator candidates, non-deterministic structuralContext). The
+    // `!technicalEvidence` gate below treated that as "already covered" and permanently blocked
+    // the semantic-runtime-evidence fallback, even though the browser had already proven a
+    // unique semantic descendant (e.g. an alt-named image) for this exact interaction. Gating on
+    // actual usable authority instead -- a real locator candidate, or a structural identity
+    // already proven deterministic and unique -- never on mere presence of the object.
+    const technicalEvidenceCandidate = technicalEvidence?.candidates?.[0];
+    const technicalEvidenceUsable = Boolean(technicalEvidenceCandidate) && (
+      (technicalEvidenceCandidate!.locatorCandidates?.length ?? 0) > 0
+      || (technicalEvidenceCandidate!.structuralContext?.deterministicStructuralIdentity === true
+        && technicalEvidenceCandidate!.structuralContext?.identityAmbiguous !== true)
+    );
     // LAST-RESORT, EXECUTION-ONLY (recordingId=5514cd5b-...): a click whose owner classification
     // succeeded (Priority 2-4) but whose OWN structural identity failed to certify
     // (ambiguous/insufficient -- technicalEvidence undefined) previously had NO fallback at all,
@@ -698,7 +738,7 @@ export class CaptureEngineV2ShadowBridge {
     // computes it for the ORIGINAL clicked target unconditionally. Reuses the SAME
     // rawTarget.semanticRuntimeEvidence, never recomputed/re-validated here, never merged into
     // `technicalEvidence`/`owner` (which stay exactly as `resolveCaptureOwner` produced them).
-    const rawTargetForSemanticFallback = !technicalEvidence
+    const rawTargetForSemanticFallback = !technicalEvidenceUsable
       ? [...message.composedPath].sort((a, b) => a.pathDepth - b.pathDepth)[0]
       : undefined;
     const semanticRuntimeEvidence = rawTargetForSemanticFallback?.semanticRuntimeEvidence;

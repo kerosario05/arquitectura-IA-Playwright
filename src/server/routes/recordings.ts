@@ -11,6 +11,7 @@ import {
   toSummary,
   saveSemanticRecording,
   loadSemanticRecording,
+  findOwningAppSlug,
 } from "../../recording/recording-store";
 import {
   RecordingError,
@@ -34,14 +35,253 @@ import {
 import { toPublishableScenario } from "../../recording/scenario-to-testrail";
 import { materializeRecordedScenario, type RecordedScenario } from "../../recording/trace-to-scenario";
 import { buildSemanticRecordingModel, attachScenarioSuggestions } from "../../recording/semantic-recording";
-import { applyRuntimeDatasetValues, hydrateCanonicalInteractionsFromSemanticModel, toSharedMcpScenario } from "../../recording/canonical-recording-contract";
+import { applyRuntimeDatasetValues, hydrateCanonicalInteractionsFromSemanticModel, toSharedMcpScenario, type RecordedScenarioMcpContract } from "../../recording/canonical-recording-contract";
 import { hydratePersistedScenarios } from "../../recording/persisted-scenario-hydration";
 import { jobStore } from "../jobs/job-store";
 import { startScenarioPreviewRun, startReuseExistingPromotedSpecRun, type ReuseExistingPromotedSpecScenario } from "../jobs/scenario-preview-runner";
 import { resolveReplayAdmission } from "../services/replay-admission";
 import { resolveScenarioAutomationPlans, partitionScenariosForExecution, computeTestRailPublishCandidates, type ScenarioAutomationPlan, type TestRailCaseLookup, type TestRailDestination } from "../../automations/recording-automation-resolution";
+import { startMixedRerun } from "../jobs/mixed-rerun-orchestrator";
 
 export const recordingsRouter = Router();
+
+type RecordingBatchSelection = {
+  recordingId: string;
+  scenarioId: string;
+  datasetValues?: Record<string, string | undefined>;
+  dataOverrides?: Record<number, string>;
+};
+
+/** Execute selections from different recordings through one public job and one evidence run. */
+recordingsRouter.post("/execute-batch", async (req, res) => {
+  try {
+    const body = req.body ?? {};
+    const projectSlug = String(body.projectSlug ?? "").trim();
+    const selections = Array.isArray(body.selections) ? body.selections as RecordingBatchSelection[] : [];
+    if (!projectSlug || selections.length === 0) {
+      sendError(res, 400, "INVALID_RECORDING_BATCH", "projectSlug y selections son obligatorios");
+      return;
+    }
+    const appSlug = await appSlugFor(projectSlug);
+    const selectionKeys = new Set<string>();
+    const groups = new Map<string, RecordingBatchSelection[]>();
+    for (const selection of selections) {
+      const recordingId = String(selection?.recordingId ?? "").trim();
+      const scenarioId = String(selection?.scenarioId ?? "").trim();
+      if (!recordingId || !scenarioId) {
+        sendError(res, 400, "INVALID_RECORDING_BATCH", "Cada selección debe incluir recordingId y scenarioId");
+        return;
+      }
+      const key = `${recordingId}\u0000${scenarioId}`;
+      if (selectionKeys.has(key)) continue;
+      selectionKeys.add(key);
+      const group = groups.get(recordingId) ?? [];
+      group.push({ ...selection, recordingId, scenarioId });
+      groups.set(recordingId, group);
+    }
+
+    const fallbackContracts: RecordedScenarioMcpContract[] = [];
+    const reuseScenarios: ReuseExistingPromotedSpecScenario[] = [];
+    const requestedIds: string[] = [];
+    const destinationInput = body.testRailDestination && typeof body.testRailDestination === "object"
+      ? body.testRailDestination as Record<string, unknown>
+      : undefined;
+    const destination: TestRailDestination | undefined = destinationInput
+      ? {
+          projectId: String(destinationInput.projectId ?? "").trim(),
+          suiteId: typeof destinationInput.suiteId === "string" ? destinationInput.suiteId.trim() : undefined,
+          sectionId: String(destinationInput.sectionId ?? "").trim(),
+        }
+      : undefined;
+    if (destination && (!destination.projectId || !destination.sectionId)) {
+      sendError(res, 400, "INVALID_TESTRAIL_DESTINATION", "projectId y sectionId son obligatorios para ejecutar el lote");
+      return;
+    }
+    let sectionSlug: string | undefined;
+    let sectionName: string | undefined;
+    let publishToTestRailInvoked = false;
+
+    const lookupCase: TestRailCaseLookup = async (caseId) => {
+      try {
+        const client = new TestRailClient(requireTestRailConfig(config));
+        const raw = await client.getCase(caseId);
+        if (raw?.section_id === undefined) return null;
+        const section = await client.getSection(raw.section_id);
+        return { projectId: section?.project_id !== undefined ? String(section.project_id) : undefined, sectionId: String(raw.section_id) };
+      } catch {
+        return null;
+      }
+    };
+
+    for (const [recordingId, recordingSelections] of groups) {
+      // A batch can mix scenarios recorded under different apps; projectSlug only picks one
+      // default appSlug. Fall back to this recording's own owning app before failing it.
+      const groupAppSlug = loadTrace(appSlug, recordingId) ? appSlug : findOwningAppSlug(recordingId) ?? appSlug;
+      const trace = loadTrace(groupAppSlug, recordingId);
+      if (!trace || !["stopped", "derived"].includes(trace.status)) {
+        sendError(res, 409, "TRACE_NOT_READY", `La grabación ${recordingId} no tiene un trace detenido`);
+        return;
+      }
+      if (!loadSemanticRecording(groupAppSlug, recordingId)) {
+        sendError(res, 409, "SEMANTIC_NOT_READY", `La grabación ${recordingId} no tiene base semántica materializada`);
+        return;
+      }
+      const all = readRecordingScenarios(groupAppSlug, recordingId);
+      const ids = recordingSelections.map((selection) => selection.scenarioId);
+      const chosen = all.filter((scenario) => ids.includes(scenario.scenarioId));
+      if (chosen.length !== ids.length) {
+        sendError(res, 400, "NO_SCENARIOS_SELECTED", `Uno o más escenarios no pertenecen a la grabación ${recordingId}`);
+        return;
+      }
+      const values: Record<string, string | undefined> = {};
+      for (const selection of recordingSelections) {
+        for (const [key, value] of Object.entries(selection.datasetValues ?? {})) {
+          if (typeof value === "string") values[key] = value;
+        }
+      }
+      for (const selection of recordingSelections) {
+        const scenario = chosen.find((candidate) => candidate.scenarioId === selection.scenarioId);
+        if (!scenario || !selection.dataOverrides) continue;
+        for (const field of scenario.requiredData) {
+          const stepValue = selection.dataOverrides[field.stepIndex];
+          const sameStep = scenario.requiredData.filter((candidate) => candidate.stepIndex === field.stepIndex);
+          if (sameStep.length === 1 && typeof stepValue === "string" && values[field.key] === undefined) values[field.key] = stepValue;
+        }
+      }
+      const admissionResult = evaluateRecordingExecutionAdmission({
+        requested: ids,
+        all,
+        selected: chosen,
+        semanticModel: buildSemanticRecordingModel(trace),
+        values,
+        appSlug: groupAppSlug,
+      });
+      if (!admissionResult.ready) {
+        res.status(409).json(admissionResult.responseBody);
+        return;
+      }
+      const { materialized, executableContracts } = admissionResult;
+      requestedIds.push(...executableContracts
+        .map((scenario) => scenario.scenarioId)
+        .filter((scenarioId): scenarioId is string => typeof scenarioId === "string"));
+      const materializedById = new Map(materialized.map((scenario) => [scenario.scenarioId, scenario]));
+      saveScenarios(groupAppSlug, recordingId, all.map((scenario) => materializedById.get(scenario.scenarioId) ?? scenario));
+
+      if (destination) {
+        let plans = await resolveScenarioAutomationPlans(admissionResult.selected, destination, undefined, lookupCase);
+        const needsCaseIds = computeTestRailPublishCandidates(plans);
+        if (needsCaseIds.size > 0) {
+          publishToTestRailInvoked = true;
+          const needsCaseScenarios = admissionResult.selected.filter((scenario) => needsCaseIds.has(scenario.scenarioId));
+          const outcome = await publishRecordingScenariosToTestRail({
+            appSlug: groupAppSlug,
+            recordingId,
+            destination,
+            scenarios: needsCaseScenarios.map((scenario) => applyRuntimeDatasetValues(
+              hydrateCanonicalInteractionsFromSemanticModel(scenario, buildSemanticRecordingModel(trace)),
+              values,
+            )),
+            datasetValues: values,
+            recordingDataPolicy: trace.recordingDataPolicy,
+          }).catch((error) => {
+            console.warn(`[recordings:execute-batch] TestRail publish failed recordingId=${recordingId}: ${error instanceof Error ? error.message : String(error)}`);
+            return undefined;
+          });
+          if (outcome) {
+            const createdByScenarioId = buildPublishedCaseIdByScenarioId(outcome);
+            if (createdByScenarioId.size > 0) {
+              const persistedDestination = { projectId: String(outcome.effectiveProjectId), suiteId: outcome.effectiveSuiteId ? String(outcome.effectiveSuiteId) : undefined, sectionId: destination.sectionId };
+              const updated = all.map((scenario) => {
+                const caseId = createdByScenarioId.get(scenario.scenarioId);
+                return caseId ? { ...scenario, testRailCaseId: caseId, testRailDestination: persistedDestination } : scenario;
+              });
+              saveScenarios(groupAppSlug, recordingId, updated);
+              const updatedSelected = admissionResult.selected.map((scenario) => updated.find((candidate) => candidate.scenarioId === scenario.scenarioId) ?? scenario);
+              plans = await resolveScenarioAutomationPlans(updatedSelected, destination, undefined, lookupCase);
+            }
+          }
+        }
+        const planById = new Map(plans.map((plan) => [plan.scenarioId, plan]));
+        const reuseIds = new Set(partitionScenariosForExecution(plans).reuseScenarioIds);
+        const reuseItems = admissionResult.selected.filter((scenario) => reuseIds.has(scenario.scenarioId));
+        reuseScenarios.push(...reuseItems.flatMap((scenario) => {
+          const plan = planById.get(scenario.scenarioId);
+          if (scenario.promotedSpec?.specPath === undefined) return [];
+          return [{
+            scenarioId: scenario.scenarioId,
+            caseId: plan?.testRail.status === "existing" ? plan.testRail.caseId : 0,
+            specPath: scenario.promotedSpec.specPath,
+            title: scenario.title,
+            runtimeValues: scenario.runtimeDataset?.resolvedValues,
+          }];
+        }));
+        const fallbackIds = new Set(admissionResult.selected.filter((scenario) => !reuseIds.has(scenario.scenarioId)).map((scenario) => scenario.scenarioId));
+        fallbackContracts.push(...executableContracts.filter((contract) => fallbackIds.has(String(contract.scenarioId))));
+        sectionSlug ??= String(destination.sectionId);
+        sectionName ??= undefined;
+      } else {
+        fallbackContracts.push(...executableContracts);
+      }
+    }
+
+    const fallbackScenarios = fallbackContracts;
+    const scenarioCount = reuseScenarios.length + fallbackContracts.length;
+    if (scenarioCount === 0) {
+      res.status(409).json({ ok: false, error: "NO_SCENARIOS_SELECTED", message: "No hay escenarios ejecutables en el lote" });
+      return;
+    }
+
+    const parent = jobStore.create("scenario-preview", {
+      appSlug,
+      scenarioIds: requestedIds,
+      recordingIds: Array.from(groups.keys()),
+      executionMode: "recording_batch",
+      publishToTestRailInvoked,
+    });
+    if (reuseScenarios.length > 0 && fallbackScenarios.length > 0) {
+      setImmediate(() => void startMixedRerun({
+        parentJobId: parent.id,
+        appSlug,
+        sectionSlug,
+        sectionName,
+        sourceJobId: parent.id,
+        rerunMode: "recording-batch",
+        reuseScenarios,
+        fallbackScenarios,
+        options: { overwrite: true, autoPromote: true, autoPom: true, headed: false },
+      }));
+    } else if (reuseScenarios.length > 0) {
+      const publicParent = jobStore.getInternal(parent.id);
+      if (publicParent) {
+        publicParent.params.executionMode = "reuse_existing_promoted_spec";
+        publicParent.params.scenarios = reuseScenarios;
+        publicParent.params.sectionSlug = sectionSlug;
+      }
+      setImmediate(() => void startReuseExistingPromotedSpecRun(parent.id));
+    } else {
+      const parentInternal = jobStore.getInternal(parent.id);
+      if (parentInternal) {
+        parentInternal.params.scenarios = fallbackScenarios;
+        parentInternal.params.targetAppSlug = appSlug;
+        parentInternal.params.options = { overwrite: true, autoPromote: true, autoPom: true, headed: false };
+        parentInternal.params.sectionSlug = sectionSlug;
+      }
+      setImmediate(() => void startScenarioPreviewRun(parent.id));
+    }
+
+    res.status(202).json({
+      ok: true,
+      jobId: parent.id,
+      scenarioCount,
+      requestedCount: selectionKeys.size,
+      acceptedCount: scenarioCount,
+      executionMode: "recording_batch",
+      publishToTestRailInvoked,
+    });
+  } catch (error) {
+    handle(res, error);
+  }
+});
 
 /**
  * Recorded exploration sessions.

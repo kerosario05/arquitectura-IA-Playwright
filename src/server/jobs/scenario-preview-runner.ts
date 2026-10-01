@@ -14,6 +14,7 @@ import {
 import { config, requireTestRailConfig } from "../../config/env";
 import { TestRailClient } from "../../clients/testrail.client";
 import { defectChecklistStore } from "../services/defect-checklist-store";
+import type { EvidenceScenarioRecord } from "../../evidence/evidence-types";
 
 function safeUrlForLog(value: unknown): string {
   if (typeof value !== "string" || !value) return "urlPresent=false";
@@ -88,6 +89,7 @@ export async function consolidateRunEvidence(
   sectionSlug: string | undefined,
   sectionName: string | undefined,
   caseOutcomeMap?: Map<string, CaseOutcomeEntry>,
+  additionalScenarios: EvidenceScenarioRecord[] = [],
 ): Promise<{ docxPath?: string; evidenceJsonPath?: string } | undefined> {
   try {
     const evidenceConfig = loadEvidenceConfig();
@@ -112,6 +114,7 @@ export async function consolidateRunEvidence(
     const evidenceRoot = evidenceConfig.outputRoot;
     const sectionSlugNormalized = sectionSlug || "default-section";
     const runDir = path.join(evidenceRoot, appSlug, sectionSlugNormalized, "runs", jobId, "scenarios");
+    const includedScenarioIds = new Set<string>();
 
     console.log(`[evidence:run] searching for scenarios in runDir=${runDir}`);
 
@@ -126,6 +129,12 @@ export async function consolidateRunEvidence(
         const evidenceJsonPath = path.join(runDir, scenarioDir, "evidence.json");
         if (fs.existsSync(evidenceJsonPath)) {
           console.log(`[evidence:run] loading scenario evidence from ${evidenceJsonPath}`);
+          try {
+            const parsedEvidence = JSON.parse(fs.readFileSync(evidenceJsonPath, "utf8"));
+            if (typeof parsedEvidence?.scenarioId === "string") includedScenarioIds.add(parsedEvidence.scenarioId);
+          } catch {
+            // addScenarioFromFile below owns the evidence parse error handling.
+          }
           await runRecorder.addScenarioFromFile(evidenceJsonPath);
         } else {
           console.log(`[evidence:run] evidence.json not found in ${scenarioDir}`);
@@ -177,6 +186,13 @@ export async function consolidateRunEvidence(
       }
     } else {
       console.log(`[evidence:run] runDir does not exist: ${runDir}`);
+    }
+
+    for (const scenario of additionalScenarios) {
+      if (includedScenarioIds.has(scenario.scenarioId)) continue;
+      runRecorder.addScenario(scenario);
+      includedScenarioIds.add(scenario.scenarioId);
+      console.log(`[evidence:run] added terminal scenario scenarioId=${scenario.scenarioId} status=${scenario.status}`);
     }
 
     const record = await runRecorder.finish();

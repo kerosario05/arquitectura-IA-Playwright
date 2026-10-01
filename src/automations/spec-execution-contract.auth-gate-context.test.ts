@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { resolveAuthGateFillScenarioStepIndices, type ScenarioStepLike, type SpecExecutionContractAuth } from "./spec-execution-contract";
+import { buildSpecExecutionContract, resolveAuthGateFillScenarioStepIndices, type ScenarioStepLike, type SpecExecutionContractAuth } from "./spec-execution-contract";
 
 /**
  * FIRST_LOSS (jobId df8f6c09-c99c-40a1-820b-edcc203143ae): the promoted runtime's contextual guard
@@ -40,6 +40,52 @@ test("2/businessFill. a business fill (no credential role) is never an auth-gate
   const auth: SpecExecutionContractAuth = { gateDetected: true, required: false };
   const set = resolveAuthGateFillScenarioStepIndices(RECORDING_LIKE_STEPS, auth, CREDENTIAL_PLAN_STEPS);
   assert.equal(set.has(13), false, "step13 carries a business data key, not a credential role");
+});
+
+test("2a/companyIdentifierFill. a parsed RNC/tax identifier fill owns auth-gate authority only when the gate was observed", () => {
+  const steps: ScenarioStepLike[] = [{ index: 2, action: 'Ingresar "sample" en "Identificador fiscal"' }];
+  const planSteps = [{ index: 2, valueKey: "rnc_de_la_empresa" }];
+  assert.deepEqual(
+    [...resolveAuthGateFillScenarioStepIndices(steps, { gateDetected: true, required: true }, planSteps)],
+    [2],
+  );
+  assert.equal(
+    resolveAuthGateFillScenarioStepIndices(steps, { gateDetected: false, required: false }, planSteps).size,
+    0,
+  );
+});
+
+test("2b/recordedCredentialLogin. a complete, explicit credential-and-submit sequence does not inject a second AuthFlow", () => {
+  const steps = [
+    { index: 2, action: 'Ingresar "sample-id" en "Identificador fiscal"' },
+    { index: 3, action: 'Ingresar "sample-user" en "Usuario"' },
+    { index: 4, action: 'Ingresar "sample-password" en "Contraseña"' },
+    { index: 5, action: 'Presionar "Continuar"' },
+  ];
+  const plan = {
+    version: "1.0",
+    source: "discovery_generated",
+    status: "validated",
+    scenario: { source: "scenario_preview", externalId: "S-login", title: "Explicit login" },
+    requiredData: [],
+    createdAt: new Date().toISOString(),
+    metadata: { authFlowRequired: true, authGateDetectedDuringDiscovery: true, authGateStage: "identification_input", authFlowInsertionAfterStepIndex: 5 },
+    steps: [
+      { index: 2, action: "fill", target: { strategy: "text", value: "sample-id" }, valueKey: "rnc_de_la_empresa" },
+      { index: 3, action: "fill", target: { strategy: "text", value: "sample-user" }, valueKey: "nombre_de_usuario" },
+      { index: 4, action: "fill", target: { strategy: "text", value: "sample-password" }, valueKey: "contrasena" },
+      { index: 5, action: "click", target: { strategy: "text", value: "Continuar" } },
+    ],
+  } as any;
+  const contract = buildSpecExecutionContract(plan, {
+    auth: { gateDetected: true, required: true, insertionAfterStepIndex: 5 },
+    steps,
+  });
+
+  assert.equal(contract.auth?.gateDetected, true, "observed gate authority remains available to credential fills");
+  assert.equal(contract.auth?.required, false, "the recorded credential+submit sequence is already the auth implementation");
+  assert.equal(contract.auth?.aggregate, undefined, "a second AuthFlow aggregate must not replace explicit recorded steps");
+  assert.equal(contract.steps.find((step) => step.scenarioStepIndex === 2)?.authGateExpected, true);
 });
 
 test("3/partialAuthority. only the fills covered by auth authority are marked, siblings are not", () => {

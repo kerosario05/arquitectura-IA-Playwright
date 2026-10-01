@@ -108,6 +108,26 @@ test("3/click generates exactly one action", () => {
   assert.equal(result.bindings[0].runtimeMethod, "clickPromotedTarget");
 });
 
+test("3b/configuredNavigation uses the project base URL without a display-text locator", () => {
+  const navigationStep = step({
+    scenarioStepIndex: 1,
+    operation: "navigate",
+    target: { strategy: "url", value: "APP_BASE_URL" },
+  });
+  const result = compileDeterministicSpec(contract([navigationStep]));
+
+  assert.equal(result.unsupportedCapabilities.length, 0);
+  assert.match(result.source, /const navigationUrl_1 = process\.env\.APP_BASE_URL;/);
+  assert.match(result.source, /await page\.goto\(navigationUrl_1\);/);
+  assert.doesNotMatch(result.source, /getByText\('APP_BASE_URL'\)/);
+  assert.deepEqual(result.bindings[0], {
+    scenarioStepIndex: 1,
+    operation: "navigate",
+    runtimeMethod: "page.goto",
+    targetRef: "APP_BASE_URL",
+  });
+});
+
 test("4/sequence fill->fill->press->click preserves order and cardinality", () => {
   const result = compileDeterministicSpec(contract([FILL_STEP, FILL_STEP_2, PRESS_STEP, CLICK_STEP]));
   assert.equal(result.unsupportedCapabilities.length, 0);
@@ -132,13 +152,137 @@ test("5/determinism: compiling the same input twice yields identical source", ()
   assert.deepEqual(first.unsupportedCapabilities, second.unsupportedCapabilities);
 });
 
-test("6/unsupported operation is reported and never invents code", () => {
-  const unsupportedStep = step({ scenarioStepIndex: 9, operation: "select", target: { strategy: "role", role: "combobox", name: "Pais" } });
-  const result = compileDeterministicSpec(contract([unsupportedStep]));
+test("6/select compiles through the existing runtime with structured value authority", () => {
+  const selectStep = step({
+    scenarioStepIndex: 9,
+    operation: "select",
+    target: { strategy: "role", role: "combobox", name: "Pais" },
+    valueKey: "pais",
+    resolvedExecutionTarget: "República Dominicana",
+    associatedField: "Pais",
+    selectionField: "Pais",
+  });
+  const result = compileDeterministicSpec(contract([selectStep]));
+  assert.equal(result.unsupportedCapabilities.length, 0);
+  assert.match(result.source, /pageObject\.select\(\{/);
+  assert.match(result.source, /selectPromotedItem/);
+  assert.match(result.source, /valueKey: 'pais'/);
+  assert.match(result.source, /PROMOTED_PAIS/);
+  assert.match(result.source, /selectionValue: String\(process\.env\['PROMOTED_PAIS'\] \?\? ''\)/);
+  assert.match(result.source, /selectionField: 'Pais'/);
+  assert.match(result.source, /associatedField: 'Pais'/);
+  assert.match(result.source, /getByRole\('option', \{ name: String\(process\.env\['PROMOTED_PAIS'\] \?\? ''\), exact: true \}\)/);
+  assert.equal(result.bindings[0].runtimeMethod, "selectPromotedItem");
+  assert.equal(result.bindings[0].dataRef, "pais");
+});
+
+test("6a/select keeps option semantics and carries the adjacent fill field as grid search context", () => {
+  const selectStep = step({
+    scenarioStepIndex: 9,
+    operation: "select",
+    target: { strategy: "role", role: "option", name: "Selected option" },
+    resolvedExecutionTarget: "Selected option",
+    associatedField: "Selection owner",
+  });
+  const amountStep = step({
+    scenarioStepIndex: 10,
+    operation: "fill",
+    target: { strategy: "label", value: "Containing field" },
+    valueKey: "containing_field",
+  });
+  const result = compileDeterministicSpec(contract([selectStep, amountStep]));
+  const selectCall = result.source.slice(result.source.indexOf("pageObject.select({"), result.source.indexOf("pageObject.fill({"));
+  assert.match(selectCall, /selectionField: 'Selection owner'/);
+  assert.match(selectCall, /associatedField: 'Containing field'/);
+});
+
+test("6aa/select preserves explicit field context and does not infer across a different row", () => {
+  const selectStep = step({
+    scenarioStepIndex: 9,
+    operation: "select",
+    target: { strategy: "role", role: "option", name: "Selected option" },
+    resolvedExecutionTarget: "Selected option",
+    selectionField: "Explicit selection field",
+    associatedField: "Explicit owner field",
+    entityScope: "row-a",
+  });
+  const nextFill = step({
+    scenarioStepIndex: 10,
+    operation: "fill",
+    target: { strategy: "label", value: "Another row field" },
+    valueKey: "another_row_field",
+    entityScope: "row-b",
+  });
+  const result = compileDeterministicSpec(contract([selectStep, nextFill]));
+  const selectCall = result.source.slice(result.source.indexOf("pageObject.select({"), result.source.indexOf("pageObject.fill({"));
+  assert.match(selectCall, /selectionField: 'Explicit selection field'/);
+  assert.match(selectCall, /associatedField: 'Explicit owner field'/);
+  assert.doesNotMatch(selectCall, /Another row field/);
+});
+
+test("6b/select fails closed without a structured selection value", () => {
+  const selectStep = step({
+    scenarioStepIndex: 9,
+    operation: "select",
+    target: { strategy: "role", role: "combobox", name: "Pais" },
+  });
+  const result = compileDeterministicSpec(contract([selectStep]));
   assert.equal(result.bindings.length, 0);
-  assert.equal(result.unsupportedCapabilities.length, 1);
-  assert.match(result.unsupportedCapabilities[0], /operation_unsupported:select/);
-  assert.doesNotMatch(result.source, /selectPromotedItem/);
+  assert.deepEqual(result.unsupportedCapabilities, ["scenarioStepIndex=9:select_missing_value_authority"]);
+  assert.doesNotMatch(result.source, /pageObject\.select\(/);
+});
+
+test("6c/required AuthFlow is imported from the app profile and invoked at the contract insertion point", () => {
+  const authContract = contract(
+    [CLICK_STEP, step({ scenarioStepIndex: 5, operation: "fill", target: { strategy: "role", role: "textbox", name: "Next" }, valueKey: "next" })],
+    {
+      appSlug: "synthetic-app",
+      auth: {
+        gateDetected: true,
+        required: true,
+        insertionAfterStepIndex: 4,
+        flowAlias: "clientAlias",
+        flowLanding: "protectedLanding",
+      },
+    },
+  );
+  const result = compileDeterministicSpec(authContract);
+
+  assert.equal(result.unsupportedCapabilities.length, 0);
+  assert.match(result.source, /import \{ AuthFlow, setAuthFlowTestData \} from '[^']*\/flows\/auth\.flow'/);
+  assert.match(result.source, /import \{ resolvePromotedSpecAuthDataFromEnv \} from '[^']*\/flows\/auth\.flow\.helpers'/);
+  assert.match(result.source, /const authFlow = new AuthFlow\(page\)/);
+  assert.match(result.source, /alias: 'clientAlias'/);
+  assert.match(result.source, /landing: 'protectedLanding'/);
+  assert.ok(result.source.indexOf("pageObject.click({") < result.source.indexOf("authFlow.ensureAuthenticated({"));
+  assert.ok(result.source.indexOf("authFlow.ensureAuthenticated({") < result.source.indexOf("pageObject.fill({"));
+});
+
+test("6d/AuthFlow aggregate coverage replaces its covered manual contract actions", () => {
+  const authContract = contract(
+    [CLICK_STEP, FILL_STEP, FILL_STEP_2],
+    {
+      appSlug: "synthetic-app",
+      auth: {
+        gateDetected: true,
+        required: true,
+        insertionAfterStepIndex: 4,
+        flowAlias: "clientAlias",
+        flowLanding: "protectedLanding",
+        aggregate: {
+          kind: "auth_flow",
+          helper: "ensureAuthenticated",
+          bindingId: "auth-aggregate",
+          coveredScenarioStepIndices: [1, 2],
+        },
+      },
+    },
+  );
+  const result = compileDeterministicSpec(authContract);
+
+  assert.equal(result.unsupportedCapabilities.length, 0);
+  assert.equal((result.source.match(/pageObject\.fill\(/g) ?? []).length, 0);
+  assert.match(result.source, /contractBinding: \{"bindingId":"auth-aggregate","coveredScenarioStepIndices":\[1,2\]\}/);
 });
 
 test("7/sensitive dataset: source carries the key/ref, never the literal value", () => {
@@ -214,6 +358,52 @@ test("11/click step with an attached navigation_transition oracle emits both, ac
   const clickIdx = result.source.indexOf("pageObject.click(");
   const oracleIdx = result.source.indexOf("expectPromotedVisible");
   assert.ok(clickIdx < oracleIdx, "action must precede oracle in emitted source");
+});
+
+test("11b/click step with a snapshot-backed literal oracle emits an exact visible-text assertion", () => {
+  const clickWithVisibleOracle = step({
+    scenarioStepIndex: 37,
+    operation: "click",
+    target: { strategy: "role", role: "button", name: "Cancelar" },
+    oracle: {
+      type: "literal_visible_text",
+      backed: true,
+      implementationKind: "heading_or_control",
+      requirement: 'Se muestra "Más detalles del producto"',
+      target: "Más detalles del producto",
+    },
+  });
+  const result = compileDeterministicSpec(contract([clickWithVisibleOracle]));
+
+  assert.equal(result.unsupportedCapabilities.length, 0);
+  assert.match(result.source, /^import \{ test, expect \} from '@playwright\/test';/m);
+  assert.equal((result.source.match(/pageObject\.click\(/g) ?? []).length, 1);
+  assert.match(result.source, /getByText\('Más detalles del producto', \{ exact: true \}\)\)\.toBeVisible\(\)/);
+  assert.equal((result.source.match(/promotedRuntime\.expectPromotedVisible\(/g) ?? []).length, 1);
+  assert.equal(result.bindings.filter((binding) => binding.runtimeMethod === "expectPromotedVisible").length, 1);
+  assert.ok(result.source.indexOf("pageObject.click(") < result.source.indexOf("expectPromotedVisible"));
+});
+
+test("11c/assertion-only step with a backed literal oracle compiles without an action binding", () => {
+  const assertionOnlyStep = step({
+    scenarioStepIndex: 20,
+    operation: "assertVisible",
+    target: { strategy: "text", value: "¡Hola!" },
+    oracle: {
+      type: "literal_visible_text",
+      backed: true,
+      implementationKind: "heading_or_control",
+      requirement: 'El sistema muestra "¡Hola!"',
+      target: "¡Hola!",
+    },
+  });
+  const result = compileDeterministicSpec(contract([assertionOnlyStep]));
+
+  assert.equal(result.unsupportedCapabilities.length, 0);
+  assert.equal(result.bindings.length, 1);
+  assert.equal(result.bindings[0].runtimeMethod, "expectPromotedVisible");
+  assert.match(result.source, /getByText\('¡Hola!', \{ exact: true \}\)\)\.toBeVisible\(\)/);
+  assert.equal((result.source.match(/promotedRuntime\.expectPromotedVisible\(/g) ?? []).length, 1);
 });
 
 test("10/binding manifest relates each action identity to operation + runtimeMethod + targetRef/dataRef", () => {

@@ -68,6 +68,8 @@ export type TestScenarioStep = {
   rowRelation?: "next" | "added";
   associatedField?: string;
   selectionField?: string;
+  selectorControlId?: string;
+  optionSurfaceId?: string;
   expectedValueKey?: string;
   valueKey?: string;
   technicalTargetRef?: string;

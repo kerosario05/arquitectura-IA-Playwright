@@ -453,6 +453,7 @@ function buildExpectedObservableOracles(
   canonicalRequirements?: CanonicalRequirement[],
   expectedResultRequirementRefs?: string[],
   recordingOutcomePolarity?: AssertionPolarity,
+  finalSnapshot?: PageSnapshot,
 ): SpecGenerationObservableOracle[] {
   const transitionEvidence = caseResult.runtimeEvidenceTrace?.clickActions
     ?.filter((click) => click.success && (click.transitionDetected === true || Boolean(click.postClickUiChange)))
@@ -533,6 +534,7 @@ function buildExpectedObservableOracles(
     let stepIndex: number | undefined;
     let target: string | undefined;
     let polarity: AssertionPolarity | undefined;
+    const expectedVisibleText = extractQuotedAssertionTarget(line);
 
     if (authSignal && (authGateEvidence?.authGateDiagnostics?.detected || authMetadata?.authGateDetectedDuringDiscovery === true)) {
       type = "auth_gate";
@@ -647,6 +649,31 @@ function buildExpectedObservableOracles(
       type = "literal_visible_text";
       backed = true;
       evidence.push("observed_assertion_match:true");
+    } else if (discoveryPassed && finalSnapshot && expectedVisibleText) {
+      // Narrative expected results can be promoted only when their quoted observable is
+      // present as exact, visible text in the final physical snapshot. This lets a recorded
+      // end state (for example, a dialog closing back to a product detail screen) satisfy the
+      // oracle without weakening the gate to route stability or a successful click alone.
+      const normalizedExpectedVisibleText = normalizeOracleText(expectedVisibleText);
+      const visibleMatch = normalizedExpectedVisibleText
+        ? finalSnapshot.elements.find((element) => element.visible && [element.text, element.label, element.name, element.ariaLabel]
+          .some((value) => typeof value === "string" && normalizeOracleText(value) === normalizedExpectedVisibleText))
+        : undefined;
+      if (visibleMatch && expectedVisibleText) {
+        type = "literal_visible_text";
+        backed = true;
+        target = expectedVisibleText;
+        stepIndex = Math.max(0, ...caseResult.steps.filter((step) => step.status === "found").map((step) => step.index)) || undefined;
+        evidence.push("exact_visible_text_in_final_runtime_snapshot:true", `final_snapshot_url:${finalSnapshot.url}`);
+        details = {
+          observedText: expectedVisibleText,
+          exactVisibleMatch: true,
+          finalSnapshotUrl: finalSnapshot.url,
+          finalSnapshotCapturedAt: finalSnapshot.capturedAt,
+        };
+      } else {
+        evidence.push("exact_visible_text_not_found_in_final_runtime_snapshot");
+      }
     } else if (discoveryPassed && hasStructuralEvidence) {
       type = "page_object_state";
       backed = true;
@@ -786,25 +813,130 @@ export function resolveObservableOraclePolarity(
 
 export function buildPromotionSourceScenario(
   scenario: TestScenario,
-  caseResult: CaseDiscoveryResult
+  caseResult: CaseDiscoveryResult,
+  finalSnapshot?: PageSnapshot,
 ): SpecGenerationSourceScenario {
   const canonicalRequirements = (scenario as TestScenario & { canonicalRequirements?: CanonicalRequirement[] }).canonicalRequirements;
   const expectedResultRequirementRefs = (scenario as TestScenario & { expectedResultRequirementRefs?: string[] }).expectedResultRequirementRefs;
   const recordingExecutionContract = (scenario as TestScenario & { recordingExecutionContract?: import("../scenarios/scenario-types").RecordingExecutionContract }).recordingExecutionContract;
   const recordingNegativeOracle = (scenario as TestScenario & { negativeOracle?: import("../scenarios/scenario-types").NegativeScenarioOracle }).negativeOracle;
   const rawExpected = typeof scenario.raw?.custom_expected === "string" ? scenario.raw.custom_expected : "";
+  const terminalRecordingAction = [...(recordingExecutionContract?.actions ?? [])].reverse().find((action) =>
+    action.actionType !== "system_observation" && action.actionType !== "navigation"
+  );
+  const terminalActionStep = terminalRecordingAction
+    ? [...caseResult.steps].reverse().find((step) => {
+        if (step.status !== "found" || !isClickAction(step.action)) return false;
+        const recordedAction = normalizeOracleText(terminalRecordingAction.humanStep ?? "");
+        const runtimeAction = normalizeOracleText(step.action ?? "");
+        const recordedTarget = normalizeOracleText(terminalRecordingAction.semanticField ?? "");
+        const runtimeTarget = normalizeOracleText(step.targetText ?? "");
+        return (recordedAction && runtimeAction === recordedAction)
+          || (recordedTarget && runtimeTarget === recordedTarget);
+      })
+    : undefined;
+  const terminalActionScenarioStep = terminalRecordingAction
+    ? [...scenario.steps].reverse().find((step) => {
+        const recordedAction = normalizeOracleText(terminalRecordingAction.humanStep ?? "");
+        const runtimeAction = normalizeOracleText(step.action ?? "");
+        const recordedTarget = normalizeOracleText(terminalRecordingAction.semanticField ?? "");
+        const runtimeTarget = normalizeOracleText(extractQuotedAssertionTarget(step.action) ?? step.action ?? "");
+        return (recordedAction && runtimeAction === recordedAction)
+          || (recordedTarget && runtimeTarget === recordedTarget);
+      })
+    : undefined;
+  const terminalRecordedFeedbackCompleted = Boolean(
+    recordingExecutionContract
+    && !recordingNegativeOracle
+    && terminalRecordingAction?.actionType === "click"
+    && terminalActionStep?.status === "found"
+    && (terminalActionStep.assertionDiagnostics as any)?.postActionSyncSignal === "terminal_feedback"
+    && (!expectedResultRequirementRefs || expectedResultRequirementRefs.length === 0)
+  );
+  if (terminalRecordedFeedbackCompleted) {
+    console.log(`[promotion-oracle] recordingTerminalClickCompleted=true expectedResultNarrativeSuppressed=${Boolean(rawExpected.trim())} reason=terminal_feedback_without_canonical_expected_refs`);
+  }
+  const terminalOutcomeObservationIndexes = new Set(
+    terminalRecordedFeedbackCompleted && terminalActionScenarioStep
+      ? scenario.steps
+          .filter((step) => step.index > terminalActionScenarioStep.index && /^(assert|validar|verificar|comprobar|confirmar|el sistema|la aplicaci[oó]n|la app|se muestra|debe aparecer|debe mostrarse)/i.test(step.action.trim()))
+          .map((step) => step.index)
+      : [],
+  );
+  // Keep the recording's technical lineage when scenario indices differ from plan indices.
+  // Match by authored step identity (humanStep/semanticField plus action kind), using occurrence
+  // order only to distinguish repeated identical actions. This carries existing authority; it
+  // does not certify a target from the runtime click outcome or invent a locator.
+  const recordingActionByScenarioStepIndex = new Map<number, NonNullable<typeof recordingExecutionContract>["actions"][number]>();
+  const claimedRecordingActions = new Set<number>();
+  for (const scenarioStep of scenario.steps) {
+    const normalizedAction = normalizeOracleText(scenarioStep.action ?? "");
+    const normalizedTarget = normalizeOracleText(extractQuotedAssertionTarget(scenarioStep.action) ?? scenarioStep.action ?? "");
+    const candidates = (recordingExecutionContract?.actions ?? []).map((action, actionIndex) => ({ action, actionIndex }))
+      .filter(({ action, actionIndex }) => !claimedRecordingActions.has(actionIndex))
+      .filter(({ action }) => {
+        const recordedHumanStep = normalizeOracleText(action.humanStep ?? "");
+        const recordedSemanticField = normalizeOracleText(action.semanticField ?? "");
+        return (recordedHumanStep && recordedHumanStep === normalizedAction)
+          || (recordedSemanticField && recordedSemanticField === normalizedTarget);
+      });
+    const compatible = candidates.find(({ action }) => {
+      const actionType = action.actionType;
+      if (actionType === "click") return isClickAction(scenarioStep.action);
+      if (actionType === "fill") return /^(fill|completar|ingresar|escribir|seleccionar\s+todo)/i.test(scenarioStep.action.trim());
+      if (actionType === "press") return /^(press|presionar\s+tecla|tecla)/i.test(scenarioStep.action.trim());
+      if (actionType === "select") return /^(select|seleccionar)/i.test(scenarioStep.action.trim());
+      return false;
+    });
+    if (compatible) {
+      claimedRecordingActions.add(compatible.actionIndex);
+      recordingActionByScenarioStepIndex.set(scenarioStep.index, compatible.action);
+    }
+  }
+  const recordingLineageForStep = (step: TestScenario["steps"][number]) => {
+    const recordingAction = recordingActionByScenarioStepIndex.get(step.index);
+    const evidence = (step as typeof step & {
+      playwrightRecorderEvidence?: NonNullable<NonNullable<typeof recordingExecutionContract>["actions"][number]["playwrightRecorderEvidence"]>;
+    }).playwrightRecorderEvidence ?? recordingAction?.playwrightRecorderEvidence;
+    const sourceTarget = normalizeOracleText(extractQuotedAssertionTarget(step.action) ?? "");
+    const evidenceNamesSourceTarget = Boolean(
+      evidence?.runtimeResolutionRequired === true
+      && evidence.kind !== "segmented_input"
+      && evidence.normalizedName?.trim()
+      && normalizeOracleText(evidence.normalizedName) === sourceTarget,
+    );
+    const scopeRef = evidence?.scopeIdentity
+      ? `${evidence.scopeIdentity.strategy}:${evidence.scopeIdentity.value}`
+      : undefined;
+    const sourceRefs = (step as typeof step & { technicalTargetRefs?: string[] }).technicalTargetRefs
+      ?? recordingAction?.technicalTargetRefs;
+    const filteredRefs = sourceRefs?.filter((ref) => !scopeRef || ref !== scopeRef);
+    const sourceRef = (step as typeof step & { technicalTargetRef?: string }).technicalTargetRef
+      ?? recordingAction?.technicalTargetRef;
+    const scopeWasMistakenForTarget = evidenceNamesSourceTarget
+      && Boolean(scopeRef)
+      && sourceRef === scopeRef
+      && (filteredRefs?.length ?? 0) === 0;
+    return {
+      recordingAction,
+      playwrightRecorderEvidence: evidence,
+      technicalTargetRef: scopeWasMistakenForTarget ? undefined : (sourceRef === scopeRef ? filteredRefs?.[0] : sourceRef),
+      technicalTargetRefs: scopeWasMistakenForTarget ? undefined : (sourceRef === scopeRef ? filteredRefs : sourceRefs),
+    };
+  };
   const stepExpected = scenario.steps
     .map((step) => step.expected?.trim())
     .filter((value): value is string => Boolean(value && value.length > 0));
   const expectedFromConsumption = caseResult.partialDiagnostics?.expectedResultConsumption
     ?.map((entry) => entry.originalText?.trim())
     .filter((value): value is string => Boolean(value && value.length > 0)) ?? [];
-  const expectedResult = [rawExpected.trim(), ...stepExpected, ...expectedFromConsumption]
+  const expectedResult = [terminalRecordedFeedbackCompleted ? "" : rawExpected.trim(), ...stepExpected, ...expectedFromConsumption]
     .filter((value) => value.length > 0)
     .join("\n");
   const observedAssertionsFromSteps = caseResult.steps
     .filter((step) => isAssertionLikeStep(step))
     .filter((step) => step.status === "found" || step.assertionStatus === "passed")
+    .filter((step) => !terminalOutcomeObservationIndexes.has(step.index))
     .flatMap((step) => [
       (step.targetText ?? step.action ?? "").trim(),
       (step.matchedText ?? "").trim(),
@@ -940,26 +1072,32 @@ export function buildPromotionSourceScenario(
       : undefined,
       canonicalAssertion: step.canonicalAssertion,
       conditionalAction: (step as typeof step & { conditionalAction?: import("../scenarios/canonical-scenario").CanonicalConditionalAction }).conditionalAction,
-    assertionImportance: discoveryStepByIndex.get(step.index)?.assertionImportance,
+    assertionImportance: terminalOutcomeObservationIndexes.has(step.index)
+      ? "contextual" as const
+      : discoveryStepByIndex.get(step.index)?.assertionImportance,
     // Recording technical authority (owner/stableDescendants/semanticShape) must survive into
     // the persisted SpecGenerationSourceScenario — this is the exact field that
     // spec-execution-contract.ts's shared materializer prefers over any Discovery PlanTarget
     // text fallback. Previously dropped here, forcing every step through the weaker Discovery
     // path regardless of recordingReplay=true.
-    technicalTargetRef: (step as typeof step & { technicalTargetRef?: string }).technicalTargetRef,
-    technicalTargetRefs: (step as typeof step & { technicalTargetRefs?: string[] }).technicalTargetRefs,
+    technicalTargetRef: (step as typeof step & { technicalTargetRef?: string }).technicalTargetRef
+      ?? recordingActionByScenarioStepIndex.get(step.index)?.technicalTargetRef,
+    technicalTargetRefs: (step as typeof step & { technicalTargetRefs?: string[] }).technicalTargetRefs
+      ?? recordingActionByScenarioStepIndex.get(step.index)?.technicalTargetRefs,
     // Recording-sourced authority (above) wins when present; otherwise, a field-scoped certified
     // target Discovery's own live execution already physically reconfirmed for this step
     // (case-discovery.ts's fill success path) is the same-shaped fallback -- mirrors the
     // existing discoveryStepByIndex.get(step.index)?.assertionImportance merge pattern just
     // below, never a new field/schema.
     technicalTargetCandidates: (step as typeof step & { technicalTargetCandidates?: Array<Record<string, unknown>> }).technicalTargetCandidates
+      ?? recordingActionByScenarioStepIndex.get(step.index)?.technicalTargetCandidates
       ?? (discoveryStepByIndex.get(step.index) as { technicalTargetCandidates?: Array<Record<string, unknown>> } | undefined)?.technicalTargetCandidates,
     // Same fallback shape as technicalTargetCandidates above, for the plain field-relation hint
     // (associatedField) Discovery's own live click resolution already used -- never a
     // certification, just a hint transported so a runtime_resolution_required click can retry
     // with it later.
     associatedField: step.associatedField
+      ?? recordingActionByScenarioStepIndex.get(step.index)?.associatedField
       ?? (discoveryStepByIndex.get(step.index) as { associatedField?: string } | undefined)?.associatedField,
     // FIRST_LOSS fix (this ticket): the SAME lineage `deterministic-spec-compiler.ts` needs to
     // recognize a selection-like recorded click (`isSelectionLikeRecordedRole` +
@@ -998,6 +1136,7 @@ export function buildPromotionSourceScenario(
       type: "literal_visible_text" as const,
       backed: true,
       source: "discovery" as const,
+      target: extractQuotedAssertionTarget(assertion) ?? assertion,
       evidence: ["assertion_resolved_during_discovery"],
     })),
     ...controlledAdvanceOracles,
@@ -1012,6 +1151,7 @@ export function buildPromotionSourceScenario(
       canonicalRequirements,
       expectedResultRequirementRefs,
       recordingOutcomePolarity,
+      finalSnapshot,
     ),
     ...satisfiedReconciledOracles,
   ];
@@ -1054,14 +1194,17 @@ export function buildPromotionSourceScenario(
       // (this return statement rebuilds `steps` independently of the `scenarioSteps` variable
       // above), forcing every step through the weaker Discovery PlanTarget path regardless of
       // recordingReplay=true. See case-discovery-workflow.technical-target-propagation.test.ts.
-      technicalTargetRef: (step as typeof step & { technicalTargetRef?: string }).technicalTargetRef,
-      technicalTargetRefs: (step as typeof step & { technicalTargetRefs?: string[] }).technicalTargetRefs,
+      technicalTargetRef: recordingLineageForStep(step).technicalTargetRef,
+      technicalTargetRefs: recordingLineageForStep(step).technicalTargetRefs,
+      playwrightRecorderEvidence: recordingLineageForStep(step).playwrightRecorderEvidence,
       // Same fallback merge as scenarioSteps above -- a field-scoped certified target Discovery's
       // own live fill execution already physically reconfirmed, when no Recording-sourced
       // authority already exists for this step.
       technicalTargetCandidates: (step as typeof step & { technicalTargetCandidates?: Array<Record<string, unknown>> }).technicalTargetCandidates
+        ?? recordingActionByScenarioStepIndex.get(step.index)?.technicalTargetCandidates
         ?? (discoveryStepByIndex.get(step.index) as { technicalTargetCandidates?: Array<Record<string, unknown>> } | undefined)?.technicalTargetCandidates,
       associatedField: step.associatedField
+        ?? recordingActionByScenarioStepIndex.get(step.index)?.associatedField
         ?? (discoveryStepByIndex.get(step.index) as { associatedField?: string } | undefined)?.associatedField,
       // FIRST_LOSS fix (this ticket): same as `scenarioSteps` above -- this is the actual
       // persisted `SpecGenerationSourceScenario` `deterministic-spec-compiler.ts`'s
@@ -1076,7 +1219,9 @@ export function buildPromotionSourceScenario(
       : undefined,
     canonicalAssertion: step.canonicalAssertion,
       conditionalAction: (step as typeof step & { conditionalAction?: import("../scenarios/canonical-scenario").CanonicalConditionalAction }).conditionalAction,
-      assertionImportance: discoveryStepByIndex.get(step.index)?.assertionImportance
+      assertionImportance: terminalOutcomeObservationIndexes.has(step.index)
+        ? "contextual" as const
+        : discoveryStepByIndex.get(step.index)?.assertionImportance
     })),
     expectedResult: expectedResult || undefined,
     negativeOracle: recordingNegativeOracle,
@@ -1131,6 +1276,16 @@ function getDefaultOutputDir(id: number | string): string {
 
 export function isAssertionLikeStep(step: DiscoveryStepResult): boolean {
   const actionText = (step.action ?? "").toLowerCase();
+  // An imperative interaction is not an oracle just because its target happens to
+  // contain a verb such as "Validar", "Resumen" or "Confirmación". This matters
+  // for recorded flows: "Presionar Validar" is a click step; the resulting
+  // assertion must come from an explicit expected-result/assertion, not from the
+  // button label. Preserve explicit assert actions and explicitly classified
+  // assertion steps below.
+  const imperativeInteraction = /^\s*(?:presionar|pulsar|hacer\s+clic|dar\s+clic|click|seleccionar|elegir|ingresar|escribir|introducir|completar|llenar|abrir|navegar|presionar\s+tecla)\b/i.test(step.action ?? "");
+  if (imperativeInteraction && !/^(?:assert(?:text|visible|exists)?|validar\s+que|verificar\s+que)\b/i.test(step.action ?? "")) {
+    return false;
+  }
   if (step.assertionStatus || step.assertionClassification) return true;
   if (["asserttext", "assertvisible", "assertexists"].includes(actionText.replace(/\s+/g, ""))) return true;
   return /\b(validar|verificar|assert|visible|mostrar|muestra|show|confirmacion|confirmation|detalle|resumen|formulario|catalogo|catalog|carrito|cart)\b/i.test(step.action ?? "");
@@ -1212,6 +1367,9 @@ export function buildRuntimeEvidenceTrace(caseResult: CaseDiscoveryResult): Runt
        locatorStrategy: s.locatorStrategy,
        controlIdentity: s.controlIdentity,
       success: true,
+      postActionSyncSignal: typeof (s.assertionDiagnostics as any)?.postActionSyncSignal === "string"
+        ? (s.assertionDiagnostics as any).postActionSyncSignal
+        : undefined,
       transitionDetected: s.status !== "click_no_transition",
       postClickUiChange: (s.assertionDiagnostics as any)?.postClickUiChangeReason,
       beforeContext: (s.assertionDiagnostics as any)?.assertionContextDiagnostics?.previousContext,
@@ -1546,7 +1704,11 @@ async function loadLatestSnapshot(dir: string): Promise<{ snapshot?: PageSnapsho
     const files = await readdir(dir);
     const candidates = files
       .filter((f) => f.endsWith("-snapshot.json"))
-      .sort((a, b) => a.localeCompare(b));
+      .sort((a, b) => {
+        const stepA = Number(a.match(/step-(\d+)-snapshot\.json$/)?.[1] ?? -1);
+        const stepB = Number(b.match(/step-(\d+)-snapshot\.json$/)?.[1] ?? -1);
+        return stepA - stepB || a.localeCompare(b);
+      });
     const last = candidates[candidates.length - 1];
     if (!last) return {};
     const snapshotPath = path.join(dir, last);
@@ -2110,8 +2272,13 @@ export function toScenarioDataOverrides(runtimeEntries: DataContextEntry[] | und
 
 export function buildDiscoveryBrowserContextOptions(config: {
   app?: { ignoreHTTPSErrors?: unknown };
-}): { ignoreHTTPSErrors: boolean } {
-  return { ignoreHTTPSErrors: config.app?.ignoreHTTPSErrors === true };
+}): { ignoreHTTPSErrors: boolean; hasTouch?: boolean } {
+  // FIRST_LOSS investigation (opt-in, never a default-behavior change): a self-service kiosk
+  // UI may bind its real interaction handlers to touch/pointer events rather than plain mouse
+  // clicks, which Playwright's default mouse-only context never dispatches. Generic env-var
+  // opt-in so no app is affected unless explicitly asked for; not tied to any app/case/text.
+  const hasTouch = process.env.DISCOVERY_ENABLE_TOUCH_EMULATION === "true" ? true : undefined;
+  return { ignoreHTTPSErrors: config.app?.ignoreHTTPSErrors === true, ...(hasTouch ? { hasTouch } : {}) };
 }
 
 export async function runCaseDiscoveryWorkflow(
@@ -2864,7 +3031,8 @@ export async function runCaseDiscoveryWorkflow(
     console.log(`[discovery:workflow] Overwrite enabled: ${options.overwrite === true}`);
 
     const promotionResultPath = path.join(outputDir, "promotion-result.json");
-    const sourceScenario = buildPromotionSourceScenario(scenario, caseResult);
+    const finalSnapshot = await loadLatestSnapshot(path.join(outputDir, "evidence"));
+    const sourceScenario = buildPromotionSourceScenario(scenario, caseResult, finalSnapshot.snapshot);
     if (options.contextOnly) {
       if (!caseResult.candidatePlan || !sourceScenario.steps?.length) {
         return { ...caseResult, status: "discovery_failed", failedReason: "insufficient_context", outputDir } as any;
@@ -2940,7 +3108,14 @@ export async function runCaseDiscoveryWorkflow(
           // unmodified would silently reintroduce a missing/stale baseUrl into promotion
           // (promoteExecutionPlan prefers appProfileObject over fullConfig when both are set).
           appProfileObject: options.appProfile
-            ? { ...options.appProfile, baseUrl: activeConfig.app.baseUrl }
+            ? {
+                ...options.appProfile,
+                baseUrl: activeConfig.app.baseUrl,
+                // Carry the same effective project/app TLS policy used by Discovery into the
+                // candidate Playwright process. options.appProfile is captured before the
+                // project_sql overlay above, so forwarding it unchanged can lose this setting.
+                ignoreHTTPSErrors: activeConfig.app.ignoreHTTPSErrors,
+              }
             : options.appProfile,
           sectionSlug: sectionProfile?.sectionSlug,
           sectionId: sectionProfile?.sectionId,

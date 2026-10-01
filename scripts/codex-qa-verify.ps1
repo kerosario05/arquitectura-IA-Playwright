@@ -31,7 +31,10 @@
 
 .PARAMETER Prompt
   Compact task description: problem summary, verification mode, seed job/recording id if any,
-  relevant artifact refs, and the expected physical test. Never the full conversation.
+  relevant artifact refs, and the expected physical test. Never the full conversation. Source
+  this from docs/ai/00-current-state.md's CURRENT FRONTIER / relevant PHYSICAL GREEN / DO NOT
+  REOPEN / NEXT ACTION -- not from conversation memory, so the same compact context reaches
+  Codex whether this session has been compacted or is brand new.
 
 .PARAMETER Effort
   low (default) or medium. high is rejected outright -- this verifier never needs it.
@@ -91,6 +94,10 @@ FRESH RUN
 jobId=
 status=
 artifacts=
+stepsExpected=
+stepsExecuted=
+functionalExecution=
+causalOutcomeObserved=
 
 FIRST LOSS
 file=
@@ -100,6 +107,10 @@ reason=
 
 EVIDENCE
 - (paths / decisive lines only, no full logs, no secrets)
+
+Only report step counts and functional/causal booleans supported by this fresh run's artifacts.
+If no fresh run was created, leave jobId empty and identify the pre-run first-loss; never reuse
+an old id or infer successful steps.
 
 REPAIR DIRECTION
 filesLikelyRelevant=
@@ -120,14 +131,17 @@ Write-Output "FRESH_RUN_STARTED seed=inline"
 
 $outFile = Join-Path $repoTmp ("result-{0}.txt" -f (Get-Date -Format "yyyyMMdd-HHmmss"))
 
-& codex exec `
+# Pass the prompt through UTF-8 stdin instead of a native-command argv element. Windows
+# PowerShell's legacy native argument marshalling splits embedded quotes in the physical steps.
+$OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+$guardrails | & codex exec `
   -m $Model `
   -c "model_reasoning_effort=$Effort" `
   -s danger-full-access `
   -C $repoRoot `
   --skip-git-repo-check `
   -o $outFile `
-  $guardrails
+  -
 
 $exitCode = $LASTEXITCODE
 
@@ -143,7 +157,10 @@ $statusAfter = git status --porcelain -- . 2>&1
 $beforeSet = [System.Collections.Generic.HashSet[string]]::new([string[]]$statusBefore)
 $unexpected = @($statusAfter | Where-Object { -not $beforeSet.Contains($_) })
 # Never treat the verifier's own permitted runtime-output writes as an unexpected source change.
-$unexpectedSource = @($unexpected | Where-Object { $_ -notmatch '\.artifacts[\\/]' })
+$unexpectedSource = @($unexpected | Where-Object {
+  $_ -notmatch '\.artifacts[\\/]'
+  -and $_ -notmatch '^\?\? automations[\\/]+apps[\\/]+[^\\/]+[\\/]+recordings[\\/]'
+})
 
 if ($unexpectedSource.Count -gt 0) {
   Write-Output "REPO_CHANGE_GUARD status=HUMAN_GATE"

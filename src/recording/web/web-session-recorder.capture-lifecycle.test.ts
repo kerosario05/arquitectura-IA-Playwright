@@ -47,6 +47,7 @@ test("1/2/3. the safety-net re-injection is wired to the exact same script conte
   assert.match(SOURCE, /frame\.evaluate\(captureScriptContent\)/, "the framenavigated handler must re-evaluate the SAME content addInitScript registered, never a separately-built string");
 });
 
+
 test("4. the legacy __qaRecord binding is registered once, at context scope, never inside the per-navigation handler (no re-registration needed or attempted)", () => {
   // CaptureEngine V2 (a separate, disconnected shadow bridge -- see
   // web-session-recorder.v2-shadow-integration.test.ts) registers its OWN, distinctly-named

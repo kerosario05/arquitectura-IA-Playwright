@@ -115,6 +115,104 @@ test("no accessible name AND no field relation -> the pre-existing honest neutra
   assert.equal(scenario.testRailSteps.at(-1)?.content, "Presionar el control indicado");
 });
 
+test("dynamic person labels render as a generic action and retain only the stable locator", () => {
+  const trace = fixture({
+    events: [{
+      seq: 1,
+      t: 100,
+      kind: "tap",
+      screenKey: "home",
+      target: {
+        label: "Ana Maria Perez",
+        associatedField: "Ana Maria Perez",
+        role: "div",
+        tag: "div",
+        attributes: { id: "profile-name" },
+        locators: [
+          { strategy: "text", value: "Ana Maria Perez", confidence: 0.55 },
+          { strategy: "id", value: "profile-name", confidence: 0.8 },
+        ],
+        interactionType: "click",
+        actionability: "NATIVE_ACTIONABLE",
+        actionOwner: true,
+        playwrightRecorderEvidence: { kind: "text", normalizedName: "ana maria perez", runtimeResolutionRequired: true },
+      },
+    }] as SessionTrace["events"],
+  });
+
+  const scenario = buildHappyPathScenario(trace, trace.events);
+  const clickStep = scenario.testRailSteps.at(-1)!;
+  const webStep = scenario.webSteps.at(-1)!;
+  assert.equal(clickStep.content, "Presionar el control grabado");
+  assert.deepEqual(webStep.target, { strategy: "id", value: "profile-name" });
+  assert.equal(webStep.valueKey, undefined);
+  assert.equal(scenario.canonicalInteractions?.at(-1)?.semanticField, undefined);
+});
+
+test("dynamic numeric labels are not emitted as text selectors", () => {
+  const trace = fixture({
+    events: [{
+      seq: 1,
+      t: 100,
+      kind: "tap",
+      screenKey: "home",
+      target: {
+        label: "4111 1111 1111 1111",
+        role: "button",
+        tag: "button",
+        locators: [{ strategy: "text", value: "4111 1111 1111 1111", confidence: 0.55 }],
+        interactionType: "click",
+        actionability: "NATIVE_ACTIONABLE",
+        actionOwner: true,
+      },
+    }] as SessionTrace["events"],
+  });
+
+  const scenario = buildHappyPathScenario(trace, trace.events);
+  const clickStep = scenario.testRailSteps.at(-1)!;
+  const webStep = scenario.webSteps.at(-1)!;
+  assert.equal(clickStep.content, "Presionar el control indicado");
+  assert.equal(webStep.target, undefined);
+  assert.equal(scenario.canonicalInteractions?.at(-1)?.admissionReason, "dynamic_label_without_stable_target");
+});
+
+test("a static structural click keeps its accessible name so recording actions remain distinguishable", () => {
+  const trace = fixture({
+    events: [{
+      seq: 1,
+      t: 100,
+      kind: "tap",
+      screenKey: "login",
+      target: {
+        label: "Empresarial",
+        role: "link",
+        tag: "a",
+        locators: [{ strategy: "role", value: "link|Empresarial", confidence: 0.85 }],
+        interactionType: "click",
+        actionability: "NATIVE_ACTIONABLE",
+        actionOwner: true,
+        technicalTargetCandidates: [{
+          targetType: "structural",
+          locatorCandidates: [{ strategy: "role", value: "link|Empresarial", confidence: 0.85 }],
+          structuralContext: {
+            owner: { tag: "a" },
+            stableDirectAttributes: { href: "#empresarial" },
+            deterministicStructuralIdentity: true,
+            identityAmbiguous: false,
+          },
+          interactionEvidence: ["v2_click_owner"],
+          confidence: 0.85,
+          validatedByInteraction: true,
+        }],
+      },
+    }] as SessionTrace["events"],
+  });
+
+  const scenario = buildHappyPathScenario(trace, trace.events);
+  assert.equal(scenario.testRailSteps.at(-1)?.content, 'Presionar "Empresarial"');
+  assert.deepEqual(scenario.webSteps.at(-1)?.target, { strategy: "role", value: "link|Empresarial" });
+});
+
 test("5/noFakeName. a generic-shaped associatedField ('control') is never used as the field-associated wording either", () => {
   const trace = fixture({
     events: [
@@ -143,4 +241,66 @@ test("14/generic. no app/project/field hardcode -- an arbitrary associatedField 
     const scenario = buildHappyPathScenario(trace, trace.events);
     assert.equal(scenario.testRailSteps.at(-1)?.content, `Presionar botón asociado a "${field}"`);
   }
+});
+
+/**
+ * FIRST_LOSS fix (fresh run d3fa4d58-06b3-4053-bebb-2a8d31d7c951, interaction-15 "Tarjeta
+ * Crédito Visa Clásica"): this branch already produced a testRailStep for a locator-less plain
+ * click, but never a webStep/stepTarget -- so the step silently had no plan.json/spec
+ * representation and vanished from every consumer reading `webSteps`, even though
+ * `buildCanonicalInteractions` still tracked it as a real, execution-authoritative interaction.
+ */
+test("15/webStepParity. a locator-less plain click still produces a webStep (target-less, bound by interactionId) alongside its testRailStep", () => {
+  const trace = fixture({
+    events: [
+      { seq: 1, t: 100, kind: "tap", screenKey: "login", target: { label: "", role: "button", locators: [], associatedField: "Tarjeta Crédito Visa Clásica" } },
+    ] as SessionTrace["events"],
+  });
+  const scenario = buildHappyPathScenario(trace, trace.events);
+  const clickWebStep = scenario.webSteps.at(-1);
+  assert.ok(clickWebStep, "a webStep must exist for this click");
+  assert.equal(clickWebStep!.action, "click");
+  assert.equal(clickWebStep!.target, undefined, "no locator was ever captured -- never fabricate one");
+  assert.equal(clickWebStep!.interactionId, "interaction-1");
+  assert.equal(clickWebStep!.description, 'Presionar botón asociado a "Tarjeta Crédito Visa Clásica"');
+});
+
+test("16/mobileUnaffected. the same locator-less click on a mobile trace still produces no webStep (mobile uses its own mobileSteps list)", () => {
+  const trace = fixture({
+    platform: "android",
+    events: [
+      { seq: 1, t: 100, kind: "tap", screenKey: "login", target: { label: "", role: "button", locators: [], associatedField: "Campo móvil" } },
+    ] as SessionTrace["events"],
+  });
+  const scenario = buildHappyPathScenario(trace, trace.events);
+  assert.equal(scenario.webSteps.length, 0);
+});
+
+test("17/reusableStructuralClick. stable structural owners hide captured personal labels", () => {
+  const dynamicLabel = "Person 123@example.test";
+  const trace = fixture({
+    events: [{
+      seq: 1, t: 100, kind: "tap", screenKey: "login",
+      target: {
+        label: dynamicLabel, tag: "div", locators: [],
+        technicalTargetCandidates: [{
+          targetType: "structural", locatorCandidates: [],
+          structuralContext: {
+            owner: { tag: "div" }, stableDirectAttributes: { id: "profile-menu" },
+            stableDescendants: [], semanticShape: ["div"],
+            deterministicStructuralIdentity: true, structuralIdentityMatchCount: 1,
+          },
+          interactionEvidence: ["v2_click_owner"], confidence: 0.6, validatedByInteraction: true,
+        }],
+      },
+    }] as SessionTrace["events"],
+  });
+  const scenario = buildHappyPathScenario(trace, trace.events);
+  const step = scenario.testRailSteps.at(-1)!;
+  const webStep = scenario.webSteps.at(-1)!;
+  assert.equal(step.content, "Presionar el control grabado");
+  assert.equal(webStep.description, "Presionar el control grabado");
+  assert.equal(webStep.target, undefined);
+  assert.equal(webStep.interactionId, "interaction-1");
+  assert.ok(!step.content.includes(dynamicLabel));
 });

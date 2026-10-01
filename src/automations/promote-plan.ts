@@ -594,6 +594,11 @@ export function buildVerifyPromotedSpecExecEnv(options: VerifyPromotedSpecOption
   if (options.evidenceContext) {
     const { runId, scenarioId, scenarioTitle, appSlug, sectionSlug } = options.evidenceContext;
     execEnv.EVIDENCE_RUN_ID = runId;
+    // Generated specs set SCENARIO_ID/SCENARIO_TITLE to their compile-time identity inside
+    // the test body. Keep the selected rerun's evidence identity on dedicated keys so multiple
+    // promoted specs in one parent job cannot overwrite the same evidence directory.
+    execEnv.EVIDENCE_SCENARIO_ID = scenarioId;
+    execEnv.EVIDENCE_SCENARIO_TITLE = scenarioTitle;
     execEnv.SCENARIO_ID = scenarioId;
     execEnv.SCENARIO_TITLE = scenarioTitle;
     execEnv.EVIDENCE_APP_SLUG = appSlug;
@@ -1623,7 +1628,16 @@ export async function promoteExecutionPlan(
       const requiredActionSteps = deterministicContract.steps.filter(
         (s) => s.required !== false && ["fill", "press", "click"].includes(s.operation),
       ).length;
-      const compiledActionBindings = deterministicResult.bindings.filter((b) => b.runtimeMethod !== "expectPromotedVisible").length;
+      // Navigation is a required compiled capability, but it is not an interactive
+      // scenario action. Keep this parity gate scoped to the same operations as
+      // requiredActionSteps so adding a plan-backed setup navigation does not
+      // make a complete deterministic contract look over-bound. Oracle bindings
+      // can carry the triggering action's operation too, so exclude them by
+      // runtime method before comparing action coverage.
+      const compiledActionBindings = deterministicResult.bindings.filter(
+        (b) => b.runtimeMethod !== "expectPromotedVisible"
+          && ["fill", "press", "click"].includes(b.operation),
+      ).length;
       const failedGate = deterministicResult.unsupportedCapabilities.length > 0
         ? "deterministic_unsupported_capabilities"
         : compiledActionBindings !== requiredActionSteps

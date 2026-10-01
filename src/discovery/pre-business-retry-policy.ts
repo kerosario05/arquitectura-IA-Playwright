@@ -12,6 +12,12 @@ export type PreBusinessFailureSignals = {
 const TRANSIENT_PRE_BUSINESS_FAILURES = new Set([
   "POST_AUTH_NAVIGATION_FAILURE",
   "post_auth_navigation_failure",
+  // A recorded route can be briefly replaced by an intermediate SPA surface
+  // while its data/state transition settles. A fresh browser context is a
+  // bounded, generic retry for that pre-business condition; it is not tied to
+  // a project, route, or business label.
+  "RECORDED_PRECONDITION_NOT_REACHED",
+  "RECORDED_POSTCONDITION_NOT_REACHED",
 ]);
 
 export function isTransientPreBusinessFailure(input: PreBusinessFailureSignals): boolean {

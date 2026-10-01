@@ -50,7 +50,15 @@ class FakeLocator {
     return this.opts.enabled ?? true;
   }
 
-  async evaluate(): Promise<boolean> {
+  private evaluateCalls = 0;
+
+  async evaluate(): Promise<boolean | string> {
+    this.evaluateCalls += 1;
+    // FIRST_LOSS fix regression fixture gap: `tryFieldScopedStructuralFallback` now issues a
+    // SECOND `evaluate()` call on the accepted container -- the final identity-text gate
+    // (`elementTextMatchesAssociatedField`), after the first (CORE eligibility) call. Real
+    // `innerText`/`textContent` would carry the associated field's own text.
+    if (this.evaluateCalls > 1) return ASSOCIATED_FIELD;
     return true;
   }
 }

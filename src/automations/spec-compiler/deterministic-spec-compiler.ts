@@ -74,7 +74,7 @@ function portableImportPath(targetSpecPath: string, absoluteTargetPath: string):
   return buildPortablePathFromSpec(targetSpecPath, absoluteTargetPath).replace(/\.ts$/, "");
 }
 
-export type SpecCompilerSupportedOperation = Extract<SpecStepOperation, "fill" | "press" | "click">;
+export type SpecCompilerSupportedOperation = Extract<SpecStepOperation, "navigate" | "fill" | "press" | "click" | "select">;
 
 /**
  * Deterministic Page Object shell: pure organization/maintainability layer,
@@ -95,6 +95,7 @@ const POM_METHOD_BY_OPERATION: Record<SpecCompilerSupportedOperation, string> = 
   fill: "fill",
   click: "click",
   press: "press",
+  select: "select",
 };
 
 function buildPomClassSource(): string[] {
@@ -104,14 +105,17 @@ function buildPomClassSource(): string[] {
     `  fill(options: Parameters<typeof this.runtime.fillPromotedField>[0]) { return this.runtime.fillPromotedField(options); }`,
     `  click(options: Parameters<typeof this.runtime.clickPromotedTarget>[0]) { return this.runtime.clickPromotedTarget(options); }`,
     `  press(options: Parameters<typeof this.runtime.pressPromotedTarget>[0]) { return this.runtime.pressPromotedTarget(options); }`,
+    `  select(options: Parameters<typeof this.runtime.selectPromotedItem>[0]) { return this.runtime.selectPromotedItem(options); }`,
     `}`,
   ];
 }
 
 const SUPPORTED_OPERATIONS: ReadonlySet<SpecStepOperation> = new Set<SpecStepOperation>([
+  "navigate",
   "fill",
   "press",
   "click",
+  "select",
 ]);
 
 export type SpecCompileBinding = {
@@ -145,6 +149,36 @@ export type SpecCompileResult = {
 
 function escapeString(value: string): string {
   return value.replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/\n/g, "\\n");
+}
+
+function compileNavigateStep(
+  step: SpecExecutionContractStep,
+  lines: string[],
+  bindings: SpecCompileBinding[],
+  unsupportedCapabilities: string[],
+): void {
+  const target = step.target;
+  if (target?.strategy !== "url" || !target.value) {
+    unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:navigate_missing_url_authority`);
+    return;
+  }
+
+  const targetRef = target.value;
+  if (targetRef === "APP_BASE_URL") {
+    const urlVariable = `navigationUrl_${step.scenarioStepIndex}`;
+    lines.push(`    const ${urlVariable} = process.env.APP_BASE_URL;`);
+    lines.push(`    if (!${urlVariable}) throw new Error('APP_BASE_URL is required');`);
+    lines.push(`    await page.goto(${urlVariable});`);
+  } else {
+    lines.push(`    await page.goto('${escapeString(targetRef)}');`);
+  }
+  lines.push(`    await page.waitForLoadState('domcontentloaded');`);
+  bindings.push({
+    scenarioStepIndex: step.scenarioStepIndex,
+    operation: "navigate",
+    runtimeMethod: "page.goto",
+    targetRef,
+  });
 }
 
 function jsonLiteral(value: unknown): string {
@@ -354,6 +388,40 @@ function resolveActionTargetAuthority(step: SpecExecutionContractStep): ActionTa
   if (step.resolutionState === "unresolved_unrecoverable") {
     return { kind: "insufficient", reason: "unresolved_unrecoverable" };
   }
+  // A recorder scope identifies the container in which the original control was
+  // observed; it is never the control's own locator. Some recordings persist that
+  // same scope as technicalTargetRef (for example, text "SMS" inside
+  // id:IdentifyUserForm). When runtime-only recorder evidence names the actual
+  // control, discard this aliased container identity and let the shared runtime
+  // resolver re-prove the control inside the recorded scope. This is limited to
+  // an exact scope-ref match and evidence with a semantic target name.
+  const recorderEvidence = step.playwrightRecorderEvidence;
+  const recorderScopeRef = recorderEvidence?.scopeIdentity
+    ? `${recorderEvidence.scopeIdentity.strategy}:${recorderEvidence.scopeIdentity.value}`
+    : undefined;
+  const recorderActionSupportsEvidence = step.operation === "click" || step.operation === "fill" || step.operation === "press";
+  const recorderHasSemanticTarget = recorderActionSupportsEvidence
+    && recorderEvidence?.runtimeResolutionRequired === true
+    && recorderEvidence.kind !== "segmented_input"
+    && Boolean(recorderEvidence.normalizedName?.trim());
+  const certifiedTargetRef = step.certifiedTechnicalTarget?.locatorCandidates?.[0]
+    ? `${step.certifiedTechnicalTarget.locatorCandidates[0].strategy}:${step.certifiedTechnicalTarget.locatorCandidates[0].value}`
+    : undefined;
+  const scopeAliasedTargetRef = Boolean(
+    recorderHasSemanticTarget
+    && recorderScopeRef
+    && ((hasTechnicalTargetRef(step) && step.technicalTargetRef === recorderScopeRef)
+      || (!hasTechnicalTargetRef(step) && certifiedTargetRef === recorderScopeRef)),
+  );
+  const certifiedStructural = step.resolutionState !== "runtime_resolution_required"
+    ? resolveCertifiedStructuralAuthority(step)
+    : undefined;
+  if (certifiedStructural && certifiedStructural.ref !== recorderScopeRef) {
+    return certifiedStructural;
+  }
+  if (scopeAliasedTargetRef || (recorderHasSemanticTarget && certifiedStructural?.ref === recorderScopeRef)) {
+    return { kind: "semantic_runtime_only" };
+  }
   // FIRST_LOSS fix (jobId 25a2af2e-1ef3-4661-b156-5417c8783fe1): a coexisting, earlier-provenance
   // technicalTargetRef must never opaque a freshly-materialized, non-ambiguous certified
   // structural target -- but only when this step's identity is not already explicitly deferred
@@ -361,7 +429,6 @@ function resolveActionTargetAuthority(step: SpecExecutionContractStep): ActionTa
   // upgrade/bypass. When the fresh certification isn't valid/usable, existing behavior below is
   // untouched.
   if (step.resolutionState !== "runtime_resolution_required") {
-    const certifiedStructural = resolveCertifiedStructuralAuthority(step);
     if (certifiedStructural) {
       return certifiedStructural;
     }
@@ -616,6 +683,18 @@ function compileClickStep(
 ): void {
   const target = step.target;
   const authority = resolveActionTargetAuthority(step);
+  // For a recorded selection option, keep the exact accessible-role identity as the replay ref
+  // even when its structural certificate contains ephemeral DOM attributes. The certificate is
+  // still transported and tried first; the exact role ref reaches the shared causal resolver if
+  // that capture-time scope has changed.
+  const selectionLike = isSelectionLikeRecordedRole(step) && hasUniqueControlLineage(step, allSteps);
+  const recordedSelectionRef = selectionLike
+    ? [step.technicalTargetRef, ...(step.technicalTargetRefs ?? [])]
+      .find((ref) => {
+        const role = recordedRole(ref);
+        return Boolean(role && SELECTION_LIKE_ROLES.has(role));
+      })
+    : undefined;
 
   let locatorExpr: string | undefined;
   let refForBinding: string | undefined;
@@ -623,7 +702,7 @@ function compileClickStep(
   const usesRefLocator = authority.kind === "technical_ref" || authority.kind === "certified_structural" || authority.kind === "runtime_deferred";
 
   if (usesRefLocator) {
-    refForBinding = (authority as { ref: string }).ref;
+    refForBinding = recordedSelectionRef ?? (authority as { ref: string }).ref;
     locatorExpr = buildTechnicalTargetRefLocatorExpression(refForBinding);
   } else if (authority.kind === "display_fallback" || authority.kind === "semantic_runtime_only") {
     // The generic display/text fallback locator is independent, pre-existing behavior for the
@@ -650,7 +729,6 @@ function compileClickStep(
   // Structured authority only (recorded ARIA role + verified, non-positional control lineage) --
   // never inferred from target/step text. Fails closed to the existing generic `ui_change`
   // whenever either signal is missing or the lineage is ambiguous.
-  const selectionLike = isSelectionLikeRecordedRole(step) && hasUniqueControlLineage(step, allSteps);
   lines.push(`    await pageObject.${pomMethod}({`);
   lines.push(`      stepIndex: ${step.scenarioStepIndex},`);
   lines.push(`      target: '${escapeString(targetRef)}',`);
@@ -671,6 +749,11 @@ function compileClickStep(
   // the SAME shared field-scoped resolver Discovery's own live walk already used for this step.
   if (isRuntimeDeferred && step.associatedField) {
     lines.push(`      associatedField: '${escapeString(step.associatedField)}',`);
+  }
+  // A recorded option's owning field can be recovered from its same-control capture lineage.
+  // Carry that field only as runtime causal context; it does not replace the option identity.
+  if (selectionLike && step.selectionActivationField) {
+    lines.push(`      selectionActivationField: '${escapeString(step.selectionActivationField)}',`);
   }
   // LAST-RESORT, EXECUTION-ONLY: emitted as STRUCTURED DATA (never a getByText/text=/nth/first/
   // last/coordinate selector) -- the shared runtime resolver re-proves uniqueness live, this
@@ -710,6 +793,102 @@ function compileClickStep(
   });
 }
 
+function compileSelectStep(
+  step: SpecExecutionContractStep,
+  nextStep: SpecExecutionContractStep | undefined,
+  lines: string[],
+  bindings: SpecCompileBinding[],
+  unsupportedCapabilities: string[],
+): void {
+  const target = step.target;
+  const authority = resolveActionTargetAuthority(step);
+  const usesRefLocator = authority.kind === "technical_ref"
+    || authority.kind === "certified_structural"
+    || authority.kind === "runtime_deferred";
+  const isRuntimeDeferred = authority.kind === "runtime_deferred" || authority.kind === "semantic_runtime_only";
+  let targetRef: string | undefined;
+
+  if (usesRefLocator) {
+    targetRef = (authority as { ref: string }).ref;
+  } else if (authority.kind === "display_fallback" || authority.kind === "semantic_runtime_only") {
+    targetRef = target ? displayTargetRef(target) : undefined;
+  } else {
+    unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:select_insufficient_authority:${authority.reason}`);
+    return;
+  }
+  if (!targetRef) {
+    unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:select_missing_structured_target`);
+    return;
+  }
+
+  // The selection value comes only from the contract's data binding or its
+  // explicitly resolved execution target. Runtime selection remains primary;
+  // this exact option locator is the callback fallback accepted by the existing
+  // selectPromotedItem wrapper.
+  const selectionValueExpr = step.valueKey
+    ? dataRefEnvExpression(step.valueKey)
+    : step.resolvedExecutionTarget
+      ? `'${escapeString(step.resolvedExecutionTarget)}'`
+      : step.value
+        ? `'${escapeString(step.value)}'`
+        : undefined;
+  if (!selectionValueExpr) {
+    unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:select_missing_value_authority`);
+    return;
+  }
+
+  const pomMethod = POM_METHOD_BY_OPERATION.select;
+  const runtimeMethod = ACTION_RUNTIME_METHOD_BY_OPERATION.select;
+  if (!runtimeMethod) {
+    unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:no_runtime_authority:select`);
+    return;
+  }
+  lines.push(`    await pageObject.${pomMethod}({`);
+  lines.push(`      stepIndex: ${step.scenarioStepIndex},`);
+  lines.push(`      target: '${escapeString(targetRef)}',`);
+  if (step.valueKey) lines.push(`      valueKey: '${escapeString(step.valueKey)}',`);
+  lines.push(`      selectionValue: ${selectionValueExpr},`);
+  const nextFillField = nextStep?.operation === "fill"
+    && nextStep.scenarioStepIndex === step.scenarioStepIndex + 1
+    && (!step.entityScope || !nextStep.entityScope || step.entityScope === nextStep.entityScope)
+    && (!step.rowRelation || !nextStep.rowRelation || step.rowRelation === nextStep.rowRelation)
+    ? nextStep.target?.value?.trim()
+    : undefined;
+  // Some recorded compound controls report their option owner (for example, a
+  // currency chooser) as associatedField, while the next recorded fill names
+  // the containing grid cell. Preserve the former as selectionField and use
+  // the adjacent fill only as runtime search context when it is the immediate
+  // same-entity/same-row action. This does not certify or replace target refs.
+  const inferredSelectionField = !step.selectionField
+    && step.associatedField
+    && nextFillField
+    && step.associatedField !== nextFillField
+    ? step.associatedField
+    : undefined;
+  const selectionField = step.selectionField ?? inferredSelectionField;
+  const associatedField = inferredSelectionField ? nextFillField : step.associatedField;
+  if (selectionField) lines.push(`      selectionField: '${escapeString(selectionField)}',`);
+  if (associatedField) lines.push(`      associatedField: '${escapeString(associatedField)}',`);
+  if (usesRefLocator) lines.push(`      technicalTargetRefs: ['${escapeString(targetRef)}'],`);
+  if (isRuntimeDeferred && step.playwrightRecorderEvidence) {
+    lines.push(`      playwrightRecorderEvidence: ${JSON.stringify(step.playwrightRecorderEvidence)},`);
+  }
+  lines.push(`      actionIntent: 'select',`);
+  lines.push(`      expectedEffect: 'selection_state_change',`);
+  lines.push(`      action: async () => { await page.getByRole('option', { name: ${selectionValueExpr}, exact: true }).click(); }`);
+  lines.push(`    });`);
+
+  bindings.push({
+    scenarioStepIndex: step.scenarioStepIndex,
+    operation: "select",
+    runtimeMethod,
+    pomMethod,
+    targetRef,
+    ...(step.valueKey ? { dataRef: step.valueKey } : {}),
+    ...(isRuntimeDeferred ? { runtimeResolutionRequired: true } : {}),
+  });
+}
+
 function compileNavigationTransitionOracle(
   step: SpecExecutionContractStep,
   lines: string[],
@@ -743,6 +922,35 @@ function compileNavigationTransitionOracle(
   });
 }
 
+function compileVisibleTextOracle(
+  step: SpecExecutionContractStep,
+  lines: string[],
+  bindings: SpecCompileBinding[],
+  unsupportedCapabilities: string[],
+): void {
+  const oracle = step.oracle;
+  const target = oracle?.target?.trim();
+  if (!oracle || !["literal_visible_text", "heading_or_control"].includes(oracle.type) || !target) {
+    unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:oracle_unsupported:${oracle?.type ?? "none"}`);
+    return;
+  }
+  const targetRef = `text:${target}`;
+  lines.push(`    await promotedRuntime.expectPromotedVisible({`);
+  lines.push(`      stepIndex: ${step.scenarioStepIndex},`);
+  lines.push(`      target: '${escapeString(targetRef)}',`);
+  if (oracle.requirement) lines.push(`      description: '${escapeString(oracle.requirement)}',`);
+  lines.push(`      polarity: 'positive',`);
+  lines.push(`      assertion: async () => { await expect(page.getByText('${escapeString(target)}', { exact: true })).toBeVisible(); }`);
+  lines.push(`    });`);
+
+  bindings.push({
+    scenarioStepIndex: step.scenarioStepIndex,
+    operation: step.operation,
+    runtimeMethod: "expectPromotedVisible",
+    targetRef,
+  });
+}
+
 /**
  * Pure, deterministic compiler: same contract + same compile context always
  * yields byte-for-byte identical source. Not wired into production spec
@@ -757,20 +965,49 @@ export function compileDeterministicSpec(contract: SpecExecutionContract, compil
 
   const promotedRuntimeImportPath = portableImportPath(compileContext.targetSpecPath, PROMOTED_RUNTIME_ABS_PATH);
   const targetResolverImportPath = portableImportPath(compileContext.targetSpecPath, TARGET_RESOLVER_ABS_PATH);
+  const authFlowRequired = contract.auth?.required === true;
+  const authFlowPath = authFlowRequired && contract.appSlug
+    ? portableImportPath(
+        compileContext.targetSpecPath,
+        path.resolve(process.cwd(), "automations/apps", contract.appSlug, "flows/auth.flow.ts"),
+      )
+    : undefined;
+  const authFlowHelpersPath = authFlowRequired && contract.appSlug
+    ? portableImportPath(
+        compileContext.targetSpecPath,
+        path.resolve(process.cwd(), "automations/apps", contract.appSlug, "flows/auth.flow.helpers.ts"),
+      )
+    : undefined;
+  if (authFlowRequired && (!authFlowPath || !authFlowHelpersPath)) {
+    unsupportedCapabilities.push("auth_flow_missing_app_identity");
+  }
+  if (authFlowRequired && contract.auth?.insertionAfterStepIndex === undefined) {
+    unsupportedCapabilities.push("auth_flow_missing_insertion_point");
+  } else if (
+    authFlowRequired
+    && contract.auth?.insertionAfterStepIndex !== undefined
+    && !contract.steps.some((step) => step.scenarioStepIndex === contract.auth!.insertionAfterStepIndex)
+  ) {
+    unsupportedCapabilities.push(`auth_flow_insertion_step_missing:${contract.auth?.insertionAfterStepIndex}`);
+  }
 
   const usesTechnicalTargetRef = contract.steps.some((s) => {
     if (s.required === false) return false;
     const authority = resolveActionTargetAuthority(s);
     return authority.kind === "technical_ref" || authority.kind === "certified_structural" || authority.kind === "runtime_deferred";
   });
-  // Structural, not regex-on-source: mirrors compileNavigationTransitionOracle's
-  // own success condition exactly, so `expect` is imported iff an oracle call that
-  // actually uses it will be emitted.
+  // Structural, not regex-on-source: `expect` is imported iff a supported backed
+  // oracle implementation that actually uses it will be emitted.
   const usesExpectOracle = contract.steps.some((s) =>
     s.required !== false
-    && s.oracle?.type === "navigation_transition"
-    && typeof s.oracle.mechanism?.expected?.urlPattern === "string"
-    && s.oracle.mechanism.expected.urlPattern.trim().length > 0
+    && (
+      (s.oracle?.type === "navigation_transition"
+        && typeof s.oracle.mechanism?.expected?.urlPattern === "string"
+        && s.oracle.mechanism.expected.urlPattern.trim().length > 0)
+      || (["literal_visible_text", "heading_or_control"].includes(s.oracle?.type ?? "")
+        && typeof s.oracle?.target === "string"
+        && s.oracle.target.trim().length > 0)
+    )
   );
 
   lines.push(usesExpectOracle ? `import { test, expect } from '@playwright/test';` : `import { test } from '@playwright/test';`);
@@ -781,6 +1018,10 @@ export function compileDeterministicSpec(contract: SpecExecutionContract, compil
   );
   if (usesTechnicalTargetRef) {
     lines.push(`import { recordedLocatorFactory } from '${targetResolverImportPath}';`);
+  }
+  if (authFlowPath && authFlowHelpersPath) {
+    lines.push(`import { AuthFlow, setAuthFlowTestData } from '${authFlowPath}';`);
+    lines.push(`import { resolvePromotedSpecAuthDataFromEnv } from '${authFlowHelpersPath}';`);
   }
   lines.push(``);
   lines.push(...buildPomClassSource());
@@ -806,24 +1047,55 @@ export function compileDeterministicSpec(contract: SpecExecutionContract, compil
   }
   lines.push(`  const promotedRuntime = createPromotedSpecRuntime(page);`);
   lines.push(`  const pageObject = new ${POM_CLASS_NAME}(promotedRuntime);`);
+  if (authFlowPath && authFlowHelpersPath) {
+    lines.push(`  const authFlow = new AuthFlow(page);`);
+  }
   lines.push(`  try {`);
 
   // Accumulates, in original step order, every prior click/fill/press step's own
   // already-compiled callback -- so a LATER click step can transport a real
   // `previousStepReplays` array instead of a hardcoded `[]`. See `PreviousStepReplay`.
   const previousStepReplays: PreviousStepReplay[] = [];
+  const authAggregateCoverage = new Set(contract.auth?.aggregate?.coveredScenarioStepIndices ?? []);
+  let authFlowCallEmitted = false;
+  const emitAuthFlowCall = (): void => {
+    if (authFlowCallEmitted || !authFlowRequired || !authFlowPath || !authFlowHelpersPath) return;
+    const alias = contract.auth?.flowAlias;
+    const landing = contract.auth?.flowLanding;
+    lines.push(`    setAuthFlowTestData(resolvePromotedSpecAuthDataFromEnv(${alias ? `{ alias: '${escapeString(alias)}' }` : "undefined"}));`);
+    lines.push(`    const authFlowResult = await authFlow.ensureAuthenticated({`);
+    if (alias) lines.push(`      alias: '${escapeString(alias)}',`);
+    if (landing) lines.push(`      landing: '${escapeString(landing)}',`);
+    if (contract.auth?.aggregate) {
+      lines.push(`      contractBinding: ${JSON.stringify({
+        bindingId: contract.auth.aggregate.bindingId,
+        coveredScenarioStepIndices: contract.auth.aggregate.coveredScenarioStepIndices,
+      })},`);
+    }
+    lines.push(`    });`);
+    lines.push(`    if (!authFlowResult.success) throw new Error('auth_flow_failed_in_promoted_spec: ' + (authFlowResult.error ?? 'unknown_error'));`);
+    authFlowCallEmitted = true;
+  };
 
   for (const step of contract.steps) {
+    if (authFlowRequired && contract.auth?.insertionAfterStepIndex === step.scenarioStepIndex && authAggregateCoverage.has(step.scenarioStepIndex)) {
+      emitAuthFlowCall();
+    }
     if (step.required === false) continue;
+    if (authAggregateCoverage.has(step.scenarioStepIndex)) continue;
 
     // Action and oracle are independent semantics that may coexist on the
     // same contract step (e.g. click + navigation_transition). The action,
     // when present, is always emitted first; the oracle never replaces it.
     const isSupportedAction = SUPPORTED_OPERATIONS.has(step.operation);
     const hasNavigationOracle = step.oracle?.type === "navigation_transition";
+    const hasVisibleTextOracle = ["literal_visible_text", "heading_or_control"].includes(step.oracle?.type ?? "");
 
     if (isSupportedAction) {
       switch (step.operation as SpecCompilerSupportedOperation) {
+        case "navigate":
+          compileNavigateStep(step, lines, bindings, unsupportedCapabilities);
+          break;
         case "fill":
           compileFillStep(step, lines, bindings, unsupportedCapabilities, previousStepReplays);
           break;
@@ -833,14 +1105,31 @@ export function compileDeterministicSpec(contract: SpecExecutionContract, compil
         case "click":
           compileClickStep(step, contract.steps, lines, bindings, unsupportedCapabilities, previousStepReplays);
           break;
+        case "select":
+          compileSelectStep(
+            step,
+            contract.steps.find((candidate) => candidate.scenarioStepIndex === step.scenarioStepIndex + 1),
+            lines,
+            bindings,
+            unsupportedCapabilities,
+          );
+          break;
       }
-    } else if (!hasNavigationOracle) {
+    } else if (!hasNavigationOracle && !hasVisibleTextOracle) {
       unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:operation_unsupported:${step.operation}`);
     }
 
     if (hasNavigationOracle) {
       compileNavigationTransitionOracle(step, lines, bindings, unsupportedCapabilities);
     }
+    if (hasVisibleTextOracle) {
+      compileVisibleTextOracle(step, lines, bindings, unsupportedCapabilities);
+    }
+
+    if (authFlowRequired && contract.auth?.insertionAfterStepIndex === step.scenarioStepIndex) emitAuthFlowCall();
+  }
+  if (authFlowRequired && !authFlowCallEmitted) {
+    unsupportedCapabilities.push(`auth_flow_insertion_step_not_emitted:${contract.auth?.insertionAfterStepIndex ?? "missing"}`);
   }
 
   lines.push(`  } finally {`);

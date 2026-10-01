@@ -21,6 +21,7 @@ export type RuntimeEvidenceTrace = {
     locatorStrategy?: string;
     controlIdentity?: ControlIdentity;
     success: boolean;
+    postActionSyncSignal?: string;
     transitionDetected?: boolean;
     beforeStructuralFingerprint?: string;
     afterStructuralFingerprint?: string;

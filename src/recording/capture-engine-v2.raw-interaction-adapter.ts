@@ -24,6 +24,7 @@ export type RawInteractionLike = {
   tagName?: string;
   inputType?: string;
   value?: string;
+  rawTypedValue?: string;
   testId?: string;
   domId?: string;
   name?: string;
@@ -119,6 +120,7 @@ export function adaptCaptureActionToRawInteraction(action: CaptureAction): RawIn
 
   if (kind === "input") {
     raw.value = action.value?.literal;
+    raw.rawTypedValue = action.value?.rawTypedValue;
     raw.valueSource = "user";
   }
 

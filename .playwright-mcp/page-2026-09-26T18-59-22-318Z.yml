@@ -1,0 +1,66 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - generic [ref=e386]:
+    - banner [ref=e387]:
+      - img "Banco Santa Cruz" [ref=e388]
+    - main [ref=e389]:
+      - generic [ref=e390]:
+        - button [ref=e391] [cursor=pointer]
+        - generic [ref=e394]:
+          - heading "Más detalles del producto" [level=1] [ref=e395]
+          - paragraph [ref=e396]: Tarjeta Crédito Visa Clásica
+      - generic [ref=e397]:
+        - generic [ref=e398]:
+          - heading "Tarjeta Crédito Visa Clásica" [level=3] [ref=e399]
+          - paragraph [ref=e401]: Las tarjetas de crédito Visa Santa Cruz te permiten de manera segura simplificar tus pagos, respaldando tus necesidades de una forma confiable y flexible.
+          - generic [ref=e402]:
+            - generic [ref=e403]:
+              - heading "Beneficios" [level=4] [ref=e404]
+              - generic [ref=e405]:
+                - generic [ref=e406]: Doble Saldo
+                - generic [ref=e411]: Puntos Santa Cruz
+            - generic [ref=e416]:
+              - heading "Detalles" [level=4] [ref=e417]
+              - generic [ref=e418]:
+                - generic [ref=e419]: Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz.
+                - generic [ref=e424]: Pagos en línea con disponibilidad inmediata.
+                - generic [ref=e429]: Tecnología contactless y Click to Pay.
+                - generic [ref=e434]: Opción de elegir la fecha de corte para pagos mensuales.
+                - generic [ref=e439]: Seguro de vida Santa Cruz (opcional).
+                - generic [ref=e444]: "Mayor plazo para pagar: 26 días después de la fecha de corte."
+                - generic [ref=e449]: 10% del límite aprobado en sobregiros.
+                - generic [ref=e454]: Amplia red de cajeros automáticos a nivel mundial.
+                - generic [ref=e459]: La cobertura anual protege en caso de pérdida, robo o falsificación del plástico, luego de ser notificado al banco la pérdida o robo de la tarjeta (Obligatorio).
+                - generic [ref=e464]: Plan de asistencia Santa Cruz (Opcional).
+            - generic [ref=e469]:
+              - heading "Requisitos:" [level=4] [ref=e470]
+              - generic [ref=e471]:
+                - generic [ref=e472]: Certificación de ingresos.
+                - generic [ref=e477]: Si es profesional independiente, la empresa deberá tener dos (2) años de establecida.
+                - generic [ref=e482]: Copia de la cédula de identidad y electoral.
+                - generic [ref=e487]: Mínimo seis (6) meses en empleo actual y doce (12) meses en caso de haber tenido empleo anterior.
+                - generic [ref=e492]: Edad entre 18 a 70 años.
+            - generic [ref=e497]:
+              - heading "Información del Producto" [level=4] [ref=e498]
+              - generic [ref=e499]:
+                - generic [ref=e500]:
+                  - generic [ref=e501]: "Tipo:"
+                  - generic [ref=e502]: Tarjetas de Crédito Clásica
+                - generic [ref=e503]:
+                  - generic [ref=e504]: "Límite mínimo:"
+                  - generic [ref=e505]: RD$50,000
+                - generic [ref=e506]:
+                  - generic [ref=e507]: "Límite máximo:"
+                  - generic [ref=e508]: RD$75,000
+                - generic [ref=e509]:
+                  - generic [ref=e510]: "Límite mínimo USD:"
+                  - generic [ref=e511]: US$100
+                - generic [ref=e512]:
+                  - generic [ref=e513]: "Límite máximo USD:"
+                  - generic [ref=e514]: US$3,000
+        - generic [ref=e515]:
+          - button "Finalizar sesión" [ref=e516] [cursor=pointer]
+          - button "Volver" [ref=e518] [cursor=pointer]
+          - button "Solicitar" [ref=e520] [cursor=pointer]
+    - contentinfo [ref=e522]: © 2024 Banco Santa Cruz S.A. | Todos los derechos reservadosAv. Lope de Vega No.21, Ensanche Naco, Santo Domingo, Rep. Dom.

@@ -963,6 +963,95 @@ test("11n/resolvedOwnerSemanticFallback. a resolved-but-technically-weak owner (
   assert.ok(action.playwrightRecorderEvidence, "the recorder-candidate adapter runs for this path too");
 });
 
+/**
+ * FIRST_LOSS fix (physical evidence: interaction-14, role=null, technicalTargetCount=0,
+ * semanticRuntimeEligible=false despite the browser proving a unique semantic descendant): a
+ * resolved, framework-actionable `div` owner with NO id/data-testid but a non-deterministic or
+ * ambiguous `structuralIdentity` made `buildOwnerTechnicalEvidence` return a TRUTHY-but-empty
+ * object (0 locatorCandidates, `deterministicStructuralIdentity` false/ambiguous) -- test 11n
+ * above only covered `technicalEvidence === undefined`, never this "present but useless" shape,
+ * which is the actual real-world one for a plain React/Tailwind clickable div. That falsely
+ * satisfied the old `!technicalEvidence` gate and permanently blocked the semantic fallback.
+ */
+test("11p/resolvedOwnerWeakStructuralIdentityStillGetsSemanticFallback. a resolved owner whose OWN structuralIdentity is present but non-deterministic (0 real locators) still gets the semantic runtime evidence fallback, not blocked by a merely-present-but-useless technicalEvidence", () => {
+  const bridge = new CaptureEngineV2ShadowBridge();
+  bridge.handleMessage({ type: "document_ready", ...doc });
+  bridge.handleMessage({
+    type: "click",
+    ...doc,
+    interactionId: "pointer-resolved-weak-structural-1",
+    composedPath: [candidate({
+      tag: "div",
+      pathDepth: 0,
+      associatedField: "SMS",
+      groupEvidence: "tab-group",
+      structuralIdentity: {
+        owner: { tag: "div" },
+        stableDirectAttributes: {},
+        stableDescendants: [],
+        semanticShape: ["img"],
+        deterministicStructuralIdentity: false,
+      },
+      semanticRuntimeEvidence: {
+        source: "accessible_name",
+        normalizedValue: "producto ejemplo",
+        targetTag: "img",
+        scopeAlternatives: [{ scopeIdentity: { strategy: "id", value: "stable-scope" }, captureMatchCount: 1 }],
+        captureUniqueTarget: true,
+      },
+    })],
+  });
+
+  const action = bridge.technicalActions[0]?.action;
+  assert.ok(action, "the div owner still resolves via stable_associated_control_evidence, unchanged");
+  assert.ok(action.owner, "owner resolution itself is completely unchanged -- still the div");
+  assert.ok(
+    action.semanticRuntimeEvidence,
+    "semantic runtime evidence must reach a resolved owner whose OWN technicalEvidence is present but carries no usable locator/deterministic identity",
+  );
+  assert.equal(action.semanticRuntimeEvidence?.normalizedValue, "producto ejemplo");
+  assert.equal(action.semanticRuntimeEvidence?.targetTag, "img");
+});
+
+test("11q/resolvedOwnerDeterministicStructuralIdentityBlocksSemanticFallback. a resolved owner whose OWN structuralIdentity IS deterministic and unique (even with 0 locatorCandidates) still counts as real technical authority and does not get a semantic fallback", () => {
+  const bridge = new CaptureEngineV2ShadowBridge();
+  bridge.handleMessage({ type: "document_ready", ...doc });
+  bridge.handleMessage({
+    type: "click",
+    ...doc,
+    interactionId: "pointer-resolved-strong-structural-1",
+    composedPath: [candidate({
+      tag: "div",
+      pathDepth: 0,
+      associatedField: "SMS",
+      groupEvidence: "tab-group",
+      structuralIdentity: {
+        owner: { tag: "div" },
+        stableDirectAttributes: {},
+        stableDescendants: [],
+        semanticShape: ["img"],
+        deterministicStructuralIdentity: true,
+        structuralIdentityMatchCount: 1,
+      },
+      semanticRuntimeEvidence: {
+        source: "accessible_name",
+        normalizedValue: "producto ejemplo",
+        targetTag: "img",
+        scopeAlternatives: [{ scopeIdentity: { strategy: "id", value: "stable-scope" }, captureMatchCount: 1 }],
+        captureUniqueTarget: true,
+      },
+    })],
+  });
+
+  const action = bridge.technicalActions[0]?.action;
+  assert.ok(action);
+  assert.equal(
+    action.semanticRuntimeEvidence,
+    undefined,
+    "an owner already deterministically/uniquely certified structurally must never be degraded by a semantic fallback",
+  );
+});
+
 test("11o/resolvedOwnerWithTechnicalEvidenceUnaffected. a resolved owner that DOES have real technicalEvidence never gets a semantic fallback attached -- priority order preserved", () => {
   const bridge = new CaptureEngineV2ShadowBridge();
   bridge.handleMessage({ type: "document_ready", ...doc });
@@ -1278,6 +1367,37 @@ test("4/6/7. the same combobox+option pair ALSO produces exactly one functional 
   assert.equal(projection.owner?.role, "combobox", "the functional projection's owner must be the combobox, never the option");
   assert.equal(projection.owner?.associatedField, "Tipo de documento");
   assert.equal(projection.selectionEvidence.optionOwner?.role, "option", "the option's own evidence is kept separately, not merged into owner");
+});
+
+test("trusted selection pointerdowns preserve a selection when a portal suppresses the option click, without duplicating its later click", () => {
+  const bridge = new CaptureEngineV2ShadowBridge();
+  bridge.handleMessage({ type: "document_ready", ...doc });
+  bridge.handleMessage({
+    type: "pointer",
+    ...doc,
+    interactionId: "pointer-combo",
+    trusted: true,
+    composedPath: [candidate({ tag: "span", role: "combobox", actionable: true, associatedField: "Currency", pathDepth: 0 })],
+  });
+  bridge.handleMessage({
+    type: "pointer",
+    ...doc,
+    interactionId: "pointer-option",
+    trusted: true,
+    composedPath: [candidate({ tag: "li", role: "option", actionable: true, accessibleName: "DOP", pathDepth: 0 })],
+  });
+
+  assert.equal(bridge.functionalActions.length, 1);
+  assert.equal(bridge.functionalActions[0].action.selectionEvidence.selectedDisplay, "DOP");
+  assert.equal(bridge.technicalActions.length, 2, "each trusted pointerdown is represented once in the technical stream");
+  bridge.handleMessage({
+    type: "click",
+    ...doc,
+    interactionId: "pointer-option",
+    composedPath: [candidate({ tag: "li", role: "option", actionable: true, accessibleName: "DOP", pathDepth: 0 })],
+  });
+  assert.equal(bridge.technicalActions.length, 2, "the matching click is consumed after its pointerdown was captured");
+  assert.equal(bridge.functionalActions.length, 1, "the same physical selection is projected once");
 });
 
 test("5. the functional select projection's sourceTechnicalActionSeqs trace back to the exact two technical click seqs", () => {

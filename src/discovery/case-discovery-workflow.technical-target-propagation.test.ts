@@ -130,3 +130,69 @@ test("recordingBeatsTextPlanTest (CASE 2): recording evidence wins over a Discov
   assert.ok(step?.certifiedTechnicalTarget);
   assert.equal(step!.certifiedTechnicalTarget!.certifiedFrom, "recording", "recording authority must not be discarded in favor of the discovery PlanTarget");
 });
+
+test("recording action lineage is matched by semantic step identity when scenario and plan indices differ", () => {
+  const scenario = buildRecordingScenario();
+  scenario.steps = [{
+    index: 19,
+    action: `Presionar "${LONG_LABEL}"`,
+    dataHints: [],
+  }];
+  scenario.recordingExecutionContract = {
+    actions: [{
+      actionType: "click",
+      humanStep: `Presionar "${LONG_LABEL}"`,
+      semanticField: LONG_LABEL,
+      technicalTargetRef: `role:div|${LONG_LABEL}`,
+      technicalTargetRefs: [`role:div|${LONG_LABEL}`],
+      technicalTargetCandidates: step4TechnicalTargetCandidates(),
+      associatedField: LONG_LABEL,
+    }],
+    runtimeInputRequirements: [],
+  };
+
+  const sourceScenario = buildPromotionSourceScenario(scenario, buildCaseResult());
+  const propagated = sourceScenario.steps?.find((candidate) => candidate.index === 19) as any;
+  assert.equal(propagated.technicalTargetRef, `role:div|${LONG_LABEL}`);
+  assert.equal(propagated.associatedField, LONG_LABEL);
+  assert.ok(propagated.technicalTargetCandidates?.length);
+
+  const contract = buildSpecExecutionContract(buildPlan({ strategy: "text", value: LONG_LABEL }), sourceScenario);
+  const contractStep = contract.steps.find((candidate) => candidate.scenarioStepIndex === 19);
+  assert.equal(contractStep?.technicalTargetRef, `role:div|${LONG_LABEL}`);
+  assert.ok(contractStep?.certifiedTechnicalTarget, "recording candidate remains available to the shared target materializer");
+});
+
+test("terminal feedback promotion does not require a trailing narrative success message", () => {
+  const scenario = buildRecordingScenario();
+  scenario.steps = [
+    { index: 19, action: 'Presionar "Generar Turno"', dataHints: [] },
+    { index: 20, action: 'El sistema muestra "¡Hola!"', dataHints: [] },
+  ];
+  scenario.raw = { custom_expected: 'Se muestra "¡Hola!"' } as any;
+  scenario.recordingExecutionContract = {
+    actions: [{ actionType: "click", humanStep: 'Presionar "Generar Turno"', semanticField: "Generar Turno" }],
+    runtimeInputRequirements: [],
+  };
+  const sourceScenario = buildPromotionSourceScenario(scenario, buildCaseResult({
+    steps: [
+      { index: 19, action: 'Presionar "Generar Turno"', targetText: "Generar Turno", status: "found", assertionDiagnostics: { postActionSyncSignal: "terminal_feedback" } } as any,
+      { index: 20, action: 'El sistema muestra "¡Hola!"', targetText: 'El sistema muestra "¡Hola!"', status: "found" } as any,
+    ],
+  }));
+
+  assert.deepEqual(sourceScenario.observedAssertions, []);
+  assert.equal(sourceScenario.expectedResult, undefined);
+  assert.equal(sourceScenario.steps?.find((candidate) => candidate.index === 20)?.assertionImportance, "contextual");
+
+  const contract = buildSpecExecutionContract({
+    ...buildPlan({ strategy: "text", value: "Generar Turno" }),
+    steps: [
+      { index: 19, action: "click", target: { strategy: "text", value: "Generar Turno" }, description: 'Presionar "Generar Turno"' },
+      { index: 20, action: "assert", target: { strategy: "text", value: "¡Hola!" }, description: 'El sistema muestra "¡Hola!"' },
+    ],
+  } as any, sourceScenario);
+  const narrativeOutcome = contract.steps.find((candidate) => candidate.scenarioStepIndex === 20);
+  assert.equal(narrativeOutcome?.required, false);
+  assert.equal(narrativeOutcome?.executionStatus, "contextual_unresolved");
+});

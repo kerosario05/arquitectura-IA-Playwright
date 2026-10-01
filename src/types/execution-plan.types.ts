@@ -89,6 +89,9 @@ export type ExecutionPlanStep = {
   rowScope?: number;
   rowRelation?: "next" | "added";
   associatedField?: string;
+  /** Recorder-captured runtime evidence for compound controls such as segmented OTP inputs. */
+  playwrightRecorderEvidence?: import("../recording/structural-owner-identity").PlaywrightRecorderEvidence;
+  resolutionState?: "certified" | "runtime_resolution_required" | "unresolved_unrecoverable";
   expectedValueKey?: string;
   controlIdentity?: ControlIdentity;
   supportingStrategy?: {

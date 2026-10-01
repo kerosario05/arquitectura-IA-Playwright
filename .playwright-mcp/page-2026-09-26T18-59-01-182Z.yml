@@ -1,0 +1,39 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - img "Banco Santa Cruz" [ref=e5]
+    - main [ref=e6]:
+      - generic [ref=e7]:
+        - generic [ref=e8]:
+          - generic [ref=e9]: Operaciones seguras
+          - generic [ref=e13]: Disponible 24/7
+        - generic [ref=e17]:
+          - generic [ref=e18]:
+            - paragraph [ref=e19]: KIOSCO DE AUTOGESTIÓN
+            - heading "¡Hola!" [level=1] [ref=e20]
+            - paragraph [ref=e21]: Bienvenido al kiosco de autogestión de Banco Santa Cruz
+          - generic [ref=e22]: Toca cualquier opción para comenzar
+          - generic [ref=e29]:
+            - button "Estados de cuenta" [ref=e30] [cursor=pointer]:
+              - generic [ref=e36]:
+                - heading "Estados de cuenta" [level=3] [ref=e37]
+                - paragraph [ref=e38]: Genera y recibe tus estados por correo
+            - button "Consulta de balance" [ref=e39] [cursor=pointer]:
+              - generic [ref=e45]:
+                - heading "Consulta de balance" [level=3] [ref=e46]
+                - paragraph [ref=e47]: Cuentas, préstamos, certificados y tarjetas
+            - button "Cartas y certificaciones" [ref=e48] [cursor=pointer]:
+              - generic [ref=e55]:
+                - heading "Cartas y certificaciones" [level=3] [ref=e56]
+                - paragraph [ref=e57]: Cartas de referencia y consulares
+            - button "Canje de Puntos" [ref=e58] [cursor=pointer]:
+              - generic [ref=e65]:
+                - heading "Canje de Puntos" [level=3] [ref=e66]
+                - paragraph [ref=e67]: Aplica tus Puntos Santa Cruz a tu tarjeta
+            - button "Explora nuestros productos" [ref=e68] [cursor=pointer]:
+              - generic [ref=e74]:
+                - heading "Explora nuestros productos" [level=3] [ref=e75]
+                - paragraph [ref=e76]: Conoce los beneficios de los productos BSC
+    - contentinfo [ref=e77]: © 2024 Banco Santa Cruz S.A. | Todos los derechos reservadosAv. Lope de Vega No.21, Ensanche Naco, Santo Domingo, Rep. Dom.

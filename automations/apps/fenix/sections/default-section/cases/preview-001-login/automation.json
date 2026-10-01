@@ -7,17 +7,17 @@
   "specPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-login\\case.spec.ts",
   "appSlug": "fenix",
   "appConfigPath": "automations\\apps\\fenix\\app.config.json",
-  "status": "spec_failed",
+  "status": "active",
   "source": "discovery",
   "appProfile": "fenix",
-  "createdAt": "2026-09-23T14:54:40.254Z",
-  "updatedAt": "2026-09-23T14:54:40.254Z",
-  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-23T14-53-39-279Z\\discovered-plans.pending.json",
-  "pomStatus": "needs_manual_review",
+  "createdAt": "2026-09-30T21:44:09.743Z",
+  "updatedAt": "2026-09-30T21:44:09.743Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-30T21-39-21-278Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
   "inlineDebugMode": false,
-  "specVerificationStatus": "failed",
+  "specVerificationStatus": "passed",
   "metadata": {
-    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-23T14-53-39-279Z",
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-30T21-39-21-278Z",
     "pomDiagnostics": {
       "status": "promoted",
       "inlineFallbackUsed": false,
@@ -41,7 +41,7 @@
       },
       "invocations": 0,
       "invocationsConsumed": 0,
-      "durationMs": 50074,
+      "durationMs": 87617,
       "usage": {
         "inputTokens": null,
         "cachedInputTokens": null,
@@ -60,31 +60,27 @@
         "typescript": "passed",
         "playwrightDiscovery": "passed",
         "semanticCoverage": "passed",
-        "functionalExecution": "failed"
+        "functionalExecution": "passed"
       },
-      "promotionAllowed": false,
+      "promotionAllowed": true,
       "specsRequested": 1,
-      "specsValidated": 0,
-      "specsRejected": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
       "specGenerationAttempts": 0,
       "specRepairAttempts": 0,
-      "firstPassPromotion": false,
-      "failedGatesAttempt1": [
-        "functionalExecution"
-      ],
+      "firstPassPromotion": true,
+      "failedGatesAttempt1": [],
       "regressedGates": [],
       "missingRequirements": [],
       "oracleTypes": [
         "navigation_transition"
       ],
-      "errors": [
-        "functional_execution_failed:exitCode=1",
-        "functional_execution_error:Error: Post-click stability check failed. expectedEffect=ui_change reason=no_observable_post_action_outcome target=\"role:textbox|Contraseña:\" previousUrl=\"https://qa1.santacruz.do/onlinebanking/\" currentUrl=\"https://qa1.santacruz.do/onlinebanking/\""
-      ],
+      "errors": [],
       "warnings": [
-        "step_index_not_explicit_in_spec:6",
-        "functional_execution_screenshots=0",
-        "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 0)."
+        "step_index_not_explicit_in_spec:9",
+        "step_index_not_explicit_in_spec:10",
+        "step_index_not_explicit_in_spec:11",
+        "step_index_not_explicit_in_spec:12"
       ],
       "finalSpec": {
         "origin": "deterministic_compiler",
@@ -93,11 +89,11 @@
         "fallback": null
       },
       "runtimeGate": {
-        "decision": "block",
-        "promotionStatus": "blocked",
-        "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 0)."
+        "decision": "promote",
+        "promotionStatus": "promoted",
+        "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
       },
-      "specWritten": false,
+      "specWritten": true,
       "previousSpec": {
         "existed": false,
         "hash": null,
@@ -108,10 +104,8 @@
       "requestedStrategy": "auto",
       "autoPomEnabled": true,
       "selectedStrategy": "pom",
-      "reason": "spec_generation_validation_failed",
-      "blockers": [
-        "spec_generation_validation_failed"
-      ],
+      "reason": "promoted",
+      "blockers": [],
       "availablePageObjects": [
         "ProductListPage",
         "OperationsMenuPage"
@@ -123,8 +117,14 @@
       "fallbackUsed": false,
       "requirePomRuntime": false,
       "specPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-login\\case.spec.ts",
-      "specHash": "05b79910cbfaee8d30994c84fa1c74bd63d3f113f194f0457e91c679796c6ff9",
-      "specSource": "ai_candidate"
-    }
-  }
+      "specHash": "ab8a3a3b543223ea47dfc59e561b9e484ad034add2df0cfd339125d8497a876a",
+      "specSource": "generatedSpec"
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-login\\plan.json",
+    "previousStatus": "spec_failed"
+  },
+  "promotionPersisted": true,
+  "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-login\\case.spec.ts",
+  "promotedSpecHash": "ab8a3a3b543223ea47dfc59e561b9e484ad034add2df0cfd339125d8497a876a"
 }

@@ -4,6 +4,7 @@ import { confirmedCompoundSelectionBefore, logicalCompoundChildValue } from "./c
 
 test("compound logical child is separated only from a confirmed selection", () => {
   assert.equal(logicalCompoundChildValue("DOP 15000", "DOP"), "15000");
+  assert.equal(logicalCompoundChildValue("DOP 8,5000", "DOP"), "85000");
   assert.equal(logicalCompoundChildValue("USD 75", "USD"), "75");
   assert.equal(logicalCompoundChildValue("15000", "DOP"), undefined);
   assert.equal(logicalCompoundChildValue("DOP 15000", undefined), undefined);

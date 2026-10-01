@@ -22,6 +22,7 @@ import { CANDIDATE_STRUCTURAL_IDENTITY_SOURCE } from "../capture-engine-v2.struc
 import { STRUCTURAL_OWNER_IDENTITY_SOURCE } from "../structural-owner-identity";
 import { ACTIONABILITY_CONTRACT_SOURCE } from "../actionability-contract";
 import { CLASSIFY_NATIVE_ROLE_IDENTITY_SOURCE } from "../capture-engine-v2.native-role-identity";
+import { GENERIC_UNRESOLVED_LABELS, isGenericUnresolvedLabel } from "../trace-normalizer";
 
 export function buildCaptureScriptV2Content(captureInstanceId: string): string {
   return String.raw`
@@ -38,8 +39,13 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
   // user causality for a value-delta commit -- never to turn focus/click alone into an edit.
   var currentSessionEl = null;
   var currentSessionTrusted = false;
+  var currentSessionRawValue = "";
+  var pendingRawInput = null;
   var pointerInteractionCounter = 0;
   var pendingPointerInteractionId = null;
+  // Keep browser-to-Node binding calls observable until their exposed-binding promises settle.
+  // Stop asks every recorder-owned frame to flush this set before closing the context.
+  var pendingBindingCalls = new Set();
   // Read-only accessor for the legacy CAPTURE_SCRIPT's own MutationObserver-driven post_action
   // observation (a separate, always-installed script -- see web-session-recorder.ts) to correlate
   // its diagnostic mutation evidence to the V2 interaction that actually caused it, without a
@@ -59,8 +65,21 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
     if (!window.__qaRecordV2) return;
     message.captureInstanceId = captureInstanceId;
     message.documentId = documentId;
-    window.__qaRecordV2(message).catch(function () {});
+    var pending;
+    try {
+      pending = Promise.resolve(window.__qaRecordV2(message));
+    } catch (e) {
+      return;
+    }
+    pendingBindingCalls.add(pending);
+    pending.catch(function () {}).then(function () { pendingBindingCalls.delete(pending); });
   }
+
+  window.__qaRecorderV2Flush = async function () {
+    while (pendingBindingCalls.size > 0) {
+      await Promise.allSettled(Array.from(pendingBindingCalls));
+    }
+  };
 
   function isVisible(el) {
     if (!el || typeof el.getBoundingClientRect !== "function") return false;
@@ -133,6 +152,10 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
   // already being declared, in exactly this order.
   var normalizeStructuralOwnerIdentity = ${STRUCTURAL_OWNER_IDENTITY_SOURCE};
   var buildCandidateStructuralIdentity = ${CANDIDATE_STRUCTURAL_IDENTITY_SOURCE};
+  // Serialize the same generic-label contract used by Node-side admission so a placeholder
+  // button caption cannot suppress a stronger grid/header relation during browser capture.
+  var GENERIC_UNRESOLVED_LABELS = new Set(${JSON.stringify(Array.from(GENERIC_UNRESOLVED_LABELS))});
+  var isGenericUnresolvedLabel = ${isGenericUnresolvedLabel.toString()};
   window.__qaStructuralIdentityDiagnostic = function (kind, payload) {
     send({ type: "structural_identity_diagnostic", diagnosticKind: kind, payload: payload });
   };
@@ -165,6 +188,16 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
     if (el.labels && el.labels.length > 0 && el.labels[0].textContent && el.labels[0].textContent.trim()) {
       return el.labels[0].textContent.trim();
     }
+    // FIRST_LOSS fix: alt is a native, explicit accessible-name source per the HTML/ARIA
+    // accessible-name computation (img, area, input type=image) -- as authoritative as
+    // aria-label, never inferred from tag. Without this, a trusted click on such an element
+    // (e.g. a clickable product-card image with no wrapping labelled control) had no explicit
+    // name to classify, fell through to the no-textContent "none" branch below, and was never
+    // captured as a semantic role+name identifier -- confirmed physically: Capture V2 showed it
+    // only as an unlabeled structural "control" while a role-based img locator using that alt
+    // text resolved it correctly and uniquely at runtime.
+    var altText = el.getAttribute && el.getAttribute("alt");
+    if (altText && altText.trim()) return altText.trim();
     // FIRST_LOSS fix: input type=submit/button/reset is a void element -- it can never have
     // textContent -- and per the standard HTML accessible-name computation, its value attribute
     // IS the control's real name (e.g. input type=submit value=Continuar), not a
@@ -238,7 +271,12 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
   // about THIS control, never a large panel's aggregated heading. Never reads a huge ancestor's
   // full textContent, never picks by DOM position among several candidates.
   var MAX_FIELD_CONTAINER_DEPTH = 4;
-  var MAX_FIELD_CONTAINER_INTERACTIVE_DESCENDANTS = 4;
+  // FIRST_LOSS fix: a real product-card grid ancestor (a handful of sibling cards, each with its
+  // own button/link) routinely has more than 4 interactive descendants without being some huge,
+  // page-wide container -- this guard exists to reject genuinely oversized containers (e.g. a
+  // whole page body/nav), never a normal multi-card grid a few levels up. Raised from 4 to 16,
+  // still a bounded sanity check, not unlimited.
+  var MAX_FIELD_CONTAINER_INTERACTIVE_DESCENDANTS = 16;
   var MAX_FIELD_LABEL_LENGTH = 60;
 
   function shortLabelChildOf(container, excludeEl) {
@@ -256,13 +294,20 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
 
   function computeAssociatedField(el) {
     var node = el;
+    var levelDiagnostics = [];
     for (var depth = 0; depth < MAX_FIELD_CONTAINER_DEPTH && node && node.parentElement; depth++) {
       node = node.parentElement;
       var interactiveCount = node.querySelectorAll ? node.querySelectorAll(INTERACTIVE_SELECTOR).length : 0;
-      if (interactiveCount > MAX_FIELD_CONTAINER_INTERACTIVE_DESCENDANTS) continue;
+      var skippedForInteractiveCount = interactiveCount > MAX_FIELD_CONTAINER_INTERACTIVE_DESCENDANTS;
+      levelDiagnostics.push({ ancestorDepth: depth, interactiveCount: interactiveCount, childCount: node.children ? node.children.length : 0, skippedForInteractiveCount: skippedForInteractiveCount });
+      if (skippedForInteractiveCount) continue;
       var label = shortLabelChildOf(node, el);
-      if (label) return label;
+      if (label) {
+        try { send({ type: "capture_trace", stage: "associated_field_depth_diagnostic", trusted: true, diagnostic: { found: true, foundAtDepth: depth, levels: levelDiagnostics } }); } catch (e) { /* never blocks capture */ }
+        return label;
+      }
     }
+    try { send({ type: "capture_trace", stage: "associated_field_depth_diagnostic", trusted: true, diagnostic: { found: false, levels: levelDiagnostics } }); } catch (e) { /* never blocks capture */ }
     return undefined;
   }
 
@@ -465,6 +510,111 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
     return { scopeIdentity: scopeIdentityRef, captureMatchCount: 1, source: targetValue.source, normalizedValue: normalized, targetTag: tag };
   }
 
+  // GATE #3 fix: when the click's raw target IS the candidate itself (originalTarget === el,
+  // never an ancestor case -- that is Gate #1 above) and el carries no strong role/name of its
+  // own, a unique semantic descendant already inside el (found via the SAME structural-evidence
+  // scan, never a new pipeline) may lend its role+name as el's OWN semantic identity. Never
+  // rewrites el.role/el.accessibleName -- functionalOwner stays el, only semanticRuntimeAlternative
+  // is attached. Fail-closed: exactly one visible descendant with a strong native role identity,
+  // else undefined. Never positional (no nth/first/last/index).
+  function computeOwnOnlySemanticRuntimeAlternative(el, scopeIdentityRef) {
+    if (!el.querySelectorAll) return undefined;
+    var descendants = el.querySelectorAll("*");
+    var found;
+    var foundCount = 0;
+    for (var i = 0; i < descendants.length && foundCount < 2; i++) {
+      var d = descendants[i];
+      if (!isVisible(d)) continue;
+      var nativeIdentity = classifyNativeRoleIdentity({
+        tag: (d.tagName || "").toLowerCase(),
+        explicitName: explicitAccessibleName(d),
+        textContent: ownVisibleText(d),
+        semanticFragments: semanticTextFragments(d),
+        headingFragments: semanticHeadingFragments(d),
+      });
+      if (!nativeIdentity.roleTechnicalIdentityEligible || !nativeIdentity.displayName) continue;
+      foundCount++;
+      found = d;
+    }
+    // DIAGNOSE-ONLY (gate #3 rollout): shape only -- attribute NAMES present, never values;
+    // never business text.
+    try {
+      send({
+        type: "capture_trace",
+        stage: "gate3_found_descendant_shape_diagnostic",
+        trusted: true,
+        diagnostic: {
+          foundCount: foundCount,
+          foundTag: found ? (found.tagName || "").toLowerCase() : "none",
+          foundAttributeNames: found && found.attributes ? Array.prototype.map.call(found.attributes, function (a) { return a.name; }) : [],
+        },
+      });
+    } catch (e) { /* never blocks capture */ }
+    if (foundCount !== 1 || !found) {
+      try { send({ type: "capture_trace", stage: "gate3_descendant_scan_diagnostic", trusted: true, diagnostic: { foundCount: foundCount, rejectedReason: foundCount === 0 ? "no_qualifying_descendant" : "ambiguous_descendants" } }); } catch (e) { /* never blocks capture */ }
+      return undefined;
+    }
+    var displayValue = semanticDisplayValueOf(found);
+    var normalized = normalizeSemanticValue(displayValue.value);
+    if (!normalized) {
+      try { send({ type: "capture_trace", stage: "gate3_descendant_scan_diagnostic", trusted: true, diagnostic: { foundCount: foundCount, rejectedReason: "empty_normalized_value" } }); } catch (e) { /* never blocks capture */ }
+      return undefined;
+    }
+    var foundRole = nativeRole(found);
+    return {
+      scopeIdentity: scopeIdentityRef,
+      captureMatchCount: 1,
+      source: displayValue.source,
+      normalizedValue: normalized,
+      targetTag: (found.tagName || "").toLowerCase(),
+      // The descendant's own role, never el's (el has none -- that is why this path ran at
+      // all). A webStep target needs a truthy role to be emitted; el's own empty role must never
+      // suppress the borrowed identity's role.
+      role: foundRole || undefined,
+      // The physical click landed on el itself (the scope element), never on the matched
+      // descendant -- replay must click the scope element, not the descendant used only to
+      // prove identity.
+      clickScopeElement: true,
+    };
+  }
+
+  // Shared by Gate #1 (ancestor scope for a distinct originalTarget) and Gate #3 (el's own
+  // identity when el === originalTarget): id/data-testid first, else a non-positional css
+  // :has() built from el's own already-computed stable descendant evidence, verified unique via
+  // an innermost-match filter. Never a new identity kind, never a new pipeline.
+  function buildOwnScopeIdentity(el, structuralIdentity) {
+    if (el.id) return { strategy: "id", value: el.id };
+    var ownTestId = el.getAttribute && el.getAttribute("data-testid");
+    if (ownTestId) return { strategy: "data-testid", value: ownTestId };
+    if (!structuralIdentity || (structuralIdentity.stableDescendants || []).length === 0) return undefined;
+    var ownTag = (el.tagName || "").toLowerCase();
+    for (var sdIdx = 0; sdIdx < structuralIdentity.stableDescendants.length; sdIdx++) {
+      var descendantForScope = structuralIdentity.stableDescendants[sdIdx];
+      var descAttrNames = Object.keys(descendantForScope.stableAttributes || {});
+      for (var anIdx = 0; anIdx < descAttrNames.length; anIdx++) {
+        var descAttrName = descAttrNames[anIdx];
+        var descAttrValue = descendantForScope.stableAttributes[descAttrName];
+        if (!descAttrValue) continue;
+        var cssScopeCandidate = ownTag + ":has(" + descendantForScope.tag + "[" + descAttrName + "=\"" +
+          String(descAttrValue).replace(/\\/g, "\\\\").replace(/"/g, "\\\"") + "\"])";
+        try {
+          var scopeMatches = document.querySelectorAll(cssScopeCandidate);
+          var innermostMatches = [];
+          for (var smIdx = 0; smIdx < scopeMatches.length; smIdx++) {
+            var isAncestorOfAnotherMatch = false;
+            for (var smIdx2 = 0; smIdx2 < scopeMatches.length; smIdx2++) {
+              if (smIdx === smIdx2) continue;
+              if (scopeMatches[smIdx].contains(scopeMatches[smIdx2])) { isAncestorOfAnotherMatch = true; break; }
+            }
+            if (!isAncestorOfAnotherMatch) innermostMatches.push(scopeMatches[smIdx]);
+          }
+          if (innermostMatches.length === 1 && innermostMatches[0] === el) return { strategy: "css", value: cssScopeCandidate };
+        } catch (e) { /* unsupported/invalid selector shape -- try the next stable attribute */ }
+      }
+    }
+    return undefined;
+  }
+
   // Bounded, structural-only candidate -- never a full textContent dump of a container.
   // originalTarget is the RAW clicked event target (composedPath[0]), threaded through so an
   // ANCESTOR candidate (el !== originalTarget) that itself carries a durable id/data-testid can
@@ -479,6 +629,14 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
       headingFragments: semanticHeadingFragments(el),
     });
     var strongName = nativeRoleIdentity.displayName || "";
+    var explicitRole = (el.getAttribute && el.getAttribute("role") || "").toLowerCase();
+    var nativeTag = (el.tagName || "").toLowerCase();
+    // A generic caption on a button (for example an empty-cell prompt) is not a durable
+    // accessible identity. Let the existing structural header/field logic scope it; the real
+    // observed click remains in the trace, while runtime uniqueness is still checked later.
+    if ((nativeTag === "button" || explicitRole === "button")
+      && explicitRole !== "checkbox"
+      && isGenericUnresolvedLabel(strongName)) strongName = "";
     var technicalRefs = [];
     if (el.id) technicalRefs.push("id:" + el.id);
     if (el.getAttribute && el.getAttribute("data-testid")) technicalRefs.push("testid:" + el.getAttribute("data-testid"));
@@ -497,7 +655,28 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
     // editor's placeholder ("Indicar...", a phone-format mask) must never win over its own
     // certified column identity, which is already captured above as associatedField.
     var weakName = (!strongName && !associatedField) ? computeWeakAccessibleName(el) : "";
+    // A structural/container node must never transport an unbounded descendant dump as its
+    // human label. Keep short names (including a unique semantic heading) but demote aggregate
+    // content to structural/runtime evidence so a click cannot become a whole-screen sentence.
     var accessibleName = strongName || weakName;
+    if (accessibleName && accessibleName.length > 120) accessibleName = "";
+    // DIAGNOSE-ONLY (gate #1/#3 boundary rollout): booleans/counts only, bounded to shallow
+    // composedPath depths so a deep DOM never turns one click into a log flood.
+    if (trustedInteraction === true && depth < 4) {
+      try {
+        send({
+          type: "capture_trace",
+          stage: "candidate_gate_boundary_diagnostic",
+          trusted: true,
+          diagnostic: {
+            candidateOrdinalDiagnostic: depth,
+            elEqualsOriginalTarget: Boolean(originalTarget) && el === originalTarget,
+            accessibleNamePresent: Boolean(accessibleName),
+            associatedFieldPresent: Boolean(associatedField),
+          },
+        });
+      } catch (e) { /* diagnostic must never break capture */ }
+    }
     var editable = isEditableNode(el);
     var actionable = isActionableNode(el);
     var style;
@@ -537,7 +716,15 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
       var scopeTestId = scopeNode.getAttribute && scopeNode.getAttribute("data-testid");
       if (scopeTestId) { scopeIdentity = { strategy: "data-testid", value: scopeTestId }; scopeElement = scopeNode; break; }
     }
-    var shouldCaptureStructuralEvidence = editable || actionable || frameworkActionable || (trustedInteraction === true && Boolean(scopeIdentity));
+    // GATE #3 fix: a real click's raw target (originalTarget === el) with NO strong name of its
+    // own is EXACTLY the shape gate #3 exists to rescue -- a plain, nameless React/Tailwind card
+    // div with no onclick attribute/tabIndex/id/data-testid (a synthetic React click handler
+    // never sets el.onclick or an "onclick" attribute, so frameworkActionable above is false
+    // for this shape by construction). Without this, structuralIdentity (and its
+    // stableDescendants) is never computed for exactly the owners gate #3 targets, so its own
+    // buildOwnScopeIdentity css-fallback has nothing to work with and always fails closed.
+    var isGate3Candidate = trustedInteraction === true && originalTarget && originalTarget === el && !accessibleName;
+    var shouldCaptureStructuralEvidence = editable || actionable || frameworkActionable || isGate3Candidate || (trustedInteraction === true && Boolean(scopeIdentity));
     var segmentedEvidence = segmentedInputEvidence(el, scopeIdentity, scopeElement);
     var structuralIdentity;
     if (shouldCaptureStructuralEvidence) {
@@ -553,12 +740,13 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
     var scopeBoundOriginalTargetIdentity;
     var semanticRuntimeAlternative;
     if (trustedInteraction === true && originalTarget && originalTarget !== el) {
-      var ownScopeIdentity;
-      if (el.id) ownScopeIdentity = { strategy: "id", value: el.id };
-      else {
-        var ownTestId = el.getAttribute && el.getAttribute("data-testid");
-        if (ownTestId) ownScopeIdentity = { strategy: "data-testid", value: ownTestId };
-      }
+      // FIRST_LOSS fix: a framework-actionable owner with a real handler but no id/data-testid
+      // (the common React/Tailwind div-with-onClick shape) previously never got ANY scope
+      // identity here, so the semantic-runtime-alternative search below never even ran -- the
+      // original target's own semantic role+name (e.g. a clickable card's img) was silently
+      // dropped even when it was the sole semantic descendant. Reuses the EXISTING "css" scope
+      // strategy (already fully supported end-to-end at replay, target-resolver.ts).
+      var ownScopeIdentity = buildOwnScopeIdentity(el, structuralIdentity);
       if (ownScopeIdentity) {
         scopeBoundOriginalTargetIdentity = computeScopeBoundEvidence(originalTarget, ownScopeIdentity, el, false);
         try { semanticRuntimeAlternative = computeSemanticRuntimeAlternative(originalTarget, ownScopeIdentity, el); } catch (e) { /* transient DOM */ }
@@ -574,6 +762,72 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
           });
         } catch (e) { /* transient DOM -- never blocks capture */ }
       }
+    } else if (trustedInteraction === true && originalTarget && originalTarget === el && !accessibleName) {
+      // GATE #3: the click landed directly on el itself (not a descendant), and el has no
+      // strong role/name of its own. If el contains EXACTLY ONE visible descendant with a
+      // strong native role identity, that descendant's role+name becomes el's OWN semantic
+      // identity (never el's role/accessibleName reassigned -- functionalOwner stays el).
+      var selfScopeIdentity = buildOwnScopeIdentity(el, structuralIdentity);
+      // DIAGNOSE-ONLY: run the descendant scan regardless of scope success, so the diagnostic
+      // inside it fires even when selfScopeIdentity is undefined (never affects real behavior --
+      // the result is only KEPT when selfScopeIdentity is truthy, exactly as before).
+      try {
+        var gate3ScanResult = computeOwnOnlySemanticRuntimeAlternative(el, selfScopeIdentity);
+        if (selfScopeIdentity) semanticRuntimeAlternative = gate3ScanResult;
+      } catch (e) { /* transient DOM */ }
+      // DIAGNOSE-ONLY (gate #3 rollout): booleans/counts only, never text/attributes/DOM paths.
+      try {
+        send({
+          type: "capture_trace",
+          stage: "gate3_self_semantic_diagnostic",
+          trusted: true,
+          diagnostic: {
+            candidateOrdinalDiagnostic: depth,
+            selfScopeIdentityFound: Boolean(selfScopeIdentity),
+            selfScopeIdentityStrategy: selfScopeIdentity ? selfScopeIdentity.strategy : "none",
+            semanticAlternativeCreated: Boolean(semanticRuntimeAlternative),
+            structuralIdentityPresent: Boolean(structuralIdentity),
+            stableDescendantCount: structuralIdentity ? (structuralIdentity.stableDescendants || []).length : -1,
+            elId: Boolean(el.id),
+            elTestId: Boolean(el.getAttribute && el.getAttribute("data-testid")),
+          },
+        });
+      } catch (e) { /* diagnostic must never break capture */ }
+      // DIAGNOSE-ONLY: test the sibling-relation hypothesis -- if el's own descendants have no
+      // qualifying identity, does a SIBLING (same parent, different child) have one? Shape/count
+      // only, never text/attribute values.
+      try {
+        var parentForSiblingScan = el.parentElement;
+        var siblingFoundCount = 0;
+        var siblingFoundTag = "none";
+        if (parentForSiblingScan && parentForSiblingScan.children) {
+          for (var sibIdx = 0; sibIdx < parentForSiblingScan.children.length && siblingFoundCount < 2; sibIdx++) {
+            var sib = parentForSiblingScan.children[sibIdx];
+            if (sib === el || !isVisible(sib)) continue;
+            var sibIdentity = classifyNativeRoleIdentity({
+              tag: (sib.tagName || "").toLowerCase(),
+              explicitName: explicitAccessibleName(sib),
+              textContent: ownVisibleText(sib),
+              semanticFragments: semanticTextFragments(sib),
+              headingFragments: semanticHeadingFragments(sib),
+            });
+            if (!sibIdentity.roleTechnicalIdentityEligible || !sibIdentity.displayName) continue;
+            siblingFoundCount++;
+            siblingFoundTag = (sib.tagName || "").toLowerCase();
+          }
+        }
+        send({
+          type: "capture_trace",
+          stage: "gate3_sibling_hypothesis_diagnostic",
+          trusted: true,
+          diagnostic: {
+            parentPresent: Boolean(parentForSiblingScan),
+            siblingChildCount: parentForSiblingScan ? parentForSiblingScan.children.length : -1,
+            siblingFoundCount: siblingFoundCount,
+            siblingFoundTag: siblingFoundTag,
+          },
+        });
+      } catch (e) { /* diagnostic must never break capture */ }
     }
     // Diagnostic-only census for unresolved physical controls.  It deliberately carries
     // booleans/enums/counts only: no identity values, text, attributes, DOM paths, or secrets.
@@ -758,6 +1012,8 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
       var semanticSharedSource;
       var semanticSharedNormalizedValue;
       var semanticSharedTargetTag;
+      var semanticSharedClickScopeElement;
+      var semanticSharedBorrowedRole;
       for (var sIdx = 0; sIdx < candidates.length; sIdx++) {
         var alternative = candidates[sIdx].semanticRuntimeAlternative;
         delete candidates[sIdx].semanticRuntimeAlternative;
@@ -766,6 +1022,8 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
         semanticSharedSource = alternative.source;
         semanticSharedNormalizedValue = alternative.normalizedValue;
         semanticSharedTargetTag = alternative.targetTag;
+        if (alternative.clickScopeElement === true) semanticSharedClickScopeElement = true;
+        if (alternative.role) semanticSharedBorrowedRole = alternative.role;
       }
       var semanticHash = 0;
       if (semanticSharedNormalizedValue) {
@@ -784,14 +1042,16 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
         candidates[0].semanticRuntimeEvidence = {
           source: semanticSharedSource,
           normalizedValue: semanticSharedNormalizedValue,
-          role: candidates[0].role,
+          role: candidates[0].role || semanticSharedBorrowedRole,
           targetTag: semanticSharedTargetTag,
           scopeAlternatives: semanticScopeAlternatives,
           captureUniqueTarget: true,
+          ...(semanticSharedClickScopeElement === true ? { clickScopeElement: true } : {}),
         };
+        var semanticEffectiveRole = candidates[0].role || semanticSharedBorrowedRole;
         candidates[0].playwrightRecorderEvidence = {
-          kind: semanticSharedSource === "accessible_name" && candidates[0].role ? "role" : "text",
-      ...(candidates[0].role ? { role: candidates[0].role } : {}),
+          kind: semanticSharedSource === "accessible_name" && semanticEffectiveRole ? "role" : "text",
+      ...(semanticEffectiveRole ? { role: semanticEffectiveRole } : {}),
           normalizedName: semanticSharedNormalizedValue,
           targetTag: semanticSharedTargetTag,
           scopeIdentity: semanticScopeAlternatives[0].scopeIdentity,
@@ -894,6 +1154,25 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
     return (el.getAttribute && (el.getAttribute("type") || "").toLowerCase() === "password") || isSegmentedValueNode(el);
   }
 
+  // Reconstruct the logical text from trusted beforeinput edits. Reading only the DOM after
+  // input loses keystrokes when a mask/currency component has already reformatted the value.
+  // Selection offsets and inputType keep insertions/deletions generic; no punctuation is stripped.
+  function predictedRawInputValue(el, event) {
+    if (!el || typeof el.selectionStart !== "number" || typeof el.selectionEnd !== "number") return undefined;
+    var value = currentSessionRawValue;
+    var start = el.selectionStart;
+    var end = el.selectionEnd;
+    var type = event.inputType || "";
+    if (type === "deleteContentBackward" && start === end && start > 0) start -= 1;
+    else if (type === "deleteContentForward" && start === end && end < value.length) end += 1;
+    if (type.indexOf("delete") === 0) return value.slice(0, start) + value.slice(end);
+    if (type.indexOf("insert") === 0 && event.data != null) {
+      var inserted = String(event.data);
+      return value.slice(0, start) + inserted + value.slice(end);
+    }
+    return undefined;
+  }
+
   document.addEventListener("focusin", function (event) {
     var el = event.target;
     if (!el || !isEditableNode(el)) return;
@@ -901,6 +1180,8 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
     currentSessionId = "v2-session-" + sessionCounter;
     currentSessionEl = el;
     currentSessionTrusted = false;
+    currentSessionRawValue = String(readValueState(el).literal || "");
+    pendingRawInput = null;
     var sensitive = isSensitiveNode(el);
     send({
       type: "focus",
@@ -919,6 +1200,13 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
       if (!el || !isEditableNode(el)) return;
       var sensitive = isSensitiveNode(el);
       var valueState = sensitive ? { present: readValueState(el).present, changed: true } : readValueState(el);
+      if (!sensitive && event.isTrusted === true && kind === "beforeinput") {
+        pendingRawInput = predictedRawInputValue(el, event);
+      } else if (!sensitive && event.isTrusted === true && kind === "input") {
+        if (pendingRawInput !== null && pendingRawInput !== undefined) currentSessionRawValue = pendingRawInput;
+        pendingRawInput = null;
+      }
+      if (!sensitive && kind !== "beforeinput") valueState.rawTypedValue = currentSessionRawValue;
       send({ type: "edit_evidence", sessionId: currentSessionId, kind: kind, valueState: valueState });
     };
   }
@@ -928,7 +1216,9 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
   function commitValueState(el) {
     if (!el) return undefined;
     var sensitive = isSensitiveNode(el);
-    return sensitive ? { present: readValueState(el).present, changed: true } : readValueState(el);
+    return sensitive
+      ? { present: readValueState(el).present, changed: true }
+      : { ...readValueState(el), rawTypedValue: currentSessionRawValue };
   }
 
   // A TRUSTED keyboard/pointer interaction on the session's own editable proves user causality
@@ -960,6 +1250,8 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
     currentSessionId = null;
     currentSessionEl = null;
     currentSessionTrusted = false;
+    currentSessionRawValue = "";
+    pendingRawInput = null;
   }, true);
 
   document.addEventListener("submit", function () {

@@ -75,6 +75,30 @@ test("4/ordinaryFillUnchanged. an ordinary fill is completely unaffected by this
   assert.equal(step.value, "juan");
 });
 
+test("7/fillTargetUsesField. a recorded fill description binds its field label as the promoted target, not its typed value", () => {
+  const contract = buildSpecExecutionContract(
+    buildPlan([{ index: 2, action: "fill", target: { strategy: "text", value: "sample-data" }, valueKey: "company_identifier", description: 'Ingresar "sample-data" en "Identificador fiscal"' }]),
+    { steps: [{ index: 2, action: 'Ingresar "sample-data" en "Identificador fiscal"' }] },
+  );
+  const step = contract.steps[0];
+  assert.equal(step.operation, "fill");
+  assert.deepEqual(step.target, { strategy: "label", value: "Identificador fiscal" });
+  assert.equal(step.valueKey, "company_identifier");
+});
+
+test("8/previewAuthFillAuthority. a parsed tax-identifier fill on an observed auth gate carries both field and gate authority", () => {
+  const contract = buildSpecExecutionContract(
+    buildPlan([{ index: 2, action: "fill", target: { strategy: "text", value: "sample-data" }, valueKey: "rnc_de_la_empresa", description: 'Ingresar "sample-data" en "Identificador fiscal"' }]),
+    {
+      auth: { gateDetected: true, required: true, detectedStage: "identification_input" },
+      steps: [{ index: 2, action: 'Ingresar "sample-data" en "Identificador fiscal"' }],
+    },
+  );
+  const step = contract.steps[0];
+  assert.deepEqual(step.target, { strategy: "label", value: "Identificador fiscal" });
+  assert.equal(step.authGateExpected, true);
+});
+
 test("5/textCannotOverrideStructuredAuthority. scenario text alone (\"Presionar X\", no compatible plan step at all) still classifies as click -- text is never promoted to press without real plan authority", () => {
   const contract = buildSpecExecutionContract(
     buildPlan([]),

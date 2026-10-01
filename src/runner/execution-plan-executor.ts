@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 import type { DataContext } from "../data/data-context";
 import { assertValidExecutionPlan } from "../plans";
 import type { ExecutionPlan, ExecutionPlanStep } from "../types/execution-plan.types";
@@ -73,6 +73,27 @@ export type ScreenCompletionProbeResult = {
   signal?: string;
 };
 
+export function startPagePointerActivityHeartbeat(
+  page: Page,
+  targetBox: { x: number; y: number; width: number; height: number },
+): () => void {
+  let point = 0;
+  let moveInFlight = false;
+  const idleWindowMs = Number(process.env.LOADING_STABILITY_TIMEOUT_MS) || 8000;
+  const intervalMs = Math.min(5000, Math.max(50, Math.floor(idleWindowMs / 2)));
+  const timer = setInterval(() => {
+    if (moveInFlight || page.isClosed() || targetBox.width < 4 || targetBox.height < 2) return;
+    moveInFlight = true;
+    const x = targetBox.width * (point % 2 === 0 ? 0.25 : 0.75);
+    point += 1;
+    void page.mouse.move(targetBox.x + x, targetBox.y + targetBox.height * 0.5)
+      .then(() => console.log(`[async-wait] pointerActivity=mouse_move targetVisible=true point=${point % 2 === 1 ? "left" : "right"}`))
+      .catch(() => undefined)
+      .finally(() => { moveInFlight = false; });
+  }, intervalMs);
+  return () => clearInterval(timer);
+}
+
 export type ScreenStabilityResult = {
   stable: boolean;
   waitedMs: number;
@@ -104,6 +125,10 @@ export async function waitForStableInteractiveScreen(
     completionProbe?: () => Promise<ScreenCompletionProbeResult>;
     waitForPendingTransport?: boolean;
     absoluteDeadlineMs?: number;
+    /** Resolved action target to keep pointer activity alive during long post-action waits. */
+    activityTarget?: Locator;
+    /** Last known target geometry captured before transient target markers are released. */
+    activityTargetBox?: { x: number; y: number; width: number; height: number } | null;
   },
 ): Promise<ScreenStabilityResult> {
   const start = Date.now();
@@ -127,6 +152,9 @@ export async function waitForStableInteractiveScreen(
     hardSafetyCapMs,
   });
   const pollMs = Math.min(250, Math.max(10, Math.floor(idleWindowMs / 4)));
+  const pointerActivityIntervalMs = Math.min(5000, Math.max(50, Math.floor(idleWindowMs / 2)));
+  let nextPointerActivityAt = start + pointerActivityIntervalMs;
+  let pointerActivityPoint = 0;
   const signals: string[] = [];
   const progressSignals: string[] = [];
   let loadingObserved = false;
@@ -274,6 +302,22 @@ export async function waitForStableInteractiveScreen(
     let lastCompletionProbeSatisfied: boolean | undefined;
 
     if (pageClosed || contextClosed) break;
+
+    // Discovery may spend several seconds confirming a recorded postcondition. Keep the
+    // resolved control active with real browser pointer movement during that wait so an
+    // application's inactivity timer does not expire while the runner is observing it.
+    // This heartbeat never clicks or changes the resolved action target.
+    if (options?.activityTarget && Date.now() >= nextPointerActivityAt) {
+      nextPointerActivityAt = Date.now() + pointerActivityIntervalMs;
+      const target = options.activityTarget;
+      const box = options.activityTargetBox ?? await target.boundingBox().catch(() => null);
+      if (box && box.width >= 4 && box.height >= 2) {
+        const x = box.width * (pointerActivityPoint % 2 === 0 ? 0.25 : 0.75);
+        pointerActivityPoint++;
+        await page.mouse.move(box.x + x, box.y + box.height * 0.5).catch(() => undefined);
+        console.log(`[async-wait] pointerActivity=mouse_move targetVisible=true point=${pointerActivityPoint % 2 === 1 ? "left" : "right"}`);
+      }
+    }
 
     if (options?.completionProbe) {
       const completion = await options.completionProbe().catch(() => ({ completed: false } as ScreenCompletionProbeResult));

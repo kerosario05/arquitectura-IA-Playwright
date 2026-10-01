@@ -1,0 +1,23 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - generic [ref=e78]:
+    - banner [ref=e79]:
+      - img "Banco Santa Cruz" [ref=e80]
+    - main [ref=e81]:
+      - generic [ref=e82]:
+        - button [ref=e83] [cursor=pointer]
+        - heading "Conoce nuestros productos" [level=1] [ref=e87]
+      - generic [ref=e88]:
+        - paragraph [ref=e90]: "Selecciona una categoría:"
+        - generic [ref=e91]:
+          - button [ref=e92] [cursor=pointer]:
+            - heading "Tarjetas" [level=3] [ref=e99]
+          - button [ref=e104] [cursor=pointer]:
+            - heading "Cuentas" [level=3] [ref=e112]
+          - button [ref=e117] [cursor=pointer]:
+            - heading "Préstamos" [level=3] [ref=e128]
+          - button [ref=e133] [cursor=pointer]:
+            - heading "Depósitos a plazo" [level=3] [ref=e142]
+        - button "Salir" [ref=e147] [cursor=pointer]
+    - contentinfo [ref=e149]: © 2024 Banco Santa Cruz S.A. | Todos los derechos reservadosAv. Lope de Vega No.21, Ensanche Naco, Santo Domingo, Rep. Dom.

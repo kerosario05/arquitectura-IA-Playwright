@@ -1,0 +1,116 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-10-01T12:54:26.475Z",
+  "entries": [
+    {
+      "key": "rnc_de_la_empresa",
+      "source": "unknown",
+      "fieldName": "RNC de la empresa*",
+      "stepIndex": 2,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "nombre_de_usuario",
+      "source": "unknown",
+      "fieldName": "Nombre de usuario*",
+      "stepIndex": 3,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "contrasena",
+      "source": "unknown",
+      "fieldName": "Contraseña*",
+      "stepIndex": 4,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "colaborador",
+      "source": "unknown",
+      "fieldName": "Colaborador",
+      "stepIndex": 12,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "puesto",
+      "source": "unknown",
+      "fieldName": "Puesto",
+      "stepIndex": 13,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "ingresos",
+      "source": "unknown",
+      "fieldName": "Ingresos",
+      "stepIndex": 15,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "correo_electronico",
+      "source": "unknown",
+      "fieldName": "Correo electrónico",
+      "stepIndex": 16,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "telefono_residencial",
+      "source": "unknown",
+      "fieldName": "Teléfono residencial",
+      "stepIndex": 17,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "celular",
+      "source": "unknown",
+      "fieldName": "Celular",
+      "stepIndex": 18,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "fecha_de_ingreso",
+      "source": "unknown",
+      "fieldName": "Fecha de Ingreso",
+      "stepIndex": 19,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

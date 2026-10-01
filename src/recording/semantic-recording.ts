@@ -8,7 +8,7 @@ import type {
   RecordedTechnicalTarget,
   SessionTrace,
 } from "./session-trace.types";
-import { buildEditingSessions, normalizeEvents, stableControlIdentity, reconstructLogicalInputBuffer, isGenericUnresolvedLabel } from "./trace-normalizer";
+import { buildEditingSessions, normalizeEvents, stableControlIdentity, reconstructLogicalInputBuffer, isGenericUnresolvedLabel, isNonActionableContainerTap } from "./trace-normalizer";
 import { buildCanonicalInteractions, type MutationOpportunity } from "./canonical-recording-contract";
 import type { CanonicalInteraction } from "./canonical-recording-contract";
 import { confirmedCompoundSelectionBefore, logicalCompoundChildValue } from "./compound-value";
@@ -447,22 +447,43 @@ export function resolveRecordedField(
 
 function isFocusOnlyEvent(event: RecordedEvent, next?: RecordedEvent): boolean {
   if (event.kind !== "tap" || !next || next.kind !== "fill") return false;
+  // A tap with its own real accessible name (e.g. a button opening an OTP flow) is a genuine
+  // user action, never a focus artifact -- even when its only captured locator is a shared
+  // container scope id that happens to collide with the following fill's own locator (both
+  // `runtimeResolutionRequired`, so neither has a precise per-element locator yet). Checked via
+  // the same generic-label sentinel every other admission/display gate already shares, so this
+  // never depends on any app-specific field or button name.
+  const tapLabel = event.target?.label?.trim();
+  if (tapLabel && !isGenericUnresolvedLabel(tapLabel)) return false;
   const currentKey = event.target?.locators?.[0]?.value ?? event.target?.label;
   const nextKey = next.target?.locators?.[0]?.value ?? next.target?.label;
   return Boolean(currentKey && nextKey && currentKey === nextKey);
 }
 
-function isDynamicEditorInternalEvent(event: RecordedEvent): boolean {
+function isDynamicEditorInternalEvent(event: RecordedEvent, next?: RecordedEvent): boolean {
   const label = event.target?.label?.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/…/g, "...").trim();
-  return event.kind === "tap" && event.target?.interactionType !== "select"
-    && (label === "indicar..." || label === "indicar" || label === "seleccionar fila");
+  if (event.kind !== "tap" || event.target?.interactionType === "select") return false;
+
+  // A checkbox tap is a user action even when its accessible name is a generic row-control
+  // caption. Likewise, keep an observed owner click when the next recorded action is an option:
+  // that click opened the selection surface the option depends on. These checks use roles and
+  // event order only; labels such as "Indicar..." never decide whether the action is discarded.
+  const role = event.target?.role?.toLowerCase();
+  if (role === "checkbox") return false;
+  const nextRole = next?.target?.role?.toLowerCase();
+  const opensRecordedSelection = next?.kind === "tap"
+    && (nextRole === "option" || next?.target?.compoundRole === "selection" || next?.target?.interactionType === "select");
+  if (opensRecordedSelection) return false;
+
+  return label === "indicar..." || label === "indicar" || label === "seleccionar fila";
 }
 
 export function classifySemanticEvent(event: RecordedEvent, next?: RecordedEvent): SemanticEvent["classification"] {
   if (event.kind === "screen_change") return "SCREEN_TECHNICAL_TRANSITION";
   if (event.kind === "note") return "TECHNICAL_NOISE";
+  if (isNonActionableContainerTap(event)) return "TECHNICAL_NOISE";
   if (isFocusOnlyEvent(event, next)) return "FOCUS_ONLY";
-  if (isDynamicEditorInternalEvent(event)) return "DYNAMIC_EDITOR_INTERNAL";
+  if (isDynamicEditorInternalEvent(event, next)) return "DYNAMIC_EDITOR_INTERNAL";
   if (event.kind === "fill" || event.kind === "tap" || event.kind === "press") return "FUNCTIONAL_ACTION";
   return "TECHNICAL_NOISE";
 }

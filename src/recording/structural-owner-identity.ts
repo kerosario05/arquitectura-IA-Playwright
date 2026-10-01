@@ -76,6 +76,14 @@ export type SemanticRuntimeEvidence = {
   targetTag?: string;
   scopeAlternatives: Array<{ scopeIdentity: StructuralScopeIdentity; captureMatchCount: 1 }>;
   captureUniqueTarget: true;
+  /**
+   * True only when the matched element (targetTag/normalizedValue) is a DESCENDANT lending its
+   * identity to the ACTUAL clicked node (the click landed on that ancestor itself, not on the
+   * descendant) -- the physical click must be replayed on the scope element, never on the
+   * descendant used purely to prove uniqueness. Absent/false keeps the existing behavior: click
+   * the matched element itself (the click really was on it at capture time).
+   */
+  clickScopeElement?: boolean;
 };
 
 /**

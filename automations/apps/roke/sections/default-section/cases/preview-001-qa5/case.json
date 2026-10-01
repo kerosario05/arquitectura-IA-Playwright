@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-qa5",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "QA5",
+  "source": "discovery",
+  "appSlug": "roke",
+  "appConfigPath": "automations\\apps\\roke\\app.config.json",
+  "createdAt": "2026-09-30T14:21:05.470Z"
+}

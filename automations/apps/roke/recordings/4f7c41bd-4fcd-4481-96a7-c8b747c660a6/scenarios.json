@@ -1,0 +1,4401 @@
+[
+  {
+    "scenarioId": "REC-4F7C41BD-01",
+    "title": "QA",
+    "description": "Recorrido observado para completar \"QA\". Se registraron 37 acciones funcionales.",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://172.27.4.50/",
+        "description": "Navegar a https://172.27.4.50/"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Explora nuestros productos"
+        },
+        "description": "Presionar \"Explora nuestros productos\"",
+        "interactionId": "interaction-5"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Tarjetas"
+        },
+        "description": "Presionar \"Tarjetas\"",
+        "interactionId": "interaction-8"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Tarjeta de Crédito"
+        },
+        "description": "Presionar \"Tarjeta de Crédito\"",
+        "interactionId": "interaction-11"
+      },
+      {
+        "action": "click",
+        "description": "Presionar \"Tarjeta de Crédito Visa Platinum\"",
+        "interactionId": "interaction-14"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Solicitar"
+        },
+        "description": "Presionar \"Solicitar\"",
+        "interactionId": "interaction-17"
+      },
+      {
+        "action": "click",
+        "description": "Presionar \"Generar Turno\"",
+        "interactionId": "interaction-19"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|4"
+        },
+        "description": "Presionar \"4\"",
+        "interactionId": "interaction-21"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|0"
+        },
+        "description": "Presionar \"0\"",
+        "interactionId": "interaction-23"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|2"
+        },
+        "description": "Presionar \"2\"",
+        "interactionId": "interaction-25"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|2"
+        },
+        "description": "Presionar \"2\"",
+        "interactionId": "interaction-27"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|4"
+        },
+        "description": "Presionar \"4\"",
+        "interactionId": "interaction-29"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|6"
+        },
+        "description": "Presionar \"6\"",
+        "interactionId": "interaction-31"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|7"
+        },
+        "description": "Presionar \"7\"",
+        "interactionId": "interaction-33"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|9"
+        },
+        "description": "Presionar \"9\"",
+        "interactionId": "interaction-35"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|5"
+        },
+        "description": "Presionar \"5\"",
+        "interactionId": "interaction-37"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|5"
+        },
+        "description": "Presionar \"5\"",
+        "interactionId": "interaction-39"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|1"
+        },
+        "description": "Presionar \"1\"",
+        "interactionId": "interaction-41"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Generar Turno"
+        },
+        "description": "Presionar \"Generar Turno\"",
+        "interactionId": "interaction-43"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Atrás"
+        },
+        "description": "Presionar \"Atrás\"",
+        "interactionId": "interaction-45"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Cancelar"
+        },
+        "description": "Presionar \"Cancelar\"",
+        "interactionId": "interaction-47"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Finalizar sesión"
+        },
+        "description": "Presionar \"Finalizar sesión\"",
+        "interactionId": "interaction-49"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Explora nuestros productos"
+        },
+        "description": "Presionar \"Explora nuestros productos\"",
+        "interactionId": "interaction-52"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Cuentas"
+        },
+        "description": "Presionar \"Cuentas\"",
+        "interactionId": "interaction-55"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Cuenta de Ahorro"
+        },
+        "description": "Presionar \"Cuenta de Ahorro\"",
+        "interactionId": "interaction-58"
+      },
+      {
+        "action": "click",
+        "description": "Presionar \"Cuenta de Ahorros Personal en Dólares\"",
+        "interactionId": "interaction-61"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Solicitar"
+        },
+        "description": "Presionar \"Solicitar\"",
+        "interactionId": "interaction-64"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Cancelar"
+        },
+        "description": "Presionar \"Cancelar\"",
+        "interactionId": "interaction-66"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Finalizar sesión"
+        },
+        "description": "Presionar \"Finalizar sesión\"",
+        "interactionId": "interaction-68"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Explora nuestros productos"
+        },
+        "description": "Presionar \"Explora nuestros productos\"",
+        "interactionId": "interaction-71"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Préstamos"
+        },
+        "description": "Presionar \"Préstamos\"",
+        "interactionId": "interaction-74"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Préstamo Personal"
+        },
+        "description": "Presionar \"Préstamo Personal\"",
+        "interactionId": "interaction-77"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Finalizar sesión"
+        },
+        "description": "Presionar \"Finalizar sesión\"",
+        "interactionId": "interaction-81"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Explora nuestros productos"
+        },
+        "description": "Presionar \"Explora nuestros productos\"",
+        "interactionId": "interaction-84"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Depósitos a plazo"
+        },
+        "description": "Presionar \"Depósitos a plazo\"",
+        "interactionId": "interaction-87"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Depósitos a plazo en Dólares"
+        },
+        "description": "Presionar \"Depósitos a plazo en Dólares\"",
+        "interactionId": "interaction-90"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Solicitar"
+        },
+        "description": "Presionar \"Solicitar\"",
+        "interactionId": "interaction-94"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Cancelar"
+        },
+        "description": "Presionar \"Cancelar\"",
+        "interactionId": "interaction-96"
+      },
+      {
+        "action": "assert",
+        "target": {
+          "strategy": "text",
+          "value": "Más detalles del producto"
+        },
+        "description": "Verificar que se muestra \"Más detalles del producto\""
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Presionar \"Explora nuestros productos\"",
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "renderedStep": "Presionar \"Explora nuestros productos\"",
+        "interactionId": "interaction-5",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "routeAfter": "https://172.27.4.50/product-catalog",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 2
+      },
+      {
+        "content": "Presionar \"Tarjetas\"",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "renderedStep": "Presionar \"Tarjetas\"",
+        "interactionId": "interaction-8",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-catalog",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=cards",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 3
+      },
+      {
+        "content": "Presionar \"Tarjeta de Crédito\"",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "renderedStep": "Presionar \"Tarjeta de Crédito\"",
+        "interactionId": "interaction-11",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=cards",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 4
+      },
+      {
+        "content": "Presionar \"Tarjeta de Crédito Visa Platinum\"",
+        "sourceEventRefs": [
+          "event-14"
+        ],
+        "renderedStep": "Presionar \"Tarjeta de Crédito Visa Platinum\"",
+        "interactionId": "interaction-14",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+        "routeAfter": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 5
+      },
+      {
+        "content": "Presionar \"Solicitar\"",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "renderedStep": "Presionar \"Solicitar\"",
+        "interactionId": "interaction-17",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 6
+      },
+      {
+        "content": "Presionar \"Generar Turno\"",
+        "sourceEventRefs": [
+          "event-19"
+        ],
+        "renderedStep": "Presionar \"Generar Turno\"",
+        "interactionId": "interaction-19",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 7
+      },
+      {
+        "content": "Presionar \"4\"",
+        "sourceEventRefs": [
+          "event-21"
+        ],
+        "renderedStep": "Presionar \"4\"",
+        "interactionId": "interaction-21",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 8
+      },
+      {
+        "content": "Presionar \"0\"",
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "renderedStep": "Presionar \"0\"",
+        "interactionId": "interaction-23",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 9
+      },
+      {
+        "content": "Presionar \"2\"",
+        "sourceEventRefs": [
+          "event-25"
+        ],
+        "renderedStep": "Presionar \"2\"",
+        "interactionId": "interaction-25",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 10
+      },
+      {
+        "content": "Presionar \"2\"",
+        "sourceEventRefs": [
+          "event-27"
+        ],
+        "renderedStep": "Presionar \"2\"",
+        "interactionId": "interaction-27",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 11
+      },
+      {
+        "content": "Presionar \"4\"",
+        "sourceEventRefs": [
+          "event-29"
+        ],
+        "renderedStep": "Presionar \"4\"",
+        "interactionId": "interaction-29",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 12
+      },
+      {
+        "content": "Presionar \"6\"",
+        "sourceEventRefs": [
+          "event-31"
+        ],
+        "renderedStep": "Presionar \"6\"",
+        "interactionId": "interaction-31",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 13
+      },
+      {
+        "content": "Presionar \"7\"",
+        "sourceEventRefs": [
+          "event-33"
+        ],
+        "renderedStep": "Presionar \"7\"",
+        "interactionId": "interaction-33",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 14
+      },
+      {
+        "content": "Presionar \"9\"",
+        "sourceEventRefs": [
+          "event-35"
+        ],
+        "renderedStep": "Presionar \"9\"",
+        "interactionId": "interaction-35",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 15
+      },
+      {
+        "content": "Presionar \"5\"",
+        "sourceEventRefs": [
+          "event-37"
+        ],
+        "renderedStep": "Presionar \"5\"",
+        "interactionId": "interaction-37",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 16
+      },
+      {
+        "content": "Presionar \"5\"",
+        "sourceEventRefs": [
+          "event-39"
+        ],
+        "renderedStep": "Presionar \"5\"",
+        "interactionId": "interaction-39",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 17
+      },
+      {
+        "content": "Presionar \"1\"",
+        "sourceEventRefs": [
+          "event-41"
+        ],
+        "renderedStep": "Presionar \"1\"",
+        "interactionId": "interaction-41",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 18
+      },
+      {
+        "content": "Presionar \"Generar Turno\"",
+        "sourceEventRefs": [
+          "event-43"
+        ],
+        "renderedStep": "Presionar \"Generar Turno\"",
+        "interactionId": "interaction-43",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 19
+      },
+      {
+        "content": "Presionar \"Atrás\"",
+        "sourceEventRefs": [
+          "event-45"
+        ],
+        "renderedStep": "Presionar \"Atrás\"",
+        "interactionId": "interaction-45",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 20
+      },
+      {
+        "content": "Presionar \"Cancelar\"",
+        "sourceEventRefs": [
+          "event-47"
+        ],
+        "renderedStep": "Presionar \"Cancelar\"",
+        "interactionId": "interaction-47",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 21
+      },
+      {
+        "content": "Presionar \"Finalizar sesión\"",
+        "sourceEventRefs": [
+          "event-49"
+        ],
+        "renderedStep": "Presionar \"Finalizar sesión\"",
+        "interactionId": "interaction-49",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "routeAfter": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 22
+      },
+      {
+        "content": "Presionar \"Explora nuestros productos\"",
+        "sourceEventRefs": [
+          "event-52"
+        ],
+        "renderedStep": "Presionar \"Explora nuestros productos\"",
+        "interactionId": "interaction-52",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "routeAfter": "https://172.27.4.50/product-catalog",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 23
+      },
+      {
+        "content": "Presionar \"Cuentas\"",
+        "sourceEventRefs": [
+          "event-55"
+        ],
+        "renderedStep": "Presionar \"Cuentas\"",
+        "interactionId": "interaction-55",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-catalog",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=accounts",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 24
+      },
+      {
+        "content": "Presionar \"Cuenta de Ahorro\"",
+        "sourceEventRefs": [
+          "event-58"
+        ],
+        "renderedStep": "Presionar \"Cuenta de Ahorro\"",
+        "interactionId": "interaction-58",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=accounts",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=accounts&subcategory=savings",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 25
+      },
+      {
+        "content": "Presionar \"Cuenta de Ahorros Personal en Dólares\"",
+        "sourceEventRefs": [
+          "event-61"
+        ],
+        "renderedStep": "Presionar \"Cuenta de Ahorros Personal en Dólares\"",
+        "interactionId": "interaction-61",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=accounts&subcategory=savings",
+        "routeAfter": "https://172.27.4.50/product-extended?product=cuenta-de-ahorros-personal-en-dolares",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 26
+      },
+      {
+        "content": "Presionar \"Solicitar\"",
+        "sourceEventRefs": [
+          "event-64"
+        ],
+        "renderedStep": "Presionar \"Solicitar\"",
+        "interactionId": "interaction-64",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=cuenta-de-ahorros-personal-en-dolares",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 27
+      },
+      {
+        "content": "Presionar \"Cancelar\"",
+        "sourceEventRefs": [
+          "event-66"
+        ],
+        "renderedStep": "Presionar \"Cancelar\"",
+        "interactionId": "interaction-66",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=cuenta-de-ahorros-personal-en-dolares",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 28
+      },
+      {
+        "content": "Presionar \"Finalizar sesión\"",
+        "sourceEventRefs": [
+          "event-68"
+        ],
+        "renderedStep": "Presionar \"Finalizar sesión\"",
+        "interactionId": "interaction-68",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=cuenta-de-ahorros-personal-en-dolares",
+        "routeAfter": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 29
+      },
+      {
+        "content": "Presionar \"Explora nuestros productos\"",
+        "sourceEventRefs": [
+          "event-71"
+        ],
+        "renderedStep": "Presionar \"Explora nuestros productos\"",
+        "interactionId": "interaction-71",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "routeAfter": "https://172.27.4.50/product-catalog",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 30
+      },
+      {
+        "content": "Presionar \"Préstamos\"",
+        "sourceEventRefs": [
+          "event-74"
+        ],
+        "renderedStep": "Presionar \"Préstamos\"",
+        "interactionId": "interaction-74",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-catalog",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=loans",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 31
+      },
+      {
+        "content": "Presionar \"Préstamo Personal\"",
+        "sourceEventRefs": [
+          "event-77"
+        ],
+        "renderedStep": "Presionar \"Préstamo Personal\"",
+        "interactionId": "interaction-77",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=loans",
+        "routeAfter": "https://172.27.4.50/product-extended?product=prestamo-personal",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 32
+      },
+      {
+        "content": "Presionar \"Finalizar sesión\"",
+        "sourceEventRefs": [
+          "event-81"
+        ],
+        "renderedStep": "Presionar \"Finalizar sesión\"",
+        "interactionId": "interaction-81",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=prestamo-personal",
+        "routeAfter": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 33
+      },
+      {
+        "content": "Presionar \"Explora nuestros productos\"",
+        "sourceEventRefs": [
+          "event-84"
+        ],
+        "renderedStep": "Presionar \"Explora nuestros productos\"",
+        "interactionId": "interaction-84",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "routeAfter": "https://172.27.4.50/product-catalog",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 34
+      },
+      {
+        "content": "Presionar \"Depósitos a plazo\"",
+        "sourceEventRefs": [
+          "event-87"
+        ],
+        "renderedStep": "Presionar \"Depósitos a plazo\"",
+        "interactionId": "interaction-87",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-catalog",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=certificates",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 35
+      },
+      {
+        "content": "Presionar \"Depósitos a plazo en Dólares\"",
+        "sourceEventRefs": [
+          "event-90"
+        ],
+        "renderedStep": "Presionar \"Depósitos a plazo en Dólares\"",
+        "interactionId": "interaction-90",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=certificates",
+        "routeAfter": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-dolares",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 36
+      },
+      {
+        "content": "Presionar \"Solicitar\"",
+        "sourceEventRefs": [
+          "event-94"
+        ],
+        "renderedStep": "Presionar \"Solicitar\"",
+        "interactionId": "interaction-94",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-dolares",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 37
+      },
+      {
+        "content": "Presionar \"Cancelar\"",
+        "sourceEventRefs": [
+          "event-96"
+        ],
+        "renderedStep": "Presionar \"Cancelar\"",
+        "interactionId": "interaction-96",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "5004cea6b230",
+        "routeBefore": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-dolares",
+        "routeAfter": "https://172.27.4.50/",
+        "stateScope": "9f12e61beacd",
+        "stepNumber": 38
+      },
+      {
+        "content": "El sistema muestra \"Más detalles del producto\"",
+        "expected": "Se muestra \"Más detalles del producto\"",
+        "classification": "FUNCTIONAL_ASSERTION",
+        "stepNumber": 39
+      }
+    ],
+    "requiredData": [],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"Explora nuestros productos\"",
+        "strategy": "role",
+        "value": "button|Explora nuestros productos"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Presionar \"Tarjetas\"",
+        "strategy": "role",
+        "value": "button|Tarjetas"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Tarjeta de Crédito\"",
+        "strategy": "role",
+        "value": "button|Tarjeta de Crédito"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"Solicitar\"",
+        "strategy": "role",
+        "value": "button|Solicitar"
+      },
+      {
+        "stepIndex": 7,
+        "description": "Presionar \"4\"",
+        "strategy": "role",
+        "value": "button|4"
+      },
+      {
+        "stepIndex": 8,
+        "description": "Presionar \"0\"",
+        "strategy": "role",
+        "value": "button|0"
+      },
+      {
+        "stepIndex": 9,
+        "description": "Presionar \"2\"",
+        "strategy": "role",
+        "value": "button|2"
+      },
+      {
+        "stepIndex": 10,
+        "description": "Presionar \"2\"",
+        "strategy": "role",
+        "value": "button|2"
+      },
+      {
+        "stepIndex": 11,
+        "description": "Presionar \"4\"",
+        "strategy": "role",
+        "value": "button|4"
+      },
+      {
+        "stepIndex": 12,
+        "description": "Presionar \"6\"",
+        "strategy": "role",
+        "value": "button|6"
+      },
+      {
+        "stepIndex": 13,
+        "description": "Presionar \"7\"",
+        "strategy": "role",
+        "value": "button|7"
+      },
+      {
+        "stepIndex": 14,
+        "description": "Presionar \"9\"",
+        "strategy": "role",
+        "value": "button|9"
+      },
+      {
+        "stepIndex": 15,
+        "description": "Presionar \"5\"",
+        "strategy": "role",
+        "value": "button|5"
+      },
+      {
+        "stepIndex": 16,
+        "description": "Presionar \"5\"",
+        "strategy": "role",
+        "value": "button|5"
+      },
+      {
+        "stepIndex": 17,
+        "description": "Presionar \"1\"",
+        "strategy": "role",
+        "value": "button|1"
+      },
+      {
+        "stepIndex": 18,
+        "description": "Presionar \"Generar Turno\"",
+        "strategy": "role",
+        "value": "button|Generar Turno"
+      },
+      {
+        "stepIndex": 19,
+        "description": "Presionar \"Atrás\"",
+        "strategy": "role",
+        "value": "button|Atrás"
+      },
+      {
+        "stepIndex": 20,
+        "description": "Presionar \"Cancelar\"",
+        "strategy": "role",
+        "value": "button|Cancelar"
+      },
+      {
+        "stepIndex": 21,
+        "description": "Presionar \"Finalizar sesión\"",
+        "strategy": "role",
+        "value": "button|Finalizar sesión"
+      },
+      {
+        "stepIndex": 22,
+        "description": "Presionar \"Explora nuestros productos\"",
+        "strategy": "role",
+        "value": "button|Explora nuestros productos"
+      },
+      {
+        "stepIndex": 23,
+        "description": "Presionar \"Cuentas\"",
+        "strategy": "role",
+        "value": "button|Cuentas"
+      },
+      {
+        "stepIndex": 24,
+        "description": "Presionar \"Cuenta de Ahorro\"",
+        "strategy": "role",
+        "value": "button|Cuenta de Ahorro"
+      },
+      {
+        "stepIndex": 26,
+        "description": "Presionar \"Solicitar\"",
+        "strategy": "role",
+        "value": "button|Solicitar"
+      },
+      {
+        "stepIndex": 27,
+        "description": "Presionar \"Cancelar\"",
+        "strategy": "role",
+        "value": "button|Cancelar"
+      },
+      {
+        "stepIndex": 28,
+        "description": "Presionar \"Finalizar sesión\"",
+        "strategy": "role",
+        "value": "button|Finalizar sesión"
+      },
+      {
+        "stepIndex": 29,
+        "description": "Presionar \"Explora nuestros productos\"",
+        "strategy": "role",
+        "value": "button|Explora nuestros productos"
+      },
+      {
+        "stepIndex": 30,
+        "description": "Presionar \"Préstamos\"",
+        "strategy": "role",
+        "value": "button|Préstamos"
+      },
+      {
+        "stepIndex": 31,
+        "description": "Presionar \"Préstamo Personal\"",
+        "strategy": "role",
+        "value": "button|Préstamo Personal"
+      },
+      {
+        "stepIndex": 32,
+        "description": "Presionar \"Finalizar sesión\"",
+        "strategy": "role",
+        "value": "button|Finalizar sesión"
+      },
+      {
+        "stepIndex": 33,
+        "description": "Presionar \"Explora nuestros productos\"",
+        "strategy": "role",
+        "value": "button|Explora nuestros productos"
+      },
+      {
+        "stepIndex": 34,
+        "description": "Presionar \"Depósitos a plazo\"",
+        "strategy": "role",
+        "value": "button|Depósitos a plazo"
+      },
+      {
+        "stepIndex": 35,
+        "description": "Presionar \"Depósitos a plazo en Dólares\"",
+        "strategy": "role",
+        "value": "button|Depósitos a plazo en Dólares"
+      },
+      {
+        "stepIndex": 36,
+        "description": "Presionar \"Solicitar\"",
+        "strategy": "role",
+        "value": "button|Solicitar"
+      },
+      {
+        "stepIndex": 37,
+        "description": "Presionar \"Cancelar\"",
+        "strategy": "role",
+        "value": "button|Cancelar"
+      }
+    ],
+    "sourceRecordingId": "4f7c41bd-4fcd-4481-96a7-c8b747c660a6",
+    "hasUncertainSteps": true,
+    "primary": true,
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7",
+      "event-8",
+      "event-9",
+      "event-10",
+      "event-11",
+      "event-12",
+      "event-13",
+      "event-14",
+      "event-15",
+      "event-16",
+      "event-17",
+      "event-18",
+      "event-19",
+      "event-20",
+      "event-21",
+      "event-22",
+      "event-23",
+      "event-24",
+      "event-25",
+      "event-26",
+      "event-27",
+      "event-28",
+      "event-29",
+      "event-30",
+      "event-31",
+      "event-32",
+      "event-33",
+      "event-34",
+      "event-35",
+      "event-36",
+      "event-37",
+      "event-38",
+      "event-39",
+      "event-40",
+      "event-41",
+      "event-42",
+      "event-43",
+      "event-44",
+      "event-45",
+      "event-46",
+      "event-47",
+      "event-48",
+      "event-49",
+      "event-50",
+      "event-51",
+      "event-52",
+      "event-53",
+      "event-54",
+      "event-55",
+      "event-56",
+      "event-57",
+      "event-58",
+      "event-59",
+      "event-60",
+      "event-61",
+      "event-62",
+      "event-63",
+      "event-64",
+      "event-65",
+      "event-66",
+      "event-67",
+      "event-68",
+      "event-69",
+      "event-70",
+      "event-71",
+      "event-72",
+      "event-73",
+      "event-74",
+      "event-75",
+      "event-76",
+      "event-77",
+      "event-78",
+      "event-79",
+      "event-80",
+      "event-81",
+      "event-82",
+      "event-83",
+      "event-84",
+      "event-85",
+      "event-86",
+      "event-87",
+      "event-88",
+      "event-89",
+      "event-90",
+      "event-91",
+      "event-92",
+      "event-93",
+      "event-94",
+      "event-95",
+      "event-96",
+      "event-97",
+      "event-98"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": false,
+    "functionalReadiness": true,
+    "technicalReadiness": false,
+    "expectedResultCandidate": "Se muestra \"Más detalles del producto\"",
+    "oracleAuthority": "observed_only",
+    "confidence": 0.95,
+    "scenarioStepCount": 39,
+    "functionalActionCount": 37,
+    "nonUserSetupSteps": 1,
+    "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
+    "scenarioGoal": "QA",
+    "stateSequenceValid": true,
+    "stateSequenceIssues": [],
+    "postGoalObservations": [],
+    "goalContract": {
+      "nonGeneric": true,
+      "goalCoherent": true,
+      "mutationIntentExpressed": true
+    },
+    "replayEligible": true,
+    "canonicalInteractions": [
+      {
+        "id": "interaction-1",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-1"
+        ],
+        "technicalTargetRefs": [],
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9,
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://172.27.4.50/"
+      },
+      {
+        "id": "interaction-2",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-2"
+        ],
+        "technicalTargetRefs": [],
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9,
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://172.27.4.50/"
+      },
+      {
+        "id": "interaction-5",
+        "controlIdentity": "9f12e61beacd|Explora nuestros productos|role|button|Explora nuestros productos",
+        "semanticField": "Explora nuestros productos",
+        "action": "click",
+        "valueKey": "explora_nuestros_productos",
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Explora nuestros productos"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Explora nuestros productos",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Explora nuestros productos"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"circle\",1],[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Explora nuestros productos\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "routeAfter": "https://172.27.4.50/product-catalog",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-8",
+        "controlIdentity": "9f12e61beacd|Tarjetas|role|button|Tarjetas",
+        "semanticField": "Tarjetas",
+        "action": "click",
+        "valueKey": "tarjetas",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Tarjetas"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Tarjetas",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"line\",1],[\"path\",1],[\"rect\",1],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"line\\\",1],[\\\"path\\\",1],[\\\"rect\\\",1],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Tarjetas\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-catalog",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=cards",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-11",
+        "controlIdentity": "9f12e61beacd|Tarjeta de Crédito|role|button|Tarjeta de Crédito",
+        "semanticField": "Tarjeta de Crédito",
+        "action": "click",
+        "valueKey": "tarjeta_de_credito",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Tarjeta de Crédito"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Tarjeta de Crédito",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"line\",1],[\"path\",1],[\"rect\",1],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"line\\\",1],[\\\"path\\\",1],[\\\"rect\\\",1],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Tarjeta de Crédito",
+          "targetTag": "h3",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "description": "Ingresar en \"Tarjeta de Crédito\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=cards",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-14",
+        "controlIdentity": "9f12e61beacd|Tarjeta de Crédito Visa Platinum",
+        "semanticField": "Tarjeta de Crédito Visa Platinum",
+        "action": "click",
+        "valueKey": "tarjeta_de_credito_visa_platinum",
+        "sourceEventRefs": [
+          "event-14"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "div"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "img",
+                  "stableAttributes": {
+                    "alt": "Tarjeta de Crédito Visa Platinum",
+                    "src": "/assets/images/tarjetas-de-credito-visa-platinum.png"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "div",
+                "h3"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",3],[\"h3\",1]],\"descendantEntries\":[[\"div\",11],[\"h3\",1],[\"img\",1],[\"path\",4],[\"span\",4],[\"svg\",4]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"div\"},\"stableDirectAttributes\":{},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"img\",\"stableAttributes\":{\"src\":\"/assets/images/tarjetas-de-credito-visa-platinum.png\"}}],\"semanticShape\":[\"div\",\"h3\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",3],[\\\"h3\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",11],[\\\"h3\\\",1],[\\\"img\\\",1],[\\\"path\\\",4],[\\\"span\\\",4],[\\\"svg\\\",4]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner",
+              "v2_framework_actionable_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Tarjeta de Crédito Visa Platinum\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+        "routeAfter": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-17",
+        "controlIdentity": "9f12e61beacd|Solicitar|role|button|Solicitar",
+        "semanticField": "Solicitar",
+        "action": "click",
+        "valueKey": "solicitar",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Solicitar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Solicitar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 3,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 3
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Solicitar",
+          "targetTag": "span",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "description": "Ingresar en \"Solicitar\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum"
+      },
+      {
+        "id": "interaction-19",
+        "controlIdentity": "9f12e61beacd|Generar Turno",
+        "semanticField": "Generar Turno",
+        "action": "click",
+        "valueKey": "generar_turno",
+        "sourceEventRefs": [
+          "event-19"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div",
+                "h3",
+                "p"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1],[\"h3\",1],[\"p\",1]],\"descendantEntries\":[[\"div\",2],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\",\"h3\",\"p\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1],[\\\"h3\\\",1],[\\\"p\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",2],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Generar Turno\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum"
+      },
+      {
+        "id": "interaction-21",
+        "controlIdentity": "9f12e61beacd|4|role|button|4",
+        "semanticField": "4",
+        "action": "click",
+        "valueKey": "4",
+        "sourceEventRefs": [
+          "event-21"
+        ],
+        "technicalTargetRefs": [
+          "role:button|4"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "4",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "4",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"4\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum"
+      },
+      {
+        "id": "interaction-23",
+        "controlIdentity": "9f12e61beacd|0|role|button|0",
+        "semanticField": "0",
+        "action": "click",
+        "valueKey": "0",
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "technicalTargetRefs": [
+          "role:button|0"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|0",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "0",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "0",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"0\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum"
+      },
+      {
+        "id": "interaction-25",
+        "controlIdentity": "9f12e61beacd|2|role|button|2",
+        "semanticField": "2",
+        "action": "click",
+        "valueKey": "2",
+        "sourceEventRefs": [
+          "event-25"
+        ],
+        "technicalTargetRefs": [
+          "role:button|2"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|2",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "2",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "2",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"2\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum"
+      },
+      {
+        "id": "interaction-27",
+        "controlIdentity": "9f12e61beacd|2|role|button|2",
+        "semanticField": "2",
+        "action": "click",
+        "valueKey": "2",
+        "sourceEventRefs": [
+          "event-27"
+        ],
+        "technicalTargetRefs": [
+          "role:button|2"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|2",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "2",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "2",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"2\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum"
+      },
+      {
+        "id": "interaction-29",
+        "controlIdentity": "9f12e61beacd|4|role|button|4",
+        "semanticField": "4",
+        "action": "click",
+        "valueKey": "4",
+        "sourceEventRefs": [
+          "event-29"
+        ],
+        "technicalTargetRefs": [
+          "role:button|4"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "4",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "4",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"4\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum"
+      },
+      {
+        "id": "interaction-31",
+        "controlIdentity": "9f12e61beacd|6|role|button|6",
+        "semanticField": "6",
+        "action": "click",
+        "valueKey": "6",
+        "sourceEventRefs": [
+          "event-31"
+        ],
+        "technicalTargetRefs": [
+          "role:button|6"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|6",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "6",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "6",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"6\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum"
+      },
+      {
+        "id": "interaction-33",
+        "controlIdentity": "9f12e61beacd|7|role|button|7",
+        "semanticField": "7",
+        "action": "click",
+        "valueKey": "7",
+        "sourceEventRefs": [
+          "event-33"
+        ],
+        "technicalTargetRefs": [
+          "role:button|7"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|7",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "7",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "7",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"7\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum"
+      },
+      {
+        "id": "interaction-35",
+        "controlIdentity": "9f12e61beacd|9|role|button|9",
+        "semanticField": "9",
+        "action": "click",
+        "valueKey": "9",
+        "sourceEventRefs": [
+          "event-35"
+        ],
+        "technicalTargetRefs": [
+          "role:button|9"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|9",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "9",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "9",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"9\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum"
+      },
+      {
+        "id": "interaction-37",
+        "controlIdentity": "9f12e61beacd|5|role|button|5",
+        "semanticField": "5",
+        "action": "click",
+        "valueKey": "5",
+        "sourceEventRefs": [
+          "event-37"
+        ],
+        "technicalTargetRefs": [
+          "role:button|5"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|5",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "5",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "5",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"5\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum"
+      },
+      {
+        "id": "interaction-39",
+        "controlIdentity": "9f12e61beacd|5|role|button|5",
+        "semanticField": "5",
+        "action": "click",
+        "valueKey": "5",
+        "sourceEventRefs": [
+          "event-39"
+        ],
+        "technicalTargetRefs": [
+          "role:button|5"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|5",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "5",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "5",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"5\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum"
+      },
+      {
+        "id": "interaction-41",
+        "controlIdentity": "9f12e61beacd|1|role|button|1",
+        "semanticField": "1",
+        "action": "click",
+        "valueKey": "1",
+        "sourceEventRefs": [
+          "event-41"
+        ],
+        "technicalTargetRefs": [
+          "role:button|1"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|1",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "1",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "1",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"1\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum"
+      },
+      {
+        "id": "interaction-43",
+        "controlIdentity": "9f12e61beacd|Generar Turno|role|button|Generar Turno",
+        "semanticField": "Generar Turno",
+        "action": "click",
+        "valueKey": "generar_turno",
+        "sourceEventRefs": [
+          "event-43"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Generar Turno"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Generar Turno",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 5,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 5
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Generar Turno",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Generar Turno",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Generar Turno\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum"
+      },
+      {
+        "id": "interaction-45",
+        "controlIdentity": "9f12e61beacd|Atrás|role|button|Atrás",
+        "semanticField": "Atrás",
+        "action": "click",
+        "valueKey": "atras",
+        "sourceEventRefs": [
+          "event-45"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Atrás"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Atrás",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 5,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 5
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Atrás",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Atrás",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Atrás\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum"
+      },
+      {
+        "id": "interaction-47",
+        "controlIdentity": "9f12e61beacd|Cancelar|role|button|Cancelar",
+        "semanticField": "Cancelar",
+        "action": "click",
+        "valueKey": "cancelar",
+        "sourceEventRefs": [
+          "event-47"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Cancelar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Cancelar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 4,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 4
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Cancelar",
+          "targetTag": "span",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "description": "Ingresar en \"Cancelar\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum"
+      },
+      {
+        "id": "interaction-49",
+        "controlIdentity": "9f12e61beacd|Finalizar sesión|role|button|Finalizar sesión",
+        "semanticField": "Finalizar sesión",
+        "action": "click",
+        "valueKey": "finalizar_sesion",
+        "sourceEventRefs": [
+          "event-49"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Finalizar sesión"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Finalizar sesión",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 3,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 3
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Finalizar sesión",
+          "targetTag": "span",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "description": "Ingresar en \"Finalizar sesión\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "routeAfter": "https://172.27.4.50/",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-52",
+        "controlIdentity": "9f12e61beacd|Explora nuestros productos|role|button|Explora nuestros productos",
+        "semanticField": "Explora nuestros productos",
+        "action": "click",
+        "valueKey": "explora_nuestros_productos",
+        "sourceEventRefs": [
+          "event-52"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Explora nuestros productos"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Explora nuestros productos",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Explora nuestros productos"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"circle\",1],[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Explora nuestros productos\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "routeAfter": "https://172.27.4.50/product-catalog",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-55",
+        "controlIdentity": "9f12e61beacd|Cuentas|role|button|Cuentas",
+        "semanticField": "Cuentas",
+        "action": "click",
+        "valueKey": "cuentas",
+        "sourceEventRefs": [
+          "event-55"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Cuentas"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Cuentas",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"path\",3],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"path\\\",3],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Cuentas\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-catalog",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=accounts",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-58",
+        "controlIdentity": "9f12e61beacd|Cuenta de Ahorro|role|button|Cuenta de Ahorro",
+        "semanticField": "Cuenta de Ahorro",
+        "action": "click",
+        "valueKey": "cuenta_de_ahorro",
+        "sourceEventRefs": [
+          "event-58"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Cuenta de Ahorro"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Cuenta de Ahorro",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"path\",4],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"path\\\",4],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Cuenta de Ahorro",
+          "targetTag": "h3",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "description": "Ingresar en \"Cuenta de Ahorro\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=accounts",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=accounts&subcategory=savings",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-61",
+        "controlIdentity": "9f12e61beacd|Cuenta de Ahorros Personal en Dólares",
+        "semanticField": "Cuenta de Ahorros Personal en Dólares",
+        "action": "click",
+        "valueKey": "cuenta_de_ahorros_personal_en_dolares",
+        "sourceEventRefs": [
+          "event-61"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "div"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "img",
+                  "stableAttributes": {
+                    "alt": "Cuenta de Ahorros Personal en Dólares",
+                    "src": "/assets/images/cuenta-ahorro-dolares.svg"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "div",
+                "h3"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",3],[\"h3\",1]],\"descendantEntries\":[[\"div\",11],[\"h3\",1],[\"img\",1],[\"path\",4],[\"span\",4],[\"svg\",4]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"div\"},\"stableDirectAttributes\":{},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"img\",\"stableAttributes\":{\"src\":\"/assets/images/cuenta-ahorro-dolares.svg\"}}],\"semanticShape\":[\"div\",\"h3\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",3],[\\\"h3\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",11],[\\\"h3\\\",1],[\\\"img\\\",1],[\\\"path\\\",4],[\\\"span\\\",4],[\\\"svg\\\",4]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner",
+              "v2_framework_actionable_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Cuenta de Ahorros Personal en Dólares\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=accounts&subcategory=savings",
+        "routeAfter": "https://172.27.4.50/product-extended?product=cuenta-de-ahorros-personal-en-dolares",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-64",
+        "controlIdentity": "9f12e61beacd|Solicitar|role|button|Solicitar",
+        "semanticField": "Solicitar",
+        "action": "click",
+        "valueKey": "solicitar",
+        "sourceEventRefs": [
+          "event-64"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Solicitar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Solicitar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 3,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 3
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Solicitar",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Solicitar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Solicitar\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=cuenta-de-ahorros-personal-en-dolares"
+      },
+      {
+        "id": "interaction-66",
+        "controlIdentity": "9f12e61beacd|Cancelar|role|button|Cancelar",
+        "semanticField": "Cancelar",
+        "action": "click",
+        "valueKey": "cancelar",
+        "sourceEventRefs": [
+          "event-66"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Cancelar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Cancelar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 4,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 4
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Cancelar",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Cancelar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Cancelar\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=cuenta-de-ahorros-personal-en-dolares"
+      },
+      {
+        "id": "interaction-68",
+        "controlIdentity": "9f12e61beacd|Finalizar sesión|role|button|Finalizar sesión",
+        "semanticField": "Finalizar sesión",
+        "action": "click",
+        "valueKey": "finalizar_sesion",
+        "sourceEventRefs": [
+          "event-68"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Finalizar sesión"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Finalizar sesión",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 3,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 3
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Finalizar sesión",
+          "targetTag": "span",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "description": "Ingresar en \"Finalizar sesión\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=cuenta-de-ahorros-personal-en-dolares",
+        "routeAfter": "https://172.27.4.50/",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-71",
+        "controlIdentity": "9f12e61beacd|Explora nuestros productos|role|button|Explora nuestros productos",
+        "semanticField": "Explora nuestros productos",
+        "action": "click",
+        "valueKey": "explora_nuestros_productos",
+        "sourceEventRefs": [
+          "event-71"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Explora nuestros productos"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Explora nuestros productos",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Explora nuestros productos"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"circle\",1],[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Explora nuestros productos\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "routeAfter": "https://172.27.4.50/product-catalog",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-74",
+        "controlIdentity": "9f12e61beacd|Préstamos|role|button|Préstamos",
+        "semanticField": "Préstamos",
+        "action": "click",
+        "valueKey": "prestamos",
+        "sourceEventRefs": [
+          "event-74"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Préstamos"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Préstamos",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"circle\",2],[\"div\",6],[\"h3\",1],[\"path\",4],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"circle\\\",2],[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"path\\\",4],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Préstamos\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-catalog",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=loans",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-77",
+        "controlIdentity": "9f12e61beacd|Préstamo Personal|role|button|Préstamo Personal",
+        "semanticField": "Préstamo Personal",
+        "action": "click",
+        "valueKey": "prestamo_personal",
+        "sourceEventRefs": [
+          "event-77"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Préstamo Personal"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Préstamo Personal",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"circle\",1],[\"div\",6],[\"h3\",1],[\"path\",2],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"path\\\",2],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Préstamo Personal\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=loans",
+        "routeAfter": "https://172.27.4.50/product-extended?product=prestamo-personal",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-81",
+        "controlIdentity": "9f12e61beacd|Finalizar sesión|role|button|Finalizar sesión",
+        "semanticField": "Finalizar sesión",
+        "action": "click",
+        "valueKey": "finalizar_sesion",
+        "sourceEventRefs": [
+          "event-81"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Finalizar sesión"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Finalizar sesión",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 3,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 3
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Finalizar sesión",
+          "targetTag": "span",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "description": "Ingresar en \"Finalizar sesión\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=prestamo-personal",
+        "routeAfter": "https://172.27.4.50/",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-84",
+        "controlIdentity": "9f12e61beacd|Explora nuestros productos|role|button|Explora nuestros productos",
+        "semanticField": "Explora nuestros productos",
+        "action": "click",
+        "valueKey": "explora_nuestros_productos",
+        "sourceEventRefs": [
+          "event-84"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Explora nuestros productos"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Explora nuestros productos",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Explora nuestros productos"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"circle\",1],[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Explora nuestros productos\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/",
+        "routeAfter": "https://172.27.4.50/product-catalog",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-87",
+        "controlIdentity": "9f12e61beacd|Depósitos a plazo|role|button|Depósitos a plazo",
+        "semanticField": "Depósitos a plazo",
+        "action": "click",
+        "valueKey": "depositos_a_plazo",
+        "sourceEventRefs": [
+          "event-87"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Depósitos a plazo"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Depósitos a plazo",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"path\",4],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"path\\\",4],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Depósitos a plazo\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-catalog",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=certificates",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-90",
+        "controlIdentity": "9f12e61beacd|Depósitos a plazo en Dólares|role|button|Depósitos a plazo en Dólares",
+        "semanticField": "Depósitos a plazo en Dólares",
+        "action": "click",
+        "valueKey": "depositos_a_plazo_en_dolares",
+        "sourceEventRefs": [
+          "event-90"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Depósitos a plazo en Dólares"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Depósitos a plazo en Dólares",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"line\",1],[\"path\",2],[\"svg\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 2,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"line\\\",1],[\\\"path\\\",2],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 2
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Depósitos a plazo en Dólares\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=certificates",
+        "routeAfter": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-dolares",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-94",
+        "controlIdentity": "9f12e61beacd|Solicitar|role|button|Solicitar",
+        "semanticField": "Solicitar",
+        "action": "click",
+        "valueKey": "solicitar",
+        "sourceEventRefs": [
+          "event-94"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Solicitar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Solicitar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 3,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 3
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Solicitar",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Solicitar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Solicitar\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "9f12e61beacd",
+        "routeBefore": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-dolares"
+      },
+      {
+        "id": "interaction-96",
+        "controlIdentity": "9f12e61beacd|Cancelar|role|button|Cancelar",
+        "semanticField": "Cancelar",
+        "action": "click",
+        "valueKey": "cancelar",
+        "sourceEventRefs": [
+          "event-96"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Cancelar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Cancelar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 4,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 4
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Cancelar",
+          "targetTag": "span",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "description": "Ingresar en \"Cancelar\"",
+        "stateScope": "9f12e61beacd",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9f12e61beacd",
+        "screenAfterRef": "5004cea6b230",
+        "routeBefore": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-dolares",
+        "routeAfter": "https://172.27.4.50/",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      }
+    ],
+    "entityActionBlocks": [],
+    "readiness": {
+      "functionalReadiness": true,
+      "dataReadiness": true,
+      "technicalReadiness": false,
+      "oracleReadiness": true,
+      "reviewReadiness": true,
+      "publicationContentReadiness": true,
+      "executionReadiness": true,
+      "publicationReadiness": true,
+      "missingInputs": [],
+      "datasetAuthorityMismatches": [],
+      "dataReadinessReasons": []
+    },
+    "technicalKnowledgeRefs": [],
+    "runtimeInputRequirements": [],
+    "runtimeDataset": {
+      "scenarioId": "REC-4F7C41BD-01",
+      "requirements": [],
+      "resolvedValues": {},
+      "missingValues": []
+    },
+    "mutationOpportunities": [],
+    "promotedSpec": {
+      "appSlug": "roke",
+      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\roke\\sections\\default-section\\cases\\preview-001-qa\\case.spec.ts",
+      "specHash": "55664f8d2eab1b96bcf8b9c14dded42905951ad3f6df56e5fa8594da3430ab3d",
+      "automationId": "preview-001-qa",
+      "sectionSlug": "default-section",
+      "generatedAt": "2026-09-29T00:35:48.213Z"
+    },
+    "testRailCaseId": 48203,
+    "testRailDestination": {
+      "projectId": "56",
+      "suiteId": "1731",
+      "sectionId": "4755"
+    }
+  }
+]

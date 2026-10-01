@@ -204,6 +204,53 @@ test("FIRST_LOSS boundary: normalizeEvents must never demote a tap with real str
   assert.equal(iconEvent!.kind, "tap", "the icon button must survive normalization as a tap, never demoted to a note");
 });
 
+test("trusted Capture V2 taps with generic captions remain observed actions without gaining locator authority", () => {
+  const candidate = {
+    targetType: "structural" as const,
+    locatorCandidates: [],
+    structuralContext: {
+      owner: { tag: "button" },
+      stableDirectAttributes: {},
+      stableDescendants: [],
+      semanticShape: ["span"],
+      landmarkAncestor: { tag: "main" },
+      deterministicStructuralIdentity: false,
+      identityAmbiguous: true,
+      structuralIdentityMatchCount: 3,
+    },
+    interactionEvidence: ["v2_click_owner"],
+    confidence: 0.85,
+    validatedByInteraction: true,
+  };
+  const trace = fixture({
+    events: [
+      {
+        seq: 0, t: 100, kind: "tap", interactionId: "pointer-1", screenKey: "multiproduct",
+        target: { label: "Seleccionar fila", role: "checkbox", locators: [], technicalTargetCandidates: [candidate] },
+      },
+      {
+        seq: 1, t: 200, kind: "tap", interactionId: "pointer-2", screenKey: "multiproduct",
+        target: { label: "Indicar...", role: "button", locators: [], technicalTargetCandidates: [candidate] },
+      },
+      {
+        seq: 2, t: 300, kind: "tap", interactionId: "pointer-3", screenKey: "multiproduct",
+        target: { label: "Choice", role: "option", locators: [{ strategy: "role", value: "option|Choice" }] },
+      },
+    ] as SessionTrace["events"],
+  });
+
+  const normalized = normalizeEvents(trace.events);
+  assert.deepEqual(normalized.map((event) => event.kind), ["tap", "tap", "tap"]);
+  assert.deepEqual(normalized.slice(0, 2).map((event) => event.target?.locators), [[], []]);
+
+  const scenario = buildHappyPathScenario(trace, normalized);
+  for (const interactionId of ["interaction-1", "interaction-2"]) {
+    const step = scenario.webSteps.find((candidateStep) => candidateStep.interactionId === interactionId);
+    assert.equal(step?.action, "click");
+    assert.equal(step?.target, undefined, "the runtime must resolve these actions without an invented selector");
+  }
+});
+
 test("realShape/fullPipeline. capture=3, recorded=3, canonical=3, observed=3, execution=3, in order: fill, click icon (runtime_resolution_required), click Depurar", () => {
   const trace = realShapeFixture();
   const CAPTURE_ACTIONS = trace.events.length;

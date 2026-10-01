@@ -12,6 +12,8 @@ import type { TestScenario } from "../types/testrail.types";
 import { RunEvidenceRecorder } from "../evidence/run-evidence-recorder";
 import { loadEvidenceConfig } from "../evidence/evidence-types";
 import { MAX_SCENARIO_ATTEMPTS, shouldRetryScenario } from "../discovery/pre-business-retry-policy";
+import { normalizeSemanticText } from "../automations/semantic-text-normalization";
+import { isRecordedDialogContainerTap } from "../recording/recorded-action-semantics";
 
 export type PreviewCliArgs = {
   input: string;
@@ -606,6 +608,82 @@ export function virtualCaseToTestScenario(vc: VirtualCase, routeProfile?: McpRou
       .map((interaction) => typeof interaction.id === "string" ? interaction.id : undefined)
       .filter((id): id is string => Boolean(id)),
   );
+  const authoredBusinessSteps = (vc.steps ?? []).map((step, index) => {
+    // Keep the authored execution sequence, while restoring recording authority
+    // only when its recorded human action semantically identifies this row. If
+    // repeated labels point to different recorded controls, fail closed and do
+    // not attach ambiguous evidence.
+    const normalizedStep = normalizeSemanticText(step.trim());
+    const semanticMatches = recordingActions.filter(({ action }) =>
+      typeof action.humanStep === "string"
+      && normalizeSemanticText(action.humanStep.trim()) === normalizedStep
+    );
+    // Repeated generic actions (for example, selecting a row checkbox in two
+    // entities) have identical human text but distinct recorded authority.
+    // Prefer the same sequence position when its text agrees, so entityScope
+    // and target lineage are not discarded as ambiguous.
+    const samePositionMatch = semanticMatches.find(({ stepIndex }) => stepIndex === index + 1);
+    // Runtime/dataset values may replace a recorded placeholder in the authored
+    // step (for example, `[entity_2.phone]` becoming a concrete value). Preserve
+    // the recording's entity scope from the same sequence slot only when the
+    // quoted field label still agrees; the value text itself is not identity.
+    const fieldLabelMatch = step.match(/(?:\ben\b|\basociado\s+a\b)\s+["“](.+?)["”]\s*$/i);
+    const normalizedFieldLabel = fieldLabelMatch ? normalizeSemanticText(fieldLabelMatch[1].trim()) : "";
+    const samePositionFieldMatch = !samePositionMatch && normalizedFieldLabel
+      ? recordingActions.find(({ action, stepIndex }) => {
+        if (stepIndex !== index + 1) return false;
+        const recordedField = action.associatedField ?? action.semanticField;
+        return typeof recordedField === "string"
+          && normalizeSemanticText(recordedField.trim()) === normalizedFieldLabel;
+      })
+      : undefined;
+    const orderedSemanticMatches = samePositionMatch
+      ? [samePositionMatch]
+      : samePositionFieldMatch
+        ? [samePositionFieldMatch]
+        : semanticMatches;
+    const authoritySignature = (action: (typeof recordingActions)[number]["action"]) => JSON.stringify({
+      actionType: action.actionType,
+      technicalTargetRef: action.technicalTargetRef,
+      technicalTargetRefs: action.technicalTargetRefs,
+      technicalTargetCandidates: action.technicalTargetCandidates,
+      controlIdentity: action.controlIdentity,
+      semanticRuntimeEvidence: action.semanticRuntimeEvidence,
+      playwrightRecorderEvidence: action.playwrightRecorderEvidence,
+      associatedField: action.associatedField,
+    });
+    const signatures = new Set(orderedSemanticMatches.map(({ action }) => authoritySignature(action)));
+    const matchedRecordingAction = orderedSemanticMatches.length > 0 && signatures.size === 1
+      ? orderedSemanticMatches[0].action
+      : undefined;
+    return {
+      index: index + 1,
+      action: step,
+      description: step,
+      expected: "",
+      dataHints: [],
+      ...(matchedRecordingAction ? {
+        recordingActionType: matchedRecordingAction.actionType,
+        technicalTargetRef: matchedRecordingAction.technicalTargetRef,
+        technicalTargetRefs: matchedRecordingAction.technicalTargetRefs,
+        technicalTargetCandidates: matchedRecordingAction.technicalTargetCandidates,
+        controlIdentity: matchedRecordingAction.controlIdentity,
+        semanticRuntimeEvidence: matchedRecordingAction.semanticRuntimeEvidence,
+        playwrightRecorderEvidence: matchedRecordingAction.playwrightRecorderEvidence,
+        associatedField: matchedRecordingAction.associatedField,
+        ...(matchedRecordingAction.entityScope ? { entityScope: matchedRecordingAction.entityScope } : {}),
+        ...(matchedRecordingAction.rowScope !== undefined ? { rowScope: matchedRecordingAction.rowScope } : {}),
+        ...(matchedRecordingAction.rowRelation ? { rowRelation: matchedRecordingAction.rowRelation } : {}),
+      } : {}),
+    };
+  }).filter((step) => {
+    if (!isRecordedDialogContainerTap(step)) return true;
+    console.log(`[recording-replay] virtualCaseStepOmitted=true reason=recorded_dialog_container_tap stepIndex=${step.index}`);
+    return false;
+  });
+  if (recordingActions.length > 0 && authoredBusinessSteps.length > 0) {
+    console.log(`[recording-replay] virtualCaseStepsSelected=true businessSteps=${authoredBusinessSteps.length} contractActions=${recordingActions.length}`);
+  }
   const buildStructuredActionText = (action: (typeof recordingActions)[number]["action"]): string => {
     const semanticField = typeof action.semanticField === "string" && action.semanticField.trim()
       ? action.semanticField.trim()
@@ -636,10 +714,10 @@ export function virtualCaseToTestScenario(vc: VirtualCase, routeProfile?: McpRou
     externalId: embeddedCaseId > 0 ? `C${embeddedCaseId}` : vc.displayId,
     caseId: embeddedCaseId,
     title: vc.title,
-    preconditions: vc.preconditions.join("\n"),
+    preconditions: (vc.preconditions ?? []).join("\n"),
     authIntent: vc.authIntent,
     negativeOracle: vc.negativeOracle,
-    steps: recordingActions.length > 0 ? recordingActions.map(({ action: contractAction, stepIndex }) => {
+    steps: authoredBusinessSteps.length > 0 ? authoredBusinessSteps : recordingActions.length > 0 ? recordingActions.filter(({ action }) => !isRecordedDialogContainerTap(action)).map(({ action: contractAction, stepIndex }) => {
       const requirementRefs = refsByStep.get(stepIndex) ?? refsByStep.get(stepIndex - 1);
       const canonicalPolarities = (requirementRefs ?? [])
         .map((requirementId) => vc.canonicalRequirements?.find((requirement) => requirement.requirementId === requirementId)?.polarity)
@@ -661,13 +739,15 @@ export function virtualCaseToTestScenario(vc: VirtualCase, routeProfile?: McpRou
       ...(contractAction?.entityScope ? { entityScope: contractAction.entityScope } : {}),
       ...(contractAction?.rowRelation ? { rowRelation: contractAction.rowRelation } : {}),
       ...(contractAction?.semanticField && contractAction.actionType === "select" ? { selectionField: contractAction.semanticField } : {}),
+      ...(contractAction?.selectorControlId ? { selectorControlId: contractAction.selectorControlId } : {}),
+      ...(contractAction?.optionSurfaceId ? { optionSurfaceId: contractAction.optionSurfaceId } : {}),
       ...(contractAction?.technicalTargetRef ? { technicalTargetRef: contractAction.technicalTargetRef } : {}),
       ...(contractAction?.technicalTargetRefs ? { technicalTargetRefs: [...contractAction.technicalTargetRefs] } : {}),
       ...(contractAction?.technicalTargetCandidates?.length ? { technicalTargetCandidates: [...contractAction.technicalTargetCandidates] } : {}),
       ...(contractAction?.controlIdentity ? { controlIdentity: contractAction.controlIdentity } : {}),
       ...(contractAction?.actionType ? { recordingActionType: contractAction.actionType } : {}),
       };
-    }) : vc.steps.map((step, index) => ({
+    }) : (vc.steps ?? []).map((step, index) => ({
       index,
       action: step,
       expected: "",
@@ -694,10 +774,10 @@ export function virtualCaseToTestScenario(vc: VirtualCase, routeProfile?: McpRou
     recordingId: vc.recordingId,
     recordedScenarioId: vc.recordedScenarioId,
     raw: {
-      custom_preconds: vc.preconditions.join("\n"),
+      custom_preconds: (vc.preconditions ?? []).join("\n"),
       custom_expected: vc.expectedResult,
-      custom_steps: vc.steps.join("\n"),
-      custom_steps_separated: vc.steps.map((step) => ({ content: step }))
+      custom_steps: (vc.steps ?? []).join("\n"),
+      custom_steps_separated: (vc.steps ?? []).map((step) => ({ content: step }))
     },
     ...(vc.recordingExecutionContract ? { recordingExecutionContract: vc.recordingExecutionContract } : {}),
   } as any;
@@ -847,8 +927,8 @@ async function runPreviewCase(
       scenarioAttempts.businessSurfaceReached = signals.businessSurfaceReached;
       scenarioAttempts.authStatus = signals.authStatus;
       scenarioAttempts.postLoginSurface = signals.postLoginSurface;
+      const failure = String(workflowResult.caseResult?.failedReason ?? signals.failureClassification ?? "unknown");
       if (workflowResult.caseResult?.status !== "discovered_passed" && workflowResult.caseResult?.status !== "repaired_passed") {
-        const failure = String(workflowResult.caseResult?.failedReason ?? signals.failureClassification ?? "unknown");
         if (attempt === 1) scenarioAttempts.attempt1Failure = failure;
         if (attempt === 2) scenarioAttempts.attempt2Failure = failure;
       }
@@ -857,7 +937,10 @@ async function runPreviewCase(
       if (!retryAllowed) break;
 
       scenarioAttempts.retryUsed = true;
-      scenarioAttempts.retryReason = "transient_pre_business_auth_navigation";
+      scenarioAttempts.retryReason = failure === "RECORDED_PRECONDITION_NOT_REACHED"
+        || failure === "RECORDED_POSTCONDITION_NOT_REACHED"
+        ? "transient_recorded_surface_navigation"
+        : "transient_pre_business_auth_navigation";
       scenarioAttempts.previousAttemptFailure = scenarioAttempts.attempt1Failure;
       console.log(`[scenario-attempt] scenario=${vc.displayId} scenarioAttempt=${attempt}/${MAX_SCENARIO_ATTEMPTS} retry=true reason=${scenarioAttempts.retryReason} freshContext=true`);
     }
@@ -1006,6 +1089,7 @@ async function runPreviewCase(
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error(`[discovery:preview] ${vc.displayId} failed: ${message}`);
+    if (err instanceof Error && err.stack) console.error(`[discovery:preview] ${vc.displayId} stack: ${err.stack}`);
 
     // Emit JSON line for progress tracking
     const crCatch = (workflowResult as any)?.caseResult;

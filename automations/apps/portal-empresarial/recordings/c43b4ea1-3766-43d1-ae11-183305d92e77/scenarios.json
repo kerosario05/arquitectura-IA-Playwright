@@ -1,0 +1,5193 @@
+[
+  {
+    "scenarioId": "REC-C43B4EA1-01",
+    "title": "Registro varios clientes",
+    "description": "Recorrido observado para completar \"Registro varios clientes\". Se registraron 34 acciones funcionales.",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://172.27.4.31/login",
+        "description": "Navegar a https://172.27.4.31/login"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|RNC de la empresa*"
+        },
+        "valueKey": "rnc_de_la_empresa",
+        "description": "Ingresar [rnc_de_la_empresa] en \"RNC de la empresa*\"",
+        "interactionId": "interaction-6"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Nombre de usuario*"
+        },
+        "valueKey": "nombre_de_usuario",
+        "description": "Ingresar [nombre_de_usuario] en \"Nombre de usuario*\"",
+        "interactionId": "interaction-7"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Contraseña*"
+        },
+        "valueKey": "contrasena",
+        "description": "Ingresar [contrasena] en \"Contraseña*\"",
+        "interactionId": "interaction-10"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Gestión de Nóminas"
+        },
+        "description": "Presionar \"Gestión de Nóminas\"",
+        "interactionId": "interaction-14"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Crear Manualmente"
+        },
+        "description": "Presionar \"Crear Manualmente\"",
+        "interactionId": "interaction-17"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Close"
+        },
+        "description": "Presionar \"Close\"",
+        "interactionId": "interaction-20"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "td:has(button[aria-label=\"Seleccionar fila\"])"
+        },
+        "description": "Presionar el control indicado",
+        "interactionId": "interaction-21"
+      },
+      {
+        "action": "click",
+        "description": "Presionar el control indicado",
+        "interactionId": "interaction-23"
+      },
+      {
+        "action": "click",
+        "description": "Presionar botón asociado a \"Tipo de ID\"",
+        "entityScope": "entity_1",
+        "interactionId": "interaction-25"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "option|cédula"
+        },
+        "description": "Presionar \"cédula\"",
+        "entityScope": "entity_1",
+        "interactionId": "interaction-26"
+      },
+      {
+        "action": "fill",
+        "valueKey": "entity_1.colaborador",
+        "description": "Ingresar [entity_1.colaborador] en \"Colaborador\"",
+        "entityScope": "entity_1",
+        "interactionId": "interaction-28"
+      },
+      {
+        "action": "fill",
+        "valueKey": "entity_1.puesto",
+        "description": "Ingresar [entity_1.puesto] en \"Puesto\"",
+        "entityScope": "entity_1",
+        "interactionId": "interaction-29"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "option|DOP"
+        },
+        "valueKey": "entity_1.moneda_seleccion",
+        "description": "Seleccionar [entity_1.moneda_seleccion] en \"Moneda\"",
+        "entityScope": "entity_1",
+        "interactionId": "interaction-33"
+      },
+      {
+        "action": "fill",
+        "valueKey": "entity_1.ingresos",
+        "description": "Ingresar [entity_1.ingresos] en \"Ingresos\"",
+        "entityScope": "entity_1",
+        "interactionId": "interaction-35"
+      },
+      {
+        "action": "fill",
+        "valueKey": "entity_1.correo_electronico",
+        "description": "Ingresar [entity_1.correo_electronico] en \"Correo electrónico\"",
+        "entityScope": "entity_1",
+        "interactionId": "interaction-36"
+      },
+      {
+        "action": "fill",
+        "valueKey": "entity_1.telefono_residencial",
+        "description": "Ingresar [entity_1.telefono_residencial] en \"Teléfono residencial\"",
+        "entityScope": "entity_1",
+        "interactionId": "interaction-37"
+      },
+      {
+        "action": "fill",
+        "valueKey": "entity_1.celular",
+        "description": "Ingresar [entity_1.celular] en \"Celular\"",
+        "entityScope": "entity_1",
+        "interactionId": "interaction-38"
+      },
+      {
+        "action": "fill",
+        "valueKey": "entity_1.fecha_de_ingreso",
+        "description": "Ingresar [entity_1.fecha_de_ingreso] en \"Fecha de Ingreso\"",
+        "entityScope": "entity_1",
+        "interactionId": "interaction-39"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Añadir otro"
+        },
+        "description": "Presionar \"Añadir otro\"",
+        "entityScope": "entity_1",
+        "interactionId": "interaction-41"
+      },
+      {
+        "action": "click",
+        "description": "Presionar el control indicado",
+        "entityScope": "entity_2",
+        "interactionId": "interaction-43"
+      },
+      {
+        "action": "click",
+        "description": "Presionar botón asociado a \"Tipo de ID\"",
+        "entityScope": "entity_2",
+        "interactionId": "interaction-45"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "option|cédula"
+        },
+        "description": "Presionar \"cédula\"",
+        "entityScope": "entity_2",
+        "interactionId": "interaction-46"
+      },
+      {
+        "action": "fill",
+        "valueKey": "entity_2.colaborador",
+        "description": "Ingresar [entity_2.colaborador] en \"Colaborador\"",
+        "entityScope": "entity_2",
+        "interactionId": "interaction-49"
+      },
+      {
+        "action": "fill",
+        "valueKey": "entity_2.puesto",
+        "description": "Ingresar [entity_2.puesto] en \"Puesto\"",
+        "entityScope": "entity_2",
+        "interactionId": "interaction-50"
+      },
+      {
+        "action": "fill",
+        "valueKey": "entity_2.ingresos",
+        "description": "Ingresar [entity_2.ingresos] en \"Ingresos\"",
+        "entityScope": "entity_2",
+        "interactionId": "interaction-51"
+      },
+      {
+        "action": "fill",
+        "valueKey": "entity_2.correo_electronico",
+        "description": "Ingresar [entity_2.correo_electronico] en \"Correo electrónico\"",
+        "entityScope": "entity_2",
+        "interactionId": "interaction-52"
+      },
+      {
+        "action": "fill",
+        "valueKey": "entity_2.telefono_residencial",
+        "description": "Ingresar [entity_2.telefono_residencial] en \"Teléfono residencial\"",
+        "entityScope": "entity_2",
+        "interactionId": "interaction-53"
+      },
+      {
+        "action": "fill",
+        "valueKey": "entity_2.celular",
+        "description": "Ingresar [entity_2.celular] en \"Celular\"",
+        "entityScope": "entity_2",
+        "interactionId": "interaction-54"
+      },
+      {
+        "action": "fill",
+        "valueKey": "entity_2.fecha_de_nacimiento",
+        "description": "Ingresar [entity_2.fecha_de_nacimiento] en \"Fecha de Nacimiento\"",
+        "entityScope": "entity_2",
+        "interactionId": "interaction-55"
+      },
+      {
+        "action": "fill",
+        "valueKey": "entity_2.fecha_de_ingreso",
+        "description": "Ingresar [entity_2.fecha_de_ingreso] en \"Fecha de Ingreso\"",
+        "entityScope": "entity_2",
+        "interactionId": "interaction-56"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Validar"
+        },
+        "description": "Presionar \"Validar\"",
+        "entityScope": "entity_2",
+        "interactionId": "interaction-58"
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Ingresar [rnc_de_la_empresa] en \"RNC de la empresa*\"",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "stepTemplate": "Ingresar [rnc_de_la_empresa] en \"RNC de la empresa*\"",
+        "renderedStep": "Ingresar \"130598983\" en \"RNC de la empresa*\"",
+        "valueKey": "rnc_de_la_empresa",
+        "interactionId": "interaction-6",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login",
+        "stateScope": "3e7b2674871e",
+        "stepNumber": 2
+      },
+      {
+        "content": "Ingresar [nombre_de_usuario] en \"Nombre de usuario*\"",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "stepTemplate": "Ingresar [nombre_de_usuario] en \"Nombre de usuario*\"",
+        "renderedStep": "Ingresar \"olivam\" en \"Nombre de usuario*\"",
+        "valueKey": "nombre_de_usuario",
+        "interactionId": "interaction-7",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login",
+        "stateScope": "3e7b2674871e",
+        "stepNumber": 3
+      },
+      {
+        "content": "Ingresar [contrasena] en \"Contraseña*\"",
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "stepTemplate": "Ingresar [contrasena] en \"Contraseña*\"",
+        "renderedStep": "Ingresar \"qwerty123123\" en \"Contraseña*\"",
+        "valueKey": "contrasena",
+        "interactionId": "interaction-10",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login",
+        "stateScope": "3e7b2674871e",
+        "stepNumber": 4
+      },
+      {
+        "content": "Presionar \"Enter\" en \"Contraseña*\"",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "renderedStep": "Presionar \"Enter\" en \"Contraseña*\"",
+        "interactionId": "interaction-11",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login",
+        "routeAfter": "https://172.27.4.31/dashboard",
+        "stateScope": "3e7b2674871e",
+        "stepNumber": 5
+      },
+      {
+        "content": "Presionar \"Gestión de Nóminas\"",
+        "sourceEventRefs": [
+          "event-14"
+        ],
+        "renderedStep": "Presionar \"Gestión de Nóminas\"",
+        "interactionId": "interaction-14",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/dashboard",
+        "routeAfter": "https://172.27.4.31/payroll/electronicPayroll",
+        "stateScope": "3e7b2674871e",
+        "stepNumber": 6
+      },
+      {
+        "content": "Presionar \"Crear Manualmente\"",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "renderedStep": "Presionar \"Crear Manualmente\"",
+        "interactionId": "interaction-17",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/electronicPayroll",
+        "routeAfter": "https://172.27.4.31/payroll/manualCreationTable",
+        "stateScope": "3e7b2674871e",
+        "stepNumber": 7
+      },
+      {
+        "content": "Presionar \"Close\"",
+        "sourceEventRefs": [
+          "event-20"
+        ],
+        "renderedStep": "Presionar \"Close\"",
+        "interactionId": "interaction-20",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "stateScope": "3e7b2674871e",
+        "stepNumber": 8
+      },
+      {
+        "content": "Presionar el control indicado",
+        "sourceEventRefs": [
+          "event-21"
+        ],
+        "renderedStep": "Presionar el control indicado",
+        "interactionId": "interaction-21",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "stateScope": "3e7b2674871e",
+        "stepNumber": 9
+      },
+      {
+        "content": "Presionar el control indicado",
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "renderedStep": "Presionar el control indicado",
+        "interactionId": "interaction-23",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "stateScope": "3e7b2674871e",
+        "stepNumber": 10
+      },
+      {
+        "content": "Presionar botón asociado a \"Tipo de ID\"",
+        "entityScope": "entity_1",
+        "sourceEventRefs": [
+          "event-25"
+        ],
+        "renderedStep": "Presionar botón asociado a \"Tipo de ID\"",
+        "interactionId": "interaction-25",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "stateScope": "3e7b2674871e|entity_1",
+        "stepNumber": 11
+      },
+      {
+        "content": "Presionar \"cédula\"",
+        "entityScope": "entity_1",
+        "sourceEventRefs": [
+          "event-26"
+        ],
+        "renderedStep": "Presionar \"cédula\"",
+        "interactionId": "interaction-26",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "stateScope": "3e7b2674871e|entity_1",
+        "stepNumber": 12
+      },
+      {
+        "content": "Ingresar [entity_1.colaborador] en \"Colaborador\"",
+        "entityScope": "entity_1",
+        "sourceEventRefs": [
+          "event-28"
+        ],
+        "stepTemplate": "Ingresar [entity_1.colaborador] en \"Colaborador\"",
+        "renderedStep": "Ingresar \"10400143961\" en \"Colaborador\"",
+        "valueKey": "entity_1.colaborador",
+        "interactionId": "interaction-28",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "stateScope": "3e7b2674871e|entity_1",
+        "stepNumber": 13
+      },
+      {
+        "content": "Ingresar [entity_1.puesto] en \"Puesto\"",
+        "entityScope": "entity_1",
+        "sourceEventRefs": [
+          "event-29"
+        ],
+        "stepTemplate": "Ingresar [entity_1.puesto] en \"Puesto\"",
+        "renderedStep": "Ingresar \"Analista\" en \"Puesto\"",
+        "valueKey": "entity_1.puesto",
+        "interactionId": "interaction-29",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "stateScope": "3e7b2674871e|entity_1",
+        "stepNumber": 14
+      },
+      {
+        "content": "Seleccionar [entity_1.moneda_seleccion] en \"Moneda\"",
+        "entityScope": "entity_1",
+        "sourceEventRefs": [
+          "event-33"
+        ],
+        "stepTemplate": "Seleccionar [entity_1.moneda_seleccion] en \"Moneda\"",
+        "renderedStep": "Seleccionar \"DOP\" en \"Moneda\"",
+        "valueKey": "entity_1.moneda_seleccion",
+        "interactionId": "interaction-33",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "stepNumber": 15
+      },
+      {
+        "content": "Ingresar [entity_1.ingresos] en \"Ingresos\"",
+        "entityScope": "entity_1",
+        "sourceEventRefs": [
+          "event-35"
+        ],
+        "stepTemplate": "Ingresar [entity_1.ingresos] en \"Ingresos\"",
+        "renderedStep": "Ingresar \"30000\" en \"Ingresos\"",
+        "valueKey": "entity_1.ingresos",
+        "interactionId": "interaction-35",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "stateScope": "3e7b2674871e|entity_1",
+        "stepNumber": 16
+      },
+      {
+        "content": "Ingresar [entity_1.correo_electronico] en \"Correo electrónico\"",
+        "entityScope": "entity_1",
+        "sourceEventRefs": [
+          "event-36"
+        ],
+        "stepTemplate": "Ingresar [entity_1.correo_electronico] en \"Correo electrónico\"",
+        "renderedStep": "Ingresar \"calidad@test.com\" en \"Correo electrónico\"",
+        "valueKey": "entity_1.correo_electronico",
+        "interactionId": "interaction-36",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "stateScope": "3e7b2674871e|entity_1",
+        "stepNumber": 17
+      },
+      {
+        "content": "Ingresar [entity_1.telefono_residencial] en \"Teléfono residencial\"",
+        "entityScope": "entity_1",
+        "sourceEventRefs": [
+          "event-37"
+        ],
+        "stepTemplate": "Ingresar [entity_1.telefono_residencial] en \"Teléfono residencial\"",
+        "renderedStep": "Ingresar \"829-255-1232\" en \"Teléfono residencial\"",
+        "valueKey": "entity_1.telefono_residencial",
+        "interactionId": "interaction-37",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "stateScope": "3e7b2674871e|entity_1",
+        "stepNumber": 18
+      },
+      {
+        "content": "Ingresar [entity_1.celular] en \"Celular\"",
+        "entityScope": "entity_1",
+        "sourceEventRefs": [
+          "event-38"
+        ],
+        "stepTemplate": "Ingresar [entity_1.celular] en \"Celular\"",
+        "renderedStep": "Ingresar \"809-221-2121\" en \"Celular\"",
+        "valueKey": "entity_1.celular",
+        "interactionId": "interaction-38",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "stateScope": "3e7b2674871e|entity_1",
+        "stepNumber": 19
+      },
+      {
+        "content": "Ingresar [entity_1.fecha_de_ingreso] en \"Fecha de Ingreso\"",
+        "entityScope": "entity_1",
+        "sourceEventRefs": [
+          "event-39"
+        ],
+        "stepTemplate": "Ingresar [entity_1.fecha_de_ingreso] en \"Fecha de Ingreso\"",
+        "renderedStep": "Ingresar \"1995-02-20\" en \"Fecha de Ingreso\"",
+        "valueKey": "entity_1.fecha_de_ingreso",
+        "interactionId": "interaction-39",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "stateScope": "3e7b2674871e|entity_1",
+        "stepNumber": 20
+      },
+      {
+        "content": "Presionar \"Añadir otro\"",
+        "entityScope": "entity_1",
+        "sourceEventRefs": [
+          "event-41"
+        ],
+        "renderedStep": "Presionar \"Añadir otro\"",
+        "interactionId": "interaction-41",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "stateScope": "3e7b2674871e|entity_1",
+        "stepNumber": 21
+      },
+      {
+        "content": "Presionar el control indicado",
+        "entityScope": "entity_2",
+        "sourceEventRefs": [
+          "event-43"
+        ],
+        "renderedStep": "Presionar el control indicado",
+        "interactionId": "interaction-43",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "stateScope": "3e7b2674871e|entity_2",
+        "stepNumber": 22
+      },
+      {
+        "content": "Presionar botón asociado a \"Tipo de ID\"",
+        "entityScope": "entity_2",
+        "sourceEventRefs": [
+          "event-45"
+        ],
+        "renderedStep": "Presionar botón asociado a \"Tipo de ID\"",
+        "interactionId": "interaction-45",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "stateScope": "3e7b2674871e|entity_2",
+        "stepNumber": 23
+      },
+      {
+        "content": "Presionar \"cédula\"",
+        "entityScope": "entity_2",
+        "sourceEventRefs": [
+          "event-46"
+        ],
+        "renderedStep": "Presionar \"cédula\"",
+        "interactionId": "interaction-46",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "stateScope": "3e7b2674871e|entity_2",
+        "stepNumber": 24
+      },
+      {
+        "content": "Ingresar [entity_2.colaborador] en \"Colaborador\"",
+        "entityScope": "entity_2",
+        "sourceEventRefs": [
+          "event-49"
+        ],
+        "stepTemplate": "Ingresar [entity_2.colaborador] en \"Colaborador\"",
+        "renderedStep": "Ingresar \"40224679551\" en \"Colaborador\"",
+        "valueKey": "entity_2.colaborador",
+        "interactionId": "interaction-49",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "stateScope": "3e7b2674871e|entity_2",
+        "stepNumber": 25
+      },
+      {
+        "content": "Ingresar [entity_2.puesto] en \"Puesto\"",
+        "entityScope": "entity_2",
+        "sourceEventRefs": [
+          "event-50"
+        ],
+        "stepTemplate": "Ingresar [entity_2.puesto] en \"Puesto\"",
+        "renderedStep": "Ingresar \"analista\" en \"Puesto\"",
+        "valueKey": "entity_2.puesto",
+        "interactionId": "interaction-50",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "stateScope": "3e7b2674871e|entity_2",
+        "stepNumber": 26
+      },
+      {
+        "content": "Ingresar [entity_2.ingresos] en \"Ingresos\"",
+        "entityScope": "entity_2",
+        "sourceEventRefs": [
+          "event-51"
+        ],
+        "stepTemplate": "Ingresar [entity_2.ingresos] en \"Ingresos\"",
+        "renderedStep": "Ingresar \"80000\" en \"Ingresos\"",
+        "valueKey": "entity_2.ingresos",
+        "interactionId": "interaction-51",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "stateScope": "3e7b2674871e|entity_2",
+        "stepNumber": 27
+      },
+      {
+        "content": "Ingresar [entity_2.correo_electronico] en \"Correo electrónico\"",
+        "entityScope": "entity_2",
+        "sourceEventRefs": [
+          "event-52"
+        ],
+        "stepTemplate": "Ingresar [entity_2.correo_electronico] en \"Correo electrónico\"",
+        "renderedStep": "Ingresar \"calidad@test.com\" en \"Correo electrónico\"",
+        "valueKey": "entity_2.correo_electronico",
+        "interactionId": "interaction-52",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "stateScope": "3e7b2674871e|entity_2",
+        "stepNumber": 28
+      },
+      {
+        "content": "Ingresar [entity_2.telefono_residencial] en \"Teléfono residencial\"",
+        "entityScope": "entity_2",
+        "sourceEventRefs": [
+          "event-53"
+        ],
+        "stepTemplate": "Ingresar [entity_2.telefono_residencial] en \"Teléfono residencial\"",
+        "renderedStep": "Ingresar \"8292551232\" en \"Teléfono residencial\"",
+        "valueKey": "entity_2.telefono_residencial",
+        "interactionId": "interaction-53",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "stateScope": "3e7b2674871e|entity_2",
+        "stepNumber": 29
+      },
+      {
+        "content": "Ingresar [entity_2.celular] en \"Celular\"",
+        "entityScope": "entity_2",
+        "sourceEventRefs": [
+          "event-54"
+        ],
+        "stepTemplate": "Ingresar [entity_2.celular] en \"Celular\"",
+        "renderedStep": "Ingresar \"809-221-2121\" en \"Celular\"",
+        "valueKey": "entity_2.celular",
+        "interactionId": "interaction-54",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "stateScope": "3e7b2674871e|entity_2",
+        "stepNumber": 30
+      },
+      {
+        "content": "Ingresar [entity_2.fecha_de_nacimiento] en \"Fecha de Nacimiento\"",
+        "entityScope": "entity_2",
+        "sourceEventRefs": [
+          "event-55"
+        ],
+        "stepTemplate": "Ingresar [entity_2.fecha_de_nacimiento] en \"Fecha de Nacimiento\"",
+        "renderedStep": "Ingresar \"2020-02-20\" en \"Fecha de Nacimiento\"",
+        "valueKey": "entity_2.fecha_de_nacimiento",
+        "interactionId": "interaction-55",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "stateScope": "3e7b2674871e|entity_2",
+        "stepNumber": 31
+      },
+      {
+        "content": "Ingresar [entity_2.fecha_de_ingreso] en \"Fecha de Ingreso\"",
+        "entityScope": "entity_2",
+        "sourceEventRefs": [
+          "event-56"
+        ],
+        "stepTemplate": "Ingresar [entity_2.fecha_de_ingreso] en \"Fecha de Ingreso\"",
+        "renderedStep": "Ingresar \"1995-02-20\" en \"Fecha de Ingreso\"",
+        "valueKey": "entity_2.fecha_de_ingreso",
+        "interactionId": "interaction-56",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "stateScope": "3e7b2674871e|entity_2",
+        "stepNumber": 32
+      },
+      {
+        "content": "Presionar \"Validar\"",
+        "entityScope": "entity_2",
+        "sourceEventRefs": [
+          "event-58"
+        ],
+        "renderedStep": "Presionar \"Validar\"",
+        "interactionId": "interaction-58",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "routeAfter": "https://172.27.4.31/payroll/loadingList",
+        "stateScope": "3e7b2674871e|entity_2",
+        "stepNumber": 33
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "rnc_de_la_empresa",
+        "label": "RNC de la empresa*",
+        "stepIndex": 1,
+        "technicalTargetRefs": [
+          "role:textbox|RNC de la empresa*",
+          "css:#rnc",
+          "id:rnc"
+        ],
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "exampleValue": "130598983",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "RNC de la empresa*",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "nombre_de_usuario",
+        "label": "Nombre de usuario*",
+        "stepIndex": 2,
+        "technicalTargetRefs": [
+          "role:textbox|Nombre de usuario*",
+          "css:#email",
+          "id:email"
+        ],
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "exampleValue": "olivam",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Nombre de usuario*",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "contrasena",
+        "label": "Contraseña*",
+        "stepIndex": 3,
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña*",
+          "css:#password",
+          "id:password"
+        ],
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "secure",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Contraseña*",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "entity_1.colaborador",
+        "label": "Colaborador",
+        "entityScope": "entity_1",
+        "stepIndex": 12,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-28"
+        ],
+        "exampleValue": "10400143961",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Colaborador",
+        "needsReview": false,
+        "reviewReason": "explicit_associated_label"
+      },
+      {
+        "key": "entity_1.puesto",
+        "label": "Puesto",
+        "entityScope": "entity_1",
+        "stepIndex": 13,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-29"
+        ],
+        "exampleValue": "Analista",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Puesto",
+        "needsReview": false,
+        "reviewReason": "explicit_associated_label"
+      },
+      {
+        "key": "entity_1.moneda_seleccion",
+        "label": "Moneda",
+        "entityScope": "entity_1",
+        "stepIndex": 13,
+        "technicalTargetRefs": [
+          "role:option|DOP"
+        ],
+        "sourceEventRefs": [
+          "event-33"
+        ],
+        "exampleValue": "DOP",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED"
+      },
+      {
+        "key": "entity_1.ingresos",
+        "label": "Ingresos",
+        "entityScope": "entity_1",
+        "stepIndex": 15,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-35"
+        ],
+        "exampleValue": "DOP 3,0000",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Ingresos",
+        "needsReview": true,
+        "reviewReason": "aggregate_compound_text_without_separate_control_evidence"
+      },
+      {
+        "key": "entity_1.correo_electronico",
+        "label": "Correo electrónico",
+        "entityScope": "entity_1",
+        "stepIndex": 16,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-36"
+        ],
+        "exampleValue": "calidad@test.com",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Correo electrónico",
+        "needsReview": false,
+        "reviewReason": "explicit_associated_label"
+      },
+      {
+        "key": "entity_1.telefono_residencial",
+        "label": "Teléfono residencial",
+        "entityScope": "entity_1",
+        "stepIndex": 17,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-37"
+        ],
+        "exampleValue": "829-255-1232",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Teléfono residencial",
+        "needsReview": false,
+        "reviewReason": "explicit_associated_label"
+      },
+      {
+        "key": "entity_1.celular",
+        "label": "Celular",
+        "entityScope": "entity_1",
+        "stepIndex": 18,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-38"
+        ],
+        "exampleValue": "809-221-2121",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Celular",
+        "needsReview": false,
+        "reviewReason": "explicit_associated_label"
+      },
+      {
+        "key": "entity_1.fecha_de_ingreso",
+        "label": "Fecha de Ingreso",
+        "entityScope": "entity_1",
+        "stepIndex": 19,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-39"
+        ],
+        "exampleValue": "1995-02-20",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Fecha de Ingreso",
+        "needsReview": false,
+        "reviewReason": "explicit_associated_label",
+        "formatHint": "date"
+      },
+      {
+        "key": "entity_2.colaborador",
+        "label": "Colaborador",
+        "entityScope": "entity_2",
+        "stepIndex": 24,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-49"
+        ],
+        "exampleValue": "DOP 3,0000",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Colaborador",
+        "needsReview": false,
+        "reviewReason": "explicit_associated_label"
+      },
+      {
+        "key": "entity_2.puesto",
+        "label": "Puesto",
+        "entityScope": "entity_2",
+        "stepIndex": 25,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-50"
+        ],
+        "exampleValue": "calidad@test.com",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Puesto",
+        "needsReview": false,
+        "reviewReason": "explicit_associated_label"
+      },
+      {
+        "key": "entity_2.ingresos",
+        "label": "Ingresos",
+        "entityScope": "entity_2",
+        "stepIndex": 26,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-51"
+        ],
+        "exampleValue": "829-255-1232",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Ingresos",
+        "needsReview": true,
+        "reviewReason": "aggregate_compound_text_without_separate_control_evidence"
+      },
+      {
+        "key": "entity_2.correo_electronico",
+        "label": "Correo electrónico",
+        "entityScope": "entity_2",
+        "stepIndex": 27,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-52"
+        ],
+        "exampleValue": "809-221-2121",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Correo electrónico",
+        "needsReview": false,
+        "reviewReason": "explicit_associated_label"
+      },
+      {
+        "key": "entity_2.telefono_residencial",
+        "label": "Teléfono residencial",
+        "entityScope": "entity_2",
+        "stepIndex": 28,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-53"
+        ],
+        "exampleValue": "1995-02-20",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Teléfono residencial",
+        "needsReview": false,
+        "reviewReason": "explicit_associated_label"
+      },
+      {
+        "key": "entity_2.celular",
+        "label": "Celular",
+        "entityScope": "entity_2",
+        "stepIndex": 29,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-54"
+        ],
+        "exampleValue": "809-221-2121",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Celular",
+        "needsReview": false,
+        "reviewReason": "explicit_associated_label"
+      },
+      {
+        "key": "entity_2.fecha_de_nacimiento",
+        "label": "Fecha de Nacimiento",
+        "entityScope": "entity_2",
+        "stepIndex": 30,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-55"
+        ],
+        "exampleValue": "2020-02-20",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Fecha de Nacimiento",
+        "needsReview": false,
+        "reviewReason": "explicit_associated_label",
+        "formatHint": "date"
+      },
+      {
+        "key": "entity_2.fecha_de_ingreso",
+        "label": "Fecha de Ingreso",
+        "entityScope": "entity_2",
+        "stepIndex": 31,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-56"
+        ],
+        "exampleValue": "1995-02-20",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Fecha de Ingreso",
+        "needsReview": false,
+        "reviewReason": "explicit_associated_label",
+        "formatHint": "date"
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Ingresar [rnc_de_la_empresa] en \"RNC de la empresa*\"",
+        "strategy": "role",
+        "value": "textbox|RNC de la empresa*"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Ingresar [nombre_de_usuario] en \"Nombre de usuario*\"",
+        "strategy": "role",
+        "value": "textbox|Nombre de usuario*"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Ingresar [contrasena] en \"Contraseña*\"",
+        "strategy": "role",
+        "value": "textbox|Contraseña*"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Presionar \"Gestión de Nóminas\"",
+        "strategy": "role",
+        "value": "button|Gestión de Nóminas"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"Crear Manualmente\"",
+        "strategy": "role",
+        "value": "button|Crear Manualmente"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Presionar \"Close\"",
+        "strategy": "role",
+        "value": "button|Close"
+      },
+      {
+        "stepIndex": 7,
+        "description": "Presionar el control indicado",
+        "strategy": "css",
+        "value": "td:has(button[aria-label=\"Seleccionar fila\"])"
+      },
+      {
+        "stepIndex": 10,
+        "description": "Presionar \"cédula\"",
+        "strategy": "role",
+        "value": "option|cédula"
+      },
+      {
+        "stepIndex": 13,
+        "description": "Seleccionar [entity_1.moneda_seleccion] en \"Moneda\"",
+        "strategy": "role",
+        "value": "option|DOP"
+      },
+      {
+        "stepIndex": 19,
+        "description": "Presionar \"Añadir otro\"",
+        "strategy": "role",
+        "value": "button|Añadir otro"
+      },
+      {
+        "stepIndex": 22,
+        "description": "Presionar \"cédula\"",
+        "strategy": "role",
+        "value": "option|cédula"
+      },
+      {
+        "stepIndex": 31,
+        "description": "Presionar \"Validar\"",
+        "strategy": "role",
+        "value": "button|Validar"
+      }
+    ],
+    "sourceRecordingId": "c43b4ea1-3766-43d1-ae11-183305d92e77",
+    "hasUncertainSteps": true,
+    "primary": true,
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7",
+      "event-8",
+      "event-9",
+      "event-10",
+      "event-11",
+      "event-12",
+      "event-13",
+      "event-14",
+      "event-15",
+      "event-16",
+      "event-17",
+      "event-18",
+      "event-19",
+      "event-20",
+      "event-21",
+      "event-22",
+      "event-23",
+      "event-24",
+      "event-25",
+      "event-26",
+      "event-27",
+      "event-28",
+      "event-29",
+      "event-30",
+      "event-31",
+      "event-32",
+      "event-33",
+      "event-34",
+      "event-35",
+      "event-36",
+      "event-37",
+      "event-38",
+      "event-39",
+      "event-40",
+      "event-41",
+      "event-42",
+      "event-43",
+      "event-44",
+      "event-45",
+      "event-46",
+      "event-47",
+      "event-48",
+      "event-49",
+      "event-50",
+      "event-51",
+      "event-52",
+      "event-53",
+      "event-54",
+      "event-55",
+      "event-56",
+      "event-57",
+      "event-58",
+      "event-59"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": false,
+    "functionalReadiness": true,
+    "technicalReadiness": false,
+    "expectedResultCandidate": "La aplicación carga su pantalla inicial",
+    "oracleAuthority": "observed_only",
+    "confidence": 0.95,
+    "scenarioStepCount": 33,
+    "functionalActionCount": 32,
+    "nonUserSetupSteps": 1,
+    "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
+    "scenarioGoal": "Registro varios clientes",
+    "stateSequenceValid": true,
+    "stateSequenceIssues": [],
+    "postGoalObservations": [],
+    "goalContract": {
+      "nonGeneric": true,
+      "goalCoherent": true,
+      "mutationIntentExpressed": true
+    },
+    "replayEligible": true,
+    "canonicalInteractions": [
+      {
+        "id": "interaction-1",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-1"
+        ],
+        "technicalTargetRefs": [],
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9,
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://172.27.4.31/login"
+      },
+      {
+        "id": "interaction-3",
+        "controlIdentity": "3e7b2674871e",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-3"
+        ],
+        "technicalTargetRefs": [],
+        "stateScope": "3e7b2674871e",
+        "technicalOnly": true,
+        "confidence": 0.9,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login"
+      },
+      {
+        "id": "interaction-6",
+        "controlIdentity": "3e7b2674871e|RNC de la empresa*|role|textbox|RNC de la empresa*",
+        "semanticField": "RNC de la empresa*",
+        "action": "fill",
+        "valueKey": "rnc_de_la_empresa",
+        "recordedValue": "130598983",
+        "rawTypedValue": "130598983",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|RNC de la empresa*",
+          "css:#rnc",
+          "id:rnc"
+        ],
+        "editingSessionRef": "edit-1",
+        "description": "Ingresar en \"RNC de la empresa*\"",
+        "stateScope": "3e7b2674871e",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login"
+      },
+      {
+        "id": "interaction-7",
+        "controlIdentity": "3e7b2674871e|Nombre de usuario*|role|textbox|Nombre de usuario*",
+        "semanticField": "Nombre de usuario*",
+        "action": "fill",
+        "valueKey": "nombre_de_usuario",
+        "recordedValue": "olivam",
+        "rawTypedValue": "olivam",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Nombre de usuario*",
+          "css:#email",
+          "id:email"
+        ],
+        "editingSessionRef": "edit-2",
+        "description": "Ingresar en \"Nombre de usuario*\"",
+        "stateScope": "3e7b2674871e",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login"
+      },
+      {
+        "id": "interaction-10",
+        "controlIdentity": "3e7b2674871e|Contraseña*|role|textbox|Contraseña*",
+        "semanticField": "Contraseña*",
+        "action": "fill",
+        "valueKey": "contrasena",
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña*",
+          "css:#password",
+          "id:password"
+        ],
+        "editingSessionRef": "edit-3",
+        "description": "Ingresar en \"Contraseña*\"",
+        "stateScope": "3e7b2674871e",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login"
+      },
+      {
+        "id": "interaction-11",
+        "controlIdentity": "3e7b2674871e|Contraseña*|role|textbox|Contraseña*",
+        "action": "press",
+        "key": "Enter",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña*",
+          "css:#password",
+          "id:password"
+        ],
+        "stateScope": "3e7b2674871e",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login",
+        "routeAfter": "https://172.27.4.31/dashboard",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-14",
+        "controlIdentity": "3e7b2674871e|Gestión de Nóminas|role|button|Gestión de Nóminas",
+        "semanticField": "Gestión de Nóminas",
+        "action": "click",
+        "valueKey": "gestion_de_nominas",
+        "sourceEventRefs": [
+          "event-14"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Gestión de Nóminas"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Gestión de Nóminas",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "img",
+                  "stableAttributes": {
+                    "alt": "user",
+                    "src": "/images/payroll.svg"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "img",
+                "p"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"img\",1],[\"p\",1]],\"descendantEntries\":[[\"img\",1],[\"p\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Gestión de Nóminas",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Gestión de Nóminas\"",
+        "stateScope": "3e7b2674871e",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/dashboard",
+        "routeAfter": "https://172.27.4.31/payroll/electronicPayroll",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-17",
+        "controlIdentity": "3e7b2674871e|Crear Manualmente|role|button|Crear Manualmente",
+        "semanticField": "Crear Manualmente",
+        "action": "click",
+        "valueKey": "crear_manualmente",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Crear Manualmente"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Crear Manualmente",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "img",
+                  "stableAttributes": {
+                    "alt": "icon-plus",
+                    "src": "/images/feather-plus-white.svg"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "img",
+                "p"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"img\",1],[\"p\",1]],\"descendantEntries\":[[\"img\",1],[\"p\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Crear Manualmente\"",
+        "stateScope": "3e7b2674871e",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/electronicPayroll",
+        "routeAfter": "https://172.27.4.31/payroll/manualCreationTable",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-20",
+        "controlIdentity": "3e7b2674871e|Close|role|button|Close",
+        "semanticField": "Close",
+        "action": "click",
+        "valueKey": "close",
+        "sourceEventRefs": [
+          "event-20"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Close"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Close",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span",
+                "svg"
+              ],
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",1],[\"svg\",1]],\"descendantEntries\":[[\"path\",2],[\"span\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "radix-_r_11_"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\",\"svg\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1],[\\\"svg\\\",1]],\\\"descendantEntries\\\":[[\\\"path\\\",2],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Close",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "radix-_r_11_"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Close",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "radix-_r_11_"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Close\"",
+        "stateScope": "3e7b2674871e",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-21",
+        "controlIdentity": "3e7b2674871e|control|css|td:has(button[aria-label=\"Seleccionar fila\"])",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-21"
+        ],
+        "technicalTargetRefs": [
+          "css:td:has(button[aria-label=\"Seleccionar fila\"])"
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Seleccionar fila",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "td:has(button[aria-label=\"Seleccionar fila\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true,
+          "clickScopeElement": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Seleccionar fila",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "td:has(button[aria-label=\"Seleccionar fila\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "stateScope": "3e7b2674871e",
+        "admissionStatus": "unresolved",
+        "admissionReason": "generic_label_without_technical_identity",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.55,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-23",
+        "controlIdentity": "3e7b2674871e|Seleccionar fila",
+        "action": "check",
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button",
+                "role": "checkbox"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Seleccionar fila",
+                "role": "checkbox"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "checkbox",
+          "normalizedName": "Seleccionar fila",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
+        "stateScope": "3e7b2674871e",
+        "admissionStatus": "unresolved",
+        "admissionReason": "generic_label_without_technical_identity",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-25",
+        "controlIdentity": "3e7b2674871e|entity_1|Tipo de ID",
+        "semanticField": "Tipo de ID",
+        "entityScope": "entity_1",
+        "action": "click",
+        "valueKey": "entity_1.tipo_de_id",
+        "sourceEventRefs": [
+          "event-25"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 9
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Tipo de ID\"",
+        "stateScope": "3e7b2674871e|entity_1",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-26",
+        "controlIdentity": "3e7b2674871e|entity_1|cédula|role|option|cédula",
+        "semanticField": "cédula",
+        "entityScope": "entity_1",
+        "action": "click",
+        "valueKey": "entity_1.cedula",
+        "sourceEventRefs": [
+          "event-26"
+        ],
+        "technicalTargetRefs": [
+          "role:option|cédula"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "option|cédula",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "div",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-labelledby": "radix-_r_1i_",
+                "role": "option"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "span",
+                  "stableAttributes": {
+                    "id": "radix-_r_1i_"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "radix-_r_1g_"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"div\",\"role\":\"option\"},\"stableDirectAttributes\":{\"role\":\"option\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"span\",\"stableAttributes\":{\"id\":\"radix-_r_1i_\"}}],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "cédula",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(div[aria-labelledby=\"radix-_r_1i_\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"cédula\"",
+        "stateScope": "3e7b2674871e|entity_1",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-28",
+        "controlIdentity": "3e7b2674871e|entity_1|Colaborador",
+        "semanticField": "Colaborador",
+        "entityScope": "entity_1",
+        "action": "fill",
+        "valueKey": "entity_1.colaborador",
+        "recordedValue": "10400143961",
+        "rawTypedValue": "402-24679551",
+        "sourceEventRefs": [
+          "event-28"
+        ],
+        "technicalTargetRefs": [],
+        "editingSessionRef": "edit-5",
+        "description": "Ingresar en \"Colaborador\"",
+        "stateScope": "3e7b2674871e|entity_1",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-29",
+        "controlIdentity": "3e7b2674871e|entity_1|Puesto",
+        "semanticField": "Puesto",
+        "entityScope": "entity_1",
+        "action": "fill",
+        "valueKey": "entity_1.puesto",
+        "recordedValue": "Analista",
+        "rawTypedValue": "Analista",
+        "sourceEventRefs": [
+          "event-29"
+        ],
+        "technicalTargetRefs": [],
+        "editingSessionRef": "edit-6",
+        "description": "Ingresar en \"Puesto\"",
+        "stateScope": "3e7b2674871e|entity_1",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-30",
+        "controlIdentity": "3e7b2674871e|entity_1|Moneda|role|combobox|Moneda",
+        "semanticField": "Moneda",
+        "entityScope": "entity_1",
+        "action": "click",
+        "valueKey": "entity_1.moneda",
+        "recordedValue": "10400143961",
+        "sourceEventRefs": [
+          "event-30"
+        ],
+        "technicalTargetRefs": [
+          "role:combobox|Moneda"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "combobox|Moneda",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button",
+                "role": "combobox"
+              },
+              "stableDirectAttributes": {
+                "role": "combobox"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span",
+                "svg"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1],[\"svg\",1]],\"descendantEntries\":[[\"path\",1],[\"span\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "combobox",
+          "normalizedName": "Moneda",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Moneda\"",
+        "stateScope": "3e7b2674871e|entity_1",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "technicalOnly": true,
+        "executionAuthority": true,
+        "confidence": 0.85,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-32",
+        "controlIdentity": "3e7b2674871e|entity_1|DOP|role|option|DOP",
+        "semanticField": "Moneda",
+        "entityScope": "entity_1",
+        "action": "click",
+        "valueKey": "entity_1.dop",
+        "recordedValue": "10400143961",
+        "sourceEventRefs": [
+          "event-32"
+        ],
+        "technicalTargetRefs": [
+          "role:option|DOP"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "option|DOP",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "div",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-labelledby": "radix-_r_29_",
+                "role": "option"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "span",
+                  "stableAttributes": {
+                    "id": "radix-_r_29_"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "radix-_r_25_"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"div\",\"role\":\"option\"},\"stableDirectAttributes\":{\"role\":\"option\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"span\",\"stableAttributes\":{\"id\":\"radix-_r_29_\"}}],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "DOP",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(div[aria-labelledby=\"radix-_r_29_\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"DOP\"",
+        "stateScope": "3e7b2674871e|entity_1",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "technicalOnly": true,
+        "executionAuthority": true,
+        "confidence": 0.85,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-33",
+        "controlIdentity": "3e7b2674871e|entity_1|Moneda|role|option|DOP",
+        "semanticField": "Moneda",
+        "entityScope": "entity_1",
+        "action": "select",
+        "valueKey": "entity_1.moneda_seleccion",
+        "recordedValue": "DOP",
+        "sourceEventRefs": [
+          "event-33"
+        ],
+        "technicalTargetRefs": [
+          "role:option|DOP"
+        ],
+        "selectorControlId": "3e7b2674871e||entity_1|Moneda",
+        "optionSurfaceId": "3e7b2674871e|3e7b2674871e||entity_1|Moneda|option-surface",
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "option|DOP",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "div",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-labelledby": "radix-_r_29_",
+                "role": "option"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "span",
+                  "stableAttributes": {
+                    "id": "radix-_r_29_"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "radix-_r_25_"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"div\",\"role\":\"option\"},\"stableDirectAttributes\":{\"role\":\"option\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"span\",\"stableAttributes\":{\"id\":\"radix-_r_29_\"}}],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "DOP",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(div[aria-labelledby=\"radix-_r_29_\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Seleccionar en \"Moneda\"",
+        "stateScope": "3e7b2674871e|entity_1",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "executionAuthority": false,
+        "confidence": 0.85,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-35",
+        "controlIdentity": "3e7b2674871e|entity_1|Ingresos",
+        "semanticField": "Ingresos",
+        "entityScope": "entity_1",
+        "action": "fill",
+        "valueKey": "entity_1.ingresos",
+        "recordedValue": "DOP 3,0000",
+        "rawTypedValue": "DOP 2,5000",
+        "sourceEventRefs": [
+          "event-35"
+        ],
+        "technicalTargetRefs": [],
+        "editingSessionRef": "edit-10",
+        "description": "Ingresar en \"Ingresos\"",
+        "stateScope": "3e7b2674871e|entity_1",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-36",
+        "controlIdentity": "3e7b2674871e|entity_1|Correo electrónico",
+        "semanticField": "Correo electrónico",
+        "entityScope": "entity_1",
+        "action": "fill",
+        "valueKey": "entity_1.correo_electronico",
+        "recordedValue": "calidad@test.com",
+        "rawTypedValue": "calidad@test.com",
+        "sourceEventRefs": [
+          "event-36"
+        ],
+        "technicalTargetRefs": [],
+        "editingSessionRef": "edit-11",
+        "description": "Ingresar en \"Correo electrónico\"",
+        "stateScope": "3e7b2674871e|entity_1",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-37",
+        "controlIdentity": "3e7b2674871e|entity_1|Teléfono residencial",
+        "semanticField": "Teléfono residencial",
+        "entityScope": "entity_1",
+        "action": "fill",
+        "valueKey": "entity_1.telefono_residencial",
+        "recordedValue": "829-255-1232",
+        "rawTypedValue": "829255123221",
+        "sourceEventRefs": [
+          "event-37"
+        ],
+        "technicalTargetRefs": [],
+        "editingSessionRef": "edit-12",
+        "description": "Ingresar en \"Teléfono residencial\"",
+        "stateScope": "3e7b2674871e|entity_1",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-38",
+        "controlIdentity": "3e7b2674871e|entity_1|Celular",
+        "semanticField": "Celular",
+        "entityScope": "entity_1",
+        "action": "fill",
+        "valueKey": "entity_1.celular",
+        "recordedValue": "809-221-2121",
+        "rawTypedValue": "82925512323",
+        "sourceEventRefs": [
+          "event-38"
+        ],
+        "technicalTargetRefs": [],
+        "editingSessionRef": "edit-13",
+        "description": "Ingresar en \"Celular\"",
+        "stateScope": "3e7b2674871e|entity_1",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-39",
+        "controlIdentity": "3e7b2674871e|entity_1|Fecha de Ingreso",
+        "semanticField": "Fecha de Ingreso",
+        "entityScope": "entity_1",
+        "action": "fill",
+        "valueKey": "entity_1.fecha_de_ingreso",
+        "recordedValue": "1995-02-20",
+        "sourceEventRefs": [
+          "event-39"
+        ],
+        "technicalTargetRefs": [],
+        "editingSessionRef": "edit-14",
+        "description": "Ingresar en \"Fecha de Ingreso\"",
+        "stateScope": "3e7b2674871e|entity_1",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-41",
+        "controlIdentity": "3e7b2674871e|entity_1|Añadir otro|role|button|Añadir otro",
+        "semanticField": "Añadir otro",
+        "entityScope": "entity_1",
+        "action": "click",
+        "valueKey": "entity_1.anadir_otro",
+        "sourceEventRefs": [
+          "event-41"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Añadir otro"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Añadir otro",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "img",
+                  "stableAttributes": {
+                    "alt": "add",
+                    "src": "/images/feather-plus.svg"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "img",
+                "p"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"img\",1],[\"p\",1]],\"descendantEntries\":[[\"img\",1],[\"p\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Añadir otro\"",
+        "stateScope": "3e7b2674871e|entity_1",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-43",
+        "controlIdentity": "3e7b2674871e|entity_2|Seleccionar fila",
+        "entityScope": "entity_2",
+        "action": "check",
+        "recordedValue": "DOP",
+        "sourceEventRefs": [
+          "event-43"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button",
+                "role": "checkbox"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Seleccionar fila",
+                "role": "checkbox"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "checkbox",
+          "normalizedName": "Seleccionar fila",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
+        "stateScope": "3e7b2674871e|entity_2",
+        "admissionStatus": "unresolved",
+        "admissionReason": "generic_label_without_technical_identity",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-45",
+        "controlIdentity": "3e7b2674871e|entity_2|Tipo de ID",
+        "semanticField": "Tipo de ID",
+        "entityScope": "entity_2",
+        "action": "click",
+        "valueKey": "entity_2.tipo_de_id",
+        "recordedValue": "DOP 3,0000",
+        "sourceEventRefs": [
+          "event-45"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 17
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Tipo de ID\"",
+        "stateScope": "3e7b2674871e|entity_2",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-46",
+        "controlIdentity": "3e7b2674871e|entity_2|cédula|role|option|cédula",
+        "semanticField": "cédula",
+        "entityScope": "entity_2",
+        "action": "click",
+        "valueKey": "entity_2.cedula",
+        "recordedValue": "DOP 3,0000",
+        "sourceEventRefs": [
+          "event-46"
+        ],
+        "technicalTargetRefs": [
+          "role:option|cédula"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "option|cédula",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "div",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-labelledby": "radix-_r_3e_",
+                "role": "option"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "span",
+                  "stableAttributes": {
+                    "id": "radix-_r_3e_"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "radix-_r_3c_"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"div\",\"role\":\"option\"},\"stableDirectAttributes\":{\"role\":\"option\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"span\",\"stableAttributes\":{\"id\":\"radix-_r_3e_\"}}],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "cédula",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(div[aria-labelledby=\"radix-_r_3e_\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"cédula\"",
+        "stateScope": "3e7b2674871e|entity_2",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-49",
+        "controlIdentity": "3e7b2674871e|entity_2|Colaborador",
+        "semanticField": "Colaborador",
+        "entityScope": "entity_2",
+        "action": "fill",
+        "valueKey": "entity_2.colaborador",
+        "recordedValue": "DOP 3,0000",
+        "rawTypedValue": "10400143961\r\n",
+        "sourceEventRefs": [
+          "event-49"
+        ],
+        "technicalTargetRefs": [],
+        "editingSessionRef": "edit-16",
+        "description": "Ingresar en \"Colaborador\"",
+        "stateScope": "3e7b2674871e|entity_2",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-50",
+        "controlIdentity": "3e7b2674871e|entity_2|Puesto",
+        "semanticField": "Puesto",
+        "entityScope": "entity_2",
+        "action": "fill",
+        "valueKey": "entity_2.puesto",
+        "recordedValue": "calidad@test.com",
+        "rawTypedValue": "Analista",
+        "sourceEventRefs": [
+          "event-50"
+        ],
+        "technicalTargetRefs": [],
+        "editingSessionRef": "edit-17",
+        "description": "Ingresar en \"Puesto\"",
+        "stateScope": "3e7b2674871e|entity_2",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-51",
+        "controlIdentity": "3e7b2674871e|entity_2|Ingresos",
+        "semanticField": "Ingresos",
+        "entityScope": "entity_2",
+        "action": "fill",
+        "valueKey": "entity_2.ingresos",
+        "recordedValue": "829-255-1232",
+        "rawTypedValue": "DOP 3,0000",
+        "sourceEventRefs": [
+          "event-51"
+        ],
+        "technicalTargetRefs": [],
+        "editingSessionRef": "edit-18",
+        "description": "Ingresar en \"Ingresos\"",
+        "stateScope": "3e7b2674871e|entity_2",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-52",
+        "controlIdentity": "3e7b2674871e|entity_2|Correo electrónico",
+        "semanticField": "Correo electrónico",
+        "entityScope": "entity_2",
+        "action": "fill",
+        "valueKey": "entity_2.correo_electronico",
+        "recordedValue": "809-221-2121",
+        "rawTypedValue": "calidad@test.com",
+        "sourceEventRefs": [
+          "event-52"
+        ],
+        "technicalTargetRefs": [],
+        "editingSessionRef": "edit-19",
+        "description": "Ingresar en \"Correo electrónico\"",
+        "stateScope": "3e7b2674871e|entity_2",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-53",
+        "controlIdentity": "3e7b2674871e|entity_2|Teléfono residencial",
+        "semanticField": "Teléfono residencial",
+        "entityScope": "entity_2",
+        "action": "fill",
+        "valueKey": "entity_2.telefono_residencial",
+        "recordedValue": "1995-02-20",
+        "rawTypedValue": "829255123232",
+        "sourceEventRefs": [
+          "event-53"
+        ],
+        "technicalTargetRefs": [],
+        "editingSessionRef": "edit-20",
+        "description": "Ingresar en \"Teléfono residencial\"",
+        "stateScope": "3e7b2674871e|entity_2",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-54",
+        "controlIdentity": "3e7b2674871e|entity_2|Celular",
+        "semanticField": "Celular",
+        "entityScope": "entity_2",
+        "action": "fill",
+        "valueKey": "entity_2.celular",
+        "recordedValue": "809-221-2121",
+        "rawTypedValue": "8092212121",
+        "sourceEventRefs": [
+          "event-54"
+        ],
+        "technicalTargetRefs": [],
+        "editingSessionRef": "edit-21",
+        "description": "Ingresar en \"Celular\"",
+        "stateScope": "3e7b2674871e|entity_2",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-55",
+        "controlIdentity": "3e7b2674871e|entity_2|Fecha de Nacimiento",
+        "semanticField": "Fecha de Nacimiento",
+        "entityScope": "entity_2",
+        "action": "fill",
+        "valueKey": "entity_2.fecha_de_nacimiento",
+        "recordedValue": "2020-02-20",
+        "rawTypedValue": "1820-01-30",
+        "sourceEventRefs": [
+          "event-55"
+        ],
+        "technicalTargetRefs": [],
+        "editingSessionRef": "edit-22",
+        "description": "Ingresar en \"Fecha de Nacimiento\"",
+        "stateScope": "3e7b2674871e|entity_2",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-56",
+        "controlIdentity": "3e7b2674871e|entity_2|Fecha de Ingreso",
+        "semanticField": "Fecha de Ingreso",
+        "entityScope": "entity_2",
+        "action": "fill",
+        "valueKey": "entity_2.fecha_de_ingreso",
+        "recordedValue": "1995-02-20",
+        "sourceEventRefs": [
+          "event-56"
+        ],
+        "technicalTargetRefs": [],
+        "editingSessionRef": "edit-23",
+        "description": "Ingresar en \"Fecha de Ingreso\"",
+        "stateScope": "3e7b2674871e|entity_2",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable"
+      },
+      {
+        "id": "interaction-58",
+        "controlIdentity": "3e7b2674871e|entity_2|Validar|role|button|Validar",
+        "semanticField": "Validar",
+        "entityScope": "entity_2",
+        "action": "click",
+        "valueKey": "entity_2.validar",
+        "sourceEventRefs": [
+          "event-58"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Validar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Validar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "img",
+                  "stableAttributes": {
+                    "alt": "validate",
+                    "src": "/images/feather-arrow-right.svg"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "img",
+                "p"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"img\",1],[\"p\",1]],\"descendantEntries\":[[\"img\",1],[\"p\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Validar",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Validar\"",
+        "stateScope": "3e7b2674871e|entity_2",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+        "routeAfter": "https://172.27.4.31/payroll/loadingList",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      }
+    ],
+    "entityActionBlocks": [
+      {
+        "entityScope": "entity_1",
+        "semanticActions": [
+          {
+            "id": "interaction-25",
+            "controlIdentity": "3e7b2674871e|entity_1|Tipo de ID",
+            "semanticField": "Tipo de ID",
+            "entityScope": "entity_1",
+            "action": "click",
+            "valueKey": "entity_1.tipo_de_id",
+            "sourceEventRefs": [
+              "event-25"
+            ],
+            "technicalTargetRefs": [],
+            "technicalTargetCandidates": [
+              {
+                "targetType": "structural",
+                "locatorCandidates": [],
+                "structuralContext": {
+                  "owner": {
+                    "tag": "button"
+                  },
+                  "stableDirectAttributes": {},
+                  "stableDescendants": [],
+                  "semanticShape": [
+                    "span"
+                  ],
+                  "landmarkAncestor": {
+                    "tag": "main"
+                  },
+                  "deterministicStructuralIdentity": false,
+                  "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+                  "identityAmbiguous": true,
+                  "structuralIdentityMatchCount": 9
+                },
+                "interactionEvidence": [
+                  "v2_click_owner"
+                ],
+                "confidence": 0.85,
+                "validatedByInteraction": true
+              }
+            ],
+            "validatedByInteraction": true,
+            "description": "Ingresar en \"Tipo de ID\"",
+            "screenBeforeRef": "3e7b2674871e",
+            "screenAfterRef": "3e7b2674871e",
+            "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+            "stateScope": "3e7b2674871e|entity_1",
+            "admissionStatus": "accepted",
+            "resolutionState": "runtime_resolution_required",
+            "confidence": 0.7
+          },
+          {
+            "id": "interaction-26",
+            "controlIdentity": "3e7b2674871e|entity_1|cédula|role|option|cédula",
+            "semanticField": "cédula",
+            "entityScope": "entity_1",
+            "action": "click",
+            "valueKey": "entity_1.cedula",
+            "sourceEventRefs": [
+              "event-26"
+            ],
+            "technicalTargetRefs": [
+              "role:option|cédula"
+            ],
+            "technicalTargetCandidates": [
+              {
+                "targetType": "structural",
+                "locatorCandidates": [
+                  {
+                    "strategy": "role",
+                    "value": "option|cédula",
+                    "confidence": 0.85
+                  }
+                ],
+                "structuralContext": {
+                  "owner": {
+                    "tag": "div",
+                    "role": "option"
+                  },
+                  "stableDirectAttributes": {
+                    "aria-labelledby": "radix-_r_1i_",
+                    "role": "option"
+                  },
+                  "stableDescendants": [
+                    {
+                      "relation": "descendant",
+                      "tag": "span",
+                      "stableAttributes": {
+                        "id": "radix-_r_1i_"
+                      }
+                    }
+                  ],
+                  "semanticShape": [
+                    "span"
+                  ],
+                  "deterministicStructuralIdentity": true,
+                  "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+                  "structuralIdentityMatchCount": 1,
+                  "scopeIdentity": {
+                    "strategy": "id",
+                    "value": "radix-_r_1g_"
+                  },
+                  "targetFingerprint": "{\"owner\":{\"tag\":\"div\",\"role\":\"option\"},\"stableDirectAttributes\":{\"role\":\"option\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"span\",\"stableAttributes\":{\"id\":\"radix-_r_1i_\"}}],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+                  "captureScopeUnique": true,
+                  "captureTargetMatchCount": 1
+                },
+                "interactionEvidence": [
+                  "v2_click_owner"
+                ],
+                "confidence": 0.85,
+                "validatedByInteraction": true
+              }
+            ],
+            "validatedByInteraction": true,
+            "playwrightRecorderEvidence": {
+              "kind": "role",
+              "role": "option",
+              "normalizedName": "cédula",
+              "targetTag": "div",
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(div[aria-labelledby=\"radix-_r_1i_\"])"
+              },
+              "captureMatchCount": 1,
+              "runtimeResolutionRequired": true
+            },
+            "description": "Ingresar en \"cédula\"",
+            "screenBeforeRef": "3e7b2674871e",
+            "screenAfterRef": "3e7b2674871e",
+            "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+            "stateScope": "3e7b2674871e|entity_1",
+            "admissionStatus": "accepted",
+            "resolutionState": "certified",
+            "confidence": 0.85
+          },
+          {
+            "id": "interaction-28",
+            "controlIdentity": "3e7b2674871e|entity_1|Colaborador",
+            "semanticField": "Colaborador",
+            "entityScope": "entity_1",
+            "action": "fill",
+            "valueKey": "entity_1.colaborador",
+            "recordedValue": "10400143961",
+            "rawTypedValue": "402-24679551",
+            "sourceEventRefs": [
+              "event-28"
+            ],
+            "technicalTargetRefs": [],
+            "editingSessionRef": "edit-5",
+            "description": "Ingresar en \"Colaborador\"",
+            "screenBeforeRef": "3e7b2674871e",
+            "screenAfterRef": "3e7b2674871e",
+            "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+            "stateScope": "3e7b2674871e|entity_1",
+            "admissionStatus": "accepted",
+            "resolutionState": "runtime_resolution_required",
+            "confidence": 0.7
+          },
+          {
+            "id": "interaction-29",
+            "controlIdentity": "3e7b2674871e|entity_1|Puesto",
+            "semanticField": "Puesto",
+            "entityScope": "entity_1",
+            "action": "fill",
+            "valueKey": "entity_1.puesto",
+            "recordedValue": "Analista",
+            "rawTypedValue": "Analista",
+            "sourceEventRefs": [
+              "event-29"
+            ],
+            "technicalTargetRefs": [],
+            "editingSessionRef": "edit-6",
+            "description": "Ingresar en \"Puesto\"",
+            "screenBeforeRef": "3e7b2674871e",
+            "screenAfterRef": "3e7b2674871e",
+            "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+            "stateScope": "3e7b2674871e|entity_1",
+            "admissionStatus": "accepted",
+            "resolutionState": "runtime_resolution_required",
+            "confidence": 0.7
+          },
+          {
+            "id": "interaction-30",
+            "controlIdentity": "3e7b2674871e|entity_1|Moneda|role|combobox|Moneda",
+            "semanticField": "Moneda",
+            "entityScope": "entity_1",
+            "action": "click",
+            "valueKey": "entity_1.moneda",
+            "recordedValue": "10400143961",
+            "sourceEventRefs": [
+              "event-30"
+            ],
+            "technicalTargetRefs": [
+              "role:combobox|Moneda"
+            ],
+            "technicalTargetCandidates": [
+              {
+                "targetType": "structural",
+                "locatorCandidates": [
+                  {
+                    "strategy": "role",
+                    "value": "combobox|Moneda",
+                    "confidence": 0.85
+                  }
+                ],
+                "structuralContext": {
+                  "owner": {
+                    "tag": "button",
+                    "role": "combobox"
+                  },
+                  "stableDirectAttributes": {
+                    "role": "combobox"
+                  },
+                  "stableDescendants": [],
+                  "semanticShape": [
+                    "span",
+                    "svg"
+                  ],
+                  "landmarkAncestor": {
+                    "tag": "main"
+                  },
+                  "deterministicStructuralIdentity": true,
+                  "topologySignature": "{\"childEntries\":[[\"span\",1],[\"svg\",1]],\"descendantEntries\":[[\"path\",1],[\"span\",1],[\"svg\",1]]}",
+                  "structuralIdentityMatchCount": 1
+                },
+                "interactionEvidence": [
+                  "v2_click_owner"
+                ],
+                "confidence": 0.85,
+                "validatedByInteraction": true
+              }
+            ],
+            "validatedByInteraction": true,
+            "playwrightRecorderEvidence": {
+              "kind": "role",
+              "role": "combobox",
+              "normalizedName": "Moneda",
+              "targetTag": "button",
+              "runtimeResolutionRequired": true
+            },
+            "description": "Ingresar en \"Moneda\"",
+            "screenBeforeRef": "3e7b2674871e",
+            "screenAfterRef": "3e7b2674871e",
+            "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+            "stateScope": "3e7b2674871e|entity_1",
+            "admissionStatus": "accepted",
+            "resolutionState": "certified",
+            "technicalOnly": true,
+            "executionAuthority": true,
+            "confidence": 0.85
+          },
+          {
+            "id": "interaction-32",
+            "controlIdentity": "3e7b2674871e|entity_1|DOP|role|option|DOP",
+            "semanticField": "Moneda",
+            "entityScope": "entity_1",
+            "action": "click",
+            "valueKey": "entity_1.dop",
+            "recordedValue": "10400143961",
+            "sourceEventRefs": [
+              "event-32"
+            ],
+            "technicalTargetRefs": [
+              "role:option|DOP"
+            ],
+            "technicalTargetCandidates": [
+              {
+                "targetType": "structural",
+                "locatorCandidates": [
+                  {
+                    "strategy": "role",
+                    "value": "option|DOP",
+                    "confidence": 0.85
+                  }
+                ],
+                "structuralContext": {
+                  "owner": {
+                    "tag": "div",
+                    "role": "option"
+                  },
+                  "stableDirectAttributes": {
+                    "aria-labelledby": "radix-_r_29_",
+                    "role": "option"
+                  },
+                  "stableDescendants": [
+                    {
+                      "relation": "descendant",
+                      "tag": "span",
+                      "stableAttributes": {
+                        "id": "radix-_r_29_"
+                      }
+                    }
+                  ],
+                  "semanticShape": [
+                    "span"
+                  ],
+                  "deterministicStructuralIdentity": true,
+                  "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+                  "structuralIdentityMatchCount": 1,
+                  "scopeIdentity": {
+                    "strategy": "id",
+                    "value": "radix-_r_25_"
+                  },
+                  "targetFingerprint": "{\"owner\":{\"tag\":\"div\",\"role\":\"option\"},\"stableDirectAttributes\":{\"role\":\"option\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"span\",\"stableAttributes\":{\"id\":\"radix-_r_29_\"}}],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+                  "captureScopeUnique": true,
+                  "captureTargetMatchCount": 1
+                },
+                "interactionEvidence": [
+                  "v2_click_owner"
+                ],
+                "confidence": 0.85,
+                "validatedByInteraction": true
+              }
+            ],
+            "validatedByInteraction": true,
+            "playwrightRecorderEvidence": {
+              "kind": "role",
+              "role": "option",
+              "normalizedName": "DOP",
+              "targetTag": "div",
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(div[aria-labelledby=\"radix-_r_29_\"])"
+              },
+              "captureMatchCount": 1,
+              "runtimeResolutionRequired": true
+            },
+            "description": "Ingresar en \"DOP\"",
+            "screenBeforeRef": "3e7b2674871e",
+            "screenAfterRef": "3e7b2674871e",
+            "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+            "stateScope": "3e7b2674871e|entity_1",
+            "admissionStatus": "accepted",
+            "resolutionState": "certified",
+            "technicalOnly": true,
+            "executionAuthority": true,
+            "confidence": 0.85
+          },
+          {
+            "id": "interaction-35",
+            "controlIdentity": "3e7b2674871e|entity_1|Ingresos",
+            "semanticField": "Ingresos",
+            "entityScope": "entity_1",
+            "action": "fill",
+            "valueKey": "entity_1.ingresos",
+            "recordedValue": "DOP 3,0000",
+            "rawTypedValue": "DOP 2,5000",
+            "sourceEventRefs": [
+              "event-35"
+            ],
+            "technicalTargetRefs": [],
+            "editingSessionRef": "edit-10",
+            "description": "Ingresar en \"Ingresos\"",
+            "screenBeforeRef": "3e7b2674871e",
+            "screenAfterRef": "3e7b2674871e",
+            "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+            "stateScope": "3e7b2674871e|entity_1",
+            "admissionStatus": "accepted",
+            "resolutionState": "runtime_resolution_required",
+            "confidence": 0.7
+          },
+          {
+            "id": "interaction-36",
+            "controlIdentity": "3e7b2674871e|entity_1|Correo electrónico",
+            "semanticField": "Correo electrónico",
+            "entityScope": "entity_1",
+            "action": "fill",
+            "valueKey": "entity_1.correo_electronico",
+            "recordedValue": "calidad@test.com",
+            "rawTypedValue": "calidad@test.com",
+            "sourceEventRefs": [
+              "event-36"
+            ],
+            "technicalTargetRefs": [],
+            "editingSessionRef": "edit-11",
+            "description": "Ingresar en \"Correo electrónico\"",
+            "screenBeforeRef": "3e7b2674871e",
+            "screenAfterRef": "3e7b2674871e",
+            "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+            "stateScope": "3e7b2674871e|entity_1",
+            "admissionStatus": "accepted",
+            "resolutionState": "runtime_resolution_required",
+            "confidence": 0.7
+          },
+          {
+            "id": "interaction-37",
+            "controlIdentity": "3e7b2674871e|entity_1|Teléfono residencial",
+            "semanticField": "Teléfono residencial",
+            "entityScope": "entity_1",
+            "action": "fill",
+            "valueKey": "entity_1.telefono_residencial",
+            "recordedValue": "829-255-1232",
+            "rawTypedValue": "829255123221",
+            "sourceEventRefs": [
+              "event-37"
+            ],
+            "technicalTargetRefs": [],
+            "editingSessionRef": "edit-12",
+            "description": "Ingresar en \"Teléfono residencial\"",
+            "screenBeforeRef": "3e7b2674871e",
+            "screenAfterRef": "3e7b2674871e",
+            "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+            "stateScope": "3e7b2674871e|entity_1",
+            "admissionStatus": "accepted",
+            "resolutionState": "runtime_resolution_required",
+            "confidence": 0.7
+          },
+          {
+            "id": "interaction-38",
+            "controlIdentity": "3e7b2674871e|entity_1|Celular",
+            "semanticField": "Celular",
+            "entityScope": "entity_1",
+            "action": "fill",
+            "valueKey": "entity_1.celular",
+            "recordedValue": "809-221-2121",
+            "rawTypedValue": "82925512323",
+            "sourceEventRefs": [
+              "event-38"
+            ],
+            "technicalTargetRefs": [],
+            "editingSessionRef": "edit-13",
+            "description": "Ingresar en \"Celular\"",
+            "screenBeforeRef": "3e7b2674871e",
+            "screenAfterRef": "3e7b2674871e",
+            "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+            "stateScope": "3e7b2674871e|entity_1",
+            "admissionStatus": "accepted",
+            "resolutionState": "runtime_resolution_required",
+            "confidence": 0.7
+          },
+          {
+            "id": "interaction-39",
+            "controlIdentity": "3e7b2674871e|entity_1|Fecha de Ingreso",
+            "semanticField": "Fecha de Ingreso",
+            "entityScope": "entity_1",
+            "action": "fill",
+            "valueKey": "entity_1.fecha_de_ingreso",
+            "recordedValue": "1995-02-20",
+            "sourceEventRefs": [
+              "event-39"
+            ],
+            "technicalTargetRefs": [],
+            "editingSessionRef": "edit-14",
+            "description": "Ingresar en \"Fecha de Ingreso\"",
+            "screenBeforeRef": "3e7b2674871e",
+            "screenAfterRef": "3e7b2674871e",
+            "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+            "stateScope": "3e7b2674871e|entity_1",
+            "admissionStatus": "accepted",
+            "resolutionState": "runtime_resolution_required",
+            "confidence": 0.7
+          },
+          {
+            "id": "interaction-41",
+            "controlIdentity": "3e7b2674871e|entity_1|Añadir otro|role|button|Añadir otro",
+            "semanticField": "Añadir otro",
+            "entityScope": "entity_1",
+            "action": "click",
+            "valueKey": "entity_1.anadir_otro",
+            "sourceEventRefs": [
+              "event-41"
+            ],
+            "technicalTargetRefs": [
+              "role:button|Añadir otro"
+            ],
+            "technicalTargetCandidates": [
+              {
+                "targetType": "structural",
+                "locatorCandidates": [
+                  {
+                    "strategy": "role",
+                    "value": "button|Añadir otro",
+                    "confidence": 0.85
+                  }
+                ],
+                "structuralContext": {
+                  "owner": {
+                    "tag": "button"
+                  },
+                  "stableDirectAttributes": {},
+                  "stableDescendants": [
+                    {
+                      "relation": "descendant",
+                      "tag": "img",
+                      "stableAttributes": {
+                        "alt": "add",
+                        "src": "/images/feather-plus.svg"
+                      }
+                    }
+                  ],
+                  "semanticShape": [
+                    "img",
+                    "p"
+                  ],
+                  "landmarkAncestor": {
+                    "tag": "main"
+                  },
+                  "deterministicStructuralIdentity": true,
+                  "topologySignature": "{\"childEntries\":[[\"img\",1],[\"p\",1]],\"descendantEntries\":[[\"img\",1],[\"p\",1]]}",
+                  "structuralIdentityMatchCount": 1
+                },
+                "interactionEvidence": [
+                  "v2_click_owner"
+                ],
+                "confidence": 0.85,
+                "validatedByInteraction": true
+              }
+            ],
+            "validatedByInteraction": true,
+            "description": "Ingresar en \"Añadir otro\"",
+            "screenBeforeRef": "3e7b2674871e",
+            "screenAfterRef": "3e7b2674871e",
+            "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+            "stateScope": "3e7b2674871e|entity_1",
+            "admissionStatus": "accepted",
+            "resolutionState": "certified",
+            "confidence": 0.85
+          }
+        ],
+        "dataRequirements": [
+          {
+            "valueKey": "entity_1.colaborador",
+            "semanticField": "Colaborador",
+            "entityScope": "entity_1",
+            "valueRole": "action_input",
+            "required": true,
+            "value": "10400143961",
+            "source": "RECORDED_CONFIRMED",
+            "resolved": true,
+            "sensitive": false,
+            "stepIndex": 12,
+            "readOnly": false,
+            "computed": false,
+            "systemGenerated": false,
+            "masked": false,
+            "editable": true,
+            "authority": "canonical_logical",
+            "authorityValue": "10400143961",
+            "datasetAuthorityMismatch": true
+          },
+          {
+            "valueKey": "entity_1.puesto",
+            "semanticField": "Puesto",
+            "entityScope": "entity_1",
+            "valueRole": "action_input",
+            "required": true,
+            "value": "Analista",
+            "source": "RECORDED_CONFIRMED",
+            "resolved": true,
+            "sensitive": false,
+            "stepIndex": 13,
+            "readOnly": false,
+            "computed": false,
+            "systemGenerated": false,
+            "masked": false,
+            "editable": true,
+            "authority": "canonical_logical",
+            "authorityValue": "Analista",
+            "datasetAuthorityMismatch": false
+          },
+          {
+            "valueKey": "entity_1.moneda_seleccion",
+            "semanticField": "Moneda",
+            "entityScope": "entity_1",
+            "valueRole": "action_input",
+            "required": true,
+            "value": "DOP",
+            "source": "RECORDED_CONFIRMED",
+            "resolved": true,
+            "sensitive": false,
+            "stepIndex": 13,
+            "readOnly": false,
+            "computed": false,
+            "systemGenerated": false,
+            "masked": false,
+            "editable": true,
+            "authority": "canonical_logical",
+            "authorityValue": "DOP",
+            "datasetAuthorityMismatch": false
+          },
+          {
+            "valueKey": "entity_1.ingresos",
+            "semanticField": "Ingresos",
+            "entityScope": "entity_1",
+            "valueRole": "action_input",
+            "required": true,
+            "value": "DOP 3,0000",
+            "source": "RECORDED_CONFIRMED",
+            "resolved": true,
+            "sensitive": false,
+            "stepIndex": 15,
+            "readOnly": false,
+            "computed": false,
+            "systemGenerated": false,
+            "masked": false,
+            "editable": true,
+            "authority": "canonical_logical",
+            "authorityValue": "DOP 3,0000",
+            "datasetAuthorityMismatch": true
+          },
+          {
+            "valueKey": "entity_1.correo_electronico",
+            "semanticField": "Correo electrónico",
+            "entityScope": "entity_1",
+            "valueRole": "action_input",
+            "required": true,
+            "value": "calidad@test.com",
+            "source": "RECORDED_CONFIRMED",
+            "resolved": true,
+            "sensitive": false,
+            "stepIndex": 16,
+            "readOnly": false,
+            "computed": false,
+            "systemGenerated": false,
+            "masked": false,
+            "editable": true,
+            "authority": "canonical_logical",
+            "authorityValue": "calidad@test.com",
+            "datasetAuthorityMismatch": false
+          },
+          {
+            "valueKey": "entity_1.telefono_residencial",
+            "semanticField": "Teléfono residencial",
+            "entityScope": "entity_1",
+            "valueRole": "action_input",
+            "required": true,
+            "value": "829-255-1232",
+            "source": "RECORDED_CONFIRMED",
+            "resolved": true,
+            "sensitive": false,
+            "stepIndex": 17,
+            "readOnly": false,
+            "computed": false,
+            "systemGenerated": false,
+            "masked": false,
+            "editable": true,
+            "authority": "canonical_logical",
+            "authorityValue": "829-255-1232",
+            "datasetAuthorityMismatch": false
+          },
+          {
+            "valueKey": "entity_1.celular",
+            "semanticField": "Celular",
+            "entityScope": "entity_1",
+            "valueRole": "action_input",
+            "required": true,
+            "value": "809-221-2121",
+            "source": "RECORDED_CONFIRMED",
+            "resolved": true,
+            "sensitive": false,
+            "stepIndex": 18,
+            "readOnly": false,
+            "computed": false,
+            "systemGenerated": false,
+            "masked": false,
+            "editable": true,
+            "authority": "canonical_logical",
+            "authorityValue": "809-221-2121",
+            "datasetAuthorityMismatch": true
+          },
+          {
+            "valueKey": "entity_1.fecha_de_ingreso",
+            "semanticField": "Fecha de Ingreso",
+            "entityScope": "entity_1",
+            "valueRole": "action_input",
+            "required": true,
+            "value": "1995-02-20",
+            "source": "RECORDED_CONFIRMED",
+            "resolved": true,
+            "sensitive": false,
+            "stepIndex": 19,
+            "controlType": "date",
+            "readOnly": false,
+            "computed": false,
+            "systemGenerated": false,
+            "masked": false,
+            "editable": true,
+            "authority": "canonical_logical",
+            "authorityValue": "1995-02-20",
+            "datasetAuthorityMismatch": true
+          }
+        ],
+        "runtimeDerivedOracles": [],
+        "technicalKnowledgeRefs": []
+      },
+      {
+        "entityScope": "entity_2",
+        "semanticActions": [
+          {
+            "id": "interaction-43",
+            "controlIdentity": "3e7b2674871e|entity_2|Seleccionar fila",
+            "entityScope": "entity_2",
+            "action": "check",
+            "recordedValue": "DOP",
+            "sourceEventRefs": [
+              "event-43"
+            ],
+            "technicalTargetRefs": [],
+            "technicalTargetCandidates": [
+              {
+                "targetType": "structural",
+                "locatorCandidates": [],
+                "structuralContext": {
+                  "owner": {
+                    "tag": "button",
+                    "role": "checkbox"
+                  },
+                  "stableDirectAttributes": {
+                    "aria-label": "Seleccionar fila",
+                    "role": "checkbox"
+                  },
+                  "stableDescendants": [],
+                  "semanticShape": [],
+                  "landmarkAncestor": {
+                    "tag": "main"
+                  },
+                  "deterministicStructuralIdentity": true,
+                  "structuralIdentityMatchCount": 1
+                },
+                "interactionEvidence": [
+                  "v2_click_owner"
+                ],
+                "confidence": 0.85,
+                "validatedByInteraction": true
+              }
+            ],
+            "validatedByInteraction": true,
+            "playwrightRecorderEvidence": {
+              "kind": "role",
+              "role": "checkbox",
+              "normalizedName": "Seleccionar fila",
+              "targetTag": "button",
+              "runtimeResolutionRequired": true
+            },
+            "screenBeforeRef": "3e7b2674871e",
+            "screenAfterRef": "3e7b2674871e",
+            "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+            "stateScope": "3e7b2674871e|entity_2",
+            "admissionStatus": "unresolved",
+            "admissionReason": "generic_label_without_technical_identity",
+            "resolutionState": "runtime_resolution_required",
+            "confidence": 0.7
+          },
+          {
+            "id": "interaction-45",
+            "controlIdentity": "3e7b2674871e|entity_2|Tipo de ID",
+            "semanticField": "Tipo de ID",
+            "entityScope": "entity_2",
+            "action": "click",
+            "valueKey": "entity_2.tipo_de_id",
+            "recordedValue": "DOP 3,0000",
+            "sourceEventRefs": [
+              "event-45"
+            ],
+            "technicalTargetRefs": [],
+            "technicalTargetCandidates": [
+              {
+                "targetType": "structural",
+                "locatorCandidates": [],
+                "structuralContext": {
+                  "owner": {
+                    "tag": "button"
+                  },
+                  "stableDirectAttributes": {},
+                  "stableDescendants": [],
+                  "semanticShape": [
+                    "span"
+                  ],
+                  "landmarkAncestor": {
+                    "tag": "main"
+                  },
+                  "deterministicStructuralIdentity": false,
+                  "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+                  "identityAmbiguous": true,
+                  "structuralIdentityMatchCount": 17
+                },
+                "interactionEvidence": [
+                  "v2_click_owner"
+                ],
+                "confidence": 0.85,
+                "validatedByInteraction": true
+              }
+            ],
+            "validatedByInteraction": true,
+            "description": "Ingresar en \"Tipo de ID\"",
+            "screenBeforeRef": "3e7b2674871e",
+            "screenAfterRef": "3e7b2674871e",
+            "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+            "stateScope": "3e7b2674871e|entity_2",
+            "admissionStatus": "accepted",
+            "resolutionState": "runtime_resolution_required",
+            "confidence": 0.7
+          },
+          {
+            "id": "interaction-46",
+            "controlIdentity": "3e7b2674871e|entity_2|cédula|role|option|cédula",
+            "semanticField": "cédula",
+            "entityScope": "entity_2",
+            "action": "click",
+            "valueKey": "entity_2.cedula",
+            "recordedValue": "DOP 3,0000",
+            "sourceEventRefs": [
+              "event-46"
+            ],
+            "technicalTargetRefs": [
+              "role:option|cédula"
+            ],
+            "technicalTargetCandidates": [
+              {
+                "targetType": "structural",
+                "locatorCandidates": [
+                  {
+                    "strategy": "role",
+                    "value": "option|cédula",
+                    "confidence": 0.85
+                  }
+                ],
+                "structuralContext": {
+                  "owner": {
+                    "tag": "div",
+                    "role": "option"
+                  },
+                  "stableDirectAttributes": {
+                    "aria-labelledby": "radix-_r_3e_",
+                    "role": "option"
+                  },
+                  "stableDescendants": [
+                    {
+                      "relation": "descendant",
+                      "tag": "span",
+                      "stableAttributes": {
+                        "id": "radix-_r_3e_"
+                      }
+                    }
+                  ],
+                  "semanticShape": [
+                    "span"
+                  ],
+                  "deterministicStructuralIdentity": true,
+                  "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+                  "structuralIdentityMatchCount": 1,
+                  "scopeIdentity": {
+                    "strategy": "id",
+                    "value": "radix-_r_3c_"
+                  },
+                  "targetFingerprint": "{\"owner\":{\"tag\":\"div\",\"role\":\"option\"},\"stableDirectAttributes\":{\"role\":\"option\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"span\",\"stableAttributes\":{\"id\":\"radix-_r_3e_\"}}],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+                  "captureScopeUnique": true,
+                  "captureTargetMatchCount": 1
+                },
+                "interactionEvidence": [
+                  "v2_click_owner"
+                ],
+                "confidence": 0.85,
+                "validatedByInteraction": true
+              }
+            ],
+            "validatedByInteraction": true,
+            "playwrightRecorderEvidence": {
+              "kind": "role",
+              "role": "option",
+              "normalizedName": "cédula",
+              "targetTag": "div",
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(div[aria-labelledby=\"radix-_r_3e_\"])"
+              },
+              "captureMatchCount": 1,
+              "runtimeResolutionRequired": true
+            },
+            "description": "Ingresar en \"cédula\"",
+            "screenBeforeRef": "3e7b2674871e",
+            "screenAfterRef": "3e7b2674871e",
+            "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+            "stateScope": "3e7b2674871e|entity_2",
+            "admissionStatus": "accepted",
+            "resolutionState": "certified",
+            "confidence": 0.85
+          },
+          {
+            "id": "interaction-49",
+            "controlIdentity": "3e7b2674871e|entity_2|Colaborador",
+            "semanticField": "Colaborador",
+            "entityScope": "entity_2",
+            "action": "fill",
+            "valueKey": "entity_2.colaborador",
+            "recordedValue": "10400143961",
+            "rawTypedValue": "10400143961\r\n",
+            "sourceEventRefs": [
+              "event-49"
+            ],
+            "technicalTargetRefs": [],
+            "editingSessionRef": "edit-16",
+            "description": "Ingresar en \"Colaborador\"",
+            "screenBeforeRef": "3e7b2674871e",
+            "screenAfterRef": "3e7b2674871e",
+            "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+            "stateScope": "3e7b2674871e|entity_2",
+            "admissionStatus": "accepted",
+            "resolutionState": "runtime_resolution_required",
+            "confidence": 0.7
+          },
+          {
+            "id": "interaction-50",
+            "controlIdentity": "3e7b2674871e|entity_2|Puesto",
+            "semanticField": "Puesto",
+            "entityScope": "entity_2",
+            "action": "fill",
+            "valueKey": "entity_2.puesto",
+            "recordedValue": "Analista",
+            "rawTypedValue": "Analista",
+            "sourceEventRefs": [
+              "event-50"
+            ],
+            "technicalTargetRefs": [],
+            "editingSessionRef": "edit-17",
+            "description": "Ingresar en \"Puesto\"",
+            "screenBeforeRef": "3e7b2674871e",
+            "screenAfterRef": "3e7b2674871e",
+            "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+            "stateScope": "3e7b2674871e|entity_2",
+            "admissionStatus": "accepted",
+            "resolutionState": "runtime_resolution_required",
+            "confidence": 0.7
+          },
+          {
+            "id": "interaction-51",
+            "controlIdentity": "3e7b2674871e|entity_2|Ingresos",
+            "semanticField": "Ingresos",
+            "entityScope": "entity_2",
+            "action": "fill",
+            "valueKey": "entity_2.ingresos",
+            "recordedValue": "DOP 3,0000",
+            "rawTypedValue": "DOP 3,0000",
+            "sourceEventRefs": [
+              "event-51"
+            ],
+            "technicalTargetRefs": [],
+            "editingSessionRef": "edit-18",
+            "description": "Ingresar en \"Ingresos\"",
+            "screenBeforeRef": "3e7b2674871e",
+            "screenAfterRef": "3e7b2674871e",
+            "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+            "stateScope": "3e7b2674871e|entity_2",
+            "admissionStatus": "accepted",
+            "resolutionState": "runtime_resolution_required",
+            "confidence": 0.7
+          },
+          {
+            "id": "interaction-52",
+            "controlIdentity": "3e7b2674871e|entity_2|Correo electrónico",
+            "semanticField": "Correo electrónico",
+            "entityScope": "entity_2",
+            "action": "fill",
+            "valueKey": "entity_2.correo_electronico",
+            "recordedValue": "calidad@test.com",
+            "rawTypedValue": "calidad@test.com",
+            "sourceEventRefs": [
+              "event-52"
+            ],
+            "technicalTargetRefs": [],
+            "editingSessionRef": "edit-19",
+            "description": "Ingresar en \"Correo electrónico\"",
+            "screenBeforeRef": "3e7b2674871e",
+            "screenAfterRef": "3e7b2674871e",
+            "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+            "stateScope": "3e7b2674871e|entity_2",
+            "admissionStatus": "accepted",
+            "resolutionState": "runtime_resolution_required",
+            "confidence": 0.7
+          },
+          {
+            "id": "interaction-53",
+            "controlIdentity": "3e7b2674871e|entity_2|Teléfono residencial",
+            "semanticField": "Teléfono residencial",
+            "entityScope": "entity_2",
+            "action": "fill",
+            "valueKey": "entity_2.telefono_residencial",
+            "recordedValue": "829-255-1232",
+            "rawTypedValue": "829255123232",
+            "sourceEventRefs": [
+              "event-53"
+            ],
+            "technicalTargetRefs": [],
+            "editingSessionRef": "edit-20",
+            "description": "Ingresar en \"Teléfono residencial\"",
+            "screenBeforeRef": "3e7b2674871e",
+            "screenAfterRef": "3e7b2674871e",
+            "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+            "stateScope": "3e7b2674871e|entity_2",
+            "admissionStatus": "accepted",
+            "resolutionState": "runtime_resolution_required",
+            "confidence": 0.7
+          },
+          {
+            "id": "interaction-54",
+            "controlIdentity": "3e7b2674871e|entity_2|Celular",
+            "semanticField": "Celular",
+            "entityScope": "entity_2",
+            "action": "fill",
+            "valueKey": "entity_2.celular",
+            "recordedValue": "809-221-2121",
+            "rawTypedValue": "8092212121",
+            "sourceEventRefs": [
+              "event-54"
+            ],
+            "technicalTargetRefs": [],
+            "editingSessionRef": "edit-21",
+            "description": "Ingresar en \"Celular\"",
+            "screenBeforeRef": "3e7b2674871e",
+            "screenAfterRef": "3e7b2674871e",
+            "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+            "stateScope": "3e7b2674871e|entity_2",
+            "admissionStatus": "accepted",
+            "resolutionState": "runtime_resolution_required",
+            "confidence": 0.7
+          },
+          {
+            "id": "interaction-55",
+            "controlIdentity": "3e7b2674871e|entity_2|Fecha de Nacimiento",
+            "semanticField": "Fecha de Nacimiento",
+            "entityScope": "entity_2",
+            "action": "fill",
+            "valueKey": "entity_2.fecha_de_nacimiento",
+            "recordedValue": "2020-02-20",
+            "rawTypedValue": "1820-01-30",
+            "sourceEventRefs": [
+              "event-55"
+            ],
+            "technicalTargetRefs": [],
+            "editingSessionRef": "edit-22",
+            "description": "Ingresar en \"Fecha de Nacimiento\"",
+            "screenBeforeRef": "3e7b2674871e",
+            "screenAfterRef": "3e7b2674871e",
+            "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+            "stateScope": "3e7b2674871e|entity_2",
+            "admissionStatus": "accepted",
+            "resolutionState": "runtime_resolution_required",
+            "confidence": 0.7
+          },
+          {
+            "id": "interaction-56",
+            "controlIdentity": "3e7b2674871e|entity_2|Fecha de Ingreso",
+            "semanticField": "Fecha de Ingreso",
+            "entityScope": "entity_2",
+            "action": "fill",
+            "valueKey": "entity_2.fecha_de_ingreso",
+            "recordedValue": "1995-02-20",
+            "sourceEventRefs": [
+              "event-56"
+            ],
+            "technicalTargetRefs": [],
+            "editingSessionRef": "edit-23",
+            "description": "Ingresar en \"Fecha de Ingreso\"",
+            "screenBeforeRef": "3e7b2674871e",
+            "screenAfterRef": "3e7b2674871e",
+            "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+            "stateScope": "3e7b2674871e|entity_2",
+            "admissionStatus": "accepted",
+            "resolutionState": "runtime_resolution_required",
+            "confidence": 0.7
+          },
+          {
+            "id": "interaction-58",
+            "controlIdentity": "3e7b2674871e|entity_2|Validar|role|button|Validar",
+            "semanticField": "Validar",
+            "entityScope": "entity_2",
+            "action": "click",
+            "valueKey": "entity_2.validar",
+            "sourceEventRefs": [
+              "event-58"
+            ],
+            "technicalTargetRefs": [
+              "role:button|Validar"
+            ],
+            "technicalTargetCandidates": [
+              {
+                "targetType": "structural",
+                "locatorCandidates": [
+                  {
+                    "strategy": "role",
+                    "value": "button|Validar",
+                    "confidence": 0.85
+                  }
+                ],
+                "structuralContext": {
+                  "owner": {
+                    "tag": "button"
+                  },
+                  "stableDirectAttributes": {},
+                  "stableDescendants": [
+                    {
+                      "relation": "descendant",
+                      "tag": "img",
+                      "stableAttributes": {
+                        "alt": "validate",
+                        "src": "/images/feather-arrow-right.svg"
+                      }
+                    }
+                  ],
+                  "semanticShape": [
+                    "img",
+                    "p"
+                  ],
+                  "landmarkAncestor": {
+                    "tag": "main"
+                  },
+                  "deterministicStructuralIdentity": true,
+                  "topologySignature": "{\"childEntries\":[[\"img\",1],[\"p\",1]],\"descendantEntries\":[[\"img\",1],[\"p\",1]]}",
+                  "structuralIdentityMatchCount": 1
+                },
+                "interactionEvidence": [
+                  "v2_click_owner"
+                ],
+                "confidence": 0.85,
+                "validatedByInteraction": true
+              }
+            ],
+            "validatedByInteraction": true,
+            "playwrightRecorderEvidence": {
+              "kind": "role",
+              "role": "button",
+              "normalizedName": "Validar",
+              "targetTag": "button",
+              "runtimeResolutionRequired": true
+            },
+            "description": "Ingresar en \"Validar\"",
+            "screenBeforeRef": "3e7b2674871e",
+            "screenAfterRef": "3e7b2674871e",
+            "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+            "routeAfter": "https://172.27.4.31/payroll/loadingList",
+            "stateScope": "3e7b2674871e|entity_2",
+            "transitionObserved": true,
+            "causedTransition": true,
+            "terminalForContext": true,
+            "admissionStatus": "accepted",
+            "resolutionState": "certified",
+            "confidence": 0.85
+          }
+        ],
+        "dataRequirements": [
+          {
+            "valueKey": "entity_2.colaborador",
+            "semanticField": "Colaborador",
+            "entityScope": "entity_2",
+            "valueRole": "action_input",
+            "required": true,
+            "value": "10400143961",
+            "source": "RECORDED_CONFIRMED",
+            "resolved": true,
+            "sensitive": false,
+            "stepIndex": 24,
+            "readOnly": false,
+            "computed": false,
+            "systemGenerated": false,
+            "masked": false,
+            "editable": true,
+            "authority": "canonical_logical",
+            "authorityValue": "10400143961",
+            "datasetAuthorityMismatch": false
+          },
+          {
+            "valueKey": "entity_2.puesto",
+            "semanticField": "Puesto",
+            "entityScope": "entity_2",
+            "valueRole": "action_input",
+            "required": true,
+            "value": "Analista",
+            "source": "RECORDED_CONFIRMED",
+            "resolved": true,
+            "sensitive": false,
+            "stepIndex": 25,
+            "readOnly": false,
+            "computed": false,
+            "systemGenerated": false,
+            "masked": false,
+            "editable": true,
+            "authority": "canonical_logical",
+            "authorityValue": "Analista",
+            "datasetAuthorityMismatch": false
+          },
+          {
+            "valueKey": "entity_2.ingresos",
+            "semanticField": "Ingresos",
+            "entityScope": "entity_2",
+            "valueRole": "action_input",
+            "required": true,
+            "value": "DOP 3,0000",
+            "source": "RECORDED_CONFIRMED",
+            "resolved": true,
+            "sensitive": false,
+            "stepIndex": 26,
+            "readOnly": false,
+            "computed": false,
+            "systemGenerated": false,
+            "masked": false,
+            "editable": true,
+            "authority": "canonical_logical",
+            "authorityValue": "DOP 3,0000",
+            "datasetAuthorityMismatch": false
+          },
+          {
+            "valueKey": "entity_2.correo_electronico",
+            "semanticField": "Correo electrónico",
+            "entityScope": "entity_2",
+            "valueRole": "action_input",
+            "required": true,
+            "value": "calidad@test.com",
+            "source": "RECORDED_CONFIRMED",
+            "resolved": true,
+            "sensitive": false,
+            "stepIndex": 27,
+            "readOnly": false,
+            "computed": false,
+            "systemGenerated": false,
+            "masked": false,
+            "editable": true,
+            "authority": "canonical_logical",
+            "authorityValue": "calidad@test.com",
+            "datasetAuthorityMismatch": false
+          },
+          {
+            "valueKey": "entity_2.telefono_residencial",
+            "semanticField": "Teléfono residencial",
+            "entityScope": "entity_2",
+            "valueRole": "action_input",
+            "required": true,
+            "value": "829-255-1232",
+            "source": "RECORDED_CONFIRMED",
+            "resolved": true,
+            "sensitive": false,
+            "stepIndex": 28,
+            "readOnly": false,
+            "computed": false,
+            "systemGenerated": false,
+            "masked": false,
+            "editable": true,
+            "authority": "canonical_logical",
+            "authorityValue": "829-255-1232",
+            "datasetAuthorityMismatch": false
+          },
+          {
+            "valueKey": "entity_2.celular",
+            "semanticField": "Celular",
+            "entityScope": "entity_2",
+            "valueRole": "action_input",
+            "required": true,
+            "value": "809-221-2121",
+            "source": "RECORDED_CONFIRMED",
+            "resolved": true,
+            "sensitive": false,
+            "stepIndex": 29,
+            "readOnly": false,
+            "computed": false,
+            "systemGenerated": false,
+            "masked": false,
+            "editable": true,
+            "authority": "canonical_logical",
+            "authorityValue": "809-221-2121",
+            "datasetAuthorityMismatch": false
+          },
+          {
+            "valueKey": "entity_2.fecha_de_nacimiento",
+            "semanticField": "Fecha de Nacimiento",
+            "entityScope": "entity_2",
+            "valueRole": "action_input",
+            "required": true,
+            "value": "2020-02-20",
+            "source": "RECORDED_CONFIRMED",
+            "resolved": true,
+            "sensitive": false,
+            "stepIndex": 30,
+            "controlType": "date",
+            "readOnly": false,
+            "computed": false,
+            "systemGenerated": false,
+            "masked": false,
+            "editable": true,
+            "authority": "canonical_logical",
+            "authorityValue": "2020-02-20",
+            "datasetAuthorityMismatch": false
+          },
+          {
+            "valueKey": "entity_2.fecha_de_ingreso",
+            "semanticField": "Fecha de Ingreso",
+            "entityScope": "entity_2",
+            "valueRole": "action_input",
+            "required": true,
+            "value": "1995-02-20",
+            "source": "RECORDED_CONFIRMED",
+            "resolved": true,
+            "sensitive": false,
+            "stepIndex": 31,
+            "controlType": "date",
+            "readOnly": false,
+            "computed": false,
+            "systemGenerated": false,
+            "masked": false,
+            "editable": true,
+            "authority": "canonical_logical",
+            "authorityValue": "1995-02-20",
+            "datasetAuthorityMismatch": false
+          }
+        ],
+        "runtimeDerivedOracles": [],
+        "technicalKnowledgeRefs": []
+      }
+    ],
+    "readiness": {
+      "functionalReadiness": true,
+      "dataReadiness": true,
+      "technicalReadiness": false,
+      "oracleReadiness": true,
+      "reviewReadiness": true,
+      "publicationContentReadiness": true,
+      "executionReadiness": true,
+      "publicationReadiness": true,
+      "missingInputs": [],
+      "datasetAuthorityMismatches": [],
+      "dataReadinessReasons": []
+    },
+    "technicalKnowledgeRefs": [],
+    "runtimeInputRequirements": [
+      {
+        "valueKey": "rnc_de_la_empresa",
+        "semanticField": "RNC de la empresa*",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "130598983",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 1,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "130598983",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "nombre_de_usuario",
+        "semanticField": "Nombre de usuario*",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "olivam",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 2,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "olivam",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "contrasena",
+        "semanticField": "Contraseña*",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": "qwerty123123",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": true,
+        "stepIndex": 3,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "qwerty123123",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "entity_1.colaborador",
+        "semanticField": "Colaborador",
+        "entityScope": "entity_1",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "10400143961",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 12,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "10400143961",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "entity_1.puesto",
+        "semanticField": "Puesto",
+        "entityScope": "entity_1",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "Analista",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 13,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "Analista",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "entity_1.moneda_seleccion",
+        "semanticField": "Moneda",
+        "entityScope": "entity_1",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "DOP",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 13,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "DOP",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "entity_1.ingresos",
+        "semanticField": "Ingresos",
+        "entityScope": "entity_1",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "30000",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 15,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "30000",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "entity_1.correo_electronico",
+        "semanticField": "Correo electrónico",
+        "entityScope": "entity_1",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "calidad@test.com",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 16,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "calidad@test.com",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "entity_1.telefono_residencial",
+        "semanticField": "Teléfono residencial",
+        "entityScope": "entity_1",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "829-255-1232",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 17,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "829-255-1232",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "entity_1.celular",
+        "semanticField": "Celular",
+        "entityScope": "entity_1",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "809-221-2121",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 18,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "809-221-2121",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "entity_1.fecha_de_ingreso",
+        "semanticField": "Fecha de Ingreso",
+        "entityScope": "entity_1",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "1995-02-20",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 19,
+        "controlType": "date",
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "1995-02-20",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "entity_2.colaborador",
+        "semanticField": "Colaborador",
+        "entityScope": "entity_2",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "40224679551",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 24,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "40224679551",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "entity_2.puesto",
+        "semanticField": "Puesto",
+        "entityScope": "entity_2",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "analista",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 25,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "analista",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "entity_2.ingresos",
+        "semanticField": "Ingresos",
+        "entityScope": "entity_2",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "80000",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 26,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "80000",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "entity_2.correo_electronico",
+        "semanticField": "Correo electrónico",
+        "entityScope": "entity_2",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "calidad@test.com",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 27,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "calidad@test.com",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "entity_2.telefono_residencial",
+        "semanticField": "Teléfono residencial",
+        "entityScope": "entity_2",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "8292551232",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 28,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "8292551232",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "entity_2.celular",
+        "semanticField": "Celular",
+        "entityScope": "entity_2",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "809-221-2121",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 29,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "809-221-2121",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "entity_2.fecha_de_nacimiento",
+        "semanticField": "Fecha de Nacimiento",
+        "entityScope": "entity_2",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "2020-02-20",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 30,
+        "controlType": "date",
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "2020-02-20",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "entity_2.fecha_de_ingreso",
+        "semanticField": "Fecha de Ingreso",
+        "entityScope": "entity_2",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "1995-02-20",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 31,
+        "controlType": "date",
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "1995-02-20",
+        "datasetAuthorityMismatch": false
+      }
+    ],
+    "runtimeDataset": {
+      "scenarioId": "REC-C43B4EA1-01",
+      "requirements": [
+        {
+          "valueKey": "rnc_de_la_empresa",
+          "semanticField": "RNC de la empresa*",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "130598983",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 1,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "130598983",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "nombre_de_usuario",
+          "semanticField": "Nombre de usuario*",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "olivam",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 2,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "olivam",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña*",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": "qwerty123123",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": true,
+          "stepIndex": 3,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "qwerty123123",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "entity_1.colaborador",
+          "semanticField": "Colaborador",
+          "entityScope": "entity_1",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "10400143961",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 12,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "10400143961",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "entity_1.puesto",
+          "semanticField": "Puesto",
+          "entityScope": "entity_1",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "Analista",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 13,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "Analista",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "entity_1.moneda_seleccion",
+          "semanticField": "Moneda",
+          "entityScope": "entity_1",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "DOP",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 13,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "DOP",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "entity_1.ingresos",
+          "semanticField": "Ingresos",
+          "entityScope": "entity_1",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "30000",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 15,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "30000",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "entity_1.correo_electronico",
+          "semanticField": "Correo electrónico",
+          "entityScope": "entity_1",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "calidad@test.com",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 16,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "calidad@test.com",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "entity_1.telefono_residencial",
+          "semanticField": "Teléfono residencial",
+          "entityScope": "entity_1",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "829-255-1232",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 17,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "829-255-1232",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "entity_1.celular",
+          "semanticField": "Celular",
+          "entityScope": "entity_1",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "809-221-2121",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 18,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "809-221-2121",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "entity_1.fecha_de_ingreso",
+          "semanticField": "Fecha de Ingreso",
+          "entityScope": "entity_1",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "1995-02-20",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 19,
+          "controlType": "date",
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "1995-02-20",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "entity_2.colaborador",
+          "semanticField": "Colaborador",
+          "entityScope": "entity_2",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "40224679551",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 24,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "40224679551",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "entity_2.puesto",
+          "semanticField": "Puesto",
+          "entityScope": "entity_2",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "analista",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 25,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "analista",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "entity_2.ingresos",
+          "semanticField": "Ingresos",
+          "entityScope": "entity_2",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "80000",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 26,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "80000",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "entity_2.correo_electronico",
+          "semanticField": "Correo electrónico",
+          "entityScope": "entity_2",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "calidad@test.com",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 27,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "calidad@test.com",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "entity_2.telefono_residencial",
+          "semanticField": "Teléfono residencial",
+          "entityScope": "entity_2",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "8292551232",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 28,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "8292551232",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "entity_2.celular",
+          "semanticField": "Celular",
+          "entityScope": "entity_2",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "809-221-2121",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 29,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "809-221-2121",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "entity_2.fecha_de_nacimiento",
+          "semanticField": "Fecha de Nacimiento",
+          "entityScope": "entity_2",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "2020-02-20",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 30,
+          "controlType": "date",
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "2020-02-20",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "entity_2.fecha_de_ingreso",
+          "semanticField": "Fecha de Ingreso",
+          "entityScope": "entity_2",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "1995-02-20",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 31,
+          "controlType": "date",
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "1995-02-20",
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "resolvedValues": {
+        "rnc_de_la_empresa": "130598983",
+        "nombre_de_usuario": "olivam",
+        "contrasena": "qwerty123123",
+        "entity_1.colaborador": "10400143961",
+        "entity_1.puesto": "Analista",
+        "entity_1.moneda_seleccion": "DOP",
+        "entity_1.ingresos": "30000",
+        "entity_1.correo_electronico": "calidad@test.com",
+        "entity_1.telefono_residencial": "829-255-1232",
+        "entity_1.celular": "809-221-2121",
+        "entity_1.fecha_de_ingreso": "1995-02-20",
+        "entity_2.colaborador": "40224679551",
+        "entity_2.puesto": "analista",
+        "entity_2.ingresos": "80000",
+        "entity_2.correo_electronico": "calidad@test.com",
+        "entity_2.telefono_residencial": "8292551232",
+        "entity_2.celular": "809-221-2121",
+        "entity_2.fecha_de_nacimiento": "2020-02-20",
+        "entity_2.fecha_de_ingreso": "1995-02-20"
+      },
+      "missingValues": []
+    },
+    "mutationOpportunities": [
+      {
+        "opportunityId": "REC-C43B4EA1-01:repeat_entity",
+        "title": "Registro varios clientes: registrar varias entidades en un mismo proceso",
+        "mutationType": "REPEAT_ENTITY",
+        "basePrimaryScenarioId": "REC-C43B4EA1-01",
+        "operations": [
+          {
+            "type": "insert_action",
+            "action": {
+              "id": "repeat-affordance-obs-41",
+              "controlIdentity": "3e7b2674871e:control:role:button|Añadir otro",
+              "action": "click",
+              "sourceEventRefs": [
+                "obs-41"
+              ],
+              "technicalTargetRefs": [
+                "role:button|Añadir otro"
+              ],
+              "screenBeforeRef": "3e7b2674871e",
+              "screenAfterRef": "3e7b2674871e",
+              "routeBefore": "https://172.27.4.31/login",
+              "routeAfter": "https://172.27.4.31/login",
+              "stateScope": "3e7b2674871e",
+              "goalRelevant": true,
+              "description": "Presionar \"Añadir otro\"",
+              "confidence": 0.85
+            },
+            "afterInteractionId": "interaction-41"
+          },
+          {
+            "type": "clone_entity",
+            "sourceEntityScope": "entity_1",
+            "targetEntityScope": "entity_2"
+          }
+        ],
+        "evidenceRefs": [
+          "event-1",
+          "event-2",
+          "event-3",
+          "event-4",
+          "event-5",
+          "event-6",
+          "event-7",
+          "event-8",
+          "event-9",
+          "event-10",
+          "event-11",
+          "event-12",
+          "event-13",
+          "event-14",
+          "event-15",
+          "event-16",
+          "event-17",
+          "event-18",
+          "event-19",
+          "event-20",
+          "event-21",
+          "event-22",
+          "event-23",
+          "event-24",
+          "event-25",
+          "event-26",
+          "event-27",
+          "event-28",
+          "event-29",
+          "event-30",
+          "event-31",
+          "event-32",
+          "event-33",
+          "event-34",
+          "event-35",
+          "event-36",
+          "event-37",
+          "event-38",
+          "event-39",
+          "event-40",
+          "event-41",
+          "event-42",
+          "event-43",
+          "event-44",
+          "event-45",
+          "event-46",
+          "event-47",
+          "event-48",
+          "event-49",
+          "event-50",
+          "event-51",
+          "event-52",
+          "event-53",
+          "event-54",
+          "event-55",
+          "event-56",
+          "event-57",
+          "event-58",
+          "event-59"
+        ],
+        "rationale": "El recorrido observó un affordance de repetición/agregado y existe un bloque de entidad completo.",
+        "oracleAuthority": "MISSING",
+        "confidence": 0.8,
+        "needsReview": true
+      },
+      {
+        "opportunityId": "REC-C43B4EA1-01:field_omission",
+        "title": "Registro varios clientes: comprobar la omisión de un dato",
+        "mutationType": "FIELD_OMISSION",
+        "basePrimaryScenarioId": "REC-C43B4EA1-01",
+        "operations": [
+          {
+            "type": "remove_action",
+            "interactionId": "interaction-6"
+          }
+        ],
+        "evidenceRefs": [
+          "event-1",
+          "event-2",
+          "event-3",
+          "event-4",
+          "event-5",
+          "event-6",
+          "event-7",
+          "event-8",
+          "event-9",
+          "event-10",
+          "event-11",
+          "event-12",
+          "event-13",
+          "event-14",
+          "event-15",
+          "event-16",
+          "event-17",
+          "event-18",
+          "event-19",
+          "event-20",
+          "event-21",
+          "event-22",
+          "event-23",
+          "event-24",
+          "event-25",
+          "event-26",
+          "event-27",
+          "event-28",
+          "event-29",
+          "event-30",
+          "event-31",
+          "event-32",
+          "event-33",
+          "event-34",
+          "event-35",
+          "event-36",
+          "event-37",
+          "event-38",
+          "event-39",
+          "event-40",
+          "event-41",
+          "event-42",
+          "event-43",
+          "event-44",
+          "event-45",
+          "event-46",
+          "event-47",
+          "event-48",
+          "event-49",
+          "event-50",
+          "event-51",
+          "event-52",
+          "event-53",
+          "event-54",
+          "event-55",
+          "event-56",
+          "event-57",
+          "event-58",
+          "event-59"
+        ],
+        "rationale": "Existen varios inputs observados; se propone una omisión agrupada sin inventar el resultado.",
+        "oracleAuthority": "MISSING",
+        "confidence": 0.5,
+        "needsReview": true
+      }
+    ],
+    "testRailCaseId": 48648,
+    "testRailDestination": {
+      "projectId": "56",
+      "suiteId": "1731",
+      "sectionId": "4755"
+    }
+  }
+]

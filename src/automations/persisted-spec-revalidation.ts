@@ -2,7 +2,8 @@ import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { revalidateExistingSpecDeterministically, type ExistingSpecRevalidationResult } from "./existing-spec-revalidation";
-import { upsertAutomationIndexEntry, type PromotedAutomationIndex } from "./automation-index";
+import { upsertAutomationIndexEntry } from "./automation-index";
+import type { PromotedAutomationIndex } from "../types/automation-promotion.types";
 
 export type SuccessfulExistingSpecRevalidationPersistenceInput = {
   caseDir: string;

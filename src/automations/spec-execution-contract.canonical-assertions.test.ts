@@ -49,3 +49,27 @@ test("round-trips canonical assertion parents into semantic contract steps", () 
   assert.equal(step14.condition, 'el campo "subject" permanezca inválido');
   assert.equal(step14.requirementRefs?.length, 1);
 });
+
+test("classifies recorded Spanish system observations as visible text assertions", () => {
+  const contract = buildSpecExecutionContract({
+    scenario: { externalId: "PREVIEW-001", title: "Recorded flow" },
+    steps: [],
+  } as any, {
+    expectedResult: "",
+    observableOracles: [{
+      id: "observed-01",
+      requirement: 'El sistema muestra "¡Hola!"',
+      target: "¡Hola!",
+      type: "literal_visible_text",
+      backed: true,
+      source: "discovery",
+      stepIndex: 1,
+      evidence: ["assertion_resolved_during_discovery"],
+    }],
+    steps: [{ index: 1, action: 'El sistema muestra "¡Hola!"', description: 'El sistema muestra "¡Hola!"' }],
+  } as any);
+  assert.equal(contract.steps[0]?.operation, "assertVisible");
+  assert.equal(contract.steps[0]?.oracle?.type, "literal_visible_text");
+  assert.equal(contract.steps[0]?.oracle?.target, "¡Hola!");
+  assert.equal(contract.steps[0]?.required, true);
+});

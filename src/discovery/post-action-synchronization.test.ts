@@ -70,6 +70,23 @@ test("application error is terminal and does not request a retry", () => {
   });
 });
 
+test("an auth submit response cannot complete while the same auth gate remains active", () => {
+  assert.deepEqual(resolvePostActionSynchronization({
+    actionNetworkObserved: true,
+    actionNetworkResponse: true,
+    authenticationBoundaryStillActive: true,
+    domMutation: true,
+    loadingSettled: true,
+  }), { completed: false });
+});
+
+test("an auth error remains terminal while the auth gate is still active", () => {
+  assert.deepEqual(resolvePostActionSynchronization({
+    applicationError: true,
+    authenticationBoundaryStillActive: true,
+  }), { completed: true, signal: "application_error" });
+});
+
 test("redirect chain is completed by the terminal action response", () => {
   assert.deepEqual(resolvePostActionSynchronization({ actionNetworkObserved: true, actionNetworkResponse: true }), {
     completed: true,
@@ -127,6 +144,32 @@ test("a recorded post-action surface is not satisfied by a 2xx on an intermediat
       actionNetworkResponse: true,
       recordedPostActionSurfaceRequired: true,
       recordedPostActionSurfaceReached: false,
+    }),
+    { completed: false },
+  );
+});
+
+test("a settled terminal recorded click completes from its own terminal feedback when its recorded route is not reached", () => {
+  assert.deepEqual(
+    resolvePostActionSynchronization({
+      actionNetworkObserved: true,
+      actionNetworkResponse: true,
+      recordedPostActionSurfaceRequired: true,
+      recordedPostActionSurfaceReached: false,
+      recordedTerminalActionFeedback: true,
+    }),
+    { completed: true, signal: "terminal_feedback" },
+  );
+});
+
+test("terminal feedback does not weaken intermediate recorded post-action surfaces", () => {
+  assert.deepEqual(
+    resolvePostActionSynchronization({
+      actionNetworkObserved: true,
+      actionNetworkResponse: true,
+      recordedPostActionSurfaceRequired: true,
+      recordedPostActionSurfaceReached: false,
+      recordedTerminalActionFeedback: false,
     }),
     { completed: false },
   );
@@ -615,6 +658,17 @@ test("22/nonNetworkSelectionCompletes. a same-surface selection-state transition
   );
 });
 
+test("22b/resolverAppliedSelectionCompletes. a selection applied and verified by the shared resolver before the post-action observer completes without waiting for a second signal", () => {
+  assert.deepEqual(
+    resolvePostActionSynchronization({
+      selectionApplied: true,
+      actionNetworkObserved: false,
+      nextTargetAvailable: false,
+    }),
+    { completed: true, signal: "target_selection_state_changed" },
+  );
+});
+
 test("23/noTransitionStaysPending. no selection-state transition and no other signal stays pending, exactly as before this ticket", () => {
   assert.deepEqual(
     resolvePostActionSynchronization({
@@ -748,4 +802,3 @@ test("32/focusOnlyMutationRejected. a focus-only (incidental) DOM mutation with 
     { completed: false },
   );
 });
-

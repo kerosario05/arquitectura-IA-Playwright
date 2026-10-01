@@ -60,9 +60,40 @@ test("3/focusOnlyRejected. a focus/activeElement change alone never becomes a st
 });
 
 test("4/ambiguousStateFailsClosed. two changed candidates are not a single causal owner", () => {
-  const before = snapshot({ stateCandidates: [display("a"), display("b")] });
-  const after = snapshot({ stateCandidates: [display("a2"), display("b2")] });
+  const before = snapshot({ stateCandidates: [
+    { ...display("a"), identity: "div|id=owner-a" },
+    { ...display("b"), identity: "div|id=owner-b" },
+  ] });
+  const after = snapshot({ stateCandidates: [
+    { ...display("a2"), identity: "div|id=owner-a" },
+    { ...display("b2"), identity: "div|id=owner-b" },
+  ] });
   assert.equal(diffAssertionObservation(before, after).stateMutation, false);
+});
+
+test("related text carriers under one structural owner form one local state mutation", () => {
+  const before = snapshot({ stateCandidates: [
+    { ...display("4"), scopeIdentity: "div|testid=display-region" },
+    { ...display("helper-a"), identity: "span|helper", scopeIdentity: "div|testid=display-region" },
+  ] });
+  const after = snapshot({ stateCandidates: [
+    { ...display("40"), scopeIdentity: "div|testid=display-region" },
+    { ...display("helper-b"), identity: "span|helper", scopeIdentity: "div|testid=display-region" },
+  ] });
+  assert.equal(diffAssertionObservation(before, after).stateMutation, true);
+});
+
+test("text carriers split across nearby wrappers share their local changed-display owner", () => {
+  const localRegion = "section|children=div,p";
+  const before = snapshot({ stateCandidates: [
+    { ...display("4"), identity: "p|display", scopeIdentities: ["div|children=p", localRegion, "main|children=section"] },
+    { ...display("helper-a"), tag: "span", identity: "span|helper", scopeIdentities: ["p|children=span", "div|children=p", localRegion, "main|children=section"] },
+  ] });
+  const after = snapshot({ stateCandidates: [
+    { ...display("40"), identity: "p|display", scopeIdentities: ["div|children=p", localRegion, "main|children=section"] },
+    { ...display("helper-b"), tag: "span", identity: "span|helper", scopeIdentities: ["p|children=span", "div|children=p", localRegion, "main|children=section"] },
+  ] });
+  assert.equal(diffAssertionObservation(before, after).stateMutation, true);
 });
 
 test("5/newlyAppearedOnlyNotCausal. a node that only appeared after the click never counts", () => {

@@ -22,7 +22,7 @@ test("0. RawInteractionLike mirror has not drifted: every mirrored field name st
   const mirroredFields = [
     "kind", "label", "role", "tagName", "inputType", "value", "testId", "domId", "name",
     "ariaLabel", "text", "placeholder", "containerContext", "headerContext", "rowContext",
-    "associatedField", "valueSource", "technicalTargetCandidates", "fieldOwnerDiagnostic",
+    "associatedField", "rawTypedValue", "valueSource", "technicalTargetCandidates", "fieldOwnerDiagnostic",
     "eventTargetRef", "currentTargetRef", "composedPathRefs", "deepestEditableTargetRef",
   ];
   const rawInteractionBlockMatch = RECORDER_SOURCE.match(/type RawInteraction = \{[\s\S]*?\n\};/);
@@ -44,6 +44,17 @@ test("1. V2 edit action adapts to RawInteraction kind=input", () => {
   assert.equal(raw.label, "Correo electrónico");
   assert.equal(raw.value, "persona@correo-fixture.test");
   assert.equal(raw.valueSource, "user");
+});
+
+test("V2 masked edit preserves the trusted raw input separately from the displayed value", () => {
+  const action: CaptureAction = {
+    actionType: "edit",
+    identity: { label: "Amount", tagName: "input", inputType: "text" },
+    value: { present: true, changed: true, literal: "DOP 5,0000", rawTypedValue: "5000" },
+  };
+  const raw = adaptCaptureActionToRawInteraction(action);
+  assert.equal(raw.value, "DOP 5,0000");
+  assert.equal(raw.rawTypedValue, "5000");
 });
 
 test("2. V2 click adapts to RawInteraction kind=click", () => {
