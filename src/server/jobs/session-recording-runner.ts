@@ -18,6 +18,7 @@ import {
   loadSemanticRecording,
   loadTrace,
   saveScenarios,
+  saveSuggestionCandidates,
   saveTrace,
   createCoalescedWriter,
   type CoalescedWriter,
@@ -42,6 +43,9 @@ import {
   materializeScenarioMutation,
 } from "../../recording/canonical-recording-contract";
 import { applyStory, enrichFromTrace } from "../../recording/trace-ai-enricher";
+import { carryReviewDrafts, diffDerivedScenarios, type SuggestionCandidate } from "../../recording/suggestion-drafts";
+import { keepReviewerTitles } from "../../recording/scenario-title-review";
+import { buildSubFlowScenarios } from "../../recording/sub-flow-scenarios";
 import { createScenarioAiProvider } from "../../ai/ai-provider-factory";
 import type { RecordedEvent, RecordingDataPolicy, RecordingPlatform, RecordingSummary, SessionTrace } from "../../recording/session-trace.types";
 import { LiveViewSession } from "../../recording/web/live-view-session";
@@ -555,7 +559,7 @@ export async function stopRecording(recordingId: string): Promise<RecordingSumma
   if (observedPrimary) {
     // STOP owns the observed primary. This is the only scenario written by the deterministic
     // lane; deriveScenarios may later merge optional suggestions without cloning this identity.
-    saveScenarios(entry.trace.appSlug, recordingId, [observedPrimary]);
+    saveScenarios(entry.trace.appSlug, recordingId, [observedPrimary, ...buildSubFlowScenarios(entry.trace, normalizeEvents(events), observedPrimary.scenarioId)]);
     onLog(`[recording:lifecycle] state=PRIMARY_MATERIALIZED scenarioId=${observedPrimary.scenarioId} aiScenarioGenerationInvoked=false`);
   } else {
     onLog(`[recording:lifecycle] state=PRIMARY_NOT_MATERIALIZED reason=insufficient_observed_authority aiScenarioGenerationInvoked=false`);
@@ -597,6 +601,7 @@ export type DeriveResult = {
  * works from the trace and the narrative, which is exactly why the narrative is produced
  * before the frames go.
  */
+
 export async function deriveScenarios(
   appSlug: string,
   recordingId: string,
@@ -653,11 +658,9 @@ export async function deriveScenarios(
     onLog(`[recording:goal-lineage] deriveGoal=${JSON.stringify(trace.recordingGoal?.declaredGoal)} scenarioGoal=${JSON.stringify(trace.recordingGoal?.declaredGoal ?? trace.recordingGoal?.normalizedGoal)}`);
     const enrichedHappyPath = {
       ...applyStory(happyPath, enrichment),
-      // The declared goal is the authority for the observed primary. AI enrichment can
-      // improve prose, but may not turn the primary into another case.
-      ...(trace.recordingGoal?.declaredGoal?.trim()
-        ? { title: capTitle(trace.recordingGoal.declaredGoal.trim()) }
-        : {}),
+      // The title built from the observed screens and choices is the authority for the primary.
+      // AI enrichment can improve prose, but may not rename the case.
+      title: happyPath.title,
     };
 
     // Build the semantic model before suggestions so deterministic mutation materialization
@@ -732,14 +735,30 @@ export async function deriveScenarios(
       0.6,
       canonicalPrimary,
     );
-    const scenarios = [canonicalPrimary, ...scoped.suggestions];
+    // Observed sub-flows (one per branch the walkthrough returned from) come right after the
+    // primary: they are observed cases, not suggestions, so they skip the suggestion filters.
+    const subFlowScenarios = buildSubFlowScenarios(trace, events, canonicalPrimary.scenarioId);
+    const scenarios = [canonicalPrimary, ...subFlowScenarios, ...scoped.suggestions];
     // TEMPORARY DIAGNOSTIC (this ticket only): no dataset value/secret is logged -- only ids and
     // counts, to distinguish "derive never produced scenarios" from "derive produced scenarios
     // that were later lost between save and load" when a historical recording is later found
     // with scenarios=[].
     console.info("[recording-materialization]", { recordingId, appSlug, phase: "derive_generated", scenarioCount: scenarios.length, scenarioIds: scenarios.map((s) => s.scenarioId) });
+    // Titles a reviewer typed and drafts a reviewer kept survive the regeneration -- in what is
+    // saved AND in what is answered. The difference against what was persisted before is what
+    // the panel reports, so a regeneration that changed nothing says so instead of looking dead.
+    const previousScenarios = loadScenarios(appSlug, recordingId);
+    const persistedScenarios = carryReviewDrafts(keepReviewerTitles(scenarios, previousScenarios), previousScenarios);
+    const changes = diffDerivedScenarios(previousScenarios, persistedScenarios);
+    // Discarded AI suggestions stay materialized (latest derivation only) so a reviewer can keep
+    // one as a draft without asking the AI again.
+    const suggestionCandidates: SuggestionCandidate[] = aiCandidateEvaluations.flatMap(({ quality, scenario }, index) =>
+      quality.finalDecision === "accepted"
+        ? []
+        : [{ candidateId: `cand-${index + 1}`, title: scenario.title, rejectionReason: quality.rejectionReason, scenario }]);
     const previousSemantic = loadSemanticRecording(appSlug, recordingId);
     const derivation = {
+      changes,
       version: (previousSemantic?.derivation?.version ?? 0) + 1,
       generatedAt: new Date().toISOString(),
       executed: true as const,
@@ -793,7 +812,8 @@ export async function deriveScenarios(
         totalTokens: enrichment.usage?.totalPhysicalTokens,
         contextBeforeChars: enrichment.contextBeforeChars,
         contextAfterChars: enrichment.contextAfterChars,
-        candidates: aiCandidateEvaluations.map(({ proposal, quality }) => ({
+        candidates: aiCandidateEvaluations.map(({ proposal, quality }, index) => ({
+          ...(quality.finalDecision === "accepted" ? {} : { candidateId: `cand-${index + 1}` }),
           title: proposal.title,
           type: proposal.type,
           rationale: proposal.rationale,
@@ -842,7 +862,8 @@ export async function deriveScenarios(
     // window: no reader can ever observe the semantic model as ready before its scenarios exist.
     reportStage("saving", { actionCount, stepCount });
     console.info("[recording-materialization]", { recordingId, appSlug, phase: "save_start", scenarioCount: scenarios.length });
-    saveScenarios(appSlug, recordingId, scenarios);
+    saveScenarios(appSlug, recordingId, persistedScenarios);
+    saveSuggestionCandidates(appSlug, recordingId, suggestionCandidates);
     console.info("[recording-materialization]", { recordingId, appSlug, phase: "save_done", scenarioCount: scenarios.length });
     saveSemanticRecording(semantic);
     onLog(
@@ -859,7 +880,7 @@ export async function deriveScenarios(
     saveTrace(derived);
 
     onLog(`[recording] ${scenarios.length} escenarios generados desde la grabación ${recordingId}`);
-    return { summary: toSummary(derived, scenarios.length), scenarios, narrative: enrichment.narrative, semanticModel: semantic, derivation };
+    return { summary: toSummary(derived, persistedScenarios.length), scenarios: persistedScenarios, narrative: enrichment.narrative, semanticModel: semantic, derivation };
   } finally {
     // Even on failure the frames go: they only ever existed to feed this call.
     const current = loadTrace(appSlug, recordingId);

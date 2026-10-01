@@ -231,3 +231,21 @@ test("11/delayedTapDelivery. first transition after pointer belongs to that acti
   assert.equal(deriveExpectedRouteBefore(actionB!, actionA!), "/middle-1");
   assert.equal(validateInteractionStateSequence(interactions).stateSequenceValid, false, "raw delayed-delivery evidence remains auditable; replay uses the preceding owned transition");
 });
+
+test("12/appAutoRedirect. navigations recorded after the action's own record end at its destination (recording 73f03712)", () => {
+  const events = [
+    ev({ seq: 0, t: 1, kind: "note", observationType: "pointer", interactionId: "gesture-A", screenKey: "s", url: "/product-subcategory?category=loans" }),
+    ev({ seq: 1, t: 2, kind: "tap", interactionId: "gesture-A", screenKey: "s", url: "/product-subcategory?category=loans", target: { role: "button", associatedField: "Préstamo Personal", locators: [{ strategy: "role", value: "button[name=Préstamo Personal]" }] } }),
+    // The click opens the subcategory, and the app redirects it to the product page 60 ms later.
+    ev({ seq: 2, t: 3, kind: "navigate", screenKey: "s", url: "/product-subcategory?category=loans&subcategory=personal" }),
+    ev({ seq: 3, t: 4, kind: "navigate", screenKey: "s", url: "/product-extended?product=prestamo-personal" }),
+    ev({ seq: 4, t: 5, kind: "note", observationType: "pointer", interactionId: "gesture-B", screenKey: "s", url: "/product-extended?product=prestamo-personal" }),
+    ev({ seq: 5, t: 6, kind: "tap", interactionId: "gesture-B", screenKey: "s", url: "/product-extended?product=prestamo-personal", target: { role: "button", associatedField: "Finalizar sesión", locators: [{ strategy: "role", value: "button[name=Finalizar sesión]" }] } }),
+  ];
+  const interactions = buildCanonicalInteractions(events);
+  const [actionA, actionB] = interactions.filter((interaction) => interaction.action === "click");
+  assert.equal(actionA?.routeAfter, "/product-extended?product=prestamo-personal");
+  assert.equal(actionB?.routeBefore, "/product-extended?product=prestamo-personal");
+  assert.equal(interactions.filter((interaction) => interaction.action === "navigation").length, 0, "the redirect is owned by the click, never a second transition");
+  assert.equal(validateInteractionStateSequence(interactions).stateSequenceValid, true);
+});

@@ -231,6 +231,8 @@ export type SemanticRecordingModel = {
     contextBeforeChars?: number;
     contextAfterChars?: number;
     candidates?: Array<{
+      /** Set on discarded candidates only: the id a reviewer keeps one as a draft by. */
+      candidateId?: string;
       title: string;
       type: string;
       rationale: string;
@@ -250,6 +252,8 @@ export type SemanticRecordingModel = {
     executed: true;
     primaryCount: number;
     suggestionCount: number;
+    /** Difference against the scenarios persisted before this derivation. */
+    changes?: import("./suggestion-drafts").DerivationChanges;
   };
   gridMetadata?: {
     detected: boolean;

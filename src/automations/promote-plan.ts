@@ -8,7 +8,7 @@ import type { FullConfig } from "../types/env.types";
 import type { PromotedAutomationIndexEntry, PromotionPolicy, POMPromotionStatus } from "../types/automation-promotion.types";
 import { DEFAULT_PROMOTION_POLICY } from "../types/automation-promotion.types";
 import {
-  buildAutomationId,
+  buildPlanAutomationId,
   determineAutomationStatus
 } from "./automation-naming";
 import {
@@ -123,7 +123,7 @@ export async function materializePromotionContext(input: {
   sectionSlug?: string;
   outputRoot?: string;
 }): Promise<{ planPath: string; sourceScenario: unknown; executionContract: unknown }> {
-  const automationId = buildAutomationId({ externalId: input.plan.scenario.externalId, caseId: input.plan.scenario.caseId, title: input.plan.scenario.title });
+  const automationId = buildPlanAutomationId(input.plan.scenario);
   const paths = buildAppAutomationPaths(input.appProfile, automationId, input.outputRoot, input.sectionSlug);
   await fs.mkdir(path.dirname(paths.planPath), { recursive: true });
   const executionContract = buildSpecExecutionContract(input.plan, input.sourceScenario, { appSlug: input.appProfile.appSlug, sectionSlug: input.sectionSlug });
@@ -1361,11 +1361,7 @@ export async function promoteExecutionPlan(
     assertPromotable(status, allowDraft);
   }
 
-  const automationId = buildAutomationId({
-    externalId: plan.scenario.externalId,
-    caseId: plan.scenario.caseId,
-    title: plan.scenario.title
-  });
+  const automationId = buildPlanAutomationId(plan.scenario);
 
   const runtimeConfig = input.fullConfig;
 
@@ -1461,7 +1457,8 @@ export async function promoteExecutionPlan(
       sectionSlug: sectionSlug ?? "default-section",
       sectionName: input.sectionName,
       sectionId: input.sectionId,
-      sourceScenarioId: plan.scenario.externalId,
+      sourceScenarioId: plan.scenario.recordedScenarioId ?? plan.scenario.externalId,
+      ...(plan.scenario.recordingId ? { sourceRecordingId: plan.scenario.recordingId } : {}),
       testRailCaseId: plan.scenario.caseId ?? input.sectionId,
       generatedAt: new Date().toISOString(),
       title: plan.scenario.title,
@@ -1945,7 +1942,15 @@ export async function promoteExecutionPlan(
   const rawAutomationStatus = determineAutomationStatus(plan.status, source);
 
   // Override status if POM requires a non-active status
-  const automationStatus = !specPromotionAllowed
+  // A spec whose runtime check never ran (functional execution disabled) was neither proven nor
+  // disproven: it is pending, not failed. Anything else that kept it from being promoted
+  // (a failed gate, unresolved imports) is still a failure.
+  const specPromotionDeferred = !specPromotionAllowed
+    && promotedImportValidation.unresolved.length === 0
+    && specGenerationDiagnostics?.runtimeGate?.promotionStatus === "deferred";
+  const automationStatus = specPromotionDeferred
+    ? "spec_deferred"
+    : !specPromotionAllowed
     ? "spec_failed"
     : pomStatus === "inline_debug_only"
     ? "inline_debug_only"
@@ -1976,7 +1981,7 @@ export async function promoteExecutionPlan(
     lastExecutionResultPath: input.lastExecutionResultPath,
     pomStatus,
     inlineDebugMode,
-    specVerificationStatus: specPromotionAllowed ? "passed" : "failed",
+    specVerificationStatus: specPromotionAllowed ? "passed" : specPromotionDeferred ? "not_run" : "failed",
     metadata: pomDiagnostics || wasOverwritten || specGenerationDiagnostics ? {
       ...metadata,
       ...(pomDiagnostics ? { pomDiagnostics } : {}),

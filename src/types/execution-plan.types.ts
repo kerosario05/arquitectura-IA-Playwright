@@ -145,6 +145,9 @@ export type ExecutionPlanScenarioRef = {
   externalId?: string;
   caseId?: number;
   title: string;
+  /** Set when the case comes from a Recording: the durable identity of its RecordedScenario. */
+  recordingId?: string;
+  recordedScenarioId?: string;
 };
 
 export type ExecutionPlan = {

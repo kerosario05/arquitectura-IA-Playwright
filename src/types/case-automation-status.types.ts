@@ -11,6 +11,7 @@ export type CaseAutomationStatus =
   | "needs_flow"
   | "blocked_missing_pom"
   | "spec_failed"
+  | "spec_deferred"
   | "promoted_but_verification_failed";
 
 export type CaseAutomationSummary = {

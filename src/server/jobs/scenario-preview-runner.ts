@@ -2946,6 +2946,9 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
         sourceJobId: params.sourceJobId,
         rerunMode: params.rerunMode,
         options: params.options,
+        // Recording replays: which recording, and the TestRail destination picked for it.
+        ...(params.recordingId ? { recordingId: params.recordingId } : {}),
+        ...(params.testRail ? { testRail: params.testRail } : {}),
       };
       fs.writeFileSync(
         path.join(artifactDir, "job.json"),

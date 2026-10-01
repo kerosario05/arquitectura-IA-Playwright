@@ -427,7 +427,9 @@ export function hydrateCanonicalInteractionsFromSemanticModel(
   // portalized option note during materialization. Rehydrate only the missing
   // canonical selection from the current semantic model; mutation-specific
   // interactions and their original IDs remain untouched.
-  const missingSelections = scenario.mutation?.mutationType === "ALTERNATIVE_SELECTION"
+  // A sub-flow replays one branch of the recording: a selection the model saw on another branch
+  // is not missing from it, it belongs to a different case.
+  const missingSelections = scenario.mutation?.mutationType === "ALTERNATIVE_SELECTION" || scenario.scope === "sub_flow"
     ? []
     : (model.canonicalInteractions ?? []).filter((candidate) =>
     candidate.action === "select"
@@ -880,20 +882,31 @@ function nextPointerBoundaryT(events: readonly RecordedEvent[], fromT: number, a
  * navigation that fired after this action's pointerdown and before the next pointerdown.
  * Capture delivery can lag behind the browser, so later navigations may already belong to
  * subsequent physical actions even when their tap records have not arrived yet. Taking the
- * first transition preserves the causal boundary without depending on app routes or timing.
+ * first transition preserves the causal boundary without depending on app routes or timing --
+ * except for navigations recorded after the action's own record, which are its consequences
+ * (redirect chains), so the last of those is its destination.
  * When no pointer anchor exists (legacy/other platforms) the forward-looking transition is used.
  */
 function causalTransition(events: readonly RecordedEvent[], index: number, excludeSeqs?: ReadonlySet<number>): { event?: RecordedEvent } {
   const anchor = actionablePointerAnchor(events, index);
   if (!anchor || !anchor.url) return transitionAfter(events, index, excludeSeqs);
   const end = nextPointerBoundaryT(events, anchor.t, anchor) ?? Number.POSITIVE_INFINITY;
-  for (const candidate of events) {
-    if (candidate.kind !== "navigate" || !candidate.url) continue;
-    if (typeof candidate.seq === "number" && excludeSeqs?.has(candidate.seq)) continue;
-    if (candidate.t < anchor.t || candidate.t > end) continue;
-    if (candidate.url === anchor.url) continue;
-    return { event: candidate };
-  }
+  const windowNavigations = events.filter((candidate) => candidate.kind === "navigate"
+    && Boolean(candidate.url)
+    && !(typeof candidate.seq === "number" && excludeSeqs?.has(candidate.seq))
+    && candidate.t >= anchor.t
+    && candidate.t <= end);
+  // Navigations that land AFTER this action's own record (and before the next pointerdown) are
+  // unambiguously its consequences, so its destination is the last of them: a click whose page
+  // the app auto-redirects 60 ms later (recording 73f03712: subcategory -> product page) leaves
+  // the next action on the final route. Navigations that land BEFORE the record may be delayed
+  // delivery of this action or of browser noise, so those keep the first-departure rule below.
+  const actionT = events[index].t;
+  const afterRecord = windowNavigations.filter((candidate) => candidate.t > actionT);
+  const finalAfterRecord = afterRecord[afterRecord.length - 1];
+  if (finalAfterRecord && finalAfterRecord.url !== anchor.url) return { event: finalAfterRecord };
+  const firstDeparture = windowNavigations.find((candidate) => candidate.url !== anchor.url);
+  if (firstDeparture) return { event: firstDeparture };
   return transitionAfter(events, index, excludeSeqs);
 }
 
@@ -1287,7 +1300,13 @@ export function buildCanonicalInteractions(
       && !missingPressKey
       && (!recordedValueRequiredAsEvidence || Boolean(value))
       && (ownerRecertificationRequired
-        ? nonTextualTechnicalEvidencePresent
+        // After a screen change the field/owner LABEL is untrusted (it may be the previous
+        // screen's), but a click whose own target was captured as structurally unique inside a
+        // stable scope on THIS screen can still be re-found live by structure alone -- the same
+        // evidence that admits the identical click when no transition happened (an icon-only
+        // back arrow, recording 73f03712). It stays runtime_resolution_required, never certified,
+        // and the live resolver fails closed on anything but exactly one match.
+        ? nonTextualTechnicalEvidencePresent || (action === "click" && scopedStructuralEvidencePresent)
         : (technicalTargetRefsForEvent.length > 0 || Boolean(structuralFieldName) || Boolean(target?.fieldOwnerDiagnostic) || deterministicStructuralOwnerEvidence || scopedStructuralEvidencePresent || semanticRuntimeEligible || recorderRuntimeEligible));
     // A SECOND, independent runtime-resolution case: admission ACCEPTED the field/owner identity
     // (a real, non-generic associatedField/role) but the recorder never captured any technical
@@ -2201,7 +2220,8 @@ function humanizeGoal(value: string): string {
 }
 
 function humanMutationTitle(primary: RecordedScenario, mutationType: MutationType, entityType?: string, alternativeValue?: string): string {
-  const goal = humanizeGoal(primary.scenarioGoal?.trim() || primary.title.trim());
+  // The observed primary title already names the flow; the typed goal is only its fallback.
+  const goal = primary.title.trim() || humanizeGoal(primary.scenarioGoal?.trim() ?? "");
   const subject = humanizeGoal(entityType?.trim() || "entidades");
   if (mutationType === "REPEAT_ENTITY") return `${goal}: registrar varias ${subject.toLowerCase()} en un mismo proceso`;
   if (mutationType === "ZERO_ENTITY") return `${goal}: comprobar el proceso sin registrar ${subject.toLowerCase()}`;

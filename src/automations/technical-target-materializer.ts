@@ -1,3 +1,5 @@
+import { pickStructuralResolutionEvidence } from "../recording/structural-owner-eligibility";
+import type { StructuralScopeIdentity } from "../recording/structural-owner-identity";
 import type { RecordedLocator, RecordedTechnicalTarget } from "../recording/session-trace.types";
 import { normalizeMojibakeUtf8 } from "./spec-generation-hybrid";
 import { normalizeStructuralOwnerIdentity } from "../recording/structural-owner-identity";
@@ -56,6 +58,12 @@ export type TechnicalTargetEvidenceInput = {
    *  a real Generar Turno button. */
   topologyTieBreakUnique?: boolean;
   topologySignature?: string;
+  /** Scope evidence (unique inside a stable scope at capture): carried for the shared
+   *  structural-owner eligibility rule, see structural-owner-eligibility.ts. */
+  scopeIdentity?: StructuralScopeIdentity;
+  targetFingerprint?: string;
+  captureScopeUnique?: boolean;
+  captureTargetMatchCount?: number;
   surfaceIdentity?: string;
   /** Legacy flattened "strategy:value" refs — lowest-priority corroboration only. */
   existingTechnicalRefs?: string[];
@@ -184,6 +192,7 @@ export function materializeTechnicalTarget(input: TechnicalTargetEvidenceInput):
               deterministicStructuralIdentity: input.deterministicStructuralIdentity,
               identityAmbiguous: input.identityAmbiguous,
               structuralIdentityMatchCount: input.structuralIdentityMatchCount,
+              ...pickStructuralResolutionEvidence(input),
             };
           })()
         : { stableDirectAttributes: sanitizeAttributeMap(input.stableDirectAttributes) };
@@ -243,6 +252,7 @@ export function materializeTechnicalTarget(input: TechnicalTargetEvidenceInput):
           deterministicStructuralIdentity: input.deterministicStructuralIdentity,
           identityAmbiguous: input.identityAmbiguous,
           structuralIdentityMatchCount: input.structuralIdentityMatchCount,
+          ...pickStructuralResolutionEvidence(input),
         },
         confidence: confidence ?? 0.8,
         certificationTier: 3,
@@ -270,8 +280,7 @@ export function materializeTechnicalTarget(input: TechnicalTargetEvidenceInput):
         // stable attribute/descendant anchor -- transported here now that
         // TechnicalTargetEvidenceInput/normalizeRecordingEvidence carry it, instead of being
         // silently dropped and leaving this owner-alone shape with no anchor at all.
-        ...(input.topologyTieBreakUnique !== undefined ? { topologyTieBreakUnique: input.topologyTieBreakUnique } : {}),
-        ...(input.topologySignature !== undefined ? { topologySignature: input.topologySignature } : {}),
+        ...pickStructuralResolutionEvidence(input),
       },
       confidence: confidence ?? 0.6,
       certificationTier: 4,
@@ -319,8 +328,8 @@ export function normalizeRecordingEvidence(
     deterministicStructuralIdentity: structuralContext?.deterministicStructuralIdentity,
     identityAmbiguous: structuralContext?.identityAmbiguous,
     structuralIdentityMatchCount: structuralContext?.structuralIdentityMatchCount,
-    topologyTieBreakUnique: structuralContext?.topologyTieBreakUnique,
-    topologySignature: structuralContext?.topologySignature,
+    // Every field the shared eligibility rule reads, from one list -- never copied by hand.
+    ...pickStructuralResolutionEvidence(structuralContext),
     existingTechnicalRefs: Array.isArray(rec.locatorCandidates)
       ? (rec.locatorCandidates as RecordedLocator[]).map((l) => `${l.strategy}:${l.value}`)
       : undefined,

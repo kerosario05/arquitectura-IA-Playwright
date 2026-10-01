@@ -14,6 +14,7 @@ import { loadEvidenceConfig } from "../evidence/evidence-types";
 import { MAX_SCENARIO_ATTEMPTS, shouldRetryScenario } from "../discovery/pre-business-retry-policy";
 import { APPLICATION_HTTP_FAILURE_REASON } from "../discovery/application-http-failure";
 import { parseStepIntent } from "../discovery/step-intent-parser";
+import { isPendingOutcomePlaceholder } from "../recording/pending-outcome";
 
 export type PreviewCliArgs = {
   input: string;
@@ -200,7 +201,13 @@ export function resolvePreviewCompletion(
     && !workflowResult.caseResult?.failedTarget
     && !workflowResult.caseResult?.failedReason
     && partialSteps.every((step) => !step.error && !/failed|not_found|error/i.test(step.status ?? ""));
-  const eventPassed = automationReady || partialDiscoveryHasValidEvidence;
+  // The replay passed and the spec was generated, but its runtime check never ran
+  // (AI_SPEC_FUNCTIONAL_EXECUTION_ENABLED off): promotion is pending, the case did not fail.
+  const promotionDeferred = autoPromote
+    && discoveryPassed
+    && workflowResult.promotionStatus === "spec_deferred"
+    && !failedSpecGate;
+  const eventPassed = automationReady || partialDiscoveryHasValidEvidence || promotionDeferred;
 
   return {
     eventStatus: eventPassed ? "passed" : "failed",
@@ -208,7 +215,7 @@ export function resolvePreviewCompletion(
     promotionAllowed,
     specWritten,
     specGenerationStatus: autoPromote
-      ? (automationReady ? "passed" : "failed")
+      ? (automationReady ? "passed" : promotionDeferred ? "deferred" : "failed")
       : (specEligible ? "deferred" : "not_applicable"),
     specEligible,
     specGenerationInvoked,
@@ -226,6 +233,8 @@ export function resolvePreviewCompletion(
     reason: autoPromote
       ? automationReady
         ? "automation_ready"
+        : promotionDeferred
+          ? "spec_promotion_deferred_runtime_not_executed"
         : !discoveryPassed
           ? "blocking_failures"
           : failedSpecGate
@@ -613,6 +622,9 @@ async function loadVirtualCases(inputPath: string): Promise<VirtualCase[]> {
 export function buildRecordingOutcomeAssertionStep(expectedResult: string | undefined, index: number) {
   const text = expectedResult?.trim();
   if (!text || text.includes("\n")) return undefined;
+  // An unknown outcome ("Resultado por confirmar; requiere revisión humana") is not observable:
+  // parsing it made "; requiere revisión humana" an assertion target (run d947dcc9).
+  if (isPendingOutcomePlaceholder(text)) return undefined;
   const assertion = parseStepIntent(text).find((intent) => intent.type === "assertion" && intent.actionTarget && !intent.isOptional);
   if (!assertion) return undefined;
   // Positive by construction: the recording observed this text on screen.

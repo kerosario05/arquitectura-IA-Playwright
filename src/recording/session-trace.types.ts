@@ -35,6 +35,11 @@ export type RecordingGoal = {
   normalizedGoal?: string;
   provenance: "USER_DECLARED" | "LEGACY_LABEL";
   needsReview: boolean;
+  /**
+   * The reviewer accepted that the recording does not complete this goal (e.g. it documents a
+   * consultation). Cleared whenever the goal text changes.
+   */
+  coverageAcknowledged?: { acknowledgedAt: string };
 };
 
 /** Structured constraints observed or supplied for a runtime value. */
@@ -340,6 +345,12 @@ export type RecordedEvent = {
   url?: string;
   /** For `screen_change`: where the app landed. */
   toScreenKey?: string;
+  /**
+   * For `screen_change`: the texts visible on THIS visit. A screen is stored once per screenKey
+   * and overwritten by its last visit, so three product pages sharing one layout kept only the
+   * last product's texts (recording 2920301b); each visit's own evidence lives here.
+   */
+  visibleTexts?: string[];
   /** Ephemeral frame captured for this event. Cleared once derivation consumes it. */
   framePath?: string;
   note?: string;
@@ -414,6 +425,8 @@ export type SessionTrace = {
   baseUrl?: string;
   label?: string;
   recordingGoal?: RecordingGoal;
+  /** Business context a reviewer added (reviewer-context.ts). Never execution authority. */
+  reviewerContext?: import("./reviewer-context").RecordingReviewerContext;
   recordingDataPolicy?: RecordingDataPolicy;
   startedAt: string;
   endedAt?: string;

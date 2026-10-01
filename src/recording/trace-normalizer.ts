@@ -554,6 +554,44 @@ function targetWithSession(
   };
 }
 
+const USER_ACTION_KINDS = new Set(["tap", "fill", "press", "select", "note"]);
+
+function comparableUrl(value: string): string {
+  try {
+    const url = new URL(value);
+    return `${url.pathname.replace(/\/+$/, "") || "/"}${url.search}`;
+  } catch {
+    return value;
+  }
+}
+
+/**
+ * A screen_change observed after the user had already moved on. The recorder photographs the
+ * screen when it PROCESSES a click, and its queue can lag the user by seconds: in recording
+ * e52ee42c the screen after "Explora nuestros productos" was photographed on the Visa Gold detail
+ * page, so the scenario asserted "Más detalles del producto" right after opening the catalog and
+ * every replay failed there.
+ *
+ * Navigations are recorded the moment they happen, so they are the reference: when the click that
+ * caused this screen_change navigated, the photographed page must be where that click landed (the
+ * last navigation before the user's next action). A contradiction means the photo belongs to a
+ * later step. No navigation, no URL (mobile), or no causal action: nothing to contradict.
+ */
+export function isStaleScreenChange(events: readonly RecordedEvent[], index: number): boolean {
+  const event = events[index];
+  if (event?.kind !== "screen_change" || !event.url) return false;
+  let cause = index - 1;
+  while (cause >= 0 && !USER_ACTION_KINDS.has(events[cause].kind)) cause -= 1;
+  if (cause < 0) return false;
+  let landed: string | undefined;
+  for (let next = cause + 1; next < events.length; next += 1) {
+    const candidate = events[next];
+    if (USER_ACTION_KINDS.has(candidate.kind)) break;
+    if (candidate.kind === "navigate" && candidate.url) landed = candidate.url;
+  }
+  return landed !== undefined && comparableUrl(landed) !== comparableUrl(event.url);
+}
+
 /**
  * Collapses capture noise by stable control identity and editing session, while preserving all
  * technical notes. Raw traces remain untouched in RecordingStore; this projection is the only
@@ -566,9 +604,11 @@ export function normalizeEvents(
   const debounce = options.tapDebounceMs ?? 400;
   const dropUnidentified = options.dropUnidentifiedTaps !== false;
 
-  // Pass 1 — a screen_change that did not change the screen is a poller artifact.
+  // Pass 1 — a screen_change that did not change the screen is a poller artifact, and one
+  // photographed after the user had moved on is evidence of a later step (isStaleScreenChange).
   const realTransitions = events.filter(
-    (e) => e.kind !== "screen_change" || (e.toScreenKey && e.toScreenKey !== e.screenKey),
+    (e, index) => e.kind !== "screen_change"
+      || (Boolean(e.toScreenKey && e.toScreenKey !== e.screenKey) && !isStaleScreenChange(events, index)),
   );
 
   const sessions = buildEditingSessions(realTransitions);

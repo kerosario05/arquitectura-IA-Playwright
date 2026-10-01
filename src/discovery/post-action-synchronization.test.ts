@@ -749,3 +749,45 @@ test("32/focusOnlyMutationRejected. a focus-only (incidental) DOM mutation with 
   );
 });
 
+
+test("33/recordedSurfaceReached. a route change that lands on the recorded destination completes, even with the next owner still to resolve (recording 73f03712)", () => {
+  assert.deepEqual(
+    resolvePostActionSynchronization({
+      recordedPostActionSurfaceRequired: true,
+      recordedPostActionSurfaceReached: true,
+      routeChanged: true,
+      actionNetworkObserved: false,
+      domMutation: false,
+      nextTargetKnown: true,
+      nextTargetAvailable: false,
+      nextTargetRequiresRuntimeResolution: true,
+      nextTargetReady: false,
+    }),
+    { completed: true, signal: "recorded_surface_reached" },
+  );
+});
+
+test("34/recordedSurfaceWithoutRouteChange. being on the recorded surface without the action changing the route is not this signal", () => {
+  assert.deepEqual(
+    resolvePostActionSynchronization({
+      recordedPostActionSurfaceRequired: true,
+      recordedPostActionSurfaceReached: true,
+      routeChanged: false,
+      domMutation: false,
+    }),
+    { completed: false },
+  );
+});
+
+test("35/routeChangeElsewhere. a route change that does not reach the recorded destination stays pending", () => {
+  assert.deepEqual(
+    resolvePostActionSynchronization({
+      recordedPostActionSurfaceRequired: true,
+      recordedPostActionSurfaceReached: false,
+      routeChanged: true,
+      actionNetworkObserved: true,
+      actionNetworkResponse: true,
+    }),
+    { completed: false },
+  );
+});

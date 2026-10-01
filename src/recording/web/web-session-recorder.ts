@@ -1381,7 +1381,14 @@ export class WebSessionRecorder {
   private v2IngestionQueue: Promise<void> = Promise.resolve();
 
   /** Arrival time/URL of the queued capture currently being applied (see `now()`). */
-  private activeArrival: { t: number; url?: string } | null = null;
+  private activeArrival: { t: number; url?: string; userActions: number } | null = null;
+
+  /**
+   * User actions (pointer observations and technical actions) received so far, counted on
+   * ARRIVAL. A queued click whose processing sees a higher count than at its own arrival is being
+   * applied after the user already moved on: the page it would photograph is a later step's.
+   */
+  private userActionArrivals = 0;
 
   /** Ingestion work accepted into `v2IngestionQueue` and not yet applied -- read by the Stop drain. */
   private v2PendingIngestion = 0;
@@ -1393,7 +1400,7 @@ export class WebSessionRecorder {
   private readonly legacyInflight = new Set<Promise<unknown>>();
 
   private enqueueV2Ingestion(work: () => unknown): void {
-    const arrival = { t: Date.now() - this.startedAt, url: this.page?.url() };
+    const arrival = { t: Date.now() - this.startedAt, url: this.page?.url(), userActions: this.userActionArrivals };
     this.v2PendingIngestion += 1;
     this.ingestionGeneration += 1;
     this.v2IngestionQueue = (this.v2IngestionQueue.then(async () => {
@@ -1527,6 +1534,7 @@ export class WebSessionRecorder {
    */
   private onV2TechnicalAction(record: ShadowActionRecord): void {
     if (this.captureAuthority !== "v2") return;
+    this.userActionArrivals += 1;
     if (record.action.interactionId && record.action.sourceRefs?.eventTargetRef) {
       this.v2InteractionIdToEventTargetRef.set(record.action.interactionId, record.action.sourceRefs.eventTargetRef);
     }
@@ -1556,6 +1564,7 @@ export class WebSessionRecorder {
 
   private onV2PointerObservation(record: ShadowActionRecord): void {
     if (this.captureAuthority !== "v2") return;
+    this.userActionArrivals += 1;
     this.enqueueV2Ingestion(() => {
       const raw = adaptCaptureActionToRawInteraction(record.action) as unknown as RawInteraction;
       return this.onInteraction(raw).catch((err) => {
@@ -1897,7 +1906,14 @@ export class WebSessionRecorder {
     }
     const from = this.lastScreenKey;
     const { changed, screenKey } = await this.absorbScreen(fingerprintBeforeClick);
-    if (changed && screenKey !== from) {
+    // The queue lagged past this click: the user already acted again, so the page on screen is a
+    // later step's. Recording it as THIS click's result made the scenario assert the product
+    // detail right after opening the catalog (recording e52ee42c). No evidence, no transition.
+    const userMovedOn = this.activeArrival !== null && this.userActionArrivals > this.activeArrival.userActions;
+    if (changed && screenKey !== from && userMovedOn) {
+      this.lastScreenKey = screenKey;
+      this.log(`[recording] pantalla tras "${raw.label || raw.text || "(sin etiqueta)"}" descartada: la captura llegó tarde y el usuario ya había seguido`);
+    } else if (changed && screenKey !== from) {
       this.lastScreenKey = screenKey;
       this.pushEvent({
         t: this.now(),
@@ -1905,6 +1921,7 @@ export class WebSessionRecorder {
         screenKey: from,
         toScreenKey: screenKey,
         fingerprint: this.lastFingerprint,
+        visibleTexts: [...(this.screens.get(screenKey)?.texts ?? [])],
         url: this.page?.url(),
         framePath: await this.captureFrame("screen"),
       });

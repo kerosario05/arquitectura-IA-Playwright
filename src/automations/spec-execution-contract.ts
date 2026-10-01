@@ -6,6 +6,7 @@ import { getPreferredOwnerForIntent, METHOD_INTENT_NAME_MAP, ACTION_RUNTIME_METH
 import { decodeJsStringLiteralBody, normalizeSemanticText, semanticallyEqualText } from "./semantic-text-normalization";
 import { detectCredentialRole } from "../data/data-key-resolver";
 import type { AssertionPolarity } from "../scenarios/canonical-scenario";
+import { isPendingOutcomePlaceholder } from "../recording/pending-outcome";
 import {
   materializeTechnicalTarget,
   normalizeDiscoveryEvidence,
@@ -636,6 +637,8 @@ export function resolveAuthGateFillScenarioStepIndices(
 export type ScenarioStepLike = { index: number; action: string; description?: string; expected?: string; valueKey?: string; entityScope?: string; rowRelation?: "next" | "added"; selectionField?: string; associatedField?: string; technicalTargetRef?: string; technicalTargetRefs?: string[]; technicalTargetCandidates?: Array<Record<string, unknown>>; semanticRuntimeEvidence?: import("../recording/structural-owner-identity").SemanticRuntimeEvidence; playwrightRecorderEvidence?: import("../recording/structural-owner-identity").PlaywrightRecorderEvidence; resolutionState?: "certified" | "runtime_resolution_required" | "unresolved_unrecoverable"; assertionImportance?: "blocking" | "contextual" | "optional"; canonicalAssertion?: import("../scenarios/canonical-scenario").CanonicalAssertion; conditionalAction?: import("../scenarios/canonical-scenario").CanonicalConditionalAction; controlIdentity?: string; recordingActionType?: "fill" | "select" | "click" | "check" | "uncheck" | "press" | "navigation" | "system_observation" };
 
 function extractQuotedText(value: string | undefined): string | undefined {
+  // "Resultado por confirmar..." says the outcome is unknown: never a target nor an oracle.
+  if (isPendingOutcomePlaceholder(value)) return undefined;
   if (!value) return undefined;
   const quoted = value.match(/["'“”‘’]([^"'“”‘’]+)["'“”‘’]/);
   if (quoted) return quoted[1].trim();

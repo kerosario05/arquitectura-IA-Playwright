@@ -433,6 +433,7 @@ export class AndroidSessionRecorder {
           screenKey: from,
           toScreenKey: screenKey,
           fingerprint: this.lastFingerprint,
+          visibleTexts: [...(this.screens.get(screenKey)?.texts ?? [])],
           framePath: await this.captureFrame("screen"),
         });
         this.log(`[recording] pantalla -> ${this.screens.get(screenKey)?.title ?? screenKey}`);
@@ -529,6 +530,7 @@ export class AndroidSessionRecorder {
             screenKey: from,
             toScreenKey: screenKey,
             fingerprint: this.lastFingerprint,
+            visibleTexts: [...(this.screens.get(screenKey)?.texts ?? [])],
           });
         }
       });

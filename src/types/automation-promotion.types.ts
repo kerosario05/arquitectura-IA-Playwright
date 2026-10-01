@@ -1,4 +1,4 @@
-export type PromotedAutomationStatus = "active" | "disabled" | "draft" | "inline_debug_only" | "needs_page_object" | "needs_page_method" | "needs_component_object" | "needs_flow" | "blocked_missing_pom" | "spec_failed" | "promoted_but_verification_failed";
+export type PromotedAutomationStatus = "active" | "disabled" | "draft" | "inline_debug_only" | "needs_page_object" | "needs_page_method" | "needs_component_object" | "needs_flow" | "blocked_missing_pom" | "spec_failed" | "spec_deferred" | "promoted_but_verification_failed";
 
 export type PromotedAutomationSource = "agent_handoff" | "manual" | "rule_based" | "discovery";
 

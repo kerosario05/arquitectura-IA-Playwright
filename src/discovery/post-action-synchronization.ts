@@ -67,11 +67,19 @@ export type PostActionSynchronizationInput = {
    * and newly-appeared-only candidates never set it).
    */
   structuredStateMutation?: boolean;
+  /**
+   * The control the action clicked is no longer visible, on the same route: it belonged to what
+   * the click closed (a modal's "Cancelar", a dialog's close button). The click's own target is the
+   * causal evidence -- a click that did nothing leaves it on screen. Recording e52ee42c: closing
+   * "Solicita tu Producto" with "Cancelar" produced no navigation, network or tracked mutation, so
+   * the last action of every sub-flow stalled into loading_timeout with the app in the right state.
+   */
+  clickedTargetDismissed?: boolean;
 };
 
 export type PostActionSynchronizationResult = {
   completed: boolean;
-  signal?: "application_error" | "network_response" | "auth_gate_changed" | "next_target_visible" | "next_target_resolver_ready" | "dom_navigation_mutation" | "dom_validation_mutation" | "target_selection_state_changed" | "structured_state_mutation";
+  signal?: "application_error" | "network_response" | "auth_gate_changed" | "next_target_visible" | "next_target_resolver_ready" | "dom_navigation_mutation" | "dom_validation_mutation" | "target_selection_state_changed" | "structured_state_mutation" | "recorded_surface_reached" | "clicked_target_dismissed";
 };
 
 /**
@@ -111,6 +119,15 @@ export function resolvePostActionSynchronization(
   // so it is not subject to `nextOwnerBlocking` (an unrelated concern).
   if (input.targetSelectionStateChanged) {
     return { completed: true, signal: "target_selection_state_changed" };
+  }
+
+  // The action changed the route AND the page now shows the destination the recording observed
+  // for it: that is the recorded functional outcome itself, not a proxy for it. Without this, a
+  // client-side navigation with no request, no mutation the diff observers track and a next owner
+  // still to be resolved live (an icon-only back arrow in a kiosk SPA, recording 73f03712) could
+  // never complete and stalled into loading_timeout although it had reached its surface.
+  if (recordedSurfaceConfirmed && input.routeChanged) {
+    return { completed: true, signal: "recorded_surface_reached" };
   }
 
   if (!nextOwnerBlocking && input.actionNetworkObserved && input.actionNetworkResponse) {
@@ -173,6 +190,13 @@ export function resolvePostActionSynchronization(
   // known-not-ready next owner still blocks it, exactly like the other generic signals.
   if (!nextOwnerBlocking && input.structuredStateMutation && !input.routeChanged && input.loadingSettled) {
     return { completed: true, signal: "structured_state_mutation" };
+  }
+  // The clicked control vanished without leaving the route: what it belonged to closed. Settled
+  // loading only, and a known next target must already be visible -- the same gate an in-place
+  // mutation gets below -- so a closing animation can never race the next action.
+  if (!nextOwnerBlocking && input.clickedTargetDismissed && !input.routeChanged && input.loadingSettled) {
+    if (input.nextTargetKnown && !input.nextTargetAvailable && !recordedSurfaceConfirmed) return { completed: false };
+    return { completed: true, signal: "clicked_target_dismissed" };
   }
   // A navigation-shaped DOM mutation is a progress signal, never readiness. It can
   // fire before the new route's fetch is even registered, so it must not declare an

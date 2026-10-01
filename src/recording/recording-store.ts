@@ -51,6 +51,10 @@ function scenariosPath(appSlug: string, recordingId: string): string {
   return path.join(recordingDir(appSlug, recordingId), "scenarios.json");
 }
 
+function suggestionCandidatesPath(appSlug: string, recordingId: string): string {
+  return path.join(recordingDir(appSlug, recordingId), "suggestion-candidates.json");
+}
+
 function semanticPath(appSlug: string, recordingId: string): string {
   return path.join(recordingDir(appSlug, recordingId), "semantic-recording.json");
 }
@@ -270,4 +274,26 @@ export function deleteRecording(appSlug: string, recordingId: string): boolean {
   fs.rmSync(dir, { recursive: true, force: true });
   fs.rmSync(framesDir(recordingId), { recursive: true, force: true });
   return true;
+}
+
+/**
+ * The suggestions the last derivation produced but did not keep (quality gate), already
+ * materialized, so a reviewer can keep one as a draft without asking the AI again. Replaced on
+ * every derivation: it describes the latest one only.
+ */
+export function saveSuggestionCandidates(appSlug: string, recordingId: string, candidates: unknown[]): void {
+  const dir = recordingDir(appSlug, recordingId);
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(suggestionCandidatesPath(appSlug, recordingId), JSON.stringify(candidates, null, 2), "utf8");
+}
+
+export function loadSuggestionCandidates<T>(appSlug: string, recordingId: string): T[] {
+  const file = suggestionCandidatesPath(appSlug, recordingId);
+  if (!fs.existsSync(file)) return [];
+  try {
+    const parsed = JSON.parse(fs.readFileSync(file, "utf8"));
+    return Array.isArray(parsed) ? (parsed as T[]) : [];
+  } catch {
+    return [];
+  }
 }

@@ -9,6 +9,7 @@ import { ACTION_RUNTIME_METHOD_BY_OPERATION } from "../../types/pom-ownership";
 import { buildPortablePathFromSpec } from "../spec-generator-pom";
 import type { CertifiedTechnicalTarget } from "../technical-target-materializer";
 import { isUniqueLineage } from "../../db/recording-route-observation-repository";
+import { evaluateStructuralOwnerEligibility } from "../../recording/structural-owner-eligibility";
 
 /**
  * First kernel of the deterministic (non-AI) spec compiler.
@@ -245,6 +246,9 @@ type ActionTargetAuthority =
   // owner, which stays on the existing ref-only (locatorCandidates[0]) path unchanged.
   | { kind: "certified_structural"; ref: string; structuralTarget?: CertifiedTechnicalTarget }
   | { kind: "runtime_deferred"; ref: string }
+  // A certified structural owner with NO locator candidate (icon-only control): resolved only
+  // through the shared structural resolver, never through a ref -- there is none.
+  | { kind: "structural_owner_only"; structuralTarget: CertifiedTechnicalTarget }
   // LAST-RESORT, EXECUTION-ONLY: a runtime_resolution_required step with NO structured
   // locator/certified-target evidence at all (technicalTargetCandidates/certifiedTechnicalTarget/
   // plan target all absent), but a captured SemanticRuntimeEvidence. Never a ref -- there is none.
@@ -278,6 +282,12 @@ function resolveCertifiedStructuralAuthority(step: SpecExecutionContractStep): A
     (typeof ctx?.structuralIdentityMatchCount === "number" && ctx.structuralIdentityMatchCount > 1);
   if (ambiguous) return undefined;
   const candidate = cert.locatorCandidates?.[0];
+  // No locator at all (an icon-only button: no text, no attributes) but a structure the shared
+  // resolver can re-find: the click is emitted against that structure alone, resolved live and
+  // fail-closed by the same resolveRecordedStructuralOwner the replay uses.
+  if (!(candidate?.strategy && candidate.value) && evaluateStructuralOwnerEligibility(ctx).eligible) {
+    return { kind: "structural_owner_only", structuralTarget: cert };
+  }
   if (candidate?.strategy && candidate.value) {
     // Transport the full structural identity to the promoted runtime ONLY when it is rich
     // enough (an owner tag present) for the shared resolveRecordedStructuralOwner resolver to
@@ -310,20 +320,10 @@ function resolveCertifiedStructuralAuthority(step: SpecExecutionContractStep): A
     // with only semanticShape+landmarkAncestor, no stable attributes/descendants, no topology
     // tie-break at all). Same shared resolver, same principle as the fix above: the compiler must
     // replicate every one of the runtime's own unconditional gates, not just the first one hit.
-    const hasStableAnchor = Boolean(
-      (ctx?.stableDirectAttributes && Object.keys(ctx.stableDirectAttributes).length > 0)
-      || (ctx?.stableDescendants && ctx.stableDescendants.length > 0),
-    );
-    const hasTopologyAuthority = Boolean(
-      ctx?.topologyTieBreakUnique === true
-      && ctx.structuralIdentityMatchCount === 1
-      && (ctx.semanticShape?.length ?? 0) > 0,
-    );
-    const structuralTarget = ctx?.owner?.tag
-      && ctx.deterministicStructuralIdentity === true
-      && (hasStableAnchor || hasTopologyAuthority)
-      ? cert
-      : undefined;
+    // These gates are no longer replicated here: the resolver and the compiler share ONE rule
+    // (structural-owner-eligibility.ts), so a structural target is attached exactly when the
+    // runtime can resolve it -- the replica that drifted is what failed recording 73f03712.
+    const structuralTarget = evaluateStructuralOwnerEligibility(ctx).eligible ? cert : undefined;
     // FIRST_LOSS fix (jobId 71728dc2-..., same physical case, next boundary again): a bare
     // role-only locator (value has no "|name" qualifier -- technical-target-materializer.ts's own
     // Tier 4 comment: "structural owner alone... Ambiguity is a resolution-time concern handled
@@ -345,6 +345,25 @@ function resolveCertifiedStructuralAuthority(step: SpecExecutionContractStep): A
     };
   }
   return undefined;
+}
+
+/**
+ * The structural target a click must be re-found by in the generated source itself (its context
+ * replay and action callback), not only in the runtime's structural path: an owner with no
+ * locator, or one whose only locator is a nameless role (Tier 4 "button" -- matches every button on
+ * the page). Such a ref is never valid authority alone; replaying it during a session-reset
+ * recovery would click whichever button came first.
+ */
+function structuralReplayTargetOf(authority: ActionTargetAuthority): CertifiedTechnicalTarget | undefined {
+  if (authority.kind === "structural_owner_only") return authority.structuralTarget;
+  if (authority.kind === "certified_structural" && authority.structuralTarget && isBareRoleRef(authority.ref)) {
+    return authority.structuralTarget;
+  }
+  return undefined;
+}
+
+function isBareRoleRef(ref: string): boolean {
+  return ref.startsWith("role:") && !ref.includes("|");
 }
 
 function resolveActionTargetAuthority(step: SpecExecutionContractStep): ActionTargetAuthority {
@@ -458,7 +477,7 @@ function compileFillStep(
   } else if (authority.kind === "display_fallback" || authority.kind === "semantic_runtime_only") {
     locatorExpr = target ? buildLocatorExpression(target) : undefined;
   } else {
-    unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:fill_insufficient_authority:${authority.reason}`);
+    unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:fill_insufficient_authority:${authority.kind === "insufficient" ? authority.reason : authority.kind}`);
     return;
   }
   if (!locatorExpr) {
@@ -622,9 +641,18 @@ function compileClickStep(
   const isRuntimeDeferred = authority.kind === "runtime_deferred" || authority.kind === "semantic_runtime_only";
   const usesRefLocator = authority.kind === "technical_ref" || authority.kind === "certified_structural" || authority.kind === "runtime_deferred";
 
+  const structuralOwnerOnly = authority.kind === "structural_owner_only" ? authority.structuralTarget : undefined;
+  const structuralReplayTarget = structuralReplayTargetOf(authority);
   if (usesRefLocator) {
     refForBinding = (authority as { ref: string }).ref;
-    locatorExpr = buildTechnicalTargetRefLocatorExpression(refForBinding);
+  }
+  if (structuralReplayTarget) {
+    // No ref, or only a nameless role ref: the context-restoring replay below re-finds the owner
+    // by structure, through the same shared resolver, and throws instead of guessing when it is
+    // not exactly one.
+    locatorExpr = `(await structuralOwnerLocator(page, ${JSON.stringify(structuralReplayTarget)}, ${step.scenarioStepIndex}))`;
+  } else if (usesRefLocator) {
+    locatorExpr = buildTechnicalTargetRefLocatorExpression(refForBinding!);
   } else if (authority.kind === "display_fallback" || authority.kind === "semantic_runtime_only") {
     // The generic display/text fallback locator is independent, pre-existing behavior for the
     // final `action:` callback closure -- never derived FROM `semanticRuntimeEvidence`, which is
@@ -632,7 +660,7 @@ function compileClickStep(
     // resolver BEFORE this callback is ever reached.
     locatorExpr = target ? buildLocatorExpression(target) : undefined;
   } else {
-    unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:click_insufficient_authority:${authority.reason}`);
+    unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:click_insufficient_authority:${authority.kind === "insufficient" ? authority.reason : authority.kind}`);
     return;
   }
   if (!locatorExpr) {
@@ -644,7 +672,11 @@ function compileClickStep(
     unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:no_runtime_authority:click`);
     return;
   }
-  const targetRef = usesRefLocator ? refForBinding! : displayTargetRef(target!);
+  const targetRef = usesRefLocator
+    ? refForBinding!
+    : target
+      ? displayTargetRef(target)
+      : `structural-owner:step-${step.scenarioStepIndex}`;
   const pomMethod = POM_METHOD_BY_OPERATION.click;
 
   // Structured authority only (recorded ARIA role + verified, non-positional control lineage) --
@@ -665,6 +697,9 @@ function compileClickStep(
   // callback path unchanged.
   if (authority.kind === "certified_structural" && authority.structuralTarget) {
     lines.push(`      structuralTarget: ${JSON.stringify(authority.structuralTarget)},`);
+  }
+  if (structuralOwnerOnly) {
+    lines.push(`      structuralTarget: ${JSON.stringify(structuralOwnerOnly)},`);
   }
   // Transported ONLY for runtime_resolution_required clicks (never upgrades/replaces
   // technicalTargetRefs/firstStructuredEvidenceRef above) -- lets clickPromotedTarget retry via
@@ -698,7 +733,7 @@ function compileClickStep(
     runtimeMethod,
     pomMethod,
     targetRef,
-    ...(isRuntimeDeferred ? { runtimeResolutionRequired: true } : {}),
+    ...(isRuntimeDeferred || structuralOwnerOnly ? { runtimeResolutionRequired: true } : {}),
   });
 
   previousStepReplays.push({
@@ -829,8 +864,25 @@ export function compileDeterministicSpec(contract: SpecExecutionContract, compil
       ? `import { createPromotedSpecRuntime, parseSerializedTechnicalTargetString } from '${promotedRuntimeImportPath}';`
       : `import { createPromotedSpecRuntime } from '${promotedRuntimeImportPath}';`,
   );
-  if (usesTechnicalTargetRef) {
-    lines.push(`import { recordedLocatorFactory } from '${targetResolverImportPath}';`);
+  const usesStructuralOwnerOnly = contract.steps.some((s) => s.required !== false
+    && s.operation === "click"
+    && structuralReplayTargetOf(resolveActionTargetAuthority(s)) !== undefined);
+  const targetResolverImports = [
+    ...(usesTechnicalTargetRef ? ["recordedLocatorFactory"] : []),
+    ...(usesStructuralOwnerOnly ? ["resolveRecordedStructuralOwner"] : []),
+  ];
+  if (targetResolverImports.length > 0) {
+    lines.push(`import { ${targetResolverImports.join(", ")} } from '${targetResolverImportPath}';`);
+  }
+  if (usesStructuralOwnerOnly) {
+    lines.push(``);
+    lines.push(`// An owner with no locator (icon-only control) is re-found by its recorded structure, through`);
+    lines.push(`// the same resolver the recording replay uses; never a weaker locator, text match or position.`);
+    lines.push(`async function structuralOwnerLocator(page: import('@playwright/test').Page, structuralTarget: Parameters<typeof resolveRecordedStructuralOwner>[1], stepIndex: number) {`);
+    lines.push(`  const resolution = await resolveRecordedStructuralOwner(page, structuralTarget);`);
+    lines.push("  if (!resolution) throw new Error(`structural owner did not resolve to exactly one element at step ${stepIndex}`);");
+    lines.push(`  return resolution.locator;`);
+    lines.push(`}`);
   }
   lines.push(``);
   lines.push(...buildPomClassSource());

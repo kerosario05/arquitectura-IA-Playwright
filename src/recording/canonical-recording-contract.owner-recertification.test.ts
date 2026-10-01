@@ -183,3 +183,61 @@ test("8. an ambiguous or non-unique structural identity is still not enough afte
     assert.equal(buildCanonicalInteractions(events)[1].ownerRecertificationRequired, true, JSON.stringify(structural));
   }
 });
+
+/** Shape of the icon-only back arrow of recording 73f03712 (kiosko, 'Selecciona un producto'). */
+function iconBackButtonTarget(structural: Record<string, unknown> = {}): Partial<RecordedTarget> & { label: string } {
+  return {
+    label: "control",
+    role: "button",
+    tag: "button",
+    // Container text picked up by the ancestor walk -- never a trustworthy field after a transition.
+    associatedField: "Tarjeta de\nCréditoVolver",
+    locators: [],
+    technicalTargetCandidates: [{
+      targetType: "structural",
+      locatorCandidates: [],
+      interactionEvidence: ["v2_click_owner"],
+      confidence: 0.85,
+      validatedByInteraction: true,
+      structuralContext: {
+        owner: { tag: "button" },
+        stableDirectAttributes: {},
+        stableDescendants: [],
+        deterministicStructuralIdentity: false,
+        scopeIdentity: { strategy: "id", value: "root" },
+        targetFingerprint: "{\"owner\":{\"tag\":\"button\"},\"semanticShape\":[\"svg\"]}",
+        captureScopeUnique: true,
+        captureTargetMatchCount: 1,
+        structuralIdentityMatchCount: 1,
+        landmarkAncestor: { tag: "main" },
+        semanticShape: ["svg"],
+        ...structural,
+      },
+    }],
+  } as unknown as Partial<RecordedTarget> & { label: string };
+}
+
+test("9. a post-transition icon-only click, unique by its own structure in a stable scope, is replayable by live re-resolution", () => {
+  seq = 0;
+  const events: RecordedEvent[] = [
+    tapEvent({ screenKey: "surface-subcategory", target: corroboratedTarget("Tarjeta de Crédito", "credit-card") }),
+    tapEvent({ screenKey: "surface-category", target: iconBackButtonTarget() }),
+  ];
+  const postTransition = buildCanonicalInteractions(events)[1];
+  // The owner is still not trusted, and its label never is...
+  assert.equal(postTransition.ownerRecertificationRequired, true);
+  assert.notEqual(postTransition.semanticField, "Tarjeta de\nCréditoVolver");
+  // ...but the structure captured on this click lets the runtime look for it live, never certified.
+  assert.equal(postTransition.resolutionState, "runtime_resolution_required");
+});
+
+test("10. the same icon-only click stays unresolved when its structure was not unique at capture", () => {
+  for (const structural of [{ structuralIdentityMatchCount: 2 }, { captureScopeUnique: false }, { identityAmbiguous: true }, { scopeIdentity: undefined }]) {
+    seq = 0;
+    const events: RecordedEvent[] = [
+      tapEvent({ screenKey: "surface-subcategory", target: corroboratedTarget("Tarjeta de Crédito", "credit-card") }),
+      tapEvent({ screenKey: "surface-category", target: iconBackButtonTarget(structural) }),
+    ];
+    assert.equal(buildCanonicalInteractions(events)[1].resolutionState, "unresolved_unrecoverable", JSON.stringify(structural));
+  }
+});

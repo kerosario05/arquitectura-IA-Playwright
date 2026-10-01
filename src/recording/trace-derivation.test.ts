@@ -406,8 +406,8 @@ describe("buildHappyPathScenario", () => {
     assert.strictEqual(s.requiredData[0].exampleValue, undefined);
   });
 
-  test("uses the recording label as the scenario title", () => {
-    assert.strictEqual(scenario.title, "Registro de usuario nuevo");
+  test("names the scenario after the observed screen and choices, not the recording label", () => {
+    assert.strictEqual(scenario.title, "Desde Iniciar sesión: Ingresar");
   });
 
   test("does not add a tautological expectation to a fill action", () => {
@@ -598,7 +598,7 @@ describe("buildAlternativePathScenarios", () => {
   test("proposes the controls the walkthrough saw but never pressed", () => {
     assert.deepStrictEqual(
       scenarios.map((s) => s.title),
-      ["Alternativa observada 1: Crear cuenta", "Alternativa observada 2: Olvidé mi clave"],
+      ["Desde Iniciar sesión: Crear cuenta", "Desde Iniciar sesión: Olvidé mi clave"],
     );
   });
 

@@ -44,6 +44,36 @@ export function buildAutomationId(input: {
   return parts.join("-");
 }
 
+// The observed titles of recorded scenarios run to ~100 characters, and a case folder holds
+// runs/evidence subfolders several levels deep: the whole title would push them past the
+// Windows 260-character path limit.
+const RECORDED_TITLE_SLUG_LENGTH = 40;
+
+/**
+ * Folder/registry id of the case promoted from an execution plan.
+ *
+ * A case that comes from a Recording is named after its RecordedScenario ("rec-7bde3453-01-…"):
+ * the batch display id (PREVIEW-001) is only a position, so two recordings with the same title
+ * used to land in the same folder and the folder could not be traced back to its recording.
+ */
+export function buildPlanAutomationId(scenario: {
+  externalId?: string;
+  caseId?: number;
+  title: string;
+  recordedScenarioId?: string;
+}): string {
+  const recordedScenarioId = scenario.recordedScenarioId?.trim();
+  if (recordedScenarioId) {
+    const fullSlug = sanitizeAutomationFileName(scenario.title);
+    // Cut at the last whole word that fits, not in the middle of one.
+    const titleSlug = fullSlug.length > RECORDED_TITLE_SLUG_LENGTH
+      ? fullSlug.slice(0, RECORDED_TITLE_SLUG_LENGTH + 1).replace(/-[^-]*$/, "")
+      : fullSlug;
+    return [sanitizeAutomationFileName(recordedScenarioId), titleSlug].filter(Boolean).join("-");
+  }
+  return buildAutomationId({ externalId: scenario.externalId, caseId: scenario.caseId, title: scenario.title });
+}
+
 export function buildAutomationPaths(id: string, outputRoot?: string): {
   planDir: string;
   specDir: string;

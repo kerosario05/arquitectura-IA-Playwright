@@ -395,6 +395,21 @@ export type SafeRedirectHop = {
   terminalReason?: "diagnostic_timeout";
 };
 
+/**
+ * The surface a URL shows: path, query and hash. SPAs select a different screen with the query
+ * alone (kiosk: /product-subcategory?category=cards vs ?category=cards&subcategory=credit), so a
+ * route change judged on the pathname misses it -- the same identity classifyRecordedSurface-
+ * Compatibility already compares.
+ */
+export const safeRouteIdentity = (rawUrl: string, baseUrl?: string): string => {
+  try {
+    const url = new URL(rawUrl, baseUrl);
+    return `${url.pathname || "/"}${url.search}${url.hash}`;
+  } catch {
+    return "/";
+  }
+};
+
 export const safePathname = (rawUrl: string, baseUrl?: string): string => {
   try {
     return new URL(rawUrl, baseUrl).pathname || "/";
@@ -3252,7 +3267,9 @@ function buildFailureResult(
       source: "testrail",
       externalId: scenario.externalId,
       caseId: scenario.caseId,
-      title: scenario.title
+      title: scenario.title,
+      ...(scenario.recordingId ? { recordingId: scenario.recordingId } : {}),
+      ...(scenario.recordedScenarioId ? { recordedScenarioId: scenario.recordedScenarioId } : {}),
     },
     requiredData,
     steps: planSteps,
@@ -10527,6 +10544,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     const actionSyncStartedAt = Date.now();
     const preClickUrl = page.url();
     const preClickPathname = safePathname(page.url());
+    const preClickRoute = safeRouteIdentity(page.url());
     console.log(`[post-action-sync] phase=before actionIndex=${actionTarget.index} technicalTargetResolved=true urlBefore=${safePathname(page.url())} authGateBefore=${authDetectionBeforeClick.detected} watcherInstalledBeforeClick=true`);
     const orderedItemPosition = orderedItems.indexOf(orderedItem);
     const nextExecutableItem = orderedItems.slice(orderedItemPosition + 1).find((item: any) => item.type === "action" || item.type === "navigation");
@@ -10739,7 +10757,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         && isActionSurfaceStableForStateProbe(preClickUrl, page.url(), afterSnapshot?.url ?? page.url())
         ? hasCausalSelectionTransition(interactiveStateBefore, await readInteractiveState(resolution.locator ?? finalLocator))
         : false;
-      const routeChangedNow = safePathname(page.url()) !== preClickPathname;
+      const routeChangedNow = safeRouteIdentity(page.url()) !== preClickRoute;
+      // The clicked control itself, re-read on the same route: gone means what it belonged to
+      // closed (see clickedTargetDismissed). An unreadable locator counts as still visible.
+      const clickedLocator = resolution.locator ?? finalLocator;
+      const clickedTargetDismissed = !routeChangedNow && clickedLocator
+        ? !(await clickedLocator.first().isVisible().catch(() => true))
+        : false;
       // OBSERVATION TIMING: write only once this action has already produced its own causal
       // route transition (watcher armed before the click, technical target resolved, structured
       // execution authority -- all already established above) and no application error is
@@ -10786,6 +10810,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         targetSelectionStateChanged,
         screenFingerprintChanged: observationDiff?.navigationMutation || observationDiff?.validationMutation,
         structuredStateMutation: observationDiff?.stateMutation === true,
+        clickedTargetDismissed,
         routeChanged: routeChangedNow,
         // A delayed recording can persist one action's post-route as the next action's
         // pre-route. If the next action is already technically resolvable on the observed
@@ -10919,7 +10944,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     );
     const finalPath = safePathname(page.url());
     currentSurfaceRouteAuthority = nextSurfaceRouteAuthority(
-      finalPath !== preClickPathname, routeObservationEligible, routeObservationAuthority, currentSurfaceRouteAuthority,
+      safeRouteIdentity(page.url()) !== preClickRoute, routeObservationEligible, routeObservationAuthority, currentSurfaceRouteAuthority,
     );
     const relevantNetworkSettled = relevantNetworkEvents.length > 0 && relevantNetworkEvents.every((event) =>
       event.state === "completed" ||
@@ -11070,7 +11095,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     }
     const applicationHttpFailure = detectApplicationHttpFailure({
       events: relevantNetworkEvents,
-      routeChanged: finalPath !== preClickPathname,
+      routeChanged: safeRouteIdentity(page.url()) !== preClickRoute,
       nextTargetVisible: postActionNextTargetVisible,
     });
     if (applicationHttpFailure) {
@@ -12758,7 +12783,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       source: "testrail",
       externalId: scenario.externalId,
       caseId: scenario.caseId,
-      title: scenario.title
+      title: scenario.title,
+      ...(scenario.recordingId ? { recordingId: scenario.recordingId } : {}),
+      ...(scenario.recordedScenarioId ? { recordedScenarioId: scenario.recordedScenarioId } : {}),
     },
     requiredData,
     steps: planSteps,

@@ -6,12 +6,16 @@ import {
   deleteRecording,
   listRecordings,
   loadScenarios,
+  loadSuggestionCandidates,
   loadTrace,
   saveScenarios,
+  saveTrace,
   toSummary,
   saveSemanticRecording,
   loadSemanticRecording,
 } from "../../recording/recording-store";
+import { loadTitleCatalog, MIN_TITLE_LENGTH, renameScenarioTitle, reviewScenarioTitles, type ScenarioTitleReview } from "../../recording/scenario-title-review";
+import { isReviewDraft, reviewDraftBlockReason, toReviewDraft, type SuggestionCandidate } from "../../recording/suggestion-drafts";
 import { resolveRecordingPresentation, resolveRecordingViewport } from "../../recording/web/recording-presentation";
 import {
   RecordingError,
@@ -36,10 +40,12 @@ import {
 } from "../services/testrail-sync-types";
 import { toPublishableScenario } from "../../recording/scenario-to-testrail";
 import { materializeRecordedScenario, type RecordedScenario } from "../../recording/trace-to-scenario";
-import { buildSemanticRecordingModel, attachScenarioSuggestions } from "../../recording/semantic-recording";
+import type { RecordingSummary } from "../../recording/session-trace.types";
+import { buildSemanticRecordingModel, attachScenarioSuggestions, normalizeRecordingGoal } from "../../recording/semantic-recording";
+import { evaluateGoalCoverage } from "../../recording/goal-coverage";
+import { normalizeReviewerContext, preconditionsWithReviewerContext, reviewerContextFor, withReviewerContext } from "../../recording/reviewer-context";
 import { applyRuntimeDatasetValues, hydrateCanonicalInteractionsFromSemanticModel, toSharedMcpScenario } from "../../recording/canonical-recording-contract";
 import { hydratePersistedScenarios } from "../../recording/persisted-scenario-hydration";
-import { startWebRecordingExecution } from "../jobs/web-recording-execution-runner";
 import { resolveRecordingAvailability } from "../../recording/recording-availability";
 import { limitFor } from "../jobs/job-queue";
 import { jobStore } from "../jobs/job-store";
@@ -261,6 +267,94 @@ recordingsRouter.get("/", async (req, res) => {
   }
 });
 
+export type RecordedScenarioCatalogEntry = {
+  recordingId: string;
+  recordingLabel?: string;
+  recordedAt: string;
+  platform: RecordingSummary["platform"];
+  scenarioId: string;
+  title: string;
+  primary: boolean;
+  provenance?: RecordedScenario["provenance"];
+  testRailCaseId?: RecordedScenario["testRailCaseId"];
+  promoted: boolean;
+  /** What POST /:recordingId/execute would admit right now, with no extra data supplied. */
+  executable: boolean;
+  blockedReasons: string[];
+  titleReview?: ScenarioTitleReview;
+};
+
+/**
+ * One recording's contribution to the scenario catalog. Executability comes from the same
+ * admission check execute runs, so the catalog never offers what execute would then refuse.
+ */
+export function toScenarioCatalogEntries(
+  summary: Pick<RecordingSummary, "recordingId" | "label" | "startedAt" | "platform">,
+  scenarios: readonly RecordedScenario[],
+  rejected: ReadonlyMap<string, string[]>,
+  reviews: Record<string, ScenarioTitleReview>,
+): RecordedScenarioCatalogEntry[] {
+  return scenarios.map((scenario) => {
+    const blockedReasons = isReviewDraft(scenario)
+      // A kept suggestion documents an idea; it was never recorded, so it never runs.
+      ? ["review_draft"]
+      : summary.platform === "web"
+        ? rejected.get(scenario.scenarioId) ?? []
+        // Android recordings run through the mobile launch chain, not this replay.
+        : ["mobile_recording"];
+    return {
+      recordingId: summary.recordingId,
+      ...(summary.label ? { recordingLabel: summary.label } : {}),
+      recordedAt: summary.startedAt,
+      platform: summary.platform,
+      scenarioId: scenario.scenarioId,
+      title: scenario.title,
+      primary: Boolean(scenario.primary),
+      ...(scenario.provenance ? { provenance: scenario.provenance } : {}),
+      ...(scenario.testRailCaseId ? { testRailCaseId: scenario.testRailCaseId } : {}),
+      promoted: Boolean(scenario.promotedSpec?.specPath),
+      executable: blockedReasons.length === 0,
+      blockedReasons,
+      ...(reviews[scenario.scenarioId] ? { titleReview: reviews[scenario.scenarioId] } : {}),
+    };
+  });
+}
+
+// GET /api/recordings/scenario-catalog?projectSlug=slug — every recorded scenario of the
+// project, newest recording first, with whether it can be executed now. Declared before
+// "/:recordingId" so the literal path wins.
+recordingsRouter.get("/scenario-catalog", async (req, res) => {
+  try {
+    const projectSlug = String(req.query.projectSlug ?? "").trim();
+    if (!projectSlug) {
+      sendError(res, 400, "MISSING_PROJECT_SLUG", "projectSlug es obligatorio");
+      return;
+    }
+    const appSlug = await appSlugFor(projectSlug);
+    const titleCatalog = loadTitleCatalog(appSlug);
+    const entries: RecordedScenarioCatalogEntry[] = [];
+    for (const summary of listRecordings(appSlug)) {
+      if (!["stopped", "derived"].includes(summary.status)) continue;
+      const semanticModel = loadSemanticRecording(appSlug, summary.recordingId);
+      if (!semanticModel) continue;
+      const scenarios = loadScenarios(appSlug, summary.recordingId);
+      if (scenarios.length === 0) continue;
+      const rejected = new Map<string, string[]>();
+      if (summary.platform === "web") {
+        const evaluation = evaluateRecordingExecutionAdmission({ requested: undefined, all: scenarios, selected: scenarios, semanticModel, values: {}, appSlug });
+        const rejections = evaluation.ready
+          ? evaluation.admission.requestedRejectedScenarios
+          : ((evaluation.responseBody.rejectedScenarios ?? []) as Array<{ scenarioId: string; reasons: string[] }>);
+        for (const rejection of rejections) rejected.set(rejection.scenarioId, rejection.reasons);
+      }
+      entries.push(...toScenarioCatalogEntries(summary, scenarios, rejected, reviewScenarioTitles(scenarios, titleCatalog)));
+    }
+    res.json({ ok: true, projectSlug, appSlug, scenarios: entries });
+  } catch (err) {
+    handle(res, err);
+  }
+});
+
 // POST /api/recordings/start — opens the app (or the browser) and begins observing.
 recordingsRouter.post("/start", async (req, res) => {
   try {
@@ -410,6 +504,9 @@ recordingsRouter.get("/:recordingId/scenarios", async (req, res) => {
     res.json({
       ok: true,
       scenarios,
+      // Per scenarioId: other scenarios/cases of the app with the same title, and whether the
+      // title is only the generic text typed before recording.
+      titleReview: reviewScenarioTitles(scenarios, loadTitleCatalog(appSlug)),
       lifecycle: {
         recordingExists: Boolean(trace),
         traceReady: Boolean(trace && ["stopped", "derived"].includes(trace.status)),
@@ -467,6 +564,211 @@ recordingsRouter.put("/:recordingId/scenario-value", async (req, res) => {
     const updated = applyRuntimeDatasetValues(hydrated, { [valueKey]: body.value });
     saveScenarios(appSlug, req.params.recordingId, scenarios.map((scenario) => scenario.scenarioId === scenarioId ? updated : scenario));
     res.json({ ok: true, scenario: updated });
+  } catch (err) {
+    handle(res, err);
+  }
+});
+
+// PUT /api/recordings/:recordingId/scenario-title — a reviewer renames one scenario. Only the
+// title changes; the answer carries the title review so the panel can re-check duplicates.
+recordingsRouter.put("/:recordingId/scenario-title", async (req, res) => {
+  try {
+    const body = req.body ?? {};
+    const projectSlug = String(body.projectSlug ?? "").trim();
+    const scenarioId = String(body.scenarioId ?? "").trim();
+    if (!projectSlug || !scenarioId || typeof body.title !== "string") {
+      sendError(res, 400, "INVALID_TITLE_COMMAND", "projectSlug, scenarioId y title son obligatorios");
+      return;
+    }
+    const appSlug = await appSlugFor(projectSlug);
+    const renamed = renameScenarioTitle(loadScenarios(appSlug, req.params.recordingId), scenarioId, body.title);
+    if (!renamed.ok) {
+      if (renamed.code === "TITLE_TOO_SHORT") sendError(res, 400, renamed.code, `El título debe tener al menos ${MIN_TITLE_LENGTH} caracteres`);
+      else sendError(res, 404, renamed.code, "El escenario indicado no existe");
+      return;
+    }
+    saveScenarios(appSlug, req.params.recordingId, renamed.scenarios);
+    res.json({
+      ok: true,
+      scenario: renamed.scenario,
+      titleReview: reviewScenarioTitles(renamed.scenarios, loadTitleCatalog(appSlug))[scenarioId],
+    });
+  } catch (err) {
+    handle(res, err);
+  }
+});
+
+// GET /api/recordings/:recordingId/goal-coverage — does the recording do what its declared goal
+// says? Computed from the stored trace on every read, so it is right for old recordings too.
+recordingsRouter.get("/:recordingId/goal-coverage", async (req, res) => {
+  try {
+    const projectSlug = String(req.query.projectSlug ?? "").trim();
+    if (!projectSlug) {
+      sendError(res, 400, "MISSING_PROJECT_SLUG", "projectSlug es obligatorio");
+      return;
+    }
+    const trace = loadTrace(await appSlugFor(projectSlug), req.params.recordingId);
+    if (!trace) {
+      sendError(res, 404, "RECORDING_NOT_FOUND", "La grabación indicada no existe");
+      return;
+    }
+    res.json({ ok: true, coverage: evaluateGoalCoverage(trace) });
+  } catch (err) {
+    handle(res, err);
+  }
+});
+
+// PUT /api/recordings/:recordingId/goal — the reviewer adjusts the declared goal, or accepts that
+// the recording does not complete it. Changing the goal clears an earlier acceptance; the new goal
+// applies to scenarios on the next regeneration.
+const MIN_GOAL_LENGTH = 5;
+recordingsRouter.put("/:recordingId/goal", async (req, res) => {
+  try {
+    const body = req.body ?? {};
+    const projectSlug = String(body.projectSlug ?? "").trim();
+    const goal = typeof body.goal === "string" ? body.goal.trim() : undefined;
+    const acknowledge = typeof body.acknowledgeCoverage === "boolean" ? body.acknowledgeCoverage : undefined;
+    if (!projectSlug || (goal === undefined && acknowledge === undefined)) {
+      sendError(res, 400, "INVALID_GOAL_COMMAND", "projectSlug y goal o acknowledgeCoverage son obligatorios");
+      return;
+    }
+    if (goal !== undefined && goal.length < MIN_GOAL_LENGTH) {
+      sendError(res, 400, "GOAL_TOO_SHORT", `El objetivo debe tener al menos ${MIN_GOAL_LENGTH} caracteres`);
+      return;
+    }
+    const trace = loadTrace(await appSlugFor(projectSlug), req.params.recordingId);
+    if (!trace) {
+      sendError(res, 404, "RECORDING_NOT_FOUND", "La grabación indicada no existe");
+      return;
+    }
+    if (trace.status === "recording" || trace.status === "starting") {
+      sendError(res, 409, "RECORDING_IN_PROGRESS", "Detén la grabación antes de cambiar su objetivo");
+      return;
+    }
+    let recordingGoal = trace.recordingGoal;
+    if (goal !== undefined && goal !== recordingGoal?.declaredGoal) {
+      recordingGoal = normalizeRecordingGoal(goal, "USER_DECLARED");
+    }
+    if (recordingGoal && acknowledge !== undefined) {
+      const { coverageAcknowledged: _previous, ...rest } = recordingGoal;
+      recordingGoal = acknowledge ? { ...rest, coverageAcknowledged: { acknowledgedAt: new Date().toISOString() } } : rest;
+    }
+    const updated = { ...trace, recordingGoal };
+    saveTrace(updated);
+    res.json({ ok: true, recordingGoal, coverage: evaluateGoalCoverage(updated) });
+  } catch (err) {
+    handle(res, err);
+  }
+});
+
+// GET /api/recordings/:recordingId/context — the business context QA added, recording-wide and
+// per scenario.
+recordingsRouter.get("/:recordingId/context", async (req, res) => {
+  try {
+    const projectSlug = String(req.query.projectSlug ?? "").trim();
+    if (!projectSlug) {
+      sendError(res, 400, "MISSING_PROJECT_SLUG", "projectSlug es obligatorio");
+      return;
+    }
+    const trace = loadTrace(await appSlugFor(projectSlug), req.params.recordingId);
+    if (!trace) {
+      sendError(res, 404, "RECORDING_NOT_FOUND", "La grabación indicada no existe");
+      return;
+    }
+    res.json({ ok: true, context: trace.reviewerContext ?? {} });
+  } catch (err) {
+    handle(res, err);
+  }
+});
+
+// PUT /api/recordings/:recordingId/context — stores the context of one scope: "recording" or a
+// scenario id. An empty context removes that scope. Applied to TestRail on the next publish and to
+// the AI on the next regeneration; never to what the replay asserts.
+recordingsRouter.put("/:recordingId/context", async (req, res) => {
+  try {
+    const body = req.body ?? {};
+    const projectSlug = String(body.projectSlug ?? "").trim();
+    const scope = String(body.scope ?? "").trim();
+    if (!projectSlug || !scope) {
+      sendError(res, 400, "INVALID_CONTEXT_COMMAND", "projectSlug y scope son obligatorios");
+      return;
+    }
+    const appSlug = await appSlugFor(projectSlug);
+    const trace = loadTrace(appSlug, req.params.recordingId);
+    if (!trace) {
+      sendError(res, 404, "RECORDING_NOT_FOUND", "La grabación indicada no existe");
+      return;
+    }
+    if (trace.status === "recording" || trace.status === "starting") {
+      sendError(res, 409, "RECORDING_IN_PROGRESS", "Detén la grabación antes de añadir contexto");
+      return;
+    }
+    if (scope !== "recording" && !loadScenarios(appSlug, req.params.recordingId).some((scenario) => scenario.scenarioId === scope)) {
+      sendError(res, 404, "SCENARIO_NOT_FOUND", "El escenario indicado no existe en la grabación");
+      return;
+    }
+    const reviewerContext = withReviewerContext(trace.reviewerContext, scope, normalizeReviewerContext(body.context));
+    saveTrace({ ...trace, reviewerContext });
+    res.json({ ok: true, context: reviewerContext ?? {} });
+  } catch (err) {
+    handle(res, err);
+  }
+});
+
+// POST /api/recordings/:recordingId/suggestion-drafts — a reviewer keeps a suggestion the quality
+// gate discarded, as a draft: documentation of an idea, never executed, promoted or published.
+recordingsRouter.post("/:recordingId/suggestion-drafts", async (req, res) => {
+  try {
+    const body = req.body ?? {};
+    const projectSlug = String(body.projectSlug ?? "").trim();
+    const candidateId = String(body.candidateId ?? "").trim();
+    if (!projectSlug || !candidateId) {
+      sendError(res, 400, "INVALID_DRAFT_COMMAND", "projectSlug y candidateId son obligatorios");
+      return;
+    }
+    const appSlug = await appSlugFor(projectSlug);
+    const scenarios = loadScenarios(appSlug, req.params.recordingId);
+    const primary = scenarios.find((scenario) => scenario.primary) ?? scenarios[0];
+    if (!primary) {
+      sendError(res, 409, "SCENARIO_NOT_READY", "La grabación todavía no tiene escenarios materializados");
+      return;
+    }
+    const candidate = loadSuggestionCandidates<SuggestionCandidate>(appSlug, req.params.recordingId)
+      .find((entry) => entry.candidateId === candidateId);
+    if (!candidate) {
+      sendError(res, 404, "CANDIDATE_NOT_FOUND", "La sugerencia ya no está disponible: vuelve a generar los escenarios");
+      return;
+    }
+    if (scenarios.some((scenario) => isReviewDraft(scenario) && scenario.title === candidate.title)) {
+      sendError(res, 409, "DRAFT_ALREADY_KEPT", "Esa sugerencia ya está guardada como borrador");
+      return;
+    }
+    const draft = toReviewDraft(candidate, primary.scenarioId, scenarios);
+    saveScenarios(appSlug, req.params.recordingId, [...scenarios, draft]);
+    res.status(201).json({ ok: true, scenario: draft });
+  } catch (err) {
+    handle(res, err);
+  }
+});
+
+// DELETE /api/recordings/:recordingId/suggestion-drafts/:scenarioId — discards a kept draft. Only
+// drafts: a recorded scenario is never removed this way.
+recordingsRouter.delete("/:recordingId/suggestion-drafts/:scenarioId", async (req, res) => {
+  try {
+    const projectSlug = String(req.query.projectSlug ?? "").trim();
+    if (!projectSlug) {
+      sendError(res, 400, "MISSING_PROJECT_SLUG", "projectSlug es obligatorio");
+      return;
+    }
+    const appSlug = await appSlugFor(projectSlug);
+    const scenarios = loadScenarios(appSlug, req.params.recordingId);
+    const target = scenarios.find((scenario) => scenario.scenarioId === req.params.scenarioId);
+    if (!target || !isReviewDraft(target)) {
+      sendError(res, 404, "DRAFT_NOT_FOUND", "El borrador indicado no existe");
+      return;
+    }
+    saveScenarios(appSlug, req.params.recordingId, scenarios.filter((scenario) => scenario !== target));
+    res.json({ ok: true, scenarioId: target.scenarioId });
   } catch (err) {
     handle(res, err);
   }
@@ -592,7 +894,15 @@ recordingsRouter.post("/:recordingId/execute", async (req, res) => {
         ? [body.scenarioId]
         : undefined;
     const requested = requestedValues?.filter((value: unknown): value is string => typeof value === "string" && value.trim().length > 0);
-    let selected = requested ? all.filter((scenario) => requested.includes(scenario.scenarioId)) : all;
+    const draftRequested = requested ? all.find((scenario) => requested.includes(scenario.scenarioId) && isReviewDraft(scenario)) : undefined;
+    if (draftRequested) {
+      sendError(res, 409, "SCENARIO_IS_DRAFT", reviewDraftBlockReason(draftRequested)!);
+      return;
+    }
+    // Without an explicit selection, "all" means every scenario that can run -- never a draft.
+    let selected = requested
+      ? all.filter((scenario) => requested.includes(scenario.scenarioId))
+      : all.filter((scenario) => !isReviewDraft(scenario));
     // TEMPORARY DIAGNOSTIC (this ticket only): no dataset value/secret is logged -- only ids,
     // so a request for a scenarioId that never reached the persisted store is distinguishable
     // from one that legitimately did.
@@ -659,6 +969,9 @@ recordingsRouter.post("/:recordingId/execute", async (req, res) => {
     let fastPathResults: Array<{ scenarioId: string; caseId: number; specPath: string; status: "passed" | "failed" | "skipped"; error?: string }> = [];
     let publishToTestRailInvoked = false;
     let reuseJobId: string | undefined;
+    // The TestRail destination the user picked, kept on the job: "Ejecuciones" shows it for this
+    // run instead of an empty TestRail block (or project fields mislabelled as the destination).
+    let executionTestRail: { projectId?: string; suiteId?: string; sectionId: string; sectionName?: string } | undefined;
     if (body.testRailDestination && typeof body.testRailDestination === "object") {
       const rawDestination = body.testRailDestination as Record<string, unknown>;
       const destination: TestRailDestination = {
@@ -666,6 +979,10 @@ recordingsRouter.post("/:recordingId/execute", async (req, res) => {
         suiteId: typeof rawDestination.suiteId === "string" && rawDestination.suiteId.trim() ? rawDestination.suiteId.trim() : undefined,
         sectionId: String(rawDestination.sectionId ?? "").trim(),
       };
+      const sectionName = typeof rawDestination.sectionName === "string" && rawDestination.sectionName.trim() ? rawDestination.sectionName.trim() : undefined;
+      executionTestRail = destination.sectionId
+        ? { projectId: destination.projectId || undefined, suiteId: destination.suiteId, sectionId: destination.sectionId, ...(sectionName ? { sectionName } : {}) }
+        : undefined;
       const lookupCase: TestRailCaseLookup = async (caseId) => {
         try {
           const client = new TestRailClient(requireTestRailConfig(config));
@@ -716,7 +1033,9 @@ recordingsRouter.post("/:recordingId/execute", async (req, res) => {
         if (outcome) {
           const createdByScenarioId = buildPublishedCaseIdByScenarioId(outcome);
           if (createdByScenarioId.size > 0) {
-            const persistedDestination = { projectId: String(outcome.effectiveProjectId), suiteId: outcome.effectiveSuiteId ? String(outcome.effectiveSuiteId) : undefined, sectionId: destination.sectionId };
+            const persistedSectionName = outcome.sectionName ?? executionTestRail?.sectionName;
+            const persistedDestination = { projectId: String(outcome.effectiveProjectId), suiteId: outcome.effectiveSuiteId ? String(outcome.effectiveSuiteId) : undefined, sectionId: destination.sectionId, ...(persistedSectionName ? { sectionName: persistedSectionName } : {}) };
+            if (executionTestRail) executionTestRail = { ...executionTestRail, projectId: persistedDestination.projectId, suiteId: persistedDestination.suiteId ?? executionTestRail.suiteId, ...(persistedSectionName ? { sectionName: persistedSectionName } : {}) };
             const updatedAll = all.map((scenario) => {
               const caseId = createdByScenarioId.get(scenario.scenarioId);
               return caseId ? { ...scenario, testRailCaseId: caseId, testRailDestination: persistedDestination } : scenario;
@@ -757,6 +1076,7 @@ recordingsRouter.post("/:recordingId/execute", async (req, res) => {
           recordingId: req.params.recordingId,
           scenarios: reuseJobScenarios,
           executionMode: "reuse_existing_promoted_spec",
+          ...(executionTestRail ? { testRail: executionTestRail } : {}),
         });
         reuseJobId = reuseJob.id;
         console.log(`[recordings:execute:fast-path] recording=${req.params.recordingId} jobId=${reuseJobId} scenarios=${reuseJobScenarios.length} publishInvoked=false generationInvoked=false headless=true`);
@@ -799,6 +1119,7 @@ recordingsRouter.post("/:recordingId/execute", async (req, res) => {
       ...admission,
       rejectedScenarios: admission.requestedRejectedScenarios,
       options: effectiveJobOptions,
+      ...(executionTestRail ? { testRail: executionTestRail } : {}),
     });
     setImmediate(() => startScenarioPreviewRun(job.id));
     res.status(202).json({
@@ -812,71 +1133,6 @@ recordingsRouter.post("/:recordingId/execute", async (req, res) => {
       unresolvedRequestedScenarioIds,
       executionMode: "shared_mcp_core",
     });
-  } catch (err) {
-    handle(res, err);
-  }
-});
-
-/**
- * POST /api/recordings/:recordingId/execute — replays a web walkthrough in a real browser.
- *
- * Only for web recordings. An Android one is executed through the mobile launch chain, which
- * owns the emulator and Appium; sending it here would find no `webSteps` and fail obscurely,
- * so it is refused with the reason instead.
- *
- * Answers immediately with a job id: a replay opens a browser and walks the flow, which takes
- * as long as the flow takes. The panel follows it on `GET /api/runs/:jobId`, the same way it
- * follows every other operation.
- */
-recordingsRouter.post("/:recordingId/execute", async (req, res) => {
-  try {
-    const body = req.body ?? {};
-    const projectSlug = String(body.projectSlug ?? "").trim();
-    if (!projectSlug) {
-      sendError(res, 400, "MISSING_PROJECT_SLUG", "projectSlug es obligatorio");
-      return;
-    }
-
-    const appSlug = await appSlugFor(projectSlug);
-    const trace = loadTrace(appSlug, req.params.recordingId);
-    if (!trace) {
-      sendError(res, 404, "RECORDING_NOT_FOUND", `No se encontró la grabación ${req.params.recordingId}`);
-      return;
-    }
-    if (trace.platform !== "web") {
-      sendError(
-        res,
-        400,
-        "NOT_A_WEB_RECORDING",
-        "Esta grabación es de Android: se ejecuta desde el lanzamiento móvil, no por esta ruta",
-      );
-      return;
-    }
-
-    const all = loadScenarios(appSlug, req.params.recordingId);
-    if (all.length === 0) {
-      sendError(res, 404, "NO_SCENARIOS", "La grabación no tiene escenarios generados");
-      return;
-    }
-    const requested: string[] | undefined = Array.isArray(body.scenarioIds)
-      ? body.scenarioIds.filter((s: unknown): s is string => typeof s === "string")
-      : undefined;
-    const selected = requested ? all.filter((s) => requested.includes(s.scenarioId)) : all;
-    if (selected.length === 0) {
-      sendError(res, 400, "NO_SCENARIOS_SELECTED", "Ninguno de los escenarios indicados existe en la grabación");
-      return;
-    }
-
-    const { jobId } = startWebRecordingExecution({
-      appSlug,
-      recordingId: req.params.recordingId,
-      scenarios: selected,
-      baseUrl: trace.baseUrl,
-      dataOverrides:
-        body.dataOverrides && typeof body.dataOverrides === "object" ? body.dataOverrides : undefined,
-    });
-
-    res.status(202).json({ ok: true, jobId, scenarioCount: selected.length });
   } catch (err) {
     handle(res, err);
   }
@@ -991,14 +1247,21 @@ async function publishRecordingScenariosToTestRail(input: {
   const effectiveSuiteId = Number(suiteId || sectionSuiteId || 0) || undefined;
 
   const cacheKey = `recording-${recordingId}`;
-  const publishable = scenarios.map((scenario) =>
-    toPublishableScenario(
+  // The reviewer's business context (purpose, rules, expected outcome, data) leads the TestRail
+  // preconditions -- read from the trace, so it is current whatever scenarios were sent.
+  const reviewerContext = loadTrace(appSlug, recordingId)?.reviewerContext;
+  const publishable = scenarios.map((scenario) => {
+    const published = toPublishableScenario(
       materializeRecordedScenario(scenario, datasetValues),
       appSlug,
       recordingId,
       input.recordingDataPolicy as never,
-    ),
-  );
+    );
+    return {
+      ...published,
+      preconditions: preconditionsWithReviewerContext(published.preconditions, reviewerContextFor(reviewerContext, scenario.scenarioId)),
+    };
+  });
   const publishIdOf = (index: number) =>
     buildScenarioPreviewScenarioId(publishable[index], index, { launchId: recordingId });
 
@@ -1090,7 +1353,12 @@ recordingsRouter.post("/:recordingId/testrail", async (req, res) => {
     const requested: string[] | undefined = Array.isArray(body.scenarioIds)
       ? body.scenarioIds.filter((s: unknown): s is string => typeof s === "string")
       : undefined;
-    const selected = requested ? all.filter((s) => requested.includes(s.scenarioId)) : all;
+    const draftRequested = requested ? all.find((s) => requested.includes(s.scenarioId) && isReviewDraft(s)) : undefined;
+    if (draftRequested) {
+      sendError(res, 409, "SCENARIO_IS_DRAFT", reviewDraftBlockReason(draftRequested)!);
+      return;
+    }
+    const selected = requested ? all.filter((s) => requested.includes(s.scenarioId)) : all.filter((s) => !isReviewDraft(s));
     if (selected.length === 0) {
       sendError(res, 400, "NO_SCENARIOS_SELECTED", "Ninguno de los escenarios indicados existe en la grabación");
       return;
@@ -1163,7 +1431,7 @@ recordingsRouter.post("/:recordingId/testrail", async (req, res) => {
       const hit = [...created, ...reconciledCreated].find((c) => c.scenarioId === s.scenarioId);
       const withDataset = applyRuntimeDatasetValues(s, datasetValues);
       return hit
-        ? { ...withDataset, testRailCaseId: hit.caseId, testRailDestination: { projectId: String(effectiveProjectId), suiteId: effectiveSuiteId ? String(effectiveSuiteId) : undefined, sectionId } }
+        ? { ...withDataset, testRailCaseId: hit.caseId, testRailDestination: { projectId: String(effectiveProjectId), suiteId: effectiveSuiteId ? String(effectiveSuiteId) : undefined, sectionId, ...(sectionName ? { sectionName } : {}) } }
         : withDataset;
     });
     saveScenarios(appSlug, recordingId, updated as RecordedScenario[]);

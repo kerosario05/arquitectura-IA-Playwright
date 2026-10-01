@@ -8,8 +8,10 @@ import type {
   TraceSegment,
   RecordedValueConstraint,
 } from "./session-trace.types";
+import { goalOperationTerms, textMentionsTerm } from "./goal-coverage";
 import { aggregateTextUsedAsValue, buildSemanticRecordingModel, isSensitiveRecordedEvent, resolveRecordedField, classifySemanticEvent, normalizeRecordingDataPolicy } from "./semantic-recording";
 import { reconstructLogicalInputBuffer, isGenericUnresolvedLabel } from "./trace-normalizer";
+import { buildObservedScenarioTitle } from "./observed-scenario-title";
 import { semanticIdentityFromFrameworkOwnerEvidence } from "./framework-owner-semantic-identity";
 import { confirmedCompoundSelectionBefore, logicalCompoundChildValue } from "./compound-value";
 import { quoteHumanValue, renderHumanStepValue } from "./human-step-renderer";
@@ -134,6 +136,8 @@ export type RecordedDataField = {
 export type RecordedScenario = {
   scenarioId: string;
   title: string;
+  /** Renamed by a reviewer: regenerating the recording keeps this title instead of the observed one. */
+  titleEditedByUser?: boolean;
   /** The user story the walkthrough implies, reconstructed rather than read from Jira. */
   description: string;
   preconditions: string[];
@@ -148,7 +152,7 @@ export type RecordedScenario = {
    */
   provenance: "observed" | "derived";
   /** `segment` scenarios cover the flow up to the end of one screen block, not the whole run. */
-  scope?: "end_to_end" | "segment";
+  scope?: "end_to_end" | "segment" | "sub_flow";
   /** Android execution steps. Empty for web recordings. */
   mobileSteps: MobileStep[];
   /** Web plan steps. Empty for Android recordings. */
@@ -171,6 +175,11 @@ export type RecordedScenario = {
   traceBacked?: boolean;
   containsUnexecutedActions?: boolean;
   replayEligible?: boolean;
+  /**
+   * A suggestion the reviewer kept as a draft although the quality gate rejected it: documentation
+   * of an idea, never executable, promotable or publishable until it is actually recorded.
+   */
+  reviewDraft?: boolean;
   functionalReadiness?: boolean;
   technicalReadiness?: boolean;
   expectedResultCandidate?: string;
@@ -216,7 +225,7 @@ export type RecordedScenario = {
    * picked?" — the same recording can be re-run against a different project/suite/section,
    * and a caseId that belongs elsewhere must never be reused as if it belonged here.
    */
-  testRailDestination?: { projectId: string; suiteId?: string; sectionId: string };
+  testRailDestination?: { projectId: string; suiteId?: string; sectionId: string; sectionName?: string };
   /**
    * Set once a promoted spec exists for this exact scenario — the durable scenarioId →
    * promotedSpecPath mapping. `specHash` is the sha256 of the spec text at promotion time,
@@ -326,6 +335,54 @@ function assertionTextFor(screen: RecordedScreen | undefined): string | undefine
   const title = screen.title?.trim();
   if (title && title !== screen.screenKey && title.length > 2 && !isTechnicalTitle(title)) return title;
   return screen.texts.find((t) => t.trim().length > 3)?.trim();
+}
+
+function foldVisibleText(value: string): string {
+  return value.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/s+/g, " ").trim();
+}
+
+/**
+ * The text that tells THIS visit apart from other visits of the same screen: the option the user
+ * pressed to get here, when the landing screen shows it. Three product pages share the title
+ * "Más detalles del producto"; only the product name proves the right one opened (recording
+ * 2920301b). Read from the visit's own texts (`visibleTexts`), never from the screen record,
+ * which keeps only the last visit. Only the label of a pressed control is used -- never a typed
+ * value.
+ */
+export function distinctiveVisitText(events: readonly RecordedEvent[], screenChangeIndex: number, title: string): string | undefined {
+  const texts = events[screenChangeIndex]?.visibleTexts;
+  if (!texts || texts.length === 0) return undefined;
+  let label: string | undefined;
+  for (let index = screenChangeIndex - 1; index >= 0; index -= 1) {
+    const candidate = events[index];
+    if (candidate.kind === "screen_change") return undefined;
+    if (candidate.kind !== "tap") continue;
+    const candidateLabel = candidate.target?.label?.trim();
+    if (!candidateLabel || isGenericUnresolvedLabel(candidateLabel)) return undefined;
+    label = candidateLabel;
+    break;
+  }
+  if (!label) return undefined;
+  const wanted = foldVisibleText(label);
+  if (wanted.length < 3 || wanted === foldVisibleText(title)) return undefined;
+  const match = texts.map((text) => text.trim()).find((text) => foldVisibleText(text) === wanted);
+  return match && foldVisibleText(match) !== foldVisibleText(title) ? match : undefined;
+}
+
+/**
+ * The scenario's final expected result: what was observed AFTER its last action, or nothing. The
+ * last non-empty expected anywhere used to be taken -- in recording e52ee42c an observation from
+ * step 7 became the final oracle of a 61-step scenario and was checked on the closing screen, where
+ * it can never be; sub-flows got the setup row "La aplicación carga su pantalla inicial". Without
+ * an observation after the last action the outcome is honestly unknown ("por confirmar").
+ */
+export function observedFinalOutcome(steps: readonly Pick<RecordedScenarioStep, "expected" | "classification" | "isSetup">[]): string | undefined {
+  for (let index = steps.length - 1; index >= 0; index -= 1) {
+    const step = steps[index];
+    if (step.expected?.trim()) return step.expected;
+    if (step.classification === "FUNCTIONAL_ACTION" && !step.isSetup) return undefined;
+  }
+  return undefined;
 }
 
 function isTechnicalTitle(value: string): boolean {
@@ -525,12 +582,24 @@ export function scoreGoalRelevance(
   // navigation item such as "Registro Digital Nuevos Colaboradores" shares "colaboradores"
   // with "Agregar varios colaboradores" but abandons the operation under test.
   const coverage = overlap.length / Math.max(goalTokens.size, 1);
-  const operationEvidence = [...candidateTokens].some((token) => /^(crear|agregar|editar|validar|eliminar|registrar|actualizar|seleccionar|seleccionar|elegir|completar|consultar|gestionar|anadir)$/.test(token));
-  const navigationOnly = [...candidateTokens].some((token) => /^(menu|inicio|registro|digital|ayuda|contacto|productos|configurar|navegar|volver)$/.test(token))
+  // The goal's OWN operation is the strongest evidence a candidate tests it: "solicitar" was
+  // missing from the fixed verb list below, so a proposal to press "Solicitar" was discarded for
+  // the goal "solicitar tarjeta, prestamo y cuenta" (recording 2920301b). Matched through word
+  // forms ("solicitud"), browsing verbs excluded -- the same reading goal-coverage.ts uses.
+  const goalOperationMatched = goalOperationTerms(goal).some((term) => textMentionsTerm(candidateText, term));
+  const operationEvidence = goalOperationMatched
+    || [...candidateTokens].some((token) => /^(crear|agregar|editar|validar|eliminar|registrar|actualizar|seleccionar|seleccionar|elegir|completar|consultar|gestionar|anadir)$/.test(token));
+  const navigationOnly = !goalOperationMatched
+    && [...candidateTokens].some((token) => /^(menu|inicio|registro|digital|ayuda|contacto|productos|configurar|navegar|volver)$/.test(token))
     && ![...candidateTokens].some((token) => /^(crear|agregar|editar|validar|eliminar|registrar|actualizar|completar|consultar|gestionar|anadir)$/.test(token));
-  const score = navigationOnly ? 0.05 : overlap.length === 0 ? 0.05 : operationEvidence
-    ? Math.min(0.95, 0.45 + coverage * 0.5)
-    : Math.min(0.55, coverage * 0.55);
+  const score = navigationOnly ? 0.05 : overlap.length === 0 && !goalOperationMatched ? 0.05 : goalOperationMatched
+    // Performing the declared operation is coherent with the goal even when the candidate does
+    // not name every object of it ("el detalle del producto" for tarjeta/préstamo/cuenta).
+    ? Math.min(0.95, Math.max(0.7, 0.45 + coverage * 0.5))
+    : operationEvidence
+      ? Math.min(0.95, 0.45 + coverage * 0.5)
+      : Math.min(0.55, coverage * 0.55);
+  if (goalOperationMatched) reasons.push("goal_operation_matched");
   if (candidate.requiredData.length > 0) reasons.push("candidate_has_observed_data");
   if (!operationEvidence && overlap.length > 0) reasons.push("shared_entity_without_operation_evidence");
   if (navigationOnly) reasons.push("navigation_alternative_abandons_declared_operation");
@@ -669,7 +738,8 @@ export function materializeRecordingSuggestion(
   proposal: RecordingAiScenarioProposal,
   quality: RecordingScenarioQuality,
 ): RecordedScenario {
-  const goal = primary.scenarioGoal?.trim() || primary.title.trim();
+  // The observed primary title already names the flow; the typed goal is only its fallback.
+  const goal = primary.title.trim() || primary.scenarioGoal?.trim() || "Recorrido grabado";
   const genericTitle = /^(?:comprobar varias entidades|opci[oó]n alternativa|repetir entidad|zero_entity|alternative_selection)$/i.test(proposal.title.trim());
   const humanTitle = genericTitle
     ? `${goal}: ${proposal.type === "DERIVED_VALIDATION" ? "comprobar el comportamiento de la variante observada" : "comprobar la alternativa observada"}`
@@ -854,9 +924,13 @@ export function buildHappyPathScenario(
           description: `Verificar que se muestra "${text}"`,
         });
       }
+      // The screen title stays the FIRST quoted text: it is what the replay and the spec assert
+      // (extractQuotedText / parseStepIntent take the first quote). The visit's distinguishing
+      // text is evidence for the reviewer and TestRail.
+      const distinctive = distinctiveVisitText(events, eventIndex, text);
       testRailSteps.push({
-        content: `El sistema muestra "${text}"`,
-        expected: `Se muestra "${text}"`,
+        content: distinctive ? `El sistema muestra "${text}" con "${distinctive}"` : `El sistema muestra "${text}"`,
+        expected: distinctive ? `Se muestra "${text}" con "${distinctive}"` : `Se muestra "${text}"`,
         classification: "FUNCTIONAL_ASSERTION",
       });
       continue;
@@ -1226,7 +1300,10 @@ export function buildHappyPathScenario(
   }
 
   const lastScreen = trace.screens[trace.screens.length - 1];
+  // What was walked names the case; the goal typed before recording ("roque 10") is only the
+  // fallback for a recording that carries no readable screen or choice.
   const title =
+    buildObservedScenarioTitle(trace, events) ||
     trace.recordingGoal?.declaredGoal?.trim() ||
     trace.recordingGoal?.normalizedGoal?.trim() ||
     options.title?.trim() ||
@@ -1259,7 +1336,7 @@ export function buildHappyPathScenario(
     containsUnexecutedActions: false,
     functionalReadiness: testRailSteps.length > 0,
     technicalReadiness: !hasUncertainSteps && stateValidation.stateSequenceValid,
-    expectedResultCandidate: [...testRailSteps].reverse().find((step) => step.expected.trim().length > 0)?.expected,
+    expectedResultCandidate: observedFinalOutcome(testRailSteps),
     oracleAuthority: "observed_only",
     confidence: 0.95,
     ...stepMetrics,
@@ -1408,7 +1485,7 @@ export function buildGateNegatives(
 
       negatives.push({
         scenarioId: `${happyPath.scenarioId}-NEG-${negatives.length + 1}`,
-        title: capTitle(`${segment.title}: "${label}" permanece deshabilitado sin cumplir su condición`),
+        title: capTitle(`Desde ${segment.title}: "${label}" permanece deshabilitado sin cumplir su condición`),
         description:
           `Durante la grabación el control "${label}" se observó deshabilitado en la pantalla ` +
           `"${segment.title}". Este escenario verifica que la aplicación mantiene ese bloqueo.`,
@@ -1599,7 +1676,7 @@ export function buildAlternativePathScenarios(
 
       scenarios.push({
         scenarioId: `${happyPath.scenarioId}-ALT-${scenarios.length + 1}`,
-        title: capTitle(`Alternativa observada ${scenarios.length + 1}: ${control.label}`),
+        title: capTitle(`Desde ${humanScreenTitle(screen, "la pantalla observada")}: ${control.label}`),
         description:
           `La pantalla "${humanScreenTitle(screen, "la pantalla observada")}" ofrece "${control.label}", que el recorrido grabado ` +
           `no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.`,

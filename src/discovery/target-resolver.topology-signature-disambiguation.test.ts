@@ -242,3 +242,80 @@ test("transport/ownerTechnicalEvidenceCarriesTopologySignature. the signature re
   const evidence = buildOwnerTechnicalEvidence(owner);
   assert.equal(evidence?.candidates?.[0]?.structuralContext?.topologySignature, "sig-xyz");
 });
+
+/** The icon-only back arrow of recording 73f03712: no attributes, no text, unique in #root. */
+function iconBackArrowTarget(structural: Record<string, unknown> = {}): RecordedTechnicalTarget {
+  return {
+    targetType: "structural",
+    locatorCandidates: [],
+    structuralContext: {
+      owner: { tag: "button" },
+      stableDirectAttributes: {},
+      stableDescendants: [],
+      semanticShape: ["svg"],
+      landmarkAncestor: { tag: "main" },
+      deterministicStructuralIdentity: false,
+      structuralIdentityMatchCount: 1,
+      scopeIdentity: { strategy: "id", value: "root" },
+      targetFingerprint: "{\"owner\":{\"tag\":\"button\"},\"semanticShape\":[\"svg\"]}",
+      captureScopeUnique: true,
+      captureTargetMatchCount: 1,
+      topologySignature: topologySignature(["svg"], ["path", "path", "svg"]),
+      ...structural,
+    },
+    interactionEvidence: ["v2_click_owner"],
+    confidence: 0.85,
+    validatedByInteraction: true,
+  } as unknown as RecordedTechnicalTarget;
+}
+
+/** A page whose #root scope is found by the CSS the resolver builds from an id scope. */
+function fakeRootScopedPage(options: { scopeCount: number; targetCount: number; markerCount?: number; topologyMatched?: boolean }) {
+  const evaluated: string[] = [];
+  const targetLocator = (selector: string) => ({
+    count: async () => (selector.includes("data-codex-structural-owner") ? (options.markerCount ?? 1) : options.targetCount),
+    isVisible: async () => true,
+    isEnabled: async () => true,
+  });
+  const scopeLocator = {
+    count: async () => options.scopeCount,
+    locator: (selector: string) => targetLocator(selector),
+  } as any;
+  return {
+    evaluated,
+    locator: (selector: string) => (selector === '[id="root"]' ? scopeLocator : targetLocator(selector)),
+    evaluate: async (_fn: unknown, input: { selector: string }) => {
+      evaluated.push(input.selector);
+      return options.topologyMatched ? { matched: true, matchCount: 1, marker: "marker-1" } : { matched: false, matchCount: 2 };
+    },
+  } as any;
+}
+
+test("9/idScope. an id-scoped owner resolves its scope through CSS (it used to fail as scoped_scope_not_unique)", async () => {
+  const target = scopedStructuralTarget({ strategy: "css", value: "#scope" });
+  (target.structuralContext as any).scopeIdentity = { strategy: "id", value: "root" };
+  const result = await resolveRecordedStructuralOwner(fakeRootScopedPage({ scopeCount: 1, targetCount: 1 }), target);
+  assert.ok(result, "the unique #root scope is found and the unique owner inside it resolves");
+});
+
+test("10/iconOnlyOwner. a non-deterministic icon-only owner unique in its scope resolves by scope + shape", async () => {
+  const result = await resolveRecordedStructuralOwner(fakeRootScopedPage({ scopeCount: 1, targetCount: 1 }), iconBackArrowTarget());
+  assert.ok(result);
+  assert.equal(result?.currentMatchCount, 1);
+});
+
+test("11/iconOnlyOwnerTopology. several icon buttons in scope: the recorded topology picks one, compared inside the scope only", async () => {
+  const page = fakeRootScopedPage({ scopeCount: 1, targetCount: 3, markerCount: 1, topologyMatched: true });
+  const result = await resolveRecordedStructuralOwner(page, iconBackArrowTarget());
+  assert.ok(result);
+  assert.equal(page.evaluated.length, 1);
+  assert.ok(page.evaluated[0].startsWith('[id="root"] '), page.evaluated[0]);
+});
+
+test("12/iconOnlyOwnerFailClosed. no unique topology, no scope, no topology or capture ambiguity -> nothing resolves", async () => {
+  assert.equal(await resolveRecordedStructuralOwner(fakeRootScopedPage({ scopeCount: 1, targetCount: 3, topologyMatched: false }), iconBackArrowTarget()), undefined);
+  assert.equal(await resolveRecordedStructuralOwner(fakeRootScopedPage({ scopeCount: 0, targetCount: 1 }), iconBackArrowTarget()), undefined);
+  for (const structural of [{ topologySignature: undefined }, { identityAmbiguous: true }, { captureScopeUnique: false }, { structuralIdentityMatchCount: 2 }, { scopeIdentity: undefined }]) {
+    assert.equal(await resolveRecordedStructuralOwner(fakeRootScopedPage({ scopeCount: 1, targetCount: 1 }), iconBackArrowTarget(structural)), undefined, JSON.stringify(structural));
+  }
+});

@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { buildAutomationId } from "../automations/automation-naming";
+import { buildPlanAutomationId } from "../automations/automation-naming";
 import { classifyAssertion } from "../discovery/assertion-resolver";
 import { validateExecutionPlan } from "../plans/execution-plan-validator";
 import type { ExecutionPlan } from "../types/execution-plan.types";
@@ -374,11 +374,7 @@ export async function buildRegistryPromotionReport(
     planToPromote: options.promotePlan || options.promoteAutomation ? plan : undefined,
     automationToCreate: options.promoteAutomation
       ? {
-          id: buildAutomationId({
-            externalId: plan.scenario.externalId,
-            caseId: plan.scenario.caseId,
-            title: plan.scenario.title
-          }),
+          id: buildPlanAutomationId(plan.scenario),
           caseId: plan.scenario.caseId,
           title: plan.scenario.title
         }

@@ -3,6 +3,7 @@ import { join } from "path";
 import type { Page, Locator } from "@playwright/test";
 import type { PageSnapshot, SnapshotElement } from "../types/page-snapshot.types";
 import type { RecordedTechnicalTarget, RecordedLocator } from "../recording/session-trace.types";
+import { evaluateStructuralOwnerEligibility, hasScopedTopologyAuthority } from "../recording/structural-owner-eligibility";
 import type { PlaywrightRecorderEvidence, SemanticRuntimeEvidence } from "../recording/structural-owner-identity";
 import type { AppRouteProfile } from "../types/env.types";
 import { parseProductConditionTarget, resolveProductConditionAgainstSnapshot, type ProductCondition } from "./product-condition-parser";
@@ -5403,6 +5404,8 @@ export function disambiguateStructuralCandidatesByTopology(input: { selector: st
   return { matched: true, matchCount: 1, marker };
 }
 
+export { hasScopedTopologyAuthority } from "../recording/structural-owner-eligibility";
+
 export async function resolveRecordedStructuralOwner(
   page: Page,
   technicalTarget: RecordedTechnicalTarget | undefined,
@@ -5418,44 +5421,25 @@ export async function resolveRecordedStructuralOwner(
   // already logs its own reason. Confirmed against a real candidate-validation run: no
   // [recording-replay][structural-match] line at all appeared between step start and the thrown
   // error, meaning resolution failed before ever reaching the existing "invoked=true" log.
-  if (!owner) {
+  if (!context || !owner) {
     console.log(`[recording-replay][structural-match] reason=no_owner_in_certified_target`);
     return undefined;
   }
-  if (context?.deterministicStructuralIdentity !== true) {
-    console.log(`[recording-replay][structural-match] reason=owner_not_deterministic ownerTag=${owner.tag}`);
+  // Eligibility is the rule shared with the spec compiler (structural-owner-eligibility.ts):
+  // the compiler only emits a structural click the replay can resolve, and vice versa.
+  const eligibility = evaluateStructuralOwnerEligibility(context);
+  if (!eligibility.eligible) {
+    const ownerTag = owner?.tag;
+    const detail = eligibility.reason === "scope_evidence_incomplete_at_capture"
+      ? ` scopeStrategy=${context?.scopeIdentity?.strategy ?? "none"} captureScopeUnique=${context?.captureScopeUnique} captureTargetMatchCount=${context?.captureTargetMatchCount}`
+      : eligibility.reason === "no_stable_anchor_or_topology_authority"
+        ? ` stableDirectAttributes=${Object.keys(stableDirectAttributes).length} stableDescendants=${stableDescendants.length} topologyTieBreakUnique=${context?.topologyTieBreakUnique} structuralIdentityMatchCount=${context?.structuralIdentityMatchCount} semanticShape=${context?.semanticShape?.length ?? 0}`
+        : "";
+    console.log(`[recording-replay][structural-match] reason=${eligibility.reason}${ownerTag === undefined ? "" : ` ownerTag=${eligibility.reason === "owner_tag_invalid" ? JSON.stringify(ownerTag) : ownerTag}`}${detail}`);
     return undefined;
   }
-  if (context.identityAmbiguous === true) {
-    console.log(`[recording-replay][structural-match] reason=owner_identity_ambiguous_at_capture ownerTag=${owner.tag}`);
-    return undefined;
-  }
+  const { scopedTopologyOwner, scopedEvidence } = eligibility;
   const scopeIdentity = context.scopeIdentity;
-  const scopedEvidence = Boolean(
-    scopeIdentity?.strategy
-    && scopeIdentity.value
-    && context.targetFingerprint
-    && context.captureScopeUnique === true
-    && context.captureTargetMatchCount === 1,
-  );
-  if (scopeIdentity && !scopedEvidence) {
-    console.log(`[recording-replay][structural-match] reason=scope_evidence_incomplete_at_capture ownerTag=${owner.tag} scopeStrategy=${scopeIdentity.strategy ?? "none"} captureScopeUnique=${context.captureScopeUnique} captureTargetMatchCount=${context.captureTargetMatchCount}`);
-    return undefined;
-  }
-  // A topology-tiebroken owner may have no durable attribute/descendant anchor: its bounded
-  // semantic shape is the recorded structural authority, already proven unique at capture.
-  // Keep the shape mandatory so the owner tag alone can never become a broad locator.
-  const topologyAuthority = context.topologyTieBreakUnique === true
-    && context.structuralIdentityMatchCount === 1
-    && (context.semanticShape?.length ?? 0) > 0;
-  if (Object.keys(stableDirectAttributes).length === 0 && stableDescendants.length === 0 && !topologyAuthority) {
-    console.log(`[recording-replay][structural-match] reason=no_stable_anchor_or_topology_authority ownerTag=${owner.tag} stableDirectAttributes=${Object.keys(stableDirectAttributes).length} stableDescendants=${stableDescendants.length} topologyTieBreakUnique=${context.topologyTieBreakUnique} structuralIdentityMatchCount=${context.structuralIdentityMatchCount} semanticShape=${context.semanticShape?.length ?? 0}`);
-    return undefined;
-  }
-  if (!/^[a-z][a-z0-9-]*$/i.test(owner.tag)) {
-    console.log(`[recording-replay][structural-match] reason=owner_tag_invalid ownerTag=${JSON.stringify(owner.tag)}`);
-    return undefined;
-  }
 
   // The nearest landmark region (nav/main/aside/...) the owner was recorded inside -- distinct,
   // otherwise-identical owners in different parts of the page (a sidebar link vs. a content-card
@@ -5466,9 +5450,14 @@ export async function resolveRecordedStructuralOwner(
   const landmarkPrefix = landmarkSelectorPrefix(landmarkAncestor);
 
   let scopeRoot: Page | Locator = page;
+  let scopeCss: string | undefined;
   if (scopedEvidence) {
+    // The value below is already a CSS selector for every scope strategy; handing it back with
+    // strategy "id"/"data-testid" made recordedLocatorFactory return nothing (it has no "id" case)
+    // or query getByTestId("[data-testid=...]"), so every id-scoped owner failed as
+    // scoped_scope_not_unique even when its scope was the unique #root.
     const scopeCandidate: RecordedLocator = {
-      strategy: scopeIdentity!.strategy,
+      strategy: "css",
       value: scopeIdentity!.strategy === "css"
         ? scopeIdentity!.value
         : scopeIdentity!.strategy === "id"
@@ -5476,6 +5465,7 @@ export async function resolveRecordedStructuralOwner(
           : `[data-testid="${cssAttributeValue(scopeIdentity!.value)}"]`,
       confidence: 1,
     };
+    scopeCss = scopeCandidate.value;
     const scopeLocator = recordedLocatorFactory(page, scopeCandidate, true);
     if (!scopeLocator || await scopeLocator.count().catch(() => 0) !== 1) {
       console.log(`[recording-replay][structural-match] reason=scoped_scope_not_unique strategy=${scopeIdentity!.strategy}`);
@@ -5548,11 +5538,13 @@ export async function resolveRecordedStructuralOwner(
   // live candidate and keep the ONE whose bounded, content-blind tag-count signature matches;
   // 0 or >1 matches fail closed -- never nth/first/position/text.
   const recordedTopologySignature = context.topologySignature;
-  if (count > 1 && recordedTopologySignature && !scopedEvidence) {
+  // A scoped topology owner is compared inside its scope only, never against the whole document.
+  const topologySelector = scopedEvidence && scopeCss ? `${scopeCss} ${ownerFullSelector}` : ownerFullSelector;
+  if (count > 1 && recordedTopologySignature && (!scopedEvidence || scopedTopologyOwner)) {
     // Pass ownerFullSelector (single-level :has(), native-CSS-safe), not nearestOwnerSelector --
     // see disambiguateStructuralCandidatesByTopology's own comment for why the ":not(:has(...))"
     // wrapper cannot cross into a native page.evaluate context.
-    const disambiguation = await page.evaluate(disambiguateStructuralCandidatesByTopology, { selector: ownerFullSelector, recordedSignature: recordedTopologySignature }).catch(() => ({ matched: false, matchCount: 0, marker: undefined as string | undefined }));
+    const disambiguation = await page.evaluate(disambiguateStructuralCandidatesByTopology, { selector: topologySelector, recordedSignature: recordedTopologySignature }).catch(() => ({ matched: false, matchCount: 0, marker: undefined as string | undefined }));
     if (!disambiguation.matched || !disambiguation.marker) {
       console.log(`[recording-replay][structural-match] reason=${disambiguation.matchCount > 1 ? "action_owner_ambiguous" : "structural_match_not_unique"} ownerTag=${owner.tag} topologySignatureCompared=true topologyMatchCount=${disambiguation.matchCount} final=0`);
       return undefined;
@@ -5918,7 +5910,8 @@ async function resolveRecordedTechnicalTarget(
       const frameworkOwnerAuthority = technicalTarget.interactionEvidence.includes("v2_framework_actionable_owner");
       const deterministicOwnerAuthority = technicalTarget.structuralContext?.deterministicStructuralIdentity === true
         && technicalTarget.structuralContext.identityAmbiguous !== true;
-      if (!frameworkOwnerAuthority && !deterministicOwnerAuthority) continue;
+      const scopedTopologyAuthority = hasScopedTopologyAuthority(technicalTarget.structuralContext);
+      if (!frameworkOwnerAuthority && !deterministicOwnerAuthority && !scopedTopologyAuthority) continue;
       const structuralOwner = await resolveRecordedStructuralOwner(page, technicalTarget);
       if (structuralOwner) return structuralOwner;
     }

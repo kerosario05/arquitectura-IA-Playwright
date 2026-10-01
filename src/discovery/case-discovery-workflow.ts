@@ -2961,6 +2961,8 @@ export async function runCaseDiscoveryWorkflow(
         promotionStatus = promotedEntry.pomStatus;
       } else if (promotedEntry.pomStatus === "inline_debug_only") {
         promotionStatus = "inline_debug_only";
+      } else if (promotedEntry.status === "spec_deferred") {
+        promotionStatus = "spec_deferred";
       } else if (promotedEntry.specVerificationStatus === "failed") {
         promotionStatus = "spec_failed";
       } else if (promotedEntry.status === "spec_failed" || promotedEntry.status === "promoted_but_verification_failed") {
