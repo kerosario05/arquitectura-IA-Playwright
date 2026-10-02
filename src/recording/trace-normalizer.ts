@@ -488,6 +488,33 @@ function semanticLabelFromSelectionTrigger(trigger: RecordedEvent["target"]): st
 }
 
 function promoteDynamicSelection(event: RecordedEvent, index: number, events: readonly RecordedEvent[]): RecordedEvent {
+  const nativeSelection = event.target?.playwrightRecorderEvidence?.nativeSelection;
+  const clickedOption = nativeSelection?.clickedOption;
+  if (event.kind === "tap" && nativeSelection && clickedOption
+    && nativeSelection.options.filter(option => option.value === clickedOption.value && option.label === clickedOption.label && !option.disabled).length === 1) {
+    // Both identities were measured in the same DOM: the clicked display option and its
+    // uniquely associated native control. No preceding generic container tap is needed.
+    const field = nativeSelection.fieldLabel || event.target?.associatedField || nativeSelection.controlIdentity.value;
+    return {
+      ...event,
+      target: {
+        ...event.target!, role: "option", interactionType: "select", compoundRole: "selection",
+        associatedField: field, afterValue: clickedOption.label,
+        observedOptions: nativeSelection.options.filter(option => option.value && !option.disabled).map(option => option.label),
+        locators: [{ strategy: nativeSelection.scopeIdentity.strategy, value: nativeSelection.scopeIdentity.value, confidence: 0.9 }],
+        playwrightRecorderEvidence: {
+          ...event.target!.playwrightRecorderEvidence!, scopeIdentity: nativeSelection.scopeIdentity,
+          normalizedName: clickedOption.label, captureMatchCount: 1,
+        },
+        dynamicLifecycle: {
+          ...event.target?.dynamicLifecycle,
+          triggerTechnicalTarget: `${nativeSelection.controlIdentity.strategy}:${nativeSelection.controlIdentity.value}`,
+          selectedOption: clickedOption.label,
+          options: nativeSelection.options.filter(option => option.value && !option.disabled).map(option => option.label),
+        },
+      },
+    };
+  }
   const evidence = selectionOptionEvidence(event, events);
   const selectorTrigger = matchingSelectionTrigger(event, index, events);
   const lifecycle = event.target?.dynamicLifecycle;
@@ -920,9 +947,44 @@ export function normalizeEvents(
   const cleaned = consolidated.map((event) => {
     if (!dropUnidentified) return event;
     if (event.kind !== "tap") return event;
-    if ((event.target?.locators?.length ?? 0) > 0) return event;
     if (event.target?.compoundRole === "selection" && event.target.afterValue !== undefined
       && (event.observationType === "pointer" || event.target.afterState?.selected === true || event.target.dynamicLifecycle?.committedState)) return event;
+    // Some recorder adapters observe a custom/native option's display node while the only
+    // technical target is its enclosing select control. Preserve that captured choice as a
+    // selection action: the resolver will open the recorded control and match the observed
+    // value on its causally bound options surface. This is based on DOM/control shape, never
+    // project, label, option text, or a business-specific selector.
+    const capturedOptionValue = event.target?.label?.trim();
+    const selectControlScope = event.target?.locators?.some((locator) =>
+      locator.strategy === "css" && /:has\(\s*select\b/i.test(locator.value),
+    ) === true;
+    if (capturedOptionValue && !isGenericUnresolvedLabel(capturedOptionValue) && selectControlScope
+      && ["span", "div", "li", "option"].includes((event.target?.tag ?? "").toLowerCase())) {
+      return {
+        ...event,
+        target: {
+          ...event.target!,
+          interactionType: "select",
+          compoundRole: "selection",
+          afterValue: event.target!.afterValue ?? capturedOptionValue,
+        },
+      };
+    }
+    // A locator can identify only the recorder's surrounding scope (form/dialog/card), not
+    // the passive leaf the pointer actually hit. Evaluate container taps before treating any
+    // locator as sufficient identity; otherwise scope-only spans/forms leak into the observed
+    // functional sequence and become false replay steps. The predicate preserves taps whose
+    // target has captured actionable owner evidence or its own admissible locator.
+    if (isNonActionableContainerTap(event)) {
+      return {
+        ...event,
+        kind: "note" as const,
+        note: event.target?.label
+          ? `Toque sin dueño accionable sobre "${event.target.label}"`
+          : "Toque en un contenedor sin dueño accionable",
+      };
+    }
+    if ((event.target?.locators?.length ?? 0) > 0) return event;
     // A trusted Capture V2 pointer identity proves this was a real physical interaction even
     // when no locator was certified. Preserve the tap for observed functional projection;
     // downstream readiness still remains fail-closed because no technical authority is added.

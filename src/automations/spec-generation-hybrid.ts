@@ -4346,6 +4346,13 @@ export function findUncertifiedRequiredTargetSteps(executionContract: SpecExecut
         && Number.isInteger(step.playwrightRecorderEvidence.segmentCount)
         && (step.playwrightRecorderEvidence.segmentCount ?? 0) >= 2
         && Boolean(step.playwrightRecorderEvidence.scopeIdentity))
+      // Discovery may have physically resolved an ambiguous/weak recorded identity using its
+      // runtime resolver and persisted that decision as runtime_resolution_required. The
+      // deterministic compiler has an explicit deferred-resolution path for this state and
+      // will fail closed if no structured target survives transport. Do not reject the contract
+      // here merely because the target was intentionally not certified as a static locator.
+      && !(step.resolutionState === "runtime_resolution_required"
+        && Boolean(step.target?.strategy && step.target.value?.trim()))
       && !(typeof step.technicalTargetRef === "string" && step.technicalTargetRef.trim().length > 0)
   );
 }

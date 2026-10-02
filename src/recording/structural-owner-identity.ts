@@ -102,6 +102,7 @@ export type PlaywrightRecorderEvidence = {
   segmentCount?: number;
   inputMode?: string;
   valueKey?: string;
+  nativeSelection?: import("./native-selection-capture").NativeSelectionCapture;
 };
 
 /** Preserve the existing semantic runtime implementation as the shared resolver source. */

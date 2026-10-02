@@ -2417,7 +2417,11 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
       const samePositionFieldMatch = actionsWithIntents.find(({ action }) => {
         const actionStepIndex = Number.isInteger(action.stepIndex) ? action.stepIndex : undefined;
         const recordedField = action.associatedField?.trim() || action.semanticField?.trim();
-        return actionStepIndex === stepIndex
+        // Virtual recorded scenarios can include the synthetic opening step in
+        // their authored sequence while the contract starts its action sequence
+        // at zero. Accept that one-step offset only when operation and field also
+        // match, so repeated fields remain bound to their corresponding row.
+        return (actionStepIndex === stepIndex || actionStepIndex === stepIndex - 1)
           && recordedActionMatchesSourceIntent(action.actionType, sourceIntent.type)
           && Boolean(sourceField && recordedField)
           && normalizedKey(recordedField) === normalizedKey(sourceField);
@@ -2446,9 +2450,21 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
         && sourceOccurrence >= 0
         ? exactCompatibleMatches[sourceOccurrence]
         : undefined;
+      // A recorded select can have a stable field contract and selected-value dataset binding
+      // while its human step is rendered with a runtime placeholder that the intent parser
+      // cannot recover as a literal option. Bind by semantic field only when exactly one select
+      // contract owns that field in the recording; repeated same-field selections remain
+      // unresolved unless the stronger sequence/value matches above disambiguate them.
+      const uniqueSemanticSelectMatches = sourceIntent.type === "action_select" && sourceField
+        ? actionsWithIntents.filter(({ action }) => action.actionType === "select"
+          && normalizedKey(action.semanticField ?? action.associatedField) === normalizedKey(sourceField))
+        : [];
+      const uniqueSemanticSelectMatch = uniqueSemanticSelectMatches.length === 1
+        ? uniqueSemanticSelectMatches[0]
+        : undefined;
       const match = orderedMatch && recordedActionMatchesSourceIntent(orderedMatch.action.actionType, sourceIntent.type)
         ? orderedMatch
-        : repeatedExactMatch ?? samePositionFieldMatch ?? (compatible.length === 1 ? compatible[0] : undefined);
+        : repeatedExactMatch ?? samePositionFieldMatch ?? uniqueSemanticSelectMatch ?? (compatible.length === 1 ? compatible[0] : undefined);
       if (match) {
         const { action, technicalRoleName } = match;
         item.recordingActionType = action.actionType as ActionTargetItem['recordingActionType'];
@@ -2607,6 +2623,33 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
     };
 
     for (const item of projected.actionTargets) enrichFromRecording(item, item.index);
+    // The human-facing TestRail selection can be re-numbered when segmented inputs are
+    // collapsed for execution. If the normal sequence matcher therefore misses the action,
+    // recover its technical owner only when one recorded select uniquely names the same field.
+    // This transports existing recording authority; it never invents a locator or chooses
+    // among repeated selections for the same field.
+    for (const item of projected.actionTargets) {
+      if (item.actionType !== "action_select" || item.technicalTargetRefs?.length) continue;
+      const field = item.selectionField?.trim() || item.target?.trim();
+      if (!field) continue;
+      const matchingSelects = recordingContract.actions.filter((action) => action.actionType === "select"
+        && normalizedKey(action.semanticField ?? action.associatedField) === normalizedKey(field));
+      if (matchingSelects.length !== 1) continue;
+      const action = matchingSelects[0];
+      if (action.technicalTargetRef) item.technicalTargetRef = action.technicalTargetRef;
+      if (action.technicalTargetRefs) item.technicalTargetRefs = action.technicalTargetRefs;
+      if (action.technicalTargetCandidates) item.technicalTargetCandidates = action.technicalTargetCandidates as any;
+      if (action.playwrightRecorderEvidence) item.playwrightRecorderEvidence = action.playwrightRecorderEvidence as any;
+      if (action.valueKey) {
+        item.valueKey = action.valueKey;
+        item.valueSource = "test_data";
+      }
+      if (action.value !== undefined) item.value = action.value;
+      if (action.interactionId) item.sourceInteractionId = action.interactionId;
+      item.associatedField = field;
+      item.selectionField = field;
+      console.log(`[recording-replay] uniqueSelectionContractBound=true fieldMatchCount=1 technicalTargetPresent=${Boolean(item.technicalTargetRef || item.technicalTargetRefs?.length)} valueKeyPresent=${Boolean(item.valueKey)}`);
+    }
     for (const step of projected.orderedSteps) {
       if (step.type === "action_fill" || step.type === "action_select" || step.type === "action_click") {
         const projectedItem = projected.actionTargets.find((item) => item.index === step.stepIndex);
@@ -9156,6 +9199,48 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
     const resolutionStartedAt = performance.now();
     console.log(`[critical-path] step=${actionTarget.index} phase=resolver_start monotonicMs=${Math.round(resolutionStartedAt)}`);
+    if (actionTarget.actionType === "action_select" || actionTarget.recordingActionType === "select" || Boolean(actionTarget.valueKey)) {
+      console.log(`[recording-replay] selectionBindCheck=true actionType=${actionTarget.actionType ?? "none"} recordingActionType=${actionTarget.recordingActionType ?? "none"} valueKeyPresent=${Boolean(actionTarget.valueKey)} refsCount=${actionTarget.technicalTargetRefs?.length ?? 0} contractActions=${scenario.recordingExecutionContract?.actions?.length ?? 0}`);
+    }
+    if ((actionTarget.actionType === "action_select" || actionTarget.recordingActionType === "select")
+      && !(actionTarget.technicalTargetRefs?.length)) {
+      actionTarget.actionType = "action_select";
+      const field = actionTarget.selectionField?.trim() || actionTarget.associatedField?.trim() || actionTarget.target?.trim();
+      const contractActions = (scenario.recordingExecutionContract?.actions ?? []).filter((action) => action.actionType === "select"
+        && field
+        && normalizeText(action.semanticField ?? action.associatedField) === normalizeText(field));
+      if (contractActions.length === 1) {
+        const recordedSelection = contractActions[0];
+        actionTarget.technicalTargetRef = recordedSelection.technicalTargetRef;
+        actionTarget.technicalTargetRefs = recordedSelection.technicalTargetRefs;
+        actionTarget.technicalTargetCandidates = recordedSelection.technicalTargetCandidates as any;
+        actionTarget.playwrightRecorderEvidence = recordedSelection.playwrightRecorderEvidence as any;
+        actionTarget.associatedField = field;
+        actionTarget.selectionField = field;
+        actionTarget.valueKey ??= recordedSelection.valueKey;
+        actionTarget.valueSource ??= "test_data";
+        actionTarget.sourceInteractionId ??= recordedSelection.interactionId;
+        console.log(`[recording-replay] selectionAuthorityRestored=true fieldMatchCount=1 technicalTargetPresent=${Boolean(actionTarget.technicalTargetRef || actionTarget.technicalTargetRefs?.length)} valueKeyPresent=${Boolean(actionTarget.valueKey)}`);
+      }
+    }
+    if (actionTarget.valueKey && !(actionTarget.technicalTargetRefs?.length)) {
+      const valueKeyMatches = (scenario.recordingExecutionContract?.actions ?? []).filter((action) =>
+        action.actionType === "select" && action.valueKey === actionTarget.valueKey,
+      );
+      if (valueKeyMatches.length === 1) {
+        const recordedSelection = valueKeyMatches[0];
+        actionTarget.actionType = "action_select";
+        actionTarget.recordingActionType = "select";
+        actionTarget.technicalTargetRef = recordedSelection.technicalTargetRef;
+        actionTarget.technicalTargetRefs = recordedSelection.technicalTargetRefs;
+        actionTarget.technicalTargetCandidates = recordedSelection.technicalTargetCandidates as any;
+        actionTarget.playwrightRecorderEvidence = recordedSelection.playwrightRecorderEvidence as any;
+        actionTarget.selectionField = recordedSelection.semanticField ?? recordedSelection.associatedField;
+        actionTarget.associatedField = actionTarget.selectionField;
+        actionTarget.sourceInteractionId ??= recordedSelection.interactionId;
+        console.log(`[recording-replay] selectionBoundByValueKey=true matchCount=1 technicalTargetPresent=${Boolean(actionTarget.technicalTargetRef || actionTarget.technicalTargetRefs?.length)}`);
+      }
+    }
     const currentTargetOptions = {
       semanticRole: actionTarget.semanticRole,
       relationContext: actionTarget.relationContext,

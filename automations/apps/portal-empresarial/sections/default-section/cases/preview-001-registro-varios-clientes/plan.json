@@ -1,0 +1,2998 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-001",
+    "caseId": 0,
+    "title": "Registro varios clientes"
+  },
+  "requiredData": [
+    {
+      "key": "rnc_de_la_empresa",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "nombre_de_usuario",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "contrasena",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "entity_1.colaborador",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "entity_1.puesto",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "entity_1.ingresos",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "entity_1.correo_electronico",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "entity_1.telefono_residencial",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "entity_1.celular",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "entity_1.fecha_de_ingreso",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "entity_2.colaborador",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "entity_2.puesto",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "entity_2.ingresos",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "entity_2.correo_electronico",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "entity_2.telefono_residencial",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "entity_2.celular",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "entity_2.fecha_de_nacimiento",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "entity_2.fecha_de_ingreso",
+      "required": true,
+      "resolved": true
+    }
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.31/login",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "fill",
+      "description": "Ingresar \"130598983\" en \"RNC de la empresa*\"",
+      "target": {
+        "strategy": "text",
+        "value": "RNC de la empresa*",
+        "exact": false
+      },
+      "valueKey": "rnc_de_la_empresa",
+      "requirementRefs": []
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "Ingresar \"olivam\" en \"Nombre de usuario*\"",
+      "target": {
+        "strategy": "text",
+        "value": "Nombre de usuario*",
+        "exact": false
+      },
+      "valueKey": "nombre_de_usuario",
+      "requirementRefs": []
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "Ingresar \"qwerty123123\" en \"Contraseña*\"",
+      "target": {
+        "strategy": "text",
+        "value": "Contraseña*",
+        "exact": false
+      },
+      "valueKey": "contrasena",
+      "requirementRefs": []
+    },
+    {
+      "index": 5,
+      "action": "press",
+      "description": "Presionar \"Enter\" en \"Contraseña*\"",
+      "target": {
+        "strategy": "text",
+        "value": "Contraseña*",
+        "exact": false
+      },
+      "value": "Enter",
+      "requirementRefs": []
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Presionar \"Gestión de Nóminas\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Gestión de Nóminas",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner",
+      "requirementRefs": []
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"Crear Manualmente\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Crear Manualmente",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner",
+      "requirementRefs": []
+    },
+    {
+      "index": 8,
+      "action": "click",
+      "description": "Presionar \"Close\"",
+      "target": {
+        "strategy": "recorded:role",
+        "value": "Close",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:role",
+      "requirementRefs": []
+    },
+    {
+      "index": 9,
+      "action": "click",
+      "description": "Presionar el control indicado",
+      "target": {
+        "strategy": "recorded:semantic-runtime",
+        "value": "el control indicado",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:semantic-runtime",
+      "requirementRefs": []
+    },
+    {
+      "index": 10,
+      "action": "click",
+      "description": "Presionar el control indicado",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Seleccionar fila",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner",
+      "requirementRefs": []
+    },
+    {
+      "index": 11,
+      "action": "click",
+      "description": "Presionar botón asociado a \"Tipo de ID\"",
+      "target": {
+        "strategy": "grid_cell_selection_control",
+        "value": "Tipo de ID",
+        "exact": false
+      },
+      "locatorStrategy": "grid_cell_selection_control",
+      "requirementRefs": []
+    },
+    {
+      "index": 12,
+      "action": "click",
+      "description": "Presionar \"cédula\"",
+      "target": {
+        "strategy": "recorded:role",
+        "value": "cédula",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:role",
+      "requirementRefs": []
+    },
+    {
+      "index": 13,
+      "action": "fill",
+      "description": "Ingresar \"10400143961\" en \"Colaborador\"",
+      "target": {
+        "strategy": "text",
+        "value": "Colaborador",
+        "exact": false
+      },
+      "valueKey": "entity_1.colaborador",
+      "requirementRefs": []
+    },
+    {
+      "index": 14,
+      "action": "fill",
+      "description": "Ingresar \"Analista\" en \"Puesto\"",
+      "target": {
+        "strategy": "text",
+        "value": "Puesto",
+        "exact": false
+      },
+      "valueKey": "entity_1.puesto",
+      "requirementRefs": []
+    },
+    {
+      "index": 15,
+      "action": "click",
+      "description": "Seleccionar \"DOP\" en \"Moneda\"",
+      "target": {
+        "strategy": "selection_keyboard_typeahead",
+        "value": "DOP",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Moneda",
+          "resolvedTargetName": "DOP",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed",
+          "confidence": 0.96
+        }
+      },
+      "locatorStrategy": "selection_keyboard_typeahead",
+      "requirementRefs": []
+    },
+    {
+      "index": 16,
+      "action": "fill",
+      "description": "Ingresar \"30000\" en \"Ingresos\"",
+      "target": {
+        "strategy": "text",
+        "value": "Ingresos",
+        "exact": false
+      },
+      "valueKey": "entity_1.ingresos",
+      "requirementRefs": []
+    },
+    {
+      "index": 17,
+      "action": "fill",
+      "description": "Ingresar \"calidad@test.com\" en \"Correo electrónico\"",
+      "target": {
+        "strategy": "text",
+        "value": "Correo electrónico",
+        "exact": false
+      },
+      "valueKey": "entity_1.correo_electronico",
+      "requirementRefs": []
+    },
+    {
+      "index": 18,
+      "action": "fill",
+      "description": "Ingresar \"829-255-1232\" en \"Teléfono residencial\"",
+      "target": {
+        "strategy": "text",
+        "value": "Teléfono residencial",
+        "exact": false
+      },
+      "valueKey": "entity_1.telefono_residencial",
+      "requirementRefs": []
+    },
+    {
+      "index": 19,
+      "action": "fill",
+      "description": "Ingresar \"809-221-2121\" en \"Celular\"",
+      "target": {
+        "strategy": "text",
+        "value": "Celular",
+        "exact": false
+      },
+      "valueKey": "entity_1.celular",
+      "requirementRefs": []
+    },
+    {
+      "index": 20,
+      "action": "fill",
+      "description": "Ingresar \"1995-02-20\" en \"Fecha de Ingreso\"",
+      "target": {
+        "strategy": "text",
+        "value": "Fecha de Ingreso",
+        "exact": false
+      },
+      "valueKey": "entity_1.fecha_de_ingreso",
+      "requirementRefs": []
+    },
+    {
+      "index": 21,
+      "action": "click",
+      "description": "Presionar \"Añadir otro\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Añadir otro",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner",
+      "requirementRefs": []
+    },
+    {
+      "index": 22,
+      "action": "click",
+      "description": "Presionar el control indicado",
+      "target": {
+        "strategy": "grid_row_checkbox_state",
+        "value": "Seleccionar fila",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "el control indicado",
+          "resolvedTargetName": "Seleccionar fila",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed",
+          "confidence": 0.96
+        }
+      },
+      "locatorStrategy": "grid_row_checkbox_state",
+      "requirementRefs": []
+    },
+    {
+      "index": 23,
+      "action": "click",
+      "description": "Presionar botón asociado a \"Tipo de ID\"",
+      "target": {
+        "strategy": "grid_cell_selection_control",
+        "value": "Tipo de ID",
+        "exact": false
+      },
+      "locatorStrategy": "grid_cell_selection_control",
+      "requirementRefs": []
+    },
+    {
+      "index": 24,
+      "action": "click",
+      "description": "Presionar \"cédula\"",
+      "target": {
+        "strategy": "selection_keyboard_typeahead",
+        "value": "cédula",
+        "exact": false
+      },
+      "locatorStrategy": "selection_keyboard_typeahead",
+      "requirementRefs": []
+    },
+    {
+      "index": 25,
+      "action": "fill",
+      "description": "Ingresar \"40224679551\" en \"Colaborador\"",
+      "target": {
+        "strategy": "text",
+        "value": "Colaborador",
+        "exact": false
+      },
+      "valueKey": "entity_2.colaborador",
+      "requirementRefs": []
+    },
+    {
+      "index": 26,
+      "action": "fill",
+      "description": "Ingresar \"analista\" en \"Puesto\"",
+      "target": {
+        "strategy": "text",
+        "value": "Puesto",
+        "exact": false
+      },
+      "valueKey": "entity_2.puesto",
+      "requirementRefs": []
+    },
+    {
+      "index": 27,
+      "action": "fill",
+      "description": "Ingresar \"80000\" en \"Ingresos\"",
+      "target": {
+        "strategy": "text",
+        "value": "Ingresos",
+        "exact": false
+      },
+      "valueKey": "entity_2.ingresos",
+      "requirementRefs": []
+    },
+    {
+      "index": 28,
+      "action": "fill",
+      "description": "Ingresar \"calidad@test.com\" en \"Correo electrónico\"",
+      "target": {
+        "strategy": "text",
+        "value": "Correo electrónico",
+        "exact": false
+      },
+      "valueKey": "entity_2.correo_electronico",
+      "requirementRefs": []
+    },
+    {
+      "index": 29,
+      "action": "fill",
+      "description": "Ingresar \"8292551232\" en \"Teléfono residencial\"",
+      "target": {
+        "strategy": "text",
+        "value": "Teléfono residencial",
+        "exact": false
+      },
+      "valueKey": "entity_2.telefono_residencial",
+      "requirementRefs": []
+    },
+    {
+      "index": 30,
+      "action": "fill",
+      "description": "Ingresar \"809-221-2121\" en \"Celular\"",
+      "target": {
+        "strategy": "text",
+        "value": "Celular",
+        "exact": false
+      },
+      "valueKey": "entity_2.celular",
+      "requirementRefs": []
+    },
+    {
+      "index": 31,
+      "action": "fill",
+      "description": "Ingresar \"2020-02-20\" en \"Fecha de Nacimiento\"",
+      "target": {
+        "strategy": "text",
+        "value": "Fecha de Nacimiento",
+        "exact": false
+      },
+      "valueKey": "entity_2.fecha_de_nacimiento",
+      "requirementRefs": []
+    },
+    {
+      "index": 32,
+      "action": "fill",
+      "description": "Ingresar \"1995-02-20\" en \"Fecha de Ingreso\"",
+      "target": {
+        "strategy": "text",
+        "value": "Fecha de Ingreso",
+        "exact": false
+      },
+      "valueKey": "entity_2.fecha_de_ingreso",
+      "requirementRefs": []
+    },
+    {
+      "index": 33,
+      "action": "click",
+      "description": "Presionar \"Validar\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Validar",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner",
+      "requirementRefs": []
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-10-02T01:22:50.589Z",
+  "metadata": {
+    "authFlowRequired": false,
+    "authFlowAlias": "defaultClient",
+    "authFlowLanding": "transactions_menu",
+    "authGateDetectedDuringDiscovery": true,
+    "authGateStage": "identification_input"
+  },
+  "sourceScenario": {
+    "title": "Registro varios clientes",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Abrir la aplicación configurada del proyecto",
+        "description": "Abrir la aplicación configurada del proyecto"
+      },
+      {
+        "index": 2,
+        "action": "Ingresar \"130598983\" en \"RNC de la empresa*\"",
+        "description": "Ingresar \"130598983\" en \"RNC de la empresa*\"",
+        "valueKey": "rnc_de_la_empresa",
+        "technicalTargetRef": "role:textbox|RNC de la empresa*",
+        "technicalTargetRefs": [
+          "role:textbox|RNC de la empresa*",
+          "css:#rnc",
+          "id:rnc"
+        ],
+        "associatedField": "RNC de la empresa*",
+        "controlIdentity": "3e7b2674871e|RNC de la empresa*|role|textbox|RNC de la empresa*",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 3,
+        "action": "Ingresar \"olivam\" en \"Nombre de usuario*\"",
+        "description": "Ingresar \"olivam\" en \"Nombre de usuario*\"",
+        "valueKey": "nombre_de_usuario",
+        "technicalTargetRef": "role:textbox|Nombre de usuario*",
+        "technicalTargetRefs": [
+          "role:textbox|Nombre de usuario*",
+          "css:#email",
+          "id:email"
+        ],
+        "associatedField": "Nombre de usuario*",
+        "controlIdentity": "3e7b2674871e|Nombre de usuario*|role|textbox|Nombre de usuario*",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 4,
+        "action": "Ingresar \"qwerty123123\" en \"Contraseña*\"",
+        "description": "Ingresar \"qwerty123123\" en \"Contraseña*\"",
+        "valueKey": "contrasena",
+        "technicalTargetRef": "role:textbox|Contraseña*",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña*",
+          "css:#password",
+          "id:password"
+        ],
+        "associatedField": "Contraseña*",
+        "controlIdentity": "3e7b2674871e|Contraseña*|role|textbox|Contraseña*",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 5,
+        "action": "Presionar \"Enter\" en \"Contraseña*\"",
+        "description": "Presionar \"Enter\" en \"Contraseña*\"",
+        "technicalTargetRef": "role:textbox|Contraseña*",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña*",
+          "css:#password",
+          "id:password"
+        ],
+        "controlIdentity": "3e7b2674871e|Contraseña*|role|textbox|Contraseña*",
+        "recordingActionType": "press"
+      },
+      {
+        "index": 6,
+        "action": "Presionar \"Gestión de Nóminas\"",
+        "description": "Presionar \"Gestión de Nóminas\"",
+        "valueKey": "gestion_de_nominas",
+        "technicalTargetRef": "role:button|Gestión de Nóminas",
+        "technicalTargetRefs": [
+          "role:button|Gestión de Nóminas"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Gestión de Nóminas",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Gestión de Nóminas",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "img",
+                  "stableAttributes": {
+                    "alt": "user",
+                    "src": "/images/payroll.svg"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "img",
+                "p"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"img\",1],[\"p\",1]],\"descendantEntries\":[[\"img\",1],[\"p\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Gestión de Nóminas",
+        "controlIdentity": "3e7b2674871e|Gestión de Nóminas|role|button|Gestión de Nóminas",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 7,
+        "action": "Presionar \"Crear Manualmente\"",
+        "description": "Presionar \"Crear Manualmente\"",
+        "valueKey": "crear_manualmente",
+        "technicalTargetRef": "role:button|Crear Manualmente",
+        "technicalTargetRefs": [
+          "role:button|Crear Manualmente"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Crear Manualmente",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "img",
+                  "stableAttributes": {
+                    "alt": "icon-plus",
+                    "src": "/images/feather-plus-white.svg"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "img",
+                "p"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"img\",1],[\"p\",1]],\"descendantEntries\":[[\"img\",1],[\"p\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Crear Manualmente",
+        "controlIdentity": "3e7b2674871e|Crear Manualmente|role|button|Crear Manualmente",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 8,
+        "action": "Presionar \"Close\"",
+        "description": "Presionar \"Close\"",
+        "valueKey": "close",
+        "technicalTargetRef": "role:button|Close",
+        "technicalTargetRefs": [
+          "role:button|Close"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Close",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "radix-_r_11_"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Close",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span",
+                "svg"
+              ],
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",1],[\"svg\",1]],\"descendantEntries\":[[\"path\",2],[\"span\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "radix-_r_11_"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\",\"svg\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1],[\\\"svg\\\",1]],\\\"descendantEntries\\\":[[\\\"path\\\",2],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Close",
+        "controlIdentity": "3e7b2674871e|Close|role|button|Close",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 9,
+        "action": "Presionar el control indicado",
+        "description": "Presionar el control indicado",
+        "technicalTargetRef": "css:td:has(button[aria-label=\"Seleccionar fila\"])",
+        "technicalTargetRefs": [
+          "css:td:has(button[aria-label=\"Seleccionar fila\"])"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "checkbox",
+          "normalizedName": "Seleccionar fila",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button",
+                "role": "checkbox"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Seleccionar fila",
+                "role": "checkbox"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "controlIdentity": "3e7b2674871e|Seleccionar fila",
+        "recordingActionType": "check"
+      },
+      {
+        "index": 10,
+        "action": "Presionar el control indicado",
+        "description": "Presionar el control indicado"
+      },
+      {
+        "index": 11,
+        "action": "Presionar botón asociado a \"Tipo de ID\"",
+        "description": "Presionar botón asociado a \"Tipo de ID\"",
+        "valueKey": "entity_1.tipo_de_id",
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 9
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Tipo de ID",
+        "controlIdentity": "3e7b2674871e|entity_1|Tipo de ID",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 12,
+        "action": "Presionar \"cédula\"",
+        "description": "Presionar \"cédula\"",
+        "technicalTargetRef": "role:option|cédula",
+        "technicalTargetRefs": [
+          "role:option|cédula"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "cédula",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(div[aria-labelledby=\"radix-_r_1i_\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "option|cédula",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "div",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-labelledby": "radix-_r_1i_",
+                "role": "option"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "span",
+                  "stableAttributes": {
+                    "id": "radix-_r_1i_"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "radix-_r_1g_"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"div\",\"role\":\"option\"},\"stableDirectAttributes\":{\"role\":\"option\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"span\",\"stableAttributes\":{\"id\":\"radix-_r_1i_\"}}],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "cédula"
+      },
+      {
+        "index": 13,
+        "action": "Ingresar \"10400143961\" en \"Colaborador\"",
+        "description": "Ingresar \"10400143961\" en \"Colaborador\"",
+        "valueKey": "entity_1.colaborador",
+        "associatedField": "Colaborador",
+        "controlIdentity": "3e7b2674871e|entity_1|Colaborador",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 14,
+        "action": "Ingresar \"Analista\" en \"Puesto\"",
+        "description": "Ingresar \"Analista\" en \"Puesto\"",
+        "valueKey": "entity_1.puesto",
+        "associatedField": "Puesto",
+        "controlIdentity": "3e7b2674871e|entity_1|Puesto",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 15,
+        "action": "Seleccionar \"DOP\" en \"Moneda\"",
+        "description": "Seleccionar \"DOP\" en \"Moneda\"",
+        "valueKey": "entity_1.moneda",
+        "technicalTargetRef": "role:combobox|Moneda",
+        "technicalTargetRefs": [
+          "role:combobox|Moneda"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "combobox",
+          "normalizedName": "Moneda",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "combobox|Moneda",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button",
+                "role": "combobox"
+              },
+              "stableDirectAttributes": {
+                "role": "combobox"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span",
+                "svg"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1],[\"svg\",1]],\"descendantEntries\":[[\"path\",1],[\"span\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Moneda",
+        "controlIdentity": "3e7b2674871e|entity_1|Moneda|role|combobox|Moneda",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 16,
+        "action": "Ingresar \"30000\" en \"Ingresos\"",
+        "description": "Ingresar \"30000\" en \"Ingresos\"",
+        "valueKey": "entity_1.ingresos",
+        "associatedField": "Ingresos",
+        "controlIdentity": "3e7b2674871e|entity_1|Ingresos",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 17,
+        "action": "Ingresar \"calidad@test.com\" en \"Correo electrónico\"",
+        "description": "Ingresar \"calidad@test.com\" en \"Correo electrónico\"",
+        "valueKey": "entity_1.correo_electronico",
+        "associatedField": "Correo electrónico",
+        "controlIdentity": "3e7b2674871e|entity_1|Correo electrónico",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 18,
+        "action": "Ingresar \"829-255-1232\" en \"Teléfono residencial\"",
+        "description": "Ingresar \"829-255-1232\" en \"Teléfono residencial\"",
+        "valueKey": "entity_1.telefono_residencial",
+        "associatedField": "Teléfono residencial",
+        "controlIdentity": "3e7b2674871e|entity_1|Teléfono residencial",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 19,
+        "action": "Ingresar \"809-221-2121\" en \"Celular\"",
+        "description": "Ingresar \"809-221-2121\" en \"Celular\"",
+        "valueKey": "entity_1.celular",
+        "associatedField": "Celular",
+        "controlIdentity": "3e7b2674871e|entity_1|Celular",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 20,
+        "action": "Ingresar \"1995-02-20\" en \"Fecha de Ingreso\"",
+        "description": "Ingresar \"1995-02-20\" en \"Fecha de Ingreso\"",
+        "valueKey": "entity_1.fecha_de_ingreso",
+        "associatedField": "Fecha de Ingreso",
+        "controlIdentity": "3e7b2674871e|entity_1|Fecha de Ingreso",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 21,
+        "action": "Presionar \"Añadir otro\"",
+        "description": "Presionar \"Añadir otro\"",
+        "valueKey": "entity_1.anadir_otro",
+        "technicalTargetRef": "role:button|Añadir otro",
+        "technicalTargetRefs": [
+          "role:button|Añadir otro"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Añadir otro",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "img",
+                  "stableAttributes": {
+                    "alt": "add",
+                    "src": "/images/feather-plus.svg"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "img",
+                "p"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"img\",1],[\"p\",1]],\"descendantEntries\":[[\"img\",1],[\"p\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Añadir otro",
+        "controlIdentity": "3e7b2674871e|entity_1|Añadir otro|role|button|Añadir otro",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 22,
+        "action": "Presionar el control indicado",
+        "description": "Presionar el control indicado",
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "checkbox",
+          "normalizedName": "Seleccionar fila",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button",
+                "role": "checkbox"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Seleccionar fila",
+                "role": "checkbox"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "controlIdentity": "3e7b2674871e|entity_2|Seleccionar fila",
+        "recordingActionType": "check"
+      },
+      {
+        "index": 23,
+        "action": "Presionar botón asociado a \"Tipo de ID\"",
+        "description": "Presionar botón asociado a \"Tipo de ID\"",
+        "valueKey": "entity_2.tipo_de_id",
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 17
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Tipo de ID",
+        "controlIdentity": "3e7b2674871e|entity_2|Tipo de ID",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 24,
+        "action": "Presionar \"cédula\"",
+        "description": "Presionar \"cédula\"",
+        "valueKey": "entity_2.cedula",
+        "technicalTargetRef": "role:option|cédula",
+        "technicalTargetRefs": [
+          "role:option|cédula"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "cédula",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(div[aria-labelledby=\"radix-_r_3e_\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "option|cédula",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "div",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-labelledby": "radix-_r_3e_",
+                "role": "option"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "span",
+                  "stableAttributes": {
+                    "id": "radix-_r_3e_"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "radix-_r_3c_"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"div\",\"role\":\"option\"},\"stableDirectAttributes\":{\"role\":\"option\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"span\",\"stableAttributes\":{\"id\":\"radix-_r_3e_\"}}],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "cédula",
+        "controlIdentity": "3e7b2674871e|entity_2|cédula|role|option|cédula",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 25,
+        "action": "Ingresar \"40224679551\" en \"Colaborador\"",
+        "description": "Ingresar \"40224679551\" en \"Colaborador\"",
+        "valueKey": "entity_2.colaborador",
+        "associatedField": "Colaborador",
+        "controlIdentity": "3e7b2674871e|entity_2|Colaborador",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 26,
+        "action": "Ingresar \"analista\" en \"Puesto\"",
+        "description": "Ingresar \"analista\" en \"Puesto\"",
+        "valueKey": "entity_2.puesto",
+        "associatedField": "Puesto",
+        "controlIdentity": "3e7b2674871e|entity_2|Puesto",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 27,
+        "action": "Ingresar \"80000\" en \"Ingresos\"",
+        "description": "Ingresar \"80000\" en \"Ingresos\"",
+        "valueKey": "entity_2.ingresos",
+        "associatedField": "Ingresos",
+        "controlIdentity": "3e7b2674871e|entity_2|Ingresos",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 28,
+        "action": "Ingresar \"calidad@test.com\" en \"Correo electrónico\"",
+        "description": "Ingresar \"calidad@test.com\" en \"Correo electrónico\"",
+        "valueKey": "entity_2.correo_electronico",
+        "associatedField": "Correo electrónico",
+        "controlIdentity": "3e7b2674871e|entity_2|Correo electrónico",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 29,
+        "action": "Ingresar \"8292551232\" en \"Teléfono residencial\"",
+        "description": "Ingresar \"8292551232\" en \"Teléfono residencial\"",
+        "valueKey": "entity_2.telefono_residencial",
+        "associatedField": "Teléfono residencial",
+        "controlIdentity": "3e7b2674871e|entity_2|Teléfono residencial",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 30,
+        "action": "Ingresar \"809-221-2121\" en \"Celular\"",
+        "description": "Ingresar \"809-221-2121\" en \"Celular\"",
+        "valueKey": "entity_2.celular",
+        "associatedField": "Celular",
+        "controlIdentity": "3e7b2674871e|entity_2|Celular",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 31,
+        "action": "Ingresar \"2020-02-20\" en \"Fecha de Nacimiento\"",
+        "description": "Ingresar \"2020-02-20\" en \"Fecha de Nacimiento\"",
+        "valueKey": "entity_2.fecha_de_nacimiento",
+        "associatedField": "Fecha de Nacimiento",
+        "controlIdentity": "3e7b2674871e|entity_2|Fecha de Nacimiento",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 32,
+        "action": "Ingresar \"1995-02-20\" en \"Fecha de Ingreso\"",
+        "description": "Ingresar \"1995-02-20\" en \"Fecha de Ingreso\"",
+        "valueKey": "entity_2.fecha_de_ingreso",
+        "associatedField": "Fecha de Ingreso",
+        "controlIdentity": "3e7b2674871e|entity_2|Fecha de Ingreso",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 33,
+        "action": "Presionar \"Validar\"",
+        "description": "Presionar \"Validar\"",
+        "valueKey": "entity_2.validar",
+        "technicalTargetRef": "role:button|Validar",
+        "technicalTargetRefs": [
+          "role:button|Validar"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Validar",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Validar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "img",
+                  "stableAttributes": {
+                    "alt": "validate",
+                    "src": "/images/feather-arrow-right.svg"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "img",
+                "p"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"img\",1],[\"p\",1]],\"descendantEntries\":[[\"img\",1],[\"p\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Validar",
+        "controlIdentity": "3e7b2674871e|entity_2|Validar|role|button|Validar",
+        "recordingActionType": "click"
+      }
+    ],
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "observedAssertions": [],
+    "observableOracles": [],
+    "stepStatuses": [
+      {
+        "index": 2,
+        "status": "found"
+      },
+      {
+        "index": 3,
+        "status": "found"
+      },
+      {
+        "index": 4,
+        "status": "found"
+      },
+      {
+        "index": 5,
+        "status": "found"
+      },
+      {
+        "index": 6,
+        "status": "found"
+      },
+      {
+        "index": 7,
+        "status": "found"
+      },
+      {
+        "index": 8,
+        "status": "found"
+      },
+      {
+        "index": 9,
+        "status": "found"
+      },
+      {
+        "index": 10,
+        "status": "found"
+      },
+      {
+        "index": 11,
+        "status": "found"
+      },
+      {
+        "index": 12,
+        "status": "found"
+      },
+      {
+        "index": 13,
+        "status": "found"
+      },
+      {
+        "index": 14,
+        "status": "found"
+      },
+      {
+        "index": 15,
+        "status": "found"
+      },
+      {
+        "index": 16,
+        "status": "found"
+      },
+      {
+        "index": 17,
+        "status": "found"
+      },
+      {
+        "index": 18,
+        "status": "found"
+      },
+      {
+        "index": 19,
+        "status": "found"
+      },
+      {
+        "index": 20,
+        "status": "found"
+      },
+      {
+        "index": 21,
+        "status": "found"
+      },
+      {
+        "index": 22,
+        "status": "found"
+      },
+      {
+        "index": 23,
+        "status": "found"
+      },
+      {
+        "index": 24,
+        "status": "found"
+      },
+      {
+        "index": 25,
+        "status": "found"
+      },
+      {
+        "index": 26,
+        "status": "found"
+      },
+      {
+        "index": 27,
+        "status": "found"
+      },
+      {
+        "index": 28,
+        "status": "found"
+      },
+      {
+        "index": 29,
+        "status": "found"
+      },
+      {
+        "index": 30,
+        "status": "found"
+      },
+      {
+        "index": 31,
+        "status": "found"
+      },
+      {
+        "index": 32,
+        "status": "found"
+      },
+      {
+        "index": 33,
+        "status": "found"
+      }
+    ],
+    "auth": {
+      "gateDetected": true,
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    }
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "PREVIEW-001",
+    "title": "Registro varios clientes",
+    "appSlug": "portal-empresarial",
+    "sectionSlug": "default-section",
+    "auth": {
+      "gateDetected": true,
+      "required": false,
+      "stage": "identification_input",
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    },
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Abrir la aplicación configurada del proyecto",
+        "operation": "navigate",
+        "target": {
+          "strategy": "url",
+          "value": "APP_BASE_URL"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Ingresar \"130598983\" en \"RNC de la empresa*\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "RNC de la empresa*"
+        },
+        "valueKey": "rnc_de_la_empresa",
+        "associatedField": "RNC de la empresa*",
+        "technicalTargetRef": "role:textbox|RNC de la empresa*",
+        "technicalTargetRefs": [
+          "role:textbox|RNC de la empresa*",
+          "css:#rnc",
+          "id:rnc"
+        ],
+        "controlIdentity": "3e7b2674871e|RNC de la empresa*|role|textbox|RNC de la empresa*",
+        "recordingActionType": "fill",
+        "authGateExpected": true,
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "RNC de la empresa*",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Ingresar \"olivam\" en \"Nombre de usuario*\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Nombre de usuario*"
+        },
+        "valueKey": "nombre_de_usuario",
+        "associatedField": "Nombre de usuario*",
+        "technicalTargetRef": "role:textbox|Nombre de usuario*",
+        "technicalTargetRefs": [
+          "role:textbox|Nombre de usuario*",
+          "css:#email",
+          "id:email"
+        ],
+        "controlIdentity": "3e7b2674871e|Nombre de usuario*|role|textbox|Nombre de usuario*",
+        "recordingActionType": "fill",
+        "authGateExpected": true,
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Nombre de usuario*",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Ingresar \"qwerty123123\" en \"Contraseña*\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Contraseña*"
+        },
+        "valueKey": "contrasena",
+        "associatedField": "Contraseña*",
+        "technicalTargetRef": "role:textbox|Contraseña*",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña*",
+          "css:#password",
+          "id:password"
+        ],
+        "controlIdentity": "3e7b2674871e|Contraseña*|role|textbox|Contraseña*",
+        "recordingActionType": "fill",
+        "authGateExpected": true,
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Contraseña*",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 4,
+        "scenarioStepIndex": 5,
+        "originalText": "Presionar \"Enter\" en \"Contraseña*\"",
+        "operation": "press",
+        "target": {
+          "strategy": "text",
+          "value": "Contraseña*",
+          "exact": false
+        },
+        "value": "Enter",
+        "technicalTargetRef": "role:textbox|Contraseña*",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña*",
+          "css:#password",
+          "id:password"
+        ],
+        "controlIdentity": "3e7b2674871e|Contraseña*|role|textbox|Contraseña*",
+        "recordingActionType": "press",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Contraseña*",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "pressPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 5,
+        "scenarioStepIndex": 6,
+        "originalText": "Presionar \"Gestión de Nóminas\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Gestión de Nóminas"
+        },
+        "valueKey": "gestion_de_nominas",
+        "associatedField": "Gestión de Nóminas",
+        "technicalTargetRef": "role:button|Gestión de Nóminas",
+        "technicalTargetRefs": [
+          "role:button|Gestión de Nóminas"
+        ],
+        "controlIdentity": "3e7b2674871e|Gestión de Nóminas|role|button|Gestión de Nóminas",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Gestión de Nóminas",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Gestión de Nóminas",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 6,
+        "scenarioStepIndex": 7,
+        "originalText": "Presionar \"Crear Manualmente\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Crear Manualmente"
+        },
+        "valueKey": "crear_manualmente",
+        "associatedField": "Crear Manualmente",
+        "technicalTargetRef": "role:button|Crear Manualmente",
+        "technicalTargetRefs": [
+          "role:button|Crear Manualmente"
+        ],
+        "controlIdentity": "3e7b2674871e|Crear Manualmente|role|button|Crear Manualmente",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Crear Manualmente",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 7,
+        "scenarioStepIndex": 8,
+        "originalText": "Presionar \"Close\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Close"
+        },
+        "valueKey": "close",
+        "associatedField": "Close",
+        "technicalTargetRef": "role:button|Close",
+        "technicalTargetRefs": [
+          "role:button|Close"
+        ],
+        "controlIdentity": "3e7b2674871e|Close|role|button|Close",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Close",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Close",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "radix-_r_11_"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 8,
+        "scenarioStepIndex": 9,
+        "originalText": "Presionar el control indicado",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Presionar el control indicado"
+        },
+        "technicalTargetRef": "css:td:has(button[aria-label=\"Seleccionar fila\"])",
+        "technicalTargetRefs": [
+          "css:td:has(button[aria-label=\"Seleccionar fila\"])"
+        ],
+        "controlIdentity": "3e7b2674871e|Seleccionar fila",
+        "recordingActionType": "check",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Seleccionar fila\"][role=\"checkbox\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button",
+              "role": "checkbox"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Seleccionar fila",
+              "role": "checkbox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "checkbox",
+          "normalizedName": "Seleccionar fila",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 9,
+        "scenarioStepIndex": 10,
+        "originalText": "Presionar el control indicado",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Presionar el control indicado"
+        },
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Presionar el control indicado",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 10,
+        "scenarioStepIndex": 11,
+        "originalText": "Presionar botón asociado a \"Tipo de ID\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Tipo de ID"
+        },
+        "valueKey": "entity_1.tipo_de_id",
+        "associatedField": "Tipo de ID",
+        "controlIdentity": "3e7b2674871e|entity_1|Tipo de ID",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 9,
+            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}"
+          },
+          "confidence": 0.85,
+          "certificationTier": 4
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 11,
+        "scenarioStepIndex": 12,
+        "originalText": "Presionar \"cédula\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "cédula"
+        },
+        "associatedField": "cédula",
+        "technicalTargetRef": "role:option|cédula",
+        "technicalTargetRefs": [
+          "role:option|cédula"
+        ],
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-labelledby=\"radix-_r_1i_\"][role=\"option\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-labelledby": "radix-_r_1i_",
+              "role": "option"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "span",
+                "stableAttributes": {
+                  "id": "radix-_r_1i_"
+                }
+              }
+            ],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "radix-_r_1g_"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"div\",\"role\":\"option\"},\"stableDirectAttributes\":{\"role\":\"option\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"span\",\"stableAttributes\":{\"id\":\"radix-_r_1i_\"}}],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "cédula",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(div[aria-labelledby=\"radix-_r_1i_\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 12,
+        "scenarioStepIndex": 13,
+        "originalText": "Ingresar \"10400143961\" en \"Colaborador\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Colaborador"
+        },
+        "valueKey": "entity_1.colaborador",
+        "associatedField": "Colaborador",
+        "controlIdentity": "3e7b2674871e|entity_1|Colaborador",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Colaborador",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 13,
+        "scenarioStepIndex": 14,
+        "originalText": "Ingresar \"Analista\" en \"Puesto\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Puesto"
+        },
+        "valueKey": "entity_1.puesto",
+        "associatedField": "Puesto",
+        "controlIdentity": "3e7b2674871e|entity_1|Puesto",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Puesto",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 14,
+        "scenarioStepIndex": 15,
+        "originalText": "Seleccionar \"DOP\" en \"Moneda\"",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "DOP"
+        },
+        "valueKey": "entity_1.moneda",
+        "associatedField": "Moneda",
+        "technicalTargetRef": "role:combobox|Moneda",
+        "technicalTargetRefs": [
+          "role:combobox|Moneda"
+        ],
+        "controlIdentity": "3e7b2674871e|entity_1|Moneda|role|combobox|Moneda",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[role=\"combobox\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button",
+              "role": "combobox"
+            },
+            "stableDirectAttributes": {
+              "role": "combobox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span",
+              "svg"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "combobox",
+          "normalizedName": "Moneda",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "resolvedExecutionTarget": "DOP",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 15,
+        "scenarioStepIndex": 16,
+        "originalText": "Ingresar \"30000\" en \"Ingresos\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Ingresos"
+        },
+        "valueKey": "entity_1.ingresos",
+        "associatedField": "Ingresos",
+        "controlIdentity": "3e7b2674871e|entity_1|Ingresos",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Ingresos",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 16,
+        "scenarioStepIndex": 17,
+        "originalText": "Ingresar \"calidad@test.com\" en \"Correo electrónico\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Correo electrónico"
+        },
+        "valueKey": "entity_1.correo_electronico",
+        "associatedField": "Correo electrónico",
+        "controlIdentity": "3e7b2674871e|entity_1|Correo electrónico",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Correo electrónico",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 17,
+        "scenarioStepIndex": 18,
+        "originalText": "Ingresar \"829-255-1232\" en \"Teléfono residencial\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Teléfono residencial"
+        },
+        "valueKey": "entity_1.telefono_residencial",
+        "associatedField": "Teléfono residencial",
+        "controlIdentity": "3e7b2674871e|entity_1|Teléfono residencial",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Teléfono residencial",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 18,
+        "scenarioStepIndex": 19,
+        "originalText": "Ingresar \"809-221-2121\" en \"Celular\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Celular"
+        },
+        "valueKey": "entity_1.celular",
+        "associatedField": "Celular",
+        "controlIdentity": "3e7b2674871e|entity_1|Celular",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Celular",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 19,
+        "scenarioStepIndex": 20,
+        "originalText": "Ingresar \"1995-02-20\" en \"Fecha de Ingreso\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Fecha de Ingreso"
+        },
+        "valueKey": "entity_1.fecha_de_ingreso",
+        "associatedField": "Fecha de Ingreso",
+        "controlIdentity": "3e7b2674871e|entity_1|Fecha de Ingreso",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Fecha de Ingreso",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 20,
+        "scenarioStepIndex": 21,
+        "originalText": "Presionar \"Añadir otro\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Añadir otro"
+        },
+        "valueKey": "entity_1.anadir_otro",
+        "associatedField": "Añadir otro",
+        "technicalTargetRef": "role:button|Añadir otro",
+        "technicalTargetRefs": [
+          "role:button|Añadir otro"
+        ],
+        "controlIdentity": "3e7b2674871e|entity_1|Añadir otro|role|button|Añadir otro",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Añadir otro",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 21,
+        "scenarioStepIndex": 22,
+        "originalText": "Presionar el control indicado",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Presionar el control indicado"
+        },
+        "controlIdentity": "3e7b2674871e|entity_2|Seleccionar fila",
+        "recordingActionType": "check",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Seleccionar fila\"][role=\"checkbox\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button",
+              "role": "checkbox"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Seleccionar fila",
+              "role": "checkbox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "checkbox",
+          "normalizedName": "Seleccionar fila",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 22,
+        "scenarioStepIndex": 23,
+        "originalText": "Presionar botón asociado a \"Tipo de ID\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Tipo de ID"
+        },
+        "valueKey": "entity_2.tipo_de_id",
+        "associatedField": "Tipo de ID",
+        "controlIdentity": "3e7b2674871e|entity_2|Tipo de ID",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 17,
+            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}"
+          },
+          "confidence": 0.85,
+          "certificationTier": 4
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 23,
+        "scenarioStepIndex": 24,
+        "originalText": "Presionar \"cédula\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "cédula"
+        },
+        "valueKey": "entity_2.cedula",
+        "selectionActivationField": "Tipo de ID",
+        "associatedField": "cédula",
+        "technicalTargetRef": "role:option|cédula",
+        "technicalTargetRefs": [
+          "role:option|cédula"
+        ],
+        "controlIdentity": "3e7b2674871e|entity_2|cédula|role|option|cédula",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-labelledby=\"radix-_r_3e_\"][role=\"option\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-labelledby": "radix-_r_3e_",
+              "role": "option"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "span",
+                "stableAttributes": {
+                  "id": "radix-_r_3e_"
+                }
+              }
+            ],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "radix-_r_3c_"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"div\",\"role\":\"option\"},\"stableDirectAttributes\":{\"role\":\"option\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"span\",\"stableAttributes\":{\"id\":\"radix-_r_3e_\"}}],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "cédula",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(div[aria-labelledby=\"radix-_r_3e_\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 24,
+        "scenarioStepIndex": 25,
+        "originalText": "Ingresar \"40224679551\" en \"Colaborador\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Colaborador"
+        },
+        "valueKey": "entity_2.colaborador",
+        "associatedField": "Colaborador",
+        "controlIdentity": "3e7b2674871e|entity_2|Colaborador",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Colaborador",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 25,
+        "scenarioStepIndex": 26,
+        "originalText": "Ingresar \"analista\" en \"Puesto\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Puesto"
+        },
+        "valueKey": "entity_2.puesto",
+        "associatedField": "Puesto",
+        "controlIdentity": "3e7b2674871e|entity_2|Puesto",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Puesto",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 26,
+        "scenarioStepIndex": 27,
+        "originalText": "Ingresar \"80000\" en \"Ingresos\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Ingresos"
+        },
+        "valueKey": "entity_2.ingresos",
+        "associatedField": "Ingresos",
+        "controlIdentity": "3e7b2674871e|entity_2|Ingresos",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Ingresos",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 27,
+        "scenarioStepIndex": 28,
+        "originalText": "Ingresar \"calidad@test.com\" en \"Correo electrónico\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Correo electrónico"
+        },
+        "valueKey": "entity_2.correo_electronico",
+        "associatedField": "Correo electrónico",
+        "controlIdentity": "3e7b2674871e|entity_2|Correo electrónico",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Correo electrónico",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 28,
+        "scenarioStepIndex": 29,
+        "originalText": "Ingresar \"8292551232\" en \"Teléfono residencial\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Teléfono residencial"
+        },
+        "valueKey": "entity_2.telefono_residencial",
+        "associatedField": "Teléfono residencial",
+        "controlIdentity": "3e7b2674871e|entity_2|Teléfono residencial",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Teléfono residencial",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 29,
+        "scenarioStepIndex": 30,
+        "originalText": "Ingresar \"809-221-2121\" en \"Celular\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Celular"
+        },
+        "valueKey": "entity_2.celular",
+        "associatedField": "Celular",
+        "controlIdentity": "3e7b2674871e|entity_2|Celular",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Celular",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 30,
+        "scenarioStepIndex": 31,
+        "originalText": "Ingresar \"2020-02-20\" en \"Fecha de Nacimiento\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Fecha de Nacimiento"
+        },
+        "valueKey": "entity_2.fecha_de_nacimiento",
+        "associatedField": "Fecha de Nacimiento",
+        "controlIdentity": "3e7b2674871e|entity_2|Fecha de Nacimiento",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Fecha de Nacimiento",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 31,
+        "scenarioStepIndex": 32,
+        "originalText": "Ingresar \"1995-02-20\" en \"Fecha de Ingreso\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Fecha de Ingreso"
+        },
+        "valueKey": "entity_2.fecha_de_ingreso",
+        "associatedField": "Fecha de Ingreso",
+        "controlIdentity": "3e7b2674871e|entity_2|Fecha de Ingreso",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Fecha de Ingreso",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 32,
+        "scenarioStepIndex": 33,
+        "originalText": "Presionar \"Validar\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Validar"
+        },
+        "valueKey": "entity_2.validar",
+        "associatedField": "Validar",
+        "technicalTargetRef": "role:button|Validar",
+        "technicalTargetRefs": [
+          "role:button|Validar"
+        ],
+        "controlIdentity": "3e7b2674871e|entity_2|Validar|role|button|Validar",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Validar",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Validar",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 33,
+      "representedScenarioSteps": 33,
+      "missingScenarioSteps": []
+    }
+  }
+}

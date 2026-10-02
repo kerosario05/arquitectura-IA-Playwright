@@ -4005,7 +4005,24 @@ export class PromotedSpecRuntime {
               },
             ).catch(() => undefined)
             : undefined;
-          const resolved = recorderRuntimeResolution?.status === "resolved" && recorderRuntimeResolution.locator
+          // FIRST_LOSS fix (portal-empresarial step4 "Contraseña*"): these three early
+          // candidates hardcoded editable:true without checking the resolved element is
+          // actually fillable. A Tier-5 text-based recorder match can land on a non-input
+          // element (e.g. a heading paragraph sharing nearby text with the field), and the
+          // old code trusted it unconditionally, then called .fill() on a <p>. Generic,
+          // multiproject: validates element tag only, never app/field-specific, and falls
+          // through to the next candidate (never a positional guess) when not fillable.
+          const validateFillableCandidate = async (locator: any): Promise<boolean> => {
+            const count = await locator.count().catch(() => 0);
+            if (count !== 1) return false;
+            const tagInfo = await locator.evaluate((el: Element) => ({
+              tag: el.tagName.toLowerCase(),
+              editable: (el as HTMLElement).isContentEditable === true,
+            })).catch(() => ({ tag: "", editable: false }));
+            return ["input", "textarea", "select"].includes(tagInfo.tag) || tagInfo.editable;
+          };
+          const resolved = (recorderRuntimeResolution?.status === "resolved" && recorderRuntimeResolution.locator
+            && await validateFillableCandidate(recorderRuntimeResolution.locator))
             ? {
               locator: recorderRuntimeResolution.locator,
               strategy: recorderRuntimeResolution.locatorStrategy ?? "recorded:playwright-recorder",
@@ -4014,7 +4031,8 @@ export class PromotedSpecRuntime {
               enabled: true,
               editable: true,
             }
-            : unboundGridFieldResolution?.status === "resolved" && unboundGridFieldResolution.locator
+            : (unboundGridFieldResolution?.status === "resolved" && unboundGridFieldResolution.locator
+            && await validateFillableCandidate(unboundGridFieldResolution.locator))
             ? {
               locator: unboundGridFieldResolution.locator,
               strategy: unboundGridFieldResolution.locatorStrategy ?? "grid_cell_editor",
@@ -4023,7 +4041,8 @@ export class PromotedSpecRuntime {
               enabled: true,
               editable: true,
             }
-            : structuralResolution?.status === "resolved" && structuralResolution.locator
+            : (structuralResolution?.status === "resolved" && structuralResolution.locator
+            && await validateFillableCandidate(structuralResolution.locator))
             ? {
               locator: structuralResolution.locator,
               strategy: structuralResolution.locatorStrategy ?? "structured:grid-cell-editor",
@@ -4442,12 +4461,16 @@ export class PromotedSpecRuntime {
           recordingActionType: "select",
           selectionField,
           selectionValue: runtimeValue,
+          playwrightRecorderEvidence: options.playwrightRecorderEvidence,
           rowScope: rowScopeFromPromotedRef(parsedTargetRefs.rowRef),
           rowRef: parsedTargetRefs.rowRef,
           entityScope: targetIdentity?.entityScope,
           associatedField: options.associatedField?.trim() || selectionField,
         },
       ).catch(() => undefined);
+      if (options.playwrightRecorderEvidence?.nativeSelection && !structuredResolution?.selectionApplied) {
+        throw new Error("Recorded native selection was not applied and verified");
+      }
       const nativeSelectionApplied = structuredResolution?.status === "resolved" && structuredResolution.locator
         ? await applyPromotedNativeSelection(structuredResolution.locator, runtimeValue)
         : false;
@@ -4517,6 +4540,7 @@ export class PromotedSpecRuntime {
             recordingActionType: "select",
             selectionField: effectiveSelectionField,
             selectionValue: runtimeValue,
+            playwrightRecorderEvidence: options.playwrightRecorderEvidence,
             rowScope: rowScopeFromPromotedRef(parsedTargetRefs.rowRef),
             rowRef: parsedTargetRefs.rowRef,
             entityScope: targetIdentity.entityScope,

@@ -23,6 +23,7 @@ import { STRUCTURAL_OWNER_IDENTITY_SOURCE } from "../structural-owner-identity";
 import { ACTIONABILITY_CONTRACT_SOURCE } from "../actionability-contract";
 import { CLASSIFY_NATIVE_ROLE_IDENTITY_SOURCE } from "../capture-engine-v2.native-role-identity";
 import { GENERIC_UNRESOLVED_LABELS, isGenericUnresolvedLabel } from "../trace-normalizer";
+import { CAPTURE_NATIVE_SELECTION_SOURCE } from "../native-selection-capture";
 
 export function buildCaptureScriptV2Content(captureInstanceId: string): string {
   return String.raw`
@@ -41,6 +42,7 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
   var currentSessionTrusted = false;
   var currentSessionRawValue = "";
   var pendingRawInput = null;
+  var captureNativeSelection = ${CAPTURE_NATIVE_SELECTION_SOURCE};
   var pointerInteractionCounter = 0;
   var pendingPointerInteractionId = null;
   // Keep browser-to-Node binding calls observable until their exposed-binding promises settle.
@@ -1117,6 +1119,21 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
         });
       }
     } catch (e) { /* diagnostic must never break capture */ }
+    // Carry the option-to-control DOM relation through the existing recorder evidence channel.
+    // This does not promote a candidate to owner or alter the physical click stream.
+    if (originalTarget && candidates.length > 0) {
+      try {
+        var nativeSelection = captureNativeSelection(originalTarget);
+        if (nativeSelection) {
+          candidates.forEach(function (candidate) {
+            candidate.playwrightRecorderEvidence = Object.assign({}, candidate.playwrightRecorderEvidence || {
+              kind: "text", normalizedName: normalizeSemanticValue(semanticDisplayValueOf(originalTarget).value),
+              targetTag: (originalTarget.tagName || "").toLowerCase(), runtimeResolutionRequired: true
+            }, { nativeSelection: nativeSelection });
+          });
+        }
+      } catch (e) { /* unsupported/transient DOM relation never certifies a selection */ }
+    }
     return candidates;
   }
 

@@ -1,0 +1,66 @@
+{
+  "mode": "deterministic",
+  "provider": null,
+  "model": null,
+  "skill": {
+    "name": null,
+    "version": null,
+    "hash": null,
+    "loaded": false
+  },
+  "invocations": 0,
+  "invocationsConsumed": 0,
+  "durationMs": 83493,
+  "usage": {
+    "inputTokens": null,
+    "cachedInputTokens": null,
+    "cacheWriteInputTokens": null,
+    "nonCachedInputTokens": null,
+    "outputTokens": null,
+    "reasoningOutputTokens": null,
+    "totalPhysicalTokens": null,
+    "durationMs": null,
+    "credits": null
+  },
+  "validation": {
+    "schema": "skipped",
+    "structure": "passed",
+    "traceFidelity": "skipped",
+    "typescript": "passed",
+    "playwrightDiscovery": "passed",
+    "semanticCoverage": "passed",
+    "functionalExecution": "failed"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "specGenerationAttempts": 0,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [
+    "functionalExecution"
+  ],
+  "regressedGates": [],
+  "missingRequirements": [],
+  "oracleTypes": [],
+  "errors": [
+    "functional_execution_failed:exitCode=1",
+    "functional_execution_error:Error: Promoted fill failed at step 4 field=\"role:textbox|Contraseña*\" value=\"qwerty123123\". fillPath=failed nativeFillAttempted=true nativeFillSucceeded=false callbackAttempted=true callbackSucceeded=false diagnostics={\"currentUrl\":\"https://172.27.4.31/login\",\"actionIntent\":\"fill\",\"target\":\"role:textbox|Contraseña*\",\"stepIndex\":4,\"timeoutMs\":15000,\"activeContainer\":\"form\",\"retryAttempted\":false,\"previousActiveContainer\":\"form\",\"refreshedActiveContainer\":\"form\",\"matchingFieldFound\":false,\"fallbackUsed\":\"none\",\"searchedContainers\":1,\"discardedReason\":\"stale_or_not_matching_field\",\"matchedLocatorStrategy\":\"text\",\"valueKey\":\"contrasena\",\"technicalTargetRefs\":[],\"fieldCandidateCount\":3,\"fillPath\":\"failed\",\"nativeFillAttempted\":true,\"nativeFillSucceeded\":false,\"nativeFillError\":\"locator.fill: Error: Element is not an <input>, <textarea>, <select> or [contenteditable] and does not have a role allowing [aria-readonly]\\nCall log:\\n\\u001b[2m  - waiting for getByText(/[aàáâãäå][cç][cç][eèéêë]d[eèéêë]\\\\s*[cç][oòóôõö][nñ]\\\\s*t[uùúûü]s\\\\s*[cç]r[eèéêë]d[eèéêë][nñ][cç][iìíîï][aàáâãäå]l[eèéêë]s/i).first()\\u001b[22m\\n\\u001b[2m    - locator resolved to <p class=\\\"!text-[#1d3557] !text-[17px] !font-bold !font-['Myriad_Pro'] !sm:text-[19px]\\\">Accede con tus credenciales</p>\\u001b[22m\\n\\u001b[2m    - fill(\\\"qwerty123123\\\")\\u001b[22m\\n\\u001b[2m  - attempting fill action\\u001b[22m\\n\\u001b[2m    - waiting for element to be visible, enabled and editable\\u001b[22m\\n\",\"callbackAttempted\":true,\"callbackSucceeded\":false,\"callbackError\":\"Fill callback failed: fill action timed out after 15000ms\",\"verificationAttempted\":false,\"verificationSucceeded\":false,\"screenshotPath\":\"[REDACTED]\"}"
+  ],
+  "warnings": [
+    "functional_execution_screenshots=0",
+    "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 4)."
+  ],
+  "finalSpec": {
+    "origin": "deterministic_compiler",
+    "generatedBy": "core",
+    "strategy": "deterministic_compiler",
+    "fallback": null
+  },
+  "runtimeGate": {
+    "decision": "block",
+    "promotionStatus": "blocked",
+    "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 4)."
+  }
+}

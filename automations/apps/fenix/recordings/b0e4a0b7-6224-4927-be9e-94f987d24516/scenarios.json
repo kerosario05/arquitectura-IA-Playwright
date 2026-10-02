@@ -1449,11 +1449,11 @@
         "needsReview": true
       }
     ],
-    "testRailCaseId": 48593,
+    "testRailCaseId": 47863,
     "testRailDestination": {
       "projectId": "56",
       "suiteId": "1731",
-      "sectionId": "6285"
+      "sectionId": "4755"
     },
     "promotedSpec": {
       "appSlug": "fenix",

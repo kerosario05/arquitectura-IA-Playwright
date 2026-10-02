@@ -487,6 +487,11 @@ recordingsRouter.post("/start", async (req, res) => {
       sendError(res, 400, "MISSING_PROJECT_SLUG", "projectSlug es obligatorio");
       return;
     }
+    const browserMode = body.browserMode;
+    if (browserMode !== undefined && browserMode !== "integrated" && browserMode !== "desktop") {
+      sendError(res, 400, "INVALID_BROWSER_MODE", 'browserMode debe ser "integrated" o "desktop"');
+      return;
+    }
     console.log(`[recordings:goal-lineage] proxyGoal=${JSON.stringify(typeof body.recordingGoal === "string" ? body.recordingGoal : undefined)} label=${JSON.stringify(typeof body.label === "string" ? body.label : undefined)}`);
     // captureAuthority is deliberately NOT read from the request body: CaptureEngine V2 is the
     // WEB recorder now, not a client-selectable feature. startRecording resolves its own
@@ -507,7 +512,14 @@ recordingsRouter.post("/start", async (req, res) => {
           }
         : undefined,
       avdName: typeof body.avdName === "string" ? body.avdName : undefined,
-      headless: typeof body.headless === "boolean" ? body.headless : undefined,
+      // Browser presentation is independent from capture authority. The integrated view keeps
+      // the existing headless Chromium + live stream; desktop opens that same recorder-owned
+      // Page in a visible Chromium window. Omitted mode preserves legacy headless compatibility.
+      headless: browserMode === "integrated"
+        ? true
+        : browserMode === "desktop"
+          ? false
+          : typeof body.headless === "boolean" ? body.headless : undefined,
       sensitiveLabels: Array.isArray(body.sensitiveLabels)
         ? body.sensitiveLabels.filter((s: unknown): s is string => typeof s === "string")
         : undefined,

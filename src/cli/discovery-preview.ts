@@ -631,7 +631,10 @@ export function virtualCaseToTestScenario(vc: VirtualCase, routeProfile?: McpRou
     const normalizedFieldLabel = fieldLabelMatch ? normalizeSemanticText(fieldLabelMatch[1].trim()) : "";
     const samePositionFieldMatch = !samePositionMatch && normalizedFieldLabel
       ? recordingActions.find(({ action, stepIndex }) => {
-        if (stepIndex !== index + 1) return false;
+        // Recording contract stepIndex follows the authored array's zero-based
+        // position. Keep the field-label equality check as the identity guard;
+        // position alone must never bind data across repeated row fields.
+        if (stepIndex !== index && stepIndex !== index + 1) return false;
         const recordedField = action.associatedField ?? action.semanticField;
         return typeof recordedField === "string"
           && normalizeSemanticText(recordedField.trim()) === normalizedFieldLabel;
@@ -671,6 +674,7 @@ export function virtualCaseToTestScenario(vc: VirtualCase, routeProfile?: McpRou
         semanticRuntimeEvidence: matchedRecordingAction.semanticRuntimeEvidence,
         playwrightRecorderEvidence: matchedRecordingAction.playwrightRecorderEvidence,
         associatedField: matchedRecordingAction.associatedField,
+        ...(matchedRecordingAction.valueKey ? { valueKey: matchedRecordingAction.valueKey } : {}),
         ...(matchedRecordingAction.entityScope ? { entityScope: matchedRecordingAction.entityScope } : {}),
         ...(matchedRecordingAction.rowScope !== undefined ? { rowScope: matchedRecordingAction.rowScope } : {}),
         ...(matchedRecordingAction.rowRelation ? { rowRelation: matchedRecordingAction.rowRelation } : {}),

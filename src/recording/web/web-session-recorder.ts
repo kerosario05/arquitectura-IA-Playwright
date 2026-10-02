@@ -66,6 +66,8 @@ export type WebRecorderOptions = {
   /** QA-only project policy; false keeps secure values out of the trace. */
   persistQaCredentials?: boolean;
   browserName?: "chromium" | "firefox" | "webkit";
+  /** Browser presentation only; capture scripts and authority are identical in both modes. */
+  headless?: boolean;
   /** Labels or names whose typed content must never be stored verbatim. */
   sensitiveLabels?: string[];
   /**
@@ -1963,7 +1965,7 @@ export class WebSessionRecorder {
     const engine =
       this.options.browserName === "firefox" ? firefox : this.options.browserName === "webkit" ? webkit : chromium;
 
-    this.browser = await engine.launch({ headless: true });
+    this.browser = await engine.launch({ headless: this.options.headless ?? true });
     this.context = await this.browser.newContext(
       buildWebRecorderContextOptions(this.options.ignoreHTTPSErrors),
     );

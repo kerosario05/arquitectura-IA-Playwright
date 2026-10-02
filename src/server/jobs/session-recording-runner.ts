@@ -343,6 +343,7 @@ export async function startRecording(params: StartRecordingParams): Promise<{
       recorder = new WebSessionRecorder({
         baseUrl: target.baseUrl!,
         ignoreHTTPSErrors: target.ignoreHTTPSErrors,
+        headless: params.headless,
         framesDir,
         // Web recording is live interaction capture; screenshots add latency to the
         // ingestion path and do not contribute to the captured action sequence.

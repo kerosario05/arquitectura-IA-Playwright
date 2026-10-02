@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-registro-varios-clientes",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Registro varios clientes",
+  "source": "discovery",
+  "appSlug": "portal-empresarial",
+  "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
+  "createdAt": "2026-10-02T01:24:14.301Z"
+}

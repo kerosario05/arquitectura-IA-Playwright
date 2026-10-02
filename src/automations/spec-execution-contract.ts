@@ -850,9 +850,17 @@ function findCompatiblePlanStep(
         .find((intent) => intent.type === "action_fill" && typeof intent.actionTarget === "string" && intent.actionTarget.trim().length > 0)
         ?.actionTarget?.trim()
     : undefined;
-  const scenarioTarget = parsedFillTarget
+  const rawScenarioTarget = parsedFillTarget
     ?? extractQuotedText(scenarioStep.expected)
     ?? extractQuotedText(scenarioStep.description);
+  // Recorder-generated placeholders describe that a control was acted on but carry no target
+  // identity. Treating the whole phrase as a literal target blocks the exact-index/operation
+  // reconciliation below and drops the validated plan's technical authority. Keep the placeholder
+  // non-identifying; the matched plan/recording contract remains the sole source of target data.
+  const isGenericControlPlaceholder = typeof rawScenarioTarget === "string"
+    && /^(?:(?:presionar|pulsar|hacer clic en|click|tap)\s+)?(?:(?:el|la|the)\s+)?(?:control|elemento|element)(?:\s+(?:indicado|indicated|grabado|recorded|seleccionado|selected))?$/i
+      .test(normalizeSemanticText(rawScenarioTarget));
+  const scenarioTarget = isGenericControlPlaceholder ? undefined : rawScenarioTarget;
   const normalizedScenarioTarget = scenarioTarget ? normalizeOracleMatch(scenarioTarget) : "";
 
   // 1. Explicit scenarioStepIndex + same operation (traceable plan step).

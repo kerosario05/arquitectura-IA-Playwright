@@ -387,6 +387,13 @@ function extractQuotedAssertionTarget(text: string | undefined): string | undefi
   return match ? match[1].trim() : undefined;
 }
 
+function extractAuthoredFieldTarget(text: string | undefined): string | undefined {
+  if (!text || !/^(fill|completar|ingresar|escribir|llenar|digitar|type)\b/i.test(text.trim())) return undefined;
+  // Fill instructions may contain a changing value first and the field label last.
+  const match = text.match(/\b(?:en|in|into)\s+["“]([^"”]+)["”]\s*$/i);
+  return match?.[1]?.trim() || undefined;
+}
+
 function isAssertionAction(text: string | undefined): boolean {
   return /^(validar|verificar|assert|comprobar|confirmar|mostrar|visualizar|se\s+muestr)/i.test((text ?? "").trim());
 }
@@ -871,7 +878,12 @@ export function buildPromotionSourceScenario(
   const claimedRecordingActions = new Set<number>();
   for (const scenarioStep of scenario.steps) {
     const normalizedAction = normalizeOracleText(scenarioStep.action ?? "");
-    const normalizedTarget = normalizeOracleText(extractQuotedAssertionTarget(scenarioStep.action) ?? scenarioStep.action ?? "");
+    const normalizedTarget = normalizeOracleText(
+      extractAuthoredFieldTarget(scenarioStep.action)
+      ?? extractQuotedAssertionTarget(scenarioStep.action)
+      ?? scenarioStep.action
+      ?? "",
+    );
     const candidates = (recordingExecutionContract?.actions ?? []).map((action, actionIndex) => ({ action, actionIndex }))
       .filter(({ action, actionIndex }) => !claimedRecordingActions.has(actionIndex))
       .filter(({ action }) => {

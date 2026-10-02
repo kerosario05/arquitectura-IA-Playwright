@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-10-01T21:35:55.446Z",
+  "updatedAt": "2026-10-02T01:34:06.358Z",
   "automations": [
     {
       "id": "c10002-test-automation-plan",
@@ -46958,6 +46958,256 @@
       "promotionPersisted": true,
       "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\roke\\sections\\default-section\\cases\\preview-001-qa14\\case.spec.ts",
       "promotedSpecHash": "bb25ddc66f6a22ea78827f34367b43d65591bc758f604af3e3580a04c7085f11"
+    },
+    {
+      "id": "preview-001-registro-varios-clientes",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "Registro varios clientes",
+      "planPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-registro-varios-clientes\\plan.json",
+      "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-registro-varios-clientes\\case.spec.ts",
+      "appSlug": "portal-empresarial",
+      "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
+      "status": "spec_failed",
+      "source": "discovery",
+      "appProfile": "portal-empresarial",
+      "createdAt": "2026-10-02T00:02:32.104Z",
+      "updatedAt": "2026-10-02T01:24:14.367Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-02T01-19-33-929Z\\discovered-plans.pending.json",
+      "pomStatus": "needs_manual_review",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "failed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-02T01-19-33-929Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 83493,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "failed"
+          },
+          "promotionAllowed": false,
+          "specsRequested": 1,
+          "specsValidated": 0,
+          "specsRejected": 1,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": false,
+          "failedGatesAttempt1": [
+            "functionalExecution"
+          ],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [],
+          "errors": [
+            "functional_execution_failed:exitCode=1",
+            "functional_execution_error:Error: Promoted fill failed at step 4 field=\"role:textbox|Contraseña*\" value=\"qwerty123123\". fillPath=failed nativeFillAttempted=true nativeFillSucceeded=false callbackAttempted=true callbackSucceeded=false diagnostics={\"currentUrl\":\"https://172.27.4.31/login\",\"actionIntent\":\"fill\",\"target\":\"role:textbox|Contraseña*\",\"stepIndex\":4,\"timeoutMs\":15000,\"activeContainer\":\"form\",\"retryAttempted\":false,\"previousActiveContainer\":\"form\",\"refreshedActiveContainer\":\"form\",\"matchingFieldFound\":false,\"fallbackUsed\":\"none\",\"searchedContainers\":1,\"discardedReason\":\"stale_or_not_matching_field\",\"matchedLocatorStrategy\":\"text\",\"valueKey\":\"contrasena\",\"technicalTargetRefs\":[],\"fieldCandidateCount\":3,\"fillPath\":\"failed\",\"nativeFillAttempted\":true,\"nativeFillSucceeded\":false,\"nativeFillError\":\"locator.fill: Error: Element is not an <input>, <textarea>, <select> or [contenteditable] and does not have a role allowing [aria-readonly]\\nCall log:\\n\\u001b[2m  - waiting for getByText(/[aàáâãäå][cç][cç][eèéêë]d[eèéêë]\\\\s*[cç][oòóôõö][nñ]\\\\s*t[uùúûü]s\\\\s*[cç]r[eèéêë]d[eèéêë][nñ][cç][iìíîï][aàáâãäå]l[eèéêë]s/i).first()\\u001b[22m\\n\\u001b[2m    - locator resolved to <p class=\\\"!text-[#1d3557] !text-[17px] !font-bold !font-['Myriad_Pro'] !sm:text-[19px]\\\">Accede con tus credenciales</p>\\u001b[22m\\n\\u001b[2m    - fill(\\\"qwerty123123\\\")\\u001b[22m\\n\\u001b[2m  - attempting fill action\\u001b[22m\\n\\u001b[2m    - waiting for element to be visible, enabled and editable\\u001b[22m\\n\",\"callbackAttempted\":true,\"callbackSucceeded\":false,\"callbackError\":\"Fill callback failed: fill action timed out after 15000ms\",\"verificationAttempted\":false,\"verificationSucceeded\":false,\"screenshotPath\":\"C:\\\\MisProyectos\\\\arquitectura-IA-Playwright-feature-auth-gate\\\\.artifacts\\\\promoted-runtime\\\\step-004.png\"}"
+          ],
+          "warnings": [
+            "functional_execution_screenshots=0",
+            "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 4)."
+          ],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "block",
+            "promotionStatus": "blocked",
+            "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 4)."
+          },
+          "specWritten": false,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "spec_generation_validation_failed",
+          "blockers": [
+            "spec_generation_validation_failed"
+          ],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-registro-varios-clientes\\case.spec.ts",
+          "specHash": "63ca968ee162329fd8a5b4d0b8eedebfd3833550dbe0ab21789409b7db197714",
+          "specSource": "ai_candidate"
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-registro-varios-clientes\\plan.json",
+        "previousStatus": "spec_failed"
+      }
+    },
+    {
+      "id": "preview-001-qa15",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "QA15",
+      "planPath": "automations\\apps\\roke\\sections\\default-section\\cases\\preview-001-qa15\\plan.json",
+      "specPath": "automations\\apps\\roke\\sections\\default-section\\cases\\preview-001-qa15\\case.spec.ts",
+      "appSlug": "roke",
+      "appConfigPath": "automations\\apps\\roke\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "roke",
+      "createdAt": "2026-10-02T01:34:06.291Z",
+      "updatedAt": "2026-10-02T01:34:06.358Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-02T01-29-08-774Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-02T01-29-08-774Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 184177,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [],
+          "errors": [],
+          "warnings": [],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\roke\\sections\\default-section\\cases\\preview-001-qa15\\case.spec.ts",
+          "specHash": "d4a7b2df23ef3b46b6fab077d7d1b3075c9db5bdbe97bf6f078e9e344f059dfa",
+          "specSource": "generatedSpec"
+        }
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\roke\\sections\\default-section\\cases\\preview-001-qa15\\case.spec.ts",
+      "promotedSpecHash": "d4a7b2df23ef3b46b6fab077d7d1b3075c9db5bdbe97bf6f078e9e344f059dfa"
     }
   ]
 }
