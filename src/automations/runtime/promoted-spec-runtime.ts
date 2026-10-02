@@ -492,6 +492,7 @@ export type PromotedActionOptions = {
   actionIntent: string;
   expectedEffect?: PromotedExpectedEffect;
   selectionValue?: string;
+  selectionIndex?: number;
   selectionField?: string;
   associatedField?: string;
   sensitive?: boolean;
@@ -915,6 +916,9 @@ export async function resolvePromotedFieldLocator(
     timeoutMs?: number;
     targetIdentity?: PromotedFieldTargetIdentity;
     technicalTargetRefs?: string[];
+    // Recorded css:/id:/data-testid: refs from the spec call itself; kept separate because a
+    // persisted-contract identity can replace targetIdentity.technicalTargetRefs wholesale.
+    directRefs?: string[];
   }
 ): Promise<{
   locator: any;
@@ -935,6 +939,12 @@ export async function resolvePromotedFieldLocator(
     : undefined);
 
   const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  // FIRST_LOSS fix (portal-empresarial step4 "Contraseña*"): field labels carrying a
+  // required-field marker like a trailing "*" were passed unescaped into `new RegExp`,
+  // where "*" is a quantifier, not a literal character. Escaping once here (reusing the
+  // same escapeRegExp already used elsewhere in this function) keeps every strategy below
+  // matching the literal label text, for any field name on any project.
+  const escapedField = escapeRegExp(normalizedField);
   const validateEditableCandidate = async (locator: any, scope: "container" | "page", strategy: string) => {
     const count = await locator.count().catch(() => 0);
     if (count !== 1) return undefined;
@@ -1088,6 +1098,27 @@ export async function resolvePromotedFieldLocator(
   const structured = await resolveStructuredCandidate();
   if (structured) return structured;
 
+  // FIRST_LOSS fix (portal-empresarial login fills): the Recording already captured stable
+  // direct-attribute refs (css:#id / id:x) next to the weak role+name ref, but the promoted fill
+  // only ever had display text to match (label/placeholder wording differs from the accessible
+  // name), so no strategy resolved. Try those recorded refs FIRST, accepting only a unique,
+  // visible, enabled, genuinely fillable element (validateEditableCandidate) -- never positional,
+  // never app-specific; on 0/>1 matches it falls through to the existing strategies unchanged.
+  for (const ref of [...(identity?.technicalTargetRefs ?? []), ...(options?.directRefs ?? [])]) {
+    const separator = ref.indexOf(":");
+    if (separator < 0) continue;
+    const refStrategy = ref.slice(0, separator).trim().toLowerCase();
+    const refValue = ref.slice(separator + 1).trim();
+    if (!refValue) continue;
+    let directLocator: any;
+    if (refStrategy === "css") directLocator = page.locator(refValue);
+    else if (refStrategy === "id") directLocator = page.locator(`[id="${refValue.replace(/"/g, '\\"')}"]`);
+    else if (refStrategy === "data-testid") directLocator = page.getByTestId(refValue);
+    else continue;
+    const directResolved = await validateEditableCandidate(directLocator, "page", `recorded:${refStrategy}`);
+    if (directResolved) return directResolved;
+  }
+
   // Dynamic grids may be re-mounted immediately after a preceding selection.
   // Re-observe the structural surface once before allowing a legacy callback
   // to take authority over the current contract.
@@ -1159,17 +1190,17 @@ export async function resolvePromotedFieldLocator(
     {
       name: "activeContainer:getByLabel",
       scope: "container",
-      build: () => container?.getByLabel(new RegExp(normalizedField, "i"))
+      build: () => container?.getByLabel(new RegExp(escapedField, "i"))
     },
     {
       name: "activeContainer:getByPlaceholder",
       scope: "container",
-      build: () => container?.getByPlaceholder(new RegExp(normalizedField, "i"))
+      build: () => container?.getByPlaceholder(new RegExp(escapedField, "i"))
     },
     {
       name: "activeContainer:getByRoleTextboxName",
       scope: "container",
-      build: () => container?.getByRole("textbox", { name: new RegExp(normalizedField, "i") })
+      build: () => container?.getByRole("textbox", { name: new RegExp(escapedField, "i") })
     },
     {
       name: "activeContainer:inputByName",
@@ -1190,7 +1221,7 @@ export async function resolvePromotedFieldLocator(
       name: "activeContainer:nearLabel",
       scope: "container",
       build: () => {
-        const label = container?.getByText(new RegExp(normalizedField, "i"), { exact: false });
+        const label = container?.getByText(new RegExp(escapedField, "i"), { exact: false });
         return label?.locator("xpath=following-sibling::input | following-sibling::textarea | following::input[1] | following::textarea[1]");
       }
     },
@@ -1198,17 +1229,17 @@ export async function resolvePromotedFieldLocator(
     {
       name: "page:getByLabel",
       scope: "page",
-      build: () => page.getByLabel(new RegExp(normalizedField, "i"))
+      build: () => page.getByLabel(new RegExp(escapedField, "i"))
     },
     {
       name: "page:getByPlaceholder",
       scope: "page",
-      build: () => page.getByPlaceholder(new RegExp(normalizedField, "i"))
+      build: () => page.getByPlaceholder(new RegExp(escapedField, "i"))
     },
     {
       name: "page:getByRoleTextboxName",
       scope: "page",
-      build: () => page.getByRole("textbox", { name: new RegExp(normalizedField, "i") })
+      build: () => page.getByRole("textbox", { name: new RegExp(escapedField, "i") })
     },
     {
       name: "page:inputByName",
@@ -4054,6 +4085,7 @@ export class PromotedSpecRuntime {
             : await resolvePromotedFieldLocator(this.page, resolvedField, {
               containerLocator: refresh.best ? containerSelector : undefined,
               targetIdentity,
+              directRefs: options.technicalTargetRefs,
               timeoutMs: this.config.actionTimeoutMs
             });
 
@@ -4344,6 +4376,31 @@ export class PromotedSpecRuntime {
       );
       throw error;
     }
+    // FIRST_LOSS fix (portal-empresarial step5 press Enter on a login field): the weak recorded
+    // role+name ref can fail to resolve in a fresh browser while the Recording also captured a
+    // stable direct-attribute ref (css:#id / id:x / data-testid:x). Same discipline as the fill
+    // path: accept one only if it resolves to exactly one element; otherwise keep the existing
+    // fail-closed outcome below. Never positional, never app-specific.
+    if (serialized && matchCount !== 1) {
+      for (const ref of options.technicalTargetRefs ?? []) {
+        const separator = ref.indexOf(":");
+        if (separator < 0) continue;
+        const refStrategy = ref.slice(0, separator).trim().toLowerCase();
+        const refValue = ref.slice(separator + 1).trim();
+        if (!refValue) continue;
+        let directLocator: any;
+        if (refStrategy === "css") directLocator = this.page.locator(refValue);
+        else if (refStrategy === "id") directLocator = this.page.locator(`[id="${refValue.replace(/"/g, '\\"')}"]`);
+        else if (refStrategy === "data-testid") directLocator = this.page.getByTestId(refValue);
+        else continue;
+        if (await directLocator.count().catch(() => 0) !== 1) continue;
+        structuralLocator = directLocator;
+        matchCount = 1;
+        serialized = { ...serialized, strategy: "css", value: refStrategy === "css" ? refValue : refStrategy === "id" ? `[id="${refValue.replace(/"/g, '\\"')}"]` : `[data-testid="${refValue.replace(/"/g, '\\"')}"]` } as typeof serialized;
+        console.log(`[promoted-press-resolution] step=${options.stepIndex} directRefAdmitted=${refStrategy}`);
+        break;
+      }
+    }
     if (serialized) {
       const exactUsed = false;
       const parsedRoleOrTag = serialized.strategy === "role" ? serialized.value.split("|")[0]?.trim() : undefined;
@@ -4441,8 +4498,14 @@ export class PromotedSpecRuntime {
       valueKey: options.valueKey,
       technicalTargetRefs: options.technicalTargetRefs,
     });
+    const capturedIndexSelection = options.playwrightRecorderEvidence?.nativeSelection;
+    const recordedIndexSeed = capturedIndexSelection?.selectionMode === "index"
+      && Number.isInteger(options.selectionIndex ?? capturedIndexSelection.selectedOptionIndex)
+      ? capturedIndexSelection.clickedOption?.label
+      : undefined;
     const runtimeValue = options.selectionValue?.trim()
-      || resolvePromotedRuntimeValue(targetIdentity?.valueKey ?? options.valueKey);
+      || resolvePromotedRuntimeValue(targetIdentity?.valueKey ?? options.valueKey)
+      || recordedIndexSeed;
     const targetRefs = targetIdentity?.technicalTargetRefs ?? [];
     const parsedTargetRefs = parseTechnicalTargetRefs(targetRefs);
     const selectionField = options.selectionField?.trim()

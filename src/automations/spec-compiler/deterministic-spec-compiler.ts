@@ -549,7 +549,13 @@ function compileFillStep(
     lines.push(`      valueKey: '${escapeString(step.valueKey)}',`);
   }
   if (usesRefLocator) {
-    lines.push(`      technicalTargetRefs: ['${escapeString(refForBinding!)}'],`);
+    // Recorded stable direct-attribute refs (css:#id / id:x / data-testid:x) captured alongside a
+    // weak role+name primary ref are transported too, so the promoted runtime can resolve the
+    // exact field instead of guessing from display text. Pure transport of recorded evidence.
+    const stableExtraRefs = (step.technicalTargetRefs ?? []).filter((ref) =>
+      ref !== refForBinding && /^(css|id|data-testid):\S/i.test(ref.trim()));
+    const allRefs = [refForBinding!, ...stableExtraRefs];
+    lines.push(`      technicalTargetRefs: [${allRefs.map((ref) => `'${escapeString(ref)}'`).join(", ")}],`);
   }
   if (isRuntimeDeferred && step.playwrightRecorderEvidence) {
     lines.push(`      playwrightRecorderEvidence: ${JSON.stringify(step.playwrightRecorderEvidence)},`);
@@ -618,6 +624,12 @@ function compilePressStep(
   lines.push(`    await pageObject.${pomMethod}({`);
   lines.push(`      stepIndex: ${step.scenarioStepIndex},`);
   lines.push(`      target: '${escapeString(resolvedTarget)}',`);
+  // Recorded stable direct-attribute refs transported as fallback evidence (see compileFillStep).
+  const stablePressRefs = (step.technicalTargetRefs ?? []).filter((ref) =>
+    /^(css|id|data-testid):\S/i.test(ref.trim()));
+  if (stablePressRefs.length > 0) {
+    lines.push(`      technicalTargetRefs: [${stablePressRefs.map((ref) => `'${escapeString(ref)}'`).join(", ")}],`);
+  }
   lines.push(`      key: '${escapeString(key)}'`);
   lines.push(`    });`);
 
@@ -634,7 +646,7 @@ function compilePressStep(
     actionIntent: "restore_recorded_context",
     targetRef: resolvedTarget,
     sensitive: false,
-    replayExpr: `async () => { await pageObject.${pomMethod}({ stepIndex: ${step.scenarioStepIndex}, target: '${escapeString(resolvedTarget)}', key: '${escapeString(key)}' }); }`,
+    replayExpr: `async () => { await pageObject.${pomMethod}({ stepIndex: ${step.scenarioStepIndex}, target: '${escapeString(resolvedTarget)}',${stablePressRefs.length > 0 ? ` technicalTargetRefs: [${stablePressRefs.map((ref) => `'${escapeString(ref)}'`).join(", ")}],` : ""} key: '${escapeString(key)}' }); }`,
   });
 }
 
@@ -832,7 +844,18 @@ function compileSelectStep(
       : step.value
         ? `'${escapeString(step.value)}'`
         : undefined;
-  if (!selectionValueExpr) {
+  const nativeSelection = step.playwrightRecorderEvidence?.nativeSelection;
+  const selectableRecordedOptions = nativeSelection?.options
+    .filter((option) => option.value.trim().length > 0 && option.disabled !== true) ?? [];
+  const recordedSelectionIndex = nativeSelection?.selectionMode === "index"
+    && Number.isInteger(nativeSelection.selectedOptionIndex)
+    && nativeSelection.selectedOptionIndex! >= 0
+    && nativeSelection.selectedOptionIndex! < selectableRecordedOptions.length
+    && nativeSelection.clickedOption?.value === selectableRecordedOptions[nativeSelection.selectedOptionIndex!]?.value
+    && nativeSelection.selectedValue === nativeSelection.clickedOption.value
+    ? nativeSelection.selectedOptionIndex
+    : undefined;
+  if (!selectionValueExpr && recordedSelectionIndex === undefined) {
     unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:select_missing_value_authority`);
     return;
   }
@@ -847,7 +870,8 @@ function compileSelectStep(
   lines.push(`      stepIndex: ${step.scenarioStepIndex},`);
   lines.push(`      target: '${escapeString(targetRef)}',`);
   if (step.valueKey) lines.push(`      valueKey: '${escapeString(step.valueKey)}',`);
-  lines.push(`      selectionValue: ${selectionValueExpr},`);
+  if (selectionValueExpr) lines.push(`      selectionValue: ${selectionValueExpr},`);
+  if (recordedSelectionIndex !== undefined) lines.push(`      selectionIndex: ${recordedSelectionIndex},`);
   const nextFillField = nextStep?.operation === "fill"
     && nextStep.scenarioStepIndex === step.scenarioStepIndex + 1
     && (!step.entityScope || !nextStep.entityScope || step.entityScope === nextStep.entityScope)
@@ -875,7 +899,9 @@ function compileSelectStep(
   }
   lines.push(`      actionIntent: 'select',`);
   lines.push(`      expectedEffect: 'selection_state_change',`);
-  lines.push(`      action: async () => { await page.getByRole('option', { name: ${selectionValueExpr}, exact: true }).click(); }`);
+  lines.push(selectionValueExpr
+    ? `      action: async () => { await page.getByRole('option', { name: ${selectionValueExpr}, exact: true }).click(); }`
+    : `      action: async () => { throw new Error('Recorded indexed selection requires runtime resolution'); }`);
   lines.push(`    });`);
 
   bindings.push({

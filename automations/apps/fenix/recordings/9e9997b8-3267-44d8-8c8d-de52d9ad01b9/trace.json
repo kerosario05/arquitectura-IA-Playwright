@@ -1,13 +1,13 @@
 {
-  "recordingId": "2c05ba11-69bd-4f27-aa97-441eb3fba78e",
+  "recordingId": "9e9997b8-3267-44d8-8c8d-de52d9ad01b9",
   "projectSlug": "fenix",
   "appSlug": "fenix",
   "platform": "web",
   "baseUrl": "https://qa1.santacruz.do/onlinebanking",
-  "label": "Transferencias Cuentas Propia",
+  "label": "Transferencias Cuentas Propiav",
   "recordingGoal": {
-    "declaredGoal": "Transferencias Cuentas Propia",
-    "normalizedGoal": "Transferencias Cuentas Propia",
+    "declaredGoal": "Transferencias Cuentas Propiav",
+    "normalizedGoal": "Transferencias Cuentas Propiav",
     "provenance": "USER_DECLARED",
     "needsReview": false
   },
@@ -17,11 +17,11 @@
     "includeQaCredentialsInTestRail": true
   },
   "captureAuthority": "v2",
-  "startedAt": "2026-10-02T01:04:28.778Z",
+  "startedAt": "2026-10-02T14:11:40.966Z",
   "status": "stopped",
   "events": [
     {
-      "t": 4055,
+      "t": 1932,
       "kind": "navigate",
       "screenKey": "inicio",
       "url": "https://qa1.santacruz.do/onlinebanking",
@@ -35,7 +35,7 @@
       "seq": 1
     },
     {
-      "t": 10421,
+      "t": 8086,
       "interactionId": "pointer-1",
       "kind": "note",
       "screenKey": "60d370b39a8d",
@@ -52,7 +52,7 @@
       "seq": 2
     },
     {
-      "t": 11220,
+      "t": 8364,
       "interactionId": "pointer-1",
       "kind": "tap",
       "screenKey": "60d370b39a8d",
@@ -112,7 +112,7 @@
       "seq": 3
     },
     {
-      "t": 22135,
+      "t": 14158,
       "interactionId": "pointer-2",
       "kind": "note",
       "screenKey": "60d370b39a8d",
@@ -129,7 +129,7 @@
       "seq": 4
     },
     {
-      "t": 26448,
+      "t": 18605,
       "interactionId": "pointer-3",
       "kind": "note",
       "screenKey": "60d370b39a8d",
@@ -146,7 +146,7 @@
       "seq": 5
     },
     {
-      "t": 26471,
+      "t": 18620,
       "kind": "fill",
       "screenKey": "60d370b39a8d",
       "fingerprint": "88a6a9bc01d0060a6c3d2ea9c821fd9c246860f77e3760f338dce3d6ed2f943c",
@@ -181,7 +181,7 @@
       "seq": 6
     },
     {
-      "t": 31696,
+      "t": 19849,
       "interactionId": "pointer-4",
       "kind": "note",
       "screenKey": "60d370b39a8d",
@@ -198,7 +198,7 @@
       "seq": 7
     },
     {
-      "t": 31717,
+      "t": 19866,
       "kind": "fill",
       "screenKey": "60d370b39a8d",
       "fingerprint": "88a6a9bc01d0060a6c3d2ea9c821fd9c246860f77e3760f338dce3d6ed2f943c",
@@ -233,7 +233,7 @@
       "seq": 8
     },
     {
-      "t": 39229,
+      "t": 25000,
       "kind": "fill",
       "screenKey": "60d370b39a8d",
       "fingerprint": "88a6a9bc01d0060a6c3d2ea9c821fd9c246860f77e3760f338dce3d6ed2f943c",
@@ -267,7 +267,7 @@
       "seq": 9
     },
     {
-      "t": 39251,
+      "t": 25011,
       "kind": "press",
       "screenKey": "60d370b39a8d",
       "fingerprint": "88a6a9bc01d0060a6c3d2ea9c821fd9c246860f77e3760f338dce3d6ed2f943c",
@@ -298,296 +298,14 @@
       "seq": 10
     },
     {
-      "t": 87196,
-      "interactionId": "pointer-5",
-      "kind": "note",
-      "screenKey": "60d370b39a8d",
-      "fingerprint": "88a6a9bc01d0060a6c3d2ea9c821fd9c246860f77e3760f338dce3d6ed2f943c",
-      "url": "https://qa1.santacruz.do/onlinebanking",
-      "target": {
-        "label": "Cerrar",
-        "role": "button",
-        "tag": "button",
-        "locators": [],
-        "playwrightRecorderEvidence": {
-          "kind": "role",
-          "role": "button",
-          "normalizedName": "Cerrar",
-          "targetTag": "button",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "sii-modal-error"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true
-        }
-      },
-      "note": "Observación técnica (pointer) sobre \"Cerrar\"",
-      "observationType": "pointer",
-      "seq": 11
-    },
-    {
-      "t": 87291,
-      "interactionId": "pointer-5",
-      "kind": "tap",
-      "screenKey": "60d370b39a8d",
-      "fingerprint": "88a6a9bc01d0060a6c3d2ea9c821fd9c246860f77e3760f338dce3d6ed2f943c",
-      "url": "https://qa1.santacruz.do/onlinebanking",
-      "target": {
-        "label": "Cerrar",
-        "role": "button",
-        "tag": "button",
-        "locators": [
-          {
-            "strategy": "role",
-            "value": "button|Cerrar",
-            "confidence": 0.85
-          }
-        ],
-        "technicalTargetCandidates": [
-          {
-            "targetType": "structural",
-            "locatorCandidates": [
-              {
-                "strategy": "role",
-                "value": "button|Cerrar",
-                "confidence": 0.85
-              }
-            ],
-            "structuralContext": {
-              "owner": {
-                "tag": "button"
-              },
-              "stableDirectAttributes": {},
-              "stableDescendants": [],
-              "semanticShape": [],
-              "deterministicStructuralIdentity": false,
-              "structuralIdentityMatchCount": 1,
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "sii-modal-error"
-              },
-              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
-              "captureScopeUnique": true,
-              "captureTargetMatchCount": 1
-            },
-            "interactionEvidence": [
-              "v2_click_owner"
-            ],
-            "confidence": 0.85,
-            "validatedByInteraction": true
-          }
-        ],
-        "semanticRuntimeEvidence": {
-          "source": "accessible_name",
-          "normalizedValue": "Cerrar",
-          "role": "button",
-          "targetTag": "button",
-          "scopeAlternatives": [
-            {
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "sii-modal-error"
-              },
-              "captureMatchCount": 1
-            },
-            {
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "login-layout"
-              },
-              "captureMatchCount": 1
-            }
-          ],
-          "captureUniqueTarget": true
-        },
-        "playwrightRecorderEvidence": {
-          "kind": "role",
-          "role": "button",
-          "normalizedName": "Cerrar",
-          "targetTag": "button",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "sii-modal-error"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true
-        }
-      },
-      "seq": 12
-    },
-    {
-      "t": 88770,
-      "interactionId": "pointer-6",
-      "kind": "tap",
-      "screenKey": "60d370b39a8d",
-      "fingerprint": "88a6a9bc01d0060a6c3d2ea9c821fd9c246860f77e3760f338dce3d6ed2f943c",
-      "url": "https://qa1.santacruz.do/onlinebanking",
-      "target": {
-        "label": "Contraseña: ¿Olvidó su contraseña?",
-        "tag": "div",
-        "locators": [
-          {
-            "strategy": "id",
-            "value": "LoginFormE",
-            "confidence": 0.55
-          }
-        ],
-        "semanticRuntimeEvidence": {
-          "source": "accessible_name",
-          "normalizedValue": "Contraseña: ¿Olvidó su contraseña?",
-          "targetTag": "div",
-          "scopeAlternatives": [
-            {
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "LoginFormE"
-              },
-              "captureMatchCount": 1
-            },
-            {
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "empresarial"
-              },
-              "captureMatchCount": 1
-            },
-            {
-              "scopeIdentity": {
-                "strategy": "css",
-                "value": "div:has(div[id=\"empresarial\"])"
-              },
-              "captureMatchCount": 1
-            },
-            {
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "client--login-box"
-              },
-              "captureMatchCount": 1
-            },
-            {
-              "scopeIdentity": {
-                "strategy": "css",
-                "value": "div:has(div[id=\"client--login-box\"])"
-              },
-              "captureMatchCount": 1
-            },
-            {
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "login-layout"
-              },
-              "captureMatchCount": 1
-            }
-          ],
-          "captureUniqueTarget": true
-        },
-        "playwrightRecorderEvidence": {
-          "kind": "text",
-          "normalizedName": "Contraseña: ¿Olvidó su contraseña?",
-          "targetTag": "div",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "LoginFormE"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true
-        }
-      },
-      "seq": 13
-    },
-    {
-      "t": 89889,
-      "interactionId": "pointer-7",
-      "kind": "note",
-      "screenKey": "60d370b39a8d",
-      "fingerprint": "88a6a9bc01d0060a6c3d2ea9c821fd9c246860f77e3760f338dce3d6ed2f943c",
-      "url": "https://qa1.santacruz.do/onlinebanking",
-      "target": {
-        "label": "Contraseña:",
-        "role": "textbox",
-        "tag": "input",
-        "locators": []
-      },
-      "note": "Observación técnica (pointer) sobre \"Contraseña:\"",
-      "observationType": "pointer",
-      "seq": 14
-    },
-    {
-      "t": 93814,
-      "kind": "fill",
-      "screenKey": "60d370b39a8d",
-      "fingerprint": "88a6a9bc01d0060a6c3d2ea9c821fd9c246860f77e3760f338dce3d6ed2f943c",
-      "url": "https://qa1.santacruz.do/onlinebanking",
-      "target": {
-        "label": "Contraseña:",
-        "role": "input",
-        "tag": "input",
-        "inputType": "password",
-        "locators": [
-          {
-            "strategy": "role",
-            "value": "textbox|Contraseña:",
-            "confidence": 0.85
-          },
-          {
-            "strategy": "css",
-            "value": "#PasswordE",
-            "confidence": 0.8
-          },
-          {
-            "strategy": "id",
-            "value": "PasswordE",
-            "confidence": 0.8
-          }
-        ],
-        "sensitive": true
-      },
-      "redactedKey": "contrasena:",
-      "valueSource": "user",
-      "seq": 15
-    },
-    {
-      "t": 93835,
-      "kind": "press",
-      "screenKey": "60d370b39a8d",
-      "fingerprint": "88a6a9bc01d0060a6c3d2ea9c821fd9c246860f77e3760f338dce3d6ed2f943c",
-      "url": "https://qa1.santacruz.do/onlinebanking",
-      "target": {
-        "label": "Contraseña:",
-        "role": "textbox",
-        "tag": "input",
-        "locators": [
-          {
-            "strategy": "role",
-            "value": "textbox|Contraseña:",
-            "confidence": 0.85
-          },
-          {
-            "strategy": "css",
-            "value": "#PasswordE",
-            "confidence": 0.8
-          },
-          {
-            "strategy": "id",
-            "value": "PasswordE",
-            "confidence": 0.8
-          }
-        ]
-      },
-      "note": "Enter",
-      "seq": 16
-    },
-    {
-      "t": 110570,
+      "t": 30696,
       "kind": "navigate",
       "screenKey": "60d370b39a8d",
       "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
-      "seq": 17
+      "seq": 11
     },
     {
-      "t": 113809,
+      "t": 32882,
       "interactionId": "pointer-1",
       "kind": "tap",
       "screenKey": "60d370b39a8d",
@@ -614,10 +332,10 @@
           "runtimeResolutionRequired": true
         }
       },
-      "seq": 18
+      "seq": 12
     },
     {
-      "t": 122893,
+      "t": 53170,
       "interactionId": "pointer-2",
       "kind": "note",
       "screenKey": "60d370b39a8d",
@@ -643,10 +361,214 @@
       },
       "note": "Observación técnica (pointer) sobre \"control\"",
       "observationType": "pointer",
+      "seq": 13
+    },
+    {
+      "t": 53655,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
+      "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "SMS",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "IdentifyUserForm",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "sensitive": false
+      },
+      "valueSource": "user",
+      "seq": 14
+    },
+    {
+      "t": 54047,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
+      "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "SMS",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "IdentifyUserForm",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "sensitive": false
+      },
+      "valueSource": "user",
+      "seq": 15
+    },
+    {
+      "t": 54572,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
+      "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "SMS",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "IdentifyUserForm",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "sensitive": false
+      },
+      "valueSource": "user",
+      "seq": 16
+    },
+    {
+      "t": 54931,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
+      "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "SMS",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "IdentifyUserForm",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "sensitive": false
+      },
+      "valueSource": "user",
+      "seq": 17
+    },
+    {
+      "t": 55442,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
+      "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "SMS",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "IdentifyUserForm",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "sensitive": false
+      },
+      "valueSource": "user",
+      "seq": 18
+    },
+    {
+      "t": 56331,
+      "interactionId": "pointer-3",
+      "kind": "note",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
+      "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "input",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(a[href=\"/onlinebanking/IdentifyUser/Cancel\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Continuar\"",
+      "observationType": "pointer",
       "seq": 19
     },
     {
-      "t": 123702,
+      "t": 56343,
       "kind": "fill",
       "screenKey": "60d370b39a8d",
       "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
@@ -681,211 +603,7 @@
       "seq": 20
     },
     {
-      "t": 124897,
-      "kind": "fill",
-      "screenKey": "60d370b39a8d",
-      "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
-      "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
-      "target": {
-        "label": "control",
-        "role": "input",
-        "tag": "input",
-        "inputType": "text",
-        "associatedField": "SMS",
-        "locators": [
-          {
-            "strategy": "id",
-            "value": "IdentifyUserForm",
-            "confidence": 0.55
-          }
-        ],
-        "playwrightRecorderEvidence": {
-          "kind": "segmented_input",
-          "targetTag": "input",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "IdentifyUserForm"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true,
-          "segmentCount": 6
-        },
-        "sensitive": false
-      },
-      "valueSource": "user",
-      "seq": 21
-    },
-    {
-      "t": 125374,
-      "kind": "fill",
-      "screenKey": "60d370b39a8d",
-      "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
-      "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
-      "target": {
-        "label": "control",
-        "role": "input",
-        "tag": "input",
-        "inputType": "text",
-        "associatedField": "SMS",
-        "locators": [
-          {
-            "strategy": "id",
-            "value": "IdentifyUserForm",
-            "confidence": 0.55
-          }
-        ],
-        "playwrightRecorderEvidence": {
-          "kind": "segmented_input",
-          "targetTag": "input",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "IdentifyUserForm"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true,
-          "segmentCount": 6
-        },
-        "sensitive": false
-      },
-      "valueSource": "user",
-      "seq": 22
-    },
-    {
-      "t": 131537,
-      "kind": "fill",
-      "screenKey": "60d370b39a8d",
-      "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
-      "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
-      "target": {
-        "label": "control",
-        "role": "input",
-        "tag": "input",
-        "inputType": "text",
-        "associatedField": "SMS",
-        "locators": [
-          {
-            "strategy": "id",
-            "value": "IdentifyUserForm",
-            "confidence": 0.55
-          }
-        ],
-        "playwrightRecorderEvidence": {
-          "kind": "segmented_input",
-          "targetTag": "input",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "IdentifyUserForm"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true,
-          "segmentCount": 6
-        },
-        "sensitive": false
-      },
-      "valueSource": "user",
-      "seq": 23
-    },
-    {
-      "t": 133058,
-      "kind": "fill",
-      "screenKey": "60d370b39a8d",
-      "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
-      "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
-      "target": {
-        "label": "control",
-        "role": "input",
-        "tag": "input",
-        "inputType": "text",
-        "associatedField": "SMS",
-        "locators": [
-          {
-            "strategy": "id",
-            "value": "IdentifyUserForm",
-            "confidence": 0.55
-          }
-        ],
-        "playwrightRecorderEvidence": {
-          "kind": "segmented_input",
-          "targetTag": "input",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "IdentifyUserForm"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true,
-          "segmentCount": 6
-        },
-        "sensitive": false
-      },
-      "valueSource": "user",
-      "seq": 24
-    },
-    {
-      "t": 135688,
-      "interactionId": "pointer-3",
-      "kind": "note",
-      "screenKey": "60d370b39a8d",
-      "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
-      "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
-      "target": {
-        "label": "Continuar",
-        "role": "button",
-        "tag": "input",
-        "locators": [],
-        "playwrightRecorderEvidence": {
-          "kind": "role",
-          "role": "button",
-          "normalizedName": "Continuar",
-          "targetTag": "input",
-          "scopeIdentity": {
-            "strategy": "css",
-            "value": "div:has(a[href=\"/onlinebanking/IdentifyUser/Cancel\"])"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true
-        }
-      },
-      "note": "Observación técnica (pointer) sobre \"Continuar\"",
-      "observationType": "pointer",
-      "seq": 25
-    },
-    {
-      "t": 135699,
-      "kind": "fill",
-      "screenKey": "60d370b39a8d",
-      "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
-      "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
-      "target": {
-        "label": "control",
-        "role": "input",
-        "tag": "input",
-        "inputType": "text",
-        "associatedField": "SMS",
-        "locators": [
-          {
-            "strategy": "id",
-            "value": "IdentifyUserForm",
-            "confidence": 0.55
-          }
-        ],
-        "playwrightRecorderEvidence": {
-          "kind": "segmented_input",
-          "targetTag": "input",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "IdentifyUserForm"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true,
-          "segmentCount": 6
-        },
-        "sensitive": false
-      },
-      "valueSource": "user",
-      "seq": 26
-    },
-    {
-      "t": 136134,
+      "t": 56523,
       "interactionId": "pointer-3",
       "kind": "tap",
       "screenKey": "60d370b39a8d",
@@ -986,21 +704,21 @@
           "runtimeResolutionRequired": true
         }
       },
-      "seq": 27
+      "seq": 21
     },
     {
-      "t": 136143,
+      "t": 56874,
       "kind": "navigate",
       "screenKey": "60d370b39a8d",
       "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
-      "seq": 28
+      "seq": 22
     },
     {
-      "t": 141668,
+      "t": 60375,
       "interactionId": "pointer-1",
       "kind": "tap",
       "screenKey": "60d370b39a8d",
-      "fingerprint": "b51320e6eb71b4a90cb57a29d6c543284f8620864fecaefc85352ef84c41d0e8",
+      "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
       "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
       "target": {
         "label": "Transferencias",
@@ -1023,10 +741,10 @@
           "runtimeResolutionRequired": true
         }
       },
-      "seq": 29
+      "seq": 23
     },
     {
-      "t": 153392,
+      "t": 61446,
       "interactionId": "pointer-2",
       "kind": "note",
       "screenKey": "60d370b39a8d",
@@ -1040,10 +758,10 @@
       },
       "note": "Observación técnica (pointer) sobre \"- Cuentas Propias\"",
       "observationType": "pointer",
-      "seq": 30
+      "seq": 24
     },
     {
-      "t": 153695,
+      "t": 62153,
       "interactionId": "pointer-2",
       "kind": "tap",
       "screenKey": "60d370b39a8d",
@@ -1111,10 +829,10 @@
           }
         ]
       },
-      "seq": 31
+      "seq": 25
     },
     {
-      "t": 157347,
+      "t": 64187,
       "interactionId": "pointer-3",
       "kind": "tap",
       "screenKey": "60d370b39a8d",
@@ -1138,100 +856,156 @@
             "strategy": "id",
             "value": "TransferForm"
           },
-          "runtimeResolutionRequired": true
+          "runtimeResolutionRequired": true,
+          "nativeSelection": {
+            "controlIdentity": {
+              "strategy": "id",
+              "value": "account-from-select-input"
+            },
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "div:has(> select[id=\"account-from-select-input\"])"
+            },
+            "options": [
+              {
+                "value": "",
+                "label": "Seleccione una Cuenta",
+                "disabled": false
+              },
+              {
+                "value": "-192973383173",
+                "label": "Cuenta Corrientes / 11311000003156 / RD$168,967.94",
+                "disabled": false
+              },
+              {
+                "value": "-178671134322",
+                "label": "Cuenta de Ahorro / 21312020003368 / US$1,385.71",
+                "disabled": false
+              }
+            ],
+            "selectedValue": "-192973383173"
+          }
         }
       },
-      "seq": 32
+      "seq": 26
     },
     {
-      "t": 161070,
-      "interactionId": "pointer-4",
-      "kind": "tap",
+      "t": 68543,
+      "kind": "fill",
       "screenKey": "60d370b39a8d",
       "fingerprint": "61a921c53ed1c8b184e968cd38fadf158d85b97ea21ce3bd279ecef11dc225b4",
       "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
       "target": {
-        "label": "Cuenta Corrientes / 11311000003156 / RD$170,480.44",
-        "tag": "span",
+        "label": "account-from-select-input",
+        "role": "input",
+        "tag": "select",
         "locators": [
           {
-            "strategy": "css",
-            "value": "div:has(select[id=\"account-from-select-input\"])",
-            "confidence": 0.55
+            "strategy": "role",
+            "value": "combobox|account-from-select-input",
+            "confidence": 0.85
           }
         ],
-        "semanticRuntimeEvidence": {
-          "source": "accessible_name",
-          "normalizedValue": "Cuenta Corrientes / 11311000003156 / RD$170,480.44",
-          "targetTag": "span",
-          "scopeAlternatives": [
-            {
-              "scopeIdentity": {
-                "strategy": "css",
-                "value": "div:has(select[id=\"account-from-select-input\"])"
-              },
-              "captureMatchCount": 1
-            },
-            {
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "TransferForm"
-              },
-              "captureMatchCount": 1
-            },
-            {
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "transfer_content"
-              },
-              "captureMatchCount": 1
-            },
-            {
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "right-content-main"
-              },
-              "captureMatchCount": 1
-            }
-          ],
-          "captureUniqueTarget": true
-        },
         "playwrightRecorderEvidence": {
           "kind": "text",
-          "normalizedName": "Cuenta Corrientes / 11311000003156 / RD$170,480.44",
-          "targetTag": "span",
+          "normalizedName": "Cuenta Corrientes / 11311000003156 / RD$168,967.94",
           "scopeIdentity": {
             "strategy": "css",
-            "value": "div:has(select[id=\"account-from-select-input\"])"
+            "value": "div:has(> select[id=\"account-from-select-input\"])"
           },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true
-        }
+          "runtimeResolutionRequired": true,
+          "nativeSelection": {
+            "controlIdentity": {
+              "strategy": "id",
+              "value": "account-from-select-input"
+            },
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "div:has(> select[id=\"account-from-select-input\"])"
+            },
+            "options": [
+              {
+                "value": "",
+                "label": "Seleccione una Cuenta",
+                "disabled": false
+              },
+              {
+                "value": "-192973383173",
+                "label": "Cuenta Corrientes / 11311000003156 / RD$168,967.94",
+                "disabled": false
+              },
+              {
+                "value": "-178671134322",
+                "label": "Cuenta de Ahorro / 21312020003368 / US$1,385.71",
+                "disabled": false
+              }
+            ],
+            "clickedOption": {
+              "value": "-192973383173",
+              "label": "Cuenta Corrientes / 11311000003156 / RD$168,967.94"
+            },
+            "selectedValue": "-192973383173",
+            "selectionMode": "index",
+            "selectedOptionIndex": 0
+          }
+        },
+        "sensitive": false
       },
-      "seq": 33
+      "value": "Cuenta Corrientes / 11311000003156 / RD$168,967.94",
+      "valueSource": "user",
+      "seq": 27
     },
     {
-      "t": 165732,
+      "t": 70526,
       "interactionId": "pointer-5",
       "kind": "note",
       "screenKey": "60d370b39a8d",
-      "fingerprint": "7000bb0762abbffdf415c5f3d6bf27cda7d2213763cbf2dae5abf6187f675031",
+      "fingerprint": "61a921c53ed1c8b184e968cd38fadf158d85b97ea21ce3bd279ecef11dc225b4",
       "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
       "target": {
         "label": "Seleccione una Cuenta / undefined Balance Disponible",
         "tag": "div",
-        "locators": []
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Seleccione una Cuenta",
+          "targetTag": "span",
+          "runtimeResolutionRequired": true,
+          "nativeSelection": {
+            "controlIdentity": {
+              "strategy": "id",
+              "value": "account-to-select-input"
+            },
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "div:has(> select[id=\"account-to-select-input\"])"
+            },
+            "options": [
+              {
+                "value": "",
+                "label": "Seleccione una Cuenta",
+                "disabled": false
+              },
+              {
+                "value": "-178671134322",
+                "label": "Cuenta de Ahorro / 21312020003368 / US$1,385.71",
+                "disabled": false
+              }
+            ],
+            "selectedValue": "-178671134322"
+          }
+        }
       },
       "note": "Observación técnica (pointer) sobre \"Seleccione una Cuenta / undefined Balance Disponible\"",
       "observationType": "pointer",
-      "seq": 34
+      "seq": 28
     },
     {
-      "t": 166097,
+      "t": 71145,
       "interactionId": "pointer-5",
       "kind": "tap",
       "screenKey": "60d370b39a8d",
-      "fingerprint": "7000bb0762abbffdf415c5f3d6bf27cda7d2213763cbf2dae5abf6187f675031",
+      "fingerprint": "61a921c53ed1c8b184e968cd38fadf158d85b97ea21ce3bd279ecef11dc225b4",
       "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
       "target": {
         "label": "Seleccione una Cuenta / undefined Balance Disponible",
@@ -1276,90 +1050,106 @@
             "confidence": 0.85,
             "validatedByInteraction": true
           }
-        ]
-      },
-      "seq": 35
-    },
-    {
-      "t": 169408,
-      "interactionId": "pointer-6",
-      "kind": "tap",
-      "screenKey": "60d370b39a8d",
-      "fingerprint": "7000bb0762abbffdf415c5f3d6bf27cda7d2213763cbf2dae5abf6187f675031",
-      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
-      "target": {
-        "label": "Cuenta de Ahorro / 21312020003368 / US$1,360.71",
-        "tag": "span",
-        "locators": [
-          {
-            "strategy": "css",
-            "value": "div:has(select[id=\"account-to-select-input\"])",
-            "confidence": 0.55
-          }
         ],
-        "semanticRuntimeEvidence": {
-          "source": "accessible_name",
-          "normalizedValue": "Cuenta de Ahorro / 21312020003368 / US$1,360.71",
-          "targetTag": "span",
-          "scopeAlternatives": [
-            {
-              "scopeIdentity": {
-                "strategy": "css",
-                "value": "div:has(select[id=\"account-to-select-input\"])"
-              },
-              "captureMatchCount": 1
-            },
-            {
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "account-to-block"
-              },
-              "captureMatchCount": 1
-            },
-            {
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "TransferForm"
-              },
-              "captureMatchCount": 1
-            },
-            {
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "transfer_content"
-              },
-              "captureMatchCount": 1
-            },
-            {
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "right-content-main"
-              },
-              "captureMatchCount": 1
-            }
-          ],
-          "captureUniqueTarget": true
-        },
         "playwrightRecorderEvidence": {
           "kind": "text",
-          "normalizedName": "Cuenta de Ahorro / 21312020003368 / US$1,360.71",
+          "normalizedName": "Seleccione una Cuenta",
           "targetTag": "span",
-          "scopeIdentity": {
-            "strategy": "css",
-            "value": "div:has(select[id=\"account-to-select-input\"])"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true
+          "runtimeResolutionRequired": true,
+          "nativeSelection": {
+            "controlIdentity": {
+              "strategy": "id",
+              "value": "account-to-select-input"
+            },
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "div:has(> select[id=\"account-to-select-input\"])"
+            },
+            "options": [
+              {
+                "value": "",
+                "label": "Seleccione una Cuenta",
+                "disabled": false
+              },
+              {
+                "value": "-178671134322",
+                "label": "Cuenta de Ahorro / 21312020003368 / US$1,385.71",
+                "disabled": false
+              }
+            ],
+            "selectedValue": "-178671134322"
+          }
         }
       },
-      "seq": 36
+      "seq": 29
     },
     {
-      "t": 169573,
+      "t": 71960,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "61a921c53ed1c8b184e968cd38fadf158d85b97ea21ce3bd279ecef11dc225b4",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "account-to-select-input",
+        "role": "input",
+        "tag": "select",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "combobox|account-to-select-input",
+            "confidence": 0.85
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Cuenta de Ahorro / 21312020003368 / US$1,385.71",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(> select[id=\"account-to-select-input\"])"
+          },
+          "runtimeResolutionRequired": true,
+          "nativeSelection": {
+            "controlIdentity": {
+              "strategy": "id",
+              "value": "account-to-select-input"
+            },
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "div:has(> select[id=\"account-to-select-input\"])"
+            },
+            "options": [
+              {
+                "value": "",
+                "label": "Seleccione una Cuenta",
+                "disabled": false
+              },
+              {
+                "value": "-178671134322",
+                "label": "Cuenta de Ahorro / 21312020003368 / US$1,385.71",
+                "disabled": false
+              }
+            ],
+            "clickedOption": {
+              "value": "-178671134322",
+              "label": "Cuenta de Ahorro / 21312020003368 / US$1,385.71"
+            },
+            "selectedValue": "-178671134322",
+            "selectionMode": "index",
+            "selectedOptionIndex": 0
+          }
+        },
+        "sensitive": false
+      },
+      "value": "Cuenta de Ahorro / 21312020003368 / US$1,385.71",
+      "valueSource": "user",
+      "seq": 30
+    },
+    {
+      "t": 73070,
       "interactionId": "pointer-7",
       "kind": "note",
       "screenKey": "60d370b39a8d",
-      "fingerprint": "7000bb0762abbffdf415c5f3d6bf27cda7d2213763cbf2dae5abf6187f675031",
+      "fingerprint": "c84a5c719acfcb4c84231af272dac5624b2a6cef928cecf06e9247905d1cc0f1",
       "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
       "target": {
         "label": "control",
@@ -1370,10 +1160,10 @@
       },
       "note": "Observación técnica (pointer) sobre \"control\"",
       "observationType": "pointer",
-      "seq": 37
+      "seq": 31
     },
     {
-      "t": 171732,
+      "t": 74985,
       "interactionId": "pointer-8",
       "kind": "note",
       "screenKey": "60d370b39a8d",
@@ -1399,10 +1189,10 @@
       },
       "note": "Observación técnica (pointer) sobre \"Continuar\"",
       "observationType": "pointer",
-      "seq": 38
+      "seq": 32
     },
     {
-      "t": 171803,
+      "t": 74998,
       "kind": "fill",
       "screenKey": "60d370b39a8d",
       "fingerprint": "c84a5c719acfcb4c84231af272dac5624b2a6cef928cecf06e9247905d1cc0f1",
@@ -1430,10 +1220,10 @@
       },
       "value": "5.00",
       "valueSource": "user",
-      "seq": 39
+      "seq": 33
     },
     {
-      "t": 171996,
+      "t": 75447,
       "interactionId": "pointer-8",
       "kind": "tap",
       "screenKey": "60d370b39a8d",
@@ -1534,14 +1324,14 @@
           "runtimeResolutionRequired": true
         }
       },
-      "seq": 40
+      "seq": 34
     },
     {
-      "t": 176098,
+      "t": 77519,
       "interactionId": "pointer-9",
       "kind": "note",
       "screenKey": "60d370b39a8d",
-      "fingerprint": "c84a5c719acfcb4c84231af272dac5624b2a6cef928cecf06e9247905d1cc0f1",
+      "fingerprint": "2cab5430f09d4f8767beb0f40d40a2a472fa57ea302d1add2f8e101813a242ab",
       "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
       "target": {
         "label": "Continuar",
@@ -1563,14 +1353,14 @@
       },
       "note": "Observación técnica (pointer) sobre \"Continuar\"",
       "observationType": "pointer",
-      "seq": 41
+      "seq": 35
     },
     {
-      "t": 176284,
+      "t": 77726,
       "interactionId": "pointer-9",
       "kind": "tap",
       "screenKey": "60d370b39a8d",
-      "fingerprint": "c84a5c719acfcb4c84231af272dac5624b2a6cef928cecf06e9247905d1cc0f1",
+      "fingerprint": "2cab5430f09d4f8767beb0f40d40a2a472fa57ea302d1add2f8e101813a242ab",
       "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
       "target": {
         "label": "Continuar",
@@ -1642,11 +1432,64 @@
           "runtimeResolutionRequired": true
         }
       },
-      "seq": 42
+      "seq": 36
     },
     {
-      "t": 178758,
+      "t": 78870,
       "interactionId": "pointer-10",
+      "kind": "tap",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "8f7648969b03c81757c5da2fc14ce8cc83bfa753f92f606d14dac7ea14658da2",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "control",
+        "tag": "div",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "requestchallengeform",
+            "confidence": 0.55
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Validar Identidad Elige el medio para recibir un Token y colócalo debajo para confirmar la transacción. E-MAIL SMS Reenviar Reenviar código en 30 segundos...",
+          "targetTag": "div",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "requestchallengeform"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "right-content-main"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Validar Identidad Elige el medio para recibir un Token y colócalo debajo para confirmar la transacción. E-MAIL SMS Reenviar Reenviar código en 30 segundos...",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "requestchallengeform"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 37
+    },
+    {
+      "t": 79770,
+      "interactionId": "pointer-11",
       "kind": "tap",
       "screenKey": "60d370b39a8d",
       "fingerprint": "8f7648969b03c81757c5da2fc14ce8cc83bfa753f92f606d14dac7ea14658da2",
@@ -1709,11 +1552,11 @@
           "runtimeResolutionRequired": true
         }
       },
-      "seq": 43
+      "seq": 38
     },
     {
-      "t": 181329,
-      "interactionId": "pointer-11",
+      "t": 82277,
+      "interactionId": "pointer-12",
       "kind": "note",
       "screenKey": "60d370b39a8d",
       "fingerprint": "8f7648969b03c81757c5da2fc14ce8cc83bfa753f92f606d14dac7ea14658da2",
@@ -1722,7 +1565,7 @@
         "label": "control",
         "role": "textbox",
         "tag": "input",
-        "associatedField": "Reenviar código en  29 segundos...",
+        "associatedField": "Reenviar código en  30 segundos...",
         "locators": [],
         "playwrightRecorderEvidence": {
           "kind": "segmented_input",
@@ -1738,10 +1581,45 @@
       },
       "note": "Observación técnica (pointer) sobre \"control\"",
       "observationType": "pointer",
-      "seq": 44
+      "seq": 39
     },
     {
-      "t": 182490,
+      "t": 83091,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "8f7648969b03c81757c5da2fc14ce8cc83bfa753f92f606d14dac7ea14658da2",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Reenviar código en  30 segundos...",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "requestchallengeform",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "requestchallengeform"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "sensitive": false
+      },
+      "valueSource": "user",
+      "seq": 40
+    },
+    {
+      "t": 83521,
       "kind": "fill",
       "screenKey": "60d370b39a8d",
       "fingerprint": "8f7648969b03c81757c5da2fc14ce8cc83bfa753f92f606d14dac7ea14658da2",
@@ -1773,10 +1651,144 @@
         "sensitive": false
       },
       "valueSource": "user",
+      "seq": 41
+    },
+    {
+      "t": 85245,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "8f7648969b03c81757c5da2fc14ce8cc83bfa753f92f606d14dac7ea14658da2",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Reenviar código en  29 segundos...",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "requestchallengeform",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "requestchallengeform"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "sensitive": false
+      },
+      "valueSource": "user",
+      "seq": 42
+    },
+    {
+      "t": 86268,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "8f7648969b03c81757c5da2fc14ce8cc83bfa753f92f606d14dac7ea14658da2",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Reenviar código en  28 segundos...",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "requestchallengeform",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "requestchallengeform"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "sensitive": false
+      },
+      "valueSource": "user",
+      "seq": 43
+    },
+    {
+      "t": 86788,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "8f7648969b03c81757c5da2fc14ce8cc83bfa753f92f606d14dac7ea14658da2",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Reenviar código en  28 segundos...",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "requestchallengeform",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "requestchallengeform"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "sensitive": false
+      },
+      "valueSource": "user",
+      "seq": 44
+    },
+    {
+      "t": 87627,
+      "interactionId": "pointer-13",
+      "kind": "note",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "8f7648969b03c81757c5da2fc14ce8cc83bfa753f92f606d14dac7ea14658da2",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "input",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(a[href=\"/onlinebanking/Transfer/MyAccountsTransfer/ConfirmTransaction\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Continuar\"",
+      "observationType": "pointer",
       "seq": 45
     },
     {
-      "t": 183257,
+      "t": 87638,
       "kind": "fill",
       "screenKey": "60d370b39a8d",
       "fingerprint": "8f7648969b03c81757c5da2fc14ce8cc83bfa753f92f606d14dac7ea14658da2",
@@ -1811,177 +1823,8 @@
       "seq": 46
     },
     {
-      "t": 183701,
-      "kind": "fill",
-      "screenKey": "60d370b39a8d",
-      "fingerprint": "8f7648969b03c81757c5da2fc14ce8cc83bfa753f92f606d14dac7ea14658da2",
-      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
-      "target": {
-        "label": "control",
-        "role": "input",
-        "tag": "input",
-        "inputType": "text",
-        "associatedField": "Reenviar código en  27 segundos...",
-        "locators": [
-          {
-            "strategy": "id",
-            "value": "requestchallengeform",
-            "confidence": 0.55
-          }
-        ],
-        "playwrightRecorderEvidence": {
-          "kind": "segmented_input",
-          "targetTag": "input",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "requestchallengeform"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true,
-          "segmentCount": 6
-        },
-        "sensitive": false
-      },
-      "valueSource": "user",
-      "seq": 47
-    },
-    {
-      "t": 184195,
-      "kind": "fill",
-      "screenKey": "60d370b39a8d",
-      "fingerprint": "8f7648969b03c81757c5da2fc14ce8cc83bfa753f92f606d14dac7ea14658da2",
-      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
-      "target": {
-        "label": "control",
-        "role": "input",
-        "tag": "input",
-        "inputType": "text",
-        "associatedField": "Reenviar código en  27 segundos...",
-        "locators": [
-          {
-            "strategy": "id",
-            "value": "requestchallengeform",
-            "confidence": 0.55
-          }
-        ],
-        "playwrightRecorderEvidence": {
-          "kind": "segmented_input",
-          "targetTag": "input",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "requestchallengeform"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true,
-          "segmentCount": 6
-        },
-        "sensitive": false
-      },
-      "valueSource": "user",
-      "seq": 48
-    },
-    {
-      "t": 184824,
-      "kind": "fill",
-      "screenKey": "60d370b39a8d",
-      "fingerprint": "8f7648969b03c81757c5da2fc14ce8cc83bfa753f92f606d14dac7ea14658da2",
-      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
-      "target": {
-        "label": "control",
-        "role": "input",
-        "tag": "input",
-        "inputType": "text",
-        "associatedField": "Reenviar código en  26 segundos...",
-        "locators": [
-          {
-            "strategy": "id",
-            "value": "requestchallengeform",
-            "confidence": 0.55
-          }
-        ],
-        "playwrightRecorderEvidence": {
-          "kind": "segmented_input",
-          "targetTag": "input",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "requestchallengeform"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true,
-          "segmentCount": 6
-        },
-        "sensitive": false
-      },
-      "valueSource": "user",
-      "seq": 49
-    },
-    {
-      "t": 186406,
-      "interactionId": "pointer-12",
-      "kind": "note",
-      "screenKey": "60d370b39a8d",
-      "fingerprint": "8f7648969b03c81757c5da2fc14ce8cc83bfa753f92f606d14dac7ea14658da2",
-      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
-      "target": {
-        "label": "Continuar",
-        "role": "button",
-        "tag": "input",
-        "locators": [],
-        "playwrightRecorderEvidence": {
-          "kind": "role",
-          "role": "button",
-          "normalizedName": "Continuar",
-          "targetTag": "input",
-          "scopeIdentity": {
-            "strategy": "css",
-            "value": "div:has(a[href=\"/onlinebanking/Transfer/MyAccountsTransfer/ConfirmTransaction\"])"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true
-        }
-      },
-      "note": "Observación técnica (pointer) sobre \"Continuar\"",
-      "observationType": "pointer",
-      "seq": 50
-    },
-    {
-      "t": 186492,
-      "kind": "fill",
-      "screenKey": "60d370b39a8d",
-      "fingerprint": "8f7648969b03c81757c5da2fc14ce8cc83bfa753f92f606d14dac7ea14658da2",
-      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
-      "target": {
-        "label": "control",
-        "role": "input",
-        "tag": "input",
-        "inputType": "text",
-        "associatedField": "Reenviar código en  26 segundos...",
-        "locators": [
-          {
-            "strategy": "id",
-            "value": "requestchallengeform",
-            "confidence": 0.55
-          }
-        ],
-        "playwrightRecorderEvidence": {
-          "kind": "segmented_input",
-          "targetTag": "input",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "requestchallengeform"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true,
-          "segmentCount": 6
-        },
-        "sensitive": false
-      },
-      "valueSource": "user",
-      "seq": 51
-    },
-    {
-      "t": 186635,
-      "interactionId": "pointer-12",
+      "t": 87915,
+      "interactionId": "pointer-13",
       "kind": "tap",
       "screenKey": "60d370b39a8d",
       "fingerprint": "8f7648969b03c81757c5da2fc14ce8cc83bfa753f92f606d14dac7ea14658da2",
@@ -2056,7 +1899,7 @@
           "runtimeResolutionRequired": true
         }
       },
-      "seq": 52
+      "seq": 47
     }
   ],
   "screens": [
@@ -2065,7 +1908,7 @@
       "title": "60d370b39a8d",
       "fingerprint": "88a6a9bc01d0060a6c3d2ea9c821fd9c246860f77e3760f338dce3d6ed2f943c",
       "url": "https://qa1.santacruz.do/onlinebanking",
-      "firstSeenAt": 5792,
+      "firstSeenAt": 4885,
       "controls": [
         {
           "label": "\n             Personal\n        ",
@@ -2340,7 +2183,7 @@
       "title": "6e9c348d2f25",
       "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
       "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
-      "firstSeenAt": 113917,
+      "firstSeenAt": 32992,
       "controls": [
         {
           "label": "Cancelar",
@@ -2472,326 +2315,11 @@
       "headerRelationships": []
     },
     {
-      "screenKey": "73464da5a790",
-      "title": "Resumen",
-      "fingerprint": "b51320e6eb71b4a90cb57a29d6c543284f8620864fecaefc85352ef84c41d0e8",
-      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
-      "firstSeenAt": 136441,
-      "controls": [
-        {
-          "label": "\n             \n        ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {},
-          "locators": [
-            {
-              "strategy": "text",
-              "value": "\n             \n        ",
-              "confidence": 0.7
-            }
-          ]
-        },
-        {
-          "label": "\n             \n             Resumen\n        ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {},
-          "locators": [
-            {
-              "strategy": "text",
-              "value": "\n             \n             Resumen\n        ",
-              "confidence": 0.7
-            }
-          ]
-        },
-        {
-          "label": "\n                                 \n                                 Dashboard\n                            ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "CASHMAN_DASHBOARD"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "CASHMAN_DASHBOARD",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "\n                                 \n                                 Cuenta Mi Bolsillo\n                            ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "MYPOCKET_PARENT"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "MYPOCKET_PARENT",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "\n                                 \n                                 Pendientes\n                            ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "PENDING_TRANSACTIONS"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "PENDING_TRANSACTIONS",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "\n                                 \n                                 Avance de Efectivo\n                            ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "CREDITCARD_WITHDRAWAL"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "CREDITCARD_WITHDRAWAL",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "\n                                 \n                                 Solicitudes Digitales\n                            ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "DIGITAL_REQUEST"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "DIGITAL_REQUEST",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "\n             \n             Cerrar Sesión\n        ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {},
-          "locators": [
-            {
-              "strategy": "text",
-              "value": "\n             \n             Cerrar Sesión\n        ",
-              "confidence": 0.7
-            }
-          ]
-        },
-        {
-          "label": "\n                         \n                         \n                    ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "LinkPendingMessage"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "LinkPendingMessage",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "\n                         \n                    ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {},
-          "locators": [
-            {
-              "strategy": "text",
-              "value": "\n                         \n                    ",
-              "confidence": 0.7
-            }
-          ]
-        },
-        {
-          "label": "\n                     \n                ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "ib-header-detail-btn"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "ib-header-detail-btn",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "Todos",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "all-t0"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "all-t0",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "Cuentas",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "account-tab-t1"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "account-tab-t1",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "Tarjetas",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "creditcard-tab-t2"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "creditcard-tab-t2",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "Préstamos",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "loan-tab-t3"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "loan-tab-t3",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "Certificados de Depósito",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "moneymarket-tab-t4"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "moneymarket-tab-t4",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "Cuenta de Ahorro",
-          "role": "a",
-          "tag": "a",
-          "attributes": {},
-          "locators": [
-            {
-              "strategy": "text",
-              "value": "\n                                                Cuenta de Ahorro\n                                            ",
-              "confidence": 0.7
-            }
-          ]
-        },
-        {
-          "label": "21312020003368",
-          "role": "a",
-          "tag": "a",
-          "attributes": {},
-          "locators": [
-            {
-              "strategy": "text",
-              "value": "\n                                                21312020003368\n                                            ",
-              "confidence": 0.7
-            }
-          ]
-        },
-        {
-          "label": "\n                                                     \n                                                ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "editar"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "editar",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "Cuenta Corriente",
-          "role": "a",
-          "tag": "a",
-          "attributes": {},
-          "locators": [
-            {
-              "strategy": "text",
-              "value": "\n                                                Cuenta Corriente\n                                            ",
-              "confidence": 0.7
-            }
-          ]
-        }
-      ],
-      "texts": [
-        "Resumen"
-      ],
-      "gridMetadata": {
-        "detected": true,
-        "grids": 3,
-        "rows": 12,
-        "cells": 66,
-        "headers": [
-          "Alias",
-          "Número",
-          "Tipo",
-          "Moneda",
-          "Balance Actual",
-          "Balance Disponible",
-          "Estatus"
-        ],
-        "headerRelationships": []
-      },
-      "headerRelationships": []
-    },
-    {
       "screenKey": "2f3e1044a78b",
       "title": "Resumen",
       "fingerprint": "c87f5e5b052145f0a70074bf5f17dde320516539dd35d32c0cbb8b89abbf4017",
       "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
-      "firstSeenAt": 141814,
+      "firstSeenAt": 60485,
       "controls": [
         {
           "label": "\n             \n        ",
@@ -3110,9 +2638,9 @@
     {
       "screenKey": "91de29fc82e6",
       "title": "Transferencias a Mis Cuentas",
-      "fingerprint": "c84a5c719acfcb4c84231af272dac5624b2a6cef928cecf06e9247905d1cc0f1",
+      "fingerprint": "2cab5430f09d4f8767beb0f40d40a2a472fa57ea302d1add2f8e101813a242ab",
       "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
-      "firstSeenAt": 153827,
+      "firstSeenAt": 62274,
       "controls": [
         {
           "label": "\n             \n        ",
@@ -3392,20 +2920,15 @@
           ]
         },
         {
-          "label": "Agregar un comentario...",
-          "role": "textarea",
-          "tag": "textarea",
-          "placeholder": "Agregar un comentario...",
-          "attributes": {
-            "id": "trx-comment",
-            "name": "transactionDetails[0].Description",
-            "placeholder": "Agregar un comentario..."
-          },
+          "label": "\n         \n         Volver Atrás\n    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
           "locators": [
             {
-              "strategy": "aria-label",
-              "value": "trx-comment",
-              "confidence": 0.9
+              "strategy": "text",
+              "value": "\n         \n         Volver Atrás\n    ",
+              "confidence": 0.7
             }
           ]
         }
@@ -3436,7 +2959,7 @@
       "title": "Token de Seguridad",
       "fingerprint": "8f7648969b03c81757c5da2fc14ce8cc83bfa753f92f606d14dac7ea14658da2",
       "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
-      "firstSeenAt": 176386,
+      "firstSeenAt": 77840,
       "controls": [
         {
           "label": "\n             \n        ",
@@ -3751,6 +3274,6 @@
       "headerRelationships": []
     }
   ],
-  "endedAt": "2026-10-02T01:08:14.935Z",
-  "durationMs": 226157
+  "endedAt": "2026-10-02T14:13:17.920Z",
+  "durationMs": 96954
 }

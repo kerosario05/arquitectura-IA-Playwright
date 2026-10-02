@@ -1,0 +1,73 @@
+{
+  "mode": "deterministic",
+  "provider": null,
+  "model": null,
+  "skill": {
+    "name": null,
+    "version": null,
+    "hash": null,
+    "loaded": false
+  },
+  "invocations": 0,
+  "invocationsConsumed": 0,
+  "durationMs": 138193,
+  "usage": {
+    "inputTokens": null,
+    "cachedInputTokens": null,
+    "cacheWriteInputTokens": null,
+    "nonCachedInputTokens": null,
+    "outputTokens": null,
+    "reasoningOutputTokens": null,
+    "totalPhysicalTokens": null,
+    "durationMs": null,
+    "credits": null
+  },
+  "validation": {
+    "schema": "skipped",
+    "structure": "passed",
+    "traceFidelity": "skipped",
+    "typescript": "passed",
+    "playwrightDiscovery": "passed",
+    "semanticCoverage": "passed",
+    "functionalExecution": "failed"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "specGenerationAttempts": 0,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [
+    "functionalExecution"
+  ],
+  "regressedGates": [],
+  "missingRequirements": [],
+  "oracleTypes": [
+    "navigation_transition"
+  ],
+  "errors": [
+    "functional_execution_failed:exitCode=1",
+    "functional_execution_error:Error: Promoted click failed at step 18 target=\"role:div|[href=\"#\"]\". reason=structural_authority_not_unique_or_unresolved structuralFailureReason=scoped_scope_not_unique structuralFailureMatchCount=0 suggestedFix=\"Certified structural authority did not resolve to exactly one visible, enabled element -- never falls back to a weaker locator, text match, or position.\""
+  ],
+  "warnings": [
+    "step_index_not_explicit_in_spec:9",
+    "step_index_not_explicit_in_spec:10",
+    "step_index_not_explicit_in_spec:11",
+    "step_index_not_explicit_in_spec:12",
+    "step_index_not_explicit_in_spec:13",
+    "functional_execution_screenshots=4",
+    "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 18)."
+  ],
+  "finalSpec": {
+    "origin": "deterministic_compiler",
+    "generatedBy": "core",
+    "strategy": "deterministic_compiler",
+    "fallback": null
+  },
+  "runtimeGate": {
+    "decision": "block",
+    "promotionStatus": "blocked",
+    "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 18)."
+  }
+}

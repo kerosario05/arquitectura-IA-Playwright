@@ -4,7 +4,7 @@ import type { RecordedLocator } from "./session-trace.types";
 export type RecordingControlTarget = { label?: string; role?: string; associatedField?: string; attributes?: Record<string, string | undefined>; locators?: readonly RecordedLocator[] };
 export type RecordingControlAction =
   | { kind: "navigate"; url: string }
-  | { kind: "click" | "fill" | "press" | "select"; target: RecordingControlTarget; value?: string; key?: string };
+  | { kind: "click" | "fill" | "press" | "select"; target: RecordingControlTarget; value?: string; key?: string; selectionOrdinal?: number };
 export type RecordingControlResult = { executed: true; action: RecordingControlAction["kind"] };
 export class RecordingControlError extends Error { constructor(public readonly code: string, message: string) { super(message); this.name = "RecordingControlError"; } }
 function quoteAttribute(value: string): string { return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"'); }
@@ -82,8 +82,64 @@ export async function executeRecordingControlAction(page: Page, action: Recordin
   if (action.kind === "navigate") { if (!action.url.trim()) throw new RecordingControlError("INVALID_ACTION", "Navigation URL is required"); await page.goto(action.url, { waitUntil: "domcontentloaded" }); return { executed: true, action: action.kind }; }
   const locator = await resolveRecordingControlTarget(page, action.target);
   if (action.kind === "click") await locator.click();
-  else if (action.kind === "fill") await locator.fill(action.value ?? "");
+  else if (action.kind === "fill") {
+    // Segmented OTP widgets often expose their stable identity on the containing form.
+    // Resolve the unique editable descendant without weakening the uniqueness contract.
+    const tagName = typeof (locator as any).evaluate === "function"
+      ? await locator.evaluate((element) => element.tagName.toLowerCase()).catch(() => "")
+      : "";
+    if (!["input", "textarea", "select"].includes(tagName)) {
+      if (typeof (locator as any).locator !== "function") { await locator.fill(action.value ?? ""); return { executed: true, action: action.kind }; }
+      const descendants = locator.locator('input:visible:not([type="submit"]):not([type="button"]),textarea:visible,[contenteditable="true"]');
+      const descendantCount = await descendants.count();
+      if (descendantCount === 1) await descendants.fill(action.value ?? "");
+      else if (descendantCount > 1 && (action.value ?? "").length === descendantCount) {
+        const value = action.value ?? "";
+        if (typeof (descendants as any).evaluateAll === "function") await descendants.evaluateAll((elements, text) => {
+          elements.forEach((element, position) => {
+            if (!(element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement)) return;
+            const setter = Object.getOwnPropertyDescriptor(element instanceof HTMLInputElement ? HTMLInputElement.prototype : HTMLTextAreaElement.prototype, "value")?.set;
+            setter?.call(element, String(text)[position] ?? "");
+            element.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: String(text)[position] ?? "" }));
+            element.dispatchEvent(new Event("change", { bubbles: true }));
+          });
+        }, value);
+        else await locator.fill(value);
+      } else if (descendantCount === 0) {
+        const allInputs = locator.locator('input:not([type="hidden"]):not([type="submit"]):not([type="button"]),textarea');
+        const allCount = await allInputs.count();
+        if (allCount > 0 && (action.value ?? "").length === allCount) {
+          const value = action.value ?? "";
+          if (typeof (allInputs as any).evaluateAll === "function") await allInputs.evaluateAll((elements, text) => {
+            elements.forEach((element, position) => {
+              if (!(element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement)) return;
+              const setter = Object.getOwnPropertyDescriptor(element instanceof HTMLInputElement ? HTMLInputElement.prototype : HTMLTextAreaElement.prototype, "value")?.set;
+              setter?.call(element, String(text)[position] ?? "");
+              element.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: String(text)[position] ?? "" }));
+              element.dispatchEvent(new Event("change", { bubbles: true }));
+            });
+          }, value);
+          else await locator.fill(value);
+        } else await locator.fill(action.value ?? "");
+      } else await locator.fill(action.value ?? "");
+    } else await locator.fill(action.value ?? "");
+  }
   else if (action.kind === "press") { if (!action.key?.trim()) throw new RecordingControlError("INVALID_ACTION", "Press key is required"); await locator.press(action.key); }
-  else { if (!action.value?.trim()) throw new RecordingControlError("INVALID_ACTION", "Select value is required"); await locator.selectOption(action.value); }
+  else {
+    if (action.selectionOrdinal !== undefined) {
+      if (!Number.isInteger(action.selectionOrdinal) || action.selectionOrdinal < 0) throw new RecordingControlError("INVALID_ACTION", "Selection ordinal must be a non-negative integer");
+      const value = await locator.evaluate((element, ordinal) => {
+        if (!(element instanceof HTMLSelectElement)) throw new Error("Selection ordinal requires a native select");
+        const options = Array.from(element.options).filter(option => !option.disabled && option.value.trim() !== "");
+        const selected = options[ordinal as number];
+        if (!selected) throw new Error("Selection ordinal is not present in the current option set");
+        return selected.value;
+      }, action.selectionOrdinal);
+      await locator.selectOption(value);
+    } else {
+      if (!action.value?.trim()) throw new RecordingControlError("INVALID_ACTION", "Select value is required");
+      await locator.selectOption(action.value);
+    }
+  }
   return { executed: true, action: action.kind };
 }

@@ -1252,6 +1252,37 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
   document.addEventListener("beforeinput", onEditEvidence("beforeinput"), true);
   document.addEventListener("input", onEditEvidence("input"), true);
   document.addEventListener("change", onEditEvidence("change"), true);
+  // Custom select widgets may dispatch an untrusted change after a real pointer action.
+  // Keep causality on the actual captured control, never on its label or current value alone.
+  var pendingNativeSelection = null;
+  document.addEventListener("pointerdown", function (event) {
+    if (!event.isTrusted || !(event.target instanceof Element)) return;
+    var evidence = captureNativeSelection(event.target);
+    pendingNativeSelection = evidence ? {
+      controlIdentity: evidence.controlIdentity,
+      selectedValue: evidence.selectedValue
+    } : null;
+  }, true);
+  // Native picker choices may dispatch change without an option click in the DOM.
+  document.addEventListener("change", function (event) {
+    var control = event.target;
+    if (!control || control.tagName.toLowerCase() !== "select") return;
+    var evidence = captureNativeSelection(control);
+    if (!evidence) return;
+    var pointerOwnedChange = pendingNativeSelection
+      && pendingNativeSelection.controlIdentity.strategy === evidence.controlIdentity.strategy
+      && pendingNativeSelection.controlIdentity.value === evidence.controlIdentity.value
+      && pendingNativeSelection.selectedValue !== evidence.selectedValue;
+    if (!event.isTrusted && !pointerOwnedChange) return;
+    var selectable = evidence.options.filter(function (option) { return option.value && !option.disabled; });
+    var matches = selectable.filter(function (option) { return option.value === control.value; });
+    if (matches.length !== 1) return;
+    evidence.clickedOption = { value: matches[0].value, label: matches[0].label };
+    evidence.selectionMode = "index";
+    evidence.selectedOptionIndex = selectable.findIndex(function (option) { return option.value === control.value; });
+    pendingNativeSelection = null;
+    send({ type: "native_selection_commit", evidence: evidence });
+  }, true);
   document.addEventListener("paste", onEditEvidence("paste"), true);
 
   document.addEventListener("focusout", function () {

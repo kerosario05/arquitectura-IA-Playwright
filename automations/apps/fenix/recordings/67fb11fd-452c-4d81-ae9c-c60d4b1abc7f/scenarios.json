@@ -1,8 +1,8 @@
 [
   {
-    "scenarioId": "REC-2C05BA11-01",
+    "scenarioId": "REC-67FB11FD-01",
     "title": "Transferencias Cuentas Propia",
-    "description": "Recorrido observado para completar \"Transferencias Cuentas Propia\". Se registraron 31 acciones funcionales.",
+    "description": "Recorrido observado para completar \"Transferencias Cuentas Propia\". Se registraron 29 acciones funcionales.",
     "preconditions": [
       "Acceso a la aplicación configurada del proyecto",
       "Datos de prueba válidos disponibles para el proyecto"
@@ -44,7 +44,7 @@
         },
         "valueKey": "usuario",
         "description": "Ingresar [usuario] en \"Usuario:\"",
-        "interactionId": "interaction-9"
+        "interactionId": "interaction-11"
       },
       {
         "action": "fill",
@@ -54,25 +54,7 @@
         },
         "valueKey": "contrasena",
         "description": "Ingresar [contrasena] en \"Contraseña:\"",
-        "interactionId": "interaction-10"
-      },
-      {
-        "action": "click",
-        "target": {
-          "strategy": "role",
-          "value": "button|Cerrar"
-        },
-        "description": "Presionar \"Cerrar\"",
-        "interactionId": "interaction-13"
-      },
-      {
-        "action": "click",
-        "target": {
-          "strategy": "id",
-          "value": "LoginFormE"
-        },
-        "description": "Presionar \"Contraseña: ¿Olvidó su contraseña?\"",
-        "interactionId": "interaction-14"
+        "interactionId": "interaction-12"
       },
       {
         "action": "click",
@@ -81,7 +63,7 @@
           "value": "IdentifyUserForm"
         },
         "description": "Presionar \"SMS\"",
-        "interactionId": "interaction-18"
+        "interactionId": "interaction-15"
       },
       {
         "action": "click",
@@ -90,7 +72,7 @@
           "value": "button|Continuar"
         },
         "description": "Presionar \"Continuar\"",
-        "interactionId": "interaction-27"
+        "interactionId": "interaction-24"
       },
       {
         "action": "click",
@@ -99,7 +81,7 @@
           "value": "left-menu-accordion"
         },
         "description": "Presionar \"Transferencias\"",
-        "interactionId": "interaction-29"
+        "interactionId": "interaction-26"
       },
       {
         "action": "click",
@@ -108,22 +90,27 @@
           "value": "link|- Cuentas Propias"
         },
         "description": "Presionar \"- Cuentas Propias\"",
-        "interactionId": "interaction-31"
+        "interactionId": "interaction-28"
+      },
+      {
+        "action": "click",
+        "description": "Presionar \"Transferencias a Mis Cuentas\"",
+        "interactionId": "interaction-30"
       },
       {
         "action": "click",
         "description": "Presionar el control grabado",
-        "interactionId": "interaction-35"
+        "interactionId": "interaction-32"
       },
       {
         "action": "click",
         "target": {
           "strategy": "css",
-          "value": "div:has(select[id=\"account-to-select-input\"])"
+          "value": "div:has(> select[id=\"account-to-select-input\"])"
         },
-        "valueKey": "seleccione_una_cuenta_seleccion",
-        "description": "Seleccionar [seleccione_una_cuenta_seleccion] en \"Seleccione una Cuenta\"",
-        "interactionId": "interaction-36"
+        "valueKey": "account_to_select_input_seleccion",
+        "description": "Seleccionar [account_to_select_input_seleccion] en \"account-to-select-input\"",
+        "interactionId": "interaction-33"
       },
       {
         "action": "fill",
@@ -133,7 +120,7 @@
         },
         "valueKey": "us",
         "description": "Ingresar [us] en \"US$\"",
-        "interactionId": "interaction-39"
+        "interactionId": "interaction-36"
       },
       {
         "action": "click",
@@ -142,6 +129,24 @@
           "value": "button|Continuar"
         },
         "description": "Presionar \"Continuar\"",
+        "interactionId": "interaction-37"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Continuar"
+        },
+        "description": "Presionar \"Continuar\"",
+        "interactionId": "interaction-39"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "div:has(a[id=\"token-resend-btn\"])"
+        },
+        "description": "Presionar \"SMS\"",
         "interactionId": "interaction-40"
       },
       {
@@ -151,25 +156,7 @@
           "value": "button|Continuar"
         },
         "description": "Presionar \"Continuar\"",
-        "interactionId": "interaction-42"
-      },
-      {
-        "action": "click",
-        "target": {
-          "strategy": "css",
-          "value": "div:has(a[id=\"token-resend-btn\"])"
-        },
-        "description": "Presionar \"SMS\"",
-        "interactionId": "interaction-43"
-      },
-      {
-        "action": "click",
-        "target": {
-          "strategy": "role",
-          "value": "button|Continuar"
-        },
-        "description": "Presionar \"Continuar\"",
-        "interactionId": "interaction-52"
+        "interactionId": "interaction-49"
       }
     ],
     "testRailSteps": [
@@ -217,12 +204,12 @@
       {
         "content": "Ingresar [usuario] en \"Usuario:\"",
         "sourceEventRefs": [
-          "event-9"
+          "event-11"
         ],
         "stepTemplate": "Ingresar [usuario] en \"Usuario:\"",
         "renderedStep": "Ingresar \"olivam\" en \"Usuario:\"",
         "valueKey": "usuario",
-        "interactionId": "interaction-9",
+        "interactionId": "interaction-11",
         "sensitive": false,
         "expected": "",
         "classification": "FUNCTIONAL_ACTION",
@@ -235,12 +222,12 @@
       {
         "content": "Ingresar [contrasena] en \"Contraseña:\"",
         "sourceEventRefs": [
-          "event-10"
+          "event-12"
         ],
         "stepTemplate": "Ingresar [contrasena] en \"Contraseña:\"",
         "renderedStep": "Ingresar \"qwerty123123\" en \"Contraseña:\"",
         "valueKey": "contrasena",
-        "interactionId": "interaction-10",
+        "interactionId": "interaction-12",
         "sensitive": true,
         "expected": "",
         "classification": "FUNCTIONAL_ACTION",
@@ -253,58 +240,10 @@
       {
         "content": "Presionar \"Enter\" en \"Contraseña:\"",
         "sourceEventRefs": [
-          "event-11"
-        ],
-        "renderedStep": "Presionar \"Enter\" en \"Contraseña:\"",
-        "interactionId": "interaction-11",
-        "sensitive": true,
-        "expected": "",
-        "classification": "FUNCTIONAL_ACTION",
-        "screenBeforeRef": "60d370b39a8d",
-        "screenAfterRef": "60d370b39a8d",
-        "routeBefore": "https://qa1.santacruz.do/onlinebanking",
-        "stateScope": "60d370b39a8d",
-        "stepNumber": 6
-      },
-      {
-        "content": "Presionar \"Cerrar\"",
-        "sourceEventRefs": [
           "event-13"
         ],
-        "renderedStep": "Presionar \"Cerrar\"",
-        "interactionId": "interaction-13",
-        "sensitive": false,
-        "expected": "",
-        "classification": "FUNCTIONAL_ACTION",
-        "screenBeforeRef": "60d370b39a8d",
-        "screenAfterRef": "60d370b39a8d",
-        "routeBefore": "https://qa1.santacruz.do/onlinebanking",
-        "stateScope": "60d370b39a8d",
-        "stepNumber": 7
-      },
-      {
-        "content": "Presionar \"Contraseña: ¿Olvidó su contraseña?\"",
-        "sourceEventRefs": [
-          "event-14"
-        ],
-        "renderedStep": "Presionar \"Contraseña: ¿Olvidó su contraseña?\"",
-        "interactionId": "interaction-14",
-        "sensitive": false,
-        "expected": "",
-        "classification": "FUNCTIONAL_ACTION",
-        "screenBeforeRef": "60d370b39a8d",
-        "screenAfterRef": "60d370b39a8d",
-        "routeBefore": "https://qa1.santacruz.do/onlinebanking",
-        "stateScope": "60d370b39a8d",
-        "stepNumber": 8
-      },
-      {
-        "content": "Presionar \"Enter\" en \"Contraseña:\"",
-        "sourceEventRefs": [
-          "event-16"
-        ],
         "renderedStep": "Presionar \"Enter\" en \"Contraseña:\"",
-        "interactionId": "interaction-16",
+        "interactionId": "interaction-13",
         "sensitive": true,
         "expected": "",
         "classification": "FUNCTIONAL_ACTION",
@@ -313,15 +252,15 @@
         "routeBefore": "https://qa1.santacruz.do/onlinebanking",
         "routeAfter": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
         "stateScope": "60d370b39a8d",
-        "stepNumber": 9
+        "stepNumber": 6
       },
       {
         "content": "Presionar \"SMS\"",
         "sourceEventRefs": [
-          "event-18"
+          "event-15"
         ],
         "renderedStep": "Presionar \"SMS\"",
-        "interactionId": "interaction-18",
+        "interactionId": "interaction-15",
         "sensitive": false,
         "expected": "",
         "classification": "FUNCTIONAL_ACTION",
@@ -329,18 +268,18 @@
         "screenAfterRef": "60d370b39a8d",
         "routeBefore": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
         "stateScope": "60d370b39a8d",
-        "stepNumber": 10
+        "stepNumber": 7
       },
       {
         "content": "Ingresar dígito 1 de 6 en \"SMS\"",
         "stepTemplate": "Ingresar [sms] en \"SMS\"",
         "segmentPosition": 1,
         "sourceEventRefs": [
-          "event-20"
+          "event-17"
         ],
         "renderedStep": "Ingresar \"1\" en \"SMS\"",
         "valueKey": "sms",
-        "interactionId": "interaction-20",
+        "interactionId": "interaction-17",
         "sensitive": true,
         "expected": "",
         "classification": "FUNCTIONAL_ACTION",
@@ -360,16 +299,97 @@
         "screenAfterRef": "60d370b39a8d",
         "routeBefore": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
         "stateScope": "60d370b39a8d",
-        "stepNumber": 11
+        "stepNumber": 8
       },
       {
         "content": "Ingresar dígito 2 de 6 en \"SMS\"",
         "stepTemplate": "Ingresar [sms] en \"SMS\"",
         "segmentPosition": 2,
         "sourceEventRefs": [
-          "event-21"
+          "event-18"
         ],
         "renderedStep": "Ingresar \"2\" en \"SMS\"",
+        "valueKey": "sms",
+        "interactionId": "interaction-18",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "resolutionState": "runtime_resolution_required",
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "stepNumber": 9
+      },
+      {
+        "content": "Ingresar dígito 3 de 6 en \"SMS\"",
+        "stepTemplate": "Ingresar [sms] en \"SMS\"",
+        "segmentPosition": 3,
+        "sourceEventRefs": [
+          "event-19"
+        ],
+        "renderedStep": "Ingresar \"3\" en \"SMS\"",
+        "valueKey": "sms",
+        "interactionId": "interaction-19",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "resolutionState": "runtime_resolution_required",
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "stepNumber": 10
+      },
+      {
+        "content": "Ingresar dígito 4 de 6 en \"SMS\"",
+        "stepTemplate": "Ingresar [sms] en \"SMS\"",
+        "segmentPosition": 4,
+        "sourceEventRefs": [
+          "event-20"
+        ],
+        "renderedStep": "Ingresar \"4\" en \"SMS\"",
+        "valueKey": "sms",
+        "interactionId": "interaction-20",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "resolutionState": "runtime_resolution_required",
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "stepNumber": 11
+      },
+      {
+        "content": "Ingresar dígito 5 de 6 en \"SMS\"",
+        "stepTemplate": "Ingresar [sms] en \"SMS\"",
+        "segmentPosition": 5,
+        "sourceEventRefs": [
+          "event-21"
+        ],
+        "renderedStep": "Ingresar \"5\" en \"SMS\"",
         "valueKey": "sms",
         "interactionId": "interaction-21",
         "sensitive": true,
@@ -390,15 +410,15 @@
         "stepNumber": 12
       },
       {
-        "content": "Ingresar dígito 3 de 6 en \"SMS\"",
+        "content": "Ingresar dígito 6 de 6 en \"SMS\"",
         "stepTemplate": "Ingresar [sms] en \"SMS\"",
-        "segmentPosition": 3,
+        "segmentPosition": 6,
         "sourceEventRefs": [
-          "event-22"
+          "event-23"
         ],
-        "renderedStep": "Ingresar \"3\" en \"SMS\"",
+        "renderedStep": "Ingresar \"6\" en \"SMS\"",
         "valueKey": "sms",
-        "interactionId": "interaction-22",
+        "interactionId": "interaction-23",
         "sensitive": true,
         "expected": "",
         "classification": "FUNCTIONAL_ACTION",
@@ -417,93 +437,12 @@
         "stepNumber": 13
       },
       {
-        "content": "Ingresar dígito 4 de 6 en \"SMS\"",
-        "stepTemplate": "Ingresar [sms] en \"SMS\"",
-        "segmentPosition": 4,
-        "sourceEventRefs": [
-          "event-23"
-        ],
-        "renderedStep": "Ingresar \"4\" en \"SMS\"",
-        "valueKey": "sms",
-        "interactionId": "interaction-23",
-        "sensitive": true,
-        "expected": "",
-        "classification": "FUNCTIONAL_ACTION",
-        "resolutionState": "runtime_resolution_required",
-        "playwrightRecorderEvidence": {
-          "kind": "segmented_input",
-          "targetTag": "input",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "IdentifyUserForm"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true,
-          "segmentCount": 6
-        },
-        "stepNumber": 14
-      },
-      {
-        "content": "Ingresar dígito 5 de 6 en \"SMS\"",
-        "stepTemplate": "Ingresar [sms] en \"SMS\"",
-        "segmentPosition": 5,
+        "content": "Presionar \"Continuar\"",
         "sourceEventRefs": [
           "event-24"
         ],
-        "renderedStep": "Ingresar \"5\" en \"SMS\"",
-        "valueKey": "sms",
-        "interactionId": "interaction-24",
-        "sensitive": true,
-        "expected": "",
-        "classification": "FUNCTIONAL_ACTION",
-        "resolutionState": "runtime_resolution_required",
-        "playwrightRecorderEvidence": {
-          "kind": "segmented_input",
-          "targetTag": "input",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "IdentifyUserForm"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true,
-          "segmentCount": 6
-        },
-        "stepNumber": 15
-      },
-      {
-        "content": "Ingresar dígito 6 de 6 en \"SMS\"",
-        "stepTemplate": "Ingresar [sms] en \"SMS\"",
-        "segmentPosition": 6,
-        "sourceEventRefs": [
-          "event-26"
-        ],
-        "renderedStep": "Ingresar \"6\" en \"SMS\"",
-        "valueKey": "sms",
-        "interactionId": "interaction-26",
-        "sensitive": true,
-        "expected": "",
-        "classification": "FUNCTIONAL_ACTION",
-        "resolutionState": "runtime_resolution_required",
-        "playwrightRecorderEvidence": {
-          "kind": "segmented_input",
-          "targetTag": "input",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "IdentifyUserForm"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true,
-          "segmentCount": 6
-        },
-        "stepNumber": 16
-      },
-      {
-        "content": "Presionar \"Continuar\"",
-        "sourceEventRefs": [
-          "event-27"
-        ],
         "renderedStep": "Presionar \"Continuar\"",
-        "interactionId": "interaction-27",
+        "interactionId": "interaction-24",
         "sensitive": false,
         "expected": "",
         "classification": "FUNCTIONAL_ACTION",
@@ -512,16 +451,62 @@
         "routeBefore": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
         "routeAfter": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
         "stateScope": "60d370b39a8d",
-        "stepNumber": 17
+        "stepNumber": 14
       },
       {
         "content": "Presionar \"Transferencias\"",
         "sourceEventRefs": [
-          "event-29"
+          "event-26"
         ],
         "renderedStep": "Presionar \"Transferencias\"",
-        "interactionId": "interaction-29",
+        "interactionId": "interaction-26",
         "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "60d370b39a8d",
+        "screenAfterRef": "60d370b39a8d",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+        "stateScope": "60d370b39a8d",
+        "stepNumber": 15
+      },
+      {
+        "content": "Presionar \"- Cuentas Propias\"",
+        "sourceEventRefs": [
+          "event-28"
+        ],
+        "renderedStep": "Presionar \"- Cuentas Propias\"",
+        "interactionId": "interaction-28",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "60d370b39a8d",
+        "screenAfterRef": "60d370b39a8d",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+        "stateScope": "60d370b39a8d",
+        "stepNumber": 16
+      },
+      {
+        "content": "Presionar \"Transferencias a Mis Cuentas\"",
+        "sourceEventRefs": [
+          "event-30"
+        ],
+        "renderedStep": "Presionar \"Transferencias a Mis Cuentas\"",
+        "interactionId": "interaction-30",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "60d370b39a8d",
+        "screenAfterRef": "60d370b39a8d",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+        "stateScope": "60d370b39a8d",
+        "stepNumber": 17
+      },
+      {
+        "content": "Presionar el control grabado",
+        "sourceEventRefs": [
+          "event-32"
+        ],
+        "renderedStep": "Presionar el control grabado",
+        "interactionId": "interaction-32",
         "expected": "",
         "classification": "FUNCTIONAL_ACTION",
         "screenBeforeRef": "60d370b39a8d",
@@ -531,12 +516,14 @@
         "stepNumber": 18
       },
       {
-        "content": "Presionar \"- Cuentas Propias\"",
+        "content": "Seleccionar [account_to_select_input_seleccion] en \"account-to-select-input\"",
         "sourceEventRefs": [
-          "event-31"
+          "event-33"
         ],
-        "renderedStep": "Presionar \"- Cuentas Propias\"",
-        "interactionId": "interaction-31",
+        "stepTemplate": "Seleccionar [account_to_select_input_seleccion] en \"account-to-select-input\"",
+        "renderedStep": "Seleccionar \"Cuenta de Ahorro / 21312020003368 / US$1,375.71\" en \"account-to-select-input\"",
+        "valueKey": "account_to_select_input_seleccion",
+        "interactionId": "interaction-33",
         "sensitive": false,
         "expected": "",
         "classification": "FUNCTIONAL_ACTION",
@@ -547,12 +534,15 @@
         "stepNumber": 19
       },
       {
-        "content": "Presionar el control grabado",
+        "content": "Ingresar [us] en \"US$\"",
         "sourceEventRefs": [
-          "event-35"
+          "event-36"
         ],
-        "renderedStep": "Presionar el control grabado",
-        "interactionId": "interaction-35",
+        "stepTemplate": "Ingresar [us] en \"US$\"",
+        "renderedStep": "Ingresar \"5.00\" en \"US$\"",
+        "valueKey": "us",
+        "interactionId": "interaction-36",
+        "sensitive": false,
         "expected": "",
         "classification": "FUNCTIONAL_ACTION",
         "screenBeforeRef": "60d370b39a8d",
@@ -562,14 +552,12 @@
         "stepNumber": 20
       },
       {
-        "content": "Seleccionar [seleccione_una_cuenta_seleccion] en \"Seleccione una Cuenta\"",
+        "content": "Presionar \"Continuar\"",
         "sourceEventRefs": [
-          "event-36"
+          "event-37"
         ],
-        "stepTemplate": "Seleccionar [seleccione_una_cuenta_seleccion] en \"Seleccione una Cuenta\"",
-        "renderedStep": "Seleccionar \"Cuenta de Ahorro / 21312020003368 / US$1,360.71\" en \"Seleccione una Cuenta\"",
-        "valueKey": "seleccione_una_cuenta_seleccion",
-        "interactionId": "interaction-36",
+        "renderedStep": "Presionar \"Continuar\"",
+        "interactionId": "interaction-37",
         "sensitive": false,
         "expected": "",
         "classification": "FUNCTIONAL_ACTION",
@@ -580,13 +568,11 @@
         "stepNumber": 21
       },
       {
-        "content": "Ingresar [us] en \"US$\"",
+        "content": "Presionar \"Continuar\"",
         "sourceEventRefs": [
           "event-39"
         ],
-        "stepTemplate": "Ingresar [us] en \"US$\"",
-        "renderedStep": "Ingresar \"5.00\" en \"US$\"",
-        "valueKey": "us",
+        "renderedStep": "Presionar \"Continuar\"",
         "interactionId": "interaction-39",
         "sensitive": false,
         "expected": "",
@@ -598,11 +584,11 @@
         "stepNumber": 22
       },
       {
-        "content": "Presionar \"Continuar\"",
+        "content": "Presionar \"SMS\"",
         "sourceEventRefs": [
           "event-40"
         ],
-        "renderedStep": "Presionar \"Continuar\"",
+        "renderedStep": "Presionar \"SMS\"",
         "interactionId": "interaction-40",
         "sensitive": false,
         "expected": "",
@@ -614,47 +600,15 @@
         "stepNumber": 23
       },
       {
-        "content": "Presionar \"Continuar\"",
+        "content": "Ingresar dígito 1 de 6 en \"Reenviar código en 26 segundos...\"",
+        "stepTemplate": "Ingresar [reenviar_codigo_en_26_segundos] en \"Reenviar código en 26 segundos...\"",
+        "segmentPosition": 1,
         "sourceEventRefs": [
           "event-42"
         ],
-        "renderedStep": "Presionar \"Continuar\"",
+        "renderedStep": "Ingresar \"1\" en \"Reenviar código en 26 segundos...\"",
+        "valueKey": "reenviar_codigo_en_26_segundos",
         "interactionId": "interaction-42",
-        "sensitive": false,
-        "expected": "",
-        "classification": "FUNCTIONAL_ACTION",
-        "screenBeforeRef": "60d370b39a8d",
-        "screenAfterRef": "60d370b39a8d",
-        "routeBefore": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
-        "stateScope": "60d370b39a8d",
-        "stepNumber": 24
-      },
-      {
-        "content": "Presionar \"SMS\"",
-        "sourceEventRefs": [
-          "event-43"
-        ],
-        "renderedStep": "Presionar \"SMS\"",
-        "interactionId": "interaction-43",
-        "sensitive": false,
-        "expected": "",
-        "classification": "FUNCTIONAL_ACTION",
-        "screenBeforeRef": "60d370b39a8d",
-        "screenAfterRef": "60d370b39a8d",
-        "routeBefore": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
-        "stateScope": "60d370b39a8d",
-        "stepNumber": 25
-      },
-      {
-        "content": "Ingresar dígito 1 de 6 en \"Reenviar código en 29 segundos...\"",
-        "stepTemplate": "Ingresar [reenviar_codigo_en_29_segundos] en \"Reenviar código en 29 segundos...\"",
-        "segmentPosition": 1,
-        "sourceEventRefs": [
-          "event-45"
-        ],
-        "renderedStep": "Ingresar \"1\" en \"Reenviar código en 29 segundos...\"",
-        "valueKey": "reenviar_codigo_en_29_segundos",
-        "interactionId": "interaction-45",
         "sensitive": true,
         "expected": "",
         "classification": "FUNCTIONAL_ACTION",
@@ -674,18 +628,72 @@
         "screenAfterRef": "60d370b39a8d",
         "routeBefore": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
         "stateScope": "60d370b39a8d",
+        "stepNumber": 24
+      },
+      {
+        "content": "Ingresar dígito 2 de 6 en \"Reenviar código en 25 segundos...\"",
+        "stepTemplate": "Ingresar [reenviar_codigo_en_26_segundos] en \"Reenviar código en 25 segundos...\"",
+        "segmentPosition": 2,
+        "sourceEventRefs": [
+          "event-43"
+        ],
+        "renderedStep": "Ingresar \"2\" en \"Reenviar código en 25 segundos...\"",
+        "valueKey": "reenviar_codigo_en_26_segundos",
+        "interactionId": "interaction-43",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "resolutionState": "runtime_resolution_required",
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "requestchallengeform"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "stepNumber": 25
+      },
+      {
+        "content": "Ingresar dígito 3 de 6 en \"Reenviar código en 25 segundos...\"",
+        "stepTemplate": "Ingresar [reenviar_codigo_en_26_segundos] en \"Reenviar código en 25 segundos...\"",
+        "segmentPosition": 3,
+        "sourceEventRefs": [
+          "event-44"
+        ],
+        "renderedStep": "Ingresar \"3\" en \"Reenviar código en 25 segundos...\"",
+        "valueKey": "reenviar_codigo_en_26_segundos",
+        "interactionId": "interaction-44",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "resolutionState": "runtime_resolution_required",
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "requestchallengeform"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
         "stepNumber": 26
       },
       {
-        "content": "Ingresar dígito 2 de 6 en \"Reenviar código en 28 segundos...\"",
-        "stepTemplate": "Ingresar [reenviar_codigo_en_29_segundos] en \"Reenviar código en 28 segundos...\"",
-        "segmentPosition": 2,
+        "content": "Ingresar dígito 4 de 6 en \"Reenviar código en 24 segundos...\"",
+        "stepTemplate": "Ingresar [reenviar_codigo_en_26_segundos] en \"Reenviar código en 24 segundos...\"",
+        "segmentPosition": 4,
         "sourceEventRefs": [
-          "event-46"
+          "event-45"
         ],
-        "renderedStep": "Ingresar \"2\" en \"Reenviar código en 28 segundos...\"",
-        "valueKey": "reenviar_codigo_en_29_segundos",
-        "interactionId": "interaction-46",
+        "renderedStep": "Ingresar \"4\" en \"Reenviar código en 24 segundos...\"",
+        "valueKey": "reenviar_codigo_en_26_segundos",
+        "interactionId": "interaction-45",
         "sensitive": true,
         "expected": "",
         "classification": "FUNCTIONAL_ACTION",
@@ -704,15 +712,15 @@
         "stepNumber": 27
       },
       {
-        "content": "Ingresar dígito 3 de 6 en \"Reenviar código en 27 segundos...\"",
-        "stepTemplate": "Ingresar [reenviar_codigo_en_29_segundos] en \"Reenviar código en 27 segundos...\"",
-        "segmentPosition": 3,
+        "content": "Ingresar dígito 5 de 6 en \"Reenviar código en 24 segundos...\"",
+        "stepTemplate": "Ingresar [reenviar_codigo_en_26_segundos] en \"Reenviar código en 24 segundos...\"",
+        "segmentPosition": 5,
         "sourceEventRefs": [
-          "event-47"
+          "event-46"
         ],
-        "renderedStep": "Ingresar \"3\" en \"Reenviar código en 27 segundos...\"",
-        "valueKey": "reenviar_codigo_en_29_segundos",
-        "interactionId": "interaction-47",
+        "renderedStep": "Ingresar \"5\" en \"Reenviar código en 24 segundos...\"",
+        "valueKey": "reenviar_codigo_en_26_segundos",
+        "interactionId": "interaction-46",
         "sensitive": true,
         "expected": "",
         "classification": "FUNCTIONAL_ACTION",
@@ -731,14 +739,14 @@
         "stepNumber": 28
       },
       {
-        "content": "Ingresar dígito 4 de 6 en \"Reenviar código en 27 segundos...\"",
-        "stepTemplate": "Ingresar [reenviar_codigo_en_29_segundos] en \"Reenviar código en 27 segundos...\"",
-        "segmentPosition": 4,
+        "content": "Ingresar dígito 6 de 6 en \"Reenviar código en 23 segundos...\"",
+        "stepTemplate": "Ingresar [reenviar_codigo_en_26_segundos] en \"Reenviar código en 23 segundos...\"",
+        "segmentPosition": 6,
         "sourceEventRefs": [
           "event-48"
         ],
-        "renderedStep": "Ingresar \"4\" en \"Reenviar código en 27 segundos...\"",
-        "valueKey": "reenviar_codigo_en_29_segundos",
+        "renderedStep": "Ingresar \"6\" en \"Reenviar código en 23 segundos...\"",
+        "valueKey": "reenviar_codigo_en_26_segundos",
         "interactionId": "interaction-48",
         "sensitive": true,
         "expected": "",
@@ -758,66 +766,12 @@
         "stepNumber": 29
       },
       {
-        "content": "Ingresar dígito 5 de 6 en \"Reenviar código en 26 segundos...\"",
-        "stepTemplate": "Ingresar [reenviar_codigo_en_29_segundos] en \"Reenviar código en 26 segundos...\"",
-        "segmentPosition": 5,
+        "content": "Presionar \"Continuar\"",
         "sourceEventRefs": [
           "event-49"
         ],
-        "renderedStep": "Ingresar \"5\" en \"Reenviar código en 26 segundos...\"",
-        "valueKey": "reenviar_codigo_en_29_segundos",
-        "interactionId": "interaction-49",
-        "sensitive": true,
-        "expected": "",
-        "classification": "FUNCTIONAL_ACTION",
-        "resolutionState": "runtime_resolution_required",
-        "playwrightRecorderEvidence": {
-          "kind": "segmented_input",
-          "targetTag": "input",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "requestchallengeform"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true,
-          "segmentCount": 6
-        },
-        "stepNumber": 30
-      },
-      {
-        "content": "Ingresar dígito 6 de 6 en \"Reenviar código en 26 segundos...\"",
-        "stepTemplate": "Ingresar [reenviar_codigo_en_29_segundos] en \"Reenviar código en 26 segundos...\"",
-        "segmentPosition": 6,
-        "sourceEventRefs": [
-          "event-51"
-        ],
-        "renderedStep": "Ingresar \"6\" en \"Reenviar código en 26 segundos...\"",
-        "valueKey": "reenviar_codigo_en_29_segundos",
-        "interactionId": "interaction-51",
-        "sensitive": true,
-        "expected": "",
-        "classification": "FUNCTIONAL_ACTION",
-        "resolutionState": "runtime_resolution_required",
-        "playwrightRecorderEvidence": {
-          "kind": "segmented_input",
-          "targetTag": "input",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "requestchallengeform"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true,
-          "segmentCount": 6
-        },
-        "stepNumber": 31
-      },
-      {
-        "content": "Presionar \"Continuar\"",
-        "sourceEventRefs": [
-          "event-52"
-        ],
         "renderedStep": "Presionar \"Continuar\"",
-        "interactionId": "interaction-52",
+        "interactionId": "interaction-49",
         "sensitive": false,
         "expected": "",
         "classification": "FUNCTIONAL_ACTION",
@@ -825,7 +779,7 @@
         "screenAfterRef": "60d370b39a8d",
         "routeBefore": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
         "stateScope": "60d370b39a8d",
-        "stepNumber": 32
+        "stepNumber": 30
       }
     ],
     "requiredData": [
@@ -861,7 +815,7 @@
           "id:UserNameE"
         ],
         "sourceEventRefs": [
-          "event-9"
+          "event-11"
         ],
         "exampleValue": "olivam",
         "sensitive": false,
@@ -883,7 +837,7 @@
           "id:PasswordE"
         ],
         "sourceEventRefs": [
-          "event-10"
+          "event-12"
         ],
         "sensitive": true,
         "valueRole": "secure_input",
@@ -897,15 +851,15 @@
       {
         "key": "sms",
         "label": "SMS",
-        "stepIndex": 10,
+        "stepIndex": 7,
         "technicalTargetRefs": [],
         "sourceEventRefs": [
+          "event-17",
+          "event-18",
+          "event-19",
           "event-20",
           "event-21",
-          "event-22",
-          "event-23",
-          "event-24",
-          "event-26"
+          "event-23"
         ],
         "sensitive": true,
         "valueRole": "secure_input",
@@ -915,16 +869,19 @@
         "formatHint": "segmented_6"
       },
       {
-        "key": "seleccione_una_cuenta_seleccion",
-        "label": "Seleccione una Cuenta",
-        "stepIndex": 12,
+        "key": "account_to_select_input_seleccion",
+        "label": "account-to-select-input",
+        "stepIndex": 11,
         "technicalTargetRefs": [
-          "css:div:has(select[id=\"account-to-select-input\"])"
+          "css:div:has(> select[id=\"account-to-select-input\"])"
         ],
         "sourceEventRefs": [
-          "event-36"
+          "event-33"
         ],
-        "exampleValue": "Cuenta de Ahorro / 21312020003368 / US$1,360.71",
+        "exampleValue": "Cuenta de Ahorro / 21312020003368 / US$1,375.71",
+        "allowedValues": [
+          "Cuenta de Ahorro / 21312020003368 / US$1,375.71"
+        ],
         "sensitive": false,
         "valueRole": "action_input",
         "source": "RECORDED_CONFIRMED"
@@ -932,13 +889,13 @@
       {
         "key": "us",
         "label": "US$",
-        "stepIndex": 13,
+        "stepIndex": 12,
         "technicalTargetRefs": [
           "css:#transactionDetails_0__AmountPayment",
           "id:transactionDetails_0__AmountPayment"
         ],
         "sourceEventRefs": [
-          "event-39"
+          "event-36"
         ],
         "exampleValue": "5.00",
         "sensitive": false,
@@ -951,17 +908,17 @@
         "reviewReason": "explicit_associated_label"
       },
       {
-        "key": "reenviar_codigo_en_29_segundos",
-        "label": "Reenviar código en 29 segundos...",
-        "stepIndex": 25,
+        "key": "reenviar_codigo_en_26_segundos",
+        "label": "Reenviar código en 26 segundos...",
+        "stepIndex": 23,
         "technicalTargetRefs": [],
         "sourceEventRefs": [
+          "event-42",
+          "event-43",
+          "event-44",
           "event-45",
           "event-46",
-          "event-47",
-          "event-48",
-          "event-49",
-          "event-51"
+          "event-48"
         ],
         "sensitive": true,
         "valueRole": "secure_input",
@@ -998,51 +955,45 @@
       },
       {
         "stepIndex": 5,
-        "description": "Presionar \"Cerrar\"",
-        "strategy": "role",
-        "value": "button|Cerrar"
-      },
-      {
-        "stepIndex": 6,
-        "description": "Presionar \"Contraseña: ¿Olvidó su contraseña?\"",
-        "strategy": "id",
-        "value": "LoginFormE"
-      },
-      {
-        "stepIndex": 7,
         "description": "Presionar \"SMS\"",
         "strategy": "id",
         "value": "IdentifyUserForm"
       },
       {
-        "stepIndex": 8,
+        "stepIndex": 6,
         "description": "Presionar \"Continuar\"",
         "strategy": "role",
         "value": "button|Continuar"
       },
       {
-        "stepIndex": 9,
+        "stepIndex": 7,
         "description": "Presionar \"Transferencias\"",
         "strategy": "id",
         "value": "left-menu-accordion"
       },
       {
-        "stepIndex": 10,
+        "stepIndex": 8,
         "description": "Presionar \"- Cuentas Propias\"",
         "strategy": "role",
         "value": "link|- Cuentas Propias"
       },
       {
-        "stepIndex": 12,
-        "description": "Seleccionar [seleccione_una_cuenta_seleccion] en \"Seleccione una Cuenta\"",
+        "stepIndex": 11,
+        "description": "Seleccionar [account_to_select_input_seleccion] en \"account-to-select-input\"",
         "strategy": "css",
-        "value": "div:has(select[id=\"account-to-select-input\"])"
+        "value": "div:has(> select[id=\"account-to-select-input\"])"
       },
       {
-        "stepIndex": 13,
+        "stepIndex": 12,
         "description": "Ingresar [us] en \"US$\"",
         "strategy": "css",
         "value": "#transactionDetails_0__AmountPayment"
+      },
+      {
+        "stepIndex": 13,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "role",
+        "value": "button|Continuar"
       },
       {
         "stepIndex": 14,
@@ -1052,24 +1003,18 @@
       },
       {
         "stepIndex": 15,
-        "description": "Presionar \"Continuar\"",
-        "strategy": "role",
-        "value": "button|Continuar"
-      },
-      {
-        "stepIndex": 16,
         "description": "Presionar \"SMS\"",
         "strategy": "css",
         "value": "div:has(a[id=\"token-resend-btn\"])"
       },
       {
-        "stepIndex": 17,
+        "stepIndex": 16,
         "description": "Presionar \"Continuar\"",
         "strategy": "role",
         "value": "button|Continuar"
       }
     ],
-    "sourceRecordingId": "2c05ba11-69bd-4f27-aa97-441eb3fba78e",
+    "sourceRecordingId": "67fb11fd-452c-4d81-ae9c-c60d4b1abc7f",
     "hasUncertainSteps": true,
     "primary": true,
     "sourceEventRefs": [
@@ -1121,10 +1066,7 @@
       "event-46",
       "event-47",
       "event-48",
-      "event-49",
-      "event-50",
-      "event-51",
-      "event-52"
+      "event-49"
     ],
     "traceBacked": true,
     "containsUnexecutedActions": false,
@@ -1133,8 +1075,8 @@
     "expectedResultCandidate": "La aplicación carga su pantalla inicial",
     "oracleAuthority": "observed_only",
     "confidence": 0.95,
-    "scenarioStepCount": 32,
-    "functionalActionCount": 31,
+    "scenarioStepCount": 30,
+    "functionalActionCount": 29,
     "nonUserSetupSteps": 1,
     "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
     "scenarioGoal": "Transferencias Cuentas Propia",
@@ -1248,7 +1190,7 @@
         "routeBefore": "https://qa1.santacruz.do/onlinebanking"
       },
       {
-        "id": "interaction-9",
+        "id": "interaction-11",
         "controlIdentity": "60d370b39a8d|Usuario:|role|textbox|Usuario:",
         "semanticField": "Usuario:",
         "action": "fill",
@@ -1256,7 +1198,7 @@
         "recordedValue": "olivam",
         "rawTypedValue": "olivam",
         "sourceEventRefs": [
-          "event-9"
+          "event-11"
         ],
         "technicalTargetRefs": [
           "role:textbox|Usuario:",
@@ -1274,13 +1216,13 @@
         "routeBefore": "https://qa1.santacruz.do/onlinebanking"
       },
       {
-        "id": "interaction-10",
+        "id": "interaction-12",
         "controlIdentity": "60d370b39a8d|Contraseña:|role|textbox|Contraseña:",
         "semanticField": "Contraseña:",
         "action": "fill",
         "valueKey": "contrasena",
         "sourceEventRefs": [
-          "event-10"
+          "event-12"
         ],
         "technicalTargetRefs": [
           "role:textbox|Contraseña:",
@@ -1298,206 +1240,12 @@
         "routeBefore": "https://qa1.santacruz.do/onlinebanking"
       },
       {
-        "id": "interaction-11",
+        "id": "interaction-13",
         "controlIdentity": "60d370b39a8d|Contraseña:|role|textbox|Contraseña:",
         "action": "press",
         "key": "Enter",
-        "sourceEventRefs": [
-          "event-11"
-        ],
-        "technicalTargetRefs": [
-          "role:textbox|Contraseña:",
-          "css:#PasswordE",
-          "id:PasswordE"
-        ],
-        "stateScope": "60d370b39a8d",
-        "admissionStatus": "accepted",
-        "resolutionState": "certified",
-        "confidence": 0.85,
-        "screenBeforeRef": "60d370b39a8d",
-        "screenAfterRef": "60d370b39a8d",
-        "routeBefore": "https://qa1.santacruz.do/onlinebanking"
-      },
-      {
-        "id": "interaction-13",
-        "controlIdentity": "60d370b39a8d|Cerrar|role|button|Cerrar",
-        "semanticField": "Cerrar",
-        "action": "click",
-        "valueKey": "cerrar",
         "sourceEventRefs": [
           "event-13"
-        ],
-        "technicalTargetRefs": [
-          "role:button|Cerrar"
-        ],
-        "technicalTargetCandidates": [
-          {
-            "targetType": "structural",
-            "locatorCandidates": [
-              {
-                "strategy": "role",
-                "value": "button|Cerrar",
-                "confidence": 0.85
-              }
-            ],
-            "structuralContext": {
-              "owner": {
-                "tag": "button"
-              },
-              "stableDirectAttributes": {},
-              "stableDescendants": [],
-              "semanticShape": [],
-              "deterministicStructuralIdentity": false,
-              "structuralIdentityMatchCount": 1,
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "sii-modal-error"
-              },
-              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
-              "captureScopeUnique": true,
-              "captureTargetMatchCount": 1
-            },
-            "interactionEvidence": [
-              "v2_click_owner"
-            ],
-            "confidence": 0.85,
-            "validatedByInteraction": true
-          }
-        ],
-        "validatedByInteraction": true,
-        "semanticRuntimeEvidence": {
-          "source": "accessible_name",
-          "normalizedValue": "Cerrar",
-          "role": "button",
-          "targetTag": "button",
-          "scopeAlternatives": [
-            {
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "sii-modal-error"
-              },
-              "captureMatchCount": 1
-            },
-            {
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "login-layout"
-              },
-              "captureMatchCount": 1
-            }
-          ],
-          "captureUniqueTarget": true
-        },
-        "playwrightRecorderEvidence": {
-          "kind": "role",
-          "role": "button",
-          "normalizedName": "Cerrar",
-          "targetTag": "button",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "sii-modal-error"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true
-        },
-        "description": "Ingresar en \"Cerrar\"",
-        "stateScope": "60d370b39a8d",
-        "admissionStatus": "accepted",
-        "resolutionState": "certified",
-        "confidence": 0.85,
-        "screenBeforeRef": "60d370b39a8d",
-        "screenAfterRef": "60d370b39a8d",
-        "routeBefore": "https://qa1.santacruz.do/onlinebanking"
-      },
-      {
-        "id": "interaction-14",
-        "controlIdentity": "60d370b39a8d|Contraseña: ¿Olvidó su contraseña?|id|LoginFormE",
-        "semanticField": "Contraseña: ¿Olvidó su contraseña?",
-        "action": "click",
-        "valueKey": "contrasena_olvido_su_contrasena",
-        "sourceEventRefs": [
-          "event-14"
-        ],
-        "technicalTargetRefs": [
-          "id:LoginFormE"
-        ],
-        "semanticRuntimeEvidence": {
-          "source": "accessible_name",
-          "normalizedValue": "Contraseña: ¿Olvidó su contraseña?",
-          "targetTag": "div",
-          "scopeAlternatives": [
-            {
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "LoginFormE"
-              },
-              "captureMatchCount": 1
-            },
-            {
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "empresarial"
-              },
-              "captureMatchCount": 1
-            },
-            {
-              "scopeIdentity": {
-                "strategy": "css",
-                "value": "div:has(div[id=\"empresarial\"])"
-              },
-              "captureMatchCount": 1
-            },
-            {
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "client--login-box"
-              },
-              "captureMatchCount": 1
-            },
-            {
-              "scopeIdentity": {
-                "strategy": "css",
-                "value": "div:has(div[id=\"client--login-box\"])"
-              },
-              "captureMatchCount": 1
-            },
-            {
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "login-layout"
-              },
-              "captureMatchCount": 1
-            }
-          ],
-          "captureUniqueTarget": true
-        },
-        "playwrightRecorderEvidence": {
-          "kind": "text",
-          "normalizedName": "Contraseña: ¿Olvidó su contraseña?",
-          "targetTag": "div",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "LoginFormE"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true
-        },
-        "description": "Ingresar en \"Contraseña: ¿Olvidó su contraseña?\"",
-        "stateScope": "60d370b39a8d",
-        "admissionStatus": "accepted",
-        "resolutionState": "certified",
-        "confidence": 0.55,
-        "screenBeforeRef": "60d370b39a8d",
-        "screenAfterRef": "60d370b39a8d",
-        "routeBefore": "https://qa1.santacruz.do/onlinebanking"
-      },
-      {
-        "id": "interaction-16",
-        "controlIdentity": "60d370b39a8d|Contraseña:|role|textbox|Contraseña:",
-        "action": "press",
-        "key": "Enter",
-        "sourceEventRefs": [
-          "event-16"
         ],
         "technicalTargetRefs": [
           "role:textbox|Contraseña:",
@@ -1517,13 +1265,13 @@
         "terminalForContext": true
       },
       {
-        "id": "interaction-18",
+        "id": "interaction-15",
         "controlIdentity": "60d370b39a8d|SMS|id|IdentifyUserForm",
         "semanticField": "SMS",
         "action": "click",
         "valueKey": "sms",
         "sourceEventRefs": [
-          "event-18"
+          "event-15"
         ],
         "technicalTargetRefs": [
           "id:IdentifyUserForm"
@@ -1548,18 +1296,18 @@
         "routeBefore": "https://qa1.santacruz.do/onlinebanking/IdentifyUser"
       },
       {
-        "id": "interaction-20",
+        "id": "interaction-17",
         "controlIdentity": "60d370b39a8d|SMS|id|IdentifyUserForm",
         "semanticField": "SMS",
         "action": "fill",
         "valueKey": "sms",
         "sourceEventRefs": [
+          "event-17",
+          "event-18",
+          "event-19",
           "event-20",
           "event-21",
-          "event-22",
-          "event-23",
-          "event-24",
-          "event-26"
+          "event-23"
         ],
         "technicalTargetRefs": [],
         "editingSessionRef": "edit-5",
@@ -1585,13 +1333,13 @@
         "routeBefore": "https://qa1.santacruz.do/onlinebanking/IdentifyUser"
       },
       {
-        "id": "interaction-27",
+        "id": "interaction-24",
         "controlIdentity": "60d370b39a8d|Continuar|role|button|Continuar",
         "semanticField": "Continuar",
         "action": "click",
         "valueKey": "continuar",
         "sourceEventRefs": [
-          "event-27"
+          "event-24"
         ],
         "technicalTargetRefs": [
           "role:button|Continuar"
@@ -1694,13 +1442,13 @@
         "terminalForContext": true
       },
       {
-        "id": "interaction-29",
+        "id": "interaction-26",
         "controlIdentity": "60d370b39a8d|Transferencias|id|left-menu-accordion",
         "semanticField": "Transferencias",
         "action": "click",
         "valueKey": "transferencias",
         "sourceEventRefs": [
-          "event-29"
+          "event-26"
         ],
         "technicalTargetRefs": [
           "id:left-menu-accordion"
@@ -1725,11 +1473,11 @@
         "routeBefore": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary"
       },
       {
-        "id": "interaction-31",
+        "id": "interaction-28",
         "controlIdentity": "60d370b39a8d|- Cuentas Propias|role|link|- Cuentas Propias",
         "action": "click",
         "sourceEventRefs": [
-          "event-31"
+          "event-28"
         ],
         "technicalTargetRefs": [
           "role:link|- Cuentas Propias",
@@ -1786,12 +1534,37 @@
         "routeBefore": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary"
       },
       {
-        "id": "interaction-35",
+        "id": "interaction-30",
+        "controlIdentity": "60d370b39a8d|Transferencias a Mis Cuentas",
+        "semanticField": "Transferencias a Mis Cuentas",
+        "action": "click",
+        "valueKey": "transferencias_a_mis_cuentas",
+        "sourceEventRefs": [
+          "event-30"
+        ],
+        "technicalTargetRefs": [],
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Transferencias a Mis Cuentas",
+          "targetTag": "body",
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Transferencias a Mis Cuentas\"",
+        "stateScope": "60d370b39a8d",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "60d370b39a8d",
+        "screenAfterRef": "60d370b39a8d",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary"
+      },
+      {
+        "id": "interaction-32",
         "controlIdentity": "60d370b39a8d|Seleccione una Cuenta / undefined Balance Disponible",
         "action": "click",
         "dynamicTargetLabel": true,
         "sourceEventRefs": [
-          "event-35"
+          "event-32"
         ],
         "technicalTargetRefs": [],
         "technicalTargetCandidates": [
@@ -1844,42 +1617,74 @@
         "routeBefore": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary"
       },
       {
-        "id": "interaction-36",
-        "controlIdentity": "60d370b39a8d|Seleccione una Cuenta|css|div:has(select[id=\"account-to-select-input\"])",
-        "semanticField": "Seleccione una Cuenta",
+        "id": "interaction-33",
+        "controlIdentity": "60d370b39a8d|account-to-select-input|css|div:has(> select[id=\"account-to-select-input\"])",
+        "semanticField": "account-to-select-input",
         "action": "select",
-        "valueKey": "seleccione_una_cuenta_seleccion",
-        "recordedValue": "Cuenta de Ahorro / 21312020003368 / US$1,360.71",
+        "valueKey": "account_to_select_input_seleccion",
+        "recordedValue": "Cuenta de Ahorro / 21312020003368 / US$1,375.71",
         "sourceEventRefs": [
-          "event-36"
+          "event-33"
         ],
         "technicalTargetRefs": [
-          "css:div:has(select[id=\"account-to-select-input\"])"
+          "css:div:has(> select[id=\"account-to-select-input\"])"
         ],
-        "selectorControlId": "selector:id:account-to-block",
-        "optionSurfaceId": "60d370b39a8d|selector:id:account-to-block|option-surface",
+        "selectorControlId": "selector:id:account-to-select-input",
+        "optionSurfaceId": "60d370b39a8d|selector:id:account-to-select-input|option-surface",
+        "observedOptions": [
+          "Cuenta de Ahorro / 21312020003368 / US$1,375.71"
+        ],
         "playwrightRecorderEvidence": {
           "kind": "text",
-          "normalizedName": "Cuenta de Ahorro / 21312020003368 / US$1,360.71",
+          "normalizedName": "Cuenta de Ahorro / 21312020003368 / US$1,375.71",
           "targetTag": "span",
           "scopeIdentity": {
             "strategy": "css",
-            "value": "div:has(select[id=\"account-to-select-input\"])"
+            "value": "div:has(> select[id=\"account-to-select-input\"])"
           },
           "captureMatchCount": 1,
-          "runtimeResolutionRequired": true
+          "runtimeResolutionRequired": true,
+          "nativeSelection": {
+            "controlIdentity": {
+              "strategy": "id",
+              "value": "account-to-select-input"
+            },
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "div:has(> select[id=\"account-to-select-input\"])"
+            },
+            "options": [
+              {
+                "value": "",
+                "label": "Seleccione una Cuenta",
+                "disabled": false
+              },
+              {
+                "value": "-178671134322",
+                "label": "Cuenta de Ahorro / 21312020003368 / US$1,375.71",
+                "disabled": false
+              }
+            ],
+            "clickedOption": {
+              "value": "-178671134322",
+              "label": "Cuenta de Ahorro / 21312020003368 / US$1,375.71"
+            },
+            "selectedValue": "-178671134322",
+            "selectionMode": "index",
+            "selectedOptionIndex": 0
+          }
         },
-        "description": "Seleccionar en \"Seleccione una Cuenta\"",
+        "description": "Seleccionar en \"account-to-select-input\"",
         "stateScope": "60d370b39a8d",
         "admissionStatus": "accepted",
         "resolutionState": "certified",
-        "confidence": 0.55,
+        "confidence": 0.9,
         "screenBeforeRef": "60d370b39a8d",
         "screenAfterRef": "60d370b39a8d",
         "routeBefore": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary"
       },
       {
-        "id": "interaction-39",
+        "id": "interaction-36",
         "controlIdentity": "60d370b39a8d|US$|css|#transactionDetails_0__AmountPayment",
         "semanticField": "US$",
         "action": "fill",
@@ -1887,7 +1692,7 @@
         "recordedValue": "5.00",
         "rawTypedValue": "0.00",
         "sourceEventRefs": [
-          "event-39"
+          "event-36"
         ],
         "technicalTargetRefs": [
           "css:#transactionDetails_0__AmountPayment",
@@ -1904,14 +1709,13 @@
         "routeBefore": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary"
       },
       {
-        "id": "interaction-40",
+        "id": "interaction-37",
         "controlIdentity": "60d370b39a8d|Continuar|role|button|Continuar",
         "semanticField": "Continuar",
         "action": "click",
         "valueKey": "continuar",
-        "recordedValue": "5.00",
         "sourceEventRefs": [
-          "event-40"
+          "event-37"
         ],
         "technicalTargetRefs": [
           "role:button|Continuar"
@@ -2010,11 +1814,11 @@
         "routeBefore": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary"
       },
       {
-        "id": "interaction-42",
+        "id": "interaction-39",
         "controlIdentity": "60d370b39a8d|Continuar|role|button|Continuar",
         "action": "click",
         "sourceEventRefs": [
-          "event-42"
+          "event-39"
         ],
         "technicalTargetRefs": [
           "role:button|Continuar",
@@ -2079,13 +1883,13 @@
         "routeBefore": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary"
       },
       {
-        "id": "interaction-43",
+        "id": "interaction-40",
         "controlIdentity": "60d370b39a8d|SMS|css|div:has(a[id=\"token-resend-btn\"])",
         "semanticField": "SMS",
         "action": "click",
         "valueKey": "sms",
         "sourceEventRefs": [
-          "event-43"
+          "event-40"
         ],
         "technicalTargetRefs": [
           "css:div:has(a[id=\"token-resend-btn\"])"
@@ -2147,18 +1951,18 @@
         "routeBefore": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary"
       },
       {
-        "id": "interaction-45",
-        "controlIdentity": "60d370b39a8d|Reenviar código en  29 segundos...|id|requestchallengeform",
-        "semanticField": "Reenviar código en  29 segundos...",
+        "id": "interaction-42",
+        "controlIdentity": "60d370b39a8d|Reenviar código en  26 segundos...|id|requestchallengeform",
+        "semanticField": "Reenviar código en  26 segundos...",
         "action": "fill",
-        "valueKey": "reenviar_codigo_en_29_segundos",
+        "valueKey": "reenviar_codigo_en_26_segundos",
         "sourceEventRefs": [
+          "event-42",
+          "event-43",
+          "event-44",
           "event-45",
           "event-46",
-          "event-47",
-          "event-48",
-          "event-49",
-          "event-51"
+          "event-48"
         ],
         "technicalTargetRefs": [],
         "editingSessionRef": "edit-15",
@@ -2173,7 +1977,7 @@
           "runtimeResolutionRequired": true,
           "segmentCount": 6
         },
-        "description": "Ingresar en \"Reenviar código en  29 segundos...\"",
+        "description": "Ingresar en \"Reenviar código en  26 segundos...\"",
         "stateScope": "60d370b39a8d",
         "admissionStatus": "unresolved",
         "resolutionState": "runtime_resolution_required",
@@ -2184,13 +1988,13 @@
         "routeBefore": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary"
       },
       {
-        "id": "interaction-52",
+        "id": "interaction-49",
         "controlIdentity": "60d370b39a8d|Continuar|role|button|Continuar",
         "semanticField": "Continuar",
         "action": "click",
         "valueKey": "continuar",
         "sourceEventRefs": [
-          "event-52"
+          "event-49"
         ],
         "technicalTargetRefs": [
           "role:button|Continuar",
@@ -2338,7 +2142,7 @@
         "source": "CURRENT_QA_EDIT",
         "resolved": true,
         "sensitive": true,
-        "stepIndex": 10,
+        "stepIndex": 7,
         "controlType": "segmented_6",
         "readOnly": false,
         "computed": false,
@@ -2350,22 +2154,25 @@
         "datasetAuthorityMismatch": false
       },
       {
-        "valueKey": "seleccione_una_cuenta_seleccion",
-        "semanticField": "Seleccione una Cuenta",
+        "valueKey": "account_to_select_input_seleccion",
+        "semanticField": "account-to-select-input",
         "valueRole": "action_input",
         "required": true,
-        "value": "Cuenta de Ahorro / 21312020003368 / US$1,360.71",
+        "value": "Cuenta de Ahorro / 21312020003368 / US$1,375.71",
         "source": "RECORDED_CONFIRMED",
         "resolved": true,
         "sensitive": false,
-        "stepIndex": 12,
+        "stepIndex": 11,
+        "allowedValues": [
+          "Cuenta de Ahorro / 21312020003368 / US$1,375.71"
+        ],
         "readOnly": false,
         "computed": false,
         "systemGenerated": false,
         "masked": false,
         "editable": true,
         "authority": "canonical_logical",
-        "authorityValue": "Cuenta de Ahorro / 21312020003368 / US$1,360.71",
+        "authorityValue": "Cuenta de Ahorro / 21312020003368 / US$1,375.71",
         "datasetAuthorityMismatch": false
       },
       {
@@ -2377,7 +2184,7 @@
         "source": "RECORDED_CONFIRMED",
         "resolved": true,
         "sensitive": false,
-        "stepIndex": 13,
+        "stepIndex": 12,
         "readOnly": false,
         "computed": false,
         "systemGenerated": false,
@@ -2388,15 +2195,15 @@
         "datasetAuthorityMismatch": false
       },
       {
-        "valueKey": "reenviar_codigo_en_29_segundos",
-        "semanticField": "Reenviar código en 29 segundos...",
+        "valueKey": "reenviar_codigo_en_26_segundos",
+        "semanticField": "Reenviar código en 26 segundos...",
         "valueRole": "secure_input",
         "required": true,
         "value": "123456",
         "source": "CURRENT_QA_EDIT",
         "resolved": true,
         "sensitive": true,
-        "stepIndex": 25,
+        "stepIndex": 23,
         "controlType": "segmented_6",
         "readOnly": false,
         "computed": false,
@@ -2409,7 +2216,7 @@
       }
     ],
     "runtimeDataset": {
-      "scenarioId": "REC-2C05BA11-01",
+      "scenarioId": "REC-67FB11FD-01",
       "requirements": [
         {
           "valueKey": "rnc",
@@ -2477,7 +2284,7 @@
           "source": "CURRENT_QA_EDIT",
           "resolved": true,
           "sensitive": true,
-          "stepIndex": 10,
+          "stepIndex": 7,
           "controlType": "segmented_6",
           "readOnly": false,
           "computed": false,
@@ -2489,22 +2296,25 @@
           "datasetAuthorityMismatch": false
         },
         {
-          "valueKey": "seleccione_una_cuenta_seleccion",
-          "semanticField": "Seleccione una Cuenta",
+          "valueKey": "account_to_select_input_seleccion",
+          "semanticField": "account-to-select-input",
           "valueRole": "action_input",
           "required": true,
-          "value": "Cuenta de Ahorro / 21312020003368 / US$1,360.71",
+          "value": "Cuenta de Ahorro / 21312020003368 / US$1,375.71",
           "source": "RECORDED_CONFIRMED",
           "resolved": true,
           "sensitive": false,
-          "stepIndex": 12,
+          "stepIndex": 11,
+          "allowedValues": [
+            "Cuenta de Ahorro / 21312020003368 / US$1,375.71"
+          ],
           "readOnly": false,
           "computed": false,
           "systemGenerated": false,
           "masked": false,
           "editable": true,
           "authority": "canonical_logical",
-          "authorityValue": "Cuenta de Ahorro / 21312020003368 / US$1,360.71",
+          "authorityValue": "Cuenta de Ahorro / 21312020003368 / US$1,375.71",
           "datasetAuthorityMismatch": false
         },
         {
@@ -2516,7 +2326,7 @@
           "source": "RECORDED_CONFIRMED",
           "resolved": true,
           "sensitive": false,
-          "stepIndex": 13,
+          "stepIndex": 12,
           "readOnly": false,
           "computed": false,
           "systemGenerated": false,
@@ -2527,15 +2337,15 @@
           "datasetAuthorityMismatch": false
         },
         {
-          "valueKey": "reenviar_codigo_en_29_segundos",
-          "semanticField": "Reenviar código en 29 segundos...",
+          "valueKey": "reenviar_codigo_en_26_segundos",
+          "semanticField": "Reenviar código en 26 segundos...",
           "valueRole": "secure_input",
           "required": true,
           "value": "123456",
           "source": "CURRENT_QA_EDIT",
           "resolved": true,
           "sensitive": true,
-          "stepIndex": 25,
+          "stepIndex": 23,
           "controlType": "segmented_6",
           "readOnly": false,
           "computed": false,
@@ -2552,18 +2362,18 @@
         "usuario": "olivam",
         "contrasena": "qwerty123123",
         "sms": "123456",
-        "seleccione_una_cuenta_seleccion": "Cuenta de Ahorro / 21312020003368 / US$1,360.71",
+        "account_to_select_input_seleccion": "Cuenta de Ahorro / 21312020003368 / US$1,375.71",
         "us": "5.00",
-        "reenviar_codigo_en_29_segundos": "123456"
+        "reenviar_codigo_en_26_segundos": "123456"
       },
       "missingValues": []
     },
     "mutationOpportunities": [
       {
-        "opportunityId": "REC-2C05BA11-01:field_omission",
+        "opportunityId": "REC-67FB11FD-01:field_omission",
         "title": "Transferencias cuentas propia: comprobar la omisión de un dato",
         "mutationType": "FIELD_OMISSION",
-        "basePrimaryScenarioId": "REC-2C05BA11-01",
+        "basePrimaryScenarioId": "REC-67FB11FD-01",
         "operations": [
           {
             "type": "remove_action",
@@ -2619,10 +2429,7 @@
           "event-46",
           "event-47",
           "event-48",
-          "event-49",
-          "event-50",
-          "event-51",
-          "event-52"
+          "event-49"
         ],
         "rationale": "Existen varios inputs observados; se propone una omisión agrupada sin inventar el resultado.",
         "oracleAuthority": "MISSING",

@@ -3630,11 +3630,18 @@ async function resolveActionTargetCore(
   if (opts.actionType === "action_select") {
     let desiredSelection = opts.selectionValue?.trim();
     const capturedSelection = opts.playwrightRecorderEvidence?.nativeSelection;
+    let capturedOptionValue: string | undefined;
     if (desiredSelection && capturedSelection && !expectedSurfaceMismatch) {
       // Translate the requested recorded choice to its current label through the actual
       // option value. Balances/names can change; the control and internal key must still exist.
-      const recordedChoices = capturedSelection.options.filter(option => !option.disabled
-        && (option.label === desiredSelection || option.value === desiredSelection));
+      const selectableRecorded = capturedSelection.options.filter(option => option.value && !option.disabled);
+      const requestedChoices = selectableRecorded.filter(option => option.label === desiredSelection || option.value === desiredSelection);
+      const useIndex = capturedSelection.selectionMode === "index";
+      const requestedIndex = useIndex && requestedChoices.length === 1
+        ? selectableRecorded.indexOf(requestedChoices[0]) : capturedSelection.selectedOptionIndex;
+      const recordedChoices = useIndex
+        ? Number.isInteger(requestedIndex) && requestedIndex! >= 0 && requestedIndex! < selectableRecorded.length ? [selectableRecorded[requestedIndex!]] : []
+        : requestedChoices;
       const controlIdentity = capturedSelection.controlIdentity;
       const control = recordedLocatorFactory(page, {
         strategy: "css",
@@ -3643,11 +3650,15 @@ async function resolveActionTargetCore(
         confidence: 1,
       }, true);
       const liveChoices = recordedChoices.length === 1 && control && await control.count().catch(() => 0) === 1
-        ? await control.evaluate((element, value) => element.tagName.toLowerCase() === "select"
-          ? Array.from((element as HTMLSelectElement).options).filter(option => option.value === value && !option.disabled
-            && !(option.parentElement?.tagName.toLowerCase() === "optgroup" && (option.parentElement as HTMLOptGroupElement).disabled))
-            .map(option => ({ value: option.value, label: option.label || option.textContent || "" }))
-          : [], recordedChoices[0].value).catch(() => []) : [];
+        ? await control.evaluate((element, choice) => {
+          if (element.tagName.toLowerCase() !== "select") return [];
+          const options = Array.from((element as HTMLSelectElement).options).filter(option => option.value && !option.disabled
+            && !(option.parentElement?.tagName.toLowerCase() === "optgroup" && (option.parentElement as HTMLOptGroupElement).disabled));
+          const chosen = choice.useIndex
+            ? Number.isInteger(choice.index) && choice.index! >= 0 && choice.index! < options.length ? [options[choice.index!]] : []
+            : options.filter(option => option.value === choice.value);
+          return chosen.map(option => ({ value: option.value, label: option.label || option.textContent || "" }));
+        }, { value: recordedChoices[0].value, index: requestedIndex, useIndex }).catch(() => []) : [];
       if (liveChoices.length !== 1) {
         return selectionFailureResult(target, "captured_selection_key_not_unique_or_present", {
           triggerResolved: Boolean(control), surfaceCausallyBound: false, desiredOptionFound: false, triggerStrategy: "recorded:native-control", ariaRelationshipFound: false,
@@ -3655,9 +3666,10 @@ async function resolveActionTargetCore(
           failureReason: "captured_selection_key_not_unique_or_present",
         });
       }
+      capturedOptionValue = liveChoices[0].value;
       desiredSelection = liveChoices[0].label.replace(/\s+/g, " ").trim();
       opts.selectionValue = desiredSelection;
-      console.log("[recorded-selection] internalValueMatched=true currentOptionCount=1");
+      console.log(`[recorded-selection] selectionMode=${useIndex ? "index" : "value"} selectedOptionIndex=${useIndex ? requestedIndex : "none"} currentOptionCount=1`);
     }
     if (desiredSelection && !expectedSurfaceMismatch) {
       let recordedOwner = await resolveRecordedTechnicalTarget(
@@ -3673,6 +3685,7 @@ async function resolveActionTargetCore(
       // Recorder evidence may retain only the unique interaction scope, with no certified
       // target refs. For selections, that scope still authorizes looking for its contained
       // native select; it does not authorize a page-wide search or infer a locator from text.
+      if (capturedSelection) recordedOwner = undefined;
       if (!recordedOwner && opts.playwrightRecorderEvidence?.scopeIdentity) {
         const scopeIdentity = opts.playwrightRecorderEvidence.scopeIdentity;
         const scopeLocator = recordedLocatorFactory(page, {
@@ -3691,6 +3704,12 @@ async function resolveActionTargetCore(
           console.log("[recorded-selection] ownerResolvedFromUniqueRecorderScope=true");
         }
       }
+      if (capturedSelection && !recordedOwner) {
+        return selectionFailureResult(target, "captured_selection_key_not_unique_or_present", {
+          triggerResolved: false, triggerStrategy: "recorded:native-control", ariaRelationshipFound: false,
+          surfaceCausallyBound: false, optionCandidateCount: 0, desiredOptionFound: false, stateVerified: false,
+        });
+      }
       if (recordedOwner) {
         const ownerIsNativeSelect = capturedSelection && await recordedOwner.locator.evaluate(element => element.tagName.toLowerCase() === "select").catch(() => false);
         const nativeSelects = ownerIsNativeSelect ? recordedOwner.locator : recordedOwner.locator.locator("select");
@@ -3704,12 +3723,46 @@ async function resolveActionTargetCore(
             const stableIdentity = selectionOptionIdentity(desiredSelection);
             const optionIdentity = stableIdentity.identifiers.length === 1 ? stableIdentity.identifiers[0] : stableIdentity.stable;
             const optionScope = capturedSelection ? recordedOwner.locator : page;
-            let visibleOption = optionIdentity ? optionScope.getByText(new RegExp(escapeRegex(optionIdentity), "i")) : undefined;
+            let visibleOption = capturedSelection ? optionScope.getByText(desiredSelection, { exact: true }).filter({ visible: true })
+              : optionIdentity ? optionScope.getByText(new RegExp(escapeRegex(optionIdentity), "i")) : undefined;
             let visibleOptionCount = visibleOption ? await visibleOption.count().catch(() => 0) : 0;
             let visibleOptionText = visibleOptionCount === 1 ? await visibleOption!.innerText().catch(() => "") : "";
             let visibleOptionMatches = visibleOptionCount === 1 && await visibleOption!.isVisible().catch(() => false)
               && selectionOptionMatches(desiredSelection, visibleOptionText);
-            if (!visibleOptionMatches && optionIdentity) {
+            if (capturedSelection && !visibleOptionMatches) {
+              // The recorded scope owns the backing select, but is not necessarily its
+              // visible trigger. Activate only a unique actionable descendant of that scope.
+              const marker = `selection-trigger-${Date.now()}`;
+              const triggerMarked = await recordedOwner.locator.evaluate((root, markerValue) => {
+                const candidates = Array.from(root.querySelectorAll('button,[role="combobox"],[role="button"],[tabindex]'))
+                  .filter((element) => {
+                    const node = element as HTMLElement;
+                    const style = window.getComputedStyle(node);
+                    const rect = node.getBoundingClientRect();
+                    return node.tagName.toLowerCase() !== "select" && node.tabIndex >= 0
+                      && !node.hasAttribute("disabled") && node.getAttribute("aria-disabled") !== "true"
+                      && style.display !== "none" && style.visibility !== "hidden" && style.pointerEvents !== "none"
+                      && rect.width > 0 && rect.height > 0;
+                  });
+                if (candidates.length !== 1) return false;
+                candidates[0].setAttribute("data-codex-selection-trigger", markerValue);
+                return true;
+              }, marker).catch(() => false);
+              if (triggerMarked) {
+                const trigger = recordedOwner.locator.locator(`[data-codex-selection-trigger="${marker}"]`);
+                try {
+                  await trigger.click({ timeout: 5000 });
+                  await visibleOption?.waitFor({ state: "visible", timeout: 5000 }).catch(() => undefined);
+                  visibleOptionCount = visibleOption ? await visibleOption.count().catch(() => 0) : 0;
+                  visibleOptionText = visibleOptionCount === 1 ? await visibleOption!.innerText().catch(() => "") : "";
+                  visibleOptionMatches = visibleOptionCount === 1 && await visibleOption!.isVisible().catch(() => false)
+                    && selectionOptionMatches(desiredSelection, visibleOptionText);
+                } finally {
+                  await trigger.evaluate(element => element.removeAttribute("data-codex-selection-trigger")).catch(() => undefined);
+                }
+              }
+            }
+            if (!visibleOptionMatches && optionIdentity && !capturedSelection) {
               let scope = nativeSelect;
               let searchInput: Locator | undefined;
               for (let depth = 0; depth < 8; depth += 1) {
@@ -3778,7 +3831,7 @@ async function resolveActionTargetCore(
                 if (leaves.length !== 1) return false;
                 leaves[0].setAttribute("data-codex-selection-option", value.marker);
                 return true;
-              }, { identity: optionIdentity, marker }).catch(() => false);
+              }, { identity: capturedSelection ? desiredSelection : optionIdentity, marker }).catch(() => false);
               if (uniqueLeaf) optionToClick = page.locator(`[data-codex-selection-option="${marker}"]`);
               visibleOptionText = optionToClick ? await optionToClick.innerText().catch(() => "") : "";
               visibleOptionMatches = Boolean(optionToClick && await optionToClick.count().catch(() => 0) === 1 && await optionToClick.isVisible().catch(() => false) && selectionOptionMatches(desiredSelection, visibleOptionText));
@@ -3787,7 +3840,7 @@ async function resolveActionTargetCore(
             if (optionToClick && visibleOptionMatches) {
               await optionToClick.click({ timeout: 5000 }).catch(() => undefined);
               const selected = await nativeSelect.locator("option:checked").evaluate((element) => ({ label: (element as HTMLOptionElement).label || (element as HTMLOptionElement).textContent || "", value: (element as HTMLOptionElement).value })).catch(() => ({ label: "", value: "" }));
-              if (selectionOptionMatches(desiredSelection, `${selected.label} ${selected.value}`)) {
+              if ((!capturedOptionValue || selected.value === capturedOptionValue) && selectionOptionMatches(desiredSelection, `${selected.label} ${selected.value}`)) {
                 console.log("[recorded-selection] visibleOptionApplied=true uniqueIdentityMatch=true stateVerified=true");
                 await optionToClick.evaluate((element) => element.removeAttribute("data-codex-selection-option")).catch(() => undefined);
                 return {
@@ -3805,7 +3858,7 @@ async function resolveActionTargetCore(
               desiredSelection,
               recordedOwner.strategy,
             );
-            if (visibleSelection.selectionApplied) {
+            if (visibleSelection.selectionApplied && (!capturedOptionValue || await nativeSelect.inputValue().catch(() => undefined) === capturedOptionValue)) {
               console.log("[recorded-selection] visibleCustomSurfaceApplied=true stateVerified=true");
               return visibleSelection;
             }
@@ -3829,7 +3882,8 @@ async function resolveActionTargetCore(
           const enabledOptions = options.filter((option) => !option.disabled);
           const exactMatches = enabledOptions.filter((option) => selectionOptionMatches(desiredSelection, `${option.label} ${option.value}`)
             && normalizeText(`${option.label} ${option.value}`).includes(normalizeText(desiredSelection)));
-          const matchingOptions = exactMatches.length > 0 ? exactMatches : enabledOptions.filter((option) =>
+          const matchingOptions = capturedOptionValue ? enabledOptions.filter(option => option.value === capturedOptionValue)
+            : exactMatches.length > 0 ? exactMatches : enabledOptions.filter((option) =>
             selectionOptionMatches(desiredSelection, `${option.label} ${option.value}`),
           );
           if (matchingOptions.length === 1) {
@@ -3845,7 +3899,7 @@ async function resolveActionTargetCore(
               label: (element as HTMLOptionElement).label || (element as HTMLOptionElement).textContent || "",
               value: (element as HTMLOptionElement).value,
             })).catch(() => ({ label: "", value: "" }));
-            if (selectionOptionMatches(desiredSelection, `${selected.label} ${selected.value}`)) {
+            if ((!capturedOptionValue || selected.value === capturedOptionValue) && selectionOptionMatches(desiredSelection, `${selected.label} ${selected.value}`)) {
               console.log(`[recorded-selection] nativeSelectApplied=true optionCount=${enabledOptions.length} uniqueMatch=true`);
               return {
                 status: "resolved",
@@ -5447,8 +5501,19 @@ export async function resolveActionTarget(
   page: Page,
   snapshot: PageSnapshot,
   target: string,
-  options?: ResolveActionTargetOptions
+  inputOptions?: ResolveActionTargetOptions
 ): Promise<TargetResolutionResult> {
+  // A bare role reference (`role:button`, no `|name`) names a control CLASS shared by every sibling,
+  // not a recorded identity. When a structured `associatedField` relation exists, keeping it as a
+  // "supplied recorded target" makes an ambiguous match short-circuit the field-scoped recovery
+  // (see recordedTargetWasSupplied below), so drop it and let the field relation resolve the owner.
+  const options = inputOptions?.associatedField?.trim() && inputOptions.recordedTechnicalTargetRefs?.length
+    ? {
+      ...inputOptions,
+      recordedTechnicalTargetRefs: inputOptions.recordedTechnicalTargetRefs
+        .filter((ref) => !/^role:[a-z]+$/i.test(ref.trim())),
+    }
+    : inputOptions;
   // Recorder scope identities describe the container in which a control was captured; they are
   // not the control locator. Older recordings can also persist that same scope as the click's
   // technical target (for example, `id:IdentifyUserForm` for the recorded control named `SMS`).
@@ -6382,6 +6447,24 @@ export async function resolveRecordedStructuralOwner(
         );
         scopeRoot = page;
         scopeCssSelectorForTopology = undefined;
+      } else if (
+        context.deterministicStructuralIdentity === true
+        && context.captureScopeUnique === true
+        && context.captureTargetMatchCount === 1
+        && typeof context.topologySignature === "string"
+        && context.topologySignature.length > 0
+      ) {
+        // The captured scope can disappear when a neighboring control is refreshed. Widen the
+        // candidate search only when capture proved one owner and recorded a content-blind
+        // topology signature; the same descendant, semantic-shape, visibility, enabled, and
+        // topology checks below must still produce exactly one live match. No text or position
+        // fallback is introduced.
+        console.log(
+          `[recording-replay][structural-match] reason=scope_unavailable_revalidating_unique_topology ` +
+          `strategy=${scopeIdentity!.strategy} scopeMatchCount=${scopeMatchCount} captureTargetMatchCount=1`,
+        );
+        scopeRoot = page;
+        scopeCssSelectorForTopology = undefined;
       } else {
         console.log(`[recording-replay][structural-match] reason=scoped_scope_not_unique strategy=${scopeIdentity!.strategy} scopeMatchCount=${scopeMatchCount}`);
         onFailureReason?.("scoped_scope_not_unique", { matchCount: scopeMatchCount });
@@ -6708,6 +6791,22 @@ export async function attemptSegmentedInputFill(
       return element.isContentEditable ? element.textContent ?? "" : "";
     }).catch(() => "");
     if (actualCharacter !== expectedCharacter) {
+      return { ok: false, reason: "segment_value_not_committed" };
+    }
+  }
+  // Recheck the entire group after the last keystroke: framework handlers can clear or
+  // rewrite earlier segments while later ones are entered. Do not admit the submit step
+  // on the strength of individual readbacks taken before those handlers ran.
+  for (let index = 0; index < segments.length; index += 1) {
+    const segment = segments[index];
+    if (!(await segment.isVisible()) || await segment.isDisabled()) {
+      return { ok: false, reason: "segment_not_actionable" };
+    }
+    const committedCharacter = await segment.evaluate((element) => {
+      if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) return element.value;
+      return element.isContentEditable ? element.textContent ?? "" : "";
+    }).catch(() => "");
+    if (committedCharacter !== value[index]) {
       return { ok: false, reason: "segment_value_not_committed" };
     }
   }

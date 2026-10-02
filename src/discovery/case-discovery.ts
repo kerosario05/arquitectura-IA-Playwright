@@ -2206,11 +2206,23 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
         const segmentCount = action.playwrightRecorderEvidence?.segmentCount;
         if (!field || !Number.isInteger(segmentCount) || !segmentCount) continue;
         const fieldKey = normalizeText(field);
+        // Captured segmented fields may carry a changing numeric status in their display
+        // label. Admit that variation only when one recorded segmented action owns the
+        // label shape; repeated entity fields with the same shape remain ambiguous.
+        const fieldShape = (label: string) => normalizeText(label)
+          .replace(/\b\d+\b/g, "#")
+          .replace(/[^a-z0-9#]+/g, " ").trim();
+        const shapeUnique = segmentedFillActions.filter((candidate) => {
+          const intent = parseStepIntent(candidate.humanStep ?? "").find((item) => item.type === "action_fill");
+          return fieldShape(candidate.associatedField?.trim() || candidate.semanticField?.trim() || intent?.actionTarget?.trim() || "") === fieldShape(field);
+        }).length === 1;
+        const matchesSegmentField = (label: string) => normalizeText(label) === fieldKey
+          || (shapeUnique && fieldShape(label) === fieldShape(field));
         for (let start = 0; start < sourceSteps.length; start += 1) {
           if (consumedSourcePositions.has(start)) continue;
           const first = sourceSteps[start];
           const firstIntent = parseStepIntent(first.action?.trim() ?? "").find((intent) => intent.type === "action_fill");
-          if (!firstIntent || normalizeText(firstIntent.actionTarget ?? "") !== fieldKey) continue;
+          if (!firstIntent || !matchesSegmentField(firstIntent.actionTarget ?? "")) continue;
           if (firstIntent.valueSource !== "unknown" && firstIntent.valueSource !== "literal") continue;
           if (typeof firstIntent.value !== "string" || firstIntent.value.length !== 1) continue;
 
@@ -2220,7 +2232,7 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
             const step = sourceSteps[nextPosition];
             const intent = parseStepIntent(step.action?.trim() ?? "").find((candidate) => candidate.type === "action_fill");
             if (!intent
-              || normalizeText(intent.actionTarget ?? "") !== fieldKey
+              || !matchesSegmentField(intent.actionTarget ?? "")
               || (intent.valueSource !== "unknown" && intent.valueSource !== "literal")
               || typeof intent.value !== "string"
               || intent.value.length !== 1) break;
@@ -8389,7 +8401,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         action: "fill",
         description: actionTarget.action,
         target: { strategy: "text", value: actionTarget.target, exact: false },
-        valueKey: actionTarget.valueKey
+        ...(actionTarget.valueKey
+          ? { valueKey: actionTarget.valueKey }
+          : { value: fillValue })
       });
 
       continue;
@@ -8907,7 +8921,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         index: planSteps.length + 1,
         action: "fill",
         description: actionTarget.action,
-        target: { strategy: "text", value: actionTarget.target, exact: false }
+        target: { strategy: "text", value: actionTarget.target, exact: false },
+        value: actionTarget.value,
+        ...(actionTarget.valueKey ? { valueKey: actionTarget.valueKey } : {}),
       });
 
       continue;
@@ -12536,7 +12552,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     }
     
     let semanticMatchForLog: { matchedTokens: string[] } = { matchedTokens: stateVerificationAccepted ? [selectionStateVerification.reason] : [] };
-    if (aliasTransitionSkip) {
+    if (resolution.selectionApplied && resolution.selectionDiagnostics?.stateVerified === true) {
+      // The selection resolver already verified the live option against the recorded
+      // control and current value. A technical field identifier is not visible UI text.
+      semanticMatchForLog = { matchedTokens: ["recorded_selection_state_verified"] };
+      console.log(`[semantic-verification] selectionStateVerified=true targetType=recorded_selection`);
+    } else if (aliasTransitionSkip) {
       console.log(`[discovery:case] postClickSemanticVerificationSkipped=true skipReason="alias_navigation_transition"`);
     } else if (isSelectionLike && wasOrdinalSelection) {
       // For ordinal_selection, skip instructive token verification

@@ -677,7 +677,7 @@
           "event-49"
         ],
         "stepTemplate": "Ingresar [entity_2.colaborador] en \"Colaborador\"",
-        "renderedStep": "Ingresar \"40224679551\" en \"Colaborador\"",
+        "renderedStep": "Ingresar \"10400144233\" en \"Colaborador\"",
         "valueKey": "entity_2.colaborador",
         "interactionId": "interaction-49",
         "sensitive": false,
@@ -4207,7 +4207,7 @@
       "oracleReadiness": true,
       "reviewReadiness": true,
       "publicationContentReadiness": true,
-      "executionReadiness": true,
+      "executionReadiness": false,
       "publicationReadiness": true,
       "missingInputs": [],
       "datasetAuthorityMismatches": [],
@@ -4439,7 +4439,7 @@
         "entityScope": "entity_2",
         "valueRole": "action_input",
         "required": true,
-        "value": "40224679551",
+        "value": "10400144233",
         "source": "CURRENT_QA_EDIT",
         "resolved": true,
         "sensitive": false,
@@ -4450,7 +4450,7 @@
         "masked": false,
         "editable": true,
         "authority": "explicit_qa_edit",
-        "authorityValue": "40224679551",
+        "authorityValue": "10400144233",
         "datasetAuthorityMismatch": false
       },
       {
@@ -4823,7 +4823,7 @@
           "entityScope": "entity_2",
           "valueRole": "action_input",
           "required": true,
-          "value": "40224679551",
+          "value": "10400144233",
           "source": "CURRENT_QA_EDIT",
           "resolved": true,
           "sensitive": false,
@@ -4834,7 +4834,7 @@
           "masked": false,
           "editable": true,
           "authority": "explicit_qa_edit",
-          "authorityValue": "40224679551",
+          "authorityValue": "10400144233",
           "datasetAuthorityMismatch": false
         },
         {
@@ -4992,7 +4992,7 @@
         "entity_1.telefono_residencial": "829-255-1232",
         "entity_1.celular": "809-221-2121",
         "entity_1.fecha_de_ingreso": "1995-02-20",
-        "entity_2.colaborador": "40224679551",
+        "entity_2.colaborador": "10400144233",
         "entity_2.puesto": "analista",
         "entity_2.ingresos": "80000",
         "entity_2.correo_electronico": "calidad@test.com",

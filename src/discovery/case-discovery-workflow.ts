@@ -876,6 +876,10 @@ export function buildPromotionSourceScenario(
   // does not certify a target from the runtime click outcome or invent a locator.
   const recordingActionByScenarioStepIndex = new Map<number, NonNullable<typeof recordingExecutionContract>["actions"][number]>();
   const claimedRecordingActions = new Set<number>();
+  const fieldIdentity = (value: string): string => normalizeOracleText(value)
+    .replace(/\b\d+\b/g, "#")
+    .replace(/[^a-z0-9#]+/g, " ")
+    .trim();
   for (const scenarioStep of scenario.steps) {
     const normalizedAction = normalizeOracleText(scenarioStep.action ?? "");
     const normalizedTarget = normalizeOracleText(
@@ -889,12 +893,27 @@ export function buildPromotionSourceScenario(
       .filter(({ action }) => {
         const recordedHumanStep = normalizeOracleText(action.humanStep ?? "");
         const recordedSemanticField = normalizeOracleText(action.semanticField ?? "");
+        const scenarioValueKey = (scenarioStep as typeof scenarioStep & { valueKey?: string }).valueKey?.trim();
+        const recordedValueKey = (action as typeof action & { valueKey?: string }).valueKey?.trim();
+        const semanticFieldShape = fieldIdentity(action.semanticField ?? "");
+        const stepFieldShape = fieldIdentity(normalizedTarget);
+        const semanticFieldInStep = Boolean(semanticFieldShape
+          && (stepFieldShape === semanticFieldShape
+            || stepFieldShape.includes(semanticFieldShape)
+            || fieldIdentity(normalizedAction).includes(semanticFieldShape)));
         return (recordedHumanStep && recordedHumanStep === normalizedAction)
-          || (recordedSemanticField && recordedSemanticField === normalizedTarget);
+          || (recordedSemanticField && recordedSemanticField === normalizedTarget)
+          || semanticFieldInStep
+          // Parsing can rewrite a captured native selection's display sentence while retaining
+          // its structured data binding. Use that same valueKey as additional lineage evidence;
+          // claimedRecordingActions keeps repeated bindings paired in authored occurrence order.
+          || (scenarioValueKey && recordedValueKey === scenarioValueKey);
       });
     const compatible = candidates.find(({ action }) => {
       const actionType = action.actionType;
-      if (actionType === "click") return isClickAction(scenarioStep.action);
+      // A recorded check/uncheck is a click on a toggle control: it was never linked to its scenario
+      // step, so the step lost its recorded structural identity and compiled to its display text.
+      if (actionType === "click" || actionType === "check" || actionType === "uncheck") return isClickAction(scenarioStep.action);
       if (actionType === "fill") return /^(fill|completar|ingresar|escribir|seleccionar\s+todo)/i.test(scenarioStep.action.trim());
       if (actionType === "press") return /^(press|presionar\s+tecla|tecla)/i.test(scenarioStep.action.trim());
       if (actionType === "select") return /^(select|seleccionar)/i.test(scenarioStep.action.trim());
@@ -903,6 +922,30 @@ export function buildPromotionSourceScenario(
     if (compatible) {
       claimedRecordingActions.add(compatible.actionIndex);
       recordingActionByScenarioStepIndex.set(scenarioStep.index, compatible.action);
+    }
+  }
+  // A single recorder action can represent a segmented control even though the authored
+  // scenario contains one character fill per physical segment. Carry that one action's scoped
+  // evidence across only a complete contiguous group of single-character fills on the same
+  // normalized field shape; this is lineage reuse, not positional target resolution.
+  for (const action of recordingExecutionContract?.actions ?? []) {
+    const evidence = action.playwrightRecorderEvidence;
+    const segmentCount = evidence?.kind === "segmented_input" ? evidence.segmentCount : undefined;
+    if (action.actionType !== "fill" || !Number.isInteger(segmentCount) || (segmentCount ?? 0) < 2) continue;
+    const actionFieldShape = fieldIdentity(action.semanticField ?? "");
+    if (!actionFieldShape) continue;
+    for (let start = 0; start + segmentCount! <= scenario.steps.length; start += 1) {
+      const group = scenario.steps.slice(start, start + segmentCount!);
+      const matches = group.every((step) => {
+        const target = extractAuthoredFieldTarget(step.action) ?? "";
+        const input = extractQuotedAssertionTarget(step.action) ?? "";
+        return /^(fill|completar|ingresar|escribir|seleccionar\s+todo)/i.test(step.action.trim())
+          && fieldIdentity(target) === actionFieldShape
+          && Array.from(input).length === 1;
+      });
+      if (!matches) continue;
+      for (const step of group) recordingActionByScenarioStepIndex.set(step.index, action);
+      break;
     }
   }
   const recordingLineageForStep = (step: TestScenario["steps"][number]) => {

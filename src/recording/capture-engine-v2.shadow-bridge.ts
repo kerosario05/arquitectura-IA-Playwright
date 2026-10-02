@@ -42,6 +42,7 @@ type CaptureTraceStage =
   | "owner_candidate_nearest_diagnostic";
 
 export type ShadowBrowserMessage =
+  | (ShadowDocumentEnvelope & { type: "native_selection_commit"; evidence: import("./native-selection-capture").NativeSelectionCapture })
   | (ShadowDocumentEnvelope & { type: "document_ready"; navigationVersion?: number })
   | (ShadowDocumentEnvelope & { type: "capture_trace"; stage: CaptureTraceStage; trusted?: boolean; diagnostic?: Record<string, unknown> })
   | (ShadowDocumentEnvelope & { type: "structural_identity_diagnostic"; diagnosticKind: "summary" | "candidate"; payload: Record<string, unknown> })
@@ -307,6 +308,19 @@ export class CaptureEngineV2ShadowBridge {
 
   private dispatch(message: ShadowBrowserMessage): void {
     switch (message.type) {
+      case "native_selection_commit": {
+        if (this.lifecycle.validateEventDocument(documentHandleOf(message)) !== "active_ready") return;
+        const evidence = message.evidence;
+        if (!evidence.clickedOption || evidence.selectionMode !== "index" || !Number.isInteger(evidence.selectedOptionIndex)) return;
+        this.pushAction({
+          actionType: "edit",
+          identity: { tagName: "select", role: "combobox", label: evidence.fieldLabel || evidence.controlIdentity.value },
+          documentContext: documentHandleOf(message),
+          value: { literal: evidence.clickedOption.label, present: true },
+          playwrightRecorderEvidence: { kind: "text", normalizedName: evidence.clickedOption.label, scopeIdentity: evidence.scopeIdentity, runtimeResolutionRequired: true, nativeSelection: evidence },
+        });
+        return;
+      }
       case "document_ready": {
         const record = this.lifecycle.registerDocument({
           captureInstanceId: message.captureInstanceId,
@@ -400,6 +414,37 @@ export class CaptureEngineV2ShadowBridge {
     if (message.trusted !== true || this.lifecycle.validateEventDocument(documentHandleOf(message)) !== "active_ready") {
       this.diagnose("pointer", message.trusted === true ? "event_document_not_ready" : "pointer_not_trusted");
       return;
+    }
+    // A custom option can be roleless and disappear before click. Preserve the trusted
+    // pointer's explicit option-to-select relation before owner resolution loses that node.
+    // Merely opening a list (selectedValue without clickedOption) is never a selection.
+    const nativeSelections = message.composedPath
+      .map((candidate) => candidate.playwrightRecorderEvidence?.nativeSelection)
+      .filter((evidence) => evidence?.clickedOption && evidence.selectionMode === "index"
+        && Number.isInteger(evidence.selectedOptionIndex));
+    const selectionIdentities = new Set(nativeSelections.map((evidence) => JSON.stringify([
+      evidence!.controlIdentity.strategy, evidence!.controlIdentity.value,
+      evidence!.clickedOption!.value, evidence!.selectedOptionIndex,
+    ])));
+    if (message.interactionId && selectionIdentities.size === 1) {
+      const evidence = nativeSelections.find((candidate) => {
+        const options = candidate!.options.filter((option) => option.value && !option.disabled);
+        const chosen = options[candidate!.selectedOptionIndex!];
+        return chosen?.value === candidate!.clickedOption!.value
+          && chosen.label === candidate!.clickedOption!.label
+          && options.filter((option) => option.value === chosen.value).length === 1;
+      });
+      if (evidence) {
+        this.pointerPromotedInteractionId = message.interactionId;
+        this.dispatch({
+          type: "native_selection_commit",
+          captureInstanceId: message.captureInstanceId,
+          documentId: message.documentId,
+          frameId: message.frameId,
+          evidence,
+        });
+        return;
+      }
     }
     const resolution = resolveCaptureOwner({ composedPath: message.composedPath });
     if (resolution.status !== "resolved") {

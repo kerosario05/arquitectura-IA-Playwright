@@ -16,7 +16,7 @@
   "autoPomCreatedMethods": [],
   "fallbackUsed": false,
   "requirePomRuntime": false,
-  "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-registro-varios-clientes\\case.spec.ts",
-  "specHash": "5fa1c1a6462c5cb474b86074f23de06ea1381beb1fd98336904b97e56913676d",
+  "specPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-transferencias-cuentas-propiav\\case.spec.ts",
+  "specHash": "b6d2f257635a11784117b28a1563d7a0812e577210dc5ac0bcf8ab61f86e19a4",
   "specSource": "ai_candidate"
 }

@@ -110,9 +110,29 @@ const SHORT_TEXT_MAX_LENGTH = 80;
  * through to the next, weaker (but honest) tier — see materializeTechnicalTarget's Tier 3
  * fallback for why a bare tag-name pair is never fabricated as if it were still tier 3 evidence.
  */
+// Framework-generated ids (Radix `radix-_r_1i_`, React `:r1:`, HeadlessUI, MUI, React Aria) are
+// regenerated on every page load, so a selector/scope built from one resolves to 0 elements in the
+// next browser session. Treated like any other unusable attribute value: discarded, so the
+// certification falls through to the next, honest tier instead of freezing a per-load token.
+const EPHEMERAL_GENERATED_ID = /^(?:radix-|:r[0-9a-z]*:|headlessui-|mui-|react-aria)/i;
+
+const GENERIC_ATTRIBUTE_KEYS = new Set([
+  "role", "type", "tabindex", "data-state", "data-orientation", "data-disabled",
+  "aria-selected", "aria-checked", "aria-expanded", "aria-haspopup", "aria-disabled",
+]);
+
+function isEphemeralGeneratedId(value: string | undefined): boolean {
+  return typeof value === "string" && EPHEMERAL_GENERATED_ID.test(value.trim());
+}
+
+function stableScopeIdentity<T extends { value: string }>(scope: T | undefined): T | undefined {
+  return scope && !isEphemeralGeneratedId(scope.value) ? scope : undefined;
+}
+
 function sanitizeAttributeValue(value: string): string | undefined {
   const normalized = normalizeMojibakeUtf8(value);
   if (normalized.includes("�")) return undefined;
+  if (isEphemeralGeneratedId(normalized)) return undefined;
   return normalized;
 }
 
@@ -167,7 +187,11 @@ export function materializeTechnicalTarget(input: TechnicalTargetEvidenceInput):
   // Tier 1: stable direct attributes.
   if (input.stableDirectAttributes && Object.keys(input.stableDirectAttributes).length > 0) {
     const cssValue = buildCssFromAttributes(input.stableDirectAttributes);
-    if (cssValue) {
+    // Attributes left after dropping ephemeral ids that only describe role/state (e.g. a bare
+    // `[role="option"]`) are shared by every sibling: not an identity, fall through to later tiers.
+    const hasIdentifyingAttribute = Object.keys(sanitizeAttributeMap(input.stableDirectAttributes))
+      .some((key) => !GENERIC_ATTRIBUTE_KEYS.has(key.toLowerCase()));
+    if (cssValue && hasIdentifyingAttribute) {
       const locator: RecordedLocator = { strategy: "css", value: cssValue, confidence: confidence ?? 0.95 };
       // FIRST_LOSS fix (jobId 938b796f-a927-49cf-95bd-3ed66d3e49c0 follow-up): Tier 1 previously
       // discarded any composite structural identity (owner/stableDescendants/semanticShape/
@@ -201,7 +225,7 @@ export function materializeTechnicalTarget(input: TechnicalTargetEvidenceInput):
               deterministicStructuralIdentity: input.deterministicStructuralIdentity,
               identityAmbiguous: input.identityAmbiguous,
               structuralIdentityMatchCount: input.structuralIdentityMatchCount,
-              ...(input.scopeIdentity ? { scopeIdentity: input.scopeIdentity } : {}),
+              ...(stableScopeIdentity(input.scopeIdentity) ? { scopeIdentity: stableScopeIdentity(input.scopeIdentity) } : {}),
               ...(input.targetFingerprint !== undefined ? { targetFingerprint: input.targetFingerprint } : {}),
               ...(input.captureScopeUnique !== undefined ? { captureScopeUnique: input.captureScopeUnique } : {}),
               ...(input.captureTargetMatchCount !== undefined ? { captureTargetMatchCount: input.captureTargetMatchCount } : {}),
@@ -264,7 +288,7 @@ export function materializeTechnicalTarget(input: TechnicalTargetEvidenceInput):
           deterministicStructuralIdentity: input.deterministicStructuralIdentity,
           identityAmbiguous: input.identityAmbiguous,
           structuralIdentityMatchCount: input.structuralIdentityMatchCount,
-          ...(input.scopeIdentity ? { scopeIdentity: input.scopeIdentity } : {}),
+          ...(stableScopeIdentity(input.scopeIdentity) ? { scopeIdentity: stableScopeIdentity(input.scopeIdentity) } : {}),
           ...(input.targetFingerprint !== undefined ? { targetFingerprint: input.targetFingerprint } : {}),
           ...(input.captureScopeUnique !== undefined ? { captureScopeUnique: input.captureScopeUnique } : {}),
           ...(input.captureTargetMatchCount !== undefined ? { captureTargetMatchCount: input.captureTargetMatchCount } : {}),
@@ -297,7 +321,7 @@ export function materializeTechnicalTarget(input: TechnicalTargetEvidenceInput):
         // silently dropped and leaving this owner-alone shape with no anchor at all.
         ...(input.topologyTieBreakUnique !== undefined ? { topologyTieBreakUnique: input.topologyTieBreakUnique } : {}),
         ...(input.topologySignature !== undefined ? { topologySignature: input.topologySignature } : {}),
-        ...(input.scopeIdentity ? { scopeIdentity: input.scopeIdentity } : {}),
+        ...(stableScopeIdentity(input.scopeIdentity) ? { scopeIdentity: stableScopeIdentity(input.scopeIdentity) } : {}),
         ...(input.targetFingerprint !== undefined ? { targetFingerprint: input.targetFingerprint } : {}),
         ...(input.captureScopeUnique !== undefined ? { captureScopeUnique: input.captureScopeUnique } : {}),
         ...(input.captureTargetMatchCount !== undefined ? { captureTargetMatchCount: input.captureTargetMatchCount } : {}),
@@ -350,7 +374,7 @@ export function normalizeRecordingEvidence(
     structuralIdentityMatchCount: structuralContext?.structuralIdentityMatchCount,
     topologyTieBreakUnique: structuralContext?.topologyTieBreakUnique,
     topologySignature: structuralContext?.topologySignature,
-    scopeIdentity: structuralContext?.scopeIdentity,
+    scopeIdentity: stableScopeIdentity(structuralContext?.scopeIdentity),
     targetFingerprint: structuralContext?.targetFingerprint,
     captureScopeUnique: structuralContext?.captureScopeUnique,
     captureTargetMatchCount: structuralContext?.captureTargetMatchCount,

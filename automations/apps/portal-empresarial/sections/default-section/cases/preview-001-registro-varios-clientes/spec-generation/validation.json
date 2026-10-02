@@ -10,7 +10,7 @@
   },
   "invocations": 0,
   "invocationsConsumed": 0,
-  "durationMs": 83493,
+  "durationMs": 125655,
   "usage": {
     "inputTokens": null,
     "cachedInputTokens": null,
@@ -46,11 +46,11 @@
   "oracleTypes": [],
   "errors": [
     "functional_execution_failed:exitCode=1",
-    "functional_execution_error:Error: Promoted fill failed at step 4 field=\"role:textbox|Contraseña*\" value=\"qwerty123123\". fillPath=failed nativeFillAttempted=true nativeFillSucceeded=false callbackAttempted=true callbackSucceeded=false diagnostics={\"currentUrl\":\"https://172.27.4.31/login\",\"actionIntent\":\"fill\",\"target\":\"role:textbox|Contraseña*\",\"stepIndex\":4,\"timeoutMs\":15000,\"activeContainer\":\"form\",\"retryAttempted\":false,\"previousActiveContainer\":\"form\",\"refreshedActiveContainer\":\"form\",\"matchingFieldFound\":false,\"fallbackUsed\":\"none\",\"searchedContainers\":1,\"discardedReason\":\"stale_or_not_matching_field\",\"matchedLocatorStrategy\":\"text\",\"valueKey\":\"contrasena\",\"technicalTargetRefs\":[],\"fieldCandidateCount\":3,\"fillPath\":\"failed\",\"nativeFillAttempted\":true,\"nativeFillSucceeded\":false,\"nativeFillError\":\"locator.fill: Error: Element is not an <input>, <textarea>, <select> or [contenteditable] and does not have a role allowing [aria-readonly]\\nCall log:\\n\\u001b[2m  - waiting for getByText(/[aàáâãäå][cç][cç][eèéêë]d[eèéêë]\\\\s*[cç][oòóôõö][nñ]\\\\s*t[uùúûü]s\\\\s*[cç]r[eèéêë]d[eèéêë][nñ][cç][iìíîï][aàáâãäå]l[eèéêë]s/i).first()\\u001b[22m\\n\\u001b[2m    - locator resolved to <p class=\\\"!text-[#1d3557] !text-[17px] !font-bold !font-['Myriad_Pro'] !sm:text-[19px]\\\">Accede con tus credenciales</p>\\u001b[22m\\n\\u001b[2m    - fill(\\\"qwerty123123\\\")\\u001b[22m\\n\\u001b[2m  - attempting fill action\\u001b[22m\\n\\u001b[2m    - waiting for element to be visible, enabled and editable\\u001b[22m\\n\",\"callbackAttempted\":true,\"callbackSucceeded\":false,\"callbackError\":\"Fill callback failed: fill action timed out after 15000ms\",\"verificationAttempted\":false,\"verificationSucceeded\":false,\"screenshotPath\":\"[REDACTED]\"}"
+    "functional_execution_error:Error: Promoted click failed at step 12 target=\"role:option|cédula\". failureClass=ACTION_CALLBACK_TIMEOUT exactRuntimeError=\"Retry failed: click retry timed out after 15000ms\" currentUrl=https://172.27.4.31/payroll/manualCreationTable clickPath=failed nativeClickAttempted=true nativeClickSucceeded=false callbackAttempted=true callbackSucceeded=false retryAttempted=true diagnostics={\"currentUrl\":\"https://172.27.4.31/payroll/manualCreationTable\",\"actionIntent\":\"click\",\"target\":\"role:option|cédula\",\"stepIndex\":12,\"timeoutMs\":15000,\"stability\":{\"currentUrl\":\"https://172.27.4.31/payroll/manualCreationTable\",\"title\":\"\",\"visibleHeadings\":[],\"visibleButtons\":[\"Cargar archivo\",\"Añadir otro\",\"Validar\",\"seleccione\",\"Indicar...\",\"Indicar...\",\"Indicar...\",\"Indicar...\",\"000-000-0000\",\"000-000-0000\"],\"visibleTexts\":[\"Empresa:\",\"CONSTRUCCIONES ...\",\"Oliva Medina\",\"Añadir colaboradores manualmente\",\"Añade y verifica que todos los datos estén correctos\",\"Cargar archivo\",\"Añadir otro\",\"Validar\",\"LISTADO DE COLABORADORES\",\"Puedes editar las celdas haciendo click sobre las mismas.\",\"Tipo de ID\",\"Colaborador\",\"Puesto\",\"Ingresos\",\"Correo electrónico\",\"Teléfono residencial\",\"Celular\",\"Fecha de Nacimiento\",\"Fecha de Ingreso\",\"seleccione\"],\"loadingDetected\":false,\"skeletonDetected\":false,\"listReadiness\":{\"cardsVisible\":0,\"listItemsVisible\":0,\"loadingDetected\":false,\"zeroProductsDetected\":false,\"hasEntityContainers\":true,\"visibleHeadings\":[],\"visibleButtons\":[\"Cargar archivo\",\"Añadir otro\",\"Validar\",\"seleccione\",\"Indicar...\",\"Indicar...\",\"Indicar...\",\"Indicar...\",\"000-000-0000\",\"000-000-0000\"],\"ready\":true},\"diagnosticStatus\":\"completed\"},\"retryAttempted\":true,\"clickPath\":\"failed\",\"nativeClickAttempted\":true,\"nativeClickSucceeded\":false,\"callbackAttempted\":true,\"callbackSucceeded\":false,\"callbackError\":\"Retry failed: click retry timed out after 15000ms\",\"expectedEffect\":\"ui_change\",\"effectDetected\":false,\"fallbackUsed\":\"none\",\"matchedLocatorStrategy\":\"unknown\",\"screenshotPath\":\"[REDACTED]\"}"
   ],
   "warnings": [
-    "functional_execution_screenshots=0",
-    "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 4)."
+    "functional_execution_screenshots=5",
+    "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 12)."
   ],
   "finalSpec": {
     "origin": "deterministic_compiler",
@@ -61,6 +61,6 @@
   "runtimeGate": {
     "decision": "block",
     "promotionStatus": "blocked",
-    "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 4)."
+    "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 12)."
   }
 }

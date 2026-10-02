@@ -10,7 +10,7 @@ import { resolveActionTarget } from "../discovery/target-resolver";
 
 // Isolated DOM fixtures only. No project login, job, or external application.
 test("native selection preserves distinct owners and keys through capture and projection", async () => {
-  new Function(buildCaptureScriptV2Content());
+  new Function(buildCaptureScriptV2Content("selection-fixture"));
   const browser = await chromium.launch({ headless: true });
   try {
     const page = await browser.newPage();
@@ -23,7 +23,7 @@ test("native selection preserves distinct owners and keys through capture and pr
     </form>`);
     const messages: any[] = [];
     await page.exposeBinding("__qaRecordV2", (_source, message) => { messages.push(message); });
-    await page.evaluate(buildCaptureScriptV2Content());
+    await page.evaluate(buildCaptureScriptV2Content("selection-fixture"));
     await page.locator("#pick-a").click();
     await page.evaluate(async () => { await (window as any).__qaRecorderV2Flush(); });
     const click = messages.find(message => message.type === "click");
@@ -57,7 +57,7 @@ test("native selection preserves distinct owners and keys through capture and pr
     assert.equal(canonical[0].playwrightRecorderEvidence?.nativeSelection?.clickedOption?.value, "key-a");
     // Exact internal key translates the old display label to the current native option.
     await page.setContent(`<div><select id="primary" aria-label="Primary item"><option value="">Choose</option><option value="key-x">Other</option><option value="key-a">Updated item / 99.00</option></select></div>`);
-    const evidence = { kind: "text" as const, normalizedName: "Item / 20.00", scopeIdentity: primary!.scopeIdentity, runtimeResolutionRequired: true, nativeSelection: primary! };
+    const evidence = { kind: "text" as const, normalizedName: "Item / 20.00", scopeIdentity: primary!.scopeIdentity, runtimeResolutionRequired: true as const, nativeSelection: { ...primary!, selectionMode: undefined, selectedOptionIndex: undefined } };
     const result = await resolveActionTarget(page, { elements: [] } as any, "Primary item", {
       actionType: "action_select", recordingActionType: "select", selectionField: "Primary item",
       associatedField: "Primary item", selectionValue: "Item / 20.00", playwrightRecorderEvidence: evidence,

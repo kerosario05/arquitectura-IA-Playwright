@@ -14424,5 +14424,33 @@
     ],
     "createdAt": "2026-10-01T21:11:36.161Z",
     "updatedAt": "2026-10-01T21:15:48.220Z"
+  },
+  {
+    "id": "1790950863480-1tqedul",
+    "issueKey": "REC-9E9997B8",
+    "urlSlug": "REC-9E9997B8",
+    "defects": [
+      {
+        "id": "1790950902320-e6eqeny",
+        "description": "Qué pasó:\nLa ejecución falló con código: navigation_failed\n\nResultado esperado:\nLa aplicación carga su pantalla inicial\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "5f68070a-5d09-47d4-b8e7-75cb565db26a",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Transferencias Cuentas Propiav",
+        "title": "[Media] No se cumplió: La aplicación carga su pantalla inicial — Transferencias Cuentas Propiav",
+        "technicalContext": {
+          "reasonCode": "navigation_failed",
+          "discoveryStatus": "exploration_failed",
+          "expectedResult": "La aplicación carga su pantalla inicial",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-02T14-21-06-784Z\\evidence"
+        },
+        "createdAt": "2026-10-02T14:21:42.320Z",
+        "updatedAt": "2026-10-02T14:21:42.320Z"
+      }
+    ],
+    "createdAt": "2026-10-02T14:21:03.479Z",
+    "updatedAt": "2026-10-02T14:21:42.320Z"
   }
 ]

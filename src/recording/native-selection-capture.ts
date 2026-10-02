@@ -6,6 +6,9 @@ export type NativeSelectionCapture = {
   fieldLabel?: string;
   options: Array<{ value: string; label: string; disabled: boolean }>;
   clickedOption?: { value: string; label: string };
+  /** Zero based among enabled options with a nonempty value; placeholders are excluded. */
+  selectionMode?: "index";
+  selectedOptionIndex?: number;
   selectedValue: string;
 };
 
@@ -59,13 +62,16 @@ export function captureNativeSelection(target: Element): NativeSelectionCapture 
     disabled: Boolean(option.disabled || (option.parentElement?.tagName.toLowerCase() === "optgroup" && (option.parentElement as HTMLOptGroupElement).disabled)),
   }));
   const clickedText = clean(target.textContent);
-  const matches = options.filter(option => option.value && !option.disabled && option.label === clickedText);
+  const selectable = options.filter(option => option.value && !option.disabled);
+  const matches = selectable.filter(option => option.label === clickedText);
   const clickedOption = tag !== "select" && matches.length === 1 ? { value: matches[0].value, label: matches[0].label } : undefined;
+  const selectedOptionIndex = clickedOption ? selectable.findIndex(option => option.value === clickedOption.value && option.label === clickedOption.label) : undefined;
   return {
     controlIdentity: { strategy: attribute === "id" ? "id" : "data-testid", value },
     scopeIdentity: { strategy: "css", value: scopeSelector },
     ...(fieldLabel ? { fieldLabel } : {}), options,
     ...(clickedOption ? { clickedOption } : {}), selectedValue: control.value,
+    ...(selectedOptionIndex !== undefined ? { selectionMode: "index" as const, selectedOptionIndex } : {}),
   };
 }
 

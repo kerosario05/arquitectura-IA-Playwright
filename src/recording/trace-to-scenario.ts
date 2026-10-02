@@ -440,6 +440,10 @@ function selectionValueKey(event: RecordedEvent, label: string): string {
 }
 
 function describeSelectionRendered(event: RecordedEvent, label: string, template: string): string {
+  const selection = event.target?.playwrightRecorderEvidence?.nativeSelection;
+  if (selection?.selectionMode === "index" && Number.isInteger(selection.selectedOptionIndex)) {
+    return `Seleccionar opción ${selection.selectedOptionIndex! + 1} en "${label}"`;
+  }
   return event.target?.afterValue === undefined
     ? template
     : `Seleccionar ${quoteHumanValue(event.target.afterValue)} en "${label}"`;

@@ -490,13 +490,16 @@ function semanticLabelFromSelectionTrigger(trigger: RecordedEvent["target"]): st
 function promoteDynamicSelection(event: RecordedEvent, index: number, events: readonly RecordedEvent[]): RecordedEvent {
   const nativeSelection = event.target?.playwrightRecorderEvidence?.nativeSelection;
   const clickedOption = nativeSelection?.clickedOption;
-  if (event.kind === "tap" && nativeSelection && clickedOption
+  if ((event.kind === "tap" || (event.kind === "fill" && event.target?.tag === "select")) && nativeSelection && clickedOption
     && nativeSelection.options.filter(option => option.value === clickedOption.value && option.label === clickedOption.label && !option.disabled).length === 1) {
     // Both identities were measured in the same DOM: the clicked display option and its
     // uniquely associated native control. No preceding generic container tap is needed.
     const field = nativeSelection.fieldLabel || event.target?.associatedField || nativeSelection.controlIdentity.value;
+    const selectable = nativeSelection.options.filter(option => option.value && !option.disabled);
+    const selectedOptionIndex = selectable.findIndex(option => option.value === clickedOption.value && option.label === clickedOption.label);
     return {
       ...event,
+      kind: "tap",
       target: {
         ...event.target!, role: "option", interactionType: "select", compoundRole: "selection",
         associatedField: field, afterValue: clickedOption.label,
@@ -505,6 +508,7 @@ function promoteDynamicSelection(event: RecordedEvent, index: number, events: re
         playwrightRecorderEvidence: {
           ...event.target!.playwrightRecorderEvidence!, scopeIdentity: nativeSelection.scopeIdentity,
           normalizedName: clickedOption.label, captureMatchCount: 1,
+          nativeSelection: { ...nativeSelection, selectionMode: "index", selectedOptionIndex },
         },
         dynamicLifecycle: {
           ...event.target?.dynamicLifecycle,

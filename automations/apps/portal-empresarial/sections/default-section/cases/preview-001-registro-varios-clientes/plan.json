@@ -404,7 +404,7 @@
     {
       "index": 25,
       "action": "fill",
-      "description": "Ingresar \"40224679551\" en \"Colaborador\"",
+      "description": "Ingresar \"10400144233\" en \"Colaborador\"",
       "target": {
         "strategy": "text",
         "value": "Colaborador",
@@ -513,7 +513,7 @@
   "notes": [
     "Discovery completed successfully. All targets and concrete assertions passed."
   ],
-  "createdAt": "2026-10-02T01:22:50.589Z",
+  "createdAt": "2026-10-02T16:19:22.039Z",
   "metadata": {
     "authFlowRequired": false,
     "authFlowAlias": "defaultClient",
@@ -818,7 +818,42 @@
       {
         "index": 10,
         "action": "Presionar el control indicado",
-        "description": "Presionar el control indicado"
+        "description": "Presionar el control indicado",
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "checkbox",
+          "normalizedName": "Seleccionar fila",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button",
+                "role": "checkbox"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Seleccionar fila",
+                "role": "checkbox"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
       },
       {
         "index": 11,
@@ -1259,8 +1294,8 @@
       },
       {
         "index": 25,
-        "action": "Ingresar \"40224679551\" en \"Colaborador\"",
-        "description": "Ingresar \"40224679551\" en \"Colaborador\"",
+        "action": "Ingresar \"10400144233\" en \"Colaborador\"",
+        "description": "Ingresar \"10400144233\" en \"Colaborador\"",
         "valueKey": "entity_2.colaborador",
         "associatedField": "Colaborador",
         "controlIdentity": "3e7b2674871e|entity_2|Colaborador",
@@ -1945,20 +1980,43 @@
         },
         "certifiedTechnicalTarget": {
           "interactionEvidence": [],
-          "validatedByInteraction": false,
-          "certifiedFrom": "discovery",
-          "targetType": "display",
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
           "locatorCandidates": [
             {
-              "strategy": "text",
-              "value": "Presionar el control indicado",
-              "confidence": 0.5
+              "strategy": "css",
+              "value": "[aria-label=\"Seleccionar fila\"][role=\"checkbox\"]",
+              "confidence": 0.85
             }
           ],
-          "confidence": 0.5,
-          "certificationTier": 5
+          "structuralContext": {
+            "owner": {
+              "tag": "button",
+              "role": "checkbox"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Seleccionar fila",
+              "role": "checkbox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
         },
-        "resolutionState": "runtime_resolution_required",
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "checkbox",
+          "normalizedName": "Seleccionar fila",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
         "required": true,
         "executionStatus": "executed",
         "implementation": {
@@ -2040,44 +2098,13 @@
           "targetType": "structural",
           "locatorCandidates": [
             {
-              "strategy": "css",
-              "value": "[aria-labelledby=\"radix-_r_1i_\"][role=\"option\"]",
+              "strategy": "role",
+              "value": "option|cédula",
               "confidence": 0.85
             }
           ],
-          "structuralContext": {
-            "owner": {
-              "tag": "div",
-              "role": "option"
-            },
-            "stableDirectAttributes": {
-              "aria-labelledby": "radix-_r_1i_",
-              "role": "option"
-            },
-            "stableDescendants": [
-              {
-                "relation": "descendant",
-                "tag": "span",
-                "stableAttributes": {
-                  "id": "radix-_r_1i_"
-                }
-              }
-            ],
-            "semanticShape": [
-              "span"
-            ],
-            "deterministicStructuralIdentity": true,
-            "structuralIdentityMatchCount": 1,
-            "scopeIdentity": {
-              "strategy": "id",
-              "value": "radix-_r_1g_"
-            },
-            "targetFingerprint": "{\"owner\":{\"tag\":\"div\",\"role\":\"option\"},\"stableDirectAttributes\":{\"role\":\"option\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"span\",\"stableAttributes\":{\"id\":\"radix-_r_1i_\"}}],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
-            "captureScopeUnique": true,
-            "captureTargetMatchCount": 1
-          },
           "confidence": 0.85,
-          "certificationTier": 1
+          "certificationTier": 2
         },
         "playwrightRecorderEvidence": {
           "kind": "role",
@@ -2195,32 +2222,13 @@
           "targetType": "structural",
           "locatorCandidates": [
             {
-              "strategy": "css",
-              "value": "[role=\"combobox\"]",
+              "strategy": "role",
+              "value": "combobox|Moneda",
               "confidence": 0.85
             }
           ],
-          "structuralContext": {
-            "owner": {
-              "tag": "button",
-              "role": "combobox"
-            },
-            "stableDirectAttributes": {
-              "role": "combobox"
-            },
-            "stableDescendants": [],
-            "semanticShape": [
-              "span",
-              "svg"
-            ],
-            "landmarkAncestor": {
-              "tag": "main"
-            },
-            "deterministicStructuralIdentity": true,
-            "structuralIdentityMatchCount": 1
-          },
           "confidence": 0.85,
-          "certificationTier": 1
+          "certificationTier": 2
         },
         "playwrightRecorderEvidence": {
           "kind": "role",
@@ -2593,44 +2601,13 @@
           "targetType": "structural",
           "locatorCandidates": [
             {
-              "strategy": "css",
-              "value": "[aria-labelledby=\"radix-_r_3e_\"][role=\"option\"]",
+              "strategy": "role",
+              "value": "option|cédula",
               "confidence": 0.85
             }
           ],
-          "structuralContext": {
-            "owner": {
-              "tag": "div",
-              "role": "option"
-            },
-            "stableDirectAttributes": {
-              "aria-labelledby": "radix-_r_3e_",
-              "role": "option"
-            },
-            "stableDescendants": [
-              {
-                "relation": "descendant",
-                "tag": "span",
-                "stableAttributes": {
-                  "id": "radix-_r_3e_"
-                }
-              }
-            ],
-            "semanticShape": [
-              "span"
-            ],
-            "deterministicStructuralIdentity": true,
-            "structuralIdentityMatchCount": 1,
-            "scopeIdentity": {
-              "strategy": "id",
-              "value": "radix-_r_3c_"
-            },
-            "targetFingerprint": "{\"owner\":{\"tag\":\"div\",\"role\":\"option\"},\"stableDirectAttributes\":{\"role\":\"option\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"span\",\"stableAttributes\":{\"id\":\"radix-_r_3e_\"}}],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
-            "captureScopeUnique": true,
-            "captureTargetMatchCount": 1
-          },
           "confidence": 0.85,
-          "certificationTier": 1
+          "certificationTier": 2
         },
         "playwrightRecorderEvidence": {
           "kind": "role",
@@ -2655,7 +2632,7 @@
       {
         "contractStepIndex": 24,
         "scenarioStepIndex": 25,
-        "originalText": "Ingresar \"40224679551\" en \"Colaborador\"",
+        "originalText": "Ingresar \"10400144233\" en \"Colaborador\"",
         "operation": "fill",
         "target": {
           "strategy": "label",
