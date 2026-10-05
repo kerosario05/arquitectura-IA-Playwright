@@ -1161,6 +1161,7 @@ export function buildPromotionSourceScenario(
     // field above. Never re-derived, never positional -- verbatim transport only.
     controlIdentity: step.controlIdentity,
     recordingActionType: step.recordingActionType,
+    ...(step.entityScope ? { entityScope: step.entityScope } : {}),
   }));
   const canonicalRequirementById = new Map((canonicalRequirements ?? []).map((requirement) => [requirement.requirementId, requirement]));
   const seenControlledAdvanceAssertions = new Set<string>();
@@ -1269,6 +1270,7 @@ export function buildPromotionSourceScenario(
       // `steps` on its own). Verbatim transport only, never re-derived, never positional.
       controlIdentity: step.controlIdentity,
       recordingActionType: step.recordingActionType,
+      ...(step.entityScope ? { entityScope: step.entityScope } : {}),
     requirementRefs: Array.isArray(step.requirementRefs) && step.requirementRefs.length > 0
       ? [...step.requirementRefs]
       : undefined,

@@ -1,5 +1,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { createHash } from "node:crypto";
+import { waitForVisualSettle, readScreenSignature } from "./screen-settle";
 import type { Page } from "@playwright/test";
 import { loadEvidenceConfig, type EvidenceConfig, type EvidenceScenarioContext, type EvidenceStepRecord, type EvidenceScenarioRecord, type DetailEvidenceMetadata, type InitialScreenEvidence, deriveScenarioStatus, type EvidenceCaptureStatus, type EvidenceFunctionalStatus } from "./evidence-types";
 import { buildEvidencePaths, buildScreenshotFilename } from "./evidence-paths";
@@ -19,8 +21,15 @@ export class EvidenceRecorder {
   private isDetailEvidence?: boolean;
   private lastActionTarget?: string;
   private initialScreenEvidence?: InitialScreenEvidence;
+  private initialScreenSignature?: string;
   private discoveryStatus?: string;
   private functionalStatus?: EvidenceFunctionalStatus;
+  private lastImage?: { hash: string; path: string };
+  private finalScreenEvidence?: EvidenceScenarioRecord["finalScreenEvidence"];
+  /** Steps since the last screen change; they share ONE image (the screen before it changed). */
+  private pendingGroup: EvidenceStepRecord[] = [];
+  /** Latest settled state of the current screen (image kept in memory until committed). */
+  private screenState?: { image: Buffer; signature: string };
 
   constructor(context: EvidenceScenarioContext, config?: Partial<EvidenceConfig>) {
     this.config = { ...loadEvidenceConfig(), ...config };
@@ -83,21 +92,36 @@ export class EvidenceRecorder {
 
     let screenshotPath: string | null = null;
     try {
-      const filename = ready ? "initial-screen.png" : "initial-load-failure.png";
-      screenshotPath = path.join(this.paths.screenshotsDir, filename);
-      // Evidence capture must not hold a SPA action hostage. A browser-side
-      // asset/layout stall is diagnostic, not a reason to wait until the
-      // runtime's full default timeout before resolving the next target.
-      await page.screenshot({ path: screenshotPath, fullPage: this.config.fullPage, timeout: 5000 });
+      if (ready) {
+        const settle = await waitForVisualSettle(page, { timeoutMs: this.config.settleTimeoutMs, quietMs: this.config.settleQuietMs });
+        if (settle.settled) {
+          screenshotPath = path.join(this.paths.screenshotsDir, "initial-screen.png");
+          await page.screenshot({ path: screenshotPath, fullPage: this.config.fullPage, timeout: this.config.captureTimeoutMs });
+        } else {
+          reason = settle.loaderVisible ? "initial_loader_still_visible" : "initial_visual_settle_timeout";
+          console.log(`[evidence:initial] screenshot skipped scenarioId=${this.context.scenarioId} settled=false waitedMs=${settle.waitedMs} loaderVisible=${settle.loaderVisible}`);
+        }
+      } else {
+        screenshotPath = path.join(this.paths.screenshotsDir, "initial-load-failure.png");
+        await page.screenshot({ path: screenshotPath, fullPage: this.config.fullPage, timeout: this.config.captureTimeoutMs });
+      }
     } catch {
       screenshotPath = null;
+    }
+    if (ready && screenshotPath) {
+      try {
+        this.initialScreenSignature = await readScreenSignature(page);
+        this.screenState = { image: await fs.promises.readFile(screenshotPath), signature: this.initialScreenSignature };
+      } catch {
+        this.screenState = undefined;
+      }
     }
     this.initialScreenEvidence = {
       status: ready ? "ready" : "load_failed",
       captured: Boolean(screenshotPath),
       path: screenshotPath,
       capturedAt,
-      ...(ready ? {} : { reason }),
+      ...(reason ? { reason } : {}),
     };
     console.log(`[evidence:initial] scenarioId=${this.context.scenarioId} executionSource=${executionSource} status=${this.initialScreenEvidence.status} captured=${this.initialScreenEvidence.captured} beforeStepIndex=1 reason=${ready ? "none" : reason}`);
     if (!ready) console.log(`[initial-readiness] scenarioId=${this.context.scenarioId} executionSource=${executionSource} ready=false reason=${reason} stepsStarted=false`);
@@ -133,16 +157,53 @@ export class EvidenceRecorder {
     // Ensure started
     if (!this.started) await this.start();
 
-    // Take screenshot
+    // Steps share images at useful checkpoints. Route/heading changes close the previous screen;
+    // completing a form or a data row commits the current filled state. Intermediate typing stays
+    // grouped so OTP digits and long text do not create a screenshot for every keystroke.
+    this.steps.push(record);
+    this.pendingGroup.push(record);
     try {
-      const filename = buildScreenshotFilename(stepIndex, stepText);
-      const screenshotPath = path.join(this.paths.screenshotsDir, filename);
-      await page.screenshot({ path: screenshotPath, fullPage: this.config.fullPage });
-      record.screenshotPath = screenshotPath;
-
-      // Log screenshot capture with size
-      const stats = await fs.promises.stat(screenshotPath);
-      console.log(`[evidence:scenario] screenshot captured scenarioId=${this.context.scenarioId} step=${stepIndex} path=${screenshotPath} size=${stats.size}`);
+      const settle = await waitForVisualSettle(page, { timeoutMs: this.config.settleTimeoutMs, quietMs: this.config.settleQuietMs });
+      if (!settle.settled) {
+        console.log(`[evidence:scenario] capture deferred scenarioId=${this.context.scenarioId} step=${stepIndex} reason=${settle.loaderVisible ? "loader_still_visible" : "visual_settle_timeout"} waitedMs=${settle.waitedMs}; retaining last settled image`);
+        return record;
+      }
+      const image = await page.screenshot({ fullPage: this.config.fullPage, timeout: this.config.captureTimeoutMs });
+      const signature = await readScreenSignature(page);
+      const previousSignature = this.screenState?.signature ?? "";
+      const previousBase = previousSignature.split("|completeForms=")[0];
+      const currentBase = signature.split("|completeForms=")[0];
+      const screenChanged = Boolean(this.screenState && previousBase !== currentBase);
+      const previousCheckpoint = previousSignature.match(/\|completeForms=(\d+)\|completeRows=(\d+)/);
+      const currentCheckpoint = signature.match(/\|completeForms=(\d+)\|completeRows=(\d+)/);
+      const completedFormChanged = Boolean(
+        this.screenState && !screenChanged && previousCheckpoint && currentCheckpoint &&
+        Number(currentCheckpoint[1]) > Number(previousCheckpoint[1])
+      );
+      const completedFormOrRowChanged = Boolean(
+        completedFormChanged || (this.screenState && !screenChanged && previousCheckpoint && currentCheckpoint &&
+          Number(currentCheckpoint[2]) > Number(previousCheckpoint[2]))
+      );
+      console.log(`[evidence:scenario] settle scenarioId=${this.context.scenarioId} step=${stepIndex} settled=${settle.settled} waitedMs=${settle.waitedMs} loaderVisible=${settle.loaderVisible} screenChanged=${screenChanged}`);
+      if (screenChanged && this.screenState) {
+        await this.commitScreenGroup(this.screenState.image, "screen_changed");
+      } else if (completedFormOrRowChanged) {
+        await this.commitScreenGroup(image, "completed_form_or_data_row");
+        const initialBase = this.initialScreenSignature?.split("|completeForms=")[0];
+        if (
+          completedFormChanged && !this.initialScreenEvidence?.completedFormCheckpointPath &&
+          this.initialScreenEvidence?.captured && initialBase && initialBase === currentBase && record.screenshotPath
+        ) {
+          this.initialScreenEvidence = {
+            ...this.initialScreenEvidence,
+            completedFormCheckpointPath: record.screenshotPath,
+          };
+          console.log(`[evidence:initial] completedFormCheckpoint=true scenarioId=${this.context.scenarioId} path=${record.screenshotPath}`);
+        }
+      } else if (record.status === "failed") {
+        await this.commitScreenGroup(image, "step_failed");
+      }
+      this.screenState = { image, signature };
     } catch (err: any) {
       const msg = `Screenshot failed for step ${stepIndex}: ${err.message}`;
       if (this.config.failOnError) {
@@ -151,8 +212,96 @@ export class EvidenceRecorder {
       console.log(`[evidence:scenario] ${msg}`);
     }
 
-    this.steps.push(record);
     return record;
+  }
+
+  /** Writes `image` once (identical consecutive images reuse the file) and assigns it to the pending group. */
+  private async commitScreenGroup(image: Buffer, reason: string): Promise<void> {
+    const group = this.pendingGroup;
+    if (group.length === 0) return;
+    this.pendingGroup = [];
+    const hash = createHash("sha1").update(image).digest("hex");
+    let imagePath: string;
+    if (this.lastImage && this.lastImage.hash === hash && fs.existsSync(this.lastImage.path)) {
+      imagePath = this.lastImage.path;
+    } else {
+      const anchor = group[group.length - 1];
+      imagePath = path.join(this.paths.screenshotsDir, buildScreenshotFilename(anchor.index, anchor.stepText));
+      await fs.promises.writeFile(imagePath, image);
+      this.lastImage = { hash, path: imagePath };
+    }
+    for (const step of group) step.screenshotPath = imagePath;
+    console.log(`[evidence:scenario] screen image committed scenarioId=${this.context.scenarioId} reason=${reason} steps=${group.length} path=${imagePath}`);
+  }
+
+  /**
+   * Closes the evidence once the last step ran: the steps still waiting get the final settled state
+   * of their screen, and when the last action itself changed the screen, the resulting screen is
+   * added as its own closing entry so the evidence shows what the last step produced.
+   */
+  private async finalizeScreens(page?: Page): Promise<void> {
+    if (this.steps.length === 0) return;
+    let image: Buffer | undefined;
+    let settledNote = "last_settled_state";
+    let finalCaptured = false;
+    if (page && !page.isClosed()) {
+      try {
+        const settle = await waitForVisualSettle(page, { timeoutMs: this.config.finalSettleTimeoutMs, quietMs: this.config.settleQuietMs });
+        settledNote = `settled=${settle.settled} waitedMs=${settle.waitedMs} loaderVisible=${settle.loaderVisible}`;
+        if (settle.settled) {
+          image = await page.screenshot({ fullPage: this.config.fullPage, timeout: this.config.captureTimeoutMs });
+          finalCaptured = true;
+        } else {
+          console.log(`[evidence:scenario] final screenshot omitted scenarioId=${this.context.scenarioId} reason=${settle.loaderVisible ? "loader_still_visible" : "visual_settle_timeout"} waitedMs=${settle.waitedMs}; no unsettled frame saved`);
+          image = this.screenState?.image;
+        }
+      } catch (err: any) {
+        console.log(`[evidence:scenario] final state capture skipped: ${err.message}`);
+        image = this.screenState?.image;
+      }
+    } else if (!page) {
+      image = this.screenState?.image;
+      finalCaptured = Boolean(image);
+    } else {
+      image = this.screenState?.image;
+    }
+    if (!image) {
+      this.finalScreenEvidence = { captured: false, path: null, capturedAt: new Date().toISOString() };
+      return;
+    }
+    const lastStep = this.steps[this.steps.length - 1];
+    if (this.pendingGroup.length > 0) {
+      if (finalCaptured) {
+        await this.commitScreenGroup(image, `final_state ${settledNote}`);
+      } else if (this.screenState) {
+        // Keep the last settled image as evidence for completed inputs, but do not claim it depicts
+        // the final result while the page is still loading.
+        this.finalScreenEvidence = { captured: false, path: null, capturedAt: new Date().toISOString() };
+      }
+      return;
+    }
+    if (!finalCaptured) {
+      this.finalScreenEvidence = { captured: false, path: null, capturedAt: new Date().toISOString() };
+      return;
+    }
+    // Last action changed the screen: attach the resulting screen as a closing entry.
+    const hash = createHash("sha1").update(image).digest("hex");
+    if (this.lastImage?.hash === hash) {
+      this.finalScreenEvidence = { captured: true, path: this.lastImage.path, capturedAt: new Date().toISOString() };
+      return;
+    }
+    const finalPath = path.join(this.paths.screenshotsDir, "final-state.png");
+    await fs.promises.writeFile(finalPath, image);
+    this.lastImage = { hash, path: finalPath };
+    this.finalScreenEvidence = { captured: true, path: finalPath, capturedAt: new Date().toISOString() };
+    this.steps.push({
+      index: lastStep.index + 1,
+      stepText: "Pantalla resultante tras el último paso",
+      status: lastStep.status === "failed" ? "failed" : "passed",
+      timestamp: new Date().toISOString(),
+      screenshotPath: finalPath,
+    });
+    console.log(`[evidence:scenario] final state captured scenarioId=${this.context.scenarioId} ${settledNote} path=${finalPath}`);
   }
 
   /**
@@ -238,9 +387,15 @@ export class EvidenceRecorder {
     console.log(`[detail-screenshot] required=true target="${target}" step=${stepIndex}`);
 
     try {
-      // Wait for detail screen to stabilize
+      // Wait for the detail view and any asynchronous loading indicators to finish.
       await page.waitForLoadState("domcontentloaded", { timeout: 5000 });
-      await page.waitForTimeout(500); // Brief stabilization
+      const settle = await waitForVisualSettle(page, { timeoutMs: this.config.finalSettleTimeoutMs, quietMs: this.config.settleQuietMs });
+      if (!settle.settled) {
+        const reason = settle.loaderVisible ? "loader_still_visible" : "visual_settle_timeout";
+        this.detailEvidence = { required: true, captured: false, target, reason, oracleReason: reason };
+        console.log(`[detail-screenshot] captured=false target="${target}" reason=${reason} waitedMs=${settle.waitedMs}`);
+        return { captured: false, reason };
+      }
 
       // Validate that detail screen is visible
       if (options?.validateSelector) {
@@ -264,7 +419,7 @@ export class EvidenceRecorder {
       // Capture screenshot
       const filename = buildScreenshotFilename(stepIndex, `detail_loaded_${target}`);
       const screenshotPath = path.join(this.paths.screenshotsDir, filename);
-      await page.screenshot({ path: screenshotPath, fullPage: this.config.fullPage });
+      await page.screenshot({ path: screenshotPath, fullPage: this.config.fullPage, timeout: this.config.captureTimeoutMs });
 
       const stats = await fs.promises.stat(screenshotPath);
       console.log(`[detail-screenshot] captured=true target="${target}" step=${stepIndex} path=${screenshotPath} size=${stats.size}`);
@@ -370,6 +525,8 @@ export class EvidenceRecorder {
     }
     this.finished = true;
 
+    await this.finalizeScreens(page);
+
     // If page is provided and we have no screenshots, capture a final screenshot
     if (page && this.config.screenshotMode === "after_step") {
       const existingScreenshots = this.steps.filter(s => {
@@ -378,14 +535,16 @@ export class EvidenceRecorder {
         return ext === ".png" || ext === ".jpg" || ext === ".jpeg";
       });
 
-      if (existingScreenshots.length === 0 && this.steps.length > 0) {
+      if (existingScreenshots.length === 0 && this.steps.length > 0 && this.finalScreenEvidence?.captured !== false) {
         console.log(`[evidence:scenario] WARNING: No per-step screenshots found, using fallback final screenshot scenarioId=${this.context.scenarioId}`);
         try {
           const lastStep = this.steps[this.steps.length - 1];
           const filename = buildScreenshotFilename(lastStep.index, lastStep.stepText);
           const screenshotPath = path.join(this.paths.screenshotsDir, filename);
 
-          await page.screenshot({ path: screenshotPath, fullPage: this.config.fullPage });
+          const settle = await waitForVisualSettle(page, { timeoutMs: this.config.finalSettleTimeoutMs, quietMs: this.config.settleQuietMs });
+          if (!settle.settled) throw new Error(`fallback_visual_settle_failed:${settle.loaderVisible ? "loader_still_visible" : "timeout"}`);
+          await page.screenshot({ path: screenshotPath, fullPage: this.config.fullPage, timeout: this.config.captureTimeoutMs });
           lastStep.screenshotPath = screenshotPath;
 
           const stats = await fs.promises.stat(screenshotPath);
@@ -398,7 +557,7 @@ export class EvidenceRecorder {
       }
     }
 
-    const captureStatus: EvidenceCaptureStatus = this.initialScreenEvidence?.status === "load_failed"
+    const captureStatus: EvidenceCaptureStatus = this.initialScreenEvidence?.status === "load_failed" || this.finalScreenEvidence?.captured === false
       ? "failed"
       : this.steps.some((step) => Boolean(step.screenshotPath)) || this.initialScreenEvidence?.captured === true
         ? "success"
@@ -417,7 +576,7 @@ export class EvidenceRecorder {
         `detailTarget=${this.detailTarget ?? "none"} finalProductClickStepIndex=${this.finalProductClickStepIndex ?? "none"}`
       );
       console.log(
-        `[evidence:scenario] finalScreenEvidence captured=${this.steps.some((step) => Boolean(step.screenshotPath))} source=last_successful_action ` +
+        `[evidence:scenario] finalScreenEvidence captured=${this.finalScreenEvidence?.captured ?? this.steps.some((step) => Boolean(step.screenshotPath))} source=last_settled_action ` +
         `scenario=${this.context.scenarioId} finalStepsCount=${this.steps.length}`
       );
       // Clear detailEvidence so downstream (DOCX) doesn't use it
@@ -504,10 +663,15 @@ export class EvidenceRecorder {
     });
 
     const finalScreenshot = [...this.steps].reverse().find((step) => Boolean(step.screenshotPath))?.screenshotPath ?? null;
-    const record = buildRecord(this.context, this.steps, this.paths.docxPath, this.paths.evidenceJsonPath, status, this.detailEvidence, date, this.evidenceKind, this.isDetailEvidence, this.lastActionTarget, this.initialScreenEvidence, {
+    const finalScreenEvidence = this.finalScreenEvidence ?? {
       captured: Boolean(finalScreenshot),
       path: finalScreenshot,
       capturedAt: new Date().toISOString(),
+    };
+    const record = buildRecord(this.context, this.steps, this.paths.docxPath, this.paths.evidenceJsonPath, status, this.detailEvidence, date, this.evidenceKind, this.isDetailEvidence, this.lastActionTarget, this.initialScreenEvidence, {
+      captured: finalScreenEvidence.captured,
+      path: finalScreenEvidence.path,
+      capturedAt: finalScreenEvidence.capturedAt,
     }, {
       captureStatus,
       discoveryStatus: this.discoveryStatus,

@@ -14435,22 +14435,143 @@
         "description": "Qué pasó:\nLa ejecución falló con código: navigation_failed\n\nResultado esperado:\nLa aplicación carga su pantalla inicial\n\nEvidencia:\nEvidencia técnica disponible.",
         "severity": "medium",
         "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
-        "jobId": "5f68070a-5d09-47d4-b8e7-75cb565db26a",
+        "jobId": "0b4b0c06-0e7d-4474-9919-1e44b61b7d1b",
         "status": "pending_review",
         "scenarioId": "PREVIEW-001",
         "scenarioTitle": "Transferencias Cuentas Propiav",
         "title": "[Media] No se cumplió: La aplicación carga su pantalla inicial — Transferencias Cuentas Propiav",
         "technicalContext": {
-          "reasonCode": "navigation_failed",
-          "discoveryStatus": "exploration_failed",
+          "discoveryStatus": "discovered_passed",
           "expectedResult": "La aplicación carga su pantalla inicial",
-          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-02T14-21-06-784Z\\evidence"
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-03T16-08-30-372Z\\attempt-2\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-03T16-08-30-372Z\\attempt-2\\evidence\\step-31-snapshot.json",
+          "lastSuccessfulStep": {
+            "stepIndex": 31,
+            "action": "Presionar \"Continuar\"",
+            "target": "Continuar",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-03T16-08-30-372Z\\attempt-2\\evidence\\step-31-snapshot.json"
+          }
         },
         "createdAt": "2026-10-02T14:21:42.320Z",
-        "updatedAt": "2026-10-02T14:21:42.320Z"
+        "updatedAt": "2026-10-03T16:20:20.112Z"
       }
     ],
     "createdAt": "2026-10-02T14:21:03.479Z",
     "updatedAt": "2026-10-02T14:21:42.320Z"
+  },
+  {
+    "id": "1791047475700-g8y2ly9",
+    "issueKey": "REC-27221248",
+    "urlSlug": "REC-27221248",
+    "defects": [
+      {
+        "id": "1791047640553-650xu51",
+        "description": "Paso fallido:\nPaso 5: Contraseña: ¿Olvidó su contraseña?\n\nQué pasó:\nLa navegación o acción esperada no completó dentro del tiempo límite.\n\nResultado esperado:\nLa aplicación carga su pantalla inicial\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "b66ddc83-8259-40ed-adea-dfd5d0e1298c",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Login",
+        "title": "[Media] No se encontró \"Contraseña: ¿Olvidó su contraseña?\" (paso 5) — Login",
+        "technicalContext": {
+          "reasonCode": "loading_timeout",
+          "discoveryStatus": "exploration_failed",
+          "failedAtStep": 5,
+          "failedTarget": "Contraseña: ¿Olvidó su contraseña?",
+          "expectedResult": "La aplicación carga su pantalla inicial",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-03T17-11-18-844Z\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-03T17-11-18-844Z\\evidence\\step-4-snapshot.json",
+          "lastSuccessfulStep": {
+            "stepIndex": 4,
+            "action": "Ingresar \"olivam\" en \"Usuario:\"",
+            "target": "Usuario",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-03T17-11-18-844Z\\evidence\\step-4-snapshot.json"
+          }
+        },
+        "createdAt": "2026-10-03T17:14:00.553Z",
+        "updatedAt": "2026-10-03T17:14:00.553Z"
+      }
+    ],
+    "createdAt": "2026-10-03T17:11:15.700Z",
+    "updatedAt": "2026-10-03T17:14:00.553Z"
+  },
+  {
+    "id": "1791064337949-1fcjgg2",
+    "issueKey": "REC-E4AB3829",
+    "urlSlug": "REC-E4AB3829",
+    "defects": [
+      {
+        "id": "1791064698049-60ob8p6",
+        "description": "Paso fallido:\nPaso 7: click aquí para descargar\n\nQué pasó:\nLa navegación o acción esperada no completó dentro del tiempo límite.\n\nResultado esperado:\nLa aplicación carga su pantalla inicial\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "fe031612-c0b0-492d-ad6d-52c52b86845c",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Descargar plantilla para carga de nómina",
+        "title": "[Media] No se encontró \"click aquí para descargar\" (paso 7) — Descargar plantilla para carga de nómina",
+        "technicalContext": {
+          "reasonCode": "loading_timeout",
+          "discoveryStatus": "exploration_failed",
+          "failedAtStep": 7,
+          "failedTarget": "click aquí para descargar",
+          "expectedResult": "La aplicación carga su pantalla inicial",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-03T21-52-22-824Z\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-03T21-52-22-824Z\\evidence\\step-6-snapshot.json",
+          "lastSuccessfulStep": {
+            "stepIndex": 6,
+            "action": "Presionar \"Gestión de Nóminas\"",
+            "target": "Gestión de Nóminas",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-03T21-52-22-824Z\\evidence\\step-6-snapshot.json"
+          }
+        },
+        "createdAt": "2026-10-03T21:58:18.049Z",
+        "updatedAt": "2026-10-03T21:58:18.049Z"
+      },
+      {
+        "id": "1791064698065-pxwwuj7",
+        "description": "Resultado esperado:\nLa aplicación carga su pantalla inicial\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "fe031612-c0b0-492d-ad6d-52c52b86845c",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-002",
+        "scenarioTitle": "Login satisfactorio",
+        "title": "[Media] No se cumplió: La aplicación carga su pantalla inicial — Login satisfactorio",
+        "technicalContext": {
+          "discoveryStatus": "discovered_passed",
+          "expectedResult": "La aplicación carga su pantalla inicial",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-10-03T21-55-39-261Z\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-10-03T21-55-39-261Z\\evidence\\step-5-snapshot.json",
+          "lastSuccessfulStep": {
+            "stepIndex": 5,
+            "action": "Presionar \"Enter\" en \"Contraseña*\"",
+            "target": "Contraseña*",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-10-03T21-55-39-261Z\\evidence\\step-5-snapshot.json"
+          }
+        },
+        "createdAt": "2026-10-03T21:58:18.065Z",
+        "updatedAt": "2026-10-03T21:58:18.065Z"
+      }
+    ],
+    "createdAt": "2026-10-03T21:52:17.949Z",
+    "updatedAt": "2026-10-03T21:58:18.065Z"
+  },
+  {
+    "id": "1791154492503-7f3iml3",
+    "issueKey": "REC-C3F7F885",
+    "urlSlug": "REC-C3F7F885",
+    "defects": [],
+    "createdAt": "2026-10-04T22:54:52.503Z",
+    "updatedAt": "2026-10-04T22:54:52.503Z"
+  },
+  {
+    "id": "1791202593331-6lxlx6f",
+    "issueKey": "REC-3CD40992",
+    "urlSlug": "REC-3CD40992",
+    "defects": [],
+    "createdAt": "2026-10-05T12:16:33.331Z",
+    "updatedAt": "2026-10-05T12:16:33.331Z"
   }
 ]

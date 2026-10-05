@@ -34,6 +34,9 @@ export async function generateConsolidatedEvidencePdf(
   templatePath: string,
   outputPath: string,
 ): Promise<PdfResult> {
+  if (scenarios.length === 0) {
+    return { success: false, error: "evidence_scenarios_empty" };
+  }
   if (!fs.existsSync(templatePath)) {
     return { success: false, error: "evidence_template_not_found" };
   }

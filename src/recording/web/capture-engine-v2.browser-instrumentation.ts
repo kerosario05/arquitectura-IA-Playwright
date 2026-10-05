@@ -139,6 +139,57 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
     return Boolean(el.getAttribute && el.getAttribute("role"));
   }
 
+  // A custom on-screen keyboard is recognized by its actual, visible set of character
+  // buttons. The signature is structural (button count + distinct one-character names),
+  // never a project name or a hard-coded keypad selector.
+  function virtualKeyboardEvidenceFor(keyElement) {
+    if (!keyElement) return undefined;
+    var node = keyElement;
+    var numericKeypadFallback;
+    for (var depth = 0; node && depth < 12; depth++, node = node.parentElement) {
+      var buttons = Array.prototype.slice.call(node.querySelectorAll('button,[role="button"],input[type="button"],input[type="submit"]'))
+        .filter(function (candidate) { return isVisible(candidate) && !(candidate.disabled === true); });
+      var keys = [];
+      buttons.forEach(function (button) {
+        var label = ((button.getAttribute && (button.getAttribute("aria-label") || button.getAttribute("value"))) || button.innerText || button.textContent || "").trim();
+        if (Array.from(label).length === 1 && !/\s/.test(label)) keys.push(label);
+      });
+      var keyLabels = Array.from(new Set(keys)).sort();
+      if (buttons.length < 10 || keyLabels.length < 10) continue;
+      var pressedLabel = ((keyElement.getAttribute && (keyElement.getAttribute("aria-label") || keyElement.getAttribute("value"))) || keyElement.innerText || keyElement.textContent || "").trim();
+      if (Array.from(pressedLabel).length !== 1 || /\s/.test(pressedLabel) || keyLabels.indexOf(pressedLabel) < 0) continue;
+      var fieldLabel;
+      var labelRoot = node.parentElement;
+      for (var labelDepth = 0; labelRoot && labelDepth < 5 && !fieldLabel; labelDepth++, labelRoot = labelRoot.parentElement) {
+        var headings = Array.prototype.slice.call(labelRoot.querySelectorAll('h1,h2,h3,h4,h5,h6,[role="heading"],label'))
+          .filter(function (candidate) { return !node.contains(candidate) && isVisible(candidate); })
+          .map(function (candidate) { return (candidate.innerText || candidate.textContent || "").trim(); })
+          .filter(function (text) { return text.length > 1 && text.length <= 60 && !/\d/.test(text); });
+        if (headings.length === 1) fieldLabel = headings[0];
+      }
+      var scopeIdentity;
+      if (node.id) scopeIdentity = { strategy: "id", value: node.id };
+      else {
+        var testId = node.getAttribute && node.getAttribute("data-testid");
+        if (testId) scopeIdentity = { strategy: "data-testid", value: testId };
+      }
+      var evidence = {
+        kind: "virtual_keyboard",
+        ...(scopeIdentity ? { scopeIdentity: scopeIdentity } : {}),
+        captureMatchCount: 1,
+        runtimeResolutionRequired: true,
+        keyLabels: keyLabels,
+        buttonCount: buttons.length,
+        ...(fieldLabel ? { fieldLabel: fieldLabel } : {}),
+      };
+      // Prefer the full alphabetic keyboard over one of its 10-key rows. A standalone
+      // numeric keypad remains supported when it is itself a compact group.
+      if (keyLabels.length >= 20) return evidence;
+      if (buttons.length <= 12) numericKeypadFallback = evidence;
+    }
+    return numericKeypadFallback;
+  }
+
   var classifyActionability = ${ACTIONABILITY_CONTRACT_SOURCE};
   var classifyNativeRoleIdentity = ${CLASSIFY_NATIVE_ROLE_IDENTITY_SOURCE};
 
@@ -1133,6 +1184,10 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
           });
         }
       } catch (e) { /* unsupported/transient DOM relation never certifies a selection */ }
+      try {
+        var virtualKeyboard = virtualKeyboardEvidenceFor(originalTarget);
+        if (virtualKeyboard) candidates.forEach(function (candidate) { candidate.playwrightRecorderEvidence = virtualKeyboard; });
+      } catch (e) { /* transient DOM never upgrades an ordinary click */ }
     }
     return candidates;
   }

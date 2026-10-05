@@ -737,16 +737,22 @@ export async function verifyPromotedSpec(
     if (options.appContext) {
       console.log(`[promoted-runtime-config] reuseAppContext appSlug=${options.appContext.appSlug} appSlugResolved=${execEnv.APP_SLUG} appProfileResolved=${execEnv.APP_PROFILE} baseUrlResolved=${execEnv.APP_BASE_URL ?? "none"}`);
     }
+    // Deterministic discovery specs declare a larger per-test budget based on their step count
+    // (`test.setTimeout(Math.max(test.info().timeout, N))`). The external process watchdog must
+    // honor that same budget; otherwise it can kill a healthy generated spec while Playwright is
+    // still within its own allowed timeout. Specs without this generated declaration continue to
+    // use the configured Playwright timeout.
+    const declaredTestBudgetMs = await readDeclaredPromotedSpecTestBudgetMs(specPath);
+    const effectiveTestBudgetMs = Math.max(timeoutMs, declaredTestBudgetMs ?? timeoutMs);
+    const processTimeoutMs = effectiveTestBudgetMs + CANDIDATE_NAVIGATION_HEADROOM_MS;
+    console.log(
+      `[promote-plan] verification budget testMs=${effectiveTestBudgetMs} processMs=${processTimeoutMs} `
+      + `source=${declaredTestBudgetMs === undefined ? "configured_timeout" : "generated_spec"}`
+    );
     const { stdout, stderr } = await execAsync(cmd, {
-      // FIRST_LOSS fix (jobId 243c3a7e-19e5-4b50-9eb6-120d3cfa1486): `timeoutMs` here is
-      // Playwright's own PER-TEST `--timeout`, never the total process budget -- startup,
-      // evidence capture, and teardown add real overhead on top of it (physically observed: a
-      // spec that itself completed and printed "1 passed" still took 2.1m wall-clock, exceeding
-      // the previous hardcoded `+30000` external watchdog and getting killed mid-teardown).
-      // Reuses the SAME lifecycle-headroom authority spec-generation-hybrid.ts's own functional
-      // execution already documents for this exact class of overhead
-      // (CANDIDATE_NAVIGATION_HEADROOM_MS) instead of a second arbitrary number.
-      timeout: timeoutMs + CANDIDATE_NAVIGATION_HEADROOM_MS,
+      // `processTimeoutMs` is the test's declared budget plus lifecycle headroom, not a fixed
+      // watchdog derived only from the CLI default. Generated long specs override that default.
+      timeout: processTimeoutMs,
       cwd: process.cwd(),
       env: execEnv,
       onLine: options.onOutput
@@ -795,6 +801,25 @@ export async function verifyPromotedSpec(
       tracePath: traceMatch ? traceMatch[1] : undefined,
       screenshotPath: screenshotMatch ? screenshotMatch[1] : undefined
     };
+  }
+}
+
+async function readDeclaredPromotedSpecTestBudgetMs(specPath: string): Promise<number | undefined> {
+  try {
+    const source = await fs.readFile(specPath, "utf-8");
+    const declaration = /test\.setTimeout\(\s*Math\.max\(\s*test\.info\(\)\.timeout\s*,\s*(\d+)\s*\)\s*\)/g;
+    let largestBudget: number | undefined;
+    for (const match of source.matchAll(declaration)) {
+      const budget = Number(match[1]);
+      if (Number.isSafeInteger(budget) && budget > 0) {
+        largestBudget = Math.max(largestBudget ?? 0, budget);
+      }
+    }
+    return largestBudget;
+  } catch {
+    // Keep verification usable for virtual/injected specs; the configured timeout remains the
+    // conservative fallback if the source file is unavailable for inspection.
+    return undefined;
   }
 }
 

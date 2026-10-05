@@ -92,7 +92,7 @@ export type SemanticRuntimeEvidence = {
  * certificate. Runtime must revalidate uniqueness before using it.
  */
 export type PlaywrightRecorderEvidence = {
-  kind: "role" | "text" | "label" | "placeholder" | "testid" | "segmented_input";
+  kind: "role" | "text" | "label" | "placeholder" | "testid" | "segmented_input" | "virtual_keyboard";
   role?: string;
   normalizedName?: string;
   targetTag?: string;
@@ -100,6 +100,10 @@ export type PlaywrightRecorderEvidence = {
   captureMatchCount?: number;
   runtimeResolutionRequired: true;
   segmentCount?: number;
+  /** Captured shape of a custom on-screen keyboard; carries no typed field value. */
+  keyLabels?: string[];
+  buttonCount?: number;
+  fieldLabel?: string;
   inputMode?: string;
   valueKey?: string;
   nativeSelection?: import("./native-selection-capture").NativeSelectionCapture;

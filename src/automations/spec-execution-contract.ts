@@ -944,9 +944,10 @@ function findCompatiblePlanStep(
 /**
  * Recording/Discovery can expose one human fill per character for a segmented input even though
  * the validated plan already represents that input as one valueKey-bound action. Collapse only
- * when all of the recorder's declared segments map to the same unique plan action and each source
- * action contributes one character. This keeps the runtime contract aligned with the action that
- * Discovery actually executed and does not merge ordinary repeated field fills.
+ * when the recorder marks adjacent per-character actions with the same segmented-input scope and
+ * each source action contributes one character. A later OTP prompt may not have its own matching
+ * plan action for every character, so the first segment's unique plan binding supplies the runtime
+ * value while recorder evidence establishes group membership.
  */
 function collapseSegmentedScenarioFills(
   scenarioSteps: readonly ScenarioStepLike[],
@@ -983,8 +984,7 @@ function collapseSegmentedScenarioFills(
         : undefined;
       const candidateEvidence = candidate.playwrightRecorderEvidence ?? candidatePlanStep?.playwrightRecorderEvidence;
       const recordedValue = extractQuotedText(candidate.action);
-      const sameRecordedGroup = candidatePlanStep?.index === planStep.index
-        && candidateEvidence?.kind === "segmented_input"
+      const sameRecordedGroup = candidateEvidence?.kind === "segmented_input"
         && candidateEvidence.segmentCount === segmentCount
         && JSON.stringify(candidateEvidence.scopeIdentity) === JSON.stringify(evidence.scopeIdentity)
         && typeof recordedValue === "string"
@@ -1217,7 +1217,41 @@ export function buildSpecExecutionContract(
 
     let required = scenarioStep.conditionalAction ? false : true;
     let executionStatus: SpecExecutionContractStep["executionStatus"] = "executed";
-    if (scenarioStep.conditionalAction) {
+    const nextScenarioStep = sourceScenario?.steps?.find((candidate) => candidate.index === scenarioStep.index + 1);
+    const nextOperation = nextScenarioStep
+      ? classifyScenarioAction(nextScenarioStep.action, nextScenarioStep.canonicalAssertion, nextScenarioStep.conditionalAction)
+      : undefined;
+    const nextNativeSelection = nextScenarioStep?.playwrightRecorderEvidence?.nativeSelection;
+    const nextSelectableOptions = nextNativeSelection?.options
+      .filter((option) => option.value.trim().length > 0 && option.disabled !== true) ?? [];
+    const nextSelectionHasPositionAuthority = nextNativeSelection?.selectionMode === "index"
+      && Number.isInteger(nextNativeSelection.selectedOptionIndex)
+      && nextNativeSelection.selectedOptionIndex! >= 0
+      && nextNativeSelection.selectedOptionIndex! < nextSelectableOptions.length
+      && nextNativeSelection.clickedOption?.value === nextSelectableOptions[nextNativeSelection.selectedOptionIndex!]?.value
+      && nextNativeSelection.selectedValue === nextNativeSelection.clickedOption.value;
+    const clickHasRecordedOwner = Boolean(
+      scenarioStep.technicalTargetRef?.trim()
+      || scenarioStep.technicalTargetRefs?.some((ref) => ref.trim())
+      || scenarioStep.playwrightRecorderEvidence
+      || scenarioStep.semanticRuntimeEvidence,
+    );
+    const activationDelegatedToIndexedSelection = operation === "click"
+      && nextOperation === "select"
+      && nextSelectionHasPositionAuthority
+      && !clickHasRecordedOwner
+      && typeof planStep?.target === "object"
+      && typeof planStep.target.strategy === "string"
+      && planStep.target.strategy.startsWith("recorded:");
+    if (activationDelegatedToIndexedSelection) {
+      // The preceding click has no recording-owned target identity and Discovery only retained a
+      // weak runtime locator for it. The immediately following native selection carries a unique
+      // recorded control and index, and its shared resolver owns opening hidden/custom controls.
+      // Delegate this activation to that selection instead of promoting the weak transient click.
+      required = false;
+      executionStatus = "skipped";
+      console.log(`[execution-contract-step] scenarioStepIndex=${scenarioStep.index} activationDelegated=true reason=next_indexed_native_selection`);
+    } else if (scenarioStep.conditionalAction) {
       executionStatus = "skipped";
     } else if (planStep?.optional) {
       executionStatus = "skipped";

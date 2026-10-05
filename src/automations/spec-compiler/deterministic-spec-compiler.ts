@@ -548,6 +548,10 @@ function compileFillStep(
   if (step.valueKey) {
     lines.push(`      valueKey: '${escapeString(step.valueKey)}',`);
   }
+  // Repeated entity rows share the same fields; the recorded entity scopes row-bound resolution.
+  if (step.entityScope) {
+    lines.push(`      entityScope: '${escapeString(step.entityScope)}',`);
+  }
   if (usesRefLocator) {
     // Recorded stable direct-attribute refs (css:#id / id:x / data-testid:x) captured alongside a
     // weak role+name primary ref are transported too, so the promoted runtime can resolve the
@@ -685,6 +689,9 @@ function hasUniqueControlLineage(step: SpecExecutionContractStep, allSteps: read
   return isUniqueLineage(interactions, step.controlIdentity, step.recordingActionType);
 }
 
+const TEST_BUDGET_BASE_MS = 60000;
+const TEST_BUDGET_PER_STEP_MS = 8000;
+
 function compileClickStep(
   step: SpecExecutionContractStep,
   allSteps: readonly SpecExecutionContractStep[],
@@ -766,6 +773,29 @@ function compileClickStep(
   // Carry that field only as runtime causal context; it does not replace the option identity.
   if (selectionLike && step.selectionActivationField) {
     lines.push(`      selectionActivationField: '${escapeString(step.selectionActivationField)}',`);
+  }
+  // A recorded check/uncheck is a desired STATE, not a toggle: a recording often carries both the
+  // physical click and the recorder's derived `check` for the same control, so replaying both as
+  // clicks flips the control back. The runtime skips the click when already in the desired state.
+  // Repeated entity rows share the same fields; transport the recorded entity so the runtime can
+  // scope row-bound resolution (never positional).
+  if (step.entityScope) {
+    lines.push(`      entityScope: '${escapeString(step.entityScope)}',`);
+  }
+  // The sibling click recorded for that same physical toggle (adjacent step, identical certified
+  // locator) inherits the state instead of toggling again.
+  const checkLocator = (candidate: SpecExecutionContractStep): string | undefined =>
+    candidate.certifiedTechnicalTarget?.locatorCandidates?.[0]?.value;
+  const stepPosition = allSteps.indexOf(step);
+  const checkOwner = step.recordingActionType === "check" || step.recordingActionType === "uncheck"
+    ? step
+    : [allSteps[stepPosition - 1], allSteps[stepPosition + 1]].find((neighbor) =>
+      neighbor !== undefined
+      && (neighbor.recordingActionType === "check" || neighbor.recordingActionType === "uncheck")
+      && checkLocator(step) !== undefined
+      && checkLocator(neighbor) === checkLocator(step));
+  if (checkOwner) {
+    lines.push(`      checkState: '${checkOwner.recordingActionType === "check" ? "checked" : "unchecked"}',`);
   }
   // LAST-RESORT, EXECUTION-ONLY: emitted as STRUCTURED DATA (never a getByText/text=/nth/first/
   // last/coordinate selector) -- the shared runtime resolver re-proves uniqueness live, this
@@ -894,12 +924,12 @@ function compileSelectStep(
   if (selectionField) lines.push(`      selectionField: '${escapeString(selectionField)}',`);
   if (associatedField) lines.push(`      associatedField: '${escapeString(associatedField)}',`);
   if (usesRefLocator) lines.push(`      technicalTargetRefs: ['${escapeString(targetRef)}'],`);
-  if (isRuntimeDeferred && step.playwrightRecorderEvidence) {
+  if ((isRuntimeDeferred || nativeSelection) && step.playwrightRecorderEvidence) {
     lines.push(`      playwrightRecorderEvidence: ${JSON.stringify(step.playwrightRecorderEvidence)},`);
   }
   lines.push(`      actionIntent: 'select',`);
   lines.push(`      expectedEffect: 'selection_state_change',`);
-  lines.push(selectionValueExpr
+  lines.push(selectionValueExpr && nativeSelection?.selectionMode !== "index"
     ? `      action: async () => { await page.getByRole('option', { name: ${selectionValueExpr}, exact: true }).click(); }`
     : `      action: async () => { throw new Error('Recorded indexed selection requires runtime resolution'); }`);
   lines.push(`    });`);
@@ -1053,6 +1083,10 @@ export function compileDeterministicSpec(contract: SpecExecutionContract, compil
   lines.push(...buildPomClassSource());
   lines.push(``);
   lines.push(`test('${escapeString(contract.title)}', async ({ page }) => {`);
+  // The outer test budget must grow with the number of business steps: a fixed config timeout sized
+  // for a short flow kills a long, healthy scenario (cold launch headroom + per-step work). Never
+  // lowers a larger budget the config already grants.
+  lines.push(`  test.setTimeout(Math.max(test.info().timeout, ${TEST_BUDGET_BASE_MS + TEST_BUDGET_PER_STEP_MS * contract.steps.length}));`);
   if (contract.appSlug) {
     // Enables the EXISTING promoted-runtime persisted-contract lookup
     // (promoted-field-target-contract.ts's resolvePromotedFieldIdentityFromPersistedContract,

@@ -77,6 +77,8 @@ export type PostActionSynchronizationInput = {
    * signal that can no longer observe the transition.
    */
   selectionApplied?: boolean;
+  /** A browser download event observed while a terminal recorded click was dispatched. */
+  terminalDownloadObserved?: boolean;
   /**
    * A causal, same-surface structured-state mutation: exactly one redacted state candidate that
    * existed before the action changed a functional property (text/ARIA value/state) after it. This
@@ -101,7 +103,7 @@ export type PostActionSynchronizationInput = {
 
 export type PostActionSynchronizationResult = {
   completed: boolean;
-  signal?: "application_error" | "network_response" | "auth_gate_changed" | "next_target_visible" | "next_target_resolver_ready" | "dom_navigation_mutation" | "dom_validation_mutation" | "target_selection_state_changed" | "structured_state_mutation" | "click_effect_next_target_visible" | "owner_subtree_mutation" | "terminal_feedback";
+  signal?: "application_error" | "network_response" | "auth_gate_changed" | "next_target_visible" | "next_target_resolver_ready" | "dom_navigation_mutation" | "dom_validation_mutation" | "target_selection_state_changed" | "structured_state_mutation" | "click_effect_next_target_visible" | "owner_subtree_mutation" | "terminal_feedback" | "download";
 };
 
 /**
@@ -113,6 +115,10 @@ export function resolvePostActionSynchronization(
   input: PostActionSynchronizationInput,
 ): PostActionSynchronizationResult {
   if (input.applicationError) return { completed: true, signal: "application_error" };
+  // A browser-confirmed terminal download is the outcome of the final recorded
+  // action itself. It must not be held behind a recorded page-surface condition
+  // or a spinner that can remain visible after the file has already arrived.
+  if (input.terminalDownloadObserved) return { completed: true, signal: "download" };
   if (input.recordedPostActionSurfaceRequired && !input.recordedPostActionSurfaceReached && input.recordedTerminalActionFeedback) {
     return { completed: true, signal: "terminal_feedback" };
   }

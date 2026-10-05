@@ -2,6 +2,36 @@
 
 ## LATEST (supersedes older CURRENT FRONTIER prose below until re-synced)
 
+### 2026-10-03 -- portal-empresarial PREVIEW-001 "Registro varios clientes" (dataset override
+`.artifacts/tmp/dataset-override/preview-scenarios.json`, row-2 cedula 10400144233)
+Discovery 33/33 passes (one env flake: step 33 Validar disabled once, rerun passed). Promoted
+functional-execution NOT yet green: promotionAllowed=false specsPromoted=0.
+PHYSICAL GREEN in promoted runtime (job preview-2026-10-03T13-37..): steps 1-24.
+Fixes (all CORE/multiproject, each physically driven by Codex): materializer drops ephemeral
+framework ids + generic-only Tier1 attrs; bare `role:x` refs no longer shadow associatedField
+recovery (target-resolver.ts); recorded check/uncheck -> `checkState` (compiler + runtime skip when
+already in state); virtualCaseToTestScenario disambiguates repeated step text by occurrence order
+and field match by authored verb; `entityScope` transported scenario->contract->compiler->runtime
+(click + fill); row-checkbox ambiguity resolved by state; compiled spec `test.setTimeout` scales with
+step count; synthetic TS validation knows `test.info()`; child telemetry allowlist extended.
+CURRENT FIRST-LOSS (last proven): step 25 fill Colaborador row 2 -> grid resolver returned the cell
+display button; fix applied (activate cell + re-resolve, only when no earlier fillable candidate)
+but NOT yet physically confirmed (run was stopped by the user).
+NEXT ACTION: rerun `scripts/codex-qa-verify.ps1` with `.artifacts/tmp/prompt-final5.txt`
+(+ note on gating) and read validation.json; continue from the first failing promoted step.
+Evidence capture redesign (this session; unit-tested with real chromium, NOT physically validated):
+policy = ONE image per SCREEN. `EvidenceRecorder.captureStep` no longer saves an image per step: steps
+accumulate in `pendingGroup`; when `readScreenSignature` (route + visible headings/dialogs) changes,
+the group is committed with the image of the screen BEFORE the changing action (all fields filled).
+A failed step commits its failure state. `finish(page)` -> `finalizeScreens`: remaining group gets the
+settled final screen; if the last action changed the screen, a closing entry "Pantalla resultante tras
+el ultimo paso" (final-state.png) is appended. Every capture first runs `waitForVisualSettle`
+(`src/evidence/screen-settle.ts`: no aria-busy/progressbar/infinite animation + DOM quiet, bounded).
+Promoted runtime `finishEvidence` and discovery (`discovery-evidence.ts`) both call `finish(page)`.
+Env: EVIDENCE_SETTLE_TIMEOUT_MS (8000), EVIDENCE_SETTLE_QUIET_MS (300). Tests:
+`screen-settle.test.ts`, `evidence-recorder.per-screen.test.ts`. DOCX still skips same-path images
+(only the first step text of a group is shown).
+
 field-scoped-live-discovery.ts fix: `isOwnerActionable`/`isOwnerCandidate` now recognize a
 role-less div via `cursor:pointer` + real click-provenance (onclick/tabIndex/id/testid), same
 discipline as `frameworkActionable`. Code/tests GREEN (3 new focal tests +

@@ -18,6 +18,10 @@ import type { VerifyPromotedSpecOptions } from "../../automations/promote-plan";
  */
 
 const ROOT = path.resolve(__dirname, "..", "..", "..");
+const STEP_SCREENSHOTS = [
+  Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAIAAAABCAIAAAB7QOjdAAAAEElEQVR4nGNgYGD4z8DAAAAGAAH0Lzn3AAAAAElFTkSuQmCC", "base64"),
+  Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAIAAAAW4yFwAAAAEElEQVR4nGNgYGBgYGAAAAAKAAEY+nm0AAAAAElFTkSuQmCC", "base64"),
+];
 
 function scenario(overrides: Partial<ReuseExistingPromotedSpecScenario> = {}): ReuseExistingPromotedSpecScenario {
   return { scenarioId: "REC-EVID-01", caseId: 1, specPath: "some/case.spec.ts", title: "Tarjeta", ...overrides };
@@ -80,11 +84,25 @@ test("3. consolidation runs for real, keyed on the CURRENT reuse jobId, and a ge
     // Plant a scenario evidence.json exactly where promoted-spec-runtime.ts would have written
     // it had it received EVIDENCE_RUN_ID=job.id — simulating runtime evidence capture without
     // spawning a real browser, so consolidation has something real to aggregate.
-    const scenarioEvidenceDir = path.join(ROOT, ".artifacts", "evidence", appSlug, "default-section", "runs", job.id, "scenarios", "REC-EVID-01");
+    const scenarioEvidenceDir = path.join(ROOT, ".artifacts", "evidence", appSlug, "source-section", "runs", job.id, "scenarios", "REC-EVID-01");
     fs.mkdirSync(scenarioEvidenceDir, { recursive: true });
+    const screenshotPaths = ["step-one.png", "step-two.png"].map(name => path.join(scenarioEvidenceDir, "screenshots", name));
+    fs.mkdirSync(path.dirname(screenshotPaths[0]), { recursive: true });
+    screenshotPaths.forEach((screenshotPath, index) => fs.writeFileSync(screenshotPath, STEP_SCREENSHOTS[index]));
     fs.writeFileSync(
       path.join(scenarioEvidenceDir, "evidence.json"),
-      JSON.stringify({ scenarioId: "REC-EVID-01", status: "Exitoso", steps: [] }),
+      JSON.stringify({
+        scenarioId: "REC-EVID-01",
+        status: "Exitoso",
+        steps: screenshotPaths.map((screenshotPath, index) => ({
+          index: index + 1,
+          stepIndex: index + 1,
+          stepText: `Paso ${index + 1}`,
+          status: "passed",
+          screenshotPath,
+          timestamp: new Date().toISOString(),
+        })),
+      }),
       "utf-8",
     );
 
@@ -96,6 +114,13 @@ test("3. consolidation runs for real, keyed on the CURRENT reuse jobId, and a ge
     assert.ok(fs.existsSync(docxPath), `evidencia.docx must actually exist on disk at ${docxPath}`);
     const runJsonPath = path.join(ROOT, ".artifacts", "evidence", appSlug, "default-section", "runs", job.id, "evidence-run.json");
     assert.ok(fs.existsSync(runJsonPath), "evidence-run.json must exist for this reuse job's own runId");
+    const consolidated = JSON.parse(fs.readFileSync(runJsonPath, "utf-8"));
+    assert.equal(consolidated.totalScenarios, 1, "evidence from a different section slug must be included for the same app and job");
+    assert.deepEqual(
+      consolidated.scenarios[0].steps.map((step: { screenshotPath?: string }) => step.screenshotPath),
+      screenshotPaths,
+      "per-step screenshot references must survive cross-section consolidation",
+    );
 
     const finishedLog = finalJob.logs.find((l) => l.includes("[reuse-existing] finished"));
     assert.ok(finishedLog?.includes("evidenceRunConsolidated=true"));
@@ -104,13 +129,17 @@ test("3. consolidation runs for real, keyed on the CURRENT reuse jobId, and a ge
   }
 });
 
-test("4. no runtime evidence captured (nothing planted) -> consolidation runs but never fabricates a document", async () => {
+test("4. no runtime evidence captured (nothing planted) -> no empty run manifest or report is generated", async () => {
   const appSlug = "hermetic-evidence-app-4";
   const job = jobStore.create("scenario-preview", { appSlug, scenarios: [scenario()], executionMode: "reuse_existing_promoted_spec" });
   try {
     await startReuseExistingPromotedSpecRun(job.id, fakeVerify({}, []));
     const finalJob = jobStore.get(job.id)!;
     assert.equal(finalJob.summary?.evidenceDir, undefined, "no evidence.json existed, so no document was actually generated — evidenceDir must stay unset");
+    const runDir = path.join(ROOT, ".artifacts", "evidence", appSlug, "default-section", "runs", job.id);
+    assert.equal(fs.existsSync(path.join(runDir, "evidence-run.json")), false, "no empty run manifest should be written");
+    assert.equal(fs.existsSync(path.join(runDir, "evidencia.docx")), false, "no blank DOCX should be written");
+    assert.equal(fs.existsSync(path.join(runDir, "evidencia.pdf")), false, "no blank PDF should be written");
   } finally {
     cleanupEvidence(appSlug);
   }

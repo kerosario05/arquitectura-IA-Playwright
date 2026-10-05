@@ -104,6 +104,8 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
     let sectionSlug: string | undefined;
     let sectionName: string | undefined;
     let publishToTestRailInvoked = false;
+    const recordingAppSlugs = new Map<string, string>();
+    const executableScenarioIdsByRecording = new Map<string, Set<string>>();
 
     const lookupCase: TestRailCaseLookup = async (caseId) => {
       try {
@@ -121,6 +123,7 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
       // A batch can mix scenarios recorded under different apps; projectSlug only picks one
       // default appSlug. Fall back to this recording's own owning app before failing it.
       const groupAppSlug = loadTrace(appSlug, recordingId) ? appSlug : findOwningAppSlug(recordingId) ?? appSlug;
+      recordingAppSlugs.set(recordingId, groupAppSlug);
       const trace = loadTrace(groupAppSlug, recordingId);
       if (!trace || !["stopped", "derived"].includes(trace.status)) {
         sendError(res, 409, "TRACE_NOT_READY", `La grabación ${recordingId} no tiene un trace detenido`);
@@ -165,9 +168,11 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
         return;
       }
       const { materialized, executableContracts } = admissionResult;
-      requestedIds.push(...executableContracts
+      const executableIds = executableContracts
         .map((scenario) => scenario.scenarioId)
-        .filter((scenarioId): scenarioId is string => typeof scenarioId === "string"));
+        .filter((scenarioId): scenarioId is string => typeof scenarioId === "string");
+      requestedIds.push(...executableIds);
+      executableScenarioIdsByRecording.set(recordingId, new Set(executableIds));
       const materializedById = new Map(materialized.map((scenario) => [scenario.scenarioId, scenario]));
       saveScenarios(groupAppSlug, recordingId, all.map((scenario) => materializedById.get(scenario.scenarioId) ?? scenario));
 
@@ -235,10 +240,19 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
       return;
     }
 
+    const recordingSelections = [...groups.keys()].flatMap((recordingId) => {
+      const selectedScenarioIds = executableScenarioIdsByRecording.get(recordingId) ?? new Set<string>();
+      const executableScenarioIds = [...selectedScenarioIds];
+      const ownerAppSlug = recordingAppSlugs.get(recordingId);
+      return ownerAppSlug && executableScenarioIds.length > 0
+        ? [{ appSlug: ownerAppSlug, recordingId, scenarioIds: executableScenarioIds }]
+        : [];
+    });
     const parent = jobStore.create("scenario-preview", {
       appSlug,
       scenarioIds: requestedIds,
       recordingIds: Array.from(groups.keys()),
+      recordingSelections,
       executionMode: "recording_batch",
       publishToTestRailInvoked,
     });
@@ -257,9 +271,9 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
     } else if (reuseScenarios.length > 0) {
       const publicParent = jobStore.getInternal(parent.id);
       if (publicParent) {
-        publicParent.params.executionMode = "reuse_existing_promoted_spec";
         publicParent.params.scenarios = reuseScenarios;
         publicParent.params.sectionSlug = sectionSlug;
+        publicParent.params.recordingSelections = recordingSelections;
       }
       setImmediate(() => void startReuseExistingPromotedSpecRun(parent.id));
     } else {
@@ -645,7 +659,10 @@ recordingsRouter.get("/:recordingId/scenarios", async (req, res) => {
     }
     const appSlug = await appSlugFor(projectSlug);
     const trace = loadTrace(appSlug, req.params.recordingId);
-    const scenarios = readRecordingScenarios(appSlug, req.params.recordingId);
+    const semanticModel = trace ? buildSemanticRecordingModel(trace) : undefined;
+    const scenarios = readRecordingScenarios(appSlug, req.params.recordingId).map((scenario) =>
+      semanticModel ? hydrateCanonicalInteractionsFromSemanticModel(scenario, semanticModel) : scenario,
+    );
     res.json({
       ok: true,
       scenarios,
@@ -985,7 +1002,14 @@ recordingsRouter.post("/:recordingId/execute", async (req, res) => {
           // DOES already carry runtimeDataset.resolvedValues ("Datos de este escenario") -- but
           // never copied it through. A SEPARATE construction site from rerun-runner.ts's
           // resolvePromotedSpecReuse (already fixed); this route bypasses that file entirely.
-          return { scenarioId: scenario.scenarioId, caseId, specPath: scenario.promotedSpec!.specPath, title: scenario.title, runtimeValues: scenario.runtimeDataset?.resolvedValues };
+          return {
+            scenarioId: scenario.scenarioId,
+            caseId,
+            specPath: scenario.promotedSpec!.specPath,
+            title: scenario.title,
+            steps: scenario.testRailSteps.map((step) => step.content),
+            runtimeValues: scenario.runtimeDataset?.resolvedValues,
+          };
         });
         fastPathResults = reuseJobScenarios.map((s) => ({ scenarioId: s.scenarioId, caseId: s.caseId, specPath: s.specPath, status: "skipped" as const }));
         const reuseJob = jobStore.create("scenario-preview", {

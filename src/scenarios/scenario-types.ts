@@ -157,6 +157,8 @@ export type RecordingExecutionAction = {
   playwrightRecorderEvidence?: import("../recording/structural-owner-identity").PlaywrightRecorderEvidence;
   valueKey?: string;
   value?: string;
+  /** 1-based character position for one executable press from a shared custom-keyboard value. */
+  segmentPosition?: number;
   valueRole?: "action_input" | "secure_input" | "runtime_derived_oracle";
   runtimeValueSource?: "dataset";
   stepIndex?: number;

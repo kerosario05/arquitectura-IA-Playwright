@@ -6,9 +6,21 @@ const router = Router();
 
 // GET /api/executions — list all finished executions (compact), newest first.
 router.get("/api/executions", (req: Request, res: Response) => {
-  const executions = filterByProjectAccess(req.principal, listExecutionSummaries(),
+  const filtered = filterByProjectAccess(req.principal, listExecutionSummaries(),
     (execution) => (execution as { appSlug?: string }).appSlug ?? null);
-  return res.json({ ok: true, total: executions.length, executions });
+  const requestedLimit = Number(req.query.limit);
+  const limit = Number.isFinite(requestedLimit) ? Math.max(1, Math.min(100, Math.floor(requestedLimit))) : 40;
+  const requestedOffset = Number(req.query.offset);
+  const offset = Number.isFinite(requestedOffset) ? Math.max(0, Math.floor(requestedOffset)) : 0;
+  const executions = filtered.slice(offset, offset + limit);
+  return res.json({
+    ok: true,
+    total: filtered.length,
+    limit,
+    offset,
+    hasMore: offset + executions.length < filtered.length,
+    executions,
+  });
 });
 
 // GET /api/executions/:launchId — full summary for one execution (HU, TestRail project/section,

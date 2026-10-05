@@ -83,6 +83,8 @@ export type ExecutionPlanStep = {
   target?: PlanTarget | "APP_BASE_URL";
   value?: string;
   valueKey?: string;
+  /** Character position for one press from a shared custom-keyboard value. */
+  segmentPosition?: number;
   inputIntent?: InputIntent;
   requirementRefs?: string[];
   entityScope?: string;

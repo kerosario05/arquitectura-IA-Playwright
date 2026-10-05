@@ -1,6 +1,7 @@
+import { isSelectionRuleValue, parseSelectionRule } from "../../recording/dynamic-selection-rule";
 import fs from "node:fs";
 import path from "node:path";
-import type { Page, Request } from "@playwright/test";
+import type { Page, Request, Locator } from "@playwright/test";
 import type { AssertionPolarity } from "../../scenarios/canonical-scenario";
 import type { AppRouteProfile } from "../../types/env.types";
 import { capturePageDiagnostics, waitForListReadiness } from "../../browser/promoted-spec-helpers";
@@ -11,7 +12,7 @@ import { EvidenceRecorder } from "../../evidence/evidence-recorder";
 import { loadEvidenceConfig } from "../../evidence/evidence-types";
 import { normalizeSemanticText } from "../semantic-text-normalization";
 import { findSemanticTargetMatch, type SemanticMatchOptions } from "./semantic-target-matcher";
-import { resolveActionTarget, recordedLocatorFactory, resolveRecordedStructuralOwner } from "../../discovery/target-resolver";
+import { resolveActionTarget, resolveFillTarget, recordedLocatorFactory, resolveRecordedStructuralOwner } from "../../discovery/target-resolver";
 import { hasCausalSelectionTransition, type InteractiveState } from "../../discovery/selection-state-verification";
 import type { RecordedLocator, RecordedTechnicalTarget } from "../../recording/session-trace.types";
 import type { PlaywrightRecorderEvidence, SemanticRuntimeEvidence } from "../../recording/structural-owner-identity";
@@ -40,7 +41,7 @@ import {
  * process is provably running a cached/stale copy of this module and must be restarted -- no
  * further code change in this file can fix that from the inside.
  */
-export const PROMOTED_SPEC_RUNTIME_MODULE_VERSION = "2026-09-24T18-boundary-diagnostics-v1";
+export const PROMOTED_SPEC_RUNTIME_MODULE_VERSION = "2026-10-05T12-positive-completion-outcome-v1";
 console.log(
   `[runtime:module-loaded] file=src/automations/runtime/promoted-spec-runtime.ts ` +
   `version=${PROMOTED_SPEC_RUNTIME_MODULE_VERSION} loadedAt=${new Date().toISOString()} pid=${process.pid}`,
@@ -643,6 +644,11 @@ function rowScopeFromEntityScope(entityScope?: string): number | undefined {
   return Number.isFinite(row) && row > 0 ? row : undefined;
 }
 
+function entityScopeFromValueKey(valueKey?: string): string | undefined {
+  const match = valueKey?.match(/^(entity_\d+)\./i);
+  return match?.[1];
+}
+
 async function resolvePromotedSelectionOption(
   page: Page,
   value: string | undefined,
@@ -673,9 +679,42 @@ export type PromotedAssertOptions = {
   description?: string;
   polarity?: AssertionPolarity;
   expectedUrl?: string;
+  requireCompletionSignal?: boolean;
   assertion: () => Promise<void>;
   evidenceDir?: string;
 };
+
+type PromotedOutcomeSignals = { failureMessages: string[]; successMessages: string[] };
+
+export function evaluatePromotedCompletionSignal(input: {
+  expectedUrlMatches: boolean;
+  routeChangedSinceAction: boolean;
+  failureMessages: string[];
+  successMessages: string[];
+}): boolean {
+  if (input.failureMessages.length > 0) return false;
+  return input.expectedUrlMatches && (input.routeChangedSinceAction || input.successMessages.length > 0);
+}
+
+async function readPromotedOutcomeSignals(page: Page): Promise<PromotedOutcomeSignals> {
+  return page.evaluate(() => {
+    const visible = (element: Element) => {
+      const node = element as HTMLElement;
+      const style = window.getComputedStyle(node);
+      const rect = node.getBoundingClientRect();
+      return style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity) !== 0 && rect.width > 0 && rect.height > 0;
+    };
+    const text = (element: Element) => (element.textContent || "").replace(/\s+/g, " ").trim();
+    const failurePattern = /\b(error|failure|failed|fall[oó]|fall[a-záéíóú]*|no podemos procesar|no se pudo|unable to|could not|denied|rechazad[oa])\b|c[oó]digo\s*[:#-]?\s*\d{3,}/i;
+    const successPattern = /\b(transferencia|operaci[oó]n|transacci[oó]n)\b.{0,70}\b(completad[ao]|realizad[ao]|exitosa?|confirmad[ao])\b|\b(completad[ao]|realizad[ao]|exitosa?|confirmad[ao])\b.{0,70}\b(transferencia|operaci[oó]n|transacci[oó]n)\b/i;
+    const failureNodes = Array.from(document.querySelectorAll('[role="dialog"], [role="alertdialog"], [aria-modal="true"], dialog, [class*="modal" i], [class*="dialog" i], [class*="overlay" i], [role="alert"]')).filter(visible);
+    const successNodes = Array.from(document.querySelectorAll('[role="dialog"], [role="alertdialog"], [role="status"], [role="alert"], [aria-live], dialog, h1, h2, h3, [class*="success" i], [data-testid*="success" i]')).filter(visible);
+    return {
+      failureMessages: failureNodes.map(text).filter((value) => value && failurePattern.test(value)),
+      successMessages: successNodes.map(text).filter((value) => value && successPattern.test(value)),
+    };
+  }).catch(() => ({ failureMessages: [], successMessages: [] }));
+}
 
 export function evaluatePromotedAssertionState(
   currentUrl: string,
@@ -2078,6 +2117,10 @@ export type PromotedClickOptions = PromotedActionOptions & {
   associatedField?: string;
   /** Recorded trigger field for a transient option; used only to prove owner→option causality. */
   selectionActivationField?: string;
+  /** Recorded check/uncheck: desired state, so the click is skipped when already in that state. */
+  checkState?: "checked" | "unchecked";
+  /** Recorded entity (repeated row) this click belongs to; fallback when the persisted identity lacks it. */
+  entityScope?: string;
   /**
    * LAST-RESORT, EXECUTION-ONLY authority (see `SemanticRuntimeEvidence`'s own doc). Set only for
    * `runtime_resolution_required` clicks whose owner/structural/related-control evidence all
@@ -2474,6 +2517,7 @@ async function resolveOrdinalSelectionOnPage(
 export class PromotedSpecRuntime {
   private readonly config: PromotedRuntimeConfig;
   private lastDialogMessage?: string;
+  private lastClickOutcome?: { stepIndex: number; previousUrl: string; currentUrl: string };
   private activeContainer?: { selector: string; descriptor: string };
   private activeContainerDiscardReason?: string;
   private lastSelectionStep?: { selectedTarget: string; stepIndex: number; timestamp: number };
@@ -2485,6 +2529,7 @@ export class PromotedSpecRuntime {
   private initialNavigationEnsured = false;
   private initialScreenCapturePromise?: Promise<void>;
   private readonly loginRequests = new Set<Request>();
+  private observedDownloadSequence = 0;
   private readonly authBoundary = {
     loginRequestObserved: false,
     loginPageUrl: undefined as string | undefined,
@@ -2504,6 +2549,10 @@ export class PromotedSpecRuntime {
   constructor(private readonly page: Page, config?: Partial<PromotedRuntimeConfig>) {
     this.config = { ...loadPromotedRuntimeConfigFromEnv(), ...config };
     this.attachAuthBoundaryObserver();
+    this.page.on("download", () => {
+      this.observedDownloadSequence += 1;
+      console.log(`[runtime:download] observed=true sequence=${this.observedDownloadSequence}`);
+    });
     this.page.on("dialog", async (dialog) => {
       this.lastDialogMessage = dialog.message();
       this.activeContainerDiscardReason = "dialog_seen_mark_container_stale";
@@ -2575,6 +2624,195 @@ export class PromotedSpecRuntime {
     if (!onLoginSurface) {
       this.authBoundary.functionalBusinessExecutionStarted = true;
     }
+  }
+
+  /**
+   * Keep a live session when an application presents its explicit expiry-warning dialog.
+   * This is a generic session lifecycle interaction: it requires a uniquely visible modal
+   * containing a recognized expiry warning and one exact, enabled close/dismiss button. It
+   * never searches outside that warning surface and fails closed when the UI is ambiguous.
+   */
+  private async dismissSessionExpiringWarningIfPresent(): Promise<void> {
+    const warningPattern = /a punto de expirar|session.{0,40}(?:about to expire|expiring|time limit)|sess(?:ion)? (?:will|is about to) expire/i;
+    const closePattern = /^(cerrar|close|dismiss)$/i;
+    const warningModal = this.page
+      .locator('[role="dialog"], [role="alertdialog"], dialog, [aria-modal="true"]')
+      .filter({ hasText: warningPattern });
+    const modalCount = await this.boundedRuntimeBoundary(
+      "inspect_session_expiry_warning",
+      this.config.actionTimeoutMs,
+      () => warningModal.count(),
+    );
+    let dismissalSurface: Locator | undefined;
+    if (modalCount > 1) {
+      throw new Error(`session_expiry_warning_ambiguous: expected one warning dialog, found ${modalCount}`);
+    }
+    if (modalCount === 1) {
+      const visible = await this.boundedRuntimeBoundary(
+        "verify_session_expiry_warning_visible",
+        this.config.actionTimeoutMs,
+        () => warningModal.isVisible(),
+      );
+      if (visible) dismissalSurface = warningModal;
+    }
+
+    // Some applications render a warning without ARIA dialog attributes. Check for visible text,
+    // not body.textContent alone: hidden templates often contain stale warning copy and must not
+    // cause this lifecycle guard to fail or click unrelated controls.
+    if (!dismissalSurface) {
+      const visibleWarning = await this.boundedRuntimeBoundary(
+        "inspect_unlabelled_session_expiry_warning",
+        this.config.actionTimeoutMs,
+        () => this.page.locator("body").evaluate((body) => {
+          const warning = /a punto de expirar|session.{0,40}(?:about to expire|expiring|time limit)|sess(?:ion)? (?:will|is about to) expire/i;
+          const visible = (element: Element): boolean => {
+            const style = window.getComputedStyle(element);
+            return style.display !== "none"
+              && style.visibility !== "hidden"
+              && Number(style.opacity) !== 0
+              && element.getClientRects().length > 0;
+          };
+          return Array.from(body.querySelectorAll("*")).some((element) => {
+            if (!visible(element) || !warning.test(element.textContent ?? "")) return false;
+            return !Array.from(element.children).some((child) => visible(child) && warning.test(child.textContent ?? ""));
+          });
+        }),
+      );
+      if (!visibleWarning) return;
+      dismissalSurface = this.page.locator("body");
+    }
+
+    const buttonLocator = dismissalSurface.getByRole("button", { name: closePattern });
+    const linkLocator = dismissalSurface.getByRole("link", { name: closePattern });
+    const buttonCount = await this.boundedRuntimeBoundary(
+      "resolve_session_expiry_warning_button",
+      this.config.actionTimeoutMs,
+      () => buttonLocator.count(),
+    );
+    const linkCount = await this.boundedRuntimeBoundary(
+      "resolve_session_expiry_warning_link",
+      this.config.actionTimeoutMs,
+      () => linkLocator.count(),
+    );
+    let dismissControl: Locator | undefined;
+    if (buttonCount + linkCount === 1) {
+      dismissControl = buttonCount === 1 ? buttonLocator : linkLocator;
+    } else if (buttonCount + linkCount === 0) {
+      // Older pages sometimes render the close control as a plain text anchor/span with no
+      // accessible role. Admit it only when the exact visible text is inside the visible warning.
+      const textControl = dismissalSurface.getByText(closePattern);
+      const textCount = await this.boundedRuntimeBoundary(
+        "resolve_session_expiry_warning_text_control",
+        this.config.actionTimeoutMs,
+        () => textControl.count(),
+      );
+      if (textCount === 1) {
+        const belongsToVisibleWarning = await this.boundedRuntimeBoundary(
+          "verify_session_warning_text_control_ownership",
+          this.config.actionTimeoutMs,
+          () => textControl.evaluate((control) => {
+            const warning = /a punto de expirar|session.{0,40}(?:about to expire|expiring|time limit)|sess(?:ion)? (?:will|is about to) expire/i;
+            const visible = (element: Element): boolean => {
+              const style = window.getComputedStyle(element);
+              return style.display !== "none"
+                && style.visibility !== "hidden"
+                && Number(style.opacity) !== 0
+                && element.getClientRects().length > 0;
+            };
+            let current: HTMLElement | null = control as HTMLElement;
+            let depth = 0;
+            while (current && current !== document.body && depth < 10) {
+              if (visible(current) && warning.test(current.textContent ?? "")) {
+                return Array.from(current.querySelectorAll("*")).some((element) => {
+                  if (!visible(element) || !warning.test(element.textContent ?? "")) return false;
+                  return !Array.from(element.children).some((child) => visible(child) && warning.test(child.textContent ?? ""));
+                });
+              }
+              current = current.parentElement;
+              depth += 1;
+            }
+            return false;
+          }),
+        );
+        if (belongsToVisibleWarning) dismissControl = textControl;
+      }
+    }
+
+    const dismissCount = dismissControl
+      ? await this.boundedRuntimeBoundary(
+        "verify_unique_session_expiry_warning_dismiss_control",
+        this.config.actionTimeoutMs,
+        () => dismissControl!.count(),
+      )
+      : 0;
+    const controlVisible = dismissCount === 1 && await dismissControl!.isVisible().catch(() => false);
+    const controlEnabled = controlVisible && await dismissControl!.isEnabled().catch(() => false);
+    if (!dismissControl || dismissCount !== 1 || !controlVisible || !controlEnabled) {
+      throw new Error(
+        `session_expiry_warning_not_dismissed: expected one visible enabled close control owned by the warning; ` +
+        `buttonCount=${buttonCount} linkCount=${linkCount} resolvedCount=${dismissCount} ` +
+        `visible=${controlVisible} enabled=${controlEnabled}`,
+      );
+    }
+    const resolvedDismissControl = dismissControl;
+    if (modalCount === 0) {
+      const belongsToWarning = await this.boundedRuntimeBoundary(
+        "verify_session_warning_close_control_ownership",
+        this.config.actionTimeoutMs,
+        () => resolvedDismissControl.evaluate((control) => {
+          const warning = /a punto de expirar|session.{0,40}(?:about to expire|expiring|time limit)|sess(?:ion)? (?:will|is about to) expire/i;
+          const visible = (element: Element): boolean => {
+            const style = window.getComputedStyle(element);
+            return style.display !== "none"
+              && style.visibility !== "hidden"
+              && Number(style.opacity) !== 0
+              && element.getClientRects().length > 0;
+          };
+          let current: HTMLElement | null = control as HTMLElement;
+          let depth = 0;
+          while (current && current !== document.body && depth < 10) {
+            if (visible(current) && warning.test(current.textContent ?? "")) {
+              return Array.from(current.querySelectorAll("*")).some((element) => {
+                if (!visible(element) || !warning.test(element.textContent ?? "")) return false;
+                return !Array.from(element.children).some((child) => visible(child) && warning.test(child.textContent ?? ""));
+              });
+            }
+            current = current.parentElement;
+            depth += 1;
+          }
+          return false;
+        }),
+      );
+      if (!belongsToWarning) {
+        throw new Error("session_expiry_warning_not_dismissed: close control is not owned by a visible warning surface");
+      }
+    }
+
+    console.log("[runtime:session-warning] phase=dismiss_start authority=unique_visible_warning_and_owned_close_control");
+    await resolvedDismissControl.click({ timeout: this.config.actionTimeoutMs });
+    await resolvedDismissControl.waitFor({ state: "hidden", timeout: this.config.actionTimeoutMs });
+    const remainingVisibleWarning = await this.boundedRuntimeBoundary(
+      "verify_session_expiry_warning_dismissed",
+      this.config.actionTimeoutMs,
+      () => this.page.locator("body").evaluate((body) => {
+        const warning = /a punto de expirar|session.{0,40}(?:about to expire|expiring|time limit)|sess(?:ion)? (?:will|is about to) expire/i;
+        const visible = (element: Element): boolean => {
+          const style = window.getComputedStyle(element);
+          return style.display !== "none"
+            && style.visibility !== "hidden"
+            && Number(style.opacity) !== 0
+            && element.getClientRects().length > 0;
+        };
+        return Array.from(body.querySelectorAll("*")).some((element) => {
+          if (!visible(element) || !warning.test(element.textContent ?? "")) return false;
+          return !Array.from(element.children).some((child) => visible(child) && warning.test(child.textContent ?? ""));
+        });
+      }),
+    );
+    if (remainingVisibleWarning) {
+      throw new Error("session_expiry_warning_not_dismissed: visible warning remains after close action");
+    }
+    console.log("[runtime:session-warning] phase=dismissed session_continues=true");
   }
 
   private async emitAuthBoundaryAttempt(): Promise<void> {
@@ -2896,7 +3134,7 @@ export class PromotedSpecRuntime {
       if (!this.evidenceRecorder.hasInitialScreenEvidence) {
         await this.evidenceRecorder.captureInitialScreen(this.page, "promoted_reuse");
       }
-      const record = await this.evidenceRecorder.finish();
+      const record = await this.evidenceRecorder.finish(this.page);
       const perScenarioDocxGenerated = Boolean(
         record.docxPath
         && fs.existsSync(record.docxPath),
@@ -3108,9 +3346,16 @@ export class PromotedSpecRuntime {
       technicalTargetRefs: options.technicalTargetRefs,
     });
     const resolvedExpectedEffect = effectiveExpectedEffect(expectedEffect, targetIdentity);
-    const beforeActionSnapshot = this.config.enabled
-      ? await capturePromotedActionSurfaceSnapshot(this.page, options.target).catch(() => undefined)
+    const beforeSnapshotOutcome = this.config.enabled
+      ? await capturePromotedActionSurfaceSnapshotBounded(this.page, options.target, this.config.actionTimeoutMs)
       : undefined;
+    if (beforeSnapshotOutcome) {
+      console.log(
+        `[runtime:before-snapshot] stepIndex=${options.stepIndex} status=${beforeSnapshotOutcome.status}` +
+        (beforeSnapshotOutcome.status === "error" ? ` error=${JSON.stringify(beforeSnapshotOutcome.error)}` : ""),
+      );
+    }
+    const beforeActionSnapshot = beforeSnapshotOutcome?.status === "available" ? beforeSnapshotOutcome.snapshot : undefined;
 
     let structuralFailureReason: string | undefined;
     let structuralFailureMatchCount: number | undefined;
@@ -3139,10 +3384,42 @@ export class PromotedSpecRuntime {
         },
       ).catch(() => undefined)
       : undefined;
+    // A row-selection checkbox certified from a single-row capture is not unique once the grid has
+    // several rows. Mirror Discovery's row-checkbox rule (grid_row_checkbox_state): among the
+    // visible, enabled checkboxes matching the certified owner, take the one -- and only the one --
+    // whose checked state differs from the desired state. Never positional; ambiguity stays fatal.
+    const structuralOwnerRole = options.structuralTarget?.structuralContext?.owner?.role;
+    const ownerCss = options.structuralTarget?.locatorCandidates?.find((candidate) => candidate.strategy === "css")?.value;
+    let rowCheckboxLocator: ReturnType<Page["locator"]> | undefined;
+    if (!resolution?.locator
+      && !causalOptionResolution?.locator
+      && structuralOwnerRole === "checkbox"
+      && ownerCss
+      && /ambiguous/i.test(structuralFailureReason ?? "")) {
+      const matches = this.page.locator(ownerCss);
+      const total = await matches.count().catch(() => 0);
+      const wantChecked = options.checkState ? options.checkState === "checked" : true;
+      const stateChanging: Array<ReturnType<Page["locator"]>> = [];
+      for (let matchIndex = 0; matchIndex < total; matchIndex += 1) {
+        const candidate = matches.nth(matchIndex);
+        if (!await candidate.isVisible().catch(() => false) || !await candidate.isEnabled().catch(() => false)) continue;
+        const checked = await candidate.evaluate((el: Element) => {
+          const attr = el.getAttribute("aria-checked") ?? el.getAttribute("data-state");
+          if (attr === "true" || attr === "checked") return true;
+          if (attr === "false" || attr === "unchecked") return false;
+          return (el as HTMLInputElement).checked === true;
+        }).catch(() => undefined);
+        if (checked !== undefined && checked !== wantChecked) stateChanging.push(candidate);
+      }
+      console.log(`[promoted-click-structural] stepIndex=${options.stepIndex} rowCheckboxByState candidates=${total} stateChanging=${stateChanging.length}`);
+      if (stateChanging.length === 1) rowCheckboxLocator = stateChanging[0];
+    }
     const resolvedLocator = (causalOptionResolution?.status === "resolved" ? causalOptionResolution.locator : undefined)
-      ?? resolution?.locator;
+      ?? resolution?.locator
+      ?? rowCheckboxLocator;
     const resolvedStrategy = (causalOptionResolution?.status === "resolved" ? causalOptionResolution.locatorStrategy : undefined)
-      ?? resolution?.strategy;
+      ?? resolution?.strategy
+      ?? (rowCheckboxLocator ? "row_checkbox_by_state" : undefined);
     if (!resolvedLocator) {
       throw new Error(
         `Promoted click failed at step ${options.stepIndex} target="${options.target}". ` +
@@ -3165,9 +3442,33 @@ export class PromotedSpecRuntime {
         causalOptionResolution?.status === "resolved" ? resolvedLocator : undefined,
       )
       : undefined;
-    await resolvedLocator.click();
-    await this.postActionStabilityWithRecordedOptionRetry(previousUrl, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe, options.selectionActivationField);
-    if (expectedEffect !== "none") await this.refreshActiveContainer();
+    if (options.checkState) {
+      const checked = await resolvedLocator.evaluate((el: Element) => {
+        const attr = el.getAttribute("aria-checked") ?? el.getAttribute("data-state");
+        if (attr === "true" || attr === "checked") return true;
+        if (attr === "false" || attr === "unchecked") return false;
+        return (el as HTMLInputElement).checked === true;
+      }).catch(() => undefined);
+      if (checked !== undefined && checked === (options.checkState === "checked")) {
+        console.log(`[promoted-click-structural] stepIndex=${options.stepIndex} checkState=${options.checkState} alreadySatisfied=true click=skipped`);
+        return;
+      }
+    }
+    console.log(`[promoted-click-structural] stepIndex=${options.stepIndex} phase=dispatch_start timeoutMs=${this.config.actionTimeoutMs}`);
+    const downloadObservationBaseline = this.observedDownloadSequence;
+    await resolvedLocator.click({ timeout: this.config.actionTimeoutMs });
+    console.log(`[promoted-click-structural] stepIndex=${options.stepIndex} phase=dispatch_end currentUrl=${this.page.url()}`);
+    await this.postActionStabilityWithRecordedOptionRetry(previousUrl, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe, options.selectionActivationField, downloadObservationBaseline);
+    console.log(`[promoted-click-structural] stepIndex=${options.stepIndex} phase=post_action_stability_complete`);
+    if (expectedEffect !== "none") {
+      await this.boundedRuntimeBoundary(
+        `refresh_active_container_after_structural_click_${options.stepIndex}`,
+        this.config.actionTimeoutMs,
+        () => this.refreshActiveContainer().then(() => undefined),
+      );
+    }
+    this.lastClickOutcome = { stepIndex: options.stepIndex, previousUrl, currentUrl: this.page.url() };
+    console.log(`[promoted-click-structural] stepIndex=${options.stepIndex} phase=complete currentUrl=${this.page.url()}`);
   }
 
   private async postActionStabilityWithRecordedOptionRetry(
@@ -3178,9 +3479,10 @@ export class PromotedSpecRuntime {
     target: string,
     selectionStateProbe: PromotedSelectionStateProbe | undefined,
     selectionActivationField?: string,
+    downloadObservationBaseline?: number,
   ): Promise<void> {
     try {
-      await this.postActionStability(previousUrl, expectedEffect, targetIdentity, beforeActionSnapshot, target, selectionStateProbe);
+      await this.postActionStability(previousUrl, expectedEffect, targetIdentity, beforeActionSnapshot, target, selectionStateProbe, downloadObservationBaseline);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       const recordedOption = targetIdentity?.technicalTargetRefs.some((ref) => /^role:option\|/i.test(ref.trim())) === true;
@@ -3200,7 +3502,7 @@ export class PromotedSpecRuntime {
       // uniquely resolved recorded option while its recorded owner remains the active context.
       console.log("[runtime:post-action] expectedEffect=selection_state_change signal=recorded_option_keyboard_activation_retry");
       await exactOption.press("Enter", { timeout: this.config.actionTimeoutMs });
-      await this.postActionStability(previousUrl, expectedEffect, targetIdentity, beforeActionSnapshot, target, selectionStateProbe);
+      await this.postActionStability(previousUrl, expectedEffect, targetIdentity, beforeActionSnapshot, target, selectionStateProbe, downloadObservationBaseline);
     }
   }
 
@@ -3215,6 +3517,7 @@ export class PromotedSpecRuntime {
     console.log(`[runtime-sequence] after_ensure_initial_evidence_start version=${PROMOTED_SPEC_RUNTIME_MODULE_VERSION} stepIndex=${options.stepIndex}`);
     console.log(`[TRACE-1] stepIndex=${options.stepIndex} about_to_call=ensureInitialEvidence`);
     await this.ensureInitialEvidence();
+    await this.dismissSessionExpiringWarningIfPresent();
     console.log(`[promoted-step] stepIndex=${options.stepIndex} phase=ensure_initial_evidence_done`);
 
     // Certified structural authority (deterministic compiler, kind=certified_structural with a
@@ -3495,6 +3798,7 @@ export class PromotedSpecRuntime {
       if (ordinalResolved) {
         matchedLocatorStrategy = `ordinal_selection:${ordinalResolved.ordinal}:${ordinalResolved.domainTerm ?? "generic"}:${ordinalResolved.selector}`;
         const previousUrlOrdinal = this.page.url();
+        const downloadObservationBaseline = this.observedDownloadSequence;
         try {
           await withTimeout(ordinalResolved.locator.click({ timeout: this.config.actionTimeoutMs, noWaitAfter: true }), this.config.actionTimeoutMs, "ordinal click");
         } catch {
@@ -3523,7 +3827,7 @@ export class PromotedSpecRuntime {
           nativeClickSucceeded = true;
           clickPath = "native_runtime";
           fallbackUsed = "page";
-          await this.postActionStability(previousUrlOrdinal, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe);
+          await this.postActionStability(previousUrlOrdinal, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe, downloadObservationBaseline);
           if (expectedEffect === "modal_or_form_or_navigation" || expectedEffect === "ui_change") {
             await this.refreshActiveContainer();
           }
@@ -3542,7 +3846,7 @@ export class PromotedSpecRuntime {
         targetIdentity?.technicalTargetRefs.some((ref) => ref.startsWith("role:checkbox|")),
       );
       const parsedTargetRefs = targetIdentity ? parseTechnicalTargetRefs(targetIdentity.technicalTargetRefs) : {};
-      const entityRowScope = rowScopeFromEntityScope(targetIdentity?.entityScope);
+      const entityRowScope = rowScopeFromEntityScope(targetIdentity?.entityScope ?? options.entityScope);
       // The recorded structural owner (ownerTag + stable descendants + semanticShape) is the
       // exact authority Recording replay already resolves this same click with — reused here
       // via the same resolveActionTarget -> resolveRecordedTechnicalTarget ->
@@ -3598,9 +3902,23 @@ export class PromotedSpecRuntime {
             recordingActionType: "click",
             associatedField: options.selectionActivationField ?? options.associatedField,
             recordedTechnicalTargetRefs: options.technicalTargetRefs,
+            // Repeated entity rows share the same column/field: without the recorded entity scope
+            // the grid resolver sees every row's control and fails closed as ambiguous.
+            rowScope: entityRowScope ?? rowScopeFromPromotedRef(parsedTargetRefs.rowRef),
+            entityScope: targetIdentity?.entityScope ?? options.entityScope,
+            rowRelation: targetIdentity?.rowRelation === "added" || targetIdentity?.rowRelation === "next"
+              ? targetIdentity.rowRelation
+              : undefined,
           },
         ).catch(() => undefined)
         : undefined;
+      if (options.associatedField || options.selectionActivationField) {
+        console.log(
+          `[runtime:associated-field-resolution] step=${options.stepIndex} status=${associatedFieldResolution?.status ?? "skipped"} ` +
+          `strategy=${associatedFieldResolution?.locatorStrategy ?? "none"} entityScopePresent=${Boolean(targetIdentity?.entityScope)} ` +
+          `rowRelation=${targetIdentity?.rowRelation ?? "none"} identityPresent=${Boolean(targetIdentity)}`,
+        );
+      }
       // LAST-RESORT, EXECUTION-ONLY: certified/structural/field-scoped tiers above, then semantic
       // runtime evidence, then the generic text/role fallback below. Reuses the SAME shared
       // resolveActionTarget -> resolveSemanticRuntimeTarget chain, never a second implementation.
@@ -3696,6 +4014,7 @@ export class PromotedSpecRuntime {
         // Dispatch the click separately from outcome observation. Waiting for Playwright's
         // implicit navigation here can time out on SPA/in-place transitions even though the
         // application received the click.
+        const downloadObservationBaseline = this.observedDownloadSequence;
         const clickResult = await clickPromotedLocatorWithBoundedReresolution(
           resolved,
           async () => resolvePromotedClickableLocator(this.page, options.target, {
@@ -3714,7 +4033,7 @@ export class PromotedSpecRuntime {
         fallbackUsed = resolved.scope === "container" ? "active_container" : "page";
         
         // Handle expected effects
-        await this.postActionStabilityWithRecordedOptionRetry(previousUrl, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe, options.selectionActivationField);
+        await this.postActionStabilityWithRecordedOptionRetry(previousUrl, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe, options.selectionActivationField, downloadObservationBaseline);
         
         // Refresh active container if modal/form/dialog expected
         if (expectedEffect === "modal_or_form_or_navigation" || expectedEffect === "ui_change") {
@@ -3733,6 +4052,7 @@ export class PromotedSpecRuntime {
         const canSafeForceClick = await shouldUseSafeForceClick(this.page, resolved.locator, options, error);
         if (canSafeForceClick) {
           try {
+            const downloadObservationBaseline = this.observedDownloadSequence;
             await withTimeout(
               resolved.locator.click({ timeout: this.config.actionTimeoutMs, force: true }),
               this.config.actionTimeoutMs,
@@ -3742,7 +4062,7 @@ export class PromotedSpecRuntime {
             clickPath = "native_runtime";
             fallbackUsed = resolved.scope === "container" ? "active_container" : "page";
             matchedLocatorStrategy = `${resolved.strategy}:safe_force_click`;
-            await this.postActionStabilityWithRecordedOptionRetry(previousUrl, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe, options.selectionActivationField);
+            await this.postActionStabilityWithRecordedOptionRetry(previousUrl, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe, options.selectionActivationField, downloadObservationBaseline);
             if (expectedEffect === "modal_or_form_or_navigation" || expectedEffect === "ui_change") {
               await this.refreshActiveContainer();
             }
@@ -3763,6 +4083,7 @@ export class PromotedSpecRuntime {
     if (!nativeClickSucceeded) {
       callbackAttempted = true;
       try {
+        const downloadObservationBaseline = this.observedDownloadSequence;
         if (resolvedExpectedEffect === "selection_state_change") {
           console.log(`[selection-runtime] phase=before_callback snapshot="${selectionRuntimeSnapshot(selectionStateProbe ? await readPromotedInteractiveState(selectionStateProbe.locator, { includeRenderedText: selectionStateProbe.strategy.startsWith("recorded-selection-owner:") }) : undefined)}"`);
         }
@@ -3772,7 +4093,7 @@ export class PromotedSpecRuntime {
         matchedLocatorStrategy = matchedLocatorStrategy === "unknown" ? "callback" : matchedLocatorStrategy;
         
         // Handle expected effects
-        await this.postActionStabilityWithRecordedOptionRetry(previousUrl, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe, options.selectionActivationField);
+        await this.postActionStabilityWithRecordedOptionRetry(previousUrl, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe, options.selectionActivationField, downloadObservationBaseline);
         if (expectedEffect !== "none") await this.refreshActiveContainer();
         callbackSucceeded = true;
         effectDetected = true;
@@ -3784,12 +4105,13 @@ export class PromotedSpecRuntime {
         if (this.config.retryEnabled && !options.sensitive && !retryAttempted) {
           retryAttempted = true;
           try {
+            const downloadObservationBaseline = this.observedDownloadSequence;
             if (resolvedExpectedEffect === "selection_state_change") {
               console.log(`[selection-runtime] phase=before_retry snapshot="${selectionRuntimeSnapshot(selectionStateProbe ? await readPromotedInteractiveState(selectionStateProbe.locator, { includeRenderedText: selectionStateProbe.strategy.startsWith("recorded-selection-owner:") }) : undefined)}"`);
             }
             await withTimeout(options.action(), this.config.actionTimeoutMs, "click retry");
             clickPath = "pom_callback";
-            await this.postActionStabilityWithRecordedOptionRetry(previousUrl, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe, options.selectionActivationField);
+            await this.postActionStabilityWithRecordedOptionRetry(previousUrl, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe, options.selectionActivationField, downloadObservationBaseline);
             if (expectedEffect !== "none") await this.refreshActiveContainer();
             callbackSucceeded = true;
             effectDetected = true;
@@ -3925,6 +4247,7 @@ export class PromotedSpecRuntime {
     }
 
     // Capture evidence after successful click
+    this.lastClickOutcome = { stepIndex: options.stepIndex, previousUrl, currentUrl: this.page.url() };
     await this.captureClickStep(options.target, "passed", undefined, options.stepIndex);
     console.log(`[promoted-step] stepIndex=${options.stepIndex} phase=passed currentUrl=${this.page.url()}`);
   }
@@ -3932,6 +4255,7 @@ export class PromotedSpecRuntime {
   async fillPromotedField(options: PromotedFillOptions): Promise<void> {
     await this.markBoundaryProgress();
     await this.ensureInitialEvidence();
+    await this.dismissSessionExpiringWarningIfPresent();
     if (options.playwrightRecorderEvidence?.kind === "segmented_input") {
       await this.fillSegmentedInput(options);
       return;
@@ -3950,6 +4274,12 @@ export class PromotedSpecRuntime {
       containerIdentity: options.containerIdentity,
       fieldIdentity: options.fieldIdentity,
     };
+    // The generated value key is itself stable, project-neutral lineage for repeated entities.
+    // Some compiled plans transport it without the parallel entityScope property, so recover the
+    // scope from `entity_N.field` before any grid resolver falls back to a page-wide control.
+    const entityScope = targetIdentity.entityScope
+      ?? options.entityScope
+      ?? entityScopeFromValueKey(targetIdentity.valueKey ?? options.valueKey);
     if (targetIdentity.technicalTargetRefs.length > 0 || targetIdentity.valueKey) {
       console.log(
         `[runtime:field-resolution] step=${options.stepIndex} field="${resolvedField}" ` +
@@ -4020,7 +4350,7 @@ export class PromotedSpecRuntime {
       
       try {
           const parsedTargetRefs = parseTechnicalTargetRefs(targetIdentity.technicalTargetRefs);
-          const entityRowScope = rowScopeFromEntityScope(targetIdentity.entityScope);
+          const entityRowScope = rowScopeFromEntityScope(entityScope);
           const structuralResolution = (entityRowScope || parsedTargetRefs.rowRef)
             ? await resolveActionTarget(
               this.page,
@@ -4031,7 +4361,7 @@ export class PromotedSpecRuntime {
                 recordingActionType: "fill",
                 rowScope: entityRowScope ?? rowScopeFromPromotedRef(parsedTargetRefs.rowRef),
                 rowRef: entityRowScope ? undefined : parsedTargetRefs.rowRef,
-                entityScope: targetIdentity.entityScope,
+                entityScope,
                 associatedField: resolvedField,
               },
             ).catch(() => undefined)
@@ -4052,6 +4382,52 @@ export class PromotedSpecRuntime {
             })).catch(() => ({ tag: "", editable: false }));
             return ["input", "textarea", "select"].includes(tagInfo.tag) || tagInfo.editable;
           };
+          // An editable grid cell shows a display button until activated. When the row-scoped
+          // resolver lands on that button (the cell, not its editor), activate the cell once and
+          // re-resolve through the same resolver; accept only a genuinely fillable result.
+          let activatedStructuralResolution = structuralResolution;
+          // Never disturb a grid whose earlier, higher-priority candidates are already fillable.
+          const earlierCandidateFillable =
+            (recorderRuntimeResolution?.status === "resolved" && Boolean(recorderRuntimeResolution.locator)
+              && await validateFillableCandidate(recorderRuntimeResolution.locator))
+            || (unboundGridFieldResolution?.status === "resolved" && Boolean(unboundGridFieldResolution.locator)
+              && await validateFillableCandidate(unboundGridFieldResolution.locator));
+          if (!earlierCandidateFillable && (entityRowScope !== undefined || parsedTargetRefs.rowRef)) {
+            // Entity/row-scoped fills must consult Discovery's fill resolver directly. The
+            // action resolver can return no structural owner (or the display button used by a
+            // click), even though the grid's field editor is recoverable by activating the
+            // associated cell. Do not gate the fill resolver on that click-oriented result.
+            // This uses only the recorded entity/row relation plus the live column header, so it
+            // stays generic and fails closed if the row/cell is ambiguous.
+            const gridFillResolution = await resolveFillTarget(
+              this.page,
+              await scanCurrentPage(this.page),
+              resolvedField,
+              undefined,
+              {
+                rowScope: entityRowScope ?? rowScopeFromPromotedRef(parsedTargetRefs.rowRef),
+                rowRef: entityRowScope ? undefined : parsedTargetRefs.rowRef,
+                entityScope,
+                associatedField: resolvedField,
+                recordedTechnicalTargetRefs: targetIdentity.technicalTargetRefs,
+              },
+            ).catch(() => undefined);
+            if (gridFillResolution?.status === "resolved"
+              && gridFillResolution.locator
+              && gridFillResolution.locatorStrategy?.startsWith("grid_cell_")
+              && await validateFillableCandidate(gridFillResolution.locator)) {
+              activatedStructuralResolution = {
+                status: "resolved",
+                locator: gridFillResolution.locator,
+                locatorStrategy: gridFillResolution.locatorStrategy ?? "grid_cell_editor_after_activation",
+              } as typeof structuralResolution;
+              console.log(`[promoted-fill-state] stepIndex=${options.stepIndex} gridCellFillResolved=true strategy=${gridFillResolution.locatorStrategy}`);
+            } else {
+              const resultStrategy = gridFillResolution?.locatorStrategy ?? "none";
+              const candidateCount = gridFillResolution?.editableCandidatesCount ?? 0;
+              console.log(`[promoted-fill-state] stepIndex=${options.stepIndex} gridCellFillResolved=false status=${gridFillResolution?.status ?? "unavailable"} strategy=${resultStrategy} editableCandidates=${candidateCount} rowScope=${entityRowScope ?? rowScopeFromPromotedRef(parsedTargetRefs.rowRef) ?? "none"}`);
+            }
+          }
           const resolved = (recorderRuntimeResolution?.status === "resolved" && recorderRuntimeResolution.locator
             && await validateFillableCandidate(recorderRuntimeResolution.locator))
             ? {
@@ -4072,11 +4448,11 @@ export class PromotedSpecRuntime {
               enabled: true,
               editable: true,
             }
-            : (structuralResolution?.status === "resolved" && structuralResolution.locator
-            && await validateFillableCandidate(structuralResolution.locator))
+            : (activatedStructuralResolution?.status === "resolved" && activatedStructuralResolution.locator
+            && await validateFillableCandidate(activatedStructuralResolution.locator))
             ? {
-              locator: structuralResolution.locator,
-              strategy: structuralResolution.locatorStrategy ?? "structured:grid-cell-editor",
+              locator: activatedStructuralResolution.locator,
+              strategy: activatedStructuralResolution.locatorStrategy ?? "structured:grid-cell-editor",
               scope: "page" as const,
               visible: true,
               enabled: true,
@@ -4248,6 +4624,16 @@ export class PromotedSpecRuntime {
         `diagnostics=${JSON.stringify(diagnostics)}`
       );
     }
+
+    // Successful fills must enter the same evidence grouping pipeline as clicks. The recorder
+    // samples each completed interaction but commits an image only when its generic screen
+    // signature detects a completed form/data row or a screen transition. This preserves one
+    // useful checkpoint for filled login forms and dynamic table rows without a screenshot per
+    // keystroke or any project-specific field rules.
+    await this.captureEvidenceStep(`Ingreso en "${resolvedField}".`, "passed", undefined, {
+      target: resolvedField,
+      sourceStepIndex: options.stepIndex,
+    });
   }
 
   /** Execute one recorder-captured segmented component after revalidating its unique scope and
@@ -4309,6 +4695,10 @@ export class PromotedSpecRuntime {
       }
     }
     console.log(`[promoted-segmented-input] stepIndex=${options.stepIndex} segmentCount=${segmentCount} inputReadback=verified valueKey=${options.valueKey ?? "none"}`);
+    await this.captureEvidenceStep(`Ingreso en "${resolvePromotedFieldTarget(options)}".`, "passed", undefined, {
+      target: resolvePromotedFieldTarget(options),
+      sourceStepIndex: options.stepIndex,
+    });
   }
 
   /**
@@ -4326,6 +4716,7 @@ export class PromotedSpecRuntime {
     console.log(`[promoted-step] stepIndex=${options.stepIndex} phase=start currentUrl=${this.page.url()}`);
     await this.markBoundaryProgress();
     await this.ensureInitialEvidence();
+    await this.dismissSessionExpiringWarningIfPresent();
     const resolvedField = resolvePromotedFieldTarget(options);
     const previousUrl = this.page.url();
     const targetIdentity = resolvePromotedFieldIdentityFromPersistedContract(options.stepIndex, resolvedField, {
@@ -4494,6 +4885,7 @@ export class PromotedSpecRuntime {
 
     await this.markBoundaryProgress();
     await this.ensureInitialEvidence();
+    await this.dismissSessionExpiringWarningIfPresent();
     const targetIdentity = resolvePromotedFieldIdentityFromPersistedContract(options.stepIndex, options.target, {
       valueKey: options.valueKey,
       technicalTargetRefs: options.technicalTargetRefs,
@@ -4506,6 +4898,9 @@ export class PromotedSpecRuntime {
     const runtimeValue = options.selectionValue?.trim()
       || resolvePromotedRuntimeValue(targetIdentity?.valueKey ?? options.valueKey)
       || recordedIndexSeed;
+    if (isSelectionRuleValue(runtimeValue) && (!parseSelectionRule(runtimeValue) || capturedIndexSelection?.selectionMode !== "index")) {
+      throw new Error("dynamic_selection_rule_invalid_or_unbound");
+    }
     const targetRefs = targetIdentity?.technicalTargetRefs ?? [];
     const parsedTargetRefs = parseTechnicalTargetRefs(targetRefs);
     const selectionField = options.selectionField?.trim()
@@ -4534,7 +4929,7 @@ export class PromotedSpecRuntime {
       if (options.playwrightRecorderEvidence?.nativeSelection && !structuredResolution?.selectionApplied) {
         throw new Error("Recorded native selection was not applied and verified");
       }
-      const nativeSelectionApplied = structuredResolution?.status === "resolved" && structuredResolution.locator
+      const nativeSelectionApplied = !structuredResolution?.selectionApplied && structuredResolution?.status === "resolved" && structuredResolution.locator
         ? await applyPromotedNativeSelection(structuredResolution.locator, runtimeValue)
         : false;
       if (structuredResolution?.status === "resolved"
@@ -4557,6 +4952,7 @@ export class PromotedSpecRuntime {
         + `fieldContextPresent=true`,
       );
     }
+    if (isSelectionRuleValue(runtimeValue)) throw new Error("dynamic_selection_rule_requires_verified_recorded_control");
     if (
       targetIdentity
       && runtimeValue
@@ -4661,6 +5057,29 @@ export class PromotedSpecRuntime {
       if (options.expectedUrl) {
         const stateMatches = evaluatePromotedAssertionState(this.page.url(), options);
         if (!stateMatches) throw new Error("PROMOTED_ASSERTION_STATE_MISMATCH");
+        if (options.polarity === "positive") {
+          const signals = await readPromotedOutcomeSignals(this.page);
+          if (signals.failureMessages.length > 0) {
+            throw new Error(`PROMOTED_FAILURE_DIALOG_VISIBLE: ${signals.failureMessages.join(" | ")}`);
+          }
+          if (options.requireCompletionSignal) {
+            const actionIsAdjacent = Boolean(
+              this.lastClickOutcome
+              && options.stepIndex >= this.lastClickOutcome.stepIndex
+              && options.stepIndex - this.lastClickOutcome.stepIndex <= 1,
+            );
+            const routeChangedSinceAction = Boolean(
+              actionIsAdjacent && this.lastClickOutcome!.previousUrl !== this.lastClickOutcome!.currentUrl,
+            );
+            const completionObserved = evaluatePromotedCompletionSignal({
+              expectedUrlMatches: stateMatches,
+              routeChangedSinceAction,
+              failureMessages: signals.failureMessages,
+              successMessages: signals.successMessages,
+            });
+            if (!completionObserved) throw new Error("PROMOTED_COMPLETION_SIGNAL_NOT_OBSERVED");
+          }
+        }
       } else {
         await withTimeout(options.assertion(), this.config.actionTimeoutMs, "assert visible");
       }
@@ -4808,6 +5227,7 @@ export class PromotedSpecRuntime {
     beforeSnapshot?: PromotedActionSurfaceSnapshot,
     target?: string,
     selectionStateProbe?: PromotedSelectionStateProbe,
+    downloadObservationBaseline?: number,
   ): Promise<void> {
     if (!this.config.enabled) return;
     if (expectedEffect === "none") return;
@@ -4824,6 +5244,10 @@ export class PromotedSpecRuntime {
     let lastOutcome: PromotedActionOutcome | undefined;
     let selectionObservationLogged = false;
     while (Date.now() - startedAt < this.config.stabilityTimeoutMs) {
+      if (downloadObservationBaseline !== undefined && this.observedDownloadSequence > downloadObservationBaseline) {
+        console.log(`[runtime:post-action] target="${target ?? "unknown"}" expectedEffect=${expectedEffect} signal=browser_download`);
+        return;
+      }
       if (expectedEffect === "selection_state_change") {
         const selectionAfter = selectionProbe
           ? await readPromotedInteractiveState(selectionProbe.locator, {
@@ -4868,7 +5292,46 @@ export class PromotedSpecRuntime {
         await this.page.waitForTimeout(100);
         continue;
       }
-      const current = await capturePromotedActionSurfaceSnapshot(this.page, target ?? "").catch(() => undefined);
+      const snapshotRemainingMs = this.config.stabilityTimeoutMs - (Date.now() - startedAt);
+      const currentOutcome = await capturePromotedActionSurfaceSnapshotBounded(
+        this.page,
+        target ?? "",
+        Math.max(1, Math.min(this.config.actionTimeoutMs, snapshotRemainingMs)),
+      );
+      if (currentOutcome.status !== "available") {
+        const currentUrl = this.page.url();
+        if (currentUrl !== previousUrl) {
+          // A cross-route navigation can briefly expose a document without a body while the
+          // prior form is being replaced. The route change is already direct evidence that the
+          // action took effect; do not turn that transient snapshot failure into a click failure
+          // or retry the old control on the new screen. Still wait for the destination UI to
+          // settle before accepting the transition.
+          console.log(
+            `[runtime:post-action] target="${target ?? "unknown"}" expectedEffect=${expectedEffect} ` +
+            `signal=route_changed_snapshot_${currentOutcome.status} previousUrl=${previousUrl} currentUrl=${currentUrl}`,
+          );
+          await this.waitForPromotedUiStable(-1, target ?? "post_action");
+          if (expectedEffect === "modal_or_form_or_navigation") await this.refreshActiveContainer();
+          return;
+        }
+        console.log(
+          `[runtime:post-action-snapshot] status=${currentOutcome.status} target="${target ?? "unknown"}" ` +
+          `remainingMs=${Math.max(0, snapshotRemainingMs)}` +
+          (currentOutcome.status === "error" ? ` error=${JSON.stringify(currentOutcome.error)}` : ""),
+        );
+        if (currentOutcome.status === "error" && snapshotRemainingMs > 0) {
+          // During a document replacement the evaluation can reject before the URL update is
+          // observable. Keep probing within this action's existing stability budget; the next
+          // observation can then certify the destination route. Do not retry the user action.
+          await this.page.waitForTimeout(Math.min(100, snapshotRemainingMs));
+          continue;
+        }
+        throw new Error(
+          `post_action_surface_snapshot_${currentOutcome.status}: target="${target ?? "unknown"}" ` +
+          `remainingMs=${Math.max(0, snapshotRemainingMs)}`,
+        );
+      }
+      const current = currentOutcome.snapshot;
       if (current) {
         const routeChanged = current.url !== previousUrl;
         // FIRST_LOSS fix (runId=preview-2026-09-24T19-08-48): `signature` alone only covers a
@@ -4911,6 +5374,10 @@ export class PromotedSpecRuntime {
         }
       }
       await this.page.waitForTimeout(100);
+    }
+    if (downloadObservationBaseline !== undefined && this.observedDownloadSequence > downloadObservationBaseline) {
+      console.log(`[runtime:post-action] target="${target ?? "unknown"}" expectedEffect=${expectedEffect} signal=browser_download`);
+      return;
     }
     const reason = targetIdentity?.expectedRouteTransition
       ? "expected_route_transition_not_observed"

@@ -81,3 +81,46 @@ test("3/routeChangeStillObserved. a real navigation (expectedEffect=navigation) 
     () => (runtime as any).postActionStability(BASE_SNAPSHOT.url, "navigation", undefined, before, "text:SMS"),
   );
 });
+
+test("4/routeChangeSurvivesTransientSnapshotError. a route transition remains successful when the outgoing document briefly has no body", async () => {
+  const destinationUrl = "https://example.test/destination";
+  let currentUrl = BASE_SNAPSHOT.url;
+  let evaluationCount = 0;
+  const page = {
+    evaluate: async () => {
+      evaluationCount += 1;
+      throw new Error("Cannot read properties of null (reading 'innerText')");
+    },
+    url: () => currentUrl,
+    waitForTimeout: async () => { currentUrl = destinationUrl; },
+    on: () => undefined,
+    off: () => undefined,
+  } as unknown as Page;
+  const runtime = new PromotedSpecRuntime(page, { evidenceEnabled: false, stabilityTimeoutMs: 500 } as any);
+  let stableWaitObserved = false;
+  (runtime as any).waitForPromotedUiStable = async () => { stableWaitObserved = true; };
+
+  await assert.doesNotReject(
+    () => (runtime as any).postActionStability(BASE_SNAPSHOT.url, "ui_change", undefined, BASE_SNAPSHOT, "role:button|Continue"),
+    "a transient snapshot error must be retried within the stability budget until the route change is observed",
+  );
+  assert.equal(evaluationCount, 2, "the runtime should observe the route change on a subsequent probe");
+  assert.equal(stableWaitObserved, true, "accept the route transition only after the destination UI stability boundary");
+});
+
+test("5/snapshotErrorWithoutTransitionStillFailsClosed. a snapshot error on the same route is not treated as success", async () => {
+  const page = {
+    evaluate: async () => { throw new Error("snapshot failed"); },
+    url: () => BASE_SNAPSHOT.url,
+    waitForTimeout: async (ms: number) => new Promise(resolve => setTimeout(resolve, Math.min(ms, 20))),
+    on: () => undefined,
+    off: () => undefined,
+  } as unknown as Page;
+  const runtime = new PromotedSpecRuntime(page, { evidenceEnabled: false, stabilityTimeoutMs: 200 } as any);
+
+  await assert.rejects(
+    () => (runtime as any).postActionStability(BASE_SNAPSHOT.url, "ui_change", undefined, BASE_SNAPSHOT, "role:button|Continue"),
+    (error: unknown) => error instanceof Error && error.message.includes("no_observable_post_action_outcome"),
+    "without an observed route transition, an unreadable surface remains a failure after the bounded observation window",
+  );
+});

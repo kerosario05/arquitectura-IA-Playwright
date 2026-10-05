@@ -45,6 +45,7 @@ export type ParsedStepIntent = {
   priority: number;
   value?: string;
   valueKey?: string;
+  segmentPosition?: number;
   valueKeys?: string[];
   valueSource?: string;
   /** Structured row/entity context extracted from a leading human clause. */
@@ -111,6 +112,7 @@ export type ActionTargetItem = {
    */
   semanticRuntimeEvidence?: import("../recording/structural-owner-identity").SemanticRuntimeEvidence;
   playwrightRecorderEvidence?: import("../recording/structural-owner-identity").PlaywrightRecorderEvidence;
+  segmentPosition?: number;
   expectedRouteBefore?: string;
   expectedRouteAfter?: string;
   expectedOutcomeKind?: "route_transition" | "in_place_transition";
@@ -990,6 +992,27 @@ function tryParseSelectAction(text: string, normalized: string): ParsedStepInten
   if (!verbMatch) return null;
 
   const afterVerb = text.slice(verbMatch[0].length).trim();
+
+  // A dynamic selection rule is presentation text, not an option locator. Older
+  // recordings may still contain its quoted/escaped rendering, so recover the
+  // trailing field and let the recording contract bind its unique select action.
+  const describedSelectionInField = afterVerb.match(
+    /^(.+?)\s+en\s+(?:(?:el\s+)?campo\s+)?["']([^"']+)["']\.?$/i
+  );
+  if (describedSelectionInField && /\bcoincidencia\s+\d+\b/i.test(describedSelectionInField[1])) {
+    const selectionField = cleanActionTarget(describedSelectionInField[2]).replace(/^de\s+/i, "");
+    return {
+      type: "action_select",
+      originalText: text,
+      normalizedText: normalized,
+      actionTarget: selectionField,
+      selectionField,
+      value: describedSelectionInField[1].trim(),
+      valueSource: "unknown",
+      actionVerb: verbMatch[0].trim().toLowerCase(),
+      priority: 5,
+    };
+  }
 
   const standaloneRuntimeValue = afterVerb.match(
     /^(?:el|la|un|una)?\s*(?:valor|opci[oó]n)\s+\[([^\]\r\n]+)\]$/i

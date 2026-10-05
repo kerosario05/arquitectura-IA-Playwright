@@ -120,6 +120,44 @@ test("six homogeneous recorder segments collapse into one runtime-resolution act
   assert.equal(interaction.sourceEventRefs.length, 6);
 });
 
+test("virtual keyboard note evidence is correlated to its tap without reclassifying ordinary taps", () => {
+  const keyboardEvidence: PlaywrightRecorderEvidence = {
+    kind: "virtual_keyboard",
+    runtimeResolutionRequired: true,
+    keyLabels: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+    buttonCount: 10,
+    fieldLabel: "Número de identificación",
+  };
+  const roleEvidence: PlaywrightRecorderEvidence = {
+    kind: "role", role: "button", normalizedName: "4", runtimeResolutionRequired: true,
+  };
+  const tapTarget = {
+    label: "4", role: "button", tag: "button",
+    locators: [{ strategy: "role", value: "button|4", confidence: 0.85 }],
+    playwrightRecorderEvidence: roleEvidence,
+  };
+  const events: RecordedEvent[] = [
+    {
+      seq: 1, t: 1, kind: "note", screenKey: "screen", interactionId: "keyboard-tap",
+      observationType: "pointer", target: { ...tapTarget, locators: [], playwrightRecorderEvidence: keyboardEvidence },
+    } as unknown as RecordedEvent,
+    {
+      seq: 2, t: 2, kind: "tap", screenKey: "screen", interactionId: "keyboard-tap", target: tapTarget,
+    } as unknown as RecordedEvent,
+    {
+      seq: 3, t: 3, kind: "tap", screenKey: "screen", interactionId: "ordinary-tap",
+      target: { ...tapTarget, label: "Continuar", playwrightRecorderEvidence: { ...roleEvidence, normalizedName: "Continuar" } },
+    } as unknown as RecordedEvent,
+  ];
+
+  const [keyboardTap, ordinaryTap] = buildCanonicalInteractions(events);
+  assert.equal(keyboardTap.playwrightRecorderEvidence?.kind, "virtual_keyboard");
+  assert.equal(keyboardTap.semanticField, "Número de identificación");
+  assert.deepEqual(keyboardTap.technicalTargetRefs, ["role:button|4"]);
+  assert.equal(ordinaryTap.playwrightRecorderEvidence?.kind, "role");
+  assert.notEqual(ordinaryTap.semanticField, "Número de identificación");
+});
+
 test("segmented runtime evidence permits execution readiness without raising technical or promotion gates", () => {
   const evidence: PlaywrightRecorderEvidence = {
     kind: "segmented_input", targetTag: "input", scopeIdentity: scope,

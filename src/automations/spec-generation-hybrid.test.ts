@@ -20,6 +20,7 @@ import {
   isFunctionalExecutionInfrastructureFailure,
   isInitialReadinessInfrastructureFailure,
   isUnresolvedRuntimeTimeout,
+  markTerminalCompletionOracle,
   normalizeMojibakeUtf8,
   resolveCandidateFunctionalExecutionTimeoutMs,
   resolvePlaywrightLaunchContext,
@@ -30,6 +31,31 @@ import {
   summarizePlaywrightDiscoveryError,
   validatePromotedSpecInternalImports,
 } from "./spec-generation-hybrid";
+
+test("only the terminal positive URL oracle requires a business completion signal", () => {
+  const source = [
+    "await promotedRuntime.expectPromotedVisible({",
+    "  stepIndex: 21,",
+    "  target: 'Continuar',",
+    "  polarity: \"positive\",",
+    "  expectedUrl: '/summary',",
+    "  assertion: async () => {},",
+    "});",
+    "await promotedRuntime.expectPromotedVisible({",
+    "  stepIndex: 31,",
+    "  target: 'Transferencia completada',",
+    "  polarity: \"positive\",",
+    "  expectedUrl: '/summary',",
+    "  assertion: async () => {},",
+    "});",
+  ].join("\n");
+
+  const marked = markTerminalCompletionOracle(source, 31);
+  const intermediate = marked.slice(0, marked.indexOf("stepIndex: 31"));
+  const terminal = marked.slice(marked.indexOf("stepIndex: 31"));
+  assert.doesNotMatch(intermediate, /requireCompletionSignal/);
+  assert.match(terminal, /requireCompletionSignal: true/);
+});
 
 test("T1: repairs a missing expect binding in a compatible Playwright import", () => {
   const source = "import { test } from '@playwright/test';\nawait expect(page).toBeVisible();";

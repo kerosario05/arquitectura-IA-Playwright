@@ -98,6 +98,7 @@ export async function consolidateRunEvidence(
       return undefined;
     }
 
+    const evidenceRoot = evidenceConfig.outputRoot;
     console.log(`[evidence:run] starting consolidation jobId=${jobId} appSlug=${appSlug} sectionSlug=${sectionSlug || "default-section"}`);
 
     const runRecorder = new RunEvidenceRecorder({
@@ -105,45 +106,67 @@ export async function consolidateRunEvidence(
       sectionSlug: sectionSlug || "default-section",
       sectionName,
       runId: jobId,
+      outputRoot: evidenceRoot,
     });
 
     await runRecorder.start();
 
     // Scan artifact directory for scenario evidence.json files
     const artifactDir = path.join(ARTIFACTS_DIR, jobId);
-    const evidenceRoot = evidenceConfig.outputRoot;
     const sectionSlugNormalized = sectionSlug || "default-section";
-    const runDir = path.join(evidenceRoot, appSlug, sectionSlugNormalized, "runs", jobId, "scenarios");
+    const appEvidenceDir = path.join(evidenceRoot, appSlug);
+    const preferredRunDir = path.join(appEvidenceDir, sectionSlugNormalized, "runs", jobId, "scenarios");
+    // A logical run can be assembled by different runners (for example promoted-spec reuse
+    // and discovery). Each runner may resolve TestRail section metadata differently, so the
+    // same runId can have scenario evidence under more than one section directory. Consolidate
+    // all evidence for this app + runId, while still writing the single report to the requested
+    // section. Never cross app or run boundaries.
+    const runDirs = new Set<string>([preferredRunDir]);
+    if (fs.existsSync(appEvidenceDir)) {
+      for (const sectionEntry of fs.readdirSync(appEvidenceDir, { withFileTypes: true })) {
+        if (!sectionEntry.isDirectory()) continue;
+        const candidate = path.join(appEvidenceDir, sectionEntry.name, "runs", jobId, "scenarios");
+        if (fs.existsSync(candidate)) runDirs.add(candidate);
+      }
+    }
     const includedScenarioIds = new Set<string>();
 
-    console.log(`[evidence:run] searching for scenarios in runDir=${runDir}`);
+    console.log(`[evidence:run] searching for scenarios in runDirs=${[...runDirs].join("|")}`);
 
-    if (fs.existsSync(runDir)) {
+    for (const runDir of runDirs) {
+      if (!fs.existsSync(runDir)) continue;
       const scenarioDirs = fs.readdirSync(runDir, { withFileTypes: true })
         .filter(dirent => dirent.isDirectory())
         .map(dirent => dirent.name);
 
-      console.log(`[evidence:run] found ${scenarioDirs.length} scenario directories: ${scenarioDirs.join(", ")}`);
+      console.log(`[evidence:run] found ${scenarioDirs.length} scenario directories in ${runDir}: ${scenarioDirs.join(", ")}`);
 
       for (const scenarioDir of scenarioDirs) {
         const evidenceJsonPath = path.join(runDir, scenarioDir, "evidence.json");
         if (fs.existsSync(evidenceJsonPath)) {
-          console.log(`[evidence:run] loading scenario evidence from ${evidenceJsonPath}`);
+          let scenarioId: string | undefined;
           try {
             const parsedEvidence = JSON.parse(fs.readFileSync(evidenceJsonPath, "utf8"));
-            if (typeof parsedEvidence?.scenarioId === "string") includedScenarioIds.add(parsedEvidence.scenarioId);
+            if (typeof parsedEvidence?.scenarioId === "string") scenarioId = parsedEvidence.scenarioId;
           } catch {
             // addScenarioFromFile below owns the evidence parse error handling.
           }
+          if (scenarioId && includedScenarioIds.has(scenarioId)) {
+            console.log(`[evidence:run] skipped duplicate scenarioId=${scenarioId} path=${evidenceJsonPath}`);
+            continue;
+          }
+          console.log(`[evidence:run] loading scenario evidence from ${evidenceJsonPath}`);
           await runRecorder.addScenarioFromFile(evidenceJsonPath);
+          if (scenarioId) includedScenarioIds.add(scenarioId);
         } else {
           console.log(`[evidence:run] evidence.json not found in ${scenarioDir}`);
         }
       }
+    }
 
-      // Apply final status overrides from case_finished events
-      // BUT: evidence gate failures (Fallido) must not be overridden to Exitoso
-      if (caseOutcomeMap && caseOutcomeMap.size > 0) {
+    // Apply final status overrides from case_finished events
+    // BUT: evidence gate failures (Fallido) must not be overridden to Exitoso
+    if (caseOutcomeMap && caseOutcomeMap.size > 0) {
         console.log(`[evidence:run] applying ${caseOutcomeMap.size} status overrides from case_finished events`);
         for (const [scenarioId, outcome] of caseOutcomeMap.entries()) {
           // Get recorded scenario - handle both Map and object/array structures
@@ -183,9 +206,6 @@ export async function consolidateRunEvidence(
 
            runRecorder.overrideScenarioStatus(scenarioId, outcome.status, "case_finished");
         }
-      }
-    } else {
-      console.log(`[evidence:run] runDir does not exist: ${runDir}`);
     }
 
     for (const scenario of additionalScenarios) {
@@ -193,6 +213,11 @@ export async function consolidateRunEvidence(
       runRecorder.addScenario(scenario);
       includedScenarioIds.add(scenario.scenarioId);
       console.log(`[evidence:run] added terminal scenario scenarioId=${scenario.scenarioId} status=${scenario.status}`);
+    }
+
+    if (runRecorder.scenarioCount === 0) {
+      console.log(`[evidence:run] skipped consolidation jobId=${jobId} reason=no_scenarios_found`);
+      return undefined;
     }
 
     const record = await runRecorder.finish();
@@ -377,6 +402,8 @@ export type ReuseExistingPromotedSpecScenario = {
   caseId: number;
   specPath: string;
   title: string;
+  /** Human-readable steps are sent with case_started so the live panel can render the active case immediately. */
+  steps?: string[];
   /** This scenario's own current "Datos de este escenario" values -- see rerun-runner.ts's
    * PromotedSpecReuseEntry.runtimeValues doc comment for provenance. */
   runtimeValues?: Record<string, string>;
@@ -441,7 +468,14 @@ export async function startReuseExistingPromotedSpecRun(
       currentCaseId: scenario.scenarioId,
       currentCaseTitle: scenario.title,
     });
-    jobStore.appendLog(jobId, JSON.stringify({ type: "case_started", caseId: scenario.scenarioId, title: scenario.title, index: index + 1, total }));
+    jobStore.appendLog(jobId, JSON.stringify({
+      type: "case_started",
+      caseId: scenario.scenarioId,
+      title: scenario.title,
+      index: index + 1,
+      total,
+      ...(scenario.steps?.length ? { steps: scenario.steps } : {}),
+    }));
     jobStore.appendLog(jobId, `[reuse-existing] scenario=${scenario.scenarioId} caseId=${scenario.caseId} specPath=${scenario.specPath} publishInvoked=false generationInvoked=false`);
 
     const verification = await verify(scenario.specPath, undefined, {

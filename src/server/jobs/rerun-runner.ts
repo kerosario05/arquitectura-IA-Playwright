@@ -9,7 +9,7 @@ import {
   readMobileExecutionManifest,
   readMobileExecutionResults,
 } from "./mobile-rerun-artifacts";
-import { loadScenarios } from "../../recording/recording-store";
+import { findOwningAppSlug, loadScenarios } from "../../recording/recording-store";
 import { resolveSpecForScenario } from "../../automations/recording-automation-resolution";
 import type { RecordedScenario } from "../../recording/trace-to-scenario";
 import { toSharedMcpScenario, reconcileRecordingExecutionContractLineage } from "../../recording/canonical-recording-contract";
@@ -30,6 +30,8 @@ export type PromotedSpecReuseEntry = {
   scenarioId: string;
   canonicalScenarioId?: string;
   specPath?: string;
+  /** Human-readable canonical steps for LiveExecution's case_started event. */
+  steps?: string[];
   specState: "fresh" | "stale" | "missing";
   reuse: boolean;
   caseId?: number;
@@ -54,6 +56,7 @@ export type RerunPrepareResult = {
   rerunMode: "failed_only" | "all";
   appSlug: string;
   recordingId?: string;
+  recordingSelections?: RecordingBatchLineageSelection[];
   targetAppSlug?: string;
   targetAppName?: string;
   sectionName?: string;
@@ -82,6 +85,12 @@ export type RerunPrepareResult = {
   ok: false;
   error: string;
   message: string;
+};
+
+export type RecordingBatchLineageSelection = {
+  appSlug: string;
+  recordingId: string;
+  scenarioIds: string[];
 };
 
 type JobMetadata = {
@@ -140,6 +149,7 @@ async function prepareRerunFromReuseExistingJob(
         caseId: scenario.caseId,
         specPath: scenario.specPath,
         title: canonical.title,
+        steps: canonical.testRailSteps.map((step) => step.content),
         runtimeValues: currentRuntimeValues,
         specState: "fresh",
         reuse: true,
@@ -158,6 +168,7 @@ async function prepareRerunFromReuseExistingJob(
         caseId: scenario.caseId,
         specPath: resolved.status !== "missing" ? resolved.path : undefined,
         title: canonical.title,
+        steps: canonical.testRailSteps.map((step) => step.content),
         runtimeValues: currentRuntimeValues,
         specState: resolved.status,
         reuse: false,
@@ -175,8 +186,123 @@ async function prepareRerunFromReuseExistingJob(
     rerunMode: mode,
     appSlug,
     recordingId,
+    recordingSelections: [{ appSlug, recordingId, scenarioIds: stored.map((scenario) => scenario.scenarioId) }],
     promotedSpecReuse,
     allReusable,
+  };
+}
+
+/**
+ * Recording-batch jobs are sourced from canonical recording stores, not
+ * preview-scenarios.json. Keep each scenario tied to its owning project and recording so reruns
+ * remain exact even when scenario IDs overlap across projects.
+ */
+async function prepareRerunFromRecordingBatchJob(
+  sourceJobId: string,
+  mode: "failed_only" | "all",
+  record: JobRecordLike | undefined,
+): Promise<RerunPrepareResult | undefined> {
+  const params = record?.params;
+  if (params?.executionMode !== "recording_batch"
+    && params?.executionMode !== "mixed_rerun"
+    && params?.executionMode !== "reuse_existing_promoted_spec") return undefined;
+
+  let selections: RecordingBatchLineageSelection[] = [];
+  if (Array.isArray(params.recordingSelections)) {
+    selections = params.recordingSelections.flatMap((entry) => {
+      if (!entry || typeof entry !== "object") return [];
+      const value = entry as Partial<RecordingBatchLineageSelection>;
+      if (typeof value.appSlug !== "string" || typeof value.recordingId !== "string" || !Array.isArray(value.scenarioIds)) return [];
+      const scenarioIds = value.scenarioIds.filter((id): id is string => typeof id === "string" && id.length > 0);
+      return scenarioIds.length ? [{ appSlug: value.appSlug, recordingId: value.recordingId, scenarioIds }] : [];
+    });
+  }
+
+  // Backward compatibility for existing jobs: older recording-batch params only persisted flat
+  // ID arrays. Reconstruct only a unique mapping from the canonical stores; ambiguity fails
+  // closed instead of crossing project/recording boundaries.
+  if (selections.length === 0 && params.executionMode === "recording_batch") {
+    const recordingIds = Array.isArray(params.recordingIds)
+      ? params.recordingIds.filter((id): id is string => typeof id === "string" && id.length > 0)
+      : typeof params.recordingId === "string" ? [params.recordingId] : [];
+    const scenarioIds = Array.isArray(params.scenarioIds)
+      ? params.scenarioIds.filter((id): id is string => typeof id === "string" && id.length > 0)
+      : [];
+    const matches = new Map<string, RecordingBatchLineageSelection[]>();
+    for (const recordingId of recordingIds) {
+      const appSlug = findOwningAppSlug(recordingId)
+        ?? (typeof params.appSlug === "string" ? params.appSlug : undefined);
+      if (!appSlug) continue;
+      const scenarios = loadScenarios(appSlug, recordingId);
+      for (const scenarioId of scenarioIds) {
+        if (!scenarios.some((scenario) => scenario.scenarioId === scenarioId)) continue;
+        const candidate = matches.get(scenarioId) ?? [];
+        candidate.push({ appSlug, recordingId, scenarioIds: [scenarioId] });
+        matches.set(scenarioId, candidate);
+      }
+    }
+    const ambiguous = scenarioIds.filter((id) => (matches.get(id)?.length ?? 0) !== 1);
+    if (ambiguous.length > 0) {
+      return {
+        ok: false,
+        error: "rerun_lineage_broken",
+        message: `Recording-batch job ${sourceJobId} cannot resolve canonical recording ownership for scenario(s): ${ambiguous.join(", ")}. Re-select the scenarios from their recording and launch again.`,
+      };
+    }
+    selections = scenarioIds.map((id) => matches.get(id)![0]);
+  }
+
+  if (selections.length === 0) {
+    if (params.executionMode !== "recording_batch") return undefined;
+    return { ok: false, error: "rerun_lineage_broken", message: `Recording-batch job ${sourceJobId} has no canonical recording selection metadata.` };
+  }
+
+  const promotedSpecReuse: PromotedSpecReuseEntry[] = [];
+  const scenarios: McpScenario[] = [];
+  for (const selection of selections) {
+    const canonicalScenarios = loadScenarios(selection.appSlug, selection.recordingId);
+    for (const scenarioId of selection.scenarioIds) {
+      const canonical = canonicalScenarios.find((candidate) => candidate.scenarioId === scenarioId);
+      if (!canonical) {
+        return { ok: false, error: "rerun_lineage_broken", message: `Recording-batch job ${sourceJobId} has no canonical scenario ${scenarioId} in ${selection.appSlug}/${selection.recordingId}.` };
+      }
+      const resolved = await resolveSpecForScenario(canonical);
+      const isReusable = resolved.status === "fresh" && Boolean(resolved.path);
+      const runtimeValues = canonical.runtimeDataset?.resolvedValues;
+      const caseId = typeof canonical.testRailCaseId === "number" ? canonical.testRailCaseId : undefined;
+      if (!isReusable) scenarios.push(toSharedMcpScenario(canonical, selection.appSlug, runtimeValues ?? {}));
+      promotedSpecReuse.push({
+        scenarioId,
+        canonicalScenarioId: scenarioId,
+        specPath: resolved.status !== "missing" ? resolved.path : undefined,
+        specState: resolved.status,
+        reuse: isReusable,
+        caseId,
+        title: canonical.title,
+        steps: canonical.testRailSteps.map((step) => step.content),
+        runtimeValues,
+      });
+    }
+  }
+
+  const appSlugs = [...new Set(selections.map((selection) => selection.appSlug))];
+  const recordingIds = [...new Set(selections.map((selection) => selection.recordingId))];
+  const allReusable = promotedSpecReuse.length > 0 && promotedSpecReuse.every((entry) => entry.reuse);
+  return {
+    ok: true,
+    jobType: "scenario-preview",
+    scenarios,
+    selectedCount: promotedSpecReuse.length,
+    totalCount: promotedSpecReuse.length,
+    sourceJobId,
+    rerunMode: mode,
+    appSlug: appSlugs.length === 1 ? appSlugs[0] : String(params?.appSlug ?? appSlugs[0]),
+    recordingId: recordingIds.length === 1 ? recordingIds[0] : undefined,
+    recordingSelections: selections,
+    promotedSpecReuse,
+    allReusable,
+    sectionSlug: typeof params.sectionSlug === "string" ? params.sectionSlug : undefined,
+    sectionName: typeof params.sectionName === "string" ? params.sectionName : undefined,
   };
 }
 
@@ -399,6 +525,8 @@ export async function prepareRerun(
 
   if (!fs.existsSync(previewPath) && sourceJobTypeHint !== "mobile-launch-execution") {
     const currentJob = await getJobRecord(sourceJobId);
+    const recordingBatch = await prepareRerunFromRecordingBatchJob(sourceJobId, mode, currentJob);
+    if (recordingBatch) return recordingBatch;
     const directReuse = await prepareRerunFromReuseExistingJob(sourceJobId, mode, currentJob);
     if (directReuse) return directReuse;
     // The immediate sourceJobId itself has no preview-scenarios.json (e.g. it's a

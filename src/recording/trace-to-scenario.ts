@@ -14,6 +14,7 @@ import { semanticIdentityFromFrameworkOwnerEvidence } from "./framework-owner-se
 import { confirmedCompoundSelectionBefore, logicalCompoundChildValue } from "./compound-value";
 import { quoteHumanValue, renderHumanStepValue } from "./human-step-renderer";
 import type { RecordingAiScenarioProposal } from "./ai-scenario-contract";
+import type { SelectorOptionInventory } from "./semantic-recording";
 import { buildCanonicalInteractions, enrichRecordedScenarioContract, evaluateRecordingReadiness, hasExecutionAuthority, hasReusableStructuralClickIdentity, isMaskActivation, materializedSemanticSignature, validateInteractionStateSequence, type CanonicalInteraction, type EntityActionBlock, type MutationOpportunity, type RecordingReadiness, type RuntimeInputRequirement, type ScenarioMutationProposal } from "./canonical-recording-contract";
 
 /**
@@ -32,6 +33,8 @@ export type RecordedWebStep = {
   target?: { strategy: string; value: string };
   value?: string;
   valueKey?: string;
+  segmentPosition?: number;
+  playwrightRecorderEvidence?: import("./structural-owner-identity").PlaywrightRecorderEvidence;
   description: string;
   entityScope?: string;
   interactionId?: string;
@@ -192,6 +195,8 @@ export type RecordedScenario = {
   canonicalInteractions?: CanonicalInteraction[];
   entityActionBlocks?: EntityActionBlock[];
   runtimeInputRequirements?: RuntimeInputRequirement[];
+  /** Exact, selector-scoped option inventories observed while recording this scenario. */
+  selectorOptionInventories?: SelectorOptionInventory[];
   readiness?: RecordingReadiness;
   technicalKnowledgeRefs?: string[];
   mutationOpportunities?: MutationOpportunity[];
@@ -805,6 +810,7 @@ export function buildHappyPathScenario(
   const stepTargets: RecordedStepTarget[] = [];
   let hasUncertainSteps = false;
   const segmentGroupValueKeys = new Map<string, string>();
+  const virtualKeyboardGroupValueKeys = new Map<string, string>();
   // Older recordings already persisted the functional selection's lineage but synthesized that
   // event with no locators. Recover only the captured option target referenced by its source seqs;
   // never derive a locator from the option text or from a position.
@@ -837,6 +843,65 @@ export function buildHappyPathScenario(
   const canonicalEvents = buildCanonicalInteractions(eventsWithSelectionTargets, semanticModel.editingSessions);
   const editingSessionsByRef = new Map(semanticModel.editingSessions.map((session) => [session.editingSessionId, session]));
   const canonicalByEvent = new Map(canonicalEvents.flatMap((interaction) => interaction.sourceEventRefs.map((ref) => [ref, interaction] as const)));
+
+  // Group only a consecutive run of one-character clicks that Capture V2 independently
+  // recognized as keys on the same visible keyboard and that causally changed the same display.
+  // Post-action notes are transparent; any other functional action closes the run.
+  const virtualKeyboardSegments = new Map<number, { groupId: string; position: number; count: number; valueKey: string; label: string; sourceEventRefs: string[]; evidence: NonNullable<CanonicalInteraction["playwrightRecorderEvidence"]> }>();
+  let pendingKeyboard: Array<{ eventIndex: number; event: RecordedEvent; interaction: CanonicalInteraction; evidence: NonNullable<CanonicalInteraction["playwrightRecorderEvidence"]>; signature: string }> = [];
+  const finishKeyboardGroup = () => {
+    if (pendingKeyboard.length >= 2) {
+      const first = pendingKeyboard[0];
+      const label = first.interaction.semanticField?.trim() || first.evidence.fieldLabel?.trim() || "Valor del teclado virtual";
+      const groupId = `virtual-keyboard:${first.eventIndex}:${first.interaction.relatedStateSurfaceEvidence?.changedNodeIdentity}`;
+      const valueKey = first.interaction.valueKey ?? `virtual_keyboard_${label.toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, "_").replace(/^_|_$/g, "") || "value"}`;
+      const sourceEventRefs = pendingKeyboard.map((entry) => `event-${entry.eventIndex + 1}`);
+      pendingKeyboard.forEach((entry, offset) => virtualKeyboardSegments.set(entry.eventIndex, {
+        groupId,
+        position: offset + 1,
+        count: pendingKeyboard.length,
+        valueKey,
+        label,
+        sourceEventRefs,
+        evidence: { ...first.evidence, segmentCount: pendingKeyboard.length },
+      }));
+    }
+    pendingKeyboard = [];
+  };
+  for (const [eventIndex, event] of eventsWithSelectionTargets.entries()) {
+    if (event.kind === "note") continue;
+    const interaction = canonicalByEvent.get(`event-${eventIndex + 1}`);
+    const evidence = interaction?.playwrightRecorderEvidence;
+    const keyboardField = interaction?.semanticField?.trim() || evidence?.fieldLabel?.trim();
+    // Some custom keyboards update a rendered string that Capture V2 cannot associate with
+    // a DOM state-surface identity. A stable field label, the same captured keyboard shape,
+    // and the same screen still bind the consecutive key presses to one runtime value.
+    const changedSurface = interaction?.relatedStateSurfaceEvidence?.changedNodeIdentity
+      ?? (keyboardField ? `field:${keyboardField.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase()}` : undefined);
+    const isVirtualKey = event.kind === "tap"
+      && evidence?.kind === "virtual_keyboard"
+      && typeof keyboardField === "string"
+      && keyboardField.length > 0
+      && Number.isInteger(evidence.buttonCount)
+      && (evidence.buttonCount ?? 0) >= 10
+      && Array.isArray(evidence.keyLabels)
+      && evidence.keyLabels.length >= 10
+      && Boolean(changedSurface);
+    if (!isVirtualKey || !interaction || evidence?.kind !== "virtual_keyboard") {
+      finishKeyboardGroup();
+      continue;
+    }
+    const signature = JSON.stringify({
+      keyboard: evidence.keyLabels ?? [],
+      buttonCount: evidence.buttonCount,
+      surface: changedSurface,
+      screen: interaction.screenBeforeRef,
+      field: interaction.semanticField ?? evidence.fieldLabel,
+    });
+    if (pendingKeyboard.length > 0 && pendingKeyboard[pendingKeyboard.length - 1].signature !== signature) finishKeyboardGroup();
+    pendingKeyboard.push({ eventIndex, event, interaction, evidence, signature });
+  }
+  finishKeyboardGroup();
 
   const isMobile = trace.platform === "android";
   const recordingDataPolicy = normalizeRecordingDataPolicy(trace.recordingDataPolicy);
@@ -935,6 +1000,58 @@ export function buildHappyPathScenario(
             && !(normalizedDynamicTargetLabel && normalizedLocatorValue.includes(normalizedDynamicTargetLabel));
         })
       : (target.locators ?? []);
+    const virtualKeyboardSegment = event.kind === "tap" ? virtualKeyboardSegments.get(eventIndex) : undefined;
+    if (virtualKeyboardSegment) {
+      if (virtualKeyboardSegment.position === 1) {
+        virtualKeyboardGroupValueKeys.set(virtualKeyboardSegment.groupId, virtualKeyboardSegment.valueKey);
+        requiredData.push({
+          key: virtualKeyboardSegment.valueKey,
+          label: virtualKeyboardSegment.label,
+          ...(entityScopeForTarget(target) ? { entityScope: entityScopeForTarget(target) } : {}),
+          stepIndex: testRailSteps.length,
+          technicalTargetRefs: [],
+          sourceEventRefs: virtualKeyboardSegment.sourceEventRefs,
+          exampleValue: undefined,
+          sensitive: true,
+          valueRole: "secure_input",
+          source: "secure",
+          confidence: 0.95,
+          needsReview: false,
+          formatHint: `virtual_keyboard_${virtualKeyboardSegment.count}`,
+          semanticField: virtualKeyboardSegment.label,
+        });
+      }
+      const valueKey = virtualKeyboardGroupValueKeys.get(virtualKeyboardSegment.groupId) ?? virtualKeyboardSegment.valueKey;
+      const stepTemplate = `Presionar [${valueKey}] en "${virtualKeyboardSegment.label}"`;
+      const renderedStep = `Presionar carácter ${virtualKeyboardSegment.position} de ${virtualKeyboardSegment.count} en "${virtualKeyboardSegment.label}"`;
+      testRailSteps.push({
+        content: stepTemplate,
+        stepTemplate,
+        renderedStep,
+        valueKey,
+        segmentPosition: virtualKeyboardSegment.position,
+        sourceEventRefs: [`event-${eventIndex + 1}`],
+        interactionId: `interaction-${eventIndex + 1}`,
+        ...(entityScopeForTarget(target) ? { entityScope: entityScopeForTarget(target) } : {}),
+        sensitive: true,
+        expected: "",
+        classification: "FUNCTIONAL_ACTION",
+        resolutionState: "runtime_resolution_required",
+        playwrightRecorderEvidence: virtualKeyboardSegment.evidence,
+      });
+      webSteps.push({
+        action: "click",
+        ...(targetLocatorsForPlan[0] ? { target: { strategy: targetLocatorsForPlan[0].strategy, value: targetLocatorsForPlan[0].value } } : {}),
+        valueKey,
+        segmentPosition: virtualKeyboardSegment.position,
+        playwrightRecorderEvidence: virtualKeyboardSegment.evidence,
+        description: stepTemplate,
+        ...(entityScopeForTarget(target) ? { entityScope: entityScopeForTarget(target) } : {}),
+        interactionId: `interaction-${eventIndex + 1}`,
+      });
+      hasUncertainSteps = true;
+      continue;
+    }
     // FIRST_LOSS fix (recordingId=efff98e2-..., reconfirmed against recordingId=b9e73c33-...):
     // canonical-recording-contract.ts's collapseSegmentedInputs already merges N sibling
     // segment-box fills into ONE canonical interaction so the dataset/execution engine only ever

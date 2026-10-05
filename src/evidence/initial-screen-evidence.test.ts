@@ -10,10 +10,13 @@ function mockPage(options: { ready: boolean; screenshotFails?: boolean }) {
     isClosed: () => false,
     waitForLoadState: async () => undefined,
     evaluate: async () => options.ready,
-    screenshot: async ({ path: screenshotPath }: { path: string }) => {
+    screenshot: async ({ path: screenshotPath }: { path?: string } = {}) => {
       if (options.screenshotFails) throw new Error("screenshot_failed");
-      await fs.mkdir(path.dirname(screenshotPath), { recursive: true });
-      await fs.writeFile(screenshotPath, "image");
+      if (screenshotPath) {
+        await fs.mkdir(path.dirname(screenshotPath), { recursive: true });
+        await fs.writeFile(screenshotPath, "image");
+      }
+      return Buffer.from("image");
     },
   } as any;
 }

@@ -226,6 +226,18 @@ test("2D/UNBOUND_GRID_FILL: an unbound field retries through the shared header/r
   assert.match(fn, /targetIdentity\.technicalTargetRefs\.length === 0/);
 });
 
+test("2D1/ENTITY_GRID_FILL: promoted fill activates and resolves the editor through the shared row-scoped fill resolver", () => {
+  const start = RUNTIME_SOURCE.indexOf("async fillPromotedField(options: PromotedFillOptions)");
+  const end = RUNTIME_SOURCE.indexOf("\n  async ", start + 10);
+  const fn = RUNTIME_SOURCE.slice(start, end);
+  assert.match(fn, /resolveFillTarget\(/);
+  assert.match(fn, /rowScope: entityRowScope \?\? rowScopeFromPromotedRef\(parsedTargetRefs\.rowRef\)/);
+  assert.match(fn, /entityScope: targetIdentity\.entityScope \?\? options\.entityScope/);
+  assert.match(fn, /gridFillResolution\?\.status === "resolved"/);
+  assert.match(fn, /locatorStrategy\?\.startsWith\("grid_cell_"\)/);
+  assert.match(fn, /gridCellFillResolved=true strategy=\$\{gridFillResolution\.locatorStrategy\}/);
+});
+
 test("2E/RECORDED_FIELD_SELECTION: compiled selection value and owner field reach the shared grid-selection resolver", () => {
   const start = RUNTIME_SOURCE.indexOf("async selectPromotedItem(options: PromotedActionOptions)");
   const end = RUNTIME_SOURCE.indexOf("\n  async expectPromotedVisible(", start);

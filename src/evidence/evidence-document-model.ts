@@ -111,6 +111,18 @@ function buildEvidenceDocumentScenario(sc: EvidenceScenarioRecord): EvidenceDocu
 
   images = prependInitialScreenImage(sc, images);
 
+  // The last settled page can belong to a synthetic validation step (for example, an
+  // assertion generated from the final "Continue" action). Validation screenshots are
+  // intentionally omitted above, so add the recorder's explicit final checkpoint back as
+  // the closing image in the document.
+  const finalScreenPath = sc.finalScreenEvidence?.captured && sc.finalScreenEvidence.path
+    ? path.resolve(sc.finalScreenEvidence.path)
+    : null;
+  if (finalScreenPath && isImageFile(finalScreenPath) && fs.existsSync(finalScreenPath)) {
+    images = images.filter(image => path.resolve(image.path) !== finalScreenPath);
+    images.push({ path: finalScreenPath, stepText: "Pantalla final después del último paso" });
+  }
+
   // Dedup final-phase images: keep only the dominant final screenshot per scenario.
   // The final phase = last N images around the dominant stepIndex.
   // Mode "detail_or_ordinal" removes adjacent steps (click → ordinal → detail).
@@ -295,15 +307,27 @@ export function prependInitialScreenImage<T extends EvidenceDocumentImage>(
   images: T[],
 ): Array<T | EvidenceDocumentImage> {
   const initial = scenario.initialScreenEvidence;
-  if (!initial?.path || !isImageFile(initial.path) || !fs.existsSync(initial.path)) return images;
-  const initialPath = path.resolve(initial.path);
-  if (images.some((image) => path.resolve(image.path) === initialPath)) return images;
-  return [{
-    path: initialPath,
-    stepText: initial.status === "load_failed"
-      ? `ESTADO INICIAL - FALLO DE CARGA: ${initial.reason ?? "initial_load_failure"}`
-      : "ESTADO INICIAL",
-  }, ...images];
+  const checkpointPath = initial?.completedFormCheckpointPath;
+  const completedFormPath = checkpointPath && isImageFile(checkpointPath) && fs.existsSync(checkpointPath)
+    ? path.resolve(checkpointPath)
+    : null;
+  const initialPath = initial?.path && isImageFile(initial.path) && fs.existsSync(initial.path)
+    ? path.resolve(initial.path)
+    : null;
+  // A useful completed-form checkpoint replaces the blank initial login frame at the
+  // beginning of the report. Keep the initial frame only when no completed checkpoint exists.
+  const preferredPath = completedFormPath ?? initialPath;
+  if (!preferredPath) return images;
+  const preferredImage: EvidenceDocumentImage = completedFormPath
+    ? { path: completedFormPath, stepText: "Formulario completado" }
+    : {
+        path: initialPath!,
+        stepText: initial?.status === "load_failed"
+          ? `ESTADO INICIAL - FALLO DE CARGA: ${initial.reason ?? "initial_load_failure"}`
+          : "ESTADO INICIAL",
+      };
+  const remaining = images.filter((image) => path.resolve(image.path) !== preferredPath);
+  return [preferredImage, ...remaining];
 }
 
 export function isImageFile(filepath: string): boolean {

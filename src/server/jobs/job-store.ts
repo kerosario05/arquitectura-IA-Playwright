@@ -1,6 +1,8 @@
 import { randomUUID } from "crypto";
 import { EventEmitter } from "events";
 import type { ChildProcess } from "child_process";
+import * as fs from "node:fs";
+import * as path from "node:path";
 
 export type JobStatus = "queued" | "running" | "done" | "failed" | "cancelled" | "completed_with_failures" | "completed_with_sync_errors";
 
@@ -81,8 +83,74 @@ export type JobInternal = Job & {
   emitter: EventEmitter;
 };
 
+const RUN_HISTORY_DIR = path.resolve(process.cwd(), ".artifacts", "qa-lab-run-history");
+const TERMINAL_STATUSES = new Set<JobStatus>([
+  "done", "failed", "cancelled", "completed_with_failures", "completed_with_sync_errors",
+]);
+const PERSISTED_PARAM_KEYS = [
+  "appSlug", "projectSlug", "targetAppSlug", "launchId", "huTitle", "scenarioTitle", "title",
+  "testrailProjectId", "testrailSuiteId", "testrailSectionId", "sectionId", "sectionName", "testRunId",
+] as const;
+const PERSISTED_SUMMARY_KEYS = [
+  "totalStories", "synced", "syncFailed", "passed", "failed", "skipped", "completed", "requested", "executed",
+  "progressPercent", "passRate", "scenarioCount", "currentCaseIndex", "totalCases", "requestedCases", "executedCases",
+  "notExecutableCases", "testRailRunId", "testRailRunUrl", "reasonCode", "errorMessage",
+] as const;
+
+function isTerminalStatus(status: string): status is JobStatus {
+  return TERMINAL_STATUSES.has(status as JobStatus);
+}
+
+function persistedSnapshot(job: JobInternal): Job {
+  const params: Record<string, unknown> = {};
+  for (const key of PERSISTED_PARAM_KEYS) {
+    const value = job.params[key];
+    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") params[key] = value;
+  }
+
+  const summary: Record<string, unknown> = {};
+  for (const key of PERSISTED_SUMMARY_KEYS) {
+    const value = job.summary?.[key as keyof JobSummary];
+    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean" || value === null) summary[key] = value;
+  }
+
+  return {
+    id: job.id,
+    type: job.type,
+    status: job.status,
+    params,
+    createdAt: job.createdAt,
+    startedAt: job.startedAt,
+    completedAt: job.completedAt,
+    durationMs: job.durationMs,
+    exitCode: job.exitCode,
+    logs: [],
+    summary: summary as JobSummary,
+    currentCase: job.currentCase,
+    currentCaseId: job.currentCaseId,
+    currentCaseTitle: job.currentCaseTitle,
+    errorMessage: job.errorMessage,
+  };
+}
+
+function isPersistedJob(value: unknown): value is Job {
+  if (!value || typeof value !== "object") return false;
+  const job = value as Partial<Job>;
+  return typeof job.id === "string"
+    && typeof job.type === "string"
+    && typeof job.status === "string"
+    && isTerminalStatus(job.status)
+    && typeof job.createdAt === "string"
+    && Boolean(job.params && typeof job.params === "object");
+}
+
 class JobStore {
   private readonly jobs = new Map<string, JobInternal>();
+  private readonly persistedJobs = new Map<string, Job>();
+
+  constructor() {
+    this.loadPersistedJobs();
+  }
 
   create(
     type: "sprint" | "discovery-batch" | "scenario-preview" | "mobile-emulator-boot" | "mobile-test-run" | "mobile-launch-execution" | "mobile-route-learning" | "session-recording",
@@ -110,6 +178,10 @@ class JobStore {
     return job ? this.serialize(job) : undefined;
   }
 
+  getPersisted(id: string): Job | undefined {
+    return this.persistedJobs.get(id);
+  }
+
   getInternal(id: string): JobInternal | undefined {
     return this.jobs.get(id);
   }
@@ -120,12 +192,15 @@ class JobStore {
    * infrastructure that must see every job regardless of ownership (e.g. device-busy checks).
    */
   list(options?: { includeInternal?: boolean }): Job[] {
-    const jobs = options?.includeInternal
+    const jobsById = new Map<string, Job>();
+    if (!options?.includeInternal) {
+      for (const job of this.persistedJobs.values()) jobsById.set(job.id, job);
+    }
+    const runtimeJobs = options?.includeInternal
       ? Array.from(this.jobs.values())
-      : Array.from(this.jobs.values()).filter((j) => !j.parentJobId);
-    return jobs
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-      .map((j) => this.serialize(j));
+      : Array.from(this.jobs.values()).filter((job) => !job.parentJobId);
+    for (const job of runtimeJobs) jobsById.set(job.id, this.serialize(job));
+    return Array.from(jobsById.values()).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
 
   update(id: string, patch: Partial<Pick<JobInternal, "status" | "startedAt" | "completedAt" | "durationMs" | "exitCode" | "summary" | "process" | "currentCase" | "currentCaseId" | "currentCaseTitle" | "errorMessage" | "issueKey" | "checklistUrl" | "defectCount">>): void {
@@ -136,7 +211,39 @@ class JobStore {
     if (patch.completedAt && job.startedAt && !patch.durationMs && !job.durationMs) {
       job.durationMs = new Date(patch.completedAt).getTime() - new Date(job.startedAt).getTime();
     }
+    if (!job.parentJobId && isTerminalStatus(job.status)) this.persistJob(job);
     job.emitter.emit("update", this.serialize(job));
+  }
+
+  private loadPersistedJobs(): void {
+    let files: string[];
+    try {
+      files = fs.readdirSync(RUN_HISTORY_DIR).filter((name) => name.endsWith(".json"));
+    } catch {
+      return;
+    }
+    for (const name of files) {
+      try {
+        const parsed: unknown = JSON.parse(fs.readFileSync(path.join(RUN_HISTORY_DIR, name), "utf-8"));
+        if (isPersistedJob(parsed)) this.persistedJobs.set(parsed.id, parsed);
+      } catch {
+        // Ignore incomplete/corrupt records so historical data cannot block startup.
+      }
+    }
+  }
+
+  private persistJob(job: JobInternal): void {
+    try {
+      fs.mkdirSync(RUN_HISTORY_DIR, { recursive: true });
+      const snapshot = persistedSnapshot(job);
+      const target = path.join(RUN_HISTORY_DIR, `${job.id}.json`);
+      const temporary = `${target}.${process.pid}.tmp`;
+      fs.writeFileSync(temporary, JSON.stringify(snapshot), "utf-8");
+      fs.renameSync(temporary, target);
+      this.persistedJobs.set(job.id, snapshot);
+    } catch {
+      // Best effort: history persistence must not alter the run's final status.
+    }
   }
 
   clearTransientParams(id: string): void {

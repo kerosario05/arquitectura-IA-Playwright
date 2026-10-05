@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { PromotedSpecRuntime } from "./promoted-spec-runtime";
+import { PromotedSpecRuntime, evaluatePromotedCompletionSignal } from "./promoted-spec-runtime";
 
 function withEnv(vars: Record<string, string | undefined>, fn: () => Promise<void>): Promise<void> {
   const original: Record<string, string | undefined> = {};
@@ -153,6 +153,97 @@ test("promoted assertion failure is recorded as failed before error propagation"
   } finally {
     await fs.rm(evidenceRoot, { recursive: true, force: true });
   }
+});
+
+test("positive URL oracle requires a fresh completion signal and rejects visible failure dialogs", async () => {
+  assert.equal(evaluatePromotedCompletionSignal({
+    expectedUrlMatches: true,
+    routeChangedSinceAction: false,
+    failureMessages: [],
+    successMessages: [],
+  }), false);
+  assert.equal(evaluatePromotedCompletionSignal({
+    expectedUrlMatches: true,
+    routeChangedSinceAction: false,
+    failureMessages: [],
+    successMessages: ["Transferencia realizada exitosamente"],
+  }), true);
+  assert.equal(evaluatePromotedCompletionSignal({
+    expectedUrlMatches: true,
+    routeChangedSinceAction: true,
+    failureMessages: ["No podemos procesar la operación (Code: 9902)"],
+    successMessages: [],
+  }), false);
+
+  const page = createMockPage() as any;
+  page.url = () => "https://example.test/summary";
+  page.evaluate = async () => ({ failureMessages: [], successMessages: [] });
+  const runtime = new PromotedSpecRuntime(page, { captureDiagnostics: false });
+  (runtime as any).ensureInitialEvidence = async () => undefined;
+  (runtime as any).captureEvidenceStep = async () => undefined;
+  (runtime as any).lastClickOutcome = {
+    stepIndex: 30,
+    previousUrl: "https://example.test/summary",
+    currentUrl: "https://example.test/summary",
+  };
+  await runtime.expectPromotedVisible({
+    stepIndex: 21,
+    target: "Continuar",
+    polarity: "positive",
+    expectedUrl: "/summary",
+    assertion: async () => undefined,
+  });
+
+  await assert.rejects(runtime.expectPromotedVisible({
+    stepIndex: 31,
+    target: "Transferencia completada",
+    polarity: "positive",
+    expectedUrl: "/summary",
+    requireCompletionSignal: true,
+    assertion: async () => undefined,
+  }), /PROMOTED_COMPLETION_SIGNAL_NOT_OBSERVED/);
+
+  page.evaluate = async () => ({
+    failureMessages: ["No podemos procesar la operación (Code: 9902)"],
+    successMessages: [],
+  });
+  await assert.rejects(runtime.expectPromotedVisible({
+    stepIndex: 31,
+    target: "Transferencia completada",
+    polarity: "positive",
+    expectedUrl: "/summary",
+    requireCompletionSignal: true,
+    assertion: async () => undefined,
+  }), /PROMOTED_FAILURE_DIALOG_VISIBLE/);
+});
+
+test("promoted successful fills feed the shared evidence checkpoint grouper", async () => {
+  const runtime = new PromotedSpecRuntime(createMockPage() as any, { captureDiagnostics: false });
+  const captured: Array<{ stepText: string; status: string; options: Record<string, unknown> }> = [];
+  let filled = false;
+  (runtime as any).markBoundaryProgress = async () => undefined;
+  (runtime as any).ensureInitialEvidence = async () => undefined;
+  (runtime as any).dismissSessionExpiringWarningIfPresent = async () => undefined;
+  (runtime as any).refreshActiveContainerForField = async () => ({ candidates: [], best: { matchingFieldFound: true } });
+  (runtime as any).waitForPromotedUiStable = async () => undefined;
+  (runtime as any).captureEvidenceStep = async (stepText: string, status: string, _error: unknown, options: Record<string, unknown>) => {
+    captured.push({ stepText, status, options });
+  };
+
+  await runtime.fillPromotedField({
+    stepIndex: 14,
+    target: "Dirección de correo",
+    value: "private-test-value",
+    actionIntent: "test_fill",
+    fill: async () => { filled = true; },
+  });
+
+  assert.strictEqual(filled, true);
+  assert.strictEqual(captured.length, 1);
+  assert.strictEqual(captured[0].status, "passed");
+  assert.strictEqual(captured[0].options.target, "Dirección de correo");
+  assert.strictEqual(captured[0].options.sourceStepIndex, 14);
+  assert.ok(!captured[0].stepText.includes("private-test-value"));
 });
 
 test("c42940 spec keeps UTF-8-safe auth gate checks", async () => {

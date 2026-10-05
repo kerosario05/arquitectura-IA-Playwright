@@ -34,6 +34,9 @@ export async function generateConsolidatedEvidenceDocx(
   templatePath: string,
   outputPath: string,
 ): Promise<{ success: boolean; error?: string; outputPath?: string }> {
+  if (scenarios.length === 0) {
+    return { success: false, error: "evidence_scenarios_empty" };
+  }
   await fs.promises.mkdir(path.dirname(outputPath), { recursive: true });
   if (!fs.existsSync(templatePath)) {
     return { success: false, error: "evidence_template_not_found" };
@@ -538,6 +541,16 @@ function prepareScenarioDocxInput(scenario: EvidenceScenarioRecord): PreparedSce
 
   images = prependInitialScreenImage(scenario, images);
 
+  // Validation images are filtered from the report, but the recorder's final settled
+  // checkpoint must still be represented even when it was attached to that validation.
+  const finalScreenPath = scenario.finalScreenEvidence?.captured && scenario.finalScreenEvidence.path
+    ? path.resolve(scenario.finalScreenEvidence.path)
+    : null;
+  if (finalScreenPath && isImageFile(finalScreenPath) && fs.existsSync(finalScreenPath)) {
+    images = images.filter(image => path.resolve(image.path) !== finalScreenPath);
+    images.push({ path: finalScreenPath, stepText: "Pantalla final después del último paso" });
+  }
+
   if (scenario.detailEvidence?.screenshotPath) {
     const detailPath = path.resolve(scenario.detailEvidence.screenshotPath);
     console.log(
@@ -635,20 +648,30 @@ function finalizeScenarioImagesForDocx(
   return { images, finalImagePath, finalIncluded, finalIsLast };
 }
 
-function prependInitialScreenImage(
+export function prependInitialScreenImage(
   scenario: EvidenceScenarioRecord,
   images: Array<{ path: string; stepText: string }>,
 ): Array<{ path: string; stepText: string }> {
   const initial = scenario.initialScreenEvidence;
-  if (!initial?.path || !isImageFile(initial.path) || !fs.existsSync(initial.path)) return images;
-  const initialPath = path.resolve(initial.path);
-  if (images.some((image) => path.resolve(image.path) === initialPath)) return images;
-  return [{
-    path: initialPath,
-    stepText: initial.status === "load_failed"
-      ? `ESTADO INICIAL - FALLO DE CARGA: ${initial.reason ?? "initial_load_failure"}`
-      : "ESTADO INICIAL",
-  }, ...images];
+  const checkpointPath = initial?.completedFormCheckpointPath;
+  const completedFormPath = checkpointPath && isImageFile(checkpointPath) && fs.existsSync(checkpointPath)
+    ? path.resolve(checkpointPath)
+    : null;
+  const initialPath = initial?.path && isImageFile(initial.path) && fs.existsSync(initial.path)
+    ? path.resolve(initial.path)
+    : null;
+  const preferredPath = completedFormPath ?? initialPath;
+  if (!preferredPath) return images;
+  const preferredImage = completedFormPath
+    ? { path: completedFormPath, stepText: "Formulario completado" }
+    : {
+        path: initialPath!,
+        stepText: initial?.status === "load_failed"
+          ? `ESTADO INICIAL - FALLO DE CARGA: ${initial.reason ?? "initial_load_failure"}`
+          : "ESTADO INICIAL",
+      };
+  const remaining = images.filter(image => path.resolve(image.path) !== preferredPath);
+  return [preferredImage, ...remaining];
 }
 
 function validateFinalImageInsertionLogs(

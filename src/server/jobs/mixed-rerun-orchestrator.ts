@@ -11,6 +11,35 @@ import type { McpScenario } from "../../scenarios/scenario-types";
 import type { JobStatus } from "./job-store";
 import type { EvidenceScenarioRecord } from "../../evidence/evidence-types";
 
+const TERMINAL_JOB_STATUSES = new Set<JobStatus>([
+  "done",
+  "failed",
+  "cancelled",
+  "completed_with_failures",
+  "completed_with_sync_errors",
+]);
+
+/** Wait until a child runner has actually completed, even if its kickoff function only spawned
+ * a background process and returned. Subscribe first and recheck after subscribing to close the
+ * race where the child reaches a terminal state between the initial read and subscription. */
+function waitForChildTerminal(childJobId: string): Promise<void> {
+  const current = jobStore.get(childJobId);
+  if (!current || TERMINAL_JOB_STATUSES.has(current.status)) return Promise.resolve();
+
+  return new Promise((resolve) => {
+    let unsubscribe = () => {};
+    const checkTerminal = () => {
+      const latest = jobStore.get(childJobId);
+      if (!latest || TERMINAL_JOB_STATUSES.has(latest.status)) {
+        unsubscribe();
+        resolve();
+      }
+    };
+    unsubscribe = jobStore.subscribe(childJobId, { onLog: () => {}, onUpdate: checkTerminal });
+    checkTerminal();
+  });
+}
+
 /**
  * A mixed rerun batch (some scenarios have a fresh promoted spec, some don't) previously fell
  * through entirely to the full scenario-preview/discovery/AI pipeline for EVERY scenario,
@@ -133,14 +162,20 @@ function relayCaseEvents(
   return (line: string) => {
     // Relay the case events plus the runner's own lifecycle/output lines. The latter are needed
     // to explain a fallback child that exits before it can emit case_started.
-    if (!line.includes('"type":"case_started"') && !line.includes('"type":"case_finished"')) {
+    const typeMarker = line.indexOf('"type"');
+    const eventStart = typeMarker >= 0 ? line.lastIndexOf("{", typeMarker) : -1;
+    const eventLine = eventStart >= 0 ? line.slice(eventStart).trim() : line;
+    if (!/"type"\s*:\s*"case_(?:started|finished)"/.test(eventLine)) {
       if (/^\[(?:reuse-existing|promoted-spec-reuse|promoted-child(?::stderr)?|run:scenario-preview|scenario-preview|discovery:preview)\]/.test(line)) {
         jobStore.appendLog(parentJobId, `[mixed-rerun:${subset}] ${line}`);
       }
       return;
     }
     try {
-      const event = JSON.parse(line) as {
+      // scenario-preview prefixes child stdout with `[scenario-preview] stdout:` before the
+      // JSON event. Parse the embedded payload so case_started/case_finished reach the parent
+      // with their true case ID and status instead of being synthesized as scenario_without_result.
+      const event = JSON.parse(eventLine) as {
         type?: string;
         index?: number;
         total?: number;
@@ -317,8 +352,12 @@ export async function startMixedRerun(
       await runners.runReuse(reuseChild.id);
     } catch (error) {
       jobStore.appendLog(parentJobId, `[mixed-rerun:reuse] child_runner_error=${error instanceof Error ? error.message : String(error)}`);
-      jobStore.update(reuseChild.id, { status: "failed", errorMessage: error instanceof Error ? error.message : String(error) });
+      const childProcess = jobStore.getInternal(reuseChild.id)?.process;
+      if (!childProcess || childProcess.exitCode !== null || childProcess.signalCode !== null) {
+        jobStore.update(reuseChild.id, { status: "failed", completedAt: new Date().toISOString(), errorMessage: error instanceof Error ? error.message : String(error) });
+      }
     } finally {
+      await waitForChildTerminal(reuseChild.id);
       unsubscribe();
     }
     reconcileMissingSubsetResults({
@@ -358,8 +397,12 @@ export async function startMixedRerun(
       await runners.runFallback(fallbackChild.id);
     } catch (error) {
       jobStore.appendLog(parentJobId, `[mixed-rerun:fallback] child_runner_error=${error instanceof Error ? error.message : String(error)}`);
-      jobStore.update(fallbackChild.id, { status: "failed", errorMessage: error instanceof Error ? error.message : String(error) });
+      const childProcess = jobStore.getInternal(fallbackChild.id)?.process;
+      if (!childProcess || childProcess.exitCode !== null || childProcess.signalCode !== null) {
+        jobStore.update(fallbackChild.id, { status: "failed", completedAt: new Date().toISOString(), errorMessage: error instanceof Error ? error.message : String(error) });
+      }
     } finally {
+      await waitForChildTerminal(fallbackChild.id);
       unsubscribe();
     }
     reconcileMissingSubsetResults({

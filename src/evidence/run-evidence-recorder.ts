@@ -26,6 +26,10 @@ export class RunEvidenceRecorder {
     return this.config.enabled;
   }
 
+  get scenarioCount(): number {
+    return this.scenarios.length;
+  }
+
   async start(): Promise<void> {
     if (!this.config.enabled) return;
 

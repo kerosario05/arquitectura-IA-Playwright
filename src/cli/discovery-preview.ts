@@ -635,16 +635,39 @@ export function virtualCaseToTestScenario(vc: VirtualCase, routeProfile?: McpRou
         // position. Keep the field-label equality check as the identity guard;
         // position alone must never bind data across repeated row fields.
         if (stepIndex !== index && stepIndex !== index + 1) return false;
+        // Several recorded actions can share one field (open combobox, pick option, select);
+        // only the one whose kind agrees with the authored verb is this row's authority.
+        const authoredVerb = step.trim().split(/\s+/)[0]?.toLowerCase() ?? "";
+        const verbKind = /^(seleccionar|select)$/.test(authoredVerb) ? "select"
+          : /^(ingresar|completar|escribir|fill)$/.test(authoredVerb) ? "fill"
+          : /^(presionar|clic|click)$/.test(authoredVerb) ? "click"
+          : undefined;
+        if (verbKind && action.actionType !== verbKind
+          && !(verbKind === "click" && (action.actionType === "check" || action.actionType === "uncheck"))) return false;
         const recordedField = action.associatedField ?? action.semanticField;
         return typeof recordedField === "string"
           && normalizeSemanticText(recordedField.trim()) === normalizedFieldLabel;
       })
       : undefined;
+    // Repeated identical human text without a position/field guard (e.g. the same option clicked
+    // once per entity): when the recording and the authored steps repeat that text the same number
+    // of times, the k-th authored occurrence is the k-th recorded one -- occurrence order only,
+    // never a guess when the counts disagree.
+    const authoredSameTextIndexes = (vc.steps ?? [])
+      .map((candidate, candidateIndex) => (normalizeSemanticText(candidate.trim()) === normalizedStep ? candidateIndex : -1))
+      .filter((candidateIndex) => candidateIndex >= 0);
+    const occurrenceMatch = !samePositionMatch && !samePositionFieldMatch
+      && semanticMatches.length > 1
+      && semanticMatches.length === authoredSameTextIndexes.length
+      ? semanticMatches[authoredSameTextIndexes.indexOf(index)]
+      : undefined;
     const orderedSemanticMatches = samePositionMatch
       ? [samePositionMatch]
       : samePositionFieldMatch
         ? [samePositionFieldMatch]
-        : semanticMatches;
+        : occurrenceMatch
+          ? [occurrenceMatch]
+          : semanticMatches;
     const authoritySignature = (action: (typeof recordingActions)[number]["action"]) => JSON.stringify({
       actionType: action.actionType,
       technicalTargetRef: action.technicalTargetRef,
@@ -1141,6 +1164,34 @@ async function runPreviewCase(
 
 const TECHNICAL_SLUGS = new Set(["tests", "test", "default", "unknown", "undefined", "null"]);
 
+/**
+ * Find this run's scenario evidence across app sections. Discovery may write under the app's
+ * default section while the parent QA Lab job resolves a numeric TestRail section; runId is the
+ * shared lineage, and appSlug + runId keep the search within the same project and job.
+ */
+export async function resolveRunEvidenceScenarioDirs(
+  evidenceRoot: string,
+  appSlug: string,
+  sectionSlug: string,
+  runId: string,
+): Promise<string[]> {
+  const appEvidenceDir = path.join(evidenceRoot, appSlug);
+  const preferredRunDir = path.join(appEvidenceDir, sectionSlug, "runs", runId, "scenarios");
+  const runDirs = new Set<string>([preferredRunDir]);
+  const sections = await fs.readdir(appEvidenceDir, { withFileTypes: true }).catch((error: NodeJS.ErrnoException) => {
+    if (error.code === "ENOENT") return [];
+    throw error;
+  });
+
+  for (const section of sections) {
+    if (!section.isDirectory()) continue;
+    const candidate = path.join(appEvidenceDir, section.name, "runs", runId, "scenarios");
+    const exists = await fs.stat(candidate).then((stat) => stat.isDirectory()).catch(() => false);
+    if (exists) runDirs.add(candidate);
+  }
+  return [...runDirs];
+}
+
 async function consolidateRunEvidence(
   runId: string,
   appSlug: string,
@@ -1169,29 +1220,41 @@ async function consolidateRunEvidence(
     // Scan evidence directory for scenario evidence.json files
     const evidenceRoot = evidenceConfig.outputRoot;
     const sectionSlugNormalized = sectionSlug || "default-section";
-    const runDir = path.join(evidenceRoot, appSlug, sectionSlugNormalized, "runs", runId, "scenarios");
+    const runDirs = await resolveRunEvidenceScenarioDirs(evidenceRoot, appSlug, sectionSlugNormalized, runId);
 
-    console.log(`[evidence:run] searching for scenarios in runDir=${runDir}`);
+    console.log(`[evidence:run] searching for scenarios in runDirs=${runDirs.join("|")}`);
 
     const fsSync = await import("node:fs");
-    if (fsSync.existsSync(runDir)) {
+    const includedScenarioIds = new Set<string>();
+    for (const runDir of runDirs) {
+      if (!fsSync.existsSync(runDir)) continue;
       const scenarioDirs = fsSync.readdirSync(runDir, { withFileTypes: true })
         .filter(dirent => dirent.isDirectory())
         .map(dirent => dirent.name);
 
-      console.log(`[evidence:run] found ${scenarioDirs.length} scenario directories: ${scenarioDirs.join(", ")}`);
+      console.log(`[evidence:run] found ${scenarioDirs.length} scenario directories in ${runDir}: ${scenarioDirs.join(", ")}`);
 
       for (const scenarioDir of scenarioDirs) {
         const evidenceJsonPath = path.join(runDir, scenarioDir, "evidence.json");
         if (fsSync.existsSync(evidenceJsonPath)) {
+          let scenarioId: string | undefined;
+          try {
+            const evidence = JSON.parse(fsSync.readFileSync(evidenceJsonPath, "utf8"));
+            if (typeof evidence?.scenarioId === "string") scenarioId = evidence.scenarioId;
+          } catch {
+            // addScenarioFromFile below owns evidence parse failures and diagnostics.
+          }
+          if (scenarioId && includedScenarioIds.has(scenarioId)) {
+            console.log(`[evidence:run] skipped duplicate scenarioId=${scenarioId} path=${evidenceJsonPath}`);
+            continue;
+          }
           console.log(`[evidence:run] loading scenario evidence from ${evidenceJsonPath}`);
           await runRecorder.addScenarioFromFile(evidenceJsonPath);
+          if (scenarioId) includedScenarioIds.add(scenarioId);
         } else {
           console.log(`[evidence:run] evidence.json not found in ${scenarioDir}`);
         }
       }
-    } else {
-      console.log(`[evidence:run] runDir does not exist: ${runDir}`);
     }
 
     if (results.length > 0) {

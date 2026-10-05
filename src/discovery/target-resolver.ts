@@ -1,3 +1,4 @@
+import { isSelectionRuleValue, parseSelectionRule, matchingSelectionOptions } from "../recording/dynamic-selection-rule";
 import { readFileSync } from "fs";
 import { join } from "path";
 import type { Page, Locator } from "@playwright/test";
@@ -936,7 +937,7 @@ export type SelectionSurfaceDiagnostics = {
   optionsFirstObservedAtMs?: number;
   candidateDropReason?: string;
   openingMethod?: "CLICK_OPENS" | "FOCUS_THEN_CLICK_OPENS" | "KEYBOARD_OPENS" | "NO_OPENING_METHOD_OBSERVED";
-  failureReason?: "selection_surface_not_observed" | "option_not_supported" | "ambiguous_option" | "selection_state_not_verified" | "captured_selection_key_not_unique_or_present";
+  failureReason?: "selection_surface_not_observed" | "option_not_supported" | "ambiguous_option" | "selection_state_not_verified" | "captured_selection_key_not_unique_or_present" | "dynamic_selection_rule_invalid_or_unbound" | "dynamic_selection_rule_no_matching_position";
 };
 
 export type GridCollectionSnapshot = {
@@ -3592,15 +3593,18 @@ async function resolveActionTargetCore(
   // control inside the same entity row, then apply the option through the
   // causal selection state machine so a page-wide option match cannot silently
   // select another row or count as success without changing this cell.
-  const recordedScopedOption = opts.playwrightRecorderEvidence?.kind === "role"
-    && opts.playwrightRecorderEvidence.role === "option"
+  const recordedOptionRef = opts.recordedTechnicalTargetRefs?.find((ref) => /^role:option\|/i.test(ref.trim()));
+  const recordedScopedOption = (opts.playwrightRecorderEvidence?.kind === "role"
+    && opts.playwrightRecorderEvidence.role === "option" || Boolean(recordedOptionRef))
     && Boolean(
       (gridContext.entityScope && /^entity_(\d+)$/i.test(gridContext.entityScope)
         && Number.parseInt(gridContext.entityScope.match(/^entity_(\d+)$/i)?.[1] ?? "0", 10) > 1)
       || (gridContext.rowScope !== undefined && gridContext.rowScope > 1)
       || gridContext.rowRelation === "added"
     );
-  const priorSelectionField = opts.previousTarget?.trim();
+  const priorSelectionField = opts.previousTarget?.trim()
+    || opts.selectionActivationField?.trim()
+    || opts.associatedField?.trim();
   if (recordedScopedOption && priorSelectionField) {
     const scopedTrigger = await resolveGridEditor(page, priorSelectionField, gridContext, {
       includeInteractiveControls: true,
@@ -3608,7 +3612,9 @@ async function resolveActionTargetCore(
       allowActivation: false,
     });
     if (scopedTrigger.locator && scopedTrigger.cell) {
-      const optionName = opts.playwrightRecorderEvidence?.normalizedName?.trim() || target;
+      const optionName = opts.playwrightRecorderEvidence?.normalizedName?.trim()
+        || recordedOptionRef?.trim().replace(/^role:option\|/i, "").trim()
+        || target;
       console.log("[recording-replay] scopedRecordedOptionOwnerResolved=true entityScopePresent=" + Boolean(gridContext.entityScope) + " triggerField=" + JSON.stringify(priorSelectionField) + " optionRole=option");
       const appliedOption = await resolveAndApplySelectionSurface(
         page,
@@ -3622,6 +3628,15 @@ async function resolveActionTargetCore(
       return appliedOption;
     }
     console.log("[recording-replay] scopedRecordedOptionOwnerResolved=false entityScopePresent=" + Boolean(gridContext.entityScope) + " triggerFieldPresent=true");
+    return selectionFailureResult(target, "recorded_scoped_selection_owner_unresolved", {
+      triggerResolved: false,
+      triggerStrategy: "recorded:associated_field",
+      surfaceCausallyBound: false,
+      optionCandidateCount: 0,
+      desiredOptionFound: false,
+      stateVerified: false,
+      failureReason: "recorded_scoped_selection_owner_unresolved",
+    });
   }
   // A recorded owner locator (combobox/button) proves where the selection lives,
   // but clicking it only opens the menu. Resolve and apply the requested option
@@ -3631,9 +3646,17 @@ async function resolveActionTargetCore(
     let desiredSelection = opts.selectionValue?.trim();
     const capturedSelection = opts.playwrightRecorderEvidence?.nativeSelection;
     let capturedOptionValue: string | undefined;
+    const ruleRequested = isSelectionRuleValue(desiredSelection);
+    const selectionRule = parseSelectionRule(desiredSelection);
+    if (ruleRequested && (!selectionRule || capturedSelection?.selectionMode !== "index" || expectedSurfaceMismatch)) {
+      return selectionFailureResult(target, "dynamic_selection_rule_invalid_or_unbound", {
+        triggerResolved: false, surfaceCausallyBound: false, desiredOptionFound: false,
+        triggerStrategy: "recorded:native-control", ariaRelationshipFound: false, optionCandidateCount: 0, stateVerified: false,
+      });
+    }
     if (desiredSelection && capturedSelection && !expectedSurfaceMismatch) {
-      // Translate the requested recorded choice to its current label through the actual
-      // option value. Balances/names can change; the control and internal key must still exist.
+      // Resolve only inside the recorded control. Explicit criteria filter current options;
+      // existing position/value modes retain their previous selection authority.
       const selectableRecorded = capturedSelection.options.filter(option => option.value && !option.disabled);
       const requestedChoices = selectableRecorded.filter(option => option.label === desiredSelection || option.value === desiredSelection);
       const useIndex = capturedSelection.selectionMode === "index";
@@ -3649,27 +3672,31 @@ async function resolveActionTargetCore(
           : `[${controlIdentity.strategy === "id" ? "id" : "data-testid"}="${cssAttributeValue(controlIdentity.value)}"]`,
         confidence: 1,
       }, true);
-      const liveChoices = recordedChoices.length === 1 && control && await control.count().catch(() => 0) === 1
-        ? await control.evaluate((element, choice) => {
+      const liveOptions = (selectionRule || recordedChoices.length === 1) && control && await control.count().catch(() => 0) === 1
+        ? await control.evaluate(element => {
           if (element.tagName.toLowerCase() !== "select") return [];
-          const options = Array.from((element as HTMLSelectElement).options).filter(option => option.value && !option.disabled
-            && !(option.parentElement?.tagName.toLowerCase() === "optgroup" && (option.parentElement as HTMLOptGroupElement).disabled));
-          const chosen = choice.useIndex
-            ? Number.isInteger(choice.index) && choice.index! >= 0 && choice.index! < options.length ? [options[choice.index!]] : []
-            : options.filter(option => option.value === choice.value);
-          return chosen.map(option => ({ value: option.value, label: option.label || option.textContent || "" }));
-        }, { value: recordedChoices[0].value, index: requestedIndex, useIndex }).catch(() => []) : [];
+          return Array.from((element as HTMLSelectElement).options).filter(option => option.value && !option.disabled
+            && !(option.parentElement?.tagName.toLowerCase() === "optgroup" && (option.parentElement as HTMLOptGroupElement).disabled))
+            .map(option => ({ value: option.value, label: option.label || option.textContent || "" }));
+        }).catch(() => []) : [];
+      const matchingOptions = selectionRule ? matchingSelectionOptions(liveOptions, selectionRule) : [];
+      const liveChoices = selectionRule
+        ? matchingOptions[selectionRule.matchIndex] ? [matchingOptions[selectionRule.matchIndex]] : []
+        : useIndex
+          ? Number.isInteger(requestedIndex) && requestedIndex! >= 0 && requestedIndex! < liveOptions.length ? [liveOptions[requestedIndex!]] : []
+          : liveOptions.filter(option => option.value === recordedChoices[0]?.value);
       if (liveChoices.length !== 1) {
-        return selectionFailureResult(target, "captured_selection_key_not_unique_or_present", {
+        const failureReason = selectionRule ? "dynamic_selection_rule_no_matching_position" : "captured_selection_key_not_unique_or_present";
+        return selectionFailureResult(target, failureReason, {
           triggerResolved: Boolean(control), surfaceCausallyBound: false, desiredOptionFound: false, triggerStrategy: "recorded:native-control", ariaRelationshipFound: false,
           optionCandidateCount: liveChoices.length, stateVerified: false,
-          failureReason: "captured_selection_key_not_unique_or_present",
+          failureReason,
         });
       }
       capturedOptionValue = liveChoices[0].value;
       desiredSelection = liveChoices[0].label.replace(/\s+/g, " ").trim();
       opts.selectionValue = desiredSelection;
-      console.log(`[recorded-selection] selectionMode=${useIndex ? "index" : "value"} selectedOptionIndex=${useIndex ? requestedIndex : "none"} currentOptionCount=1`);
+      console.log(`[recorded-selection] selectionMode=${selectionRule ? "criteria" : useIndex ? "index" : "value"} selectedOptionIndex=${selectionRule ? selectionRule.matchIndex : useIndex ? requestedIndex : "none"} currentOptionCount=${liveOptions.length} matchingOptionCount=${selectionRule ? matchingOptions.length : liveChoices.length}`);
     }
     if (desiredSelection && !expectedSurfaceMismatch) {
       let recordedOwner = await resolveRecordedTechnicalTarget(
@@ -6347,6 +6374,18 @@ export async function resolveRecordedStructuralOwner(
     onFailureReason?.("owner_identity_ambiguous_at_capture");
     return undefined;
   }
+  const fingerprintTopologySignature = (() => {
+    if (typeof context.topologySignature === "string" && context.topologySignature.trim()) return context.topologySignature;
+    if (typeof context.targetFingerprint !== "string") return undefined;
+    try {
+      const fingerprint = JSON.parse(context.targetFingerprint) as { topologySignature?: unknown };
+      return typeof fingerprint.topologySignature === "string" && fingerprint.topologySignature.trim()
+        ? fingerprint.topologySignature
+        : undefined;
+    } catch {
+      return undefined;
+    }
+  })();
   const scopeIdentity = context.scopeIdentity;
   const scopedEvidence = Boolean(
     scopeIdentity?.strategy
@@ -6451,8 +6490,7 @@ export async function resolveRecordedStructuralOwner(
         context.deterministicStructuralIdentity === true
         && context.captureScopeUnique === true
         && context.captureTargetMatchCount === 1
-        && typeof context.topologySignature === "string"
-        && context.topologySignature.length > 0
+        && Boolean(fingerprintTopologySignature)
       ) {
         // The captured scope can disappear when a neighboring control is refreshed. Widen the
         // candidate search only when capture proved one owner and recorded a content-blind
@@ -6587,7 +6625,7 @@ export async function resolveRecordedStructuralOwner(
   // a scope narrowing the search space does not itself guarantee the fingerprint is unique
   // inside it, and skipping the tiebreak here previously left recorded topology evidence unused,
   // misreporting a resolvable collision as action_owner_ambiguous.
-  const recordedTopologySignature = context.topologySignature;
+  const recordedTopologySignature = fingerprintTopologySignature;
   if (count > 1 && recordedTopologySignature) {
     // Pass ownerFullSelector (single-level :has(), native-CSS-safe), not nearestOwnerSelector --
     // see disambiguateStructuralCandidatesByTopology's own comment for why the ":not(:has(...))"
@@ -6812,6 +6850,146 @@ export async function attemptSegmentedInputFill(
   }
   console.log(`[recording-replay] segmentedInputReadback=verified segmentCount=${segments.length}`);
   return { ok: true, segmentCount };
+}
+
+export type VirtualKeyboardPressResult =
+  | { ok: true; characterCount: number }
+  | { ok: false; reason: "evidence_incomplete" | "value_length_mismatch" | "keyboard_scope_not_unique" | "keyboard_shape_changed" | "key_not_unique" | "key_not_actionable" };
+
+/** Replays one checklist action using its character from the shared editable keyboard value. */
+export async function attemptVirtualKeyboardPress(
+  page: Page,
+  evidence: PlaywrightRecorderEvidence | undefined,
+  value: string,
+  segmentPosition: number | undefined,
+): Promise<VirtualKeyboardPressResult> {
+  if (evidence?.kind !== "virtual_keyboard"
+    || !Number.isInteger(segmentPosition) || (segmentPosition ?? 0) < 1
+    || !Array.isArray(evidence.keyLabels) || evidence.keyLabels.length < 10
+    || !Number.isInteger(evidence.buttonCount)) return { ok: false, reason: "evidence_incomplete" };
+  const characters = Array.from(value);
+  // Virtual-keyboard recording evidence may preserve the key layout and per-action position
+  // without a group count. The resolved shared runtime value is the authoritative group: its
+  // length supplies the count, while an explicitly recorded count (when present) remains a
+  // consistency check. This keeps old recordings replayable without guessing from app text.
+  const segmentCount = evidence.segmentCount ?? characters.length;
+  if (characters.length < 2
+    || characters.length !== segmentCount
+    || segmentPosition! > segmentCount) {
+    return { ok: false, reason: "value_length_mismatch" };
+  }
+  const character = characters[segmentPosition! - 1];
+  const keyName = /^\p{L}$/u.test(character) ? character.toLocaleUpperCase() : character;
+  const keyLabels = [...evidence.keyLabels].sort();
+  // Button totals can change with page state (for example, a submit button becomes enabled
+  // after the last character). The exact unique key-label set is the stable keyboard identity;
+  // keep the captured total as a lower bound rather than requiring an identical live total.
+  const shape = { minimumButtonCount: evidence.keyLabels.length, keyLabels };
+  const scopeSelector = evidence.scopeIdentity
+    ? evidence.scopeIdentity.strategy === "css"
+      ? evidence.scopeIdentity.value
+      : evidence.scopeIdentity.strategy === "id"
+        ? `[id="${cssAttributeValue(evidence.scopeIdentity.value)}"]`
+        : `[data-testid="${cssAttributeValue(evidence.scopeIdentity.value)}"]`
+    : undefined;
+  const scope = scopeSelector
+    ? recordedLocatorFactory(page, { strategy: "css", value: scopeSelector, confidence: 1 }, true)
+    : undefined;
+  const marker = `data-codex-virtual-keyboard-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+  let keyboardScope: Locator | undefined;
+  if (scopeSelector) {
+    if (!scope || (await scope.count().catch(() => 0)) !== 1) return { ok: false, reason: "keyboard_scope_not_unique" };
+    const sameShape = await scope.evaluate((element, expected) => {
+      const buttons = Array.from(element.querySelectorAll('button,[role="button"],input[type="button"],input[type="submit"]'))
+        .filter((candidate) => {
+          const style = window.getComputedStyle(candidate);
+          const rect = candidate.getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0 && style.visibility !== "hidden" && style.display !== "none" && !(candidate as HTMLButtonElement).disabled;
+        });
+      const labels = [...new Set(
+        buttons
+          .map((button) => ((button as HTMLElement).innerText || button.textContent || button.getAttribute("value") || button.getAttribute("aria-label") || "").trim())
+          .filter((label) => Array.from(label).length === 1 && !/\s/.test(label)),
+      )].sort();
+      return buttons.length >= expected.minimumButtonCount && JSON.stringify(labels) === JSON.stringify(expected.keyLabels);
+    }, shape).catch(() => false);
+    if (!sameShape) return { ok: false, reason: "keyboard_shape_changed" };
+    keyboardScope = scope;
+  } else {
+    const scopeResolution = await page.evaluate((input) => {
+      const allButtons = Array.from(document.querySelectorAll('button,[role="button"],input[type="button"],input[type="submit"]'))
+        .filter((candidate) => {
+          const style = window.getComputedStyle(candidate);
+          const rect = candidate.getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0 && style.visibility !== "hidden" && style.display !== "none" && !(candidate as HTMLButtonElement).disabled;
+        });
+      const matching = new Set<Element>();
+      const expectedLabels = new Set(input.keyLabels);
+      // A recorder and the browser DOM can expose a small number of keys differently
+      // (for example, accented labels or whitespace). Require strong keyboard evidence,
+      // then validate the exact requested key separately before clicking it.
+      const minimumLabelMatches = Math.max(10, Math.ceil(expectedLabels.size * 0.85));
+      let bestButtonCount = 0;
+      let bestLabelMatches = 0;
+      for (const button of allButtons) {
+        let ancestor: Element | null = button.parentElement;
+        for (let depth = 0; ancestor && depth < 32; depth++, ancestor = ancestor.parentElement) {
+          const buttons = Array.from(ancestor.querySelectorAll('button,[role="button"],input[type="button"],input[type="submit"]'))
+            .filter((candidate) => {
+              const style = window.getComputedStyle(candidate);
+              const rect = candidate.getBoundingClientRect();
+              return rect.width > 0 && rect.height > 0 && style.visibility !== "hidden" && style.display !== "none" && !(candidate as HTMLButtonElement).disabled;
+            });
+          const labels = [...new Set(
+            buttons
+              .map((candidate) => ((candidate as HTMLElement).innerText || candidate.textContent || candidate.getAttribute("value") || candidate.getAttribute("aria-label") || "").trim())
+              .filter((label) => Array.from(label).length === 1 && !/\s/.test(label)),
+          )];
+          const matchedLabels = labels.filter((label) => expectedLabels.has(label)).length;
+          if (matchedLabels > bestLabelMatches || (matchedLabels === bestLabelMatches && buttons.length > bestButtonCount)) {
+            bestLabelMatches = matchedLabels;
+            bestButtonCount = buttons.length;
+          }
+          if (buttons.length >= input.minimumButtonCount && matchedLabels >= minimumLabelMatches) matching.add(ancestor);
+        }
+      }
+      const fieldLabel = input.fieldLabel?.trim();
+      const fieldAnchored = fieldLabel
+        ? [...matching].filter((candidate) => [...candidate.querySelectorAll('h1,h2,h3,h4,h5,h6,label,[role="heading"]')]
+          .some((label) => {
+            const style = window.getComputedStyle(label);
+            const rect = label.getBoundingClientRect();
+            const labelText = (label.textContent ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase().replace(/\s+/g, " ").trim();
+            const expectedText = fieldLabel.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase().replace(/\s+/g, " ").trim();
+            return rect.width > 0 && rect.height > 0 && style.visibility !== "hidden" && style.display !== "none" && labelText === expectedText;
+          }))
+        : [];
+      const candidates = fieldAnchored.length > 0 ? fieldAnchored : [...matching];
+      const innermost = candidates.filter((candidate) => !candidates.some((other) => other !== candidate && candidate.contains(other)));
+      if (innermost.length !== 1) {
+        return { marked: 0, matchingCount: matching.size, fieldAnchoredCount: fieldAnchored.length, innermostCount: innermost.length, bestButtonCount, bestLabelMatches, liveButtonCount: allButtons.length };
+      }
+      innermost[0].setAttribute(input.marker, "true");
+      return { marked: 1, matchingCount: matching.size, fieldAnchoredCount: fieldAnchored.length, innermostCount: innermost.length, bestButtonCount, bestLabelMatches, liveButtonCount: allButtons.length };
+    }, { ...shape, fieldLabel: evidence.fieldLabel, marker }).catch((error: unknown) => ({ marked: 0, matchingCount: 0, fieldAnchoredCount: 0, innermostCount: 0, bestButtonCount: 0, bestLabelMatches: 0, liveButtonCount: 0, evaluationError: String(error).slice(0, 160) }));
+    if (scopeResolution.marked !== 1) {
+      console.log(`[virtual-keyboard] scopeResolution=failed matchingAncestors=${scopeResolution.matchingCount} fieldAnchored=${scopeResolution.fieldAnchoredCount} innermost=${scopeResolution.innermostCount} bestButtons=${scopeResolution.bestButtonCount} bestKeys=${scopeResolution.bestLabelMatches} liveButtons=${scopeResolution.liveButtonCount}${"evaluationError" in scopeResolution ? ` evaluationError=${scopeResolution.evaluationError}` : ""}`);
+      return { ok: false, reason: "keyboard_scope_not_unique" };
+    }
+    keyboardScope = page.locator(`[${marker}="true"]`);
+  }
+  try {
+    if (!keyboardScope || (await keyboardScope.count().catch(() => 0)) !== 1) return { ok: false, reason: "keyboard_scope_not_unique" };
+    const key = keyboardScope.getByRole("button", { name: keyName, exact: true });
+    if ((await key.count().catch(() => 0)) !== 1) return { ok: false, reason: "key_not_unique" };
+    if (!(await key.isVisible().catch(() => false)) || !(await key.isEnabled().catch(() => false))) return { ok: false, reason: "key_not_actionable" };
+    await key.click();
+    return { ok: true, characterCount: characters.length };
+  } finally {
+    if (!scopeSelector) {
+      await page.locator(`[${marker}="true"]`).evaluate((element, attribute) => element.removeAttribute(attribute), marker).catch(() => undefined);
+    }
+  }
 }
 
 /**
@@ -7944,7 +8122,11 @@ async function resolveFillTargetCore(
   }
 
   const tableEditor = await resolveTableFieldEditor(page, target, gridContext, { controlKind: "fill" });
-  if (tableEditor.locator) {
+  const tableEditorReady = tableEditor.locator
+    ? await tableEditor.locator.isEnabled().catch(() => false)
+      && await tableEditor.locator.isEditable().catch(() => false)
+    : false;
+  if (tableEditor.locator && tableEditorReady) {
     const tagName = await tableEditor.locator.evaluate((el) => el.tagName.toLowerCase()).catch(() => "input");
     console.log(`[fill-resolver] Candidate accepted: tag="${tagName}" strategy="${tableEditor.strategy}" visible=true enabled=true editable=true`);
     return {
@@ -7987,6 +8169,9 @@ async function resolveFillTargetCore(
       autoRepairSkippedReason: "local_diagnostic_sufficient"
     };
   }
+  if (tableEditor.locator && !tableEditorReady) {
+    console.log(`[fill-resolver] Rejected non-editable grid candidate strategy=${tableEditor.strategy ?? "unknown"}; attempting scoped cell activation`);
+  }
 
   // Some grids record a direct fill even though the current DOM first exposes
   // a display-only cell control. Treat that control as the structural editor
@@ -8002,7 +8187,12 @@ async function resolveFillTargetCore(
       controlKind: "fill",
       allowActivation: false,
     });
-    if (!beforeActivation.locator) {
+    const beforeActivationReady = beforeActivation.locator
+      ? await beforeActivation.locator.isEnabled().catch(() => false)
+        && await beforeActivation.locator.isEditable().catch(() => false)
+      : false;
+    console.log(`[grid-editor-activation] eligibility field=${JSON.stringify(target)} scoped=${gridContext.rowScope !== undefined || Boolean(gridContext.entityScope) || Boolean(gridContext.associatedField)} tableEditorPresent=${Boolean(tableEditor.locator)} tableEditorReady=${tableEditorReady} preActivationEditorPresent=${Boolean(beforeActivation.locator)} preActivationEditorReady=${beforeActivationReady} interactiveControlPresent=${Boolean(interactiveCellControl.locator)} interactiveControlStrategy=${interactiveCellControl.strategy ?? "none"}`);
+    if (!beforeActivationReady) {
       const activationStrategy = interactiveCellControl.strategy ?? "grid_cell_structural_activation";
       const interactiveControlEnabled = interactiveCellControl.locator
         ? await interactiveCellControl.locator.isEnabled().catch(() => false)
@@ -8013,7 +8203,7 @@ async function resolveFillTargetCore(
       // enter edit mode without guessing among sibling controls.
       const activationTarget = interactiveControlEnabled
         ? interactiveCellControl.locator
-        : beforeActivation.cell ?? interactiveCellControl.cell;
+        : tableEditor.cell ?? beforeActivation.cell ?? interactiveCellControl.cell;
       if (activationTarget) {
         const activationKind = interactiveControlEnabled ? "unique_control" : "structural_cell";
         console.log(`[grid-editor-activation] field="${target}" strategy=${activationStrategy} target=${activationKind}`);
@@ -8031,7 +8221,11 @@ async function resolveFillTargetCore(
             controlKind: "fill",
             allowActivation: false,
           });
-          if (materializedEditor.locator) {
+          const materializedEditorReady = materializedEditor.locator
+            ? await materializedEditor.locator.isEnabled().catch(() => false)
+              && await materializedEditor.locator.isEditable().catch(() => false)
+            : false;
+          if (materializedEditorReady && materializedEditor.locator) {
             const tagName = await materializedEditor.locator.evaluate((el) => el.tagName.toLowerCase()).catch(() => "input");
             console.log(`[grid-editor-activation] field="${target}" materialized=true tag="${tagName}"`);
             return {

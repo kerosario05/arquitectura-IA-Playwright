@@ -12,6 +12,14 @@ export interface EvidenceConfig {
   outputRoot: string;
   screenshotMode: "after_step";
   fullPage: boolean;
+  /** Max wait for the screen to be visually final before each capture (spinners, async renders). */
+  settleTimeoutMs: number;
+  /** Required quiet stretch (no DOM mutation, no loader) that counts as settled. */
+  settleQuietMs: number;
+  /** Upper bound for an individual browser screenshot so evidence cannot stall a test. */
+  captureTimeoutMs: number;
+  /** Longer, bounded visual-settle budget for the final result screen. */
+  finalSettleTimeoutMs: number;
   failOnError: boolean;
   analystName: string;
   preserveTemplateLayout: boolean;
@@ -48,6 +56,8 @@ export interface InitialScreenEvidence {
   path: string | null;
   capturedAt: string;
   reason?: string;
+  /** Settled form checkpoint on the same screen, e.g. credentials filled before submit. */
+  completedFormCheckpointPath?: string;
 }
 
 export interface DetailEvidenceMetadata {
@@ -102,10 +112,19 @@ export const DEFAULT_EVIDENCE_CONFIG: EvidenceConfig = {
   outputRoot: ".artifacts/evidence",
   screenshotMode: "after_step",
   fullPage: true,
+  settleTimeoutMs: 8000,
+  settleQuietMs: 300,
+  captureTimeoutMs: 5000,
+  finalSettleTimeoutMs: 30000,
   failOnError: false,
   analystName: "",
   preserveTemplateLayout: true,
 };
+
+function positiveNumberOr(value: string | undefined, fallback: number): number {
+  const parsed = Number(value);
+  return value !== undefined && Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
 
 export function loadEvidenceConfig(env: Record<string, string | undefined> = process.env): EvidenceConfig {
   return {
@@ -116,6 +135,10 @@ export function loadEvidenceConfig(env: Record<string, string | undefined> = pro
     outputRoot: env.EVIDENCE_OUTPUT_DIR ?? DEFAULT_EVIDENCE_CONFIG.outputRoot,
     screenshotMode: (env.EVIDENCE_SCREENSHOT_MODE as any) ?? "after_step",
     fullPage: env.EVIDENCE_FULL_PAGE !== "false",
+    settleTimeoutMs: positiveNumberOr(env.EVIDENCE_SETTLE_TIMEOUT_MS, DEFAULT_EVIDENCE_CONFIG.settleTimeoutMs),
+    settleQuietMs: positiveNumberOr(env.EVIDENCE_SETTLE_QUIET_MS, DEFAULT_EVIDENCE_CONFIG.settleQuietMs),
+    captureTimeoutMs: positiveNumberOr(env.EVIDENCE_CAPTURE_TIMEOUT_MS, DEFAULT_EVIDENCE_CONFIG.captureTimeoutMs),
+    finalSettleTimeoutMs: positiveNumberOr(env.EVIDENCE_FINAL_SETTLE_TIMEOUT_MS, DEFAULT_EVIDENCE_CONFIG.finalSettleTimeoutMs),
     failOnError: env.EVIDENCE_FAIL_ON_ERROR === "true",
     analystName: env.EVIDENCE_ANALYST_NAME ?? "",
     preserveTemplateLayout: env.EVIDENCE_PRESERVE_TEMPLATE_LAYOUT !== "false",

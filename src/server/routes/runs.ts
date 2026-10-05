@@ -534,7 +534,7 @@ runsRouter.get("/", (req, res) => {
 });
 
 runsRouter.get("/:jobId", (req, res) => {
-  const job = jobStore.get(req.params.jobId);
+  const job = jobStore.get(req.params.jobId) ?? jobStore.getPersisted(req.params.jobId);
   if (!job) {
     res.status(404).json({ error: "Job not found" });
     return;
@@ -748,6 +748,7 @@ runsRouter.post("/:jobId/rerun", async (req, res) => {
         caseId: entry.caseId ?? 0,
         specPath: entry.specPath!,
         title: entry.title ?? entry.scenarioId,
+        steps: entry.steps,
         runtimeValues: entry.runtimeValues,
       }));
       const fallbackScenarios = prepared.scenarios.filter((s) => !s.scenarioId || !reuseIds.has(s.scenarioId));
@@ -759,6 +760,7 @@ runsRouter.post("/:jobId/rerun", async (req, res) => {
         rerunMode: mode,
         rerun: true,
         executionMode: "mixed_rerun",
+        recordingSelections: prepared.recordingSelections,
         sectionName: prepared.sectionName,
         sectionSlug: prepared.sectionSlug,
       });
@@ -800,6 +802,7 @@ runsRouter.post("/:jobId/rerun", async (req, res) => {
         caseId: entry.caseId ?? 0,
         specPath: entry.specPath!,
         title: entry.title ?? entry.scenarioId,
+        steps: entry.steps,
         runtimeValues: entry.runtimeValues,
       }));
       const reuseJob = jobStore.create("scenario-preview", {
@@ -810,6 +813,7 @@ runsRouter.post("/:jobId/rerun", async (req, res) => {
         rerun: true,
         scenarios: reuseJobScenarios,
         executionMode: "reuse_existing_promoted_spec",
+        recordingSelections: prepared.recordingSelections,
       });
       jobStore.appendLog(reuseJob.id, `[runs:rerun] sourceJobId=${jobId} mode=${mode} selected=${prepared.selectedCount} total=${prepared.totalCount} dispatch=reuse_existing_promoted_spec`);
       for (const s of reuseJobScenarios) {

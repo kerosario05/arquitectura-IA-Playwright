@@ -5,7 +5,7 @@ import type {
   RecordedScenarioStep,
   RecordedWebStep,
 } from "./trace-to-scenario";
-import type { SemanticRecordingModel } from "./semantic-recording";
+import type { SelectorOptionInventory, SemanticRecordingModel } from "./semantic-recording";
 import type { McpScenario, RecordingExecutionAction, RecordingExecutionContract } from "../scenarios/scenario-types";
 import { confirmedCompoundSelectionBefore, logicalCompoundChildValue } from "./compound-value";
 import { renderHumanStepValue } from "./human-step-renderer";
@@ -475,10 +475,14 @@ export type RecordedScenarioContract = {
  */
 export function hydrateCanonicalInteractionsFromSemanticModel(
   scenario: RecordedScenario,
-  model: Pick<SemanticRecordingModel, "editingSessions" | "canonicalInteractions">,
+  model: Pick<SemanticRecordingModel, "editingSessions" | "canonicalInteractions">
+    & Partial<Pick<SemanticRecordingModel, "selectorOptionInventories">>,
 ): RecordedScenario {
   const persistedInteractions = scenario.canonicalInteractions;
-  if (!persistedInteractions?.length) return scenario;
+  const selectorOptionInventories = model.selectorOptionInventories?.length
+    ? model.selectorOptionInventories
+    : scenario.selectorOptionInventories;
+  if (!persistedInteractions?.length) return { ...scenario, selectorOptionInventories };
   const canonicalInteractions = persistedInteractions.map((interaction) => {
     // Persisted scenario projections can outlive a canonical-contract fix. The trace is still
     // the source of truth at execute time, so refresh only state-transition ownership from the
@@ -574,7 +578,20 @@ export function hydrateCanonicalInteractionsFromSemanticModel(
       ...(selection.technicalTargetCandidates?.some((candidate) => candidate.validatedByInteraction) ? { validatedByInteraction: true } : {}),
     });
   }
-  return { ...scenario, canonicalInteractions, requiredData };
+  const withSemanticInventory = { ...scenario, canonicalInteractions, requiredData, selectorOptionInventories };
+  const runtimeInputRequirements = materializeRuntimeInputRequirements(withSemanticInventory);
+  const existingRequirements = new Map((scenario.runtimeInputRequirements ?? []).map((requirement) => [requirement.valueKey, requirement]));
+  return {
+    ...withSemanticInventory,
+    runtimeInputRequirements: runtimeInputRequirements.map((requirement) => {
+      const existing = existingRequirements.get(requirement.valueKey);
+      return existing ? {
+        ...requirement,
+        ...existing,
+        ...(requirement.controlType === "select" ? { controlType: "select", allowedValues: requirement.allowedValues } : {}),
+      } : requirement;
+    }),
+  };
 }
 
 export function buildScenarioRuntimeDataset(scenario: Pick<RecordedScenario, "scenarioId" | "requiredData" | "runtimeInputRequirements"> & { canonicalInteractions?: CanonicalInteraction[] }): ScenarioRuntimeDataset {
@@ -1230,7 +1247,17 @@ export function buildCanonicalInteractions(
   // `targetRef` (the observation's `triggerTechnicalTarget`). Pre-build the lookup so the tap/fill
   // interaction can attach it in the SAME pass without a second scan of the trace.
   const relatedStateByTrigger = new Map<string, { ownerIdentity?: string; containerIdentity?: string; mutations: RelatedStateMutationRecord[] }>();
+  // Capture V2 emits custom-keyboard recognition as a pointer `note` that shares the physical
+  // tap's interactionId. The tap itself keeps its normal role evidence for replay, so recover
+  // only the keyboard classification metadata by causal identity; never infer it from labels,
+  // adjacency, or the fact that a button looks numeric.
+  const virtualKeyboardEvidenceByInteractionId = new Map<string, NonNullable<RecordedTarget["playwrightRecorderEvidence"]>>();
   for (const event of events) {
+    if (event.kind === "note"
+      && event.interactionId
+      && event.target?.playwrightRecorderEvidence?.kind === "virtual_keyboard") {
+      virtualKeyboardEvidenceByInteractionId.set(event.interactionId, event.target.playwrightRecorderEvidence);
+    }
     if (event.kind !== "note" || event.observationType !== "post_action") continue;
     const lifecycle = event.target?.dynamicLifecycle as { triggerTechnicalTarget?: string; relatedStateOwnerIdentity?: string; relatedStateContainerIdentity?: string; relatedStateMutations?: Array<{ nodeIdentity?: string; kind?: string; attributeName?: string }> } | undefined;
     const trigger = lifecycle?.triggerTechnicalTarget;
@@ -1265,7 +1292,14 @@ export function buildCanonicalInteractions(
     }
     if (event.kind !== "tap" && event.kind !== "fill" && event.kind !== "press") continue;
     if (isMaskActivation(events, index)) continue;
-    const selection = isSelection(event);
+    const correlatedKeyboardEvidence = event.kind === "tap" && event.interactionId
+      ? virtualKeyboardEvidenceByInteractionId.get(event.interactionId)
+      : undefined;
+    const recorderEvidence = target?.playwrightRecorderEvidence?.kind === "virtual_keyboard"
+      ? target.playwrightRecorderEvidence
+      : correlatedKeyboardEvidence ?? target?.playwrightRecorderEvidence;
+    const virtualKeyboardKey = recorderEvidence?.kind === "virtual_keyboard";
+    const selection = !virtualKeyboardKey && isSelection(event);
     const derivedDisplayClick = isDerivedDisplayClick(events, index);
     // CaptureEngine V2's functional `select` projection (SelectionSessionManager) already
     // produced ONE combined selection event elsewhere in this trace summarizing this exact
@@ -1618,8 +1652,13 @@ export function buildCanonicalInteractions(
       && (!clean(target?.associatedField) || isCapturedDynamicLabel(clean(target?.associatedField)))
       && (!clean(target?.headerContext) || isCapturedDynamicLabel(clean(target?.headerContext)))
       && (!clean(target?.columnIdentity) || isCapturedDynamicLabel(clean(target?.columnIdentity)));
+    const keyboardFieldLabel = recorderEvidence?.kind === "virtual_keyboard"
+      ? clean(recorderEvidence.fieldLabel)
+      : undefined;
     const semanticField = event.kind === "press"
       ? undefined
+      : keyboardFieldLabel
+        ? keyboardFieldLabel
       : structuralClickHasOnlyDisplayLabel
         ? undefined
       : !admissionRejected
@@ -1690,7 +1729,7 @@ export function buildCanonicalInteractions(
       // LAST-RESORT, EXECUTION-ONLY authority; never a technicalTarget/certified owner. Only
       // transported when the eligibility gate above accepted it for THIS action.
       ...(!dynamicTargetLabel && semanticRuntimeEligible && target?.semanticRuntimeEvidence ? { semanticRuntimeEvidence: target.semanticRuntimeEvidence } : {}),
-      ...(!dynamicTargetLabel && target?.playwrightRecorderEvidence ? { playwrightRecorderEvidence: target.playwrightRecorderEvidence } : {}),
+      ...(!dynamicTargetLabel && recorderEvidence ? { playwrightRecorderEvidence: recorderEvidence } : {}),
       // target.label itself is withheld here too when uncertified — it is exactly the
       // ancestor-walk signal that can still reflect the previous screen for a brief window after
       // a transition, so falling back to raw label text would silently reintroduce the stale
@@ -1987,6 +2026,7 @@ function requirementFromField(
   field: RecordedDataField,
   canonical?: CanonicalInteraction,
   canonicalValueOverride?: string | null,
+  observedSelectionOptions?: string[],
 ): RuntimeInputRequirement {
   const persistedValue = clean(field.exampleValue) ?? null;
   const derived = field.valueRole === "runtime_derived_oracle";
@@ -2015,9 +2055,13 @@ function requirementFromField(
     resolved: derived || value !== null,
     sensitive: field.sensitive,
     stepIndex: field.stepIndex,
-    ...(field.formatHint ? { controlType: field.formatHint } : {}),
+    ...(canonical?.action === "select" && observedSelectionOptions?.length
+      ? { controlType: "select" }
+      : field.formatHint ? { controlType: field.formatHint } : {}),
     ...(field.constraints?.length ? { constraints: field.constraints } : {}),
-    ...(field.allowedValues?.length ? { allowedValues: [...field.allowedValues] } : {}),
+    ...(observedSelectionOptions?.length
+      ? { allowedValues: [...observedSelectionOptions] }
+      : field.allowedValues?.length ? { allowedValues: [...field.allowedValues] } : {}),
     ...(field.validatedByInteraction ? { validatedByInteraction: true } : {}),
     readOnly: derived || field.repeatClonePolicy === "SYSTEM_GENERATED",
     computed: derived,
@@ -2071,7 +2115,10 @@ function canonicalLogicalValueForField(
 }
 
 export function materializeRuntimeInputRequirements(
-  scenario: Pick<RecordedScenario, "requiredData"> & { canonicalInteractions?: CanonicalInteraction[] },
+  scenario: Pick<RecordedScenario, "requiredData"> & {
+    canonicalInteractions?: CanonicalInteraction[];
+    selectorOptionInventories?: SelectorOptionInventory[];
+  },
 ): RuntimeInputRequirement[] {
   const byKey = new Map<string, RuntimeInputRequirement>();
   const scopedSuffixes = new Set(scenario.requiredData
@@ -2084,10 +2131,27 @@ export function materializeRuntimeInputRequirements(
     // logical runtime input.
     if (!field.key.includes(".") && scopedSuffixes.has(field.key)) continue;
     const interactions = scenario.canonicalInteractions ?? [];
+    const canonical = canonicalForField(field, interactions);
+    const selectorInventory = canonical?.action === "select"
+      && canonical.selectorControlId
+      && canonical.optionSurfaceId
+      ? scenario.selectorOptionInventories?.filter((inventory) =>
+        inventory.selectorRef === canonical.selectorControlId
+          && inventory.surfaceRef === canonical.optionSurfaceId
+          && inventory.semanticField === (canonical.semanticField ?? field.semanticField ?? null)
+          && (!inventory.entityScope || inventory.entityScope === field.entityScope),
+      )
+      : undefined;
+    // This is editor metadata only. Replay keeps using its current runtime selection logic,
+    // including the live account-list resolution used by Fenix.
+    const observedSelectionOptions = selectorInventory?.length === 1 && selectorInventory[0].options.length > 0
+      ? selectorInventory[0].options
+      : undefined;
     const requirement = requirementFromField(
       field,
-      canonicalForField(field, interactions),
+      canonical,
       canonicalLogicalValueForField(field, interactions),
+      observedSelectionOptions,
     );
     if (requirement.valueRole === "runtime_derived_oracle" && !requirement.readOnly) continue;
     const previous = byKey.get(requirement.valueKey);
@@ -2204,7 +2268,7 @@ export function applyRuntimeDatasetValues(
     // its group; segmentPosition (1-based) says which character of that token this particular
     // box's own placeholder resolves to, so each box re-renders its own digit, not the whole
     // token. Generic on segmentPosition/segmentCount, never on any field name.
-    const stepValue = step.segmentPosition ? value[step.segmentPosition - 1] : value;
+    const stepValue = step.segmentPosition ? Array.from(value)[step.segmentPosition - 1] : value;
     if (stepValue === undefined) return step;
     return { ...step, renderedStep: renderHumanStepValue(template, step.valueKey, stepValue) };
   });
@@ -3118,7 +3182,11 @@ export function enrichRecordedScenarioContract(
   technicalKnowledgeRefs: string[] = [],
   model?: SemanticRecordingModel,
 ): RecordedScenario {
-  const runtimeInputRequirements = materializeRuntimeInputRequirements({ ...scenario, canonicalInteractions: interactions });
+  const selectorOptionInventories = model?.selectorOptionInventories?.length
+    ? model.selectorOptionInventories
+    : scenario.selectorOptionInventories;
+  const scenarioWithInventory = { ...scenario, selectorOptionInventories };
+  const runtimeInputRequirements = materializeRuntimeInputRequirements({ ...scenarioWithInventory, canonicalInteractions: interactions });
   const readiness = evaluateRecordingReadiness({
     functionalReadiness: scenario.testRailSteps.length > 0,
     technicalReadiness: scenario.technicalReadiness !== false && !scenario.hasUncertainSteps,
@@ -3138,7 +3206,7 @@ export function enrichRecordedScenarioContract(
   // Keep technical navigation interactions in the canonical contract as reachability
   // evidence. They are not rendered as user steps, but they bridge route/state ownership
   // for actions that occur after a screen transition.
-  const withContract = { ...scenario, replayEligible: scenario.replayEligible ?? !scenario.mutationDiagnostics?.rejectionReason, canonicalInteractions: interactions, entityActionBlocks, readiness: { ...readiness, executionReadiness: readiness.executionReadiness && stateValidation.stateSequenceValid }, technicalReadiness: scenario.technicalReadiness !== false, technicalKnowledgeRefs: scopedTechnicalRefs, stateSequenceValid: stateValidation.stateSequenceValid, stateSequenceIssues: stateValidation.stateSequenceIssues, runtimeInputRequirements, runtimeDataset: buildScenarioRuntimeDataset({ ...scenario, runtimeInputRequirements }), mutationOpportunities: [] };
+  const withContract = { ...scenarioWithInventory, replayEligible: scenario.replayEligible ?? !scenario.mutationDiagnostics?.rejectionReason, canonicalInteractions: interactions, entityActionBlocks, readiness: { ...readiness, executionReadiness: readiness.executionReadiness && stateValidation.stateSequenceValid }, technicalReadiness: scenario.technicalReadiness !== false, technicalKnowledgeRefs: scopedTechnicalRefs, stateSequenceValid: stateValidation.stateSequenceValid, stateSequenceIssues: stateValidation.stateSequenceIssues, runtimeInputRequirements, runtimeDataset: buildScenarioRuntimeDataset({ ...scenarioWithInventory, runtimeInputRequirements }), mutationOpportunities: [] };
   return { ...withContract, mutationOpportunities: detectMutationOpportunities(withContract, model) };
 }
 
@@ -3222,11 +3290,12 @@ export function toSharedMcpScenario(
           ...(interaction.semanticRuntimeEvidence ? { semanticRuntimeEvidence: interaction.semanticRuntimeEvidence } : {}),
           ...(interaction.playwrightRecorderEvidence ? { playwrightRecorderEvidence: interaction.playwrightRecorderEvidence } : {}),
           ...(valueKey ? { valueKey } : {}),
-          ...(requirement && (interaction.action === "fill" || interaction.action === "select") && typeof requirement.value === "string"
+          ...(humanStep?.segmentPosition ? { segmentPosition: humanStep.segmentPosition } : {}),
+          ...(requirement && (interaction.action === "fill" || interaction.action === "select" || interaction.playwrightRecorderEvidence?.kind === "virtual_keyboard") && typeof requirement.value === "string"
             ? { value: requirement.value }
             : {}),
           ...(requirement?.valueRole ? { valueRole: requirement.valueRole } : {}),
-          ...(interaction.action === "fill" || interaction.action === "select" ? { runtimeValueSource: "dataset" as const } : {}),
+          ...(interaction.action === "fill" || interaction.action === "select" || interaction.playwrightRecorderEvidence?.kind === "virtual_keyboard" ? { runtimeValueSource: "dataset" as const } : {}),
           // The structured contract owns executable ordering. TestRail step
           // numbers are presentation metadata and may repeat around compound
           // interactions, so they cannot be used as runtime indices.

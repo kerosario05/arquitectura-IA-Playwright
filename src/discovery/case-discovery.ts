@@ -19,6 +19,7 @@ import {
   classifyRecordedSurfaceCompatibility,
   releaseAcceptedScopeMarker,
   attemptSegmentedInputFill,
+  attemptVirtualKeyboardPress,
   type ActiveContainerContext
 } from "./target-resolver";
 import {
@@ -2019,6 +2020,7 @@ export type ExecutableStep = {
   /** The discrete command key a `"press"` action sends (e.g. "Enter"). Absent for every other action type. */
   key?: string;
   valueKey?: string;
+  segmentPosition?: number;
   valueSource?: FillValueSource;
   isOptional?: boolean;
   source: "action" | "expected" | "expanded_nav";
@@ -2054,8 +2056,12 @@ export function projectScenarioInputMetadata(step: {
   };
 }
 
-export function isFillActionTarget(target: Pick<ActionTargetItem, "actionType" | "valueKey" | "valueSource" | "value">): boolean {
-  if (target.actionType !== "action_fill") return false;
+export function isFillActionTarget(target: Pick<ActionTargetItem, "actionType" | "valueKey" | "valueSource" | "value" | "playwrightRecorderEvidence" | "segmentPosition">): boolean {
+  const virtualKeyboardValue = target.actionType === "action_click"
+    && target.playwrightRecorderEvidence?.kind === "virtual_keyboard"
+    && Boolean(target.valueKey)
+    && Number.isInteger(target.segmentPosition);
+  if (target.actionType !== "action_fill" && !virtualKeyboardValue) return false;
   // Authored literal fills (including each character in a captured code) have a value but no
   // valueKey. Requiring a key sent those steps through the click path, which clicked the field
   // label/container and then waited for a transition that a fill should never cause.
@@ -2284,6 +2290,23 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
       : sourceIntentType === "action_select"
         ? actionType === "select" || actionType === "fill"
         : ["click", "check", "uncheck", "press"].includes(actionType);
+    const sourceMatchesRecordedVirtualKeyboardAction = (
+      source: typeof executableSourceSteps[number],
+      recorded: typeof executableRecordedActions[number],
+    ): boolean => {
+      const action = recorded.action;
+      const evidence = action.playwrightRecorderEvidence;
+      const fieldLabel = evidence?.kind === "virtual_keyboard" ? evidence.fieldLabel?.trim() : undefined;
+      const recordedKey = action.semanticRuntimeEvidence?.normalizedValue?.trim();
+      const sourceKey = source.intent.value?.trim() || source.intent.actionTarget?.trim();
+      return source.intent.type === "action_click"
+        && action.actionType === "click"
+        && evidence?.kind === "virtual_keyboard"
+        && Boolean(action.valueKey?.trim())
+        && Number.isInteger(action.segmentPosition)
+        && Boolean(fieldLabel && normalizeText(source.sourceText).includes(normalizeText(fieldLabel)))
+        && Boolean(sourceKey && recordedKey && normalizeText(sourceKey) === normalizeText(recordedKey));
+    };
     const orderedRecordingActionBySourceIndex = new Map<number, typeof executableRecordedActions[number]>();
     const completeOrderedSequenceMatches = executableSourceSteps.length > 0
       && executableSourceSteps.length === executableRecordedActions.length
@@ -2291,8 +2314,11 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
         const recorded = executableRecordedActions[index];
         return Boolean(
           recorded
-          && normalizeText(recorded.action.humanStep ?? "") === normalizeText(source.sourceText)
-          && recordedActionMatchesSourceIntent(recorded.action.actionType, source.intent.type),
+          && recordedActionMatchesSourceIntent(recorded.action.actionType, source.intent.type)
+          && (
+            normalizeText(recorded.action.humanStep ?? "") === normalizeText(source.sourceText)
+            || sourceMatchesRecordedVirtualKeyboardAction(source, recorded)
+          ),
         );
       });
     if (completeOrderedSequenceMatches) {
@@ -2548,7 +2574,11 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
         }
         const candidateStepFieldMatches = normalizedKey(
           intentField(match.intent) ?? action.semanticField ?? action.associatedField,
-        ) === normalizedKey(sourceField);
+        ) === normalizedKey(sourceField)
+          || sourceMatchesRecordedVirtualKeyboardAction(
+            { stepIndex, sourceText, intent: sourceIntent },
+            match,
+          );
         // Segmented inputs have no single technical target locator: the recorded evidence
         // describes how to resolve their shared owner and fill each segment. Carry it from the
         // matched fill contract directly, including when the source scenario was collapsed from
@@ -2562,6 +2592,10 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
         if (action.valueKey && (candidateStepFieldMatches || sourceIntent.valueKey === action.valueKey)) {
           item.valueKey = action.valueKey;
           if (action.runtimeValueSource === "dataset") item.valueSource = "test_data";
+          if (action.playwrightRecorderEvidence?.kind === "virtual_keyboard"
+            && Number.isInteger(action.segmentPosition)) {
+            item.segmentPosition = action.segmentPosition;
+          }
         }
         if (sourceIntent.type === "action_select" && matchedAsRecordedOption) {
           const selectionRequirements = ((recordingContract as typeof recordingContract & {
@@ -2666,7 +2700,7 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
       if (step.type === "action_fill" || step.type === "action_select" || step.type === "action_click") {
         const projectedItem = projected.actionTargets.find((item) => item.index === step.stepIndex);
         if (projectedItem) {
-          for (const key of ["target", "recordingActionType", "key", "valueKey", "value", "valueSource", "selectionField", "selectionActivationField", "associatedField", "entityScope", "rowScope", "rowRelation", "technicalTargetRef", "technicalTargetRefs", "technicalTargetCandidates", "semanticRuntimeEvidence", "playwrightRecorderEvidence", "sourceInteractionId", "expectedRouteBefore", "expectedRouteAfter", "expectedOutcomeKind"] as const) {
+          for (const key of ["target", "recordingActionType", "key", "valueKey", "segmentPosition", "value", "valueSource", "selectionField", "selectionActivationField", "associatedField", "entityScope", "rowScope", "rowRelation", "technicalTargetRef", "technicalTargetRefs", "technicalTargetCandidates", "semanticRuntimeEvidence", "playwrightRecorderEvidence", "sourceInteractionId", "expectedRouteBefore", "expectedRouteAfter", "expectedOutcomeKind"] as const) {
             if (projectedItem[key] !== undefined) (step as any)[key] = projectedItem[key];
           }
           if (projectedItem.actionType === "action_press") step.type = "action_press";
@@ -2774,6 +2808,8 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
         actionType,
         recordingActionType: structuredAction.actionType,
         ...(structuredAction.valueKey ? { valueKey: structuredAction.valueKey } : {}),
+        ...(typeof structuredAction.value === "string" ? { value: structuredAction.value } : {}),
+        ...(structuredAction.segmentPosition ? { segmentPosition: structuredAction.segmentPosition } : {}),
         ...(structuredAction.key ? { key: structuredAction.key } : {}),
         valueSource,
         ...(actionType === "action_select" && (reconciledActionField || structuredAction.semanticField)
@@ -2818,6 +2854,7 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
         recordingActionType: structuredAction.actionType,
         target,
         ...(structuredAction.valueKey ? { valueKey: structuredAction.valueKey } : {}),
+        ...(structuredAction.segmentPosition ? { segmentPosition: structuredAction.segmentPosition } : {}),
         ...(structuredAction.key ? { key: structuredAction.key } : {}),
         valueSource,
         source: "action",
@@ -7814,6 +7851,66 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       }
 
       const fillValue = dataResolution.value!;
+      if (normalizedActionTarget.playwrightRecorderEvidence?.kind === "virtual_keyboard") {
+        const keyboardResult = await attemptVirtualKeyboardPress(
+          page,
+          normalizedActionTarget.playwrightRecorderEvidence,
+          fillValue,
+          normalizedActionTarget.segmentPosition,
+        );
+        if (!keyboardResult.ok) {
+          const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+          currentSnapshot = scan.snapshot;
+          const errorMsg = `Virtual keyboard input could not be replayed: ${keyboardResult.reason}.`;
+          steps.push({
+            index: actionTarget.index,
+            action: actionTarget.action,
+            status: "not_found",
+            targetText: normalizedActionTarget.target,
+            snapshotUrl: scan.url,
+            snapshotTitle: scan.title,
+            elementsFound: scan.elementsCount,
+            error: errorMsg,
+            evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+          });
+          failedAtStep = actionTarget.index;
+          failedTarget = normalizedActionTarget.target;
+          failedReason = keyboardResult.reason;
+          await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
+          const failure = buildFailureResult(
+            scenario, steps, allDiscoveredObjects, planSteps,
+            pendingObjectsPath, pendingPlansPath, evidenceDir,
+            failedAtStep, failedTarget, failedReason, allDiscoveredObjects,
+          );
+          await writeFile(pendingPlansPath, JSON.stringify(failure.candidatePlan ?? {}, null, 2), "utf-8");
+          return failure;
+        }
+        const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+        currentSnapshot = scan.snapshot;
+        allDiscoveredObjects.push(...scan.objects);
+        executedStepIndices.add(actionTarget.index);
+        steps.push({
+          index: actionTarget.index,
+          action: actionTarget.action,
+          status: "found",
+          targetText: normalizedActionTarget.target,
+          snapshotUrl: scan.url,
+          snapshotTitle: scan.title,
+          elementsFound: scan.elementsCount,
+          evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+        });
+        planSteps.push({
+          index: planSteps.length + 1,
+          action: "click",
+          description: actionTarget.action,
+          target: { strategy: "text", value: normalizedActionTarget.target, exact: true },
+          valueKey: normalizedActionTarget.valueKey,
+          segmentPosition: normalizedActionTarget.segmentPosition,
+          playwrightRecorderEvidence: normalizedActionTarget.playwrightRecorderEvidence,
+          resolutionState: "runtime_resolution_required",
+        });
+        continue;
+      }
       const activeClassicLoginForFill = Boolean(
         detectAuthGate(currentSnapshot).detected && detectAuthGate(currentSnapshot).gateType === "classic_login"
       );
@@ -8558,6 +8655,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         }
         const resettledScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = resettledScan.snapshot;
+        const recordedPressStep = steps.find((step) => step.index === actionTarget.index);
+        if (recordedPressStep) {
+          recordedPressStep.snapshotUrl = resettledScan.snapshot.url;
+          recordedPressStep.snapshotTitle = resettledScan.snapshot.title;
+          recordedPressStep.elementsFound = resettledScan.snapshot.elements.length;
+        }
       }
 
       continue;
@@ -11482,6 +11585,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     console.log(`[post-action-sync] phase=before actionIndex=${actionTarget.index} technicalTargetResolved=true urlBefore=${safePathname(page.url())} authGateBefore=${authDetectionBeforeClick.detected} watcherInstalledBeforeClick=true`);
     const orderedItemPosition = orderedItems.indexOf(orderedItem);
     const nextExecutableItem = orderedItems.slice(orderedItemPosition + 1).find((item: any) => item.type === "action" || item.type === "navigation");
+    let actionDownloadObserved = false;
+    const actionDownloadListener = () => {
+      actionDownloadObserved = true;
+      console.log(`[post-action-download] actionIndex=${actionTarget.index} observed=true`);
+    };
+    const watchTerminalDownload = actionTarget.recordingActionType === "click" && !nextExecutableItem;
+    if (watchTerminalDownload) page.on("download", actionDownloadListener);
     const nextTargetText = nextExecutableItem
       ? String(nextExecutableItem.actionTarget?.target ?? nextExecutableItem.navTarget?.target ?? nextExecutableItem.executableStep?.target ?? "").trim()
       : "";
@@ -11785,6 +11895,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         causalClickEffect: clickCausalEffectDetected === true,
         targetSelectionStateChanged,
         selectionApplied: resolution.selectionApplied,
+        terminalDownloadObserved: watchTerminalDownload && actionDownloadObserved,
         screenFingerprintChanged: observationDiff?.navigationMutation || observationDiff?.validationMutation,
         structuredStateMutation: observationDiff?.stateMutation === true,
         ownerSubtreeMutation: ownerSubtreeMutationDetected === true,
@@ -11807,7 +11918,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           && structuredActionOwnsSurface
           && !progress.active
           && !progress.requestFailed
-          && (progress.responseObserved || clickCausalEffectDetected === true || ownerSubtreeMutationDetected === true),
+          && (progress.responseObserved || clickCausalEffectDetected === true || ownerSubtreeMutationDetected === true || actionDownloadObserved),
       });
       const signal = synchronization.signal;
       if (!synchronization.completed || !signal) return { completed: false };
@@ -11993,6 +12104,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         ).candidatePlan ?? {}, null, 2), "utf-8");
 
         void actionNetworkObservation.stop({ passiveTail: false });
+        if (watchTerminalDownload) page.off("download", actionDownloadListener);
         return buildFailureResult(
           scenario, steps, allDiscoveredObjects, planSteps,
           pendingObjectsPath, pendingPlansPath, evidenceDir,
@@ -12029,6 +12141,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             activityTarget: finalLocator,
             activityTargetBox,
           });
+    if (watchTerminalDownload) page.off("download", actionDownloadListener);
     const actionNetworkEvents = await actionNetworkObservation.stop({
       passiveTail: !stability.stable && stability.reason === "loading_timeout"
     });
@@ -13631,7 +13744,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       action: actionTarget.action,
       status: "found",
       targetText: actionTarget.target,
-      snapshotUrl: scan.url,
+      // Capture the route after the action has settled. `scan` may still refer to
+      // the pre-action snapshot when a delayed SPA transition completes during
+      // post-action synchronization.
+      snapshotUrl: page.url(),
       snapshotTitle: scan.title,
       elementsFound: scan.elementsCount,
       evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),

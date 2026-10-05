@@ -2,7 +2,9 @@ import assert from "node:assert";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { generateConsolidatedEvidenceDocx } from "./evidence-docx-generator";
 import { generateConsolidatedEvidencePdf } from "./evidence-pdf-generator";
+import { buildEvidenceDocumentModel } from "./evidence-document-model";
 import { resolveEvidenceFormats } from "./evidence-output";
 import type { EvidenceScenarioRecord } from "./evidence-types";
 
@@ -60,6 +62,38 @@ async function main(): Promise<void> {
     fs.writeFileSync(portrait, PORTRAIT_PNG);
     fs.writeFileSync(landscapeCopy, LANDSCAPE_PNG);
 
+    await test("keeps the settled final screen when its screenshot belongs to a validation step", () => {
+      const finalScreen = path.join(dir, "final-screen.png");
+      fs.writeFileSync(finalScreen, PORTRAIT_PNG);
+      const input = scenario("S-final", "Caso con pantalla final", [landscape, finalScreen]);
+      input.steps[1].stepText = "Validar que se muestre Continuar";
+      input.finalScreenEvidence = {
+        captured: true,
+        path: finalScreen,
+        capturedAt: new Date().toISOString(),
+      };
+
+      const model = buildEvidenceDocumentModel([input]);
+      const images = model.scenarios[0].images;
+      assert.strictEqual(images.at(-1)?.path, path.resolve(finalScreen));
+      assert.strictEqual(images.at(-1)?.stepText, "Pantalla final después del último paso");
+    });
+
+    await test("starts with the completed form checkpoint instead of an empty initial login frame", () => {
+      const input = scenario("S-login", "Inicio de sesión", [landscapeCopy]);
+      input.initialScreenEvidence = {
+        status: "ready",
+        captured: true,
+        path: landscape,
+        completedFormCheckpointPath: landscapeCopy,
+        capturedAt: new Date().toISOString(),
+      };
+
+      const images = buildEvidenceDocumentModel([input]).scenarios[0].images;
+      assert.strictEqual(images[0].path, path.resolve(landscapeCopy));
+      assert.ok(!images.some(image => path.resolve(image.path) === path.resolve(landscape)));
+    });
+
     await test("renders cover + one page run per scenario, without Office", async () => {
       const output = path.join(dir, "evidencia.pdf");
       const result = await generateConsolidatedEvidencePdf(
@@ -83,6 +117,21 @@ async function main(): Promise<void> {
       const result = await generateConsolidatedEvidencePdf([scenario("S1", "x", [landscape])], path.join(dir, "none.docx"), path.join(dir, "x.pdf"));
       assert.strictEqual(result.success, false);
       assert.strictEqual(result.error, "evidence_template_not_found");
+    });
+
+    await test("does not create a blank PDF or DOCX when no scenarios were consolidated", async () => {
+      const pdfPath = path.join(dir, "empty.pdf");
+      const docxPath = path.join(dir, "empty.docx");
+      const [pdf, docx] = await Promise.all([
+        generateConsolidatedEvidencePdf([], TEMPLATE, pdfPath),
+        generateConsolidatedEvidenceDocx([], TEMPLATE, docxPath),
+      ]);
+      assert.strictEqual(pdf.success, false);
+      assert.strictEqual(pdf.error, "evidence_scenarios_empty");
+      assert.strictEqual(docx.success, false);
+      assert.strictEqual(docx.error, "evidence_scenarios_empty");
+      assert.strictEqual(fs.existsSync(pdfPath), false);
+      assert.strictEqual(fs.existsSync(docxPath), false);
     });
 
     await test("EVIDENCE_FORMAT selects the documents to generate", () => {

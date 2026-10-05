@@ -1320,7 +1320,7 @@ const PROMOTED_SPEC_RUNTIME_API_DESCRIPTOR: Record<string, { signature: string; 
   fillPromotedField: { signature: "fillPromotedField({ stepIndex: number, target: string, value: string, action: () => Promise<void> })", returns: "Promise<void>" },
   pressPromotedTarget: { signature: "pressPromotedTarget({ stepIndex: number, target: string, key: string })", returns: "Promise<void>" },
   selectPromotedItem: { signature: "selectPromotedItem({ stepIndex: number, target: string, action: () => Promise<void> })", returns: "Promise<void>" },
-  expectPromotedVisible: { signature: "expectPromotedVisible({ stepIndex: number, target: string, polarity: AssertionPolarity, expectedUrl?: string, assertion: () => Promise<void> })", returns: "Promise<void>" },
+  expectPromotedVisible: { signature: "expectPromotedVisible({ stepIndex: number, target: string, polarity: AssertionPolarity, expectedUrl?: string, requireCompletionSignal?: boolean, assertion: () => Promise<void> })", returns: "Promise<void>" },
   waitForPromotedUiStable: { signature: "waitForPromotedUiStable(stepIndex: number, target: string)", returns: "Promise<void>" },
   handlePromotedDialogOrAlert: { signature: "handlePromotedDialogOrAlert()", returns: "Promise<string | undefined>" },
   safeReplayContext: { signature: "safeReplayContext(replaySteps, stepIndex)", returns: "Promise<{ success: boolean; replayedSteps: string[]; reason?: string }>" },
@@ -3212,6 +3212,23 @@ function normalizeGateOnlyCredentialBindings(
   return next;
 }
 
+export function markTerminalCompletionOracle(specContent: string, stepIndex: number): string {
+  const call = extractRuntimeStepCalls(specContent).find((candidate) =>
+    candidate.method === "expectPromotedVisible" && candidate.stepIndex === stepIndex,
+  );
+  if (!call) return specContent;
+  const closePattern = /\n([\t ]*)\}\s*\);/g;
+  closePattern.lastIndex = call.position;
+  const close = closePattern.exec(specContent);
+  if (!close) return specContent;
+  const block = specContent.slice(call.position, close.index);
+  if (!/\bexpectedUrl\s*:/.test(block) || !/\bpolarity\s*:\s*["']positive["']/.test(block)) return specContent;
+  if (/\brequireCompletionSignal\s*:/.test(block)) return specContent;
+  const indent = close[1] ?? "";
+  const property = `\n${indent}  requireCompletionSignal: true,`;
+  return `${specContent.slice(0, close.index)}${property}${specContent.slice(close.index)}`;
+}
+
 function materializeBackedNavigationAssertions(
   specContent: string,
   response: SpecGenerationResponse,
@@ -3227,6 +3244,18 @@ function materializeBackedNavigationAssertions(
 
   let next = ensurePlaywrightExpectImport(specContent);
   const addedAssertions = [...response.coveredAssertions];
+  const latestOperationStepIndex = [
+    ...extractRuntimeStepCalls(next),
+    ...extractPomWrapperStepCalls(next),
+  ]
+    .filter((call) => call.method !== "expectPromotedVisible")
+    .reduce<number | undefined>((latest, call) => latest === undefined || call.stepIndex > latest ? call.stepIndex : latest, undefined);
+  const terminalPositiveStepIndex = backedNavigation
+    .filter((oracle) => oracle.polarity !== "negative"
+      && (latestOperationStepIndex === undefined || oracle.stepIndex! >= latestOperationStepIndex))
+    .reduce<number | undefined>((latest, oracle) =>
+      latest === undefined || oracle.stepIndex! > latest ? oracle.stepIndex! : latest,
+    undefined);
   for (const oracle of backedNavigation) {
     const stepIndex = oracle.stepIndex!;
     if (extractRuntimeStepCalls(next).some((call) => call.method === "expectPromotedVisible" && call.stepIndex === stepIndex)) continue;
@@ -3241,6 +3270,9 @@ function materializeBackedNavigationAssertions(
       `      target: ${JSON.stringify(oracle.target ?? oracle.requirement)},`,
       `      polarity: ${JSON.stringify(oracle.polarity ?? "positive")},`,
       `      expectedUrl: ${JSON.stringify(expectedUrl)},`,
+      ...(oracle.polarity !== "negative" && stepIndex === terminalPositiveStepIndex
+        ? ["      requireCompletionSignal: true,"]
+        : []),
       "      assertion: async () => {",
       `        ${assertionImplementation}`,
       "      },",
@@ -3250,6 +3282,9 @@ function materializeBackedNavigationAssertions(
     if (insertionPoint < 0) continue;
     next = `${next.slice(0, insertionPoint)}${block}\n\n${next.slice(insertionPoint)}`;
     addedAssertions.push({ requirement: oracle.requirement, implementation: assertionImplementation });
+  }
+  if (terminalPositiveStepIndex !== undefined) {
+    next = markTerminalCompletionOracle(next, terminalPositiveStepIndex);
   }
   return { specContent: next, response: { ...response, coveredAssertions: addedAssertions } };
 }
@@ -3915,7 +3950,7 @@ export function summarizePlaywrightDiscoveryError(stdout: string, stderr: string
 function buildTypeValidationSource(specContent: string): string {
   const imports = parseImportClauses(specContent);
   const declarations = new Set<string>([
-    "declare type ValidationTestFn = ((name: string, fn: (fixtures: { page: any }) => Promise<unknown> | unknown) => unknown) & { setTimeout: (ms: number) => void; describe: (name: string, fn: () => void) => void; };",
+    "declare type ValidationTestFn = ((name: string, fn: (fixtures: { page: any }) => Promise<unknown> | unknown) => unknown) & { setTimeout: (ms: number) => void; info: () => { timeout: number }; describe: (name: string, fn: () => void) => void; };",
     "declare const test: ValidationTestFn;",
     "declare const expect: any;",
     "interface PromotedSpecRuntimeApi {",
@@ -4187,6 +4222,18 @@ const CHILD_RUNTIME_TELEMETRY_PREFIXES = [
   "[runtime:diagnostic]",
   "[runtime:session_reset]",
   "[runtime:replay]",
+  "[runtime:click-resolution]",
+  "[runtime:click-callback-failure]",
+  "[runtime:press-resolution]",
+  "[runtime:post-action]",
+  "[promoted-click-structural]",
+  "[field-scope-click]",
+  "[runtime:selection-resolution]",
+  "[runtime:associated-field-resolution]",
+  "[recording-replay] structuredGridRow",
+  "[selection-editor-state]",
+  "[grid-selection-candidate]",
+  "[field-scoped-fallback]",
   "[runtime-sequence]",
   "[TRACE-",
 ];

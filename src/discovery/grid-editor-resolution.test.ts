@@ -159,6 +159,42 @@ async function main(): Promise<void> {
     assert.equal(await result.locator!.getAttribute("id"), "materialized");
   }));
 
+  await check("FILL_ACTIVATES_CELL_WHEN_EDITOR_EXISTS_BUT_IS_DISABLED", () => withPage(async (page) => {
+    await page.setContent(`
+      <table><thead><tr><th>Field</th></tr></thead><tbody><tr><td>
+        <button id="display" type="button" onclick="document.querySelector('#editor').disabled=false">Indicar...</button>
+        <input id="editor" type="text" disabled>
+      </td></tr></tbody></table>
+    `);
+    const result = await resolveFillTarget(page, EMPTY_SNAPSHOT, "Field", undefined, {
+      rowScope: 1,
+      entityScope: "entity_1",
+      associatedField: "Field",
+    });
+    assert.equal(result.status, "resolved");
+    assert.equal(result.locatorStrategy, "grid_cell_editor_after_activation");
+    assert.equal(await result.locator!.getAttribute("id"), "editor");
+    assert.equal(await result.locator!.isEditable(), true);
+  }));
+
+  await check("PROMOTED_ENTITY_FILL_ACTIVATES_ONLY_SCOPED_GRID_CELL", () => withPage(async (page) => {
+    await page.setContent(`
+      <table><thead><tr><th>Field</th></tr></thead><tbody>
+        <tr><td id="row-one"><button type="button">Display one</button></td></tr>
+        <tr><td id="row-two" onclick="this.innerHTML='<input id=entity-two-editor type=text>'"><button type="button">Display two</button></td></tr>
+      </tbody></table>
+    `);
+    const result = await resolveFillTarget(page, EMPTY_SNAPSHOT, "Field", undefined, {
+      rowScope: 2,
+      entityScope: "entity_2",
+      associatedField: "Field",
+    });
+    assert.ok(result.locator);
+    assert.equal(result.locatorStrategy, "grid_cell_editor_after_activation");
+    assert.equal(await result.locator.getAttribute("id"), "entity-two-editor");
+    assert.equal(await page.locator("#row-one input").count(), 0, "activation must remain bound to the requested entity row");
+  }));
+
   await check("UNRELATED_INPUT_NEARBY", () => withPage(async (page) => {
     await page.setContent(`
       <input id="nearby" type="text">
