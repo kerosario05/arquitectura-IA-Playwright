@@ -17,6 +17,7 @@ export type RawInteractionLike = {
   kind: "click" | "input" | "submit" | "observation" | "press";
   interactionId?: string;
   observationType?: "pointer";
+  observedOptions?: string[];
   /** Only present for kind="press". */
   key?: string;
   label: string;
@@ -92,6 +93,7 @@ export function adaptCaptureActionToRawInteraction(action: CaptureAction): RawIn
     kind,
     interactionId: action.interactionId,
     observationType: action.observationType,
+    observedOptions: action.observedOptions,
     label: action.identity.label ?? action.identity.name ?? action.identity.text ?? "control",
     role: action.identity.role,
     tagName: action.identity.tagName,

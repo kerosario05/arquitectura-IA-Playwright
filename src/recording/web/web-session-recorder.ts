@@ -1766,6 +1766,7 @@ export class WebSessionRecorder {
           afterValue: selectedValue,
           compoundRole: "selection",
           associatedField: fieldLabel,
+          observedOptions: optionSourceEvent?.target?.observedOptions,
           // The synthetic event summarizes the selection semantically, but its executable
           // authority comes only from the option click already captured by the browser. Carry
           // those exact locators/candidates forward instead of deriving a selector from the text.

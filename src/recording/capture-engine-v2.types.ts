@@ -213,6 +213,8 @@ export type CaptureEditingSession = {
 export type CaptureAction = {
   actionType: CaptureActionType;
   interactionId?: string;
+  /** Visible values captured from the option surface for a physical option click. */
+  observedOptions?: string[];
   observationType?: "pointer";
   identity: CaptureActionIdentity;
   owner?: CaptureOwner;

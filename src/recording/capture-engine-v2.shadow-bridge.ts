@@ -79,6 +79,7 @@ export type ShadowBrowserMessage =
       frameId?: string;
       composedPath: ShadowOwnerCandidate[];
       identity?: CaptureActionIdentity;
+      observedOptions?: string[];
       interactionId?: string;
       /**
        * True when the browser's own `MouseEvent.detail === 0` -- the standard, spec-defined
@@ -804,6 +805,7 @@ export class CaptureEngineV2ShadowBridge {
     const technicalSeq = this.pushAction({
       actionType: "click",
       interactionId: message.interactionId,
+      ...(message.observedOptions?.length ? { observedOptions: [...message.observedOptions] } : {}),
       identity: message.identity ?? { label: resolution.owner.accessibleName, tagName: resolution.owner.tag, role: resolution.owner.role },
       owner: resolution.owner,
       documentContext,

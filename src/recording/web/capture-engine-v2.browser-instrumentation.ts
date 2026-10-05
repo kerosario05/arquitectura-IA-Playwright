@@ -89,6 +89,30 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
     return rect.width > 0 && rect.height > 0;
   }
 
+  function observedOptionsForClick(event) {
+    var path = typeof event.composedPath === "function" ? event.composedPath() : [event.target];
+    var option = path.find(function (node) {
+      if (!node || node.nodeType !== 1) return false;
+      var tag = (node.tagName || "").toLowerCase();
+      return (node.getAttribute && node.getAttribute("role") === "option") || tag === "option" || (node.hasAttribute && node.hasAttribute("data-option"));
+    });
+    if (!option) return undefined;
+    var surface = option.closest && option.closest('[role="listbox"], [role="menu"], [data-option-surface], [data-options], select');
+    if (!surface) return undefined;
+    var nativeSelect = (surface.tagName || "").toLowerCase() === "select";
+    var candidates = nativeSelect
+      ? Array.prototype.slice.call(surface.options || [])
+      : Array.prototype.slice.call(surface.querySelectorAll('option, [role="option"], [data-option], [data-value]'));
+    var values = [];
+    candidates.forEach(function (candidate) {
+      if ((!nativeSelect && !isVisible(candidate)) || candidate.disabled === true || (candidate.getAttribute && candidate.getAttribute("aria-disabled") === "true")) return;
+      var value = (candidate.textContent || (candidate.getAttribute && (candidate.getAttribute("aria-label") || candidate.getAttribute("data-option") || candidate.getAttribute("data-value"))) || candidate.value || "")
+        .replace(/\\s+/g, " ").trim();
+      if (value && values.indexOf(value) === -1) values.push(value);
+    });
+    return values.length ? values.slice(0, 100) : undefined;
+  }
+
   function isEditableNode(el) {
     var tag = (el.tagName || "").toLowerCase();
     if (tag === "textarea") return true;
@@ -1390,7 +1414,7 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
     }
     var interactionId = pendingPointerInteractionId;
     pendingPointerInteractionId = null;
-    send({ type: "click", composedPath: buildComposedPath(event), interactionId: interactionId || undefined, syntheticProvenance: event.detail === 0 });
+    send({ type: "click", composedPath: buildComposedPath(event), observedOptions: observedOptionsForClick(event), interactionId: interactionId || undefined, syntheticProvenance: event.detail === 0 });
   }, true);
 
   // Read-only lifecycle trace: pointer reception distinguishes a document that never receives
