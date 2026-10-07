@@ -1,0 +1,1656 @@
+{
+  "appSlug": "fenix",
+  "sectionSlug": "api-tests",
+  "scenarioId": "PREVIEW-001",
+  "scenarioTitle": "Transferencias entre cuantas propias",
+  "stepCount": 30,
+  "sourceExpectedResultPresent": true,
+  "requiredAssertionCount": 1,
+  "observableOracles": [
+    {
+      "id": "expected-01",
+      "requirement": "La aplicación carga su pantalla inicial",
+      "type": "navigation_transition",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 30,
+      "polarity": "positive",
+      "target": "Continuar",
+      "evidence": [
+        "transition_observed:true",
+        "click_target:Continuar",
+        "action_type:Presionar \"Continuar\"",
+        "after_url:https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+        "assertion_polarity:positive"
+      ],
+      "details": {
+        "transitionObserved": true,
+        "clickTarget": "Continuar",
+        "resolvedTarget": null,
+        "postClickUiChange": null,
+        "sourceActionStepIndex": 30,
+        "expectedUrl": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary"
+      }
+    }
+  ],
+  "oracleTypes": [
+    "navigation_transition"
+  ],
+  "availablePageObjectCount": 2,
+  "mode": "deterministic",
+  "functionalExecutionEnabled": true,
+  "provider": null,
+  "model": null,
+  "skill": {
+    "name": null,
+    "version": null,
+    "hash": null,
+    "loaded": false
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "PREVIEW-001",
+    "title": "Transferencias entre cuantas propias",
+    "appSlug": "fenix",
+    "sectionSlug": "api-tests",
+    "auth": {
+      "gateDetected": true,
+      "required": false,
+      "stage": "otp",
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    },
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Abrir la aplicación configurada del proyecto",
+        "operation": "navigate",
+        "target": {
+          "strategy": "url",
+          "value": "APP_BASE_URL"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Presionar \"Empresarial\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Empresarial"
+        },
+        "technicalTargetRef": "role:link|Empresarial",
+        "technicalTargetRefs": [
+          "role:link|Empresarial"
+        ],
+        "controlIdentity": "60d370b39a8d|Empresarial|role|link|Empresarial",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[href=\"#empresarial\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a"
+            },
+            "stableDirectAttributes": {
+              "href": "#empresarial"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "login-box-parent"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#empresarial\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Ingresar \"130598983\" en \"RNC:\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "RNC:"
+        },
+        "valueKey": "rnc",
+        "associatedField": "RNC:",
+        "technicalTargetRef": "role:textbox|RNC:",
+        "technicalTargetRefs": [
+          "role:textbox|RNC:",
+          "css:#Enterprise",
+          "id:Enterprise"
+        ],
+        "controlIdentity": "60d370b39a8d|RNC:|role|textbox|RNC:",
+        "recordingActionType": "fill",
+        "authGateExpected": true,
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "RNC:",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Ingresar \"olivam\" en \"Usuario:\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Usuario:"
+        },
+        "valueKey": "usuario",
+        "associatedField": "Usuario:",
+        "technicalTargetRef": "role:textbox|Usuario:",
+        "technicalTargetRefs": [
+          "role:textbox|Usuario:",
+          "css:#UserNameE",
+          "id:UserNameE"
+        ],
+        "controlIdentity": "60d370b39a8d|Usuario:|role|textbox|Usuario:",
+        "recordingActionType": "fill",
+        "authGateExpected": true,
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Usuario:",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 4,
+        "scenarioStepIndex": 5,
+        "originalText": "Ingresar \"••••••\" en \"Contraseña:\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Contraseña:"
+        },
+        "valueKey": "contrasena",
+        "associatedField": "Contraseña:",
+        "technicalTargetRef": "role:textbox|Contraseña:",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña:",
+          "css:#PasswordE",
+          "id:PasswordE"
+        ],
+        "controlIdentity": "60d370b39a8d|Contraseña:|role|textbox|Contraseña:",
+        "recordingActionType": "fill",
+        "authGateExpected": true,
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Contraseña:",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 5,
+        "scenarioStepIndex": 6,
+        "originalText": "Presionar \"Enter\" en \"Contraseña:\"",
+        "operation": "press",
+        "target": {
+          "strategy": "text",
+          "value": "Contraseña:",
+          "exact": false
+        },
+        "value": "Enter",
+        "technicalTargetRef": "role:textbox|Contraseña:",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña:",
+          "css:#PasswordE",
+          "id:PasswordE"
+        ],
+        "controlIdentity": "60d370b39a8d|Contraseña:|role|textbox|Contraseña:",
+        "recordingActionType": "press",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Contraseña:",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "pressPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 6,
+        "scenarioStepIndex": 7,
+        "originalText": "Presionar \"SMS\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "SMS"
+        },
+        "valueKey": "sms",
+        "associatedField": "SMS",
+        "controlIdentity": "60d370b39a8d|SMS|id|IdentifyUserForm",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "SMS",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "SMS",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 7,
+        "scenarioStepIndex": 8,
+        "originalText": "Ingresar \"••••••\" en \"SMS\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "SMS"
+        },
+        "valueKey": "sms",
+        "associatedField": "SMS",
+        "controlIdentity": "60d370b39a8d|SMS|id|IdentifyUserForm",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "SMS",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 8,
+        "scenarioStepIndex": 9,
+        "originalText": "Ingresar \"••••••\" en \"SMS\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "SMS"
+        },
+        "valueKey": "sms",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "SMS",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 9,
+        "scenarioStepIndex": 10,
+        "originalText": "Ingresar \"••••••\" en \"SMS\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "SMS"
+        },
+        "valueKey": "sms",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "SMS",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 10,
+        "scenarioStepIndex": 11,
+        "originalText": "Ingresar \"••••••\" en \"SMS\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "SMS"
+        },
+        "valueKey": "sms",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "SMS",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 11,
+        "scenarioStepIndex": 12,
+        "originalText": "Ingresar \"••••••\" en \"SMS\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "SMS"
+        },
+        "valueKey": "sms",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "SMS",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 12,
+        "scenarioStepIndex": 13,
+        "originalText": "Ingresar \"••••••\" en \"SMS\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "SMS"
+        },
+        "valueKey": "sms",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "SMS",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 13,
+        "scenarioStepIndex": 14,
+        "originalText": "Presionar \"Continuar\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Continuar"
+        },
+        "valueKey": "continuar",
+        "associatedField": "Continuar",
+        "technicalTargetRef": "role:button|Continuar",
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ],
+        "controlIdentity": "60d370b39a8d|Continuar|role|button|Continuar",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Continuar",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(a[href=\"/onlinebanking/IdentifyUser/Cancel\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "navigation_transition",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "url_state",
+          "mechanism": {
+            "source": "url_state",
+            "method": "expectPromotedVisible",
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "navigation_transition",
+              "urlPattern": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary"
+            }
+          },
+          "sourceActionStepIndex": 30,
+          "requirement": "La aplicación carga su pantalla inicial",
+          "target": "Continuar"
+        },
+        "sourceActionStepIndex": 30,
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      },
+      {
+        "contractStepIndex": 14,
+        "scenarioStepIndex": 15,
+        "originalText": "Presionar \"Transferencias\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Transferencias"
+        },
+        "valueKey": "transferencias",
+        "associatedField": "Transferencias",
+        "controlIdentity": "60d370b39a8d|Transferencias|id|left-menu-accordion",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Transferencias",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Transferencias",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "left-menu-accordion"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 15,
+        "scenarioStepIndex": 16,
+        "originalText": "Presionar \"- Cuentas Propias\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "- Cuentas Propias"
+        },
+        "technicalTargetRef": "role:link|- Cuentas Propias",
+        "technicalTargetRefs": [
+          "role:link|- Cuentas Propias",
+          "css:#TRANSFERS_INDIVIDUAL",
+          "id:TRANSFERS_INDIVIDUAL"
+        ],
+        "controlIdentity": "60d370b39a8d|- Cuentas Propias|role|link|- Cuentas Propias",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[href=\"/onlinebanking/Transfer/MyAccountsTransfer\"][id=\"TRANSFERS_INDIVIDUAL\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a"
+            },
+            "stableDirectAttributes": {
+              "href": "/onlinebanking/Transfer/MyAccountsTransfer",
+              "id": "TRANSFERS_INDIVIDUAL"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "div"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "menuid12"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"/onlinebanking/Transfer/MyAccountsTransfer\",\"id\":\"TRANSFERS_INDIVIDUAL\"},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 16,
+        "scenarioStepIndex": 17,
+        "originalText": "Seleccionar opción que contiene Cuenta Corrientes (coincidencia 1) en el campo \"account-from-select-input\"",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "account-from-select-input"
+        },
+        "associatedField": "account-from-select-input",
+        "technicalTargetRefs": [],
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "account-from-select-input",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(> select[id=\"account-from-select-input\"])"
+          },
+          "runtimeResolutionRequired": true,
+          "nativeSelection": {
+            "controlIdentity": {
+              "strategy": "id",
+              "value": "account-from-select-input"
+            },
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "div:has(> select[id=\"account-from-select-input\"])"
+            },
+            "options": [
+              {
+                "value": "",
+                "label": "Seleccione una Cuenta",
+                "disabled": false
+              },
+              {
+                "value": "-192973383173",
+                "label": "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
+                "disabled": false
+              },
+              {
+                "value": "-178671134322",
+                "label": "Cuenta de Ahorro / 21312020003368 / US$1,495.71",
+                "disabled": false
+              }
+            ],
+            "clickedOption": {
+              "value": "-192973383173",
+              "label": "Cuenta Corrientes / 11311000003156 / RD$162,312.94"
+            },
+            "selectedValue": "-192973383173",
+            "selectionMode": "index",
+            "selectedOptionIndex": 0
+          },
+          "captureMatchCount": 1
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 17,
+        "scenarioStepIndex": 18,
+        "originalText": "Presionar el control grabado",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Presionar el control grabado"
+        },
+        "controlIdentity": "60d370b39a8d|Seleccione una Cuenta / undefined Balance Disponible",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "div|[href=\"#\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "span",
+                "stableAttributes": {
+                  "href": "#"
+                }
+              }
+            ],
+            "semanticShape": [
+              "div"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "account-to-block"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"div\"},\"stableDirectAttributes\":{},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"span\",\"stableAttributes\":{\"href\":\"#\"}}],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"b\\\",2],[\\\"div\\\",4],[\\\"i\\\",2],[\\\"span\\\",7]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 3
+        },
+        "required": false,
+        "executionStatus": "skipped",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 18,
+        "scenarioStepIndex": 19,
+        "originalText": "Seleccionar opción que contiene Cuenta de Ahorro (coincidencia 1) en el campo \"account-to-select-input\"",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "account-to-select-input"
+        },
+        "selectionActivationField": "US$",
+        "associatedField": "account-to-select-input",
+        "technicalTargetRefs": [],
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "account-to-select-input",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Cuenta de Ahorro / 21312020003368 / US$1,495.71",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(> select[id=\"account-to-select-input\"])"
+          },
+          "runtimeResolutionRequired": true,
+          "nativeSelection": {
+            "controlIdentity": {
+              "strategy": "id",
+              "value": "account-to-select-input"
+            },
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "div:has(> select[id=\"account-to-select-input\"])"
+            },
+            "options": [
+              {
+                "value": "",
+                "label": "Seleccione una Cuenta",
+                "disabled": false
+              },
+              {
+                "value": "-178671134322",
+                "label": "Cuenta de Ahorro / 21312020003368 / US$1,495.71",
+                "disabled": false
+              }
+            ],
+            "clickedOption": {
+              "value": "-178671134322",
+              "label": "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
+            },
+            "selectedValue": "-178671134322",
+            "selectionMode": "index",
+            "selectedOptionIndex": 0
+          },
+          "captureMatchCount": 1
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 19,
+        "scenarioStepIndex": 20,
+        "originalText": "Ingresar \"5.00\" en \"US$\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "US$"
+        },
+        "value": "5.00",
+        "associatedField": "US$",
+        "technicalTargetRef": "css:#transactionDetails_0__AmountPayment",
+        "technicalTargetRefs": [
+          "css:#transactionDetails_0__AmountPayment",
+          "id:transactionDetails_0__AmountPayment"
+        ],
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[data-val=\"true\"][data-val-number=\"The field AmountPayment must be a number.\"][data-val-range=\"Monto a transferir debe ser mayor que 0.\"][data-val-range-max=\"1.79769313486232E+308\"][data-val-range-min=\"0.01\"][data-val-required=\"El campo 'Monto' es requerido.\"][id=\"transactionDetails_0__AmountPayment\"][name=\"transactionDetails[0].AmountPayment\"]",
+              "confidence": 0.95
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "input",
+              "role": "textbox"
+            },
+            "stableDirectAttributes": {
+              "data-val": "true",
+              "data-val-number": "The field AmountPayment must be a number.",
+              "data-val-range": "Monto a transferir debe ser mayor que 0.",
+              "data-val-range-max": "1.79769313486232E+308",
+              "data-val-range-min": "0.01",
+              "data-val-required": "El campo 'Monto' es requerido.",
+              "id": "transactionDetails_0__AmountPayment",
+              "name": "transactionDetails[0].AmountPayment"
+            },
+            "stableDescendants": [],
+            "semanticShape": []
+          },
+          "confidence": 0.95,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 20,
+        "scenarioStepIndex": 21,
+        "originalText": "Presionar \"Continuar\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Continuar"
+        },
+        "valueKey": "continuar",
+        "associatedField": "Continuar",
+        "technicalTargetRef": "role:button|Continuar",
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ],
+        "controlIdentity": "60d370b39a8d|Continuar|role|button|Continuar",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Continuar",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(a[href=\"/onlinebanking/Transfer/MyAccountsTransfer/AbortTransaction?Length=0\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "navigation_transition",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "url_state",
+          "mechanism": {
+            "source": "url_state",
+            "method": "expectPromotedVisible",
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "navigation_transition",
+              "urlPattern": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary"
+            }
+          },
+          "sourceActionStepIndex": 30,
+          "requirement": "La aplicación carga su pantalla inicial",
+          "target": "Continuar"
+        },
+        "sourceActionStepIndex": 30,
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      },
+      {
+        "contractStepIndex": 21,
+        "scenarioStepIndex": 22,
+        "originalText": "Presionar \"Continuar\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Continuar"
+        },
+        "technicalTargetRef": "role:button|Continuar",
+        "technicalTargetRefs": [
+          "role:button|Continuar",
+          "css:#frmContinue",
+          "id:frmContinue"
+        ],
+        "controlIdentity": "60d370b39a8d|Continuar|role|button|Continuar",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[id=\"frmContinue\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "id": "frmContinue"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "right-content-main"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"frmContinue\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(a[href=\"/onlinebanking/Transfer/MyAccountsTransfer/AbortTransaction?Length=0\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "navigation_transition",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "url_state",
+          "mechanism": {
+            "source": "url_state",
+            "method": "expectPromotedVisible",
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "navigation_transition",
+              "urlPattern": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary"
+            }
+          },
+          "sourceActionStepIndex": 30,
+          "requirement": "La aplicación carga su pantalla inicial",
+          "target": "Continuar"
+        },
+        "sourceActionStepIndex": 30,
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      },
+      {
+        "contractStepIndex": 22,
+        "scenarioStepIndex": 23,
+        "originalText": "Presionar \"SMS\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "SMS"
+        },
+        "valueKey": "sms",
+        "associatedField": "SMS",
+        "controlIdentity": "60d370b39a8d|SMS|css|div:has(a[id=\"token-resend-btn\"])",
+        "recordingActionType": "click",
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "SMS",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(a[id=\"token-resend-btn\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 23,
+        "scenarioStepIndex": 24,
+        "originalText": "Ingresar \"••••••\" en \"Reenviar código en 29 segundos...\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Reenviar código en  29 segundos..."
+        },
+        "valueKey": "reenviar_codigo_en_29_segundos",
+        "associatedField": "Reenviar código en  29 segundos...",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Reenviar código en  29 segundos...",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "requestchallengeform"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 24,
+        "scenarioStepIndex": 25,
+        "originalText": "Ingresar \"••••••\" en \"Reenviar código en 29 segundos...\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Reenviar código en 29 segundos"
+        },
+        "valueKey": "reenviar_codigo_en_29_segundos",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Reenviar código en 29 segundos",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "requestchallengeform"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 25,
+        "scenarioStepIndex": 26,
+        "originalText": "Ingresar \"••••••\" en \"Reenviar código en 29 segundos...\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Reenviar código en 29 segundos"
+        },
+        "valueKey": "reenviar_codigo_en_29_segundos",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Reenviar código en 29 segundos",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "requestchallengeform"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 26,
+        "scenarioStepIndex": 27,
+        "originalText": "Ingresar \"••••••\" en \"Reenviar código en 29 segundos...\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Reenviar código en 29 segundos"
+        },
+        "valueKey": "reenviar_codigo_en_29_segundos",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Reenviar código en 29 segundos",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "requestchallengeform"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 27,
+        "scenarioStepIndex": 28,
+        "originalText": "Ingresar \"••••••\" en \"Reenviar código en 29 segundos...\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Reenviar código en 29 segundos"
+        },
+        "valueKey": "reenviar_codigo_en_29_segundos",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Reenviar código en 29 segundos",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "requestchallengeform"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 28,
+        "scenarioStepIndex": 29,
+        "originalText": "Ingresar \"••••••\" en \"Reenviar código en 29 segundos...\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Reenviar código en 29 segundos"
+        },
+        "valueKey": "reenviar_codigo_en_29_segundos",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Reenviar código en 29 segundos",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "requestchallengeform"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 29,
+        "scenarioStepIndex": 30,
+        "originalText": "Presionar \"Continuar\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Continuar"
+        },
+        "valueKey": "continuar",
+        "associatedField": "Continuar",
+        "technicalTargetRef": "role:button|Continuar",
+        "technicalTargetRefs": [
+          "role:button|Continuar",
+          "css:#validate_submit_token",
+          "id:validate_submit_token"
+        ],
+        "controlIdentity": "60d370b39a8d|Continuar|role|button|Continuar",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[id=\"validate_submit_token\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "input"
+            },
+            "stableDirectAttributes": {
+              "id": "validate_submit_token"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "requestchallengeform"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"input\"},\"stableDirectAttributes\":{\"id\":\"validate_submit_token\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(a[href=\"/onlinebanking/Transfer/MyAccountsTransfer/ConfirmTransaction\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "navigation_transition",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "url_state",
+          "mechanism": {
+            "source": "url_state",
+            "method": "expectPromotedVisible",
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "navigation_transition",
+              "urlPattern": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary"
+            }
+          },
+          "sourceActionStepIndex": 30,
+          "requirement": "La aplicación carga su pantalla inicial",
+          "target": "Continuar"
+        },
+        "sourceActionStepIndex": 30,
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 29,
+      "representedScenarioSteps": 29,
+      "missingScenarioSteps": []
+    }
+  },
+  "executionContractChars": 33732,
+  "promptChars": null,
+  "specGenerationAttempts": 0,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": true,
+  "promotionAllowed": true,
+  "failedGatesAttempt1": [],
+  "finalSpec": {
+    "origin": "deterministic_compiler",
+    "generatedBy": "core",
+    "strategy": "deterministic_compiler",
+    "fallback": null
+  }
+}

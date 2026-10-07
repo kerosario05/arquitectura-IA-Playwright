@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { resolveSupportingAutofill } from "./supporting-autofill";
 import { buildRuntimeControlIdentity } from "../types/control-identity";
+import type { RuntimeInputRequirement } from "../testrail/testrail-runtime-transformer";
 
 const identity = (name: string, role = "textbox") => buildRuntimeControlIdentity({
   tagName: role === "listbox" ? "div" : "input",
@@ -11,8 +12,10 @@ const identity = (name: string, role = "textbox") => buildRuntimeControlIdentity
   candidateLocator: { strategy: "role", role },
 });
 
-const requirement = (key: string, valuePolicy: "scenario_controlled" | "safe_synthetic" | "trusted_required" | "unresolved", kind: string) => ({
-  key, source: "contract" as const, valuePolicy, fieldCapability: { kind } as any,
+const requirement = (key: string, valuePolicy: RuntimeInputRequirement["valuePolicy"], kind: RuntimeInputRequirement["fieldCapability"]["kind"]): RuntimeInputRequirement => ({
+  key, source: "contract", valuePolicy,
+  scenarioDataPolicy: valuePolicy === "scenario_controlled" ? "explicit_value" : valuePolicy === "safe_synthetic" ? "synthetic_allowed" : valuePolicy === "trusted_required" ? "trusted_required" : "unresolved",
+  fieldCapability: { kind },
 });
 
 const control = (requirementRef: string, controlIdentity: ReturnType<typeof identity>, overrides: Record<string, unknown> = {}) => ({

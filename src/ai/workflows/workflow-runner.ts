@@ -70,8 +70,9 @@ export async function runWorkflow(
   executeStep: WorkflowStepExecutor,
   options: RunWorkflowOptions = {},
 ): Promise<WorkflowRun> {
+  const workflowId = (workflow as WorkflowDefinition | undefined)?.id;
   if (!isValidWorkflowDefinition(workflow)) {
-    throw new Error(`Invalid workflow definition: ${workflow?.id ?? "unknown"}`);
+    throw new Error(`Invalid workflow definition: ${workflowId || "unknown"}`);
   }
 
   const startedAt = new Date().toISOString();

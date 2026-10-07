@@ -72,8 +72,8 @@ async function runLocalValidatedDiscovery(reference: QaLabReference, freshId: st
   fs.copyFileSync(sourceInput, freshInput);
   const args = validatedDiscoveryArgs(reference, freshInput);
   const command = process.platform === "win32" ? "npm.cmd" : "npm";
-  let stdout = Buffer.alloc(0);
-  let stderr = Buffer.alloc(0);
+  let stdout: Buffer<ArrayBufferLike> = Buffer.alloc(0);
+  let stderr: Buffer<ArrayBufferLike> = Buffer.alloc(0);
   let processError = "";
   let exitCode: number | null = null;
   const appendBounded = (current: Buffer, chunk: Buffer): Buffer => Buffer.concat([current, chunk]).subarray(-MAX_CAPTURED_STREAM_BYTES);
@@ -158,8 +158,9 @@ export async function runDiscoveryRerun(
   if (!task.qaLabBaseUrl) throw new Error("Discovery tester requires the configured QA Lab API base URL in TaskContract.qaLabBaseUrl.");
   const base = task.qaLabBaseUrl.replace(/\/+$/, "");
   let source: JsonRecord | undefined;
-  let current: JsonRecord;
-  let freshId: string;
+  let current: JsonRecord | undefined;
+  let freshId: string | undefined;
+  let sourceProject = "";
   try {
     source = await getWithDependencyWait(`${base}/api/runs/${encodeURIComponent(reference.id)}`, onWaiting);
   } catch (error) {
@@ -172,7 +173,7 @@ export async function runDiscoveryRerun(
     current = await (options.localRunner ?? runLocalValidatedDiscovery)(reference, freshId);
   }
   if (source) {
-    const sourceProject = text(source.params?.appSlug ?? source.params?.targetAppSlug ?? source.appSlug);
+    sourceProject = text(source.params?.appSlug ?? source.params?.targetAppSlug ?? source.appSlug);
     if (!sourceProject || sourceProject.toLowerCase() !== reference.projectSlug.toLowerCase()) throw new Error(`Historical job project mismatch: expected ${reference.projectSlug}, received ${sourceProject || "unresolved"}.`);
     const started = await requestJson(`${base}/api/runs/${encodeURIComponent(reference.id)}/rerun`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ mode: "all" }) });
     freshId = jobId(started);
@@ -187,6 +188,7 @@ export async function runDiscoveryRerun(
       current = await getWithDependencyWait(`${base}/api/runs/${encodeURIComponent(freshId)}`, onWaiting);
     }
   }
+  if (!current || !freshId) throw new Error("Discovery rerun did not produce a job result.");
   const diskRunDir = path.resolve(process.cwd(), ".artifacts", "scenario-preview-runs", freshId);
   const diskResultPath = path.join(diskRunDir, "results.json");
   let results = record(current.results);

@@ -1,0 +1,400 @@
+{
+  "appSlug": "portal-empresarial",
+  "sectionSlug": "default-section",
+  "scenarioId": "PREVIEW-001",
+  "scenarioTitle": "Descargar plantilla para carga de nómina",
+  "stepCount": 7,
+  "sourceExpectedResultPresent": true,
+  "requiredAssertionCount": 1,
+  "observableOracles": [
+    {
+      "id": "expected-01",
+      "requirement": "La aplicación carga su pantalla inicial",
+      "type": "navigation_transition",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 7,
+      "polarity": "positive",
+      "target": "click aquí para descargar",
+      "evidence": [
+        "transition_observed:true",
+        "click_target:click aquí para descargar",
+        "action_type:Presionar \"click aquí para descargar\"",
+        "after_url:https://172.27.4.31/payroll/electronicPayroll",
+        "assertion_polarity:positive"
+      ],
+      "details": {
+        "transitionObserved": true,
+        "clickTarget": "click aquí para descargar",
+        "resolvedTarget": null,
+        "postClickUiChange": null,
+        "sourceActionStepIndex": 7,
+        "expectedUrl": "https://172.27.4.31/payroll/electronicPayroll"
+      }
+    }
+  ],
+  "oracleTypes": [
+    "navigation_transition"
+  ],
+  "availablePageObjectCount": 2,
+  "mode": "deterministic",
+  "functionalExecutionEnabled": true,
+  "provider": null,
+  "model": null,
+  "skill": {
+    "name": null,
+    "version": null,
+    "hash": null,
+    "loaded": false
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "PREVIEW-001",
+    "title": "Descargar plantilla para carga de nómina",
+    "appSlug": "portal-empresarial",
+    "sectionSlug": "default-section",
+    "auth": {
+      "gateDetected": true,
+      "required": false,
+      "stage": "identification_input",
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    },
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Abrir la aplicación configurada del proyecto",
+        "operation": "navigate",
+        "target": {
+          "strategy": "url",
+          "value": "APP_BASE_URL"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Ingresar \"130598983\" en \"RNC de la empresa*\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "RNC de la empresa*"
+        },
+        "valueKey": "rnc_de_la_empresa",
+        "associatedField": "RNC de la empresa*",
+        "technicalTargetRef": "role:textbox|RNC de la empresa*",
+        "technicalTargetRefs": [
+          "role:textbox|RNC de la empresa*",
+          "css:#rnc",
+          "id:rnc"
+        ],
+        "controlIdentity": "3e7b2674871e|RNC de la empresa*|role|textbox|RNC de la empresa*",
+        "recordingActionType": "fill",
+        "authGateExpected": true,
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "RNC de la empresa*",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Ingresar \"olivam\" en \"Nombre de usuario*\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Nombre de usuario*"
+        },
+        "valueKey": "nombre_de_usuario",
+        "associatedField": "Nombre de usuario*",
+        "technicalTargetRef": "role:textbox|Nombre de usuario*",
+        "technicalTargetRefs": [
+          "role:textbox|Nombre de usuario*",
+          "css:#email",
+          "id:email"
+        ],
+        "controlIdentity": "3e7b2674871e|Nombre de usuario*|role|textbox|Nombre de usuario*",
+        "recordingActionType": "fill",
+        "authGateExpected": true,
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Nombre de usuario*",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Ingresar \"••••••\" en \"Contraseña*\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Contraseña*"
+        },
+        "valueKey": "contrasena",
+        "associatedField": "Contraseña*",
+        "technicalTargetRef": "role:textbox|Contraseña*",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña*",
+          "css:#password",
+          "id:password"
+        ],
+        "controlIdentity": "3e7b2674871e|Contraseña*|role|textbox|Contraseña*",
+        "recordingActionType": "fill",
+        "authGateExpected": true,
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Contraseña*",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 4,
+        "scenarioStepIndex": 5,
+        "originalText": "Presionar \"Enter\" en \"Contraseña*\"",
+        "operation": "press",
+        "target": {
+          "strategy": "text",
+          "value": "Contraseña*",
+          "exact": false
+        },
+        "value": "Enter",
+        "technicalTargetRef": "role:textbox|Contraseña*",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña*",
+          "css:#password",
+          "id:password"
+        ],
+        "controlIdentity": "3e7b2674871e|Contraseña*|role|textbox|Contraseña*",
+        "recordingActionType": "press",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Contraseña*",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "pressPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 5,
+        "scenarioStepIndex": 6,
+        "originalText": "Presionar \"Gestión de Nóminas\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Gestión de Nóminas"
+        },
+        "valueKey": "gestion_de_nominas",
+        "associatedField": "Gestión de Nóminas",
+        "technicalTargetRef": "role:button|Gestión de Nóminas",
+        "technicalTargetRefs": [
+          "role:button|Gestión de Nóminas"
+        ],
+        "controlIdentity": "3e7b2674871e|Gestión de Nóminas|role|button|Gestión de Nóminas",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Gestión de Nóminas",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Gestión de Nóminas",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 6,
+        "scenarioStepIndex": 7,
+        "originalText": "Presionar \"click aquí para descargar\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "click aquí para descargar"
+        },
+        "technicalTargetRef": "role:link|click aquí para descargar",
+        "technicalTargetRefs": [
+          "role:link|click aquí para descargar"
+        ],
+        "controlIdentity": "3e7b2674871e|click aquí para descargar|role|link|click aquí para descargar",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[href=\"/templates/PlantillaGestionEmpresarial.xlsx\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a"
+            },
+            "stableDirectAttributes": {
+              "href": "/templates/PlantillaGestionEmpresarial.xlsx"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "click aquí para descargar",
+          "targetTag": "a",
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "oracle": {
+          "type": "navigation_transition",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "url_state",
+          "mechanism": {
+            "source": "url_state",
+            "method": "expectPromotedVisible",
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "navigation_transition",
+              "urlPattern": "https://172.27.4.31/payroll/electronicPayroll"
+            }
+          },
+          "sourceActionStepIndex": 7,
+          "requirement": "La aplicación carga su pantalla inicial",
+          "target": "click aquí para descargar"
+        },
+        "sourceActionStepIndex": 7,
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 7,
+      "representedScenarioSteps": 7,
+      "missingScenarioSteps": []
+    }
+  },
+  "executionContractChars": 7099,
+  "promptChars": null,
+  "specGenerationAttempts": 0,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": true,
+  "promotionAllowed": true,
+  "failedGatesAttempt1": [],
+  "finalSpec": {
+    "origin": "deterministic_compiler",
+    "generatedBy": "core",
+    "strategy": "deterministic_compiler",
+    "fallback": null
+  }
+}

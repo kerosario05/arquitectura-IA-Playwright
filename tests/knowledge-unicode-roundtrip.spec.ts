@@ -62,6 +62,7 @@ test("persist → dbo.ProjectKnowledge → SELECT → JSON.parse → materialize
         sourceIssueKey: "UTF8-RT",
         category: "action",
         sourceText: text,
+        expectedBehavior: text,
         status: "covered",
       }),
     );

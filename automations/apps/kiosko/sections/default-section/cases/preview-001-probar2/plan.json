@@ -1,0 +1,3093 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-001",
+    "caseId": 0,
+    "title": "probar2"
+  },
+  "requiredData": [
+    {
+      "key": "numero_de_identificacion",
+      "required": true,
+      "resolved": true
+    }
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "description": "Presionar \"Estados de cuenta\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Estados de cuenta",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner",
+      "requirementRefs": []
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Presionar \"4\" en \"Número de identificación\"",
+      "target": {
+        "strategy": "text",
+        "value": "4",
+        "exact": true
+      },
+      "valueKey": "numero_de_identificacion",
+      "segmentPosition": 1,
+      "playwrightRecorderEvidence": {
+        "kind": "virtual_keyboard",
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true,
+        "keyLabels": [
+          "-",
+          ".",
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "@",
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z",
+          "Ñ"
+        ],
+        "buttonCount": 43,
+        "fieldLabel": "Número de identificación"
+      },
+      "resolutionState": "runtime_resolution_required",
+      "requirementRefs": []
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Presionar \"0\" en \"Número de identificación\"",
+      "target": {
+        "strategy": "text",
+        "value": "0",
+        "exact": true
+      },
+      "valueKey": "numero_de_identificacion",
+      "segmentPosition": 2,
+      "playwrightRecorderEvidence": {
+        "kind": "virtual_keyboard",
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true,
+        "keyLabels": [
+          "-",
+          ".",
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "@",
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z",
+          "Ñ"
+        ],
+        "buttonCount": 43,
+        "fieldLabel": "Número de identificación"
+      },
+      "resolutionState": "runtime_resolution_required",
+      "requirementRefs": []
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Presionar \"2\" en \"Número de identificación\"",
+      "target": {
+        "strategy": "text",
+        "value": "2",
+        "exact": true
+      },
+      "valueKey": "numero_de_identificacion",
+      "segmentPosition": 3,
+      "playwrightRecorderEvidence": {
+        "kind": "virtual_keyboard",
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true,
+        "keyLabels": [
+          "-",
+          ".",
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "@",
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z",
+          "Ñ"
+        ],
+        "buttonCount": 43,
+        "fieldLabel": "Número de identificación"
+      },
+      "resolutionState": "runtime_resolution_required",
+      "requirementRefs": []
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Presionar \"2\" en \"Número de identificación\"",
+      "target": {
+        "strategy": "text",
+        "value": "2",
+        "exact": true
+      },
+      "valueKey": "numero_de_identificacion",
+      "segmentPosition": 4,
+      "playwrightRecorderEvidence": {
+        "kind": "virtual_keyboard",
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true,
+        "keyLabels": [
+          "-",
+          ".",
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "@",
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z",
+          "Ñ"
+        ],
+        "buttonCount": 43,
+        "fieldLabel": "Número de identificación"
+      },
+      "resolutionState": "runtime_resolution_required",
+      "requirementRefs": []
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"4\" en \"Número de identificación\"",
+      "target": {
+        "strategy": "text",
+        "value": "4",
+        "exact": true
+      },
+      "valueKey": "numero_de_identificacion",
+      "segmentPosition": 5,
+      "playwrightRecorderEvidence": {
+        "kind": "virtual_keyboard",
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true,
+        "keyLabels": [
+          "-",
+          ".",
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "@",
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z",
+          "Ñ"
+        ],
+        "buttonCount": 43,
+        "fieldLabel": "Número de identificación"
+      },
+      "resolutionState": "runtime_resolution_required",
+      "requirementRefs": []
+    },
+    {
+      "index": 8,
+      "action": "click",
+      "description": "Presionar \"6\" en \"Número de identificación\"",
+      "target": {
+        "strategy": "text",
+        "value": "6",
+        "exact": true
+      },
+      "valueKey": "numero_de_identificacion",
+      "segmentPosition": 6,
+      "playwrightRecorderEvidence": {
+        "kind": "virtual_keyboard",
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true,
+        "keyLabels": [
+          "-",
+          ".",
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "@",
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z",
+          "Ñ"
+        ],
+        "buttonCount": 43,
+        "fieldLabel": "Número de identificación"
+      },
+      "resolutionState": "runtime_resolution_required",
+      "requirementRefs": []
+    },
+    {
+      "index": 9,
+      "action": "click",
+      "description": "Presionar \"7\" en \"Número de identificación\"",
+      "target": {
+        "strategy": "text",
+        "value": "7",
+        "exact": true
+      },
+      "valueKey": "numero_de_identificacion",
+      "segmentPosition": 7,
+      "playwrightRecorderEvidence": {
+        "kind": "virtual_keyboard",
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true,
+        "keyLabels": [
+          "-",
+          ".",
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "@",
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z",
+          "Ñ"
+        ],
+        "buttonCount": 43,
+        "fieldLabel": "Número de identificación"
+      },
+      "resolutionState": "runtime_resolution_required",
+      "requirementRefs": []
+    },
+    {
+      "index": 10,
+      "action": "click",
+      "description": "Presionar \"9\" en \"Número de identificación\"",
+      "target": {
+        "strategy": "text",
+        "value": "9",
+        "exact": true
+      },
+      "valueKey": "numero_de_identificacion",
+      "segmentPosition": 8,
+      "playwrightRecorderEvidence": {
+        "kind": "virtual_keyboard",
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true,
+        "keyLabels": [
+          "-",
+          ".",
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "@",
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z",
+          "Ñ"
+        ],
+        "buttonCount": 43,
+        "fieldLabel": "Número de identificación"
+      },
+      "resolutionState": "runtime_resolution_required",
+      "requirementRefs": []
+    },
+    {
+      "index": 11,
+      "action": "click",
+      "description": "Presionar \"5\" en \"Número de identificación\"",
+      "target": {
+        "strategy": "text",
+        "value": "5",
+        "exact": true
+      },
+      "valueKey": "numero_de_identificacion",
+      "segmentPosition": 9,
+      "playwrightRecorderEvidence": {
+        "kind": "virtual_keyboard",
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true,
+        "keyLabels": [
+          "-",
+          ".",
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "@",
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z",
+          "Ñ"
+        ],
+        "buttonCount": 43,
+        "fieldLabel": "Número de identificación"
+      },
+      "resolutionState": "runtime_resolution_required",
+      "requirementRefs": []
+    },
+    {
+      "index": 12,
+      "action": "click",
+      "description": "Presionar \"5\" en \"Número de identificación\"",
+      "target": {
+        "strategy": "text",
+        "value": "5",
+        "exact": true
+      },
+      "valueKey": "numero_de_identificacion",
+      "segmentPosition": 10,
+      "playwrightRecorderEvidence": {
+        "kind": "virtual_keyboard",
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true,
+        "keyLabels": [
+          "-",
+          ".",
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "@",
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z",
+          "Ñ"
+        ],
+        "buttonCount": 43,
+        "fieldLabel": "Número de identificación"
+      },
+      "resolutionState": "runtime_resolution_required",
+      "requirementRefs": []
+    },
+    {
+      "index": 13,
+      "action": "click",
+      "description": "Presionar \"1\" en \"Número de identificación\"",
+      "target": {
+        "strategy": "text",
+        "value": "1",
+        "exact": true
+      },
+      "valueKey": "numero_de_identificacion",
+      "segmentPosition": 11,
+      "playwrightRecorderEvidence": {
+        "kind": "virtual_keyboard",
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true,
+        "keyLabels": [
+          "-",
+          ".",
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "@",
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z",
+          "Ñ"
+        ],
+        "buttonCount": 43,
+        "fieldLabel": "Número de identificación"
+      },
+      "resolutionState": "runtime_resolution_required",
+      "requirementRefs": []
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-10-04T21:45:19.712Z",
+  "metadata": {
+    "authFlowRequired": false,
+    "authFlowAlias": "defaultClient",
+    "authFlowLanding": "transactions_menu",
+    "authGateDetectedDuringDiscovery": true,
+    "authGateStage": "identification_input"
+  },
+  "sourceScenario": {
+    "title": "probar2",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Abrir la aplicación configurada del proyecto",
+        "description": "Abrir la aplicación configurada del proyecto"
+      },
+      {
+        "index": 2,
+        "action": "Presionar \"Estados de cuenta\"",
+        "description": "Presionar \"Estados de cuenta\"",
+        "technicalTargetRef": "role:button|Estados de cuenta",
+        "technicalTargetRefs": [
+          "role:button|Estados de cuenta"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Estados de cuenta",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Estados de cuenta"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",5],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",5],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "controlIdentity": "3a1c6dc6ce96|Estados de cuenta|role|button|Estados de cuenta",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 3,
+        "action": "Presionar \"4\" en \"Número de identificación\"",
+        "description": "Presionar \"4\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "technicalTargetRef": "role:button|4",
+        "technicalTargetRefs": [
+          "role:button|4"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Número de identificación",
+        "controlIdentity": "3a1c6dc6ce96|4|role|button|4",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 4,
+        "action": "Presionar \"0\" en \"Número de identificación\"",
+        "description": "Presionar \"0\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "technicalTargetRef": "role:button|0",
+        "technicalTargetRefs": [
+          "role:button|0"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|0",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Número de identificación",
+        "controlIdentity": "3a1c6dc6ce96|0|role|button|0",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 5,
+        "action": "Presionar \"2\" en \"Número de identificación\"",
+        "description": "Presionar \"2\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "technicalTargetRef": "role:button|2",
+        "technicalTargetRefs": [
+          "role:button|2"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|2",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Número de identificación",
+        "controlIdentity": "3a1c6dc6ce96|2|role|button|2",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 6,
+        "action": "Presionar \"2\" en \"Número de identificación\"",
+        "description": "Presionar \"2\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "technicalTargetRef": "role:button|2",
+        "technicalTargetRefs": [
+          "role:button|2"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|2",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Número de identificación",
+        "controlIdentity": "3a1c6dc6ce96|2|role|button|2",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 7,
+        "action": "Presionar \"4\" en \"Número de identificación\"",
+        "description": "Presionar \"4\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "technicalTargetRef": "role:button|4",
+        "technicalTargetRefs": [
+          "role:button|4"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Número de identificación",
+        "controlIdentity": "3a1c6dc6ce96|4|role|button|4",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 8,
+        "action": "Presionar \"6\" en \"Número de identificación\"",
+        "description": "Presionar \"6\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "technicalTargetRef": "role:button|6",
+        "technicalTargetRefs": [
+          "role:button|6"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|6",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Número de identificación",
+        "controlIdentity": "3a1c6dc6ce96|6|role|button|6",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 9,
+        "action": "Presionar \"7\" en \"Número de identificación\"",
+        "description": "Presionar \"7\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "technicalTargetRef": "role:button|7",
+        "technicalTargetRefs": [
+          "role:button|7"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|7",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Número de identificación",
+        "controlIdentity": "3a1c6dc6ce96|7|role|button|7",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 10,
+        "action": "Presionar \"9\" en \"Número de identificación\"",
+        "description": "Presionar \"9\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "technicalTargetRef": "role:button|9",
+        "technicalTargetRefs": [
+          "role:button|9"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|9",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Número de identificación",
+        "controlIdentity": "3a1c6dc6ce96|9|role|button|9",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 11,
+        "action": "Presionar \"5\" en \"Número de identificación\"",
+        "description": "Presionar \"5\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "technicalTargetRef": "role:button|5",
+        "technicalTargetRefs": [
+          "role:button|5"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|5",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Número de identificación",
+        "controlIdentity": "3a1c6dc6ce96|5|role|button|5",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 12,
+        "action": "Presionar \"5\" en \"Número de identificación\"",
+        "description": "Presionar \"5\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "technicalTargetRef": "role:button|5",
+        "technicalTargetRefs": [
+          "role:button|5"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|5",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Número de identificación",
+        "controlIdentity": "3a1c6dc6ce96|5|role|button|5",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 13,
+        "action": "Presionar \"1\" en \"Número de identificación\"",
+        "description": "Presionar \"1\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "technicalTargetRef": "role:button|1",
+        "technicalTargetRefs": [
+          "role:button|1"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|1",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Número de identificación",
+        "controlIdentity": "3a1c6dc6ce96|1|role|button|1",
+        "recordingActionType": "click"
+      }
+    ],
+    "expectedResult": "La aplicación carga su pantalla inicial",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "observedAssertions": [],
+    "observableOracles": [
+      {
+        "id": "expected-01",
+        "requirement": "La aplicación carga su pantalla inicial",
+        "type": "navigation_transition",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 13,
+        "target": "1",
+        "polarity": "positive",
+        "evidence": [
+          "transition_observed:true",
+          "click_target:1",
+          "action_type:Presionar \"1\" en \"Número de identificación\"",
+          "after_url:https://172.27.4.50/client-identification",
+          "assertion_polarity:positive"
+        ],
+        "details": {
+          "transitionObserved": true,
+          "clickTarget": "1",
+          "resolvedTarget": null,
+          "postClickUiChange": null,
+          "sourceActionStepIndex": 13,
+          "expectedUrl": "https://172.27.4.50/client-identification"
+        }
+      }
+    ],
+    "stepStatuses": [
+      {
+        "index": 2,
+        "status": "found"
+      },
+      {
+        "index": 3,
+        "status": "found"
+      },
+      {
+        "index": 4,
+        "status": "found"
+      },
+      {
+        "index": 5,
+        "status": "found"
+      },
+      {
+        "index": 6,
+        "status": "found"
+      },
+      {
+        "index": 7,
+        "status": "found"
+      },
+      {
+        "index": 8,
+        "status": "found"
+      },
+      {
+        "index": 9,
+        "status": "found"
+      },
+      {
+        "index": 10,
+        "status": "found"
+      },
+      {
+        "index": 11,
+        "status": "found"
+      },
+      {
+        "index": 12,
+        "status": "found"
+      },
+      {
+        "index": 13,
+        "status": "found"
+      }
+    ],
+    "auth": {
+      "gateDetected": true,
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    }
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "PREVIEW-001",
+    "title": "probar2",
+    "appSlug": "kiosko",
+    "sectionSlug": "default-section",
+    "auth": {
+      "gateDetected": true,
+      "required": false,
+      "stage": "identification_input",
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    },
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Abrir la aplicación configurada del proyecto",
+        "operation": "navigate",
+        "target": {
+          "strategy": "url",
+          "value": "APP_BASE_URL"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Presionar \"Estados de cuenta\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Estados de cuenta"
+        },
+        "technicalTargetRef": "role:button|Estados de cuenta",
+        "technicalTargetRefs": [
+          "role:button|Estados de cuenta"
+        ],
+        "controlIdentity": "3a1c6dc6ce96|Estados de cuenta|role|button|Estados de cuenta",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Estados de cuenta\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Estados de cuenta"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "div"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",5],[\\\"svg\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Presionar \"4\" en \"Número de identificación\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "4"
+        },
+        "valueKey": "numero_de_identificacion",
+        "associatedField": "Número de identificación",
+        "technicalTargetRef": "role:button|4",
+        "technicalTargetRefs": [
+          "role:button|4"
+        ],
+        "controlIdentity": "3a1c6dc6ce96|4|role|button|4",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|4",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Presionar \"0\" en \"Número de identificación\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "0"
+        },
+        "valueKey": "numero_de_identificacion",
+        "associatedField": "Número de identificación",
+        "technicalTargetRef": "role:button|0",
+        "technicalTargetRefs": [
+          "role:button|0"
+        ],
+        "controlIdentity": "3a1c6dc6ce96|0|role|button|0",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|0",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 4,
+        "scenarioStepIndex": 5,
+        "originalText": "Presionar \"2\" en \"Número de identificación\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "2"
+        },
+        "valueKey": "numero_de_identificacion",
+        "associatedField": "Número de identificación",
+        "technicalTargetRef": "role:button|2",
+        "technicalTargetRefs": [
+          "role:button|2"
+        ],
+        "controlIdentity": "3a1c6dc6ce96|2|role|button|2",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|2",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 5,
+        "scenarioStepIndex": 6,
+        "originalText": "Presionar \"2\" en \"Número de identificación\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "2"
+        },
+        "valueKey": "numero_de_identificacion",
+        "associatedField": "Número de identificación",
+        "technicalTargetRef": "role:button|2",
+        "technicalTargetRefs": [
+          "role:button|2"
+        ],
+        "controlIdentity": "3a1c6dc6ce96|2|role|button|2",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|2",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 6,
+        "scenarioStepIndex": 7,
+        "originalText": "Presionar \"4\" en \"Número de identificación\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "4"
+        },
+        "valueKey": "numero_de_identificacion",
+        "associatedField": "Número de identificación",
+        "technicalTargetRef": "role:button|4",
+        "technicalTargetRefs": [
+          "role:button|4"
+        ],
+        "controlIdentity": "3a1c6dc6ce96|4|role|button|4",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|4",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 7,
+        "scenarioStepIndex": 8,
+        "originalText": "Presionar \"6\" en \"Número de identificación\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "6"
+        },
+        "valueKey": "numero_de_identificacion",
+        "associatedField": "Número de identificación",
+        "technicalTargetRef": "role:button|6",
+        "technicalTargetRefs": [
+          "role:button|6"
+        ],
+        "controlIdentity": "3a1c6dc6ce96|6|role|button|6",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|6",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 8,
+        "scenarioStepIndex": 9,
+        "originalText": "Presionar \"7\" en \"Número de identificación\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "7"
+        },
+        "valueKey": "numero_de_identificacion",
+        "associatedField": "Número de identificación",
+        "technicalTargetRef": "role:button|7",
+        "technicalTargetRefs": [
+          "role:button|7"
+        ],
+        "controlIdentity": "3a1c6dc6ce96|7|role|button|7",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|7",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 9,
+        "scenarioStepIndex": 10,
+        "originalText": "Presionar \"9\" en \"Número de identificación\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "9"
+        },
+        "valueKey": "numero_de_identificacion",
+        "associatedField": "Número de identificación",
+        "technicalTargetRef": "role:button|9",
+        "technicalTargetRefs": [
+          "role:button|9"
+        ],
+        "controlIdentity": "3a1c6dc6ce96|9|role|button|9",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|9",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 10,
+        "scenarioStepIndex": 11,
+        "originalText": "Presionar \"5\" en \"Número de identificación\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "5"
+        },
+        "valueKey": "numero_de_identificacion",
+        "associatedField": "Número de identificación",
+        "technicalTargetRef": "role:button|5",
+        "technicalTargetRefs": [
+          "role:button|5"
+        ],
+        "controlIdentity": "3a1c6dc6ce96|5|role|button|5",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|5",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 11,
+        "scenarioStepIndex": 12,
+        "originalText": "Presionar \"5\" en \"Número de identificación\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "5"
+        },
+        "valueKey": "numero_de_identificacion",
+        "associatedField": "Número de identificación",
+        "technicalTargetRef": "role:button|5",
+        "technicalTargetRefs": [
+          "role:button|5"
+        ],
+        "controlIdentity": "3a1c6dc6ce96|5|role|button|5",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|5",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 12,
+        "scenarioStepIndex": 13,
+        "originalText": "Presionar \"1\" en \"Número de identificación\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "1"
+        },
+        "valueKey": "numero_de_identificacion",
+        "associatedField": "Número de identificación",
+        "technicalTargetRef": "role:button|1",
+        "technicalTargetRefs": [
+          "role:button|1"
+        ],
+        "controlIdentity": "3a1c6dc6ce96|1|role|button|1",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|1",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "oracle": {
+          "type": "navigation_transition",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "url_state",
+          "mechanism": {
+            "source": "url_state",
+            "method": "expectPromotedVisible",
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "navigation_transition",
+              "urlPattern": "https://172.27.4.50/client-identification"
+            }
+          },
+          "sourceActionStepIndex": 13,
+          "requirement": "La aplicación carga su pantalla inicial",
+          "target": "1"
+        },
+        "sourceActionStepIndex": 13,
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 13,
+      "representedScenarioSteps": 13,
+      "missingScenarioSteps": []
+    }
+  }
+}

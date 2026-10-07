@@ -703,7 +703,7 @@ export async function waitForReady(timeoutMs: number, onLog?: (line: string) => 
   // currentServer.* after the snapshot below.
   const failedProcessRef = currentServer?.process;
   const wrapperPid = failedProcessRef?.pid;
-  const failedPort = currentServer?.port ?? port;
+  const failedPort = currentServer?.port ?? config.integrations.android?.appiumPort ?? 4723;
   const stdoutTail = sanitizeOutput(currentServer?.stdoutTail ?? "");
   const stderrTail = sanitizeOutput(currentServer?.stderrTail ?? "");
   const processAlive = isChildAlive(failedProcessRef);

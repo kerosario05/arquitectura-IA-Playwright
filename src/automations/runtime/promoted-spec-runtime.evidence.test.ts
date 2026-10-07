@@ -155,7 +155,7 @@ test("promoted assertion failure is recorded as failed before error propagation"
   }
 });
 
-test("positive URL oracle requires a fresh completion signal and rejects visible failure dialogs", async () => {
+test("positive URL oracle accepts a verified adjacent in-place action and rejects visible failure dialogs", async () => {
   assert.equal(evaluatePromotedCompletionSignal({
     expectedUrlMatches: true,
     routeChangedSinceAction: false,
@@ -165,12 +165,21 @@ test("positive URL oracle requires a fresh completion signal and rejects visible
   assert.equal(evaluatePromotedCompletionSignal({
     expectedUrlMatches: true,
     routeChangedSinceAction: false,
+    actionOutcomeObserved: true,
+    failureMessages: [],
+    successMessages: [],
+  }), true);
+  assert.equal(evaluatePromotedCompletionSignal({
+    expectedUrlMatches: true,
+    routeChangedSinceAction: false,
+    actionOutcomeObserved: false,
     failureMessages: [],
     successMessages: ["Transferencia realizada exitosamente"],
   }), true);
   assert.equal(evaluatePromotedCompletionSignal({
     expectedUrlMatches: true,
     routeChangedSinceAction: true,
+    actionOutcomeObserved: true,
     failureMessages: ["No podemos procesar la operación (Code: 9902)"],
     successMessages: [],
   }), false);
@@ -181,10 +190,11 @@ test("positive URL oracle requires a fresh completion signal and rejects visible
   const runtime = new PromotedSpecRuntime(page, { captureDiagnostics: false });
   (runtime as any).ensureInitialEvidence = async () => undefined;
   (runtime as any).captureEvidenceStep = async () => undefined;
-  (runtime as any).lastClickOutcome = {
+  (runtime as any).lastActionOutcome = {
     stepIndex: 30,
     previousUrl: "https://example.test/summary",
     currentUrl: "https://example.test/summary",
+    actionOutcomeObserved: true,
   };
   await runtime.expectPromotedVisible({
     stepIndex: 21,
@@ -194,6 +204,16 @@ test("positive URL oracle requires a fresh completion signal and rejects visible
     assertion: async () => undefined,
   });
 
+  await runtime.expectPromotedVisible({
+    stepIndex: 31,
+    target: "Transferencia completada",
+    polarity: "positive",
+    expectedUrl: "/summary",
+    requireCompletionSignal: true,
+    assertion: async () => undefined,
+  });
+
+  (runtime as any).lastActionOutcome.actionOutcomeObserved = false;
   await assert.rejects(runtime.expectPromotedVisible({
     stepIndex: 31,
     target: "Transferencia completada",

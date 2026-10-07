@@ -83,16 +83,10 @@ test.afterAll(() => {
   }
 });
 
-test("hu_declared pending/trusted=false with sufficient score enters generationHints", () => {
+test("hu_declared pending/trusted=false never enters runtime knowledge", () => {
   const ctx = buildKnowledgeContextForScenarioGeneration(TEST_SLUG, TEST_HU, "balance_inquiry");
-
-  const hints = ctx.generationHints;
-  const prereq = hints.find((h) => h.actionTarget === "Consultar saldo");
-  expect(prereq).toBeDefined();
-  expect(prereq!.category).toBe("prerequisite");
-  expect(prereq!.actionIntent).toBe("select");
-  expect(prereq!.sourceText).toContain("Consultar saldo");
-  expect(prereq!.score).toBeGreaterThanOrEqual(20);
+  const runtimeHints = [...ctx.navigationHints, ...ctx.functionalHints];
+  expect(runtimeHints.some((hint) => hint.clickTargets.includes("Consultar saldo") && hint.kind === "hu_declared")).toBe(false);
 });
 
 test("same hu_declared item does NOT enter runtime authority", () => {
@@ -116,27 +110,14 @@ test("validated/runtime item keeps existing behavior", () => {
   expect(validated!.clickTargets).toContain("Consultar saldo");
 });
 
-test("hu_declared item with low score is not selected", () => {
+test("hu_declared item is never selected as runtime knowledge regardless of score", () => {
   const ctx = buildKnowledgeContextForScenarioGeneration(TEST_SLUG, TEST_HU, "balance_inquiry");
-
-  expect(ctx.generationHints.some((h) => h.actionTarget === "Seccion remota lejana")).toBe(false);
+  const runtimeHints = [...ctx.navigationHints, ...ctx.functionalHints];
+  expect(runtimeHints.some((hint) => hint.clickTargets.includes("Seccion remota lejana"))).toBe(false);
 });
 
-test("generationHints never feed allowedExecutableClicks/runtime track", () => {
+test("runtime knowledge never grants authority to hu_declared items", () => {
   const ctx = buildKnowledgeContextForScenarioGeneration(TEST_SLUG, TEST_HU, "balance_inquiry");
-
-  // generationHints carry ONLY declarative fields — never execution authority.
-  for (const h of ctx.generationHints) {
-    expect(h.category.length).toBeGreaterThan(0);
-    expect(typeof h.sourceText).toBe("string");
-    expect(typeof h.score).toBe("number");
-    expect((h as any).executionBacked).toBeUndefined();
-    expect((h as any).trustedForReuse).toBeUndefined();
-    expect((h as any).validationStatus).toBeUndefined();
-    expect((h as any).clickTargets).toBeUndefined();
-  }
-  // hu_declared kind never appears in the runtime hint tracks that drive
-  // allowedExecutableClicks / executable clicks.
   const runtimeKinds = [...ctx.navigationHints, ...ctx.functionalHints].map((h) => h.kind);
   expect(runtimeKinds.includes("hu_declared")).toBe(false);
 });

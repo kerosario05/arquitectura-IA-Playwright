@@ -1,0 +1,39 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-10-06T21:36:03.806Z",
+  "entries": [
+    {
+      "key": "rnc_de_la_empresa",
+      "source": "unknown",
+      "fieldName": "RNC de la empresa*",
+      "stepIndex": 2,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "nombre_de_usuario",
+      "source": "unknown",
+      "fieldName": "Nombre de usuario*",
+      "stepIndex": 3,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "contrasena",
+      "source": "unknown",
+      "fieldName": "Contraseña*",
+      "stepIndex": 4,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

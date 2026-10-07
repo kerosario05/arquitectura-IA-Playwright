@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-10-02T16:21:28.195Z",
+  "updatedAt": "2026-10-07T12:16:56.004Z",
   "automations": [
     {
       "id": "preview-001-grabar-el-recorrido",
@@ -262,17 +262,17 @@
       "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-registro-varios-clientes\\case.spec.ts",
       "appSlug": "portal-empresarial",
       "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
-      "status": "spec_failed",
+      "status": "active",
       "source": "discovery",
       "appProfile": "portal-empresarial",
       "createdAt": "2026-10-02T00:02:32.104Z",
-      "updatedAt": "2026-10-02T16:21:28.195Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-02T16-15-55-571Z\\discovered-plans.pending.json",
-      "pomStatus": "needs_manual_review",
+      "updatedAt": "2026-10-03T19:44:50.473Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-03T19-37-21-469Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
       "inlineDebugMode": false,
-      "specVerificationStatus": "failed",
+      "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-02T16-15-55-571Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-03T19-37-21-469Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -296,7 +296,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 125655,
+          "durationMs": 170566,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -315,29 +315,21 @@
             "typescript": "passed",
             "playwrightDiscovery": "passed",
             "semanticCoverage": "passed",
-            "functionalExecution": "failed"
+            "functionalExecution": "passed"
           },
-          "promotionAllowed": false,
+          "promotionAllowed": true,
           "specsRequested": 1,
-          "specsValidated": 0,
-          "specsRejected": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
           "specGenerationAttempts": 0,
           "specRepairAttempts": 0,
-          "firstPassPromotion": false,
-          "failedGatesAttempt1": [
-            "functionalExecution"
-          ],
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
           "regressedGates": [],
           "missingRequirements": [],
           "oracleTypes": [],
-          "errors": [
-            "functional_execution_failed:exitCode=1",
-            "functional_execution_error:Error: Promoted click failed at step 12 target=\"role:option|cédula\". failureClass=ACTION_CALLBACK_TIMEOUT exactRuntimeError=\"Retry failed: click retry timed out after 15000ms\" currentUrl=https://172.27.4.31/payroll/manualCreationTable clickPath=failed nativeClickAttempted=true nativeClickSucceeded=false callbackAttempted=true callbackSucceeded=false retryAttempted=true diagnostics={\"currentUrl\":\"https://172.27.4.31/payroll/manualCreationTable\",\"actionIntent\":\"click\",\"target\":\"role:option|cédula\",\"stepIndex\":12,\"timeoutMs\":15000,\"stability\":{\"currentUrl\":\"https://172.27.4.31/payroll/manualCreationTable\",\"title\":\"\",\"visibleHeadings\":[],\"visibleButtons\":[\"Cargar archivo\",\"Añadir otro\",\"Validar\",\"seleccione\",\"Indicar...\",\"Indicar...\",\"Indicar...\",\"Indicar...\",\"000-000-0000\",\"000-000-0000\"],\"visibleTexts\":[\"Empresa:\",\"CONSTRUCCIONES ...\",\"Oliva Medina\",\"Añadir colaboradores manualmente\",\"Añade y verifica que todos los datos estén correctos\",\"Cargar archivo\",\"Añadir otro\",\"Validar\",\"LISTADO DE COLABORADORES\",\"Puedes editar las celdas haciendo click sobre las mismas.\",\"Tipo de ID\",\"Colaborador\",\"Puesto\",\"Ingresos\",\"Correo electrónico\",\"Teléfono residencial\",\"Celular\",\"Fecha de Nacimiento\",\"Fecha de Ingreso\",\"seleccione\"],\"loadingDetected\":false,\"skeletonDetected\":false,\"listReadiness\":{\"cardsVisible\":0,\"listItemsVisible\":0,\"loadingDetected\":false,\"zeroProductsDetected\":false,\"hasEntityContainers\":true,\"visibleHeadings\":[],\"visibleButtons\":[\"Cargar archivo\",\"Añadir otro\",\"Validar\",\"seleccione\",\"Indicar...\",\"Indicar...\",\"Indicar...\",\"Indicar...\",\"000-000-0000\",\"000-000-0000\"],\"ready\":true},\"diagnosticStatus\":\"completed\"},\"retryAttempted\":true,\"clickPath\":\"failed\",\"nativeClickAttempted\":true,\"nativeClickSucceeded\":false,\"callbackAttempted\":true,\"callbackSucceeded\":false,\"callbackError\":\"Retry failed: click retry timed out after 15000ms\",\"expectedEffect\":\"ui_change\",\"effectDetected\":false,\"fallbackUsed\":\"none\",\"matchedLocatorStrategy\":\"unknown\",\"screenshotPath\":\"C:\\\\MisProyectos\\\\arquitectura-IA-Playwright-feature-auth-gate\\\\.artifacts\\\\promoted-runtime\\\\step-012.png\"}"
-          ],
-          "warnings": [
-            "functional_execution_screenshots=5",
-            "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 12)."
-          ],
+          "errors": [],
+          "warnings": [],
           "finalSpec": {
             "origin": "deterministic_compiler",
             "generatedBy": "core",
@@ -345,25 +337,23 @@
             "fallback": null
           },
           "runtimeGate": {
-            "decision": "block",
-            "promotionStatus": "blocked",
-            "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 12)."
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
           },
-          "specWritten": false,
+          "specWritten": true,
           "previousSpec": {
-            "existed": false,
-            "hash": null,
-            "lastModifiedAt": null
+            "existed": true,
+            "hash": "5a6c4bf5e98ec137ce01b168562fb0d9df441ced6a6d6c647ecf611b161788cc",
+            "lastModifiedAt": "2026-10-03T17:33:48.720Z"
           }
         },
         "promotionStrategyDiagnostics": {
           "requestedStrategy": "auto",
           "autoPomEnabled": true,
           "selectedStrategy": "pom",
-          "reason": "spec_generation_validation_failed",
-          "blockers": [
-            "spec_generation_validation_failed"
-          ],
+          "reason": "promoted",
+          "blockers": [],
           "availablePageObjects": [
             "ProductListPage",
             "OperationsMenuPage"
@@ -375,13 +365,1134 @@
           "fallbackUsed": false,
           "requirePomRuntime": false,
           "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-registro-varios-clientes\\case.spec.ts",
-          "specHash": "5fa1c1a6462c5cb474b86074f23de06ea1381beb1fd98336904b97e56913676d",
-          "specSource": "ai_candidate"
+          "specHash": "5a6c4bf5e98ec137ce01b168562fb0d9df441ced6a6d6c647ecf611b161788cc",
+          "specSource": "generatedSpec"
         },
         "overwritten": true,
         "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-registro-varios-clientes\\plan.json",
+        "previousStatus": "active"
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-registro-varios-clientes\\case.spec.ts",
+      "promotedSpecHash": "5a6c4bf5e98ec137ce01b168562fb0d9df441ced6a6d6c647ecf611b161788cc"
+    },
+    {
+      "id": "preview-002-login-satisfactorio",
+      "externalId": "PREVIEW-002",
+      "caseId": 0,
+      "title": "Login satisfactorio",
+      "planPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-002-login-satisfactorio\\plan.json",
+      "specPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-002-login-satisfactorio\\case.spec.ts",
+      "appSlug": "portal-empresarial",
+      "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "portal-empresarial",
+      "createdAt": "2026-10-03T21:46:24.402Z",
+      "updatedAt": "2026-10-06T21:36:44.245Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-10-06T21-35-20-971Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-10-06T21-35-20-971Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 40381,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "navigation_transition"
+          ],
+          "errors": [],
+          "warnings": [
+            "step_index_not_explicit_in_spec:1"
+          ],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-002-login-satisfactorio\\case.spec.ts",
+          "specHash": "1219bf22d61ad1ca23f3096ea0c83f47d65cc0f74e1ff891de57d9cb9ce9674d",
+          "specSource": "generatedSpec"
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-002-login-satisfactorio\\plan.json",
+        "previousStatus": "active"
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-002-login-satisfactorio\\case.spec.ts",
+      "promotedSpecHash": "1219bf22d61ad1ca23f3096ea0c83f47d65cc0f74e1ff891de57d9cb9ce9674d"
+    },
+    {
+      "id": "preview-001-descargar-plantilla-para-carga-de-nomina",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "Descargar plantilla para carga de nómina",
+      "planPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-descargar-plantilla-para-carga-de-nomina\\plan.json",
+      "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-descargar-plantilla-para-carga-de-nomina\\case.spec.ts",
+      "appSlug": "portal-empresarial",
+      "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "portal-empresarial",
+      "createdAt": "2026-10-03T22:42:39.350Z",
+      "updatedAt": "2026-10-07T04:16:49.949Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T04-15-18-015Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T04-15-18-015Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 53731,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "navigation_transition"
+          ],
+          "errors": [],
+          "warnings": [
+            "step_index_not_explicit_in_spec:1"
+          ],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-descargar-plantilla-para-carga-de-nomina\\case.spec.ts",
+          "specHash": "da5aae187897b97ee62c1b07a65bc8db97fd6329a4b3e13024cae28fdca341a4",
+          "specSource": "generatedSpec"
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-descargar-plantilla-para-carga-de-nomina\\plan.json",
+        "previousStatus": "active"
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-descargar-plantilla-para-carga-de-nomina\\case.spec.ts",
+      "promotedSpecHash": "da5aae187897b97ee62c1b07a65bc8db97fd6329a4b3e13024cae28fdca341a4"
+    },
+    {
+      "id": "preview-003-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente",
+      "externalId": "PREVIEW-003",
+      "caseId": 0,
+      "title": "Validar cédula con formato erróneo al agregar empleado manualmente",
+      "planPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-003-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente\\plan.json",
+      "specPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-003-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente\\case.spec.ts",
+      "appSlug": "portal-empresarial",
+      "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "portal-empresarial",
+      "createdAt": "2026-10-06T12:22:09.749Z",
+      "updatedAt": "2026-10-06T21:39:18.452Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-10-06T21-36-44-395Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-10-06T21-36-44-395Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 74445,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "navigation_transition"
+          ],
+          "errors": [],
+          "warnings": [],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-003-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente\\case.spec.ts",
+          "specHash": "10ba64c63402cf12402eb7212f2f67e036beaeab90a623029bc5ae52b886510b",
+          "specSource": "generatedSpec"
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-003-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente\\plan.json",
+        "previousStatus": "active"
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-003-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente\\case.spec.ts",
+      "promotedSpecHash": "10ba64c63402cf12402eb7212f2f67e036beaeab90a623029bc5ae52b886510b"
+    },
+    {
+      "id": "preview-004-agregar-un-empleado-manualmente-con-cedula",
+      "externalId": "PREVIEW-004",
+      "caseId": 0,
+      "title": "Agregar un empleado manualmente con cédula",
+      "planPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-004-agregar-un-empleado-manualmente-con-cedula\\plan.json",
+      "specPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-004-agregar-un-empleado-manualmente-con-cedula\\case.spec.ts",
+      "appSlug": "portal-empresarial",
+      "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "portal-empresarial",
+      "createdAt": "2026-10-06T12:25:27.077Z",
+      "updatedAt": "2026-10-06T21:42:41.910Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-10-06T21-39-18-792Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-10-06T21-39-18-792Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 92412,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [],
+          "errors": [],
+          "warnings": [],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-004-agregar-un-empleado-manualmente-con-cedula\\case.spec.ts",
+          "specHash": "c8c147926d821c578d0f4757a8abfea04d0c11f963a46479452e7f37a2587d7e",
+          "specSource": "generatedSpec"
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-004-agregar-un-empleado-manualmente-con-cedula\\plan.json",
+        "previousStatus": "active"
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-004-agregar-un-empleado-manualmente-con-cedula\\case.spec.ts",
+      "promotedSpecHash": "c8c147926d821c578d0f4757a8abfea04d0c11f963a46479452e7f37a2587d7e"
+    },
+    {
+      "id": "preview-005-descargar-plantilla-para-carga-de-nomina",
+      "externalId": "PREVIEW-005",
+      "caseId": 0,
+      "title": "Descargar plantilla para carga de nómina",
+      "planPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-005-descargar-plantilla-para-carga-de-nomina\\plan.json",
+      "specPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-005-descargar-plantilla-para-carga-de-nomina\\case.spec.ts",
+      "appSlug": "portal-empresarial",
+      "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "portal-empresarial",
+      "createdAt": "2026-10-06T15:40:22.930Z",
+      "updatedAt": "2026-10-06T21:44:03.047Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-10-06T21-42-42-051Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-10-06T21-42-42-051Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 48859,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "navigation_transition"
+          ],
+          "errors": [],
+          "warnings": [
+            "step_index_not_explicit_in_spec:1"
+          ],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-005-descargar-plantilla-para-carga-de-nomina\\case.spec.ts",
+          "specHash": "1e245b73868f6cf25f10f26739b47f8888a08f771956c4a17fb5deaaaf6e90f3",
+          "specSource": "generatedSpec"
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-005-descargar-plantilla-para-carga-de-nomina\\plan.json",
+        "previousStatus": "active"
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-005-descargar-plantilla-para-carga-de-nomina\\case.spec.ts",
+      "promotedSpecHash": "1e245b73868f6cf25f10f26739b47f8888a08f771956c4a17fb5deaaaf6e90f3"
+    },
+    {
+      "id": "preview-001-agregar-varios-empleados-manualmente-con-cedula",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "Agregar varios empleados manualmente con cédula",
+      "planPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\plan.json",
+      "specPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",
+      "appSlug": "portal-empresarial",
+      "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "portal-empresarial",
+      "createdAt": "2026-10-06T16:03:06.707Z",
+      "updatedAt": "2026-10-07T11:17:44.641Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T11-11-46-128Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T11-11-46-128Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 162227,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [],
+          "errors": [],
+          "warnings": [],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",
+          "specHash": "962fcda5b9da877baf20550f93c9728b131329bed08a9118eca76e189828aade",
+          "specSource": "generatedSpec"
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\plan.json",
         "previousStatus": "spec_failed"
-      }
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",
+      "promotedSpecHash": "962fcda5b9da877baf20550f93c9728b131329bed08a9118eca76e189828aade"
+    },
+    {
+      "id": "preview-001-login-satisfactorio",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "Login satisfactorio",
+      "planPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-login-satisfactorio\\plan.json",
+      "specPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-login-satisfactorio\\case.spec.ts",
+      "appSlug": "portal-empresarial",
+      "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "portal-empresarial",
+      "createdAt": "2026-10-07T03:48:26.524Z",
+      "updatedAt": "2026-10-07T12:16:56.004Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T12-15-33-742Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T12-15-33-742Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 54468,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "navigation_transition"
+          ],
+          "errors": [],
+          "warnings": [
+            "step_index_not_explicit_in_spec:1"
+          ],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-login-satisfactorio\\case.spec.ts",
+          "specHash": "d7b31a7000d10d52732f43d2e83784c99e96034ace4d6ac8e1ca7ebde1eb4801",
+          "specSource": "generatedSpec"
+        }
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-login-satisfactorio\\case.spec.ts",
+      "promotedSpecHash": "d7b31a7000d10d52732f43d2e83784c99e96034ace4d6ac8e1ca7ebde1eb4801"
+    },
+    {
+      "id": "preview-001-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "Validar cédula con formato erróneo al agregar empleado manualmente",
+      "planPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente\\plan.json",
+      "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente\\case.spec.ts",
+      "appSlug": "portal-empresarial",
+      "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "portal-empresarial",
+      "createdAt": "2026-10-07T03:53:47.186Z",
+      "updatedAt": "2026-10-07T03:53:47.187Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T03-51-11-752Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T03-51-11-752Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 69217,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "navigation_transition"
+          ],
+          "errors": [],
+          "warnings": [],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente\\case.spec.ts",
+          "specHash": "ec6e2f7f49de1f01753548edb1af844a190b289f079bd839d43d173ce592960b",
+          "specSource": "generatedSpec"
+        }
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente\\case.spec.ts",
+      "promotedSpecHash": "ec6e2f7f49de1f01753548edb1af844a190b289f079bd839d43d173ce592960b"
+    },
+    {
+      "id": "preview-001-agregar-un-empleado-manualmente-con-cedula",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "Agregar un empleado manualmente con cédula",
+      "planPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-un-empleado-manualmente-con-cedula\\plan.json",
+      "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-un-empleado-manualmente-con-cedula\\case.spec.ts",
+      "appSlug": "portal-empresarial",
+      "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "portal-empresarial",
+      "createdAt": "2026-10-07T04:05:34.322Z",
+      "updatedAt": "2026-10-07T04:05:34.323Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T04-02-04-753Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T04-02-04-753Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 97254,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [],
+          "errors": [],
+          "warnings": [],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-un-empleado-manualmente-con-cedula\\case.spec.ts",
+          "specHash": "4b4dd2b8fec2072fba46e920e497857633cb58ffc63f66fb961a0d4bb68f06b5",
+          "specSource": "generatedSpec"
+        }
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-un-empleado-manualmente-con-cedula\\case.spec.ts",
+      "promotedSpecHash": "4b4dd2b8fec2072fba46e920e497857633cb58ffc63f66fb961a0d4bb68f06b5"
     }
   ]
 }

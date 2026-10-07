@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import { formatEvidenceCoverPeriod, replaceEvidenceCoverDash } from "../evidence/evidence-cover-period";
 
 export type CreateTestRailRunInput = {
   projectId: number;
@@ -85,7 +86,13 @@ export async function generarDocumentoEvidencias(
   const zip = new PizZip.default(template);
   const doc = docxtemplater.createReport(zip);
   const result = doc.render(input.data);
-  const buffer = result.getZip().generate({ type: "nodebuffer" });
+  const resultZip = result.getZip();
+  const documentXmlFile = resultZip.file("word/document.xml");
+  if (documentXmlFile) {
+    const coverReplacement = replaceEvidenceCoverDash(documentXmlFile.asText(), formatEvidenceCoverPeriod());
+    resultZip.file("word/document.xml", coverReplacement.documentXml);
+  }
+  const buffer = resultZip.generate({ type: "nodebuffer" });
 
   mkdirSync(dirname(input.outputPath), { recursive: true });
   writeFileSync(input.outputPath, buffer);

@@ -34,11 +34,11 @@ import { RunEvidenceRecorder } from "../../evidence/run-evidence-recorder";
 import { loadEvidenceConfig } from "../../evidence/evidence-types";
 import { applyDataOverrides, type MobileStep, type MobileStepResult, type MobileDataField } from "../../mobile/mobile-step-types";
 import { extractMobileScreenSnapshot, type MobileScreenSnapshot } from "../../mobile/mobile-knowledge-extractor";
-import { persistMobileScreen, persistMobileRoute } from "../../mobile/mobile-knowledge-persister";
+import { persistMobileScreen, persistMobileRoute, type MobileObservedTransition } from "../../mobile/mobile-knowledge-persister";
 import { extractObservedDestination } from "../../mobile/mobile-observed-destination";
 import { buildBindingCandidate, canCreateBindingCandidate } from "../../mobile/mobile-destination-binding";
 import { loadMobileRouteProfile } from "../../mobile/mobile-route-profile";
-import { evaluateScenarioPrecheck, resolveMobileExecutionSignals } from "../../mobile/mobile-execution-precheck";
+import { evaluateScenarioPrecheck, resolveMobileExecutionSignals, type MobileExecutionSignals } from "../../mobile/mobile-execution-precheck";
 import { getProjectConfigurationBySlug } from "../../db/project-reader";
 export { evaluateScenarioPrecheck, type ScenarioPrecheckResult } from "../../mobile/mobile-execution-precheck";
 import { dismissAndroidCompatibilityDialog } from "../../mobile/mobile-modal-dismisser";
@@ -889,17 +889,7 @@ export async function runOneScenario(
   const screensByKey = new Map<string, MobileScreenSnapshot>();
   const statesByScreenKey = new Map<string, number>();
   const executedClickTargets: string[] = [];
-  const observedTransitions: Array<{
-    stepIndex?: number;
-    action: string;
-    actionTarget: { strategy: string; value: string };
-    screenBefore: string;
-    screenAfter: string;
-    controlPackage?: string;
-    controlResourceId?: string;
-    controlContentDesc?: string;
-    actionLocatorIdentity?: string;
-  }> = [];
+  const observedTransitions: MobileObservedTransition[] = [];
   let skippedByDependencyCount = 0;
   const executionSignals = resolveMobileExecutionSignals(opts.appSlug);
 
@@ -1147,7 +1137,7 @@ export async function runOneScenario(
             const bindingCandidate = (candidateTransitionId && destEvidence && actionSemanticValid && stepRequirementIds.length > 0)
               ? buildBindingCandidate(candidateTransitionId, stepRequirementIds, destEvidence)
               : undefined;
-            observedTransitions.push({
+            if (step.action === "click" && step.target && typeof step.target.value === "string" && typeof step.target.strategy === "string" && typeof afterFingerprint === "string") observedTransitions.push({
               stepIndex: i,
               action: step.action,
               actionTarget: { strategy: step.target.strategy, value: step.target.value },

@@ -124,13 +124,16 @@ export async function materializePromotionContext(input: {
   outputRoot?: string;
 }): Promise<{ planPath: string; sourceScenario: unknown; executionContract: unknown }> {
   const automationId = buildAutomationId({ externalId: input.plan.scenario.externalId, caseId: input.plan.scenario.caseId, title: input.plan.scenario.title });
+  if (!automationId) throw new Error("Cannot materialize promotion context without a stable automation id");
   const paths = buildAppAutomationPaths(input.appProfile, automationId, input.outputRoot, input.sectionSlug);
-  await fs.mkdir(path.dirname(paths.planPath), { recursive: true });
+  const planPath = paths.planPath;
+  if (!planPath) throw new Error("Cannot materialize promotion context without an app plan path");
+  await fs.mkdir(path.dirname(planPath), { recursive: true });
   const executionContract = buildSpecExecutionContract(input.plan, input.sourceScenario, { appSlug: input.appProfile.appSlug, sectionSlug: input.sectionSlug });
   const persistedPlan = { ...input.plan, sourceScenario: input.sourceScenario, executionContract };
-  await writeFileAtomicWithRetry(paths.planPath, JSON.stringify(persistedPlan, null, 2));
+  await writeFileAtomicWithRetry(planPath, JSON.stringify(persistedPlan, null, 2));
   console.log(`[promotion-context-materialization] caseId=${input.plan.scenario.caseId ?? input.plan.scenario.externalId} sourceScenario=true executionContract=true stoppedBeforeGeneration=true`);
-  return { planPath: paths.planPath, sourceScenario: input.sourceScenario, executionContract };
+  return { planPath, sourceScenario: input.sourceScenario, executionContract };
 }
 
 const PROMOTION_IO_RETRIES = 3;
@@ -295,7 +298,7 @@ export async function tryPromoteExistingSpecBeforeGeneration(
   if (!persisted.persisted) return { handled: false, promoted: false, reason: persisted.reason ?? "revalidation_persistence_failed" };
 
   const persistFreshPlan = async (): Promise<void> => {
-    if (!input.freshPlan || !input.planPath) return;
+    if (!input.freshPlan || !input.planPath || !input.sourceScenario || !input.executionContract) return;
     await (dependencies.persistFreshPlan ?? persistFreshPlanForExistingSpecReuse)({
       planPath: input.planPath,
       plan: input.freshPlan,

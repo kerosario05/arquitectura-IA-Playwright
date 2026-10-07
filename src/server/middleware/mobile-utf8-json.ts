@@ -20,7 +20,7 @@ function safeJsonStringify(value: unknown): string {
   }
 }
 
-export function captureRawJsonBody(req: Request, _res: unknown, buf: Buffer): void {
+export function captureRawJsonBody(req: object, _res: unknown, buf: Buffer): void {
   if (!buf || buf.length === 0) return;
   (req as RequestWithRawJson).rawJsonBodyBuffer = Buffer.from(buf);
 }

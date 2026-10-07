@@ -10,7 +10,7 @@
   },
   "invocations": 0,
   "invocationsConsumed": 0,
-  "durationMs": 125655,
+  "durationMs": 170566,
   "usage": {
     "inputTokens": null,
     "cachedInputTokens": null,
@@ -29,29 +29,21 @@
     "typescript": "passed",
     "playwrightDiscovery": "passed",
     "semanticCoverage": "passed",
-    "functionalExecution": "failed"
+    "functionalExecution": "passed"
   },
-  "promotionAllowed": false,
+  "promotionAllowed": true,
   "specsRequested": 1,
-  "specsValidated": 0,
-  "specsRejected": 1,
+  "specsValidated": 1,
+  "specsRejected": 0,
   "specGenerationAttempts": 0,
   "specRepairAttempts": 0,
-  "firstPassPromotion": false,
-  "failedGatesAttempt1": [
-    "functionalExecution"
-  ],
+  "firstPassPromotion": true,
+  "failedGatesAttempt1": [],
   "regressedGates": [],
   "missingRequirements": [],
   "oracleTypes": [],
-  "errors": [
-    "functional_execution_failed:exitCode=1",
-    "functional_execution_error:Error: Promoted click failed at step 12 target=\"role:option|cédula\". failureClass=ACTION_CALLBACK_TIMEOUT exactRuntimeError=\"Retry failed: click retry timed out after 15000ms\" currentUrl=https://172.27.4.31/payroll/manualCreationTable clickPath=failed nativeClickAttempted=true nativeClickSucceeded=false callbackAttempted=true callbackSucceeded=false retryAttempted=true diagnostics={\"currentUrl\":\"https://172.27.4.31/payroll/manualCreationTable\",\"actionIntent\":\"click\",\"target\":\"role:option|cédula\",\"stepIndex\":12,\"timeoutMs\":15000,\"stability\":{\"currentUrl\":\"https://172.27.4.31/payroll/manualCreationTable\",\"title\":\"\",\"visibleHeadings\":[],\"visibleButtons\":[\"Cargar archivo\",\"Añadir otro\",\"Validar\",\"seleccione\",\"Indicar...\",\"Indicar...\",\"Indicar...\",\"Indicar...\",\"000-000-0000\",\"000-000-0000\"],\"visibleTexts\":[\"Empresa:\",\"CONSTRUCCIONES ...\",\"Oliva Medina\",\"Añadir colaboradores manualmente\",\"Añade y verifica que todos los datos estén correctos\",\"Cargar archivo\",\"Añadir otro\",\"Validar\",\"LISTADO DE COLABORADORES\",\"Puedes editar las celdas haciendo click sobre las mismas.\",\"Tipo de ID\",\"Colaborador\",\"Puesto\",\"Ingresos\",\"Correo electrónico\",\"Teléfono residencial\",\"Celular\",\"Fecha de Nacimiento\",\"Fecha de Ingreso\",\"seleccione\"],\"loadingDetected\":false,\"skeletonDetected\":false,\"listReadiness\":{\"cardsVisible\":0,\"listItemsVisible\":0,\"loadingDetected\":false,\"zeroProductsDetected\":false,\"hasEntityContainers\":true,\"visibleHeadings\":[],\"visibleButtons\":[\"Cargar archivo\",\"Añadir otro\",\"Validar\",\"seleccione\",\"Indicar...\",\"Indicar...\",\"Indicar...\",\"Indicar...\",\"000-000-0000\",\"000-000-0000\"],\"ready\":true},\"diagnosticStatus\":\"completed\"},\"retryAttempted\":true,\"clickPath\":\"failed\",\"nativeClickAttempted\":true,\"nativeClickSucceeded\":false,\"callbackAttempted\":true,\"callbackSucceeded\":false,\"callbackError\":\"Retry failed: click retry timed out after 15000ms\",\"expectedEffect\":\"ui_change\",\"effectDetected\":false,\"fallbackUsed\":\"none\",\"matchedLocatorStrategy\":\"unknown\",\"screenshotPath\":\"[REDACTED]\"}"
-  ],
-  "warnings": [
-    "functional_execution_screenshots=5",
-    "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 12)."
-  ],
+  "errors": [],
+  "warnings": [],
   "finalSpec": {
     "origin": "deterministic_compiler",
     "generatedBy": "core",
@@ -59,8 +51,8 @@
     "fallback": null
   },
   "runtimeGate": {
-    "decision": "block",
-    "promotionStatus": "blocked",
-    "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 12)."
+    "decision": "promote",
+    "promotionStatus": "promoted",
+    "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
   }
 }

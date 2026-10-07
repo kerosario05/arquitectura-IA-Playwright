@@ -1,0 +1,126 @@
+{
+  "id": "preview-001-consultar-tarjeta-visa-clasica",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Consultar Tarjeta Visa Clasica",
+  "planPath": "automations\\apps\\kiosko\\sections\\default-section\\cases\\preview-001-consultar-tarjeta-visa-clasica\\plan.json",
+  "specPath": "automations\\apps\\kiosko\\sections\\default-section\\cases\\preview-001-consultar-tarjeta-visa-clasica\\case.spec.ts",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "kiosko",
+  "createdAt": "2026-10-07T03:16:58.242Z",
+  "updatedAt": "2026-10-07T03:16:58.242Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T03-13-55-468Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "passed",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T03-13-55-468Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "specGeneration": {
+      "mode": "deterministic",
+      "provider": null,
+      "model": null,
+      "skill": {
+        "name": null,
+        "version": null,
+        "hash": null,
+        "loaded": false
+      },
+      "invocations": 0,
+      "invocationsConsumed": 0,
+      "durationMs": 77418,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "skipped",
+        "structure": "passed",
+        "traceFidelity": "skipped",
+        "typescript": "passed",
+        "playwrightDiscovery": "passed",
+        "semanticCoverage": "passed",
+        "functionalExecution": "passed"
+      },
+      "promotionAllowed": true,
+      "specsRequested": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
+      "specGenerationAttempts": 0,
+      "specRepairAttempts": 0,
+      "firstPassPromotion": true,
+      "failedGatesAttempt1": [],
+      "regressedGates": [],
+      "missingRequirements": [],
+      "oracleTypes": [
+        "navigation_transition"
+      ],
+      "errors": [],
+      "warnings": [],
+      "finalSpec": {
+        "origin": "deterministic_compiler",
+        "generatedBy": "core",
+        "strategy": "deterministic_compiler",
+        "fallback": null
+      },
+      "runtimeGate": {
+        "decision": "promote",
+        "promotionStatus": "promoted",
+        "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+      },
+      "specWritten": true,
+      "previousSpec": {
+        "existed": true,
+        "hash": "73a2b4158a09dd65460eb308c45455ba179eeaac57206f49b79e257f52824f6d",
+        "lastModifiedAt": "2026-10-02T19:15:25.691Z"
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [],
+      "availablePageObjects": [
+        "ProductListPage",
+        "OperationsMenuPage",
+        "CategoryPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false,
+      "specPath": "automations\\apps\\kiosko\\sections\\default-section\\cases\\preview-001-consultar-tarjeta-visa-clasica\\case.spec.ts",
+      "specHash": "e2c8ad70f1c9494714d80e19a1c6cb6af2d85ef505d2122706bea56a6cf0a05c",
+      "specSource": "generatedSpec"
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\kiosko\\sections\\default-section\\cases\\preview-001-consultar-tarjeta-visa-clasica\\plan.json",
+    "previousStatus": "spec_failed"
+  },
+  "promotionPersisted": true,
+  "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\kiosko\\sections\\default-section\\cases\\preview-001-consultar-tarjeta-visa-clasica\\case.spec.ts",
+  "promotedSpecHash": "e2c8ad70f1c9494714d80e19a1c6cb6af2d85ef505d2122706bea56a6cf0a05c"
+}

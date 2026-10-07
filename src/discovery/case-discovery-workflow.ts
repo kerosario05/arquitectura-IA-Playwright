@@ -612,8 +612,9 @@ function buildExpectedObservableOracles(
       if (causalTransition.postClickUiChange) {
         evidence.push(`post_click_ui_change:${causalTransition.postClickUiChange}`);
       }
-      const expectedUrl = typeof causalTransition.afterUrl === "string" && causalTransition.afterUrl.trim()
-        ? causalTransition.afterUrl.trim()
+      const transitionAfterUrl = "afterUrl" in causalTransition ? causalTransition.afterUrl : undefined;
+      const expectedUrl = typeof transitionAfterUrl === "string" && transitionAfterUrl.trim()
+        ? transitionAfterUrl.trim()
         : undefined;
       if (expectedUrl) {
         evidence.push(`after_url:${expectedUrl}`);
@@ -730,8 +731,8 @@ export function reconcileWorkflowAssertionsBeforeFinalStatus(
     steps,
     runtimeEvidenceTrace: buildRuntimeEvidenceTrace({ steps } as CaseDiscoveryResult),
   } as CaseDiscoveryResult;
-  const sourceOracles = buildPromotionSourceScenario(scenario, provisionalResult).observableOracles;
-  const oracles = [...sourceOracles];
+  const sourceOracles = buildPromotionSourceScenario(scenario, provisionalResult).observableOracles ?? [];
+  const oracles = [...(sourceOracles ?? [])];
   const expectedNarratives = [
     typeof scenario.raw?.custom_expected === "string" ? scenario.raw.custom_expected : "",
     ...scenario.steps.map((step) => step.expected ?? ""),
@@ -2352,6 +2353,7 @@ export async function runCaseDiscoveryWorkflow(
     console.log(`[discovery:case] Using app profile: appSlug=${options.appProfile.appSlug} source=${options.appProfile.source}`);
   }
   const workflowAppSlug = options.appProfile?.appSlug ?? activeConfig.app.appProfile;
+  if (!workflowAppSlug) throw new Error("case_discovery_requires_resolved_app_slug");
   // ── [web:base-url] Fail-closed: appSlug → app_config → baseUrl must be preserved until navigation ──
   try {
     const { loadPromotedAppConfigSync: loadCfg } = await import("../automations/app-profile");
@@ -3102,6 +3104,9 @@ export async function runCaseDiscoveryWorkflow(
         promotionStatus: "context_materialized",
         promotionReason: "context_only",
         appSlug: options.appProfile?.appSlug,
+        outputDir,
+        evidenceDir,
+        durationMs: Date.now() - startTime,
       };
     }
     const gate = evaluatePromotionGate({

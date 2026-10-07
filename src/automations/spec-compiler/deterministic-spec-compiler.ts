@@ -92,6 +92,7 @@ export type SpecCompilerSupportedOperation = Extract<SpecStepOperation, "navigat
  */
 const POM_CLASS_NAME = "DeterministicPromotedPage";
 const POM_METHOD_BY_OPERATION: Record<SpecCompilerSupportedOperation, string> = {
+  navigate: "navigate",
   fill: "fill",
   click: "click",
   press: "press",
@@ -282,9 +283,9 @@ type ActionTargetAuthority =
   // LAST-RESORT, EXECUTION-ONLY: a runtime_resolution_required step with NO structured
   // locator/certified-target evidence at all (technicalTargetCandidates/certifiedTechnicalTarget/
   // plan target all absent), but a captured SemanticRuntimeEvidence. Never a ref -- there is none.
-  | { kind: "semantic_runtime_only" }
-  | { kind: "display_fallback" }
-  | { kind: "insufficient"; reason: string };
+  | { kind: "semantic_runtime_only"; ref?: string }
+  | { kind: "display_fallback"; ref?: string }
+  | { kind: "insufficient"; reason: string; ref?: string };
 
 function firstStructuredEvidenceRef(step: SpecExecutionContractStep): string | undefined {
   const candidate = step.certifiedTechnicalTarget?.locatorCandidates?.[0];
@@ -744,6 +745,14 @@ function compileClickStep(
   }
   const targetRef = usesRefLocator ? refForBinding! : displayTargetRef(target!);
   const pomMethod = POM_METHOD_BY_OPERATION.click;
+  const virtualKeyboardEvidence = step.playwrightRecorderEvidence?.kind === "virtual_keyboard"
+    ? step.playwrightRecorderEvidence
+    : undefined;
+  if (virtualKeyboardEvidence
+    && (!step.valueKey || !Number.isInteger(step.segmentPosition) || (step.segmentPosition ?? 0) < 1)) {
+    unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:virtual_keyboard_binding_incomplete`);
+    return;
+  }
 
   // Structured authority only (recorded ARIA role + verified, non-positional control lineage) --
   // never inferred from target/step text. Fails closed to the existing generic `ui_change`
@@ -752,7 +761,15 @@ function compileClickStep(
   lines.push(`      stepIndex: ${step.scenarioStepIndex},`);
   lines.push(`      target: '${escapeString(targetRef)}',`);
   lines.push(`      actionIntent: 'click',`);
-  lines.push(`      expectedEffect: '${selectionLike ? "selection_state_change" : "ui_change"}',`);
+  lines.push(`      expectedEffect: '${step.recordedSameSurfaceAction ? "none" : selectionLike ? "selection_state_change" : "ui_change"}',`);
+  if (virtualKeyboardEvidence) {
+    // Keep the data value outside generated source and logs. The runtime uses the recorded key
+    // layout plus this one-based position to replay exactly one character for this step.
+    const keyboardValueKey = step.valueKey!;
+    lines.push(`      keyboardValue: ${dataRefEnvExpression(keyboardValueKey)},`);
+    lines.push(`      segmentPosition: ${step.segmentPosition},`);
+    lines.push(`      valueKey: '${escapeString(keyboardValueKey)}',`);
+  }
   if (usesRefLocator) {
     lines.push(`      technicalTargetRefs: ['${escapeString(refForBinding!)}'],`);
   }
@@ -830,7 +847,9 @@ function compileClickStep(
     scenarioStepIndex: step.scenarioStepIndex,
     actionIntent: "restore_recorded_context",
     targetRef,
-    sensitive: false,
+    // A keyboard character action cannot be safely replayed by the ordinary locator callback
+    // below. Keep it out of reset recovery rather than replaying a click on the field label.
+    sensitive: step.playwrightRecorderEvidence?.kind === "virtual_keyboard",
     replayExpr: `async () => { await ${locatorExpr}.click(); }`,
   });
 }
@@ -900,6 +919,8 @@ function compileSelectStep(
   lines.push(`      stepIndex: ${step.scenarioStepIndex},`);
   lines.push(`      target: '${escapeString(targetRef)}',`);
   if (step.valueKey) lines.push(`      valueKey: '${escapeString(step.valueKey)}',`);
+  if (step.entityScope) lines.push(`      entityScope: '${escapeString(step.entityScope)}',`);
+  if (step.rowRelation) lines.push(`      rowRelation: '${step.rowRelation}',`);
   if (selectionValueExpr) lines.push(`      selectionValue: ${selectionValueExpr},`);
   if (recordedSelectionIndex !== undefined) lines.push(`      selectionIndex: ${recordedSelectionIndex},`);
   const nextFillField = nextStep?.operation === "fill"

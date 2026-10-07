@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { revalidateExistingSpecDeterministically, type ExistingSpecRevalidationResult } from "./existing-spec-revalidation";
+import { revalidateExistingSpecDeterministically, type ExistingSpecRevalidationInput, type ExistingSpecRevalidationResult } from "./existing-spec-revalidation";
 import { upsertAutomationIndexEntry } from "./automation-index";
 import type { PromotedAutomationIndex } from "../types/automation-promotion.types";
 
@@ -297,7 +297,7 @@ export async function loadExistingSpecRevalidationContext(input: {
   return { specText, specPath, specHash, sourceScenario, executionContract, contextSources: { spec: "case.spec.ts", sourceScenario: sourceScenario ? "plan.json" : "missing", executionContract: executionContract ? "plan.json" : "missing" }, identityValidated, missingContextFields };
 }
 
-export async function revalidatePersistedExistingSpec(input: Parameters<typeof loadExistingSpecRevalidationContext>[0] & { semanticContext?: Parameters<typeof revalidateExistingSpecDeterministically>[0]["semanticContext"] }): Promise<ExistingSpecRevalidationResult & { context: PersistedRevalidationContext }> {
+export async function revalidatePersistedExistingSpec(input: Parameters<typeof loadExistingSpecRevalidationContext>[0] & Pick<ExistingSpecRevalidationInput, "semanticContext" | "runTypeScriptValidation" | "runPlaywrightDiscovery">): Promise<ExistingSpecRevalidationResult & { context: PersistedRevalidationContext }> {
   const context = await loadExistingSpecRevalidationContext(input);
   if (!isEligibleForDeterministicRevalidation({
     previousSpecExisted: true,
@@ -311,7 +311,10 @@ export async function revalidatePersistedExistingSpec(input: Parameters<typeof l
     return { status: "insufficient_context", allRequiredGatesPassed: false, aiInvocationCount: 0, candidateGenerated: false, context };
   }
   const result = await revalidateExistingSpecDeterministically({
-    ...context,
+    specText: context.specText,
+    specPath: context.specPath,
+    sourceScenario: context.sourceScenario as ExistingSpecRevalidationInput["sourceScenario"],
+    executionContract: context.executionContract as ExistingSpecRevalidationInput["executionContract"],
     semanticContext: input.semanticContext,
     runTypeScriptValidation: input.runTypeScriptValidation,
     runPlaywrightDiscovery: input.runPlaywrightDiscovery,

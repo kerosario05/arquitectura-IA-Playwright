@@ -5,7 +5,7 @@ import type { FunctionalRequirementAccount, FunctionalBranchRef } from "../src/s
 // ── Helpers ─────────────────────────────────────────────────────────────
 
 function makeReq(id: string, category: FunctionalRequirementAccount["category"], sourceText: string) {
-  return { id, sourceIssueKey: "TEST-1", category, sourceText, status: "covered" as const };
+  return { id, sourceIssueKey: "TEST-1", category, sourceText, expectedBehavior: sourceText, status: "covered" as const };
 }
 
 function accounting(requirements: FunctionalRequirementAccount[]) {

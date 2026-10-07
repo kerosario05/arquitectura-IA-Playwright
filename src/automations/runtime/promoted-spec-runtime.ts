@@ -12,7 +12,7 @@ import { EvidenceRecorder } from "../../evidence/evidence-recorder";
 import { loadEvidenceConfig } from "../../evidence/evidence-types";
 import { normalizeSemanticText } from "../semantic-text-normalization";
 import { findSemanticTargetMatch, type SemanticMatchOptions } from "./semantic-target-matcher";
-import { resolveActionTarget, resolveFillTarget, recordedLocatorFactory, resolveRecordedStructuralOwner } from "../../discovery/target-resolver";
+import { attemptVirtualKeyboardPress, resolveActionTarget, resolveFillTarget, recordedLocatorFactory, resolveRecordedStructuralOwner } from "../../discovery/target-resolver";
 import { hasCausalSelectionTransition, type InteractiveState } from "../../discovery/selection-state-verification";
 import type { RecordedLocator, RecordedTechnicalTarget } from "../../recording/session-trace.types";
 import type { PlaywrightRecorderEvidence, SemanticRuntimeEvidence } from "../../recording/structural-owner-identity";
@@ -163,7 +163,7 @@ async function capturePromotedSelectionStateProbe(
         {
           actionType: "action_click",
           recordingActionType: "click",
-          recordedTechnicalTargetRefs: targetIdentity.technicalTargetRefs,
+          recordedTechnicalTargetRefs: targetIdentity?.technicalTargetRefs ?? [],
           associatedField: selectionActivationField,
         },
       ).catch(() => undefined);
@@ -495,12 +495,18 @@ export type PromotedActionOptions = {
   selectionValue?: string;
   selectionIndex?: number;
   selectionField?: string;
+  selectionActivationField?: string;
   associatedField?: string;
+  entityScope?: string;
+  rowRelation?: "next" | "added";
   sensitive?: boolean;
   routeProfile?: AppRouteProfile;
   action: () => Promise<void>;
   evidenceDir?: string;
   valueKey?: string;
+  /** Resolved at runtime from the data key; emitted only for certified recorded keyboard steps. */
+  keyboardValue?: string;
+  segmentPosition?: number;
   technicalTargetRefs?: string[];
   playwrightRecorderEvidence?: PlaywrightRecorderEvidence;
 };
@@ -538,7 +544,7 @@ function normalizePromotedFieldAlias(value: string): string {
 }
 
 const KNOWN_RECORDED_LOCATOR_STRATEGIES = new Set([
-  "css", "data-testid", "aria-label", "placeholder", "label", "text", "role",
+  "css", "id", "data-testid", "aria-label", "placeholder", "label", "text", "role",
 ]);
 
 /**
@@ -630,6 +636,30 @@ function resolvePromotedRuntimeValue(valueKey: string | undefined): string | und
   }
 }
 
+function evidenceTargetLabel(target: string): string {
+  const value = target.trim();
+  const roleTarget = value.match(/^role:([^|]+)\|(.+)$/i);
+  if (roleTarget?.[2]?.trim()) return roleTarget[2].trim().replace(/\*+$/, "");
+  if (/^role:/i.test(value)) {
+    const role = value.slice(value.indexOf(":") + 1).trim().toLowerCase();
+    const labels: Record<string, string> = {
+      button: "el botón indicado",
+      textbox: "el campo indicado",
+      combobox: "la lista indicada",
+      checkbox: "la casilla indicada",
+      option: "la opción indicada",
+      link: "el enlace indicado",
+    };
+    return labels[role] ?? "el control indicado";
+  }
+  if (/^(?:css|xpath|id|testid|data-testid|aria|placeholder):/i.test(value)) return "el control indicado";
+  return value;
+}
+
+function isSensitiveEvidenceField(field: string, valueKey?: string): boolean {
+  return /password|contrase(?:ñ|n)a|clave|token|otp|secret|pin|c[oó]digo de seguridad/i.test(`${field} ${valueKey ?? ""}`);
+}
+
 function rowScopeFromPromotedRef(rowRef?: string): number | undefined {
   const match = rowRef?.match(/(?:^|:)row:(\d+)$/) ?? rowRef?.match(/(\d+)$/);
   if (!match) return undefined;
@@ -689,11 +719,16 @@ type PromotedOutcomeSignals = { failureMessages: string[]; successMessages: stri
 export function evaluatePromotedCompletionSignal(input: {
   expectedUrlMatches: boolean;
   routeChangedSinceAction: boolean;
+  actionOutcomeObserved?: boolean;
   failureMessages: string[];
   successMessages: string[];
 }): boolean {
   if (input.failureMessages.length > 0) return false;
-  return input.expectedUrlMatches && (input.routeChangedSinceAction || input.successMessages.length > 0);
+  return input.expectedUrlMatches && (
+    input.routeChangedSinceAction
+    || input.actionOutcomeObserved === true
+    || input.successMessages.length > 0
+  );
 }
 
 async function readPromotedOutcomeSignals(page: Page): Promise<PromotedOutcomeSignals> {
@@ -709,9 +744,13 @@ async function readPromotedOutcomeSignals(page: Page): Promise<PromotedOutcomeSi
     const successPattern = /\b(transferencia|operaci[oó]n|transacci[oó]n)\b.{0,70}\b(completad[ao]|realizad[ao]|exitosa?|confirmad[ao])\b|\b(completad[ao]|realizad[ao]|exitosa?|confirmad[ao])\b.{0,70}\b(transferencia|operaci[oó]n|transacci[oó]n)\b/i;
     const failureNodes = Array.from(document.querySelectorAll('[role="dialog"], [role="alertdialog"], [aria-modal="true"], dialog, [class*="modal" i], [class*="dialog" i], [class*="overlay" i], [role="alert"]')).filter(visible);
     const successNodes = Array.from(document.querySelectorAll('[role="dialog"], [role="alertdialog"], [role="status"], [role="alert"], [aria-live], dialog, h1, h2, h3, [class*="success" i], [data-testid*="success" i]')).filter(visible);
+    const outcomeRegion = document.querySelector('main, [role="main"]') as HTMLElement | null;
+    const outcomeLines = (outcomeRegion ?? document.body).innerText.split(/\r?\n+/).map((value) => value.replace(/\s+/g, " ").trim());
+    const successMessages = [...successNodes.map(text), ...outcomeLines]
+      .filter((value) => value && successPattern.test(value));
     return {
       failureMessages: failureNodes.map(text).filter((value) => value && failurePattern.test(value)),
-      successMessages: successNodes.map(text).filter((value) => value && successPattern.test(value)),
+      successMessages: Array.from(new Set(successMessages)),
     };
   }).catch(() => ({ failureMessages: [], successMessages: [] }));
 }
@@ -1421,6 +1460,33 @@ export async function resolvePromotedClickableLocator(
   const container = options?.containerLocator
     ? page.locator(options.containerLocator)
     : undefined;
+
+  // A certified ID ref is already the Recording-selected identity. Resolve it directly
+  // before text/role heuristics, keeping the same unique + visible + enabled checks used by
+  // the discovery resolver. If it is stale or ambiguous, fail closed instead of matching
+  // the serialized string (for example, "id:profile-name") as page text.
+  const recordedIdRef = (options?.targetIdentity?.technicalTargetRefs ?? [])
+    .map(parseSerializedTechnicalTargetString)
+    .find((candidate) => candidate?.strategy === "id");
+  if (recordedIdRef) {
+    const locator = recordedLocatorFactory(page, recordedIdRef, true);
+    const count = locator ? await locator.count().catch(() => 0) : 0;
+    if (locator && count === 1) {
+      const visible = await locator.isVisible({ timeout: timeoutMs }).catch(() => false);
+      const enabled = visible && await locator.isEnabled({ timeout: timeoutMs }).catch(() => false);
+      if (visible && enabled) {
+        return {
+          locator,
+          strategy: "recorded:id",
+          scope: "page",
+          visible: true,
+          enabled: true,
+          clickable: true,
+        };
+      }
+    }
+    return undefined;
+  }
 
   const resolveStructuredTableControl = async () => {
     const identity = options?.targetIdentity;
@@ -2517,7 +2583,12 @@ async function resolveOrdinalSelectionOnPage(
 export class PromotedSpecRuntime {
   private readonly config: PromotedRuntimeConfig;
   private lastDialogMessage?: string;
-  private lastClickOutcome?: { stepIndex: number; previousUrl: string; currentUrl: string };
+  private lastActionOutcome?: {
+    stepIndex: number;
+    previousUrl: string;
+    currentUrl: string;
+    actionOutcomeObserved: boolean;
+  };
   private activeContainer?: { selector: string; descriptor: string };
   private activeContainerDiscardReason?: string;
   private lastSelectionStep?: { selectedTarget: string; stepIndex: number; timestamp: number };
@@ -3070,6 +3141,7 @@ export class PromotedSpecRuntime {
     await this.boundedRuntimeBoundary("ensure_initial_navigation", navigationTimeoutMs, () => this.ensureInitialNavigation());
     console.log(`[TRACE-3b] about_to_call=boundedRuntimeBoundary label=ensure_evidence_initialized`);
     await this.boundedRuntimeBoundary("ensure_evidence_initialized", this.config.actionTimeoutMs, () => this.ensureEvidenceInitialized());
+    await this.evidenceRecorder?.prepareForAction(this.page);
     console.log(`[TRACE-3c] about_to_call=boundedRuntimeBoundary label=capture_initial_screen_once`);
     await this.boundedRuntimeBoundary("capture_initial_screen_once", this.config.actionTimeoutMs, () => this.captureInitialScreenOnce());
   }
@@ -3101,8 +3173,9 @@ export class PromotedSpecRuntime {
   /** Capture evidence for a click target step */
   private async captureClickStep(target: string, status: "passed" | "failed" | "skipped", errorMessage?: string, sourceStepIndex?: number): Promise<void> {
     if (!this.evidenceRecorder) return;
-    const stepText = `Clic en "${target}".`;
-    await this.captureEvidenceStep(stepText, status, errorMessage, { target, sourceStepIndex });
+    const label = evidenceTargetLabel(target);
+    const stepText = `Clic en "${label}".`;
+    await this.captureEvidenceStep(stepText, status, errorMessage, { target: label, sourceStepIndex });
   }
 
   /**
@@ -3467,7 +3540,12 @@ export class PromotedSpecRuntime {
         () => this.refreshActiveContainer().then(() => undefined),
       );
     }
-    this.lastClickOutcome = { stepIndex: options.stepIndex, previousUrl, currentUrl: this.page.url() };
+    this.lastActionOutcome = {
+      stepIndex: options.stepIndex,
+      previousUrl,
+      currentUrl: this.page.url(),
+      actionOutcomeObserved: this.config.enabled && resolvedExpectedEffect !== "none",
+    };
     console.log(`[promoted-click-structural] stepIndex=${options.stepIndex} phase=complete currentUrl=${this.page.url()}`);
   }
 
@@ -3697,6 +3775,47 @@ export class PromotedSpecRuntime {
       } else {
         throw error;
       }
+    }
+
+    // A recorded virtual-keyboard character is a data-entry action, even though the validated
+    // plan represents its physical implementation as a click. Reuse Discovery's shared
+    // evidence-driven keyboard resolver; never click the human field label or infer a key from
+    // the scenario text.
+    if (options.playwrightRecorderEvidence?.kind === "virtual_keyboard") {
+      const evidence = options.playwrightRecorderEvidence;
+      if (!options.keyboardValue
+        || !options.valueKey
+        || !Number.isInteger(options.segmentPosition)
+        || (options.segmentPosition ?? 0) < 1) {
+        throw new Error(`promoted_virtual_keyboard_binding_incomplete: stepIndex=${options.stepIndex}`);
+      }
+      const keyboardResult = await attemptVirtualKeyboardPress(
+        this.page,
+        evidence,
+        options.keyboardValue,
+        options.segmentPosition,
+      );
+      if (!keyboardResult.ok) {
+        throw new Error(`promoted_virtual_keyboard_replay_failed: stepIndex=${options.stepIndex} reason=${keyboardResult.reason}`);
+      }
+      await this.postActionStability(previousUrl, "ui_change", targetIdentity, beforeActionSnapshot, evidence.fieldLabel ?? options.target);
+      this.lastActionOutcome = {
+        stepIndex: options.stepIndex,
+        previousUrl,
+        currentUrl: this.page.url(),
+        actionOutcomeObserved: true,
+      };
+      const fieldLabel = evidence.fieldLabel?.trim() || "campo indicado";
+      const characterCount = Array.from(options.keyboardValue).length;
+      await this.captureEvidenceStep(
+        `Ingreso de carácter ${options.segmentPosition} de ${characterCount} en "${fieldLabel}".`,
+        "passed",
+        undefined,
+        { target: fieldLabel, sourceStepIndex: options.stepIndex },
+      );
+      console.log(`[promoted-virtual-keyboard] stepIndex=${options.stepIndex} segmentPosition=${options.segmentPosition} segmentCount=${characterCount} keyPress=verified valueKey=${options.valueKey}`);
+      console.log(`[promoted-step] stepIndex=${options.stepIndex} phase=passed currentUrl=${this.page.url()}`);
+      return;
     }
 
     // New diagnostics for native click tracking
@@ -4079,6 +4198,43 @@ export class PromotedSpecRuntime {
       // Continue to callback fallback
     }
 
+    // A Playwright click can time out while its underlying promise is still running. If the
+    // browser applied the click after our bounded wait (for example, an "Add another" action
+    // creates a row and disables the button), replaying the POM callback would dispatch the same
+    // action twice. Re-check the already captured generic page surface before any callback retry;
+    // only an observed route or rendered-DOM transition satisfies the requested effect.
+    if (!nativeClickSucceeded && nativeClickError && resolved && beforeActionSnapshot && expectedEffect !== "none") {
+      const lateOutcome = await capturePromotedActionSurfaceSnapshotBounded(
+        this.page,
+        options.target,
+        this.config.actionTimeoutMs,
+      );
+      if (lateOutcome.status === "available") {
+        const routeChanged = lateOutcome.snapshot.url !== previousUrl;
+        const domTransitionObserved = beforeActionSnapshot.signature !== lateOutcome.snapshot.signature
+          || beforeActionSnapshot.contentFingerprint !== lateOutcome.snapshot.contentFingerprint;
+        const lateEffectSatisfied = resolvedExpectedEffect === "navigation"
+          ? routeChanged
+          : resolvedExpectedEffect === "modal_or_form_or_navigation"
+            ? routeChanged || domTransitionObserved
+            : domTransitionObserved;
+        if (lateEffectSatisfied) {
+          nativeClickSucceeded = true;
+          clickPath = "native_runtime";
+          fallbackUsed = resolved.scope === "container" ? "active_container" : "page";
+          effectDetected = true;
+          console.log(
+            `[runtime:click-effect-after-timeout] step=${options.stepIndex} target=${JSON.stringify(options.target)} ` +
+            `expectedEffect=${resolvedExpectedEffect} routeChanged=${routeChanged} domTransitionObserved=${domTransitionObserved} callbackRetrySkipped=true`,
+          );
+          await this.waitForPromotedUiStable(options.stepIndex, options.target);
+          if (expectedEffect === "modal_or_form_or_navigation" || expectedEffect === "ui_change") {
+            await this.refreshActiveContainer();
+          }
+        }
+      }
+    }
+
     // Step 2: If native click didn't succeed, try callback POM fallback
     if (!nativeClickSucceeded) {
       callbackAttempted = true;
@@ -4247,7 +4403,12 @@ export class PromotedSpecRuntime {
     }
 
     // Capture evidence after successful click
-    this.lastClickOutcome = { stepIndex: options.stepIndex, previousUrl, currentUrl: this.page.url() };
+    this.lastActionOutcome = {
+      stepIndex: options.stepIndex,
+      previousUrl,
+      currentUrl: this.page.url(),
+      actionOutcomeObserved: this.config.enabled && resolvedExpectedEffect !== "none",
+    };
     await this.captureClickStep(options.target, "passed", undefined, options.stepIndex);
     console.log(`[promoted-step] stepIndex=${options.stepIndex} phase=passed currentUrl=${this.page.url()}`);
   }
@@ -4630,8 +4791,13 @@ export class PromotedSpecRuntime {
     // signature detects a completed form/data row or a screen transition. This preserves one
     // useful checkpoint for filled login forms and dynamic table rows without a screenshot per
     // keystroke or any project-specific field rules.
-    await this.captureEvidenceStep(`Ingreso en "${resolvedField}".`, "passed", undefined, {
-      target: resolvedField,
+    const displayField = evidenceTargetLabel(resolvedField);
+    const sensitiveValue = isSensitiveEvidenceField(resolvedField, targetIdentity.valueKey);
+    const stepText = sensitiveValue
+      ? `Ingreso del valor protegido en "${displayField}".`
+      : `Ingreso de "${options.value}" en "${displayField}".`;
+    await this.captureEvidenceStep(stepText, "passed", undefined, {
+      target: displayField,
       sourceStepIndex: options.stepIndex,
     });
   }
@@ -4650,7 +4816,7 @@ export class PromotedSpecRuntime {
       throw new Error(`segmented_input_segment_count_mismatch: stepIndex=${options.stepIndex}`);
     }
     await validateScreenContextForAction(this.page, {
-      target: options.target,
+      target: options.target ?? options.field ?? "",
       actionIntent: options.actionIntent ?? "fill_form_field",
       stepIndex: options.stepIndex,
     });
@@ -4688,15 +4854,21 @@ export class PromotedSpecRuntime {
       await segment.pressSequentially(expectedCharacter);
       const actualCharacter = await segment.evaluate((element) => {
         if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) return element.value;
-        return element.isContentEditable ? element.textContent ?? "" : "";
+        return "isContentEditable" in element && element.isContentEditable ? element.textContent ?? "" : "";
       }).catch(() => "");
       if (actualCharacter !== expectedCharacter) {
         throw new Error(`segmented_input_value_not_committed: stepIndex=${options.stepIndex} segmentIndex=${index}`);
       }
     }
     console.log(`[promoted-segmented-input] stepIndex=${options.stepIndex} segmentCount=${segmentCount} inputReadback=verified valueKey=${options.valueKey ?? "none"}`);
-    await this.captureEvidenceStep(`Ingreso en "${resolvePromotedFieldTarget(options)}".`, "passed", undefined, {
-      target: resolvePromotedFieldTarget(options),
+    const resolvedField = resolvePromotedFieldTarget(options);
+    const displayField = evidenceTargetLabel(resolvedField);
+    const sensitiveValue = isSensitiveEvidenceField(resolvedField, options.valueKey);
+    const stepText = sensitiveValue
+      ? `Ingreso del valor protegido en "${displayField}".`
+      : `Ingreso de "${options.value}" en "${displayField}".`;
+    await this.captureEvidenceStep(stepText, "passed", undefined, {
+      target: displayField,
       sourceStepIndex: options.stepIndex,
     });
   }
@@ -4713,12 +4885,17 @@ export class PromotedSpecRuntime {
    * `page.keyboard` fallback, and never treats the key as a locator.
    */
   async pressPromotedTarget(options: PromotedPressOptions): Promise<void> {
+    const key = options.key;
+    if (typeof key !== "string" || key.length === 0) {
+      throw new Error(`Promoted press requires a non-empty key at step ${options.stepIndex}`);
+    }
     console.log(`[promoted-step] stepIndex=${options.stepIndex} phase=start currentUrl=${this.page.url()}`);
     await this.markBoundaryProgress();
     await this.ensureInitialEvidence();
     await this.dismissSessionExpiringWarningIfPresent();
     const resolvedField = resolvePromotedFieldTarget(options);
     const previousUrl = this.page.url();
+    const expectedEffect = options.expectedEffect ?? "ui_change";
     const targetIdentity = resolvePromotedFieldIdentityFromPersistedContract(options.stepIndex, resolvedField, {
       valueKey: options.valueKey,
       technicalTargetRefs: options.technicalTargetRefs,
@@ -4831,7 +5008,7 @@ export class PromotedSpecRuntime {
             return fresh && (await fresh.count().catch(() => 0)) === 1 ? { locator: fresh } : undefined;
           },
           this.config.actionTimeoutMs,
-          options.key,
+          key,
         );
       } catch (error) {
         throw new Error(
@@ -4839,7 +5016,13 @@ export class PromotedSpecRuntime {
           `reason=press_dispatch_failed error="${error instanceof Error ? error.message : String(error)}"`
         );
       }
-      await this.waitForPromotedPressTransition(previousUrl, options.expectedEffect ?? "ui_change", targetIdentity, options.target);
+      const actionOutcomeObserved = await this.waitForPromotedPressTransition(previousUrl, expectedEffect, targetIdentity, resolvedField);
+      this.lastActionOutcome = {
+        stepIndex: options.stepIndex,
+        previousUrl,
+        currentUrl: this.page.url(),
+        actionOutcomeObserved,
+      };
       return;
     }
 
@@ -4864,7 +5047,7 @@ export class PromotedSpecRuntime {
           timeoutMs: this.config.actionTimeoutMs,
         }),
         this.config.actionTimeoutMs,
-        options.key,
+        key,
       );
     } catch (error) {
       throw new Error(
@@ -4872,7 +5055,13 @@ export class PromotedSpecRuntime {
         `reason=press_dispatch_failed error="${error instanceof Error ? error.message : String(error)}"`
       );
     }
-    await this.waitForPromotedPressTransition(previousUrl, options.expectedEffect ?? "ui_change", targetIdentity, options.target);
+    const actionOutcomeObserved = await this.waitForPromotedPressTransition(previousUrl, expectedEffect, targetIdentity, resolvedField);
+    this.lastActionOutcome = {
+      stepIndex: options.stepIndex,
+      previousUrl,
+      currentUrl: this.page.url(),
+      actionOutcomeObserved,
+    };
   }
 
   async selectPromotedItem(options: PromotedActionOptions): Promise<void> {
@@ -4908,6 +5097,16 @@ export class PromotedSpecRuntime {
       || semanticNameFromRef(parsedTargetRefs.cellRef)
       || options.associatedField?.trim()
       || "";
+    // Some compound selectors are physically hosted by a neighboring editable
+    // cell (for example, Moneda inside the Ingresos grid cell). The compiler
+    // transports that validated cell as associatedField; forward it as the
+    // activation context when it differs from the semantic selection field.
+    const selectionActivationField = options.selectionActivationField?.trim()
+      || (options.associatedField?.trim()
+        && selectionField
+        && normalizeSemanticText(options.associatedField) !== normalizeSemanticText(selectionField)
+        ? options.associatedField.trim()
+        : undefined);
     if (runtimeValue && selectionField && (options.associatedField || options.selectionField)) {
       const previousUrl = this.page.url();
       const structuredResolution = await resolveActionTarget(
@@ -4920,9 +5119,11 @@ export class PromotedSpecRuntime {
           selectionField,
           selectionValue: runtimeValue,
           playwrightRecorderEvidence: options.playwrightRecorderEvidence,
+          selectionActivationField,
           rowScope: rowScopeFromPromotedRef(parsedTargetRefs.rowRef),
           rowRef: parsedTargetRefs.rowRef,
-          entityScope: targetIdentity?.entityScope,
+          entityScope: targetIdentity?.entityScope ?? options.entityScope,
+          rowRelation: options.rowRelation,
           associatedField: options.associatedField?.trim() || selectionField,
         },
       ).catch(() => undefined);
@@ -5000,9 +5201,11 @@ export class PromotedSpecRuntime {
             selectionField: effectiveSelectionField,
             selectionValue: runtimeValue,
             playwrightRecorderEvidence: options.playwrightRecorderEvidence,
+            selectionActivationField,
             rowScope: rowScopeFromPromotedRef(parsedTargetRefs.rowRef),
             rowRef: parsedTargetRefs.rowRef,
-            entityScope: targetIdentity.entityScope,
+            entityScope: targetIdentity.entityScope ?? options.entityScope,
+            rowRelation: options.rowRelation,
             associatedField: options.associatedField?.trim() || effectiveSelectionField,
           },
         ).catch(() => undefined);
@@ -5064,16 +5267,17 @@ export class PromotedSpecRuntime {
           }
           if (options.requireCompletionSignal) {
             const actionIsAdjacent = Boolean(
-              this.lastClickOutcome
-              && options.stepIndex >= this.lastClickOutcome.stepIndex
-              && options.stepIndex - this.lastClickOutcome.stepIndex <= 1,
+              this.lastActionOutcome
+              && options.stepIndex >= this.lastActionOutcome.stepIndex
+              && options.stepIndex - this.lastActionOutcome.stepIndex <= 1,
             );
             const routeChangedSinceAction = Boolean(
-              actionIsAdjacent && this.lastClickOutcome!.previousUrl !== this.lastClickOutcome!.currentUrl,
+              actionIsAdjacent && this.lastActionOutcome!.previousUrl !== this.lastActionOutcome!.currentUrl,
             );
             const completionObserved = evaluatePromotedCompletionSignal({
               expectedUrlMatches: stateMatches,
               routeChangedSinceAction,
+              actionOutcomeObserved: actionIsAdjacent && this.lastActionOutcome?.actionOutcomeObserved === true,
               failureMessages: signals.failureMessages,
               successMessages: signals.successMessages,
             });
@@ -5167,8 +5371,8 @@ export class PromotedSpecRuntime {
     expectedEffect: PromotedExpectedEffect,
     targetIdentity: PromotedFieldTargetIdentity | undefined,
     target: string,
-  ): Promise<void> {
-    if (!this.config.enabled || expectedEffect === "none") return;
+  ): Promise<boolean> {
+    if (!this.config.enabled || expectedEffect === "none") return false;
     const before = await capturePromotedActionSurfaceSnapshot(this.page, target).catch(() => undefined);
     // FIRST_LOSS fix (jobId e9a6c64b-2da2-4643-a855-6ea29e09a916): with no explicit
     // expectedRouteTransition/expectedInPlaceTransition on targetIdentity, the previous
@@ -5204,7 +5408,7 @@ export class PromotedSpecRuntime {
         })
       : await waitForStableInteractiveScreen(this.page);
     if (hasExplicitExpectation) {
-      if (stability.stable && outcomeObserved) return;
+      if (stability.stable && outcomeObserved) return true;
       const reason = targetIdentity?.expectedRouteTransition === true
         ? "expected_route_transition_not_observed"
         : "expected_in_place_transition_not_observed";
@@ -5213,7 +5417,7 @@ export class PromotedSpecRuntime {
         `target="${target}" previousUrl="${previousUrl}" currentUrl="${this.page.url()}"`,
       );
     }
-    if (stability.stable) return;
+    if (stability.stable) return this.page.url() !== previousUrl;
     throw new Error(
       `Post-click stability check failed. expectedEffect=${expectedEffect} reason=no_observable_post_action_outcome ` +
       `target="${target}" previousUrl="${previousUrl}" currentUrl="${this.page.url()}"`,

@@ -42,6 +42,15 @@ export async function getConnection(): Promise<DbConnection> {
   return pool!;
 }
 
+export async function withConnection<T>(fn: (conn: DbConnection) => Promise<T>): Promise<T> {
+  const conn: DbConnection = await getOdbc().connect(buildConnectionString());
+  try {
+    return await fn(conn);
+  } finally {
+    await conn.close().catch(() => undefined);
+  }
+}
+
 export async function closeConnection(): Promise<void> {
   if (pool) {
     await pool.close();

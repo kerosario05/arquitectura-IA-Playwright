@@ -79,6 +79,55 @@ async function main(): Promise<void> {
       assert.strictEqual(images.at(-1)?.stepText, "Pantalla final después del último paso");
     });
 
+    await test("places the final checkpoint after later screens even when its screenId repeats", () => {
+      const finalScreen = path.join(dir, "final-transfer.png");
+      fs.writeFileSync(finalScreen, LANDSCAPE_PNG);
+      const input = scenario("S-final-repeat", "Transferencia con segundo token", [landscape, portrait]);
+      input.steps[0].screenId = "transfer-screen";
+      input.steps[0].screenTitle = "Transferencias";
+      input.steps[1].screenId = "token-screen";
+      input.steps[1].screenTitle = "Token de Seguridad";
+      input.steps.push({
+        index: 3,
+        stepIndex: 3,
+        stepText: "Pantalla resultante tras el último paso",
+        status: "passed",
+        screenshotPath: finalScreen,
+        screenId: "transfer-screen",
+        screenTitle: "Transferencias",
+        timestamp: new Date().toISOString(),
+      });
+      input.finalScreenEvidence = {
+        captured: true,
+        path: finalScreen,
+        capturedAt: new Date().toISOString(),
+      };
+
+      const screens = buildEvidenceDocumentModel([input]).scenarios[0].screens;
+      assert.strictEqual(screens.at(-1)?.title, "Transferencias");
+      assert.strictEqual(screens.at(-1)?.images.at(-1)?.path, path.resolve(finalScreen));
+      assert.strictEqual(screens.at(-1)?.steps.length, 0);
+    });
+
+    await test("keeps a same-title final checkpoint with its last screen instead of repeating the title", () => {
+      const finalScreen = path.join(dir, "final-dashboard.png");
+      fs.writeFileSync(finalScreen, PORTRAIT_PNG);
+      const input = scenario("S-dashboard-final", "Login satisfactorio", [landscape]);
+      input.steps[0].screenId = "dashboard";
+      input.steps[0].screenTitle = "Pantalla dashboard";
+      input.finalScreenEvidence = {
+        captured: true,
+        path: finalScreen,
+        capturedAt: new Date().toISOString(),
+      };
+
+      const screens = buildEvidenceDocumentModel([input]).scenarios[0].screens;
+      assert.strictEqual(screens.length, 1);
+      assert.strictEqual(screens[0].title, "Pantalla dashboard");
+      assert.strictEqual(screens[0].steps.length, 1);
+      assert.strictEqual(screens[0].images.at(-1)?.path, path.resolve(finalScreen));
+    });
+
     await test("starts with the completed form checkpoint instead of an empty initial login frame", () => {
       const input = scenario("S-login", "Inicio de sesión", [landscapeCopy]);
       input.initialScreenEvidence = {
@@ -92,6 +141,17 @@ async function main(): Promise<void> {
       const images = buildEvidenceDocumentModel([input]).scenarios[0].images;
       assert.strictEqual(images[0].path, path.resolve(landscapeCopy));
       assert.ok(!images.some(image => path.resolve(image.path) === path.resolve(landscape)));
+    });
+
+    await test("describes a post-login dashboard validation as the main screen, not as a credential field", () => {
+      const input = scenario("S-dashboard", "Dashboard", [landscape]);
+      input.steps[0].stepText = 'Validar que se muestre "Contraseña*".';
+      input.steps[0].target = "role:textbox|Contraseña*";
+      input.steps[0].screenId = "authenticated-dashboard";
+      input.steps[0].screenTitle = "Pantalla dashboard";
+
+      const screens = buildEvidenceDocumentModel([input]).scenarios[0].screens;
+      assert.strictEqual(screens[0].steps[0].text, "Validar que se muestre la pantalla principal.");
     });
 
     await test("renders cover + one page run per scenario, without Office", async () => {

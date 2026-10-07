@@ -32,7 +32,8 @@ function countBySource(entries: DataContextEntry[]): Record<DataContextEntry["so
     data_override: 0,
     suggested_value: 0,
     qa_dataset: 0,
-    project_config: 0
+    project_config: 0,
+    manual_runtime: 0
   };
 
   for (const entry of entries) {

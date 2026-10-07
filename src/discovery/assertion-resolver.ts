@@ -1278,7 +1278,7 @@ export function resolveAssertionTargets(
         el.title,
         el.placeholder,
         el.name
-      ].filter(Boolean);
+      ].filter((value): value is string => typeof value === "string" && value.length > 0);
 
       for (const text of texts) {
         const normalizedText = normalizeForComparison(text);
@@ -1301,7 +1301,8 @@ export function resolveAssertionTargets(
       if (aliasForTarget) {
         const normalizedAlias = normalizeForComparison(aliasForTarget);
         for (const el of snapshot.elements || []) {
-          const texts = [el.text, el.label, el.accessibleName, el.ariaLabel].filter(Boolean);
+          const texts = [el.text, el.label, el.accessibleName, el.ariaLabel]
+            .filter((value): value is string => typeof value === "string" && value.length > 0);
           for (const text of texts) {
             const normalizedText = normalizeForComparison(text);
             if (normalizedText === normalizedAlias) {

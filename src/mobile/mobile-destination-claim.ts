@@ -103,6 +103,7 @@ export function buildMobileDestinationClaimManifest(
     requirementIds: string[];
     semanticIdentity: string;
     validationStatus: string;
+    source?: "canonical_requirement" | "trusted_config" | "validated_knowledge" | "human_validation";
   }>,
 ): DestinationClaimDefinition[] {
   if (!authoritativeBindings || authoritativeBindings.length === 0) {
@@ -131,7 +132,7 @@ export function buildMobileDestinationClaimManifest(
       requirementIds: validReqIds,
       kind: "semantic_destination",
       semanticIdentity: binding.semanticIdentity.trim(),
-      source: binding.source as "canonical_requirement" | "trusted_config" | "validated_knowledge" | "human_validation",
+      source: binding.source ?? "canonical_requirement",
       trustLevel: "validated",
     });
   }

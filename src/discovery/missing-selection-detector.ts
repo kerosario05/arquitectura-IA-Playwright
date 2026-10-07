@@ -280,7 +280,7 @@ export function inferMissingSelection(
 
   return {
     detected: true,
-    shouldInsert: confidence !== "low",
+    shouldInsert: true,
     confidence,
     proposedStep,
     reason: "detail_assertions_after_listing",

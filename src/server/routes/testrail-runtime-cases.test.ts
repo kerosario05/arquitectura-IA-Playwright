@@ -22,9 +22,14 @@ function clientWith(cases: any[]) {
   } as any;
 }
 
+function casesOf(response: Awaited<ReturnType<typeof resolveSectionCases>>) {
+  if (!response.body.ok) throw new Error("expected a successful TestRail section response");
+  return response.body.cases ?? [];
+}
+
 test("marks a correctly transformed case without requirements as success", async () => {
   const response = await resolveSectionCases(clientWith([rawCase(93001)]), { sectionId: 7 });
-  const returned = response.body.cases[0];
+  const returned = casesOf(response)[0] as any;
 
   assert.equal(response.status, 200);
   assert.equal(returned.custom_marker, "raw-93001");
@@ -37,9 +42,10 @@ test("marks a correctly transformed case without requirements as success", async
 test("marks a correctly transformed case with runtime requirements as success", async () => {
   const response = await resolveSectionCases(clientWith([rawCase(93002, "Cuenta (account.id, text)")]), { sectionId: 7 });
 
-  assert.equal(response.body.cases[0].runtimeTransformStatus, "success");
-  assert.equal(response.body.cases[0].inputRequirements[0].key, "account.id");
-  assert.equal(response.body.cases[0].inputRequirements[0].source, "contract");
+  const returned = casesOf(response)[0];
+  assert.equal(returned.runtimeTransformStatus, "success");
+  assert.equal(returned.inputRequirements?.[0].key, "account.id");
+  assert.equal(returned.inputRequirements?.[0].source, "contract");
 });
 
 test("materializes transformed requirements for the matching local TestRail project and case", async () => {
@@ -59,11 +65,11 @@ test("materializes transformed requirements for the matching local TestRail proj
     } as any),
     {
       resolveLocalProject: async () => ({ id: "local-project", slug: "portal-project" }),
-      materialize: async (input: any) => persisted.push(input),
+      materialize: async (input: any) => { persisted.push(input); },
     },
   );
 
-  assert.equal(response.body.cases[0].runtimeTransformStatus, "success");
+  assert.equal(casesOf(response)[0].runtimeTransformStatus, "success");
   assert.equal(persisted.length, 1);
   assert.equal(persisted[0].localProjectSlug, "portal-project");
   assert.equal(persisted[0].caseId, 93006);
@@ -100,7 +106,7 @@ test("marks a failed transformation without exposing error details", async () =>
     { sectionId: 7 },
     () => { throw new Error("sensitive case content"); },
   );
-  const returned = response.body.cases[0];
+  const returned = casesOf(response)[0] as any;
 
   assert.equal(returned.custom_marker, "raw-93003");
   assert.equal(returned.runtimeTransformStatus, "error");
@@ -124,7 +130,7 @@ test("does not materialize a case when runtime transformation fails", async () =
     },
   );
 
-  assert.equal(response.body.cases[0].runtimeTransformStatus, "error");
+  assert.equal(casesOf(response)[0].runtimeTransformStatus, "error");
   assert.equal(materialized, 0);
 });
 
@@ -144,13 +150,14 @@ test("keeps the batch when one runtime transformation fails", async () => {
   );
 
   assert.equal(response.status, 200);
-  assert.equal(response.body.cases.length, 2);
-  assert.equal(response.body.cases[0].id, 93004);
-  assert.equal(response.body.cases[0].runtimeTransformStatus, "error");
-  assert.deepEqual(response.body.cases[0].inputRequirements, []);
-  assert.equal(response.body.cases[1].id, 93005);
-  assert.equal(response.body.cases[1].runtimeTransformStatus, "success");
-  assert.equal(response.body.cases[1].normalizedScenario.caseId, 93005);
+  const returnedCases = casesOf(response);
+  assert.equal(returnedCases.length, 2);
+  assert.equal(returnedCases[0].id, 93004);
+  assert.equal(returnedCases[0].runtimeTransformStatus, "error");
+  assert.deepEqual(returnedCases[0].inputRequirements, []);
+  assert.equal(returnedCases[1].id, 93005);
+  assert.equal(returnedCases[1].runtimeTransformStatus, "success");
+  assert.equal(returnedCases[1].normalizedScenario?.caseId, 93005);
 });
 
 test("uses a valid localProjectId directly without reverse lookup", async () => {

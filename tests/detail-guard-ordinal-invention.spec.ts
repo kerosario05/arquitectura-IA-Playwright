@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { ensureDetailScenarioHasItemSelection } from "../src/automations/scenario-normalizer";
-import type { McpRouteProfile, EntryStepConfig } from "../src/scenarios/scenario-types";
+import type { McpRouteProfile } from "../src/scenarios/scenario-types";
+import type { EntryStepConfig } from "../src/server/services/entry-steps-learner";
 
 test.describe("Detail Guard: No ordinal invention from source-backed context", () => {
   const entrySteps: EntryStepConfig[] = [

@@ -22,7 +22,7 @@ export type RuntimeInputLineage = {
   dependsOn?: string[];
 };
 
-export type RuntimeInputRequirement = InputRequirement & RuntimeInputLineage & {
+export type RuntimeInputRequirement = Omit<InputRequirement, keyof RuntimeInputLineage> & RuntimeInputLineage & {
   source: "contract" | "runtime_inferred";
   fieldCapability: FieldCapability;
   inputRole?: "scenario" | "supporting";
@@ -49,7 +49,7 @@ export type TestRailRuntimeTransformerDependencies = {
 };
 
 type RuntimeInputRole = "scenario" | "supporting";
-type InputRequirementWithRole = InputRequirement & {
+type InputRequirementWithRole = Omit<InputRequirement, keyof RuntimeInputLineage> & RuntimeInputLineage & {
   inputRole?: RuntimeInputRole;
   source?: RuntimeInputRequirement["source"];
   provenance?: RuntimeInputRequirement["provenance"];
@@ -166,7 +166,11 @@ export function transformTestRailCaseForRuntime(
   const referencedKeys = structurallyReferencedRequirementKeys(normalizedScenario);
   const runtimeRequirements: RuntimeInputRequirement[] = converterOutput.requirements.map((requirement) => {
     const fieldCapability = resolveFieldCapability(requirement);
-    const inputRole = resolveRuntimeInputRole({ ...requirement, source: "contract" }, referencedKeys);
+    const inputRole = resolveRuntimeInputRole({
+      ...requirement,
+      valueRole: requirement.valueRole === "runtime_input" || requirement.valueRole === "expected_oracle" || requirement.valueRole === "runtime_derived_oracle" ? requirement.valueRole : undefined,
+      source: "contract",
+    }, referencedKeys);
     const dataset = indexedDatasetMetadata(requirement.key);
     const displayLabel = semanticFieldLabel(requirement.label, dataset)
       ?? requirement.label
@@ -174,6 +178,9 @@ export function transformTestRailCaseForRuntime(
     return {
       ...requirement,
       ...inputRequirementLineage(requirement),
+      valueRole: inputRequirementLineage(requirement).valueRole,
+      oracleSource: inputRequirementLineage(requirement).oracleSource,
+      dependsOn: inputRequirementLineage(requirement).dependsOn,
       ...(displayLabel ? { displayLabel, semanticField: displayLabel } : {}),
       technicalLabel: requirement.key,
       ...(dataset ?? {}),
@@ -196,7 +203,7 @@ export function transformTestRailCaseForRuntime(
     }
     const fieldCapability = resolveFieldCapability(incoming);
     const inputRole = resolveRuntimeInputRole(incoming, referencedKeys);
-    const runtimeRequirement: RuntimeInputRequirement = {
+    const runtimeRequirement = {
       ...incoming,
       ...inputRequirementLineage(incoming),
       ...(inputRole !== undefined ? { inputRole } : {}),
@@ -204,7 +211,7 @@ export function transformTestRailCaseForRuntime(
       fieldCapability,
       valuePolicy: resolveRuntimeInputValuePolicy({ ...incoming, inputRole, fieldCapability }),
       scenarioDataPolicy: resolveScenarioDataPolicy({ ...incoming, inputRole, source: "runtime_inferred", fieldCapability }),
-    };
+    } satisfies RuntimeInputRequirement;
     byKey.set(runtimeRequirement.key, runtimeRequirement);
     runtimeRequirements.push(runtimeRequirement);
   }

@@ -1,0 +1,783 @@
+[
+  {
+    "scenarioId": "REC-E4AB3829-01",
+    "title": "Descargar plantilla para carga de nómina",
+    "description": "Recorrido observado para completar \"Descargar plantilla para carga de nómina\". Se registraron 6 acciones funcionales.",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://172.27.4.31/login",
+        "description": "Navegar a https://172.27.4.31/login"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|RNC de la empresa*"
+        },
+        "valueKey": "rnc_de_la_empresa",
+        "description": "Ingresar [rnc_de_la_empresa] en \"RNC de la empresa*\"",
+        "interactionId": "interaction-6"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Nombre de usuario*"
+        },
+        "valueKey": "nombre_de_usuario",
+        "description": "Ingresar [nombre_de_usuario] en \"Nombre de usuario*\"",
+        "interactionId": "interaction-8"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Contraseña*"
+        },
+        "valueKey": "contrasena",
+        "description": "Ingresar [contrasena] en \"Contraseña*\"",
+        "interactionId": "interaction-9"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Gestión de Nóminas"
+        },
+        "description": "Presionar \"Gestión de Nóminas\"",
+        "interactionId": "interaction-13"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "link|click aquí para descargar"
+        },
+        "description": "Presionar \"click aquí para descargar\"",
+        "interactionId": "interaction-16"
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Ingresar [rnc_de_la_empresa] en \"RNC de la empresa*\"",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "stepTemplate": "Ingresar [rnc_de_la_empresa] en \"RNC de la empresa*\"",
+        "renderedStep": "Ingresar \"130598983\" en \"RNC de la empresa*\"",
+        "valueKey": "rnc_de_la_empresa",
+        "interactionId": "interaction-6",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login",
+        "stateScope": "3e7b2674871e",
+        "stepNumber": 2
+      },
+      {
+        "content": "Ingresar [nombre_de_usuario] en \"Nombre de usuario*\"",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "stepTemplate": "Ingresar [nombre_de_usuario] en \"Nombre de usuario*\"",
+        "renderedStep": "Ingresar \"olivam\" en \"Nombre de usuario*\"",
+        "valueKey": "nombre_de_usuario",
+        "interactionId": "interaction-8",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login",
+        "stateScope": "3e7b2674871e",
+        "stepNumber": 3
+      },
+      {
+        "content": "Ingresar [contrasena] en \"Contraseña*\"",
+        "sourceEventRefs": [
+          "event-9"
+        ],
+        "stepTemplate": "Ingresar [contrasena] en \"Contraseña*\"",
+        "renderedStep": "Ingresar \"••••••\" en \"Contraseña*\"",
+        "valueKey": "contrasena",
+        "interactionId": "interaction-9",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login",
+        "stateScope": "3e7b2674871e",
+        "stepNumber": 4
+      },
+      {
+        "content": "Presionar \"Enter\" en \"Contraseña*\"",
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "renderedStep": "Presionar \"Enter\" en \"Contraseña*\"",
+        "interactionId": "interaction-10",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login",
+        "routeAfter": "https://172.27.4.31/dashboard",
+        "stateScope": "3e7b2674871e",
+        "stepNumber": 5
+      },
+      {
+        "content": "Presionar \"Gestión de Nóminas\"",
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "renderedStep": "Presionar \"Gestión de Nóminas\"",
+        "interactionId": "interaction-13",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/dashboard",
+        "routeAfter": "https://172.27.4.31/payroll/electronicPayroll",
+        "stateScope": "3e7b2674871e",
+        "stepNumber": 6
+      },
+      {
+        "content": "Presionar \"click aquí para descargar\"",
+        "sourceEventRefs": [
+          "event-16"
+        ],
+        "renderedStep": "Presionar \"click aquí para descargar\"",
+        "interactionId": "interaction-16",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/electronicPayroll",
+        "stateScope": "3e7b2674871e",
+        "stepNumber": 7
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "rnc_de_la_empresa",
+        "label": "RNC de la empresa*",
+        "stepIndex": 1,
+        "technicalTargetRefs": [
+          "role:textbox|RNC de la empresa*",
+          "css:#rnc",
+          "id:rnc"
+        ],
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "exampleValue": "130598983",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "RNC de la empresa*",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "nombre_de_usuario",
+        "label": "Nombre de usuario*",
+        "stepIndex": 2,
+        "technicalTargetRefs": [
+          "role:textbox|Nombre de usuario*",
+          "css:#email",
+          "id:email"
+        ],
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "exampleValue": "olivam",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Nombre de usuario*",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "contrasena",
+        "label": "Contraseña*",
+        "stepIndex": 3,
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña*",
+          "css:#password",
+          "id:password"
+        ],
+        "sourceEventRefs": [
+          "event-9"
+        ],
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "secure",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Contraseña*",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Ingresar [rnc_de_la_empresa] en \"RNC de la empresa*\"",
+        "strategy": "role",
+        "value": "textbox|RNC de la empresa*"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Ingresar [nombre_de_usuario] en \"Nombre de usuario*\"",
+        "strategy": "role",
+        "value": "textbox|Nombre de usuario*"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Ingresar [contrasena] en \"Contraseña*\"",
+        "strategy": "role",
+        "value": "textbox|Contraseña*"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Presionar \"Gestión de Nóminas\"",
+        "strategy": "role",
+        "value": "button|Gestión de Nóminas"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"click aquí para descargar\"",
+        "strategy": "role",
+        "value": "link|click aquí para descargar"
+      }
+    ],
+    "sourceRecordingId": "e4ab3829-5728-452b-814b-2b2d34bb0b9a",
+    "hasUncertainSteps": false,
+    "primary": true,
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7",
+      "event-8",
+      "event-9",
+      "event-10",
+      "event-11",
+      "event-12",
+      "event-13",
+      "event-14",
+      "event-15",
+      "event-16"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": false,
+    "functionalReadiness": true,
+    "technicalReadiness": true,
+    "expectedResultCandidate": "La aplicación carga su pantalla inicial",
+    "oracleAuthority": "observed_only",
+    "confidence": 0.95,
+    "scenarioStepCount": 7,
+    "functionalActionCount": 6,
+    "nonUserSetupSteps": 1,
+    "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
+    "scenarioGoal": "Descargar plantilla para carga de nómina",
+    "stateSequenceValid": true,
+    "stateSequenceIssues": [],
+    "postGoalObservations": [],
+    "goalContract": {
+      "nonGeneric": true,
+      "goalCoherent": true,
+      "mutationIntentExpressed": true
+    },
+    "replayEligible": true,
+    "canonicalInteractions": [
+      {
+        "id": "interaction-1",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-1"
+        ],
+        "technicalTargetRefs": [],
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9,
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://172.27.4.31/login"
+      },
+      {
+        "id": "interaction-3",
+        "controlIdentity": "3e7b2674871e",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-3"
+        ],
+        "technicalTargetRefs": [],
+        "stateScope": "3e7b2674871e",
+        "technicalOnly": true,
+        "confidence": 0.9,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login"
+      },
+      {
+        "id": "interaction-6",
+        "controlIdentity": "3e7b2674871e|RNC de la empresa*|role|textbox|RNC de la empresa*",
+        "semanticField": "RNC de la empresa*",
+        "action": "fill",
+        "valueKey": "rnc_de_la_empresa",
+        "recordedValue": "130598983",
+        "rawTypedValue": "130598983",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|RNC de la empresa*",
+          "css:#rnc",
+          "id:rnc"
+        ],
+        "editingSessionRef": "edit-1",
+        "description": "Ingresar en \"RNC de la empresa*\"",
+        "stateScope": "3e7b2674871e",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login"
+      },
+      {
+        "id": "interaction-8",
+        "controlIdentity": "3e7b2674871e|Nombre de usuario*|role|textbox|Nombre de usuario*",
+        "semanticField": "Nombre de usuario*",
+        "action": "fill",
+        "valueKey": "nombre_de_usuario",
+        "recordedValue": "olivam",
+        "rawTypedValue": "olivam",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Nombre de usuario*",
+          "css:#email",
+          "id:email"
+        ],
+        "editingSessionRef": "edit-2",
+        "description": "Ingresar en \"Nombre de usuario*\"",
+        "stateScope": "3e7b2674871e",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login"
+      },
+      {
+        "id": "interaction-9",
+        "controlIdentity": "3e7b2674871e|Contraseña*|role|textbox|Contraseña*",
+        "semanticField": "Contraseña*",
+        "action": "fill",
+        "valueKey": "contrasena",
+        "sourceEventRefs": [
+          "event-9"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña*",
+          "css:#password",
+          "id:password"
+        ],
+        "editingSessionRef": "edit-3",
+        "description": "Ingresar en \"Contraseña*\"",
+        "stateScope": "3e7b2674871e",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login"
+      },
+      {
+        "id": "interaction-10",
+        "controlIdentity": "3e7b2674871e|Contraseña*|role|textbox|Contraseña*",
+        "action": "press",
+        "key": "Enter",
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña*",
+          "css:#password",
+          "id:password"
+        ],
+        "stateScope": "3e7b2674871e",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login",
+        "routeAfter": "https://172.27.4.31/dashboard",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-13",
+        "controlIdentity": "3e7b2674871e|Gestión de Nóminas|role|button|Gestión de Nóminas",
+        "semanticField": "Gestión de Nóminas",
+        "action": "click",
+        "valueKey": "gestion_de_nominas",
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Gestión de Nóminas"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Gestión de Nóminas",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "img",
+                  "stableAttributes": {
+                    "alt": "user",
+                    "src": "/images/payroll.svg"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "img",
+                "p"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"img\",1],[\"p\",1]],\"descendantEntries\":[[\"img\",1],[\"p\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Gestión de Nóminas",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Gestión de Nóminas\"",
+        "stateScope": "3e7b2674871e",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/dashboard",
+        "routeAfter": "https://172.27.4.31/payroll/electronicPayroll",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-16",
+        "controlIdentity": "3e7b2674871e|click aquí para descargar|role|link|click aquí para descargar",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-16"
+        ],
+        "technicalTargetRefs": [
+          "role:link|click aquí para descargar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|click aquí para descargar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "/templates/PlantillaGestionEmpresarial.xlsx"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "click aquí para descargar",
+          "targetTag": "a",
+          "runtimeResolutionRequired": true
+        },
+        "stateScope": "3e7b2674871e",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/payroll/electronicPayroll"
+      }
+    ],
+    "entityActionBlocks": [],
+    "readiness": {
+      "functionalReadiness": true,
+      "dataReadiness": true,
+      "technicalReadiness": true,
+      "oracleReadiness": true,
+      "reviewReadiness": true,
+      "publicationContentReadiness": true,
+      "executionReadiness": true,
+      "publicationReadiness": true,
+      "missingInputs": [],
+      "datasetAuthorityMismatches": [],
+      "dataReadinessReasons": []
+    },
+    "technicalKnowledgeRefs": [],
+    "runtimeInputRequirements": [
+      {
+        "valueKey": "rnc_de_la_empresa",
+        "semanticField": "RNC de la empresa*",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "130598983",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 1,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "130598983",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "nombre_de_usuario",
+        "semanticField": "Nombre de usuario*",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "olivam",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 2,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "olivam",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "contrasena",
+        "semanticField": "Contraseña*",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": "qwerty123123",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": true,
+        "stepIndex": 3,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "qwerty123123",
+        "datasetAuthorityMismatch": false
+      }
+    ],
+    "runtimeDataset": {
+      "scenarioId": "REC-E4AB3829-01",
+      "requirements": [
+        {
+          "valueKey": "rnc_de_la_empresa",
+          "semanticField": "RNC de la empresa*",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "130598983",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 1,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "130598983",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "nombre_de_usuario",
+          "semanticField": "Nombre de usuario*",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "olivam",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 2,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "olivam",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña*",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": "qwerty123123",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": true,
+          "stepIndex": 3,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "qwerty123123",
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "resolvedValues": {
+        "rnc_de_la_empresa": "130598983",
+        "nombre_de_usuario": "olivam",
+        "contrasena": "qwerty123123"
+      },
+      "missingValues": []
+    },
+    "mutationOpportunities": [
+      {
+        "opportunityId": "REC-E4AB3829-01:field_omission",
+        "title": "Descargar plantilla para carga de nómina: comprobar la omisión de un dato",
+        "mutationType": "FIELD_OMISSION",
+        "basePrimaryScenarioId": "REC-E4AB3829-01",
+        "operations": [
+          {
+            "type": "remove_action",
+            "interactionId": "interaction-6"
+          }
+        ],
+        "evidenceRefs": [
+          "event-1",
+          "event-2",
+          "event-3",
+          "event-4",
+          "event-5",
+          "event-6",
+          "event-7",
+          "event-8",
+          "event-9",
+          "event-10",
+          "event-11",
+          "event-12",
+          "event-13",
+          "event-14",
+          "event-15",
+          "event-16"
+        ],
+        "rationale": "Existen varios inputs observados; se propone una omisión agrupada sin inventar el resultado.",
+        "oracleAuthority": "MISSING",
+        "confidence": 0.5,
+        "needsReview": true
+      }
+    ],
+    "testRailCaseId": 48817,
+    "testRailDestination": {
+      "projectId": "56",
+      "suiteId": "1731",
+      "sectionId": "4755"
+    },
+    "promotedSpec": {
+      "appSlug": "portal-empresarial",
+      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-descargar-plantilla-para-carga-de-nomina\\case.spec.ts",
+      "specHash": "da5aae187897b97ee62c1b07a65bc8db97fd6329a4b3e13024cae28fdca341a4",
+      "automationId": "preview-001-descargar-plantilla-para-carga-de-nomina",
+      "sectionSlug": "default-section",
+      "generatedAt": "2026-10-07T04:17:17.072Z"
+    }
+  }
+]

@@ -3,7 +3,7 @@
   "sectionSlug": "default-section",
   "scenarioId": "PREVIEW-001",
   "scenarioTitle": "Login",
-  "stepCount": 17,
+  "stepCount": 14,
   "sourceExpectedResultPresent": true,
   "requiredAssertionCount": 1,
   "observableOracles": [
@@ -13,23 +13,23 @@
       "type": "navigation_transition",
       "backed": true,
       "source": "discovery",
-      "stepIndex": 17,
+      "stepIndex": 14,
       "polarity": "positive",
-      "target": "Aceptar",
+      "target": "Continuar",
       "evidence": [
         "transition_observed:true",
-        "click_target:Aceptar",
-        "action_type:Presionar \"Aceptar\"",
-        "after_url:https://qa1.santacruz.do/onlinebanking/",
+        "click_target:Continuar",
+        "action_type:Presionar \"Continuar\"",
+        "after_url:https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
         "assertion_polarity:positive"
       ],
       "details": {
         "transitionObserved": true,
-        "clickTarget": "Aceptar",
+        "clickTarget": "Continuar",
         "resolvedTarget": null,
         "postClickUiChange": null,
-        "sourceActionStepIndex": 17,
-        "expectedUrl": "https://qa1.santacruz.do/onlinebanking/"
+        "sourceActionStepIndex": 14,
+        "expectedUrl": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary"
       }
     }
   ],
@@ -148,13 +148,22 @@
       {
         "contractStepIndex": 2,
         "scenarioStepIndex": 3,
-        "originalText": "Ingresar \"130047596\" en \"RNC:\"",
+        "originalText": "Ingresar \"130598983\" en \"RNC:\"",
         "operation": "fill",
         "target": {
           "strategy": "label",
-          "value": "RNC"
+          "value": "RNC:"
         },
         "valueKey": "rnc",
+        "associatedField": "RNC:",
+        "technicalTargetRef": "role:textbox|RNC:",
+        "technicalTargetRefs": [
+          "role:textbox|RNC:",
+          "css:#Enterprise",
+          "id:Enterprise"
+        ],
+        "controlIdentity": "60d370b39a8d|RNC:|role|textbox|RNC:",
+        "recordingActionType": "fill",
         "authGateExpected": true,
         "certifiedTechnicalTarget": {
           "interactionEvidence": [],
@@ -164,7 +173,7 @@
           "locatorCandidates": [
             {
               "strategy": "text",
-              "value": "RNC",
+              "value": "RNC:",
               "confidence": 0.5
             }
           ],
@@ -182,13 +191,22 @@
       {
         "contractStepIndex": 3,
         "scenarioStepIndex": 4,
-        "originalText": "Ingresar \"jpmota\" en \"Usuario:\"",
+        "originalText": "Ingresar \"olivam\" en \"Usuario:\"",
         "operation": "fill",
         "target": {
           "strategy": "label",
-          "value": "Usuario"
+          "value": "Usuario:"
         },
         "valueKey": "usuario",
+        "associatedField": "Usuario:",
+        "technicalTargetRef": "role:textbox|Usuario:",
+        "technicalTargetRefs": [
+          "role:textbox|Usuario:",
+          "css:#UserNameE",
+          "id:UserNameE"
+        ],
+        "controlIdentity": "60d370b39a8d|Usuario:|role|textbox|Usuario:",
+        "recordingActionType": "fill",
         "authGateExpected": true,
         "certifiedTechnicalTarget": {
           "interactionEvidence": [],
@@ -198,7 +216,7 @@
           "locatorCandidates": [
             {
               "strategy": "text",
-              "value": "Usuario",
+              "value": "Usuario:",
               "confidence": 0.5
             }
           ],
@@ -220,9 +238,18 @@
         "operation": "fill",
         "target": {
           "strategy": "label",
-          "value": "Contraseña"
+          "value": "Contraseña:"
         },
         "valueKey": "contrasena",
+        "associatedField": "Contraseña:",
+        "technicalTargetRef": "role:textbox|Contraseña:",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña:",
+          "css:#PasswordE",
+          "id:PasswordE"
+        ],
+        "controlIdentity": "60d370b39a8d|Contraseña:|role|textbox|Contraseña:",
+        "recordingActionType": "fill",
         "authGateExpected": true,
         "certifiedTechnicalTarget": {
           "interactionEvidence": [],
@@ -232,7 +259,7 @@
           "locatorCandidates": [
             {
               "strategy": "text",
-              "value": "Contraseña",
+              "value": "Contraseña:",
               "confidence": 0.5
             }
           ],
@@ -298,6 +325,7 @@
           "strategy": "text",
           "value": "SMS"
         },
+        "valueKey": "sms",
         "associatedField": "SMS",
         "controlIdentity": "60d370b39a8d|SMS|id|IdentifyUserForm",
         "recordingActionType": "click",
@@ -345,6 +373,8 @@
           "value": "SMS"
         },
         "valueKey": "sms",
+        "associatedField": "SMS",
+        "controlIdentity": "60d370b39a8d|SMS|id|IdentifyUserForm",
         "recordingActionType": "fill",
         "certifiedTechnicalTarget": {
           "interactionEvidence": [],
@@ -390,6 +420,7 @@
           "strategy": "text",
           "value": "Continuar"
         },
+        "valueKey": "continuar",
         "associatedField": "Continuar",
         "technicalTargetRef": "role:button|Continuar",
         "technicalTargetRefs": [
@@ -430,221 +461,6 @@
           "kind": "runtime",
           "runtimeMethod": "clickPromotedTarget"
         },
-        "evidenceRefs": []
-      },
-      {
-        "contractStepIndex": 9,
-        "scenarioStepIndex": 15,
-        "originalText": "Presionar el control grabado",
-        "operation": "click",
-        "target": {
-          "strategy": "text",
-          "value": "Presionar el control grabado"
-        },
-        "controlIdentity": "60d370b39a8d|Lizardo Jhonatan Mata Burgos 130047596@jpmota",
-        "recordingActionType": "click",
-        "certifiedTechnicalTarget": {
-          "interactionEvidence": [],
-          "validatedByInteraction": true,
-          "certifiedFrom": "recording",
-          "targetType": "structural",
-          "locatorCandidates": [
-            {
-              "strategy": "css",
-              "value": "[id=\"profile-dropdown\"]",
-              "confidence": 0.6
-            }
-          ],
-          "structuralContext": {
-            "owner": {
-              "tag": "div"
-            },
-            "stableDirectAttributes": {
-              "id": "profile-dropdown"
-            },
-            "stableDescendants": [
-              {
-                "relation": "descendant",
-                "tag": "a",
-                "stableAttributes": {
-                  "href": "/onlinebanking/UserProfile/MyProfile",
-                  "id": "ib-header-detail-btn"
-                }
-              },
-              {
-                "relation": "descendant",
-                "tag": "div",
-                "stableAttributes": {
-                  "id": "customer-name"
-                }
-              },
-              {
-                "relation": "descendant",
-                "tag": "div",
-                "stableAttributes": {
-                  "id": "customer-user"
-                }
-              },
-              {
-                "relation": "descendant",
-                "tag": "div",
-                "stableAttributes": {
-                  "id": "profile-name"
-                }
-              }
-            ],
-            "semanticShape": [
-              "div",
-              "i"
-            ],
-            "deterministicStructuralIdentity": true,
-            "structuralIdentityMatchCount": 1,
-            "scopeIdentity": {
-              "strategy": "id",
-              "value": "profile-dd-menu-container"
-            },
-            "targetFingerprint": "{\"owner\":{\"tag\":\"div\"},\"stableDirectAttributes\":{\"id\":\"profile-dropdown\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"a\",\"stableAttributes\":{\"href\":\"/onlinebanking/UserProfile/MyProfile\",\"id\":\"ib-header-detail-btn\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"id\":\"customer-name\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"id\":\"customer-user\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"id\":\"profile-name\"}}],\"semanticShape\":[\"div\",\"i\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2],[\\\"i\\\",1]],\\\"descendantEntries\\\":[[\\\"a\\\",1],[\\\"div\\\",4],[\\\"i\\\",2]]}\"}",
-            "captureScopeUnique": true,
-            "captureTargetMatchCount": 1
-          },
-          "confidence": 0.6,
-          "certificationTier": 1
-        },
-        "required": true,
-        "executionStatus": "executed",
-        "implementation": {
-          "kind": "runtime",
-          "runtimeMethod": "clickPromotedTarget"
-        },
-        "evidenceRefs": []
-      },
-      {
-        "contractStepIndex": 10,
-        "scenarioStepIndex": 16,
-        "originalText": "Presionar \"Cerrar Sesión\"",
-        "operation": "click",
-        "target": {
-          "strategy": "text",
-          "value": "Cerrar Sesión"
-        },
-        "technicalTargetRef": "role:link|Cerrar Sesión",
-        "technicalTargetRefs": [
-          "role:link|Cerrar Sesión"
-        ],
-        "controlIdentity": "60d370b39a8d|Cerrar Sesión|role|link|Cerrar Sesión",
-        "recordingActionType": "click",
-        "certifiedTechnicalTarget": {
-          "interactionEvidence": [],
-          "validatedByInteraction": true,
-          "certifiedFrom": "recording",
-          "targetType": "structural",
-          "locatorCandidates": [
-            {
-              "strategy": "css",
-              "value": "[href=\"#\"]",
-              "confidence": 0.85
-            }
-          ],
-          "structuralContext": {
-            "owner": {
-              "tag": "a"
-            },
-            "stableDirectAttributes": {
-              "href": "#"
-            },
-            "stableDescendants": [],
-            "semanticShape": [
-              "i",
-              "span"
-            ],
-            "deterministicStructuralIdentity": true,
-            "structuralIdentityMatchCount": 1,
-            "scopeIdentity": {
-              "strategy": "id",
-              "value": "profile-dropdown-menu"
-            },
-            "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#\"},\"stableDescendants\":[],\"semanticShape\":[\"i\",\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"i\\\",1],[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"i\\\",1],[\\\"span\\\",1]]}\"}",
-            "captureScopeUnique": true,
-            "captureTargetMatchCount": 1
-          },
-          "confidence": 0.85,
-          "certificationTier": 1
-        },
-        "required": true,
-        "executionStatus": "executed",
-        "implementation": {
-          "kind": "runtime",
-          "runtimeMethod": "clickPromotedTarget"
-        },
-        "evidenceRefs": []
-      },
-      {
-        "contractStepIndex": 11,
-        "scenarioStepIndex": 17,
-        "originalText": "Presionar \"Aceptar\"",
-        "operation": "click",
-        "target": {
-          "strategy": "text",
-          "value": "Aceptar"
-        },
-        "technicalTargetRef": "role:link|Aceptar",
-        "technicalTargetRefs": [
-          "role:link|Aceptar"
-        ],
-        "controlIdentity": "60d370b39a8d|Aceptar|role|link|Aceptar",
-        "recordingActionType": "click",
-        "certifiedTechnicalTarget": {
-          "interactionEvidence": [],
-          "validatedByInteraction": true,
-          "certifiedFrom": "recording",
-          "targetType": "structural",
-          "locatorCandidates": [
-            {
-              "strategy": "css",
-              "value": "[href=\"/onlinebanking/Home/Logout\"]",
-              "confidence": 0.85
-            }
-          ],
-          "structuralContext": {
-            "owner": {
-              "tag": "a"
-            },
-            "stableDirectAttributes": {
-              "href": "/onlinebanking/Home/Logout"
-            },
-            "stableDescendants": [],
-            "semanticShape": [],
-            "deterministicStructuralIdentity": true,
-            "structuralIdentityMatchCount": 1,
-            "scopeIdentity": {
-              "strategy": "id",
-              "value": "exit-popup"
-            },
-            "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"/onlinebanking/Home/Logout\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
-            "captureScopeUnique": true,
-            "captureTargetMatchCount": 1
-          },
-          "confidence": 0.85,
-          "certificationTier": 1
-        },
-        "playwrightRecorderEvidence": {
-          "kind": "role",
-          "role": "link",
-          "normalizedName": "Aceptar",
-          "targetTag": "a",
-          "scopeIdentity": {
-            "strategy": "css",
-            "value": "div:has(a[href=\"/onlinebanking/Home/Logout\"])"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true
-        },
-        "required": true,
-        "executionStatus": "executed",
-        "implementation": {
-          "kind": "runtime",
-          "runtimeMethod": "clickPromotedTarget"
-        },
         "oracle": {
           "type": "navigation_transition",
           "backed": true,
@@ -659,14 +475,14 @@
             },
             "expected": {
               "oracleKind": "navigation_transition",
-              "urlPattern": "https://qa1.santacruz.do/onlinebanking/"
+              "urlPattern": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary"
             }
           },
-          "sourceActionStepIndex": 17,
+          "sourceActionStepIndex": 14,
           "requirement": "La aplicación carga su pantalla inicial",
-          "target": "Aceptar"
+          "target": "Continuar"
         },
-        "sourceActionStepIndex": 17,
+        "sourceActionStepIndex": 14,
         "evidenceRefs": [
           "oracle:expected-01"
         ]
@@ -674,12 +490,12 @@
     ],
     "unresolvedRequiredOracles": [],
     "diagnostics": {
-      "requiredScenarioSteps": 12,
-      "representedScenarioSteps": 12,
+      "requiredScenarioSteps": 9,
+      "representedScenarioSteps": 9,
       "missingScenarioSteps": []
     }
   },
-  "executionContractChars": 13143,
+  "executionContractChars": 8966,
   "promptChars": null,
   "specGenerationAttempts": 0,
   "specRepairAttempts": 0,

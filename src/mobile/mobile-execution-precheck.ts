@@ -9,7 +9,7 @@ function normalizeSignalToken(value: string): string {
     .trim();
 }
 
-type MobileExecutionSignals = {
+export type MobileExecutionSignals = {
   successSignals: string[];
   rejectionSignals: string[];
   validationSignals: string[];

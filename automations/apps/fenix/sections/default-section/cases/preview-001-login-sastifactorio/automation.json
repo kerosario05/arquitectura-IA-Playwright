@@ -1,0 +1,126 @@
+{
+  "id": "preview-001-login-sastifactorio",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Login Sastifactorio",
+  "planPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-login-sastifactorio\\plan.json",
+  "specPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-login-sastifactorio\\case.spec.ts",
+  "appSlug": "fenix",
+  "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "fenix",
+  "createdAt": "2026-10-07T02:42:26.286Z",
+  "updatedAt": "2026-10-07T02:42:26.286Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T02-36-52-199Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "passed",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T02-36-52-199Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "specGeneration": {
+      "mode": "deterministic",
+      "provider": null,
+      "model": null,
+      "skill": {
+        "name": null,
+        "version": null,
+        "hash": null,
+        "loaded": false
+      },
+      "invocations": 0,
+      "invocationsConsumed": 0,
+      "durationMs": 100480,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "skipped",
+        "structure": "passed",
+        "traceFidelity": "skipped",
+        "typescript": "passed",
+        "playwrightDiscovery": "passed",
+        "semanticCoverage": "passed",
+        "functionalExecution": "passed"
+      },
+      "promotionAllowed": true,
+      "specsRequested": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
+      "specGenerationAttempts": 0,
+      "specRepairAttempts": 0,
+      "firstPassPromotion": true,
+      "failedGatesAttempt1": [],
+      "regressedGates": [],
+      "missingRequirements": [],
+      "oracleTypes": [
+        "literal_visible_text",
+        "navigation_transition"
+      ],
+      "errors": [],
+      "warnings": [],
+      "finalSpec": {
+        "origin": "deterministic_compiler",
+        "generatedBy": "core",
+        "strategy": "deterministic_compiler",
+        "fallback": null
+      },
+      "runtimeGate": {
+        "decision": "promote",
+        "promotionStatus": "promoted",
+        "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+      },
+      "specWritten": true,
+      "previousSpec": {
+        "existed": true,
+        "hash": "be4cd8868a6db0d2664357c96c6907444d46cec281aed61586780701f6a27e71",
+        "lastModifiedAt": "2026-10-07T02:39:51.699Z"
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [],
+      "availablePageObjects": [
+        "ProductListPage",
+        "OperationsMenuPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false,
+      "specPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-login-sastifactorio\\case.spec.ts",
+      "specHash": "be4cd8868a6db0d2664357c96c6907444d46cec281aed61586780701f6a27e71",
+      "specSource": "generatedSpec"
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-login-sastifactorio\\plan.json",
+    "previousStatus": "active"
+  },
+  "promotionPersisted": true,
+  "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-login-sastifactorio\\case.spec.ts",
+  "promotedSpecHash": "be4cd8868a6db0d2664357c96c6907444d46cec281aed61586780701f6a27e71"
+}

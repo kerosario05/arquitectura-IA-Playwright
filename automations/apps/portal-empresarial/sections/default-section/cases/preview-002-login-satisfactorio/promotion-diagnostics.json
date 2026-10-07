@@ -1,0 +1,20 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-002-login-satisfactorio\\case.spec.ts",
+  "specHash": "c523557b2cb53e03bd9f83e597ce70180c7886301642379d554938bd74f050c2",
+  "specSource": "generatedSpec"
+}

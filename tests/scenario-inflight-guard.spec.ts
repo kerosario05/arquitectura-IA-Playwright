@@ -6,7 +6,7 @@ import {
   scenarioInFlightHas,
 } from "../src/scenarios/scenario-inflight-guard";
 
-function keyFor(overrides: Parameters<typeof buildScenarioPreviewInFlightKey>[0] = {}) {
+function keyFor(overrides: Partial<Parameters<typeof buildScenarioPreviewInFlightKey>[0]> = {}) {
   return buildScenarioPreviewInFlightKey({
     appSlug: "test-app",
     projectKey: "TEST",

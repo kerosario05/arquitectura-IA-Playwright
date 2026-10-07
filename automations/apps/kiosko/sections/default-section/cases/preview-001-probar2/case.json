@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-probar2",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "probar2",
+  "source": "discovery",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "createdAt": "2026-10-04T21:46:32.153Z"
+}

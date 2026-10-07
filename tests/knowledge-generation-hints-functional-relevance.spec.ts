@@ -93,77 +93,28 @@ test.beforeAll(() => {
 
 test.afterAll(() => { try { fs.rmSync(DIR, { recursive: true, force: true }); } catch {} });
 
-test("Case 1: branch selected via functional target relevance — trusted=false/pending", () => {
-  const ctx = buildKnowledgeContextForScenarioGeneration(
-    SLUG, NEW_HU, "navigation", undefined, undefined,
-    ["Destino B"],
-  );
-  const branch = ctx.generationHints.find((h) => h.actionTarget === "Destino B");
-  expect(branch).toBeDefined();
-  expect(branch!.category).toBe("branch");
-  expect(branch!.score).toBeGreaterThanOrEqual(20);
-  expect(branch!.reason).toContain("functional_target_relevance");
-  console.log(`Case 1: branch score=${branch!.score} reason=${branch!.reason}`);
+test("pending HU branch does not enter runtime knowledge", () => {
+  const ctx = buildKnowledgeContextForScenarioGeneration(SLUG, NEW_HU, "navigation");
+  const runtimeHints = [...ctx.navigationHints, ...ctx.functionalHints];
+  expect(runtimeHints.some((hint) => hint.clickTargets.includes("Destino B") && hint.kind === "hu_declared")).toBe(false);
 });
 
-test("Case 2: companion prerequisite included when branch selected", () => {
-  const ctx = buildKnowledgeContextForScenarioGeneration(
-    SLUG, NEW_HU, "navigation", undefined, undefined,
-    ["Destino B"],
-  );
-  const branch = ctx.generationHints.find((h) => h.actionTarget === "Destino B");
-  const prereq = ctx.generationHints.find((h) => h.actionTarget === "Entrada A");
-  expect(branch).toBeDefined();
-  expect(prereq).toBeDefined();
-  expect(prereq!.category).toBe("prerequisite");
-  expect(prereq!.reason).toBe("companion_prerequisite");
-  expect(prereq!.sourceIssueKey).toBe(branch!.sourceIssueKey);
-  expect((prereq as any).executionBacked).toBeUndefined();
-  expect((prereq as any).trustedForReuse).toBeUndefined();
-  expect((prereq as any).validationStatus).toBeUndefined();
-  console.log(`Case 2: companion prereq reason=${prereq!.reason}`);
+test("pending HU prerequisite does not enter runtime knowledge", () => {
+  const ctx = buildKnowledgeContextForScenarioGeneration(SLUG, NEW_HU, "navigation");
+  const runtimeHints = [...ctx.navigationHints, ...ctx.functionalHints];
+  expect(runtimeHints.some((hint) => hint.clickTargets.includes("Entrada A"))).toBe(false);
 });
 
-test("Case 3: visibility/restart from same issue NOT included by companion closure", () => {
-  const ctx = buildKnowledgeContextForScenarioGeneration(
-    SLUG, NEW_HU, "navigation", undefined, undefined,
-    ["Destino B"],
-  );
-  const visibility = ctx.generationHints.find((h) => h.category === "visibility");
-  const restart = ctx.generationHints.find((h) => h.category === "restart");
-  expect(visibility).toBeUndefined();
-  expect(restart).toBeUndefined();
-  console.log("Case 3: visibility and restart excluded from generationHints");
+test("pending HU visibility and restart do not enter runtime knowledge", () => {
+  const ctx = buildKnowledgeContextForScenarioGeneration(SLUG, NEW_HU, "navigation");
+  const runtimeHints = [...ctx.navigationHints, ...ctx.functionalHints];
+  expect(runtimeHints.some((hint) => hint.clickTargets.includes("titulo de la pagina"))).toBe(false);
+  expect(runtimeHints.some((hint) => hint.clickTargets.includes("Reiniciar"))).toBe(false);
 });
 
-test("Case 4: target does not match branch — no branch or prerequisite selected", () => {
-  const ctx = buildKnowledgeContextForScenarioGeneration(
-    SLUG, NEW_HU, "navigation", undefined, undefined,
-    ["Accion Irrelevante"],
-  );
-  const branch = ctx.generationHints.find((h) => h.actionTarget === "Destino B");
-  const prereq = ctx.generationHints.find((h) => h.actionTarget === "Entrada A");
-  expect(branch).toBeUndefined();
-  expect(prereq).toBeUndefined();
-  console.log("Case 4: no branch/prerequisite when no functional target match");
-});
-
-test("Case 5: allowedExecutableClicks and runtime authority not changed", () => {
-  const ctx = buildKnowledgeContextForScenarioGeneration(
-    SLUG, NEW_HU, "navigation", undefined, undefined,
-    ["Destino B"],
-  );
-  // generationHints never feed runtime tracks
+test("runtime track contains trusted knowledge only, not HU declarations", () => {
+  const ctx = buildKnowledgeContextForScenarioGeneration(SLUG, NEW_HU, "navigation");
   const runtimeKinds = [...ctx.navigationHints, ...ctx.functionalHints].map((h) => h.kind);
   expect(runtimeKinds).not.toContain("hu_declared");
-  // generationHints carry only declarative fields — no execution authority
-  for (const h of ctx.generationHints) {
-    expect(typeof h.category).toBe("string");
-    expect(typeof h.sourceText).toBe("string");
-    expect((h as any).executionBacked).toBeUndefined();
-    expect((h as any).clickTargets).toBeUndefined();
-    expect((h as any).trustedForReuse).toBeUndefined();
-    expect((h as any).validationStatus).toBeUndefined();
-  }
-  console.log("Case 5: runtime authority and allowedExecutableClicks unchanged");
+  expect(ctx.functionalHints.some((hint) => hint.kind === "route_menu_snapshot")).toBe(true);
 });

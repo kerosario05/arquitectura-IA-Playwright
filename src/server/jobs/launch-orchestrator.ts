@@ -173,6 +173,8 @@ export type LaunchExecutionResult = {
   existingCasePlan?: ExistingCaseExecutionPlan;
   discoveryJobId?: string;
   testRunId?: number;
+  checklistUrl?: string;
+  issueKey?: string;
   manifestPath: string;
 } | {
   ok: false;
@@ -1012,7 +1014,7 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
     const hasForceRediscovery = Object.prototype.hasOwnProperty.call(inputRecord, "forceRediscovery");
     const forceRediscovery = inputRecord.forceRediscovery;
     console.log(buildRediscoveryProvenanceLine({
-      boundary: "pre_job_store",
+      boundary: "job_store",
       sourceEndpoint: "/api/runs/launch-execution",
       jobType: "discovery-batch",
       correlationField: "launchId",

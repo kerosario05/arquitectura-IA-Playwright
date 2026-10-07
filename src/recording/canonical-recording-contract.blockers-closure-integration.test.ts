@@ -91,9 +91,11 @@ test("INTEGRATION: certified login + secure password (supplied) + semantic-only 
   assert.ok(requirement, "the password requirement must exist");
 
   const contract = toSharedMcpScenario(scenario, "app", { [requirement!.valueKey]: "supplied-secure-value" });
+  const readinessAudit = contract.executionReadinessAudit;
+  assert.ok(readinessAudit, "execution readiness audit must be present for the generated fixture");
 
-  const loginAction = contract.executionReadinessAudit.actions.find((a: any) => a.actionType === "click" && !a.blockReasons?.length && a !== undefined);
-  const passwordAction = contract.executionReadinessAudit.actions.find((a: any) => a.valueKey === requirement!.valueKey);
+  const loginAction = readinessAudit.actions.find((a: any) => a.actionType === "click" && !a.blockReasons?.length && a !== undefined);
+  const passwordAction = readinessAudit.actions.find((a: any) => a.valueKey === requirement!.valueKey);
   const semanticClickAction = contract.canonicalInteractions.find((c: any) => c.semanticRuntimeEvidence);
 
   assert.ok(passwordAction, "password action present");
@@ -102,13 +104,13 @@ test("INTEGRATION: certified login + secure password (supplied) + semantic-only 
 
   assert.ok(semanticClickAction, "Blocker A closed: semanticRuntimeEvidence reached the canonical interaction");
   assert.equal(semanticClickAction!.resolutionState, "runtime_resolution_required");
-  const semanticReadinessAction = contract.executionReadinessAudit.actions.find((a: any) => a.actionId === semanticClickAction!.id);
+  const semanticReadinessAction = readinessAudit.actions.find((a: any) => a.actionId === semanticClickAction!.id);
   assert.equal(semanticReadinessAction?.ready, true);
   assert.equal((semanticReadinessAction as any)?.runtimeResolutionRequired, true);
 
-  assert.equal(contract.executionReadinessAudit.executionReady, true, "both formerly-blocking actions are now ready");
-  assert.equal(contract.executionReadinessAudit.technicalReady, false, "the semantic-only click has zero technical target coverage -- never falsely marked certified");
-  assert.equal(contract.executionReadinessAudit.promotionReady, false, "a runtime_resolution_required action is present -- promotion stays gated, never forced");
+  assert.equal(readinessAudit.executionReady, true, "both formerly-blocking actions are now ready");
+  assert.equal(readinessAudit.technicalReady, false, "the semantic-only click has zero technical target coverage -- never falsely marked certified");
+  assert.equal(readinessAudit.promotionReady, false, "a runtime_resolution_required action is present -- promotion stays gated, never forced");
 
-  assert.doesNotMatch(JSON.stringify(contract.executionReadinessAudit), /supplied-secure-value/, "no plaintext in the readiness/diagnostic surface");
+  assert.doesNotMatch(JSON.stringify(readinessAudit), /supplied-secure-value/, "no plaintext in the readiness/diagnostic surface");
 });

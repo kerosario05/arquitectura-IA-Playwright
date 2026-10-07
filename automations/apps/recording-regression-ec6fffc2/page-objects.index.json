@@ -1,0 +1,82 @@
+{
+  "version": "1.0",
+  "appSlug": "recording-regression-ec6fffc2",
+  "pageObjects": [
+    {
+      "id": "po_framework_productlistpage",
+      "className": "ProductListPage",
+      "filePath": "automations/apps/recording-regression-ec6fffc2/pages/productlist.page.ts",
+      "screenSignature": "screen:recording-regression-ec6fffc2-product_list",
+      "methods": [
+        {
+          "name": "selectProduct",
+          "intent": "select_product",
+          "parameters": [
+            "productName"
+          ],
+          "available": true,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        },
+        {
+          "name": "selectFirstVisibleCard",
+          "intent": "select_first_visible_card",
+          "parameters": [],
+          "available": true,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        }
+      ],
+      "confidence": 1,
+      "status": "active",
+      "sourcePlanIds": [],
+      "caseIds": [],
+      "createdAt": "2026-10-07T03:19:24.773Z",
+      "updatedAt": "2026-10-07T03:19:24.773Z"
+    },
+    {
+      "id": "po_framework_operationsmenupage",
+      "className": "OperationsMenuPage",
+      "filePath": "automations/apps/recording-regression-ec6fffc2/pages/operationsmenu.page.ts",
+      "screenSignature": "screen:recording-regression-ec6fffc2-operations_menu",
+      "methods": [
+        {
+          "name": "openModule",
+          "intent": "open_module",
+          "parameters": [
+            "moduleName"
+          ],
+          "available": false,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        },
+        {
+          "name": "expectModuleVisible",
+          "intent": "expect_loaded",
+          "parameters": [
+            "moduleName"
+          ],
+          "available": false,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        }
+      ],
+      "confidence": 1,
+      "status": "active",
+      "sourcePlanIds": [],
+      "caseIds": [],
+      "createdAt": "2026-10-07T03:19:24.773Z",
+      "updatedAt": "2026-10-07T03:19:24.773Z"
+    }
+  ],
+  "componentCandidates": [],
+  "updatedAt": "2026-10-07T03:19:24.838Z"
+}

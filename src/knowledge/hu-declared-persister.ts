@@ -105,7 +105,9 @@ export function extractHuDeclaredItems(
 
   for (const req of requirementAccounting.requirements) {
     const category = req.category;
-    const normalizedKey = normKey(req.sourceText || req.id);
+    const sourceIdentity = req.sourceText || req.id;
+    if (!sourceIdentity) continue;
+    const normalizedKey = normKey(sourceIdentity);
     const id = `hd_${category}_${stableHash(category, normalizedKey)}`;
 
     // Explicit prerequisites carry the dynamic action target + normalized action

@@ -63,7 +63,7 @@ export async function resolveRecordingControlTarget(page: Page, target: Recordin
     // Required-field markers are often rendered visually but omitted from the accessible
     // name. Re-resolve only after the original and substring names failed, and keep the
     // same uniqueness requirement so this never becomes a positional fallback.
-    const normalizedName = stripRequiredMarker(name);
+    const normalizedName = stripRequiredMarker(name ?? "");
     if (normalizedName && normalizedName !== name) {
       const normalized = page.getByRole(target.role as any, { name: normalizedName, exact: true });
       await normalized.waitFor({ state: "attached", timeout: 10000 }).catch(() => {});

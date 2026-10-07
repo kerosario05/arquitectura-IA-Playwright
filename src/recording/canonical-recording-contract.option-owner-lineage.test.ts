@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildCanonicalInteractions } from "./canonical-recording-contract";
+import { buildCanonicalInteractions, reconcileOptionOwnerLineage } from "./canonical-recording-contract";
 import type { RecordedEvent, RecordedTarget } from "./session-trace.types";
 
 /**
@@ -115,4 +115,59 @@ test("5/ambiguousSelectSiblingsLeftUntouched. two same-screen select interaction
   const option = interactions.find((i) => i.action !== "select" && i.technicalTargetRefs.length > 0);
   assert.ok(option);
   assert.equal(option!.semanticField, "Cuentas de Efectivo", "ambiguous owner candidates must never be resolved by guessing either one");
+});
+
+test("6/dynamicComboboxNameUsesRecordedOwner. an option whose field name is the combobox current value inherits that uniquely recorded field", () => {
+  const interactions = reconcileOptionOwnerLineage([
+    {
+      id: "currency-owner",
+      action: "click",
+      semanticField: "Moneda",
+      entityScope: "entity_2",
+      stateScope: "screen|entity_2",
+      screenBeforeRef: "screen",
+      technicalTargetRefs: ["role:combobox|USD"],
+    },
+    {
+      id: "currency-option",
+      action: "click",
+      semanticField: "USD",
+      entityScope: "entity_2",
+      stateScope: "screen|entity_2",
+      screenBeforeRef: "screen",
+      technicalTargetRefs: ["role:option|DOP"],
+    },
+  ]);
+
+  assert.equal(interactions[1].semanticField, "Moneda");
+  assert.deepEqual(interactions[1].technicalTargetRefs, ["role:option|DOP"]);
+});
+
+test("7/dynamicComboboxNameRequiresUniqueScopedOwner. repeated or out-of-scope owners do not rewrite the option", () => {
+  const option = {
+    id: "currency-option",
+    action: "click",
+    semanticField: "USD",
+    entityScope: "entity_2",
+    stateScope: "screen|entity_2",
+    screenBeforeRef: "screen",
+    technicalTargetRefs: ["role:option|DOP"],
+  };
+  const unrelatedOwner = {
+    id: "currency-owner-other-row",
+    action: "click",
+    semanticField: "Moneda",
+    entityScope: "entity_1",
+    stateScope: "screen|entity_1",
+    screenBeforeRef: "screen",
+    technicalTargetRefs: ["role:combobox|USD"],
+  };
+  const ambiguousOwners = reconcileOptionOwnerLineage([
+    { ...option, id: "currency-option-ambiguous" },
+    { ...unrelatedOwner, id: "owner-one", entityScope: "entity_2", stateScope: "screen|entity_2" },
+    { ...unrelatedOwner, id: "owner-two", semanticField: "Otra moneda", entityScope: "entity_2", stateScope: "screen|entity_2" },
+  ]);
+
+  assert.equal(reconcileOptionOwnerLineage([option, unrelatedOwner])[0].semanticField, "USD");
+  assert.equal(ambiguousOwners[0].semanticField, "USD");
 });

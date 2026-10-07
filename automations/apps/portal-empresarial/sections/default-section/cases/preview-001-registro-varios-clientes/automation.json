@@ -7,17 +7,17 @@
   "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-registro-varios-clientes\\case.spec.ts",
   "appSlug": "portal-empresarial",
   "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
-  "status": "spec_failed",
+  "status": "active",
   "source": "discovery",
   "appProfile": "portal-empresarial",
-  "createdAt": "2026-10-02T16:21:28.195Z",
-  "updatedAt": "2026-10-02T16:21:28.195Z",
-  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-02T16-15-55-571Z\\discovered-plans.pending.json",
-  "pomStatus": "needs_manual_review",
+  "createdAt": "2026-10-03T19:44:50.473Z",
+  "updatedAt": "2026-10-03T19:44:50.473Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-03T19-37-21-469Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
   "inlineDebugMode": false,
-  "specVerificationStatus": "failed",
+  "specVerificationStatus": "passed",
   "metadata": {
-    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-02T16-15-55-571Z",
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-03T19-37-21-469Z",
     "pomDiagnostics": {
       "status": "promoted",
       "inlineFallbackUsed": false,
@@ -41,7 +41,7 @@
       },
       "invocations": 0,
       "invocationsConsumed": 0,
-      "durationMs": 125655,
+      "durationMs": 170566,
       "usage": {
         "inputTokens": null,
         "cachedInputTokens": null,
@@ -60,29 +60,21 @@
         "typescript": "passed",
         "playwrightDiscovery": "passed",
         "semanticCoverage": "passed",
-        "functionalExecution": "failed"
+        "functionalExecution": "passed"
       },
-      "promotionAllowed": false,
+      "promotionAllowed": true,
       "specsRequested": 1,
-      "specsValidated": 0,
-      "specsRejected": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
       "specGenerationAttempts": 0,
       "specRepairAttempts": 0,
-      "firstPassPromotion": false,
-      "failedGatesAttempt1": [
-        "functionalExecution"
-      ],
+      "firstPassPromotion": true,
+      "failedGatesAttempt1": [],
       "regressedGates": [],
       "missingRequirements": [],
       "oracleTypes": [],
-      "errors": [
-        "functional_execution_failed:exitCode=1",
-        "functional_execution_error:Error: Promoted click failed at step 12 target=\"role:option|cédula\". failureClass=ACTION_CALLBACK_TIMEOUT exactRuntimeError=\"Retry failed: click retry timed out after 15000ms\" currentUrl=https://172.27.4.31/payroll/manualCreationTable clickPath=failed nativeClickAttempted=true nativeClickSucceeded=false callbackAttempted=true callbackSucceeded=false retryAttempted=true diagnostics={\"currentUrl\":\"https://172.27.4.31/payroll/manualCreationTable\",\"actionIntent\":\"click\",\"target\":\"role:option|cédula\",\"stepIndex\":12,\"timeoutMs\":15000,\"stability\":{\"currentUrl\":\"https://172.27.4.31/payroll/manualCreationTable\",\"title\":\"\",\"visibleHeadings\":[],\"visibleButtons\":[\"Cargar archivo\",\"Añadir otro\",\"Validar\",\"seleccione\",\"Indicar...\",\"Indicar...\",\"Indicar...\",\"Indicar...\",\"000-000-0000\",\"000-000-0000\"],\"visibleTexts\":[\"Empresa:\",\"CONSTRUCCIONES ...\",\"Oliva Medina\",\"Añadir colaboradores manualmente\",\"Añade y verifica que todos los datos estén correctos\",\"Cargar archivo\",\"Añadir otro\",\"Validar\",\"LISTADO DE COLABORADORES\",\"Puedes editar las celdas haciendo click sobre las mismas.\",\"Tipo de ID\",\"Colaborador\",\"Puesto\",\"Ingresos\",\"Correo electrónico\",\"Teléfono residencial\",\"Celular\",\"Fecha de Nacimiento\",\"Fecha de Ingreso\",\"seleccione\"],\"loadingDetected\":false,\"skeletonDetected\":false,\"listReadiness\":{\"cardsVisible\":0,\"listItemsVisible\":0,\"loadingDetected\":false,\"zeroProductsDetected\":false,\"hasEntityContainers\":true,\"visibleHeadings\":[],\"visibleButtons\":[\"Cargar archivo\",\"Añadir otro\",\"Validar\",\"seleccione\",\"Indicar...\",\"Indicar...\",\"Indicar...\",\"Indicar...\",\"000-000-0000\",\"000-000-0000\"],\"ready\":true},\"diagnosticStatus\":\"completed\"},\"retryAttempted\":true,\"clickPath\":\"failed\",\"nativeClickAttempted\":true,\"nativeClickSucceeded\":false,\"callbackAttempted\":true,\"callbackSucceeded\":false,\"callbackError\":\"Retry failed: click retry timed out after 15000ms\",\"expectedEffect\":\"ui_change\",\"effectDetected\":false,\"fallbackUsed\":\"none\",\"matchedLocatorStrategy\":\"unknown\",\"screenshotPath\":\"C:\\\\MisProyectos\\\\arquitectura-IA-Playwright-feature-auth-gate\\\\.artifacts\\\\promoted-runtime\\\\step-012.png\"}"
-      ],
-      "warnings": [
-        "functional_execution_screenshots=5",
-        "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 12)."
-      ],
+      "errors": [],
+      "warnings": [],
       "finalSpec": {
         "origin": "deterministic_compiler",
         "generatedBy": "core",
@@ -90,25 +82,23 @@
         "fallback": null
       },
       "runtimeGate": {
-        "decision": "block",
-        "promotionStatus": "blocked",
-        "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 12)."
+        "decision": "promote",
+        "promotionStatus": "promoted",
+        "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
       },
-      "specWritten": false,
+      "specWritten": true,
       "previousSpec": {
-        "existed": false,
-        "hash": null,
-        "lastModifiedAt": null
+        "existed": true,
+        "hash": "5a6c4bf5e98ec137ce01b168562fb0d9df441ced6a6d6c647ecf611b161788cc",
+        "lastModifiedAt": "2026-10-03T17:33:48.720Z"
       }
     },
     "promotionStrategyDiagnostics": {
       "requestedStrategy": "auto",
       "autoPomEnabled": true,
       "selectedStrategy": "pom",
-      "reason": "spec_generation_validation_failed",
-      "blockers": [
-        "spec_generation_validation_failed"
-      ],
+      "reason": "promoted",
+      "blockers": [],
       "availablePageObjects": [
         "ProductListPage",
         "OperationsMenuPage"
@@ -120,11 +110,14 @@
       "fallbackUsed": false,
       "requirePomRuntime": false,
       "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-registro-varios-clientes\\case.spec.ts",
-      "specHash": "5fa1c1a6462c5cb474b86074f23de06ea1381beb1fd98336904b97e56913676d",
-      "specSource": "ai_candidate"
+      "specHash": "5a6c4bf5e98ec137ce01b168562fb0d9df441ced6a6d6c647ecf611b161788cc",
+      "specSource": "generatedSpec"
     },
     "overwritten": true,
     "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-registro-varios-clientes\\plan.json",
-    "previousStatus": "spec_failed"
-  }
+    "previousStatus": "active"
+  },
+  "promotionPersisted": true,
+  "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-registro-varios-clientes\\case.spec.ts",
+  "promotedSpecHash": "5a6c4bf5e98ec137ce01b168562fb0d9df441ced6a6d6c647ecf611b161788cc"
 }

@@ -91,7 +91,7 @@ export async function startMobileEmulatorBootJob(jobId: string): Promise<void> {
     jobStore.update(jobId, {
       status: "done",
       completedAt: new Date().toISOString(),
-      summary: JSON.stringify({ appium }),
+      summary: { totalStories: 0, synced: 0, passed: 0, failed: 0, appium },
     });
     jobStore.appendLog(jobId, `[mobile:emulator] ready avd=${avdName} pid=${start.pid ?? "external"} deviceId=${start.deviceId ?? "detected"} appium.ready=${appium.ready} appium.reused=${appium.reused} appium.external=${appium.external} appium.port=${appium.port ?? "unknown"}`);
     jobStore.appendLog(jobId, `[mobile:infra] infrastructure ready emulator.ready=true appium.ready=${appium.ready}`);

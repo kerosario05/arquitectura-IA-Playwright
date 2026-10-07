@@ -605,6 +605,14 @@ export function buildCoverageContract(
   optionFlows?: { flows: OptionFlow[]; totalFlows: number }
 ): CoverageContract {
   const issueKey = issue?.key || "UNKNOWN";
+  const detectedScope = evaluateHuScopeGuard(issue).functionalScope;
+  const functionalScope: CoverageContract["functionalScope"] = detectedScope === "entry_navigation"
+    ? "entry_menu_or_landing"
+    : detectedScope === "product_inquiry"
+      ? "public_info"
+      : detectedScope === "product_management" || detectedScope === "product_operations" || detectedScope === "system_admin"
+        ? "private_transactional"
+        : "unknown";
   const corpus = [issue?.summary, issue?.description, issue?.acceptanceCriteria]
     .filter(Boolean).join("\n");
   const lower = corpus.toLowerCase();
@@ -1369,6 +1377,7 @@ export function buildCoverageContract(
 
   return {
     issueKey,
+    functionalScope,
     initialActions: initialScreenItems,
     blockedWithoutAction,
     postActionScreens,

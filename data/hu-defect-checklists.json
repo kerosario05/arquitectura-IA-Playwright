@@ -14573,5 +14573,234 @@
     "defects": [],
     "createdAt": "2026-10-05T12:16:33.331Z",
     "updatedAt": "2026-10-05T12:16:33.331Z"
+  },
+  {
+    "id": "1791220950348-zkc6xh5",
+    "issueKey": "REC-BC1D84F3",
+    "urlSlug": "REC-BC1D84F3",
+    "defects": [
+      {
+        "id": "1791221181062-182tfcf",
+        "description": "Resultado esperado:\nLa aplicación carga su pantalla inicial\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "10f36a51-0435-48a8-a060-02e48c2c209c",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Consultar Tarjeta Visa Clasica",
+        "title": "[Media] No se cumplió: La aplicación carga su pantalla inicial — Consultar Tarjeta Visa Clasica",
+        "technicalContext": {
+          "discoveryStatus": "discovered_passed",
+          "expectedResult": "La aplicación carga su pantalla inicial",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-05T17-22-44-568Z\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-05T17-22-44-568Z\\evidence\\step-19-snapshot.json",
+          "lastSuccessfulStep": {
+            "stepIndex": 19,
+            "action": "Presionar \"Generar Turno\"",
+            "target": "Generar Turno",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-05T17-22-44-568Z\\evidence\\step-19-snapshot.json"
+          }
+        },
+        "createdAt": "2026-10-05T17:26:21.062Z",
+        "updatedAt": "2026-10-05T17:26:21.062Z"
+      }
+    ],
+    "createdAt": "2026-10-05T17:22:30.348Z",
+    "updatedAt": "2026-10-05T17:26:21.062Z"
+  },
+  {
+    "id": "1791234204937-mcb8vdz",
+    "issueKey": "AA-82",
+    "urlSlug": "AA-82",
+    "defects": [
+      {
+        "id": "1791234204952-79zco08",
+        "description": "Paso fallido:\nPaso 15: el control grabado\n\nQué pasó:\nNo se encontró el elemento necesario para continuar la ejecución.\n\nResultado esperado:\nSe muestra \"Cerrar sesión\"\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "60907360-8114-496d-8965-9e5763a1ae5f",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Login Sastifactorio",
+        "title": "[Media] No se encontró \"el control grabado\" (paso 15) — Login Sastifactorio",
+        "technicalContext": {
+          "reasonCode": "target_not_found",
+          "discoveryStatus": "exploration_failed",
+          "failedAtStep": 26,
+          "failedTarget": "Moneda",
+          "expectedResult": "La aplicación carga su pantalla inicial",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-06T15-19-30-785Z\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-06T15-19-30-785Z\\evidence\\step-25-snapshot.json",
+          "lastSuccessfulStep": {
+            "stepIndex": 25,
+            "action": "Ingresar \"Ingeniero\" en \"Puesto\"",
+            "target": "Puesto",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-06T15-19-30-785Z\\evidence\\step-25-snapshot.json"
+          },
+          "testRailCaseId": 48974,
+          "testRailRunId": 4546
+        },
+        "createdAt": "2026-10-05T21:03:24.952Z",
+        "updatedAt": "2026-10-06T15:27:24.505Z"
+      },
+      {
+        "id": "1791289574129-gpmbaox",
+        "description": "Resultado esperado:\nLa aplicación carga su pantalla inicial\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "60907360-8114-496d-8965-9e5763a1ae5f",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-002",
+        "scenarioTitle": "Login satisfactorio",
+        "title": "[Media] No se cumplió: La aplicación carga su pantalla inicial — Login satisfactorio",
+        "technicalContext": {
+          "discoveryStatus": "discovered_passed",
+          "expectedResult": "La aplicación carga su pantalla inicial",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-10-06T15-21-40-621Z\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-10-06T15-21-40-621Z\\evidence\\step-5-snapshot.json",
+          "lastSuccessfulStep": {
+            "stepIndex": 5,
+            "action": "Presionar \"Continuar\"",
+            "target": "Continuar",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-10-06T15-21-40-621Z\\evidence\\step-5-snapshot.json"
+          },
+          "testRailCaseId": 48818,
+          "testRailRunId": 4546
+        },
+        "createdAt": "2026-10-06T12:26:14.129Z",
+        "updatedAt": "2026-10-06T15:27:24.505Z"
+      },
+      {
+        "id": "1791289574169-rpcmy88",
+        "description": "Resultado esperado:\nLa aplicación carga su pantalla inicial\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "60907360-8114-496d-8965-9e5763a1ae5f",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-003",
+        "scenarioTitle": "Validar cédula con formato erróneo al agregar empleado manualmente",
+        "title": "[Media] No se cumplió: La aplicación carga su pantalla inicial — Validar cédula con formato erróneo al agregar empleado manualmente",
+        "technicalContext": {
+          "reasonCode": "post_auth_navigation_failure",
+          "discoveryStatus": "exploration_failed",
+          "failedAtStep": 5,
+          "failedTarget": "Continuar",
+          "expectedResult": "La aplicación carga su pantalla inicial",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-10-06T15-22-43-337Z\\attempt-2\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-10-06T15-22-43-337Z\\attempt-2\\evidence\\step-4-snapshot.json",
+          "lastSuccessfulStep": {
+            "stepIndex": 4,
+            "action": "Ingresar \"••••••\" en \"Contraseña*\"",
+            "target": "Contraseña*",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-10-06T15-22-43-337Z\\attempt-2\\evidence\\step-4-snapshot.json"
+          },
+          "testRailCaseId": 48975,
+          "testRailRunId": 4546
+        },
+        "createdAt": "2026-10-06T12:26:14.169Z",
+        "updatedAt": "2026-10-06T15:27:24.505Z"
+      },
+      {
+        "id": "1791300444506-leeo7nm",
+        "description": "Paso fallido:\nPaso 6: Gestión de Nóminas\n\nQué pasó:\nLa ejecución falló con código: recorded_precondition_not_reached\n\nResultado esperado:\nLa aplicación carga su pantalla inicial\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "60907360-8114-496d-8965-9e5763a1ae5f",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-004",
+        "scenarioTitle": "Agregar un empleado manualmente con cédula",
+        "title": "[Media] No se encontró \"Gestión de Nóminas\" (paso 6) — Agregar un empleado manualmente con cédula",
+        "technicalContext": {
+          "reasonCode": "RECORDED_PRECONDITION_NOT_REACHED",
+          "discoveryStatus": "exploration_failed",
+          "failedAtStep": 6,
+          "failedTarget": "Gestión de Nóminas",
+          "expectedResult": "La aplicación carga su pantalla inicial",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-10-06T15-23-35-925Z\\attempt-2\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-10-06T15-23-35-925Z\\attempt-2\\evidence\\step-5-snapshot.json",
+          "lastSuccessfulStep": {
+            "stepIndex": 5,
+            "action": "Presionar \"Enter\" en \"Contraseña*\"",
+            "target": "Contraseña*",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-10-06T15-23-35-925Z\\attempt-2\\evidence\\step-5-snapshot.json"
+          },
+          "testRailCaseId": 48976,
+          "testRailRunId": 4546
+        },
+        "createdAt": "2026-10-06T15:27:24.506Z",
+        "updatedAt": "2026-10-06T15:27:24.506Z"
+      },
+      {
+        "id": "1791300444515-e6j10e4",
+        "description": "Paso fallido:\nPaso 6: Gestión de Nóminas\n\nQué pasó:\nLa ejecución falló con código: recorded_precondition_not_reached\n\nResultado esperado:\nLa aplicación carga su pantalla inicial\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "60907360-8114-496d-8965-9e5763a1ae5f",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-005",
+        "scenarioTitle": "Descargar plantilla para carga de nómina",
+        "title": "[Media] No se encontró \"Gestión de Nóminas\" (paso 6) — Descargar plantilla para carga de nómina",
+        "technicalContext": {
+          "reasonCode": "RECORDED_PRECONDITION_NOT_REACHED",
+          "discoveryStatus": "exploration_failed",
+          "failedAtStep": 6,
+          "failedTarget": "Gestión de Nóminas",
+          "expectedResult": "La aplicación carga su pantalla inicial",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-10-06T15-25-05-265Z\\attempt-2\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-10-06T15-25-05-265Z\\attempt-2\\evidence\\step-5-snapshot.json",
+          "lastSuccessfulStep": {
+            "stepIndex": 5,
+            "action": "Presionar \"Enter\" en \"Contraseña*\"",
+            "target": "Contraseña*",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-10-06T15-25-05-265Z\\attempt-2\\evidence\\step-5-snapshot.json"
+          },
+          "testRailCaseId": 48817,
+          "testRailRunId": 4546
+        },
+        "createdAt": "2026-10-06T15:27:24.515Z",
+        "updatedAt": "2026-10-06T15:27:24.515Z"
+      }
+    ],
+    "createdAt": "2026-10-05T21:03:24.937Z",
+    "updatedAt": "2026-10-06T15:27:24.515Z"
+  },
+  {
+    "id": "1791293981162-ps8f9ih",
+    "issueKey": "AA-81",
+    "urlSlug": "AA-81",
+    "defects": [
+      {
+        "id": "1791293981174-rku9aln",
+        "description": "Paso fallido:\nPaso 28: Correo electrónico\n\nQué pasó:\nNo se encontró el elemento necesario para continuar la ejecución.\n\nResultado esperado:\nLa aplicación carga su pantalla inicial\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "43941227-1e94-43e8-852c-783f390837ac",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Agregar varios empleados manualmente con cédula",
+        "title": "[Media] No se encontró \"Correo electrónico\" (paso 28) — Agregar varios empleados manualmente con cédula",
+        "technicalContext": {
+          "reasonCode": "fill_target_not_found",
+          "discoveryStatus": "exploration_failed",
+          "failedAtStep": 28,
+          "failedTarget": "Correo electrónico",
+          "expectedResult": "La aplicación carga su pantalla inicial",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-06T13-36-44-306Z\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-06T13-36-44-306Z\\evidence\\step-27-snapshot.json",
+          "lastSuccessfulStep": {
+            "stepIndex": 27,
+            "action": "Ingresar \"20000\" en \"Ingresos\"",
+            "target": "Ingresos",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-06T13-36-44-306Z\\evidence\\step-27-snapshot.json"
+          },
+          "testRailCaseId": 48974,
+          "testRailRunId": 4543
+        },
+        "createdAt": "2026-10-06T13:39:41.174Z",
+        "updatedAt": "2026-10-06T13:39:41.174Z"
+      }
+    ],
+    "createdAt": "2026-10-06T13:39:41.161Z",
+    "updatedAt": "2026-10-06T13:39:41.174Z"
   }
 ]

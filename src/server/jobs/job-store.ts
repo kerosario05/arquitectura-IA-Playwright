@@ -8,8 +8,8 @@ export type JobStatus = "queued" | "running" | "done" | "failed" | "cancelled" |
 
 export type JobSummary = {
   sprintLabel?: string;
-  totalStories: number;
-  synced: number;
+  totalStories?: number;
+  synced?: number;
   syncFailed?: number;
   passed: number;
   failed: number;
@@ -18,6 +18,7 @@ export type JobSummary = {
   requested?: number;
   executed?: number;
   progressPercent?: number;
+  progress?: number;
   passRate?: number | null;
   errorMessage?: string;
   testRailRunId?: number;
@@ -43,6 +44,10 @@ export type JobSummary = {
   documentGenerated?: boolean;
   documentPathPresent?: boolean;
   documentPath?: string;
+  scenariosSkipped?: number;
+  blocked?: number;
+  totalScenarios?: number;
+  appium?: unknown;
   scenarioEvidenceCount?: number;
   evidenceResults?: number;
   documentError?: string;
@@ -88,8 +93,8 @@ const TERMINAL_STATUSES = new Set<JobStatus>([
   "done", "failed", "cancelled", "completed_with_failures", "completed_with_sync_errors",
 ]);
 const PERSISTED_PARAM_KEYS = [
-  "appSlug", "projectSlug", "targetAppSlug", "launchId", "huTitle", "scenarioTitle", "title",
-  "testrailProjectId", "testrailSuiteId", "testrailSectionId", "sectionId", "sectionName", "testRunId",
+  "appSlug", "projectSlug", "targetAppSlug", "launchId", "huKey", "huTitle", "jiraKey", "jiraTitle", "scenarioTitle", "title",
+  "testrailProjectId", "testrailProjectName", "testrailSuiteId", "testrailSuiteName", "testrailSectionId", "sectionId", "sectionName", "sectionSlug", "testRunId",
 ] as const;
 const PERSISTED_SUMMARY_KEYS = [
   "totalStories", "synced", "syncFailed", "passed", "failed", "skipped", "completed", "requested", "executed",

@@ -1,0 +1,20 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-un-empleado-manualmente-con-cedula\\case.spec.ts",
+  "specHash": "4b4dd2b8fec2072fba46e920e497857633cb58ffc63f66fb961a0d4bb68f06b5",
+  "specSource": "generatedSpec"
+}

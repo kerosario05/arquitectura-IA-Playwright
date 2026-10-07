@@ -1,0 +1,10 @@
+{
+  "id": "preview-002-consultar-tarjeta-visa-clasica",
+  "externalId": "PREVIEW-002",
+  "caseId": 0,
+  "title": "Consultar Tarjeta Visa Clasica",
+  "source": "discovery",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "createdAt": "2026-10-07T02:20:54.709Z"
+}

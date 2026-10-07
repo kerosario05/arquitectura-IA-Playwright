@@ -150,6 +150,7 @@ test.describe("canonical branch and claim binding", () => {
       database: "",
       isConverted: 0,
       automationType: "ui",
+      setupStrategy: "none",
       appSlug: "synthetic",
       routeProfile: "none",
       dataRequirements: "",

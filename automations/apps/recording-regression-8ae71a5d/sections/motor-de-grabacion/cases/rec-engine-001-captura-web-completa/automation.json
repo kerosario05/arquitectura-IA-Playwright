@@ -1,0 +1,122 @@
+{
+  "id": "rec-engine-001-captura-web-completa",
+  "externalId": "REC-ENGINE-001",
+  "caseId": 0,
+  "title": "Captura web completa",
+  "planPath": "automations\\apps\\recording-regression-8ae71a5d\\sections\\motor-de-grabacion\\cases\\rec-engine-001-captura-web-completa\\plan.json",
+  "specPath": "automations\\apps\\recording-regression-8ae71a5d\\sections\\motor-de-grabacion\\cases\\rec-engine-001-captura-web-completa\\case.spec.ts",
+  "appSlug": "recording-regression-8ae71a5d",
+  "appConfigPath": "automations\\apps\\recording-regression-8ae71a5d\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "recording-regression-8ae71a5d",
+  "createdAt": "2026-10-07T03:22:21.701Z",
+  "updatedAt": "2026-10-07T03:22:21.701Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\REC-ENGINE-001\\2026-10-07T03-21-24-262Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "passed",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\REC-ENGINE-001\\2026-10-07T03-21-24-262Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "specGeneration": {
+      "mode": "deterministic",
+      "provider": null,
+      "model": null,
+      "skill": {
+        "name": null,
+        "version": null,
+        "hash": null,
+        "loaded": false
+      },
+      "invocations": 0,
+      "invocationsConsumed": 0,
+      "durationMs": 33333,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "skipped",
+        "structure": "passed",
+        "traceFidelity": "skipped",
+        "typescript": "passed",
+        "playwrightDiscovery": "passed",
+        "semanticCoverage": "passed",
+        "functionalExecution": "passed"
+      },
+      "promotionAllowed": true,
+      "specsRequested": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
+      "specGenerationAttempts": 0,
+      "specRepairAttempts": 0,
+      "firstPassPromotion": true,
+      "failedGatesAttempt1": [],
+      "regressedGates": [],
+      "missingRequirements": [],
+      "oracleTypes": [],
+      "errors": [],
+      "warnings": [
+        "step_index_not_explicit_in_spec:1"
+      ],
+      "finalSpec": {
+        "origin": "deterministic_compiler",
+        "generatedBy": "core",
+        "strategy": "deterministic_compiler",
+        "fallback": null
+      },
+      "runtimeGate": {
+        "decision": "promote",
+        "promotionStatus": "promoted",
+        "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+      },
+      "specWritten": true,
+      "previousSpec": {
+        "existed": false,
+        "hash": null,
+        "lastModifiedAt": null
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [],
+      "availablePageObjects": [
+        "ProductListPage",
+        "OperationsMenuPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false,
+      "specPath": "automations\\apps\\recording-regression-8ae71a5d\\sections\\motor-de-grabacion\\cases\\rec-engine-001-captura-web-completa\\case.spec.ts",
+      "specHash": "59f67dbc20e003f078f9b073ba43927bfdcc9380f4611689ee70efb03d8e050f",
+      "specSource": "generatedSpec"
+    }
+  },
+  "promotionPersisted": true,
+  "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\recording-regression-8ae71a5d\\sections\\motor-de-grabacion\\cases\\rec-engine-001-captura-web-completa\\case.spec.ts",
+  "promotedSpecHash": "59f67dbc20e003f078f9b073ba43927bfdcc9380f4611689ee70efb03d8e050f"
+}

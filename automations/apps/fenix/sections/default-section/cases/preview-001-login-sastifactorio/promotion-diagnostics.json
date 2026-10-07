@@ -1,0 +1,20 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-login-sastifactorio\\case.spec.ts",
+  "specHash": "be4cd8868a6db0d2664357c96c6907444d46cec281aed61586780701f6a27e71",
+  "specSource": "generatedSpec"
+}

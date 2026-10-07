@@ -846,7 +846,7 @@ async function resolveClickableElement(
 
   let matches: WdioElement[];
   try {
-    matches = await browser.$$(clickSelector);
+    matches = await browser.$$(clickSelector) as unknown as WdioElement[];
   } catch {
     return null;
   }

@@ -948,7 +948,7 @@ export function normalizeEvents(
       const topologyTiebrokenStructuralAuthority = hasTopologyTiebrokenV2StructuralAuthority(target);
       return fieldScopedStructuralEvidence || frameworkStructuralAuthority || topologyTiebrokenStructuralAuthority;
     };
-  const cleaned = consolidated.map((event) => {
+  const cleaned: RecordedEvent[] = consolidated.map((event): RecordedEvent => {
     if (!dropUnidentified) return event;
     if (event.kind !== "tap") return event;
     if (event.target?.compoundRole === "selection" && event.target.afterValue !== undefined
@@ -968,8 +968,8 @@ export function normalizeEvents(
         ...event,
         target: {
           ...event.target!,
-          interactionType: "select",
-          compoundRole: "selection",
+        interactionType: "select" as const,
+        compoundRole: "selection" as const,
           afterValue: event.target!.afterValue ?? capturedOptionValue,
         },
       };

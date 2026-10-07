@@ -1,0 +1,1437 @@
+{
+  "appSlug": "kiosko",
+  "sectionSlug": "api-tests",
+  "scenarioId": "PREVIEW-001",
+  "scenarioTitle": "Consultar Tarjeta Visa Oro",
+  "stepCount": 19,
+  "sourceExpectedResultPresent": true,
+  "requiredAssertionCount": 1,
+  "observableOracles": [
+    {
+      "id": "expected-01",
+      "requirement": "La aplicación carga su pantalla inicial",
+      "type": "navigation_transition",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 19,
+      "polarity": "positive",
+      "target": "Generar Turno",
+      "evidence": [
+        "transition_observed:true",
+        "click_target:Generar Turno",
+        "action_type:Presionar \"Generar Turno\"",
+        "after_url:https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold",
+        "assertion_polarity:positive"
+      ],
+      "details": {
+        "transitionObserved": true,
+        "clickTarget": "Generar Turno",
+        "resolvedTarget": null,
+        "postClickUiChange": null,
+        "sourceActionStepIndex": 19,
+        "expectedUrl": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold"
+      }
+    }
+  ],
+  "oracleTypes": [
+    "navigation_transition"
+  ],
+  "availablePageObjectCount": 3,
+  "mode": "deterministic",
+  "functionalExecutionEnabled": true,
+  "provider": null,
+  "model": null,
+  "skill": {
+    "name": null,
+    "version": null,
+    "hash": null,
+    "loaded": false
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "PREVIEW-001",
+    "title": "Consultar Tarjeta Visa Oro",
+    "appSlug": "kiosko",
+    "sectionSlug": "api-tests",
+    "auth": {
+      "gateDetected": true,
+      "required": false,
+      "stage": "identification_input",
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    },
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Abrir la aplicación configurada del proyecto",
+        "operation": "navigate",
+        "target": {
+          "strategy": "url",
+          "value": "APP_BASE_URL"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Presionar \"Explora nuestros productos\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Explora nuestros productos"
+        },
+        "technicalTargetRef": "role:button|Explora nuestros productos",
+        "technicalTargetRefs": [
+          "role:button|Explora nuestros productos"
+        ],
+        "controlIdentity": "3a1c6dc6ce96|Explora nuestros productos|role|button|Explora nuestros productos",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Explora nuestros productos\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Explora nuestros productos"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "div"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Presionar \"Tarjetas\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Tarjetas"
+        },
+        "valueKey": "tarjetas",
+        "associatedField": "Tarjetas",
+        "technicalTargetRef": "role:button|Tarjetas",
+        "technicalTargetRefs": [
+          "role:button|Tarjetas"
+        ],
+        "controlIdentity": "3a1c6dc6ce96|Tarjetas|role|button|Tarjetas",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Tarjetas",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Presionar \"Tarjeta de Crédito\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Tarjeta de Crédito"
+        },
+        "valueKey": "tarjeta_de_credito",
+        "associatedField": "Tarjeta de Crédito",
+        "technicalTargetRef": "role:button|Tarjeta de Crédito",
+        "technicalTargetRefs": [
+          "role:button|Tarjeta de Crédito"
+        ],
+        "controlIdentity": "3a1c6dc6ce96|Tarjeta de Crédito|role|button|Tarjeta de Crédito",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Tarjeta de Crédito",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 4,
+        "scenarioStepIndex": 5,
+        "originalText": "Presionar \"Tarjeta Crédito Visa Gold\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Tarjeta Crédito Visa Gold"
+        },
+        "valueKey": "tarjeta_credito_visa_gold",
+        "associatedField": "Tarjeta Crédito Visa Gold",
+        "controlIdentity": "3a1c6dc6ce96|Tarjeta Crédito Visa Gold",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "div|[alt=\"Tarjeta Crédito Visa Gold\"][src=\"/assets/images/tarjetas-de-credito-visa-gold.png\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "img",
+                "stableAttributes": {
+                  "alt": "Tarjeta Crédito Visa Gold",
+                  "src": "/assets/images/tarjetas-de-credito-visa-gold.png"
+                }
+              }
+            ],
+            "semanticShape": [
+              "div",
+              "h3"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"div\"},\"stableDirectAttributes\":{},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"img\",\"stableAttributes\":{\"src\":\"/assets/images/tarjetas-de-credito-visa-gold.png\"}}],\"semanticShape\":[\"div\",\"h3\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",3],[\\\"h3\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",11],[\\\"h3\\\",1],[\\\"img\\\",1],[\\\"path\\\",4],[\\\"span\\\",4],[\\\"svg\\\",4]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 3
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 5,
+        "scenarioStepIndex": 6,
+        "originalText": "Presionar \"Solicitar\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Solicitar"
+        },
+        "valueKey": "solicitar",
+        "associatedField": "Solicitar",
+        "technicalTargetRef": "role:button|Solicitar",
+        "technicalTargetRefs": [
+          "role:button|Solicitar"
+        ],
+        "controlIdentity": "3a1c6dc6ce96|Solicitar|role|button|Solicitar",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Solicitar",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Solicitar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 6,
+        "scenarioStepIndex": 7,
+        "originalText": "Presionar \"Generar Turno\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Generar Turno"
+        },
+        "valueKey": "generar_turno",
+        "associatedField": "Generar Turno",
+        "controlIdentity": "3a1c6dc6ce96|Generar Turno",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "semanticShape": [
+              "div",
+              "h3",
+              "p"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "topologyTieBreakUnique": true,
+            "topologySignature": "{\"childEntries\":[[\"div\",1],[\"h3\",1],[\"p\",1]],\"descendantEntries\":[[\"div\",2],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\",\"h3\",\"p\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1],[\\\"h3\\\",1],[\\\"p\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",2],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 4
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 7,
+        "scenarioStepIndex": 8,
+        "originalText": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Número de identificación",
+          "exact": true
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 1,
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Número de identificación",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 8,
+        "scenarioStepIndex": 9,
+        "originalText": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Número de identificación",
+          "exact": true
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 2,
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Número de identificación",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 9,
+        "scenarioStepIndex": 10,
+        "originalText": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Número de identificación",
+          "exact": true
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 3,
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Número de identificación",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 10,
+        "scenarioStepIndex": 11,
+        "originalText": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Número de identificación",
+          "exact": true
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 4,
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Número de identificación",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 11,
+        "scenarioStepIndex": 12,
+        "originalText": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Número de identificación",
+          "exact": true
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 5,
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Número de identificación",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 12,
+        "scenarioStepIndex": 13,
+        "originalText": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Número de identificación",
+          "exact": true
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 6,
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Número de identificación",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 13,
+        "scenarioStepIndex": 14,
+        "originalText": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Número de identificación",
+          "exact": true
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 7,
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Número de identificación",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 14,
+        "scenarioStepIndex": 15,
+        "originalText": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Número de identificación",
+          "exact": true
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 8,
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Número de identificación",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 15,
+        "scenarioStepIndex": 16,
+        "originalText": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Número de identificación",
+          "exact": true
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 9,
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Número de identificación",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 16,
+        "scenarioStepIndex": 17,
+        "originalText": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Número de identificación",
+          "exact": true
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 10,
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Número de identificación",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 17,
+        "scenarioStepIndex": 18,
+        "originalText": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Número de identificación",
+          "exact": true
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 11,
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Número de identificación",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 18,
+        "scenarioStepIndex": 19,
+        "originalText": "Presionar \"Generar Turno\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Generar Turno"
+        },
+        "valueKey": "generar_turno",
+        "associatedField": "Generar Turno",
+        "technicalTargetRef": "role:button|Generar Turno",
+        "technicalTargetRefs": [
+          "role:button|Generar Turno"
+        ],
+        "controlIdentity": "3a1c6dc6ce96|Generar Turno|role|button|Generar Turno",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Generar Turno",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Generar Turno",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "oracle": {
+          "type": "navigation_transition",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "url_state",
+          "mechanism": {
+            "source": "url_state",
+            "method": "expectPromotedVisible",
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "navigation_transition",
+              "urlPattern": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold"
+            }
+          },
+          "sourceActionStepIndex": 19,
+          "requirement": "La aplicación carga su pantalla inicial",
+          "target": "Generar Turno"
+        },
+        "sourceActionStepIndex": 19,
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 19,
+      "representedScenarioSteps": 19,
+      "missingScenarioSteps": []
+    }
+  },
+  "executionContractChars": 21901,
+  "promptChars": null,
+  "specGenerationAttempts": 0,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": true,
+  "promotionAllowed": true,
+  "failedGatesAttempt1": [],
+  "finalSpec": {
+    "origin": "deterministic_compiler",
+    "generatedBy": "core",
+    "strategy": "deterministic_compiler",
+    "fallback": null
+  }
+}

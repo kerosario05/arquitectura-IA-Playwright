@@ -43,6 +43,7 @@ import { applyRuntimeDatasetValues, hydrateCanonicalInteractionsFromSemanticMode
 import { hydratePersistedScenarios } from "../../recording/persisted-scenario-hydration";
 import { jobStore } from "../jobs/job-store";
 import { startScenarioPreviewRun, startReuseExistingPromotedSpecRun, type ReuseExistingPromotedSpecScenario } from "../jobs/scenario-preview-runner";
+import { buildTestRailRunName } from "../services/testrail-run-reporter";
 import { resolveReplayAdmission } from "../services/replay-admission";
 import { resolveScenarioAutomationPlans, partitionScenariosForExecution, computeTestRailPublishCandidates, type ScenarioAutomationPlan, type TestRailCaseLookup, type TestRailDestination } from "../../automations/recording-automation-resolution";
 import { startMixedRerun } from "../jobs/mixed-rerun-orchestrator";
@@ -62,6 +63,14 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
     const body = req.body ?? {};
     const projectSlug = String(body.projectSlug ?? "").trim();
     const selections = Array.isArray(body.selections) ? body.selections as RecordingBatchSelection[] : [];
+    const jiraIssue = body.jiraIssue && typeof body.jiraIssue === "object"
+      ? body.jiraIssue as Record<string, unknown>
+      : undefined;
+    const jiraIssueKey = typeof jiraIssue?.key === "string" ? jiraIssue.key.trim() : "";
+    const jiraIssueSummary = typeof jiraIssue?.summary === "string" ? jiraIssue.summary.trim() : "";
+    const evidenceRequirement = jiraIssueKey && jiraIssueSummary
+      ? `${jiraIssueKey} ${jiraIssueSummary}`.replace(/[\r\n\t]+/g, " ").replace(/\s+/g, " ").trim()
+      : undefined;
     if (!projectSlug || selections.length === 0) {
       sendError(res, 400, "INVALID_RECORDING_BATCH", "projectSlug y selections son obligatorios");
       return;
@@ -86,6 +95,7 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
 
     const fallbackContracts: RecordedScenarioMcpContract[] = [];
     const reuseScenarios: ReuseExistingPromotedSpecScenario[] = [];
+    const publishedCaseIdsByScenarioId = new Map<string, number>();
     const requestedIds: string[] = [];
     const destinationInput = body.testRailDestination && typeof body.testRailDestination === "object"
       ? body.testRailDestination as Record<string, unknown>
@@ -102,7 +112,21 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
       return;
     }
     let sectionSlug: string | undefined;
-    let sectionName: string | undefined;
+    const testRailProjectName = typeof destinationInput?.projectName === "string" ? destinationInput.projectName.trim() : "";
+    const testRailSuiteName = typeof destinationInput?.suiteName === "string" ? destinationInput.suiteName.trim() : "";
+    let sectionName = typeof destinationInput?.sectionName === "string" ? destinationInput.sectionName.trim() : undefined;
+    const jiraKey = jiraIssueKey || undefined;
+    const jiraTitle = jiraIssueSummary || undefined;
+    if (destination && (!sectionName || !destination.suiteId)) {
+      const sectionId = Number(destination.sectionId);
+      if (Number.isSafeInteger(sectionId) && sectionId > 0) {
+        const section = await new TestRailClient(requireTestRailConfig(config)).getSection(sectionId);
+        if (section) {
+          sectionName ||= section.name;
+          if (!destination.suiteId && section.suite_id) destination.suiteId = String(section.suite_id);
+        }
+      }
+    }
     let publishToTestRailInvoked = false;
     const recordingAppSlugs = new Map<string, string>();
     const executableScenarioIdsByRecording = new Map<string, Set<string>>();
@@ -198,6 +222,9 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
           });
           if (outcome) {
             const createdByScenarioId = buildPublishedCaseIdByScenarioId(outcome);
+            for (const [scenarioId, caseId] of createdByScenarioId) {
+              publishedCaseIdsByScenarioId.set(scenarioId, caseId);
+            }
             if (createdByScenarioId.size > 0) {
               const persistedDestination = { projectId: String(outcome.effectiveProjectId), suiteId: outcome.effectiveSuiteId ? String(outcome.effectiveSuiteId) : undefined, sectionId: destination.sectionId };
               const updated = all.map((scenario) => {
@@ -211,6 +238,11 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
           }
         }
         const planById = new Map(plans.map((plan) => [plan.scenarioId, plan]));
+        for (const plan of plans) {
+          if (plan.testRail.status === "existing") {
+            publishedCaseIdsByScenarioId.set(plan.scenarioId, plan.testRail.caseId);
+          }
+        }
         const reuseIds = new Set(partitionScenariosForExecution(plans).reuseScenarioIds);
         const reuseItems = admissionResult.selected.filter((scenario) => reuseIds.has(scenario.scenarioId));
         reuseScenarios.push(...reuseItems.flatMap((scenario) => {
@@ -218,7 +250,8 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
           if (scenario.promotedSpec?.specPath === undefined) return [];
           return [{
             scenarioId: scenario.scenarioId,
-            caseId: plan?.testRail.status === "existing" ? plan.testRail.caseId : 0,
+            caseId: publishedCaseIdsByScenarioId.get(scenario.scenarioId)
+              ?? (plan?.testRail.status === "existing" ? plan.testRail.caseId : 0),
             specPath: scenario.promotedSpec.specPath,
             title: scenario.title,
             runtimeValues: scenario.runtimeDataset?.resolvedValues,
@@ -226,8 +259,9 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
         }));
         const fallbackIds = new Set(admissionResult.selected.filter((scenario) => !reuseIds.has(scenario.scenarioId)).map((scenario) => scenario.scenarioId));
         fallbackContracts.push(...executableContracts.filter((contract) => fallbackIds.has(String(contract.scenarioId))));
-        sectionSlug ??= String(destination.sectionId);
-        sectionName ??= undefined;
+        sectionSlug ??= typeof destinationInput?.sectionSlug === "string" && destinationInput.sectionSlug.trim()
+          ? destinationInput.sectionSlug.trim()
+          : String(destination.sectionId);
       } else {
         fallbackContracts.push(...executableContracts);
       }
@@ -248,6 +282,48 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
         ? [{ appSlug: ownerAppSlug, recordingId, scenarioIds: executableScenarioIds }]
         : [];
     });
+    let testRailRun: { id: number; url?: string } | undefined;
+    let testRailCaseCount = 0;
+    if (destination) {
+      const selectedScenarioIds = [...new Set(requestedIds)];
+      const selectedCaseIds = selectedScenarioIds
+        .map((scenarioId) => publishedCaseIdsByScenarioId.get(scenarioId))
+        .filter((caseId): caseId is number => typeof caseId === "number" && Number.isInteger(caseId) && caseId > 0);
+      const caseIds = [...new Set(selectedCaseIds)];
+      if (selectedCaseIds.length !== selectedScenarioIds.length) {
+        sendError(res, 409, "TESTRAIL_CASES_UNAVAILABLE", "No se puede crear el Test Run: falta un caso TestRail asociado a uno o más escenarios seleccionados.");
+        return;
+      }
+      const sectionIdNumber = Number(destination.sectionId);
+      if (!Number.isSafeInteger(sectionIdNumber) || sectionIdNumber <= 0) {
+        sendError(res, 400, "INVALID_TESTRAIL_SECTION", "La sección seleccionada de TestRail no tiene un ID válido.");
+        return;
+      }
+      try {
+        testRailCaseCount = caseIds.length;
+        const client = new TestRailClient(requireTestRailConfig(config));
+        testRailRun = await client.addRun({
+          projectId: destination.projectId,
+          suiteId: destination.suiteId,
+          name: `${jiraKey ? `${jiraKey} - ` : ""}${buildTestRailRunName(appSlug, sectionIdNumber, caseIds.length)}`,
+          description: `QA Lab recording execution for ${appSlug} / section ${sectionName ?? destination.sectionId}${jiraKey ? ` / Jira ${jiraKey}` : ""}`,
+          caseIds: [...new Set(caseIds)],
+          ...(jiraKey ? { refs: jiraKey } : {}),
+        });
+        // Set refs again after creation so Jira's TestRail Runs panel can discover the new run.
+        // Keep the create payload refs too; the update makes the association explicit for
+        // integrations that do not index refs from add_run immediately.
+        if (jiraKey) {
+          const linkedRun = await client.updateRun(testRailRun.id, { refs: jiraKey });
+          testRailRun = { ...testRailRun, ...linkedRun };
+          console.log(`[recordings:execute-batch] linked TestRail runId=${testRailRun.id} jiraKey=${jiraKey}`);
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        sendError(res, 502, "TESTRAIL_RUN_CREATION_FAILED", `No se pudo crear el Test Run en TestRail: ${message}`);
+        return;
+      }
+    }
     const parent = jobStore.create("scenario-preview", {
       appSlug,
       scenarioIds: requestedIds,
@@ -255,13 +331,42 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
       recordingSelections,
       executionMode: "recording_batch",
       publishToTestRailInvoked,
+      ...(destination ? { testRailCaseIdsByScenarioId: Object.fromEntries(publishedCaseIdsByScenarioId) } : {}),
+      ...(testRailRun ? { testRunId: testRailRun.id } : {}),
+      ...(jiraKey ? { jiraKey, huKey: jiraKey } : {}),
+      ...(jiraTitle ? { jiraTitle, huTitle: jiraTitle } : {}),
+      ...(evidenceRequirement ? { evidenceRequirement } : {}),
+      ...(destination ? {
+        testrailProjectId: destination.projectId,
+        ...(destination.suiteId ? { testrailSuiteId: destination.suiteId } : {}),
+        testrailSectionId: destination.sectionId,
+        sectionId: destination.sectionId,
+        ...(testRailProjectName ? { testrailProjectName: testRailProjectName } : {}),
+        ...(testRailSuiteName ? { testrailSuiteName: testRailSuiteName } : {}),
+        ...(sectionName ? { sectionName } : {}),
+        ...(sectionSlug ? { sectionSlug } : {}),
+      } : {}),
     });
+    if (testRailRun) {
+      jobStore.update(parent.id, {
+        summary: {
+          totalStories: scenarioCount,
+          synced: 0,
+          passed: 0,
+          failed: 0,
+          testRailRunId: testRailRun.id,
+          testRailRunUrl: testRailRun.url,
+        },
+      });
+      jobStore.appendLog(parent.id, `[testrail-run] created id=${testRailRun.id} cases=${testRailCaseCount}`);
+    }
     if (reuseScenarios.length > 0 && fallbackScenarios.length > 0) {
       setImmediate(() => void startMixedRerun({
         parentJobId: parent.id,
         appSlug,
         sectionSlug,
         sectionName,
+        evidenceRequirement,
         sourceJobId: parent.id,
         rerunMode: "recording-batch",
         reuseScenarios,
@@ -295,6 +400,7 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
       acceptedCount: scenarioCount,
       executionMode: "recording_batch",
       publishToTestRailInvoked,
+      ...(testRailRun ? { testRunId: testRailRun.id, testRailRunUrl: testRailRun.url } : {}),
     });
   } catch (error) {
     handle(res, error);

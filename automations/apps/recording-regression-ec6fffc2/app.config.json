@@ -1,0 +1,24 @@
+{
+  "appProfile": {
+    "appSlug": "recording-regression-ec6fffc2",
+    "source": "default",
+    "name": "0",
+    "baseUrl": "http://127.0.0.1:49672/",
+    "baseUrlHash": "f97b87896b97",
+    "createdAt": "2026-10-07T03:20:03.327Z",
+    "updatedAt": "2026-10-07T03:20:03.328Z",
+    "ignoreHTTPSErrors": false
+  },
+  "baseUrl": "http://127.0.0.1:49672/",
+  "loginMode": "password",
+  "testData": {},
+  "testDataAliases": {},
+  "testDataRefs": {},
+  "username": "adminr",
+  "password": "admin123",
+  "usernameRef": "APP_USERNAME",
+  "passwordRef": "APP_PASSWORD",
+  "missingInputBehavior": "auto_generate",
+  "ignoreHTTPSErrors": false,
+  "updatedAt": "2026-10-07T03:20:03.328Z"
+}

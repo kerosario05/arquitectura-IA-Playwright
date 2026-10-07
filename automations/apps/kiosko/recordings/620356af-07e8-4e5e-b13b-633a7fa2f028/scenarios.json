@@ -1,0 +1,3800 @@
+[
+  {
+    "scenarioId": "REC-620356AF-01",
+    "title": "Consultar Tarjeta Visa Oro",
+    "description": "Recorrido observado para completar \"Consultar Tarjeta Visa Oro\". Se registraron 18 acciones funcionales.",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://172.27.4.50/",
+        "description": "Navegar a https://172.27.4.50/"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Explora nuestros productos"
+        },
+        "description": "Presionar \"Explora nuestros productos\"",
+        "interactionId": "interaction-5"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Tarjetas"
+        },
+        "description": "Presionar \"Tarjetas\"",
+        "interactionId": "interaction-8"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Tarjeta de Crédito"
+        },
+        "description": "Presionar \"Tarjeta de Crédito\"",
+        "interactionId": "interaction-11"
+      },
+      {
+        "action": "click",
+        "description": "Presionar \"Tarjeta Crédito Visa Gold\"",
+        "interactionId": "interaction-14"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Solicitar"
+        },
+        "description": "Presionar \"Solicitar\"",
+        "interactionId": "interaction-17"
+      },
+      {
+        "action": "click",
+        "description": "Presionar \"Generar Turno\"",
+        "interactionId": "interaction-19"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|4"
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 1,
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 11
+        },
+        "description": "Presionar [numero_de_identificacion] en \"Número de identificación\"",
+        "interactionId": "interaction-21"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|0"
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 2,
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 11
+        },
+        "description": "Presionar [numero_de_identificacion] en \"Número de identificación\"",
+        "interactionId": "interaction-23"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|2"
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 3,
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 11
+        },
+        "description": "Presionar [numero_de_identificacion] en \"Número de identificación\"",
+        "interactionId": "interaction-25"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|2"
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 4,
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 11
+        },
+        "description": "Presionar [numero_de_identificacion] en \"Número de identificación\"",
+        "interactionId": "interaction-27"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|4"
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 5,
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 11
+        },
+        "description": "Presionar [numero_de_identificacion] en \"Número de identificación\"",
+        "interactionId": "interaction-29"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|6"
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 6,
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 11
+        },
+        "description": "Presionar [numero_de_identificacion] en \"Número de identificación\"",
+        "interactionId": "interaction-31"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|7"
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 7,
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 11
+        },
+        "description": "Presionar [numero_de_identificacion] en \"Número de identificación\"",
+        "interactionId": "interaction-33"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|9"
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 8,
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 11
+        },
+        "description": "Presionar [numero_de_identificacion] en \"Número de identificación\"",
+        "interactionId": "interaction-35"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|5"
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 9,
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 11
+        },
+        "description": "Presionar [numero_de_identificacion] en \"Número de identificación\"",
+        "interactionId": "interaction-37"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|5"
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 10,
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 11
+        },
+        "description": "Presionar [numero_de_identificacion] en \"Número de identificación\"",
+        "interactionId": "interaction-39"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|1"
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 11,
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 11
+        },
+        "description": "Presionar [numero_de_identificacion] en \"Número de identificación\"",
+        "interactionId": "interaction-41"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Generar Turno"
+        },
+        "description": "Presionar \"Generar Turno\"",
+        "interactionId": "interaction-43"
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Presionar \"Explora nuestros productos\"",
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "renderedStep": "Presionar \"Explora nuestros productos\"",
+        "interactionId": "interaction-5",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/",
+        "routeAfter": "https://172.27.4.50/product-catalog",
+        "stateScope": "3a1c6dc6ce96",
+        "stepNumber": 2
+      },
+      {
+        "content": "Presionar \"Tarjetas\"",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "renderedStep": "Presionar \"Tarjetas\"",
+        "interactionId": "interaction-8",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-catalog",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=cards",
+        "stateScope": "3a1c6dc6ce96",
+        "stepNumber": 3
+      },
+      {
+        "content": "Presionar \"Tarjeta de Crédito\"",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "renderedStep": "Presionar \"Tarjeta de Crédito\"",
+        "interactionId": "interaction-11",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=cards",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+        "stateScope": "3a1c6dc6ce96",
+        "stepNumber": 4
+      },
+      {
+        "content": "Presionar \"Tarjeta Crédito Visa Gold\"",
+        "sourceEventRefs": [
+          "event-14"
+        ],
+        "renderedStep": "Presionar \"Tarjeta Crédito Visa Gold\"",
+        "interactionId": "interaction-14",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+        "routeAfter": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold",
+        "stateScope": "3a1c6dc6ce96",
+        "stepNumber": 5
+      },
+      {
+        "content": "Presionar \"Solicitar\"",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "renderedStep": "Presionar \"Solicitar\"",
+        "interactionId": "interaction-17",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold",
+        "stateScope": "3a1c6dc6ce96",
+        "stepNumber": 6
+      },
+      {
+        "content": "Presionar \"Generar Turno\"",
+        "sourceEventRefs": [
+          "event-19"
+        ],
+        "renderedStep": "Presionar \"Generar Turno\"",
+        "interactionId": "interaction-19",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold",
+        "stateScope": "3a1c6dc6ce96",
+        "stepNumber": 7
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 1,
+        "sourceEventRefs": [
+          "event-21"
+        ],
+        "interactionId": "interaction-21",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "resolutionState": "runtime_resolution_required",
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 11
+        },
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold",
+        "stateScope": "3a1c6dc6ce96",
+        "stepNumber": 8
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 2,
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "interactionId": "interaction-23",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "resolutionState": "runtime_resolution_required",
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 11
+        },
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold",
+        "stateScope": "3a1c6dc6ce96",
+        "stepNumber": 9
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 3,
+        "sourceEventRefs": [
+          "event-25"
+        ],
+        "interactionId": "interaction-25",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "resolutionState": "runtime_resolution_required",
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 11
+        },
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold",
+        "stateScope": "3a1c6dc6ce96",
+        "stepNumber": 10
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 4,
+        "sourceEventRefs": [
+          "event-27"
+        ],
+        "interactionId": "interaction-27",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "resolutionState": "runtime_resolution_required",
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 11
+        },
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold",
+        "stateScope": "3a1c6dc6ce96",
+        "stepNumber": 11
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 5,
+        "sourceEventRefs": [
+          "event-29"
+        ],
+        "interactionId": "interaction-29",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "resolutionState": "runtime_resolution_required",
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 11
+        },
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold",
+        "stateScope": "3a1c6dc6ce96",
+        "stepNumber": 12
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 6,
+        "sourceEventRefs": [
+          "event-31"
+        ],
+        "interactionId": "interaction-31",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "resolutionState": "runtime_resolution_required",
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 11
+        },
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold",
+        "stateScope": "3a1c6dc6ce96",
+        "stepNumber": 13
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 7,
+        "sourceEventRefs": [
+          "event-33"
+        ],
+        "interactionId": "interaction-33",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "resolutionState": "runtime_resolution_required",
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 11
+        },
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold",
+        "stateScope": "3a1c6dc6ce96",
+        "stepNumber": 14
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 8,
+        "sourceEventRefs": [
+          "event-35"
+        ],
+        "interactionId": "interaction-35",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "resolutionState": "runtime_resolution_required",
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 11
+        },
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold",
+        "stateScope": "3a1c6dc6ce96",
+        "stepNumber": 15
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 9,
+        "sourceEventRefs": [
+          "event-37"
+        ],
+        "interactionId": "interaction-37",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "resolutionState": "runtime_resolution_required",
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 11
+        },
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold",
+        "stateScope": "3a1c6dc6ce96",
+        "stepNumber": 16
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 10,
+        "sourceEventRefs": [
+          "event-39"
+        ],
+        "interactionId": "interaction-39",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "resolutionState": "runtime_resolution_required",
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 11
+        },
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold",
+        "stateScope": "3a1c6dc6ce96",
+        "stepNumber": 17
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 11,
+        "sourceEventRefs": [
+          "event-41"
+        ],
+        "interactionId": "interaction-41",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "resolutionState": "runtime_resolution_required",
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 11
+        },
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold",
+        "stateScope": "3a1c6dc6ce96",
+        "stepNumber": 18
+      },
+      {
+        "content": "Presionar \"Generar Turno\"",
+        "sourceEventRefs": [
+          "event-43"
+        ],
+        "renderedStep": "Presionar \"Generar Turno\"",
+        "interactionId": "interaction-43",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold",
+        "stateScope": "3a1c6dc6ce96",
+        "stepNumber": 19
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "numero_de_identificacion",
+        "label": "Número de identificación",
+        "stepIndex": 7,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-21",
+          "event-23",
+          "event-25",
+          "event-27",
+          "event-29",
+          "event-31",
+          "event-33",
+          "event-35",
+          "event-37",
+          "event-39",
+          "event-41"
+        ],
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "secure",
+        "confidence": 0.95,
+        "needsReview": false,
+        "formatHint": "virtual_keyboard_11",
+        "semanticField": "Número de identificación"
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"Explora nuestros productos\"",
+        "strategy": "role",
+        "value": "button|Explora nuestros productos"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Presionar \"Tarjetas\"",
+        "strategy": "role",
+        "value": "button|Tarjetas"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Tarjeta de Crédito\"",
+        "strategy": "role",
+        "value": "button|Tarjeta de Crédito"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"Solicitar\"",
+        "strategy": "role",
+        "value": "button|Solicitar"
+      },
+      {
+        "stepIndex": 18,
+        "description": "Presionar \"Generar Turno\"",
+        "strategy": "role",
+        "value": "button|Generar Turno"
+      }
+    ],
+    "sourceRecordingId": "620356af-07e8-4e5e-b13b-633a7fa2f028",
+    "hasUncertainSteps": true,
+    "primary": true,
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7",
+      "event-8",
+      "event-9",
+      "event-10",
+      "event-11",
+      "event-12",
+      "event-13",
+      "event-14",
+      "event-15",
+      "event-16",
+      "event-17",
+      "event-18",
+      "event-19",
+      "event-20",
+      "event-21",
+      "event-22",
+      "event-23",
+      "event-24",
+      "event-25",
+      "event-26",
+      "event-27",
+      "event-28",
+      "event-29",
+      "event-30",
+      "event-31",
+      "event-32",
+      "event-33",
+      "event-34",
+      "event-35",
+      "event-36",
+      "event-37",
+      "event-38",
+      "event-39",
+      "event-40",
+      "event-41",
+      "event-42",
+      "event-43"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": false,
+    "functionalReadiness": true,
+    "technicalReadiness": false,
+    "expectedResultCandidate": "La aplicación carga su pantalla inicial",
+    "oracleAuthority": "observed_only",
+    "confidence": 0.95,
+    "scenarioStepCount": 19,
+    "functionalActionCount": 18,
+    "nonUserSetupSteps": 1,
+    "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
+    "scenarioGoal": "Consultar Tarjeta Visa Oro",
+    "stateSequenceValid": true,
+    "stateSequenceIssues": [],
+    "postGoalObservations": [],
+    "goalContract": {
+      "nonGeneric": true,
+      "goalCoherent": true,
+      "mutationIntentExpressed": true
+    },
+    "replayEligible": true,
+    "canonicalInteractions": [
+      {
+        "id": "interaction-1",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-1"
+        ],
+        "technicalTargetRefs": [],
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9,
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://172.27.4.50/"
+      },
+      {
+        "id": "interaction-2",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-2"
+        ],
+        "technicalTargetRefs": [],
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9,
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://172.27.4.50/"
+      },
+      {
+        "id": "interaction-5",
+        "controlIdentity": "3a1c6dc6ce96|Explora nuestros productos|role|button|Explora nuestros productos",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Explora nuestros productos"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Explora nuestros productos",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Explora nuestros productos"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"circle\",1],[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "stateScope": "3a1c6dc6ce96",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/",
+        "routeAfter": "https://172.27.4.50/product-catalog",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-8",
+        "controlIdentity": "3a1c6dc6ce96|Tarjetas|role|button|Tarjetas",
+        "semanticField": "Tarjetas",
+        "action": "click",
+        "valueKey": "tarjetas",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Tarjetas"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Tarjetas",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"line\",1],[\"path\",1],[\"rect\",1],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"line\\\",1],[\\\"path\\\",1],[\\\"rect\\\",1],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Tarjetas\"",
+        "stateScope": "3a1c6dc6ce96",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-catalog",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=cards",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-11",
+        "controlIdentity": "3a1c6dc6ce96|Tarjeta de Crédito|role|button|Tarjeta de Crédito",
+        "semanticField": "Tarjeta de Crédito",
+        "action": "click",
+        "valueKey": "tarjeta_de_credito",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Tarjeta de Crédito"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Tarjeta de Crédito",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"line\",1],[\"path\",1],[\"rect\",1],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"line\\\",1],[\\\"path\\\",1],[\\\"rect\\\",1],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Tarjeta de Crédito",
+          "targetTag": "h3",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "description": "Ingresar en \"Tarjeta de Crédito\"",
+        "stateScope": "3a1c6dc6ce96",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=cards",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-14",
+        "controlIdentity": "3a1c6dc6ce96|Tarjeta Crédito Visa Gold",
+        "semanticField": "Tarjeta Crédito Visa Gold",
+        "action": "click",
+        "valueKey": "tarjeta_credito_visa_gold",
+        "sourceEventRefs": [
+          "event-14"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "div"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "img",
+                  "stableAttributes": {
+                    "alt": "Tarjeta Crédito Visa Gold",
+                    "src": "/assets/images/tarjetas-de-credito-visa-gold.png"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "div",
+                "h3"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",3],[\"h3\",1]],\"descendantEntries\":[[\"div\",11],[\"h3\",1],[\"img\",1],[\"path\",4],[\"span\",4],[\"svg\",4]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"div\"},\"stableDirectAttributes\":{},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"img\",\"stableAttributes\":{\"src\":\"/assets/images/tarjetas-de-credito-visa-gold.png\"}}],\"semanticShape\":[\"div\",\"h3\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",3],[\\\"h3\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",11],[\\\"h3\\\",1],[\\\"img\\\",1],[\\\"path\\\",4],[\\\"span\\\",4],[\\\"svg\\\",4]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner",
+              "v2_framework_actionable_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Tarjeta Crédito Visa Gold\"",
+        "stateScope": "3a1c6dc6ce96",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+        "routeAfter": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-17",
+        "controlIdentity": "3a1c6dc6ce96|Solicitar|role|button|Solicitar",
+        "semanticField": "Solicitar",
+        "action": "click",
+        "valueKey": "solicitar",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Solicitar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Solicitar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 3,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 3
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Solicitar",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Solicitar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Solicitar\"",
+        "stateScope": "3a1c6dc6ce96",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold"
+      },
+      {
+        "id": "interaction-19",
+        "controlIdentity": "3a1c6dc6ce96|Generar Turno",
+        "semanticField": "Generar Turno",
+        "action": "click",
+        "valueKey": "generar_turno",
+        "sourceEventRefs": [
+          "event-19"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div",
+                "h3",
+                "p"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1],[\"h3\",1],[\"p\",1]],\"descendantEntries\":[[\"div\",2],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\",\"h3\",\"p\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1],[\\\"h3\\\",1],[\\\"p\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",2],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Generar Turno\"",
+        "stateScope": "3a1c6dc6ce96",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold"
+      },
+      {
+        "id": "interaction-21",
+        "controlIdentity": "3a1c6dc6ce96|4|role|button|4",
+        "semanticField": "Número de identificación",
+        "action": "click",
+        "valueKey": "numero_de_identificacion",
+        "sourceEventRefs": [
+          "event-21"
+        ],
+        "technicalTargetRefs": [
+          "role:button|4"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "4",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "description": "Ingresar en \"Número de identificación\"",
+        "stateScope": "3a1c6dc6ce96",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold"
+      },
+      {
+        "id": "interaction-23",
+        "controlIdentity": "3a1c6dc6ce96|0|role|button|0",
+        "semanticField": "Número de identificación",
+        "action": "click",
+        "valueKey": "numero_de_identificacion",
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "technicalTargetRefs": [
+          "role:button|0"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|0",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "0",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "description": "Ingresar en \"Número de identificación\"",
+        "stateScope": "3a1c6dc6ce96",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold"
+      },
+      {
+        "id": "interaction-25",
+        "controlIdentity": "3a1c6dc6ce96|2|role|button|2",
+        "semanticField": "Número de identificación",
+        "action": "click",
+        "valueKey": "numero_de_identificacion",
+        "sourceEventRefs": [
+          "event-25"
+        ],
+        "technicalTargetRefs": [
+          "role:button|2"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|2",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "2",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "description": "Ingresar en \"Número de identificación\"",
+        "stateScope": "3a1c6dc6ce96",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold"
+      },
+      {
+        "id": "interaction-27",
+        "controlIdentity": "3a1c6dc6ce96|2|role|button|2",
+        "semanticField": "Número de identificación",
+        "action": "click",
+        "valueKey": "numero_de_identificacion",
+        "sourceEventRefs": [
+          "event-27"
+        ],
+        "technicalTargetRefs": [
+          "role:button|2"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|2",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "2",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "description": "Ingresar en \"Número de identificación\"",
+        "stateScope": "3a1c6dc6ce96",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold"
+      },
+      {
+        "id": "interaction-29",
+        "controlIdentity": "3a1c6dc6ce96|4|role|button|4",
+        "semanticField": "Número de identificación",
+        "action": "click",
+        "valueKey": "numero_de_identificacion",
+        "sourceEventRefs": [
+          "event-29"
+        ],
+        "technicalTargetRefs": [
+          "role:button|4"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "4",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "description": "Ingresar en \"Número de identificación\"",
+        "stateScope": "3a1c6dc6ce96",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold"
+      },
+      {
+        "id": "interaction-31",
+        "controlIdentity": "3a1c6dc6ce96|6|role|button|6",
+        "semanticField": "Número de identificación",
+        "action": "click",
+        "valueKey": "numero_de_identificacion",
+        "sourceEventRefs": [
+          "event-31"
+        ],
+        "technicalTargetRefs": [
+          "role:button|6"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|6",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "6",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "description": "Ingresar en \"Número de identificación\"",
+        "stateScope": "3a1c6dc6ce96",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold"
+      },
+      {
+        "id": "interaction-33",
+        "controlIdentity": "3a1c6dc6ce96|7|role|button|7",
+        "semanticField": "Número de identificación",
+        "action": "click",
+        "valueKey": "numero_de_identificacion",
+        "sourceEventRefs": [
+          "event-33"
+        ],
+        "technicalTargetRefs": [
+          "role:button|7"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|7",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "7",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "description": "Ingresar en \"Número de identificación\"",
+        "stateScope": "3a1c6dc6ce96",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold"
+      },
+      {
+        "id": "interaction-35",
+        "controlIdentity": "3a1c6dc6ce96|9|role|button|9",
+        "semanticField": "Número de identificación",
+        "action": "click",
+        "valueKey": "numero_de_identificacion",
+        "sourceEventRefs": [
+          "event-35"
+        ],
+        "technicalTargetRefs": [
+          "role:button|9"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|9",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "9",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "description": "Ingresar en \"Número de identificación\"",
+        "stateScope": "3a1c6dc6ce96",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold"
+      },
+      {
+        "id": "interaction-37",
+        "controlIdentity": "3a1c6dc6ce96|5|role|button|5",
+        "semanticField": "Número de identificación",
+        "action": "click",
+        "valueKey": "numero_de_identificacion",
+        "sourceEventRefs": [
+          "event-37"
+        ],
+        "technicalTargetRefs": [
+          "role:button|5"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|5",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "5",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "description": "Ingresar en \"Número de identificación\"",
+        "stateScope": "3a1c6dc6ce96",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold"
+      },
+      {
+        "id": "interaction-39",
+        "controlIdentity": "3a1c6dc6ce96|5|role|button|5",
+        "semanticField": "Número de identificación",
+        "action": "click",
+        "valueKey": "numero_de_identificacion",
+        "sourceEventRefs": [
+          "event-39"
+        ],
+        "technicalTargetRefs": [
+          "role:button|5"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|5",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "5",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "description": "Ingresar en \"Número de identificación\"",
+        "stateScope": "3a1c6dc6ce96",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold"
+      },
+      {
+        "id": "interaction-41",
+        "controlIdentity": "3a1c6dc6ce96|1|role|button|1",
+        "semanticField": "Número de identificación",
+        "action": "click",
+        "valueKey": "numero_de_identificacion",
+        "sourceEventRefs": [
+          "event-41"
+        ],
+        "technicalTargetRefs": [
+          "role:button|1"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|1",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "1",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "description": "Ingresar en \"Número de identificación\"",
+        "stateScope": "3a1c6dc6ce96",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold"
+      },
+      {
+        "id": "interaction-43",
+        "controlIdentity": "3a1c6dc6ce96|Generar Turno|role|button|Generar Turno",
+        "semanticField": "Generar Turno",
+        "action": "click",
+        "valueKey": "generar_turno",
+        "sourceEventRefs": [
+          "event-43"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Generar Turno"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Generar Turno",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 5,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 5
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Generar Turno",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Generar Turno",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Generar Turno\"",
+        "stateScope": "3a1c6dc6ce96",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3a1c6dc6ce96",
+        "screenAfterRef": "3a1c6dc6ce96",
+        "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-gold"
+      }
+    ],
+    "entityActionBlocks": [],
+    "readiness": {
+      "functionalReadiness": true,
+      "dataReadiness": true,
+      "technicalReadiness": false,
+      "oracleReadiness": true,
+      "reviewReadiness": true,
+      "publicationContentReadiness": true,
+      "executionReadiness": false,
+      "publicationReadiness": true,
+      "missingInputs": [],
+      "datasetAuthorityMismatches": [],
+      "dataReadinessReasons": []
+    },
+    "technicalKnowledgeRefs": [],
+    "runtimeInputRequirements": [
+      {
+        "valueKey": "numero_de_identificacion",
+        "semanticField": "Número de identificación",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": "40224679551",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": true,
+        "stepIndex": 7,
+        "controlType": "virtual_keyboard_11",
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "40224679551",
+        "datasetAuthorityMismatch": false
+      }
+    ],
+    "runtimeDataset": {
+      "scenarioId": "REC-620356AF-01",
+      "requirements": [
+        {
+          "valueKey": "numero_de_identificacion",
+          "semanticField": "Número de identificación",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": "40224679551",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": true,
+          "stepIndex": 7,
+          "controlType": "virtual_keyboard_11",
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "40224679551",
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "resolvedValues": {
+        "numero_de_identificacion": "40224679551"
+      },
+      "missingValues": []
+    },
+    "mutationOpportunities": [],
+    "testRailCaseId": 48995,
+    "testRailDestination": {
+      "projectId": "56",
+      "suiteId": "1731",
+      "sectionId": "4755"
+    },
+    "promotedSpec": {
+      "appSlug": "kiosko",
+      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\kiosko\\sections\\default-section\\cases\\preview-001-consultar-tarjeta-visa-oro\\case.spec.ts",
+      "specHash": "be823c5d787955aaaaac988d6314b3786956d597aceedee4961a94b034cda6e5",
+      "automationId": "preview-001-consultar-tarjeta-visa-oro",
+      "sectionSlug": "default-section",
+      "generatedAt": "2026-10-07T03:04:13.379Z"
+    }
+  }
+]

@@ -2087,6 +2087,7 @@ async function buildAuthFlowRuntimeContext(
     // Keep default when auth flow file is unavailable.
   }
   const availableMethods = methodSignatures.map((item) => item.name);
+  if (!appPaths.specPath) throw new Error("Cannot resolve auth flow import without a generated spec path");
   return {
     required,
     gateDetected,
@@ -3226,7 +3227,11 @@ export function markTerminalCompletionOracle(specContent: string, stepIndex: num
   if (/\brequireCompletionSignal\s*:/.test(block)) return specContent;
   const indent = close[1] ?? "";
   const property = `\n${indent}  requireCompletionSignal: true,`;
-  return `${specContent.slice(0, close.index)}${property}${specContent.slice(close.index)}`;
+  // The previous property (e.g. the compiler's `assertion: async () => {...}`) may have no trailing
+  // comma; appending after it without one is a syntax error.
+  const head = specContent.slice(0, close.index);
+  const separated = /,\s*$/.test(head) ? head : head.replace(/(\S)(\s*)$/, "$1,$2");
+  return `${separated}${property}${specContent.slice(close.index)}`;
 }
 
 function materializeBackedNavigationAssertions(
@@ -4999,6 +5004,8 @@ async function runHybridSpecGenerationInternal(
   console.log(`[spec-candidate] rawChanged=${rawCandidate !== effectiveCandidate} effectiveChars=${effectiveCandidate.length}`);
   let expectRepairApplied = false;
   let executableSpecContent = repairMissingExpectImport(effectiveCandidate);
+  const generatedSpecPath = input.appPaths.specPath;
+  if (!generatedSpecPath) throw new Error("Cannot generate promoted spec without an output path");
   if (executableSpecContent !== effectiveCandidate) {
     expectRepairApplied = true;
     console.log("[spec-repair] deterministic=missing_expect_import applied=true");
@@ -5011,7 +5018,7 @@ async function runHybridSpecGenerationInternal(
   executableSpecContent = materializePromotedOracleDescriptors(executableSpecContent, promotedOracleImplementations);
   executableSpecContent = normalizeGateOnlyCredentialBindings(
     executableSpecContent,
-    input.appPaths.specPath,
+    generatedSpecPath,
     input.appProfile.appSlug,
     authFlowContext ?? undefined,
   );
@@ -5079,7 +5086,7 @@ async function runHybridSpecGenerationInternal(
     });
     const importContractErrors = await validateImportContracts({
       specContent,
-      specPath: input.appPaths.specPath,
+      specPath: generatedSpecPath,
       availablePageObjects,
       response,
       authFlowContext: authFlowContext ?? undefined

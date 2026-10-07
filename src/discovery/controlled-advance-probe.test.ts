@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { buildControlledAdvanceProbeOracles, compareControlledAdvanceSnapshots, resolveAdvanceCandidate, resolveAdvanceControl, type AdvanceControlObservation } from "./controlled-advance-probe";
 import type { AssertionObservationSnapshot } from "./assertion-observation";
+import type { ObservationControlState } from "./assertion-observation";
 import { buildRuntimeControlIdentity } from "../types/control-identity";
 
 const control = (overrides: Partial<AdvanceControlObservation> = {}): AdvanceControlObservation => ({
@@ -13,6 +14,16 @@ const control = (overrides: Partial<AdvanceControlObservation> = {}): AdvanceCon
   disabled: false,
   formAssociated: true,
   submitSemantics: true,
+  ...overrides,
+});
+
+const observedAdvanceControl = (overrides: Partial<ObservationControlState> = {}): ObservationControlState => ({
+  identity: "button|submit",
+  tagName: "button",
+  disabled: false,
+  required: false,
+  focused: false,
+  validationNodeIds: [],
   ...overrides,
 });
 
@@ -49,13 +60,13 @@ test("invalid input plus submit plus validation and preserved form backs both ou
     fingerprint: "after",
     controls: [
       { ...before.controls[0], ariaInvalid: "true", validity: { ...before.controls[0].validity!, valid: false, patternMismatch: true }, validationNodeIds: ["error-1"] },
-      { ...control(), disabled: true },
+      { ...observedAdvanceControl(), disabled: true },
     ],
     validationNodes: [{ identity: "div|id=error-1", role: "alert", id: "error-1" }],
     forms: [{ identity: "form|id=main", valid: false }],
   });
   const result = compareControlledAdvanceSnapshots({
-    before: { ...before, controls: [...before.controls, control()] },
+    before: { ...before, controls: [...before.controls, observedAdvanceControl()] },
     after,
     attemptObserved: true,
     networkEvents: [],
@@ -151,14 +162,14 @@ test("an independent invalid required control makes disabled causality ambiguous
   const before = snapshot({
     controls: [
       ...snapshot().controls,
-      { ...control(), disabled: false },
+      { ...observedAdvanceControl(), disabled: false },
       { ...snapshot().controls[0], identity: "input|name=other", validity: { valid: true, valueMissing: false, typeMismatch: false, patternMismatch: false } },
     ],
   });
   const after = snapshot({
     controls: [
       { ...before.controls[0], ariaInvalid: "true", validity: { ...before.controls[0].validity!, valid: false, patternMismatch: true } },
-      { ...control(), disabled: true },
+      { ...observedAdvanceControl(), disabled: true },
       { ...before.controls[2], ariaInvalid: "true", validity: { ...before.controls[2].validity!, valid: false, valueMissing: true } },
     ],
     forms: [{ identity: "form|id=main", valid: false }],
@@ -182,7 +193,7 @@ test("rerendered subject is re-resolved by structural runtime identity", () => {
   const before = snapshot({
     controls: [
       { ...snapshot().controls[0], identity: "input|id=el-1|name=document|type=text", id: "el-1", name: "document", inputType: "text" },
-      { ...control(), identity: "button|id=advance|type=submit" },
+      { ...observedAdvanceControl({ identity: "button|id=advance|type=submit" }) },
     ],
   });
   const after = snapshot({
@@ -206,8 +217,8 @@ test("rerendered subject is re-resolved by structural runtime identity", () => {
 });
 
 test("no subject validation after an observed trigger is reported as assertion-13 defect evidence", () => {
-  const before = { ...snapshot(), controls: [...snapshot().controls, control()] };
-  const after = { ...snapshot(), controls: [...snapshot().controls, control({ disabled: true })] };
+  const before = { ...snapshot(), controls: [...snapshot().controls, observedAdvanceControl()] };
+  const after = { ...snapshot(), controls: [...snapshot().controls, observedAdvanceControl({ disabled: true })] };
   const result = compareControlledAdvanceSnapshots({
     before,
     after,

@@ -261,8 +261,8 @@ export async function collectPromotedSpecs(appSlug?: string): Promise<Array<{ ca
   const rows: Array<{ caseSlug: string; specPath: string; diagnosticsPath: string }> = [];
 
   async function collectCaseSpecs(root: string): Promise<void> {
-    let entries: Awaited<ReturnType<typeof fs.readdir>>;
-    try { entries = await fs.readdir(root, { withFileTypes: true }); } catch { return; }
+    let entries: import("node:fs").Dirent<string>[];
+    try { entries = await fs.readdir(root, { withFileTypes: true, encoding: "utf8" }); } catch { return; }
     for (const entry of entries) {
       const entryPath = path.join(root, entry.name);
       if (entry.isDirectory()) {

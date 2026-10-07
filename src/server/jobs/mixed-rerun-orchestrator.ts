@@ -57,6 +57,7 @@ export type MixedRerunInput = {
   targetAppName?: string;
   sectionName?: string;
   sectionSlug?: string;
+  evidenceRequirement?: string;
   options?: Record<string, unknown>;
   sourceJobId: string;
   rerunMode: string;
@@ -198,7 +199,7 @@ function relayCaseEvents(
       if (event.type === "case_finished") {
         const caseId = event.caseId || `case-${indexOffset + progress.completed + 1}`;
         const index = progress.indexByCaseId.get(caseId);
-        event.index = index ?? event.index;
+        event.index = index ?? (event.index !== undefined ? indexOffset + event.index : undefined);
         event.total = total;
         if (!progress.finishedIds.has(caseId) && !(index && progress.finishedIndexes.has(index))) {
           progress.finishedIds.add(caseId);
@@ -284,7 +285,13 @@ export async function startMixedRerun(
   // the real runners.
   runners: MixedRerunRunners = DEFAULT_RUNNERS,
 ): Promise<void> {
-  const { parentJobId, appSlug, sectionName, sectionSlug, reuseScenarios, fallbackScenarios } = input;
+  const { parentJobId, appSlug, sectionName, sectionSlug, evidenceRequirement, reuseScenarios, fallbackScenarios } = input;
+  const parentParams = jobStore.getInternal(parentJobId)?.params ?? {};
+  const parentTestRunId = Number(parentParams.testRunId) || undefined;
+  const testRailCaseIdsByScenarioId = parentParams.testRailCaseIdsByScenarioId && typeof parentParams.testRailCaseIdsByScenarioId === "object"
+    ? parentParams.testRailCaseIdsByScenarioId as Record<string, number>
+    : undefined;
+  let fallbackTestRailSynced = 0;
   const total = reuseScenarios.length + fallbackScenarios.length;
   const progress: CaseProgress = {
     completed: 0,
@@ -306,6 +313,7 @@ export async function startMixedRerun(
     currentCaseId: null,
     currentCaseTitle: null,
     summary: {
+      ...jobStore.get(parentJobId)?.summary,
       totalStories: total,
       synced: 0,
       passed: 0,
@@ -339,6 +347,7 @@ export async function startMixedRerun(
       sectionSlug,
       scenarios: reuseScenarios,
       executionMode: "reuse_existing_promoted_spec",
+      ...(parentTestRunId ? { testRunId: parentTestRunId } : {}),
       executionContext: { evidenceRunId: parentJobId, suppressEvidenceConsolidation: true },
     },
     { parentJobId },
@@ -378,6 +387,8 @@ export async function startMixedRerun(
       sourceJobId: input.sourceJobId,
       rerunMode: input.rerunMode,
       rerun: true,
+      ...(parentTestRunId ? { testRunId: parentTestRunId } : {}),
+      ...(testRailCaseIdsByScenarioId ? { testRailCaseIdsByScenarioId } : {}),
       sectionName,
       sectionSlug,
       publishToTestRail: false,
@@ -409,6 +420,7 @@ export async function startMixedRerun(
       parentJobId, subset: "fallback", indexOffset: reuseScenarios.length, total, expected: fallbackScenarios,
       childJobId: fallbackChild.id, progress, appSlug, sectionSlug, sectionName, missingEvidence,
     });
+    fallbackTestRailSynced = Number(jobStore.get(fallbackChild.id)?.summary?.synced) || 0;
   } else {
     jobStore.update(fallbackChild.id, { status: "done", completedAt: new Date().toISOString(), summary: { totalStories: 0, synced: 0, passed: 0, failed: 0, completed: 0 } });
   }
@@ -425,7 +437,7 @@ export async function startMixedRerun(
   // passed: with reuse/fallback scenarios mutually exclusive by construction (prepareRerun never
   // puts the same scenario in both subsets), each scenario's own freshly-captured runtime
   // evidence status is already authoritative — there is nothing to reconcile across subsets.
-  const consolidation = await consolidateRunEvidence(parentJobId, appSlug, sectionSlug, sectionName, undefined, missingEvidence);
+  const consolidation = await consolidateRunEvidence(parentJobId, appSlug, sectionSlug, sectionName, undefined, missingEvidence, evidenceRequirement);
   const evidenceDir = consolidation?.docxPath && fs.existsSync(consolidation.docxPath)
     ? path.dirname(consolidation.docxPath)
     : undefined;
@@ -438,8 +450,9 @@ export async function startMixedRerun(
     currentCaseId: null,
     currentCaseTitle: null,
     summary: {
+      ...priorSummary,
       totalStories: total,
-      synced: priorSummary?.synced ?? 0,
+      synced: (priorSummary?.synced ?? 0) + fallbackTestRailSynced,
       passed,
       failed,
       skipped: progress.skipped,

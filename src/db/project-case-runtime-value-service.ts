@@ -1,4 +1,4 @@
-import type { Connection } from "odbc";
+import type { DbConnection } from "./db-connection";
 import { withConnection, withTransaction } from "./sql-connection";
 
 export type ConfirmedRuntimeValue = {
@@ -47,7 +47,7 @@ function valueType(value: string | number | boolean): string {
   return typeof value === "number" ? "number" : typeof value === "boolean" ? "boolean" : "string";
 }
 
-async function resolveProjectId(conn: Connection, projectSlug: string): Promise<string> {
+async function resolveProjectId(conn: DbConnection, projectSlug: string): Promise<string> {
   const rows = await conn.query<{ id: string }>("SELECT id FROM dbo.Projects WHERE slug = ?", [projectSlug]);
   if (!rows.length) throw new Error(`project not found: ${projectSlug}`);
   return rows[0].id;
@@ -72,9 +72,9 @@ function mapRow(row: RuntimeValueRow): PersistedConfirmedRuntimeValue {
 export async function getConfirmedRuntimeValues(
   projectId: string,
   caseId: number,
-  conn?: Connection,
+  conn?: DbConnection,
 ): Promise<PersistedConfirmedRuntimeValue[]> {
-  const read = async (connection: Connection): Promise<PersistedConfirmedRuntimeValue[]> => {
+  const read = async (connection: DbConnection): Promise<PersistedConfirmedRuntimeValue[]> => {
     // Probe metadata first so an un-migrated local database never prepares a
     // SELECT against a table that does not exist (which can block ODBC's
     // parameter analysis for a long time).
@@ -111,9 +111,9 @@ export async function persistConfirmedRuntimeValues(input: {
   projectSlug: string;
   caseId: number;
   values: readonly ConfirmedRuntimeValue[];
-  conn?: Connection;
+  conn?: DbConnection;
 }): Promise<number> {
-  const persist = async (conn: Connection): Promise<number> => {
+  const persist = async (conn: DbConnection): Promise<number> => {
     const projectId = await resolveProjectId(conn, input.projectSlug);
     let persisted = 0;
     for (const entry of input.values) {

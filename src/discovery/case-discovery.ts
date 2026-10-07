@@ -20,7 +20,8 @@ import {
   releaseAcceptedScopeMarker,
   attemptSegmentedInputFill,
   attemptVirtualKeyboardPress,
-  type ActiveContainerContext
+  type ActiveContainerContext,
+  type FillTargetResolutionResult
 } from "./target-resolver";
 import {
   isProductCardTarget,
@@ -73,6 +74,7 @@ import type {
   AuthenticationOutcome
 } from "../types/discovery.types";
 import type { TestScenario, TestScenarioStep } from "../types/testrail.types";
+import type { AppRouteProfile } from "../types/env.types";
 import type { ExecutionPlan, ExecutionPlanStep, RequiredDataRef, LocatorStrategy, InputIntent } from "../types/execution-plan.types";
 import type { ControlIdentity } from "../types/control-identity";
 import { buildRuntimeControlIdentity } from "../types/control-identity";
@@ -96,6 +98,7 @@ import {
 import { waitForStablePageState, type PageStabilityOptions } from "./page-stability-detector";
 import { isGenericUnresolvedLabel } from "../recording/trace-normalizer";
 import { isRecordedDialogContainerTap } from "../recording/recorded-action-semantics";
+import { isCompatibleSegmentValue, isProjectableFirstSegment } from "./segmented-fill-projection";
 import { parseProductConditionTarget, matchesProductCondition, type ProductCondition } from "./product-condition-parser";
 import { detectTransientScreen } from "./transient-screen-detector";
 import { evaluateEarlyCompletionPolicy, type EarlyCompletionPolicyResult } from "./early-completion-policy";
@@ -274,7 +277,7 @@ async function beginScopedMutationDiagnostic(
         : undefined,
     };
     return true;
-  }).then(() => ({ installed: true, reason: "installed" })).catch((error: unknown) => ({
+  }, acceptedScopeRuntimeMarker).then(() => ({ installed: true, reason: "installed" })).catch((error: unknown) => ({
     installed: false,
     reason: error instanceof Error ? error.constructor.name : "evaluate_failed",
   }));
@@ -2041,6 +2044,7 @@ export type ExecutableStep = {
   expectedRouteBefore?: string;
   expectedRouteAfter?: string;
   expectedOutcomeKind?: "route_transition" | "in_place_transition";
+  recordedSameSurfaceAction?: boolean;
   /** Structured source-interaction lineage (RecordingExecutionAction.interactionId). */
   sourceInteractionId?: string;
 };
@@ -2229,8 +2233,7 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
           const first = sourceSteps[start];
           const firstIntent = parseStepIntent(first.action?.trim() ?? "").find((intent) => intent.type === "action_fill");
           if (!firstIntent || !matchesSegmentField(firstIntent.actionTarget ?? "")) continue;
-          if (firstIntent.valueSource !== "unknown" && firstIntent.valueSource !== "literal") continue;
-          if (typeof firstIntent.value !== "string" || firstIntent.value.length !== 1) continue;
+          if (!isProjectableFirstSegment(firstIntent.value, firstIntent.valueSource)) continue;
 
           const sequencePositions = [start];
           let nextPosition = start + 1;
@@ -2240,8 +2243,7 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
             if (!intent
               || !matchesSegmentField(intent.actionTarget ?? "")
               || (intent.valueSource !== "unknown" && intent.valueSource !== "literal")
-              || typeof intent.value !== "string"
-              || intent.value.length !== 1) break;
+              || !isCompatibleSegmentValue(intent.value, firstIntent.value)) break;
             sequencePositions.push(nextPosition);
             nextPosition += 1;
           }
@@ -2285,8 +2287,16 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
     const recordedActionMatchesSourceIntent = (
       actionType: string,
       sourceIntentType: string,
+      recordedAction?: typeof executableRecordedActions[number]["action"],
     ): boolean => sourceIntentType === "action_fill"
       ? actionType === "fill"
+        || (actionType === "click"
+          && recordedAction?.playwrightRecorderEvidence?.kind === "virtual_keyboard"
+          && Boolean(recordedAction.valueKey?.trim())
+          && Number.isInteger(recordedAction.segmentPosition)
+          && Boolean(recordedAction.playwrightRecorderEvidence.fieldLabel?.trim())
+          && (recordedAction.playwrightRecorderEvidence.buttonCount ?? 0) >= 10
+          && (recordedAction.playwrightRecorderEvidence.keyLabels?.length ?? 0) >= 10)
       : sourceIntentType === "action_select"
         ? actionType === "select" || actionType === "fill"
         : ["click", "check", "uncheck", "press"].includes(actionType);
@@ -2299,13 +2309,18 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
       const fieldLabel = evidence?.kind === "virtual_keyboard" ? evidence.fieldLabel?.trim() : undefined;
       const recordedKey = action.semanticRuntimeEvidence?.normalizedValue?.trim();
       const sourceKey = source.intent.value?.trim() || source.intent.actionTarget?.trim();
-      return source.intent.type === "action_click"
+      const sourceIsRecordedKeyPress = source.intent.type === "action_click"
+        && Boolean(sourceKey && recordedKey && normalizeText(sourceKey) === normalizeText(recordedKey));
+      const sourceIsFieldValueStep = source.intent.type === "action_fill"
+        && Boolean(fieldLabel && normalizeText(source.sourceText).includes(normalizeText(fieldLabel)));
+      return (sourceIsRecordedKeyPress || sourceIsFieldValueStep)
         && action.actionType === "click"
         && evidence?.kind === "virtual_keyboard"
         && Boolean(action.valueKey?.trim())
         && Number.isInteger(action.segmentPosition)
         && Boolean(fieldLabel && normalizeText(source.sourceText).includes(normalizeText(fieldLabel)))
-        && Boolean(sourceKey && recordedKey && normalizeText(sourceKey) === normalizeText(recordedKey));
+        && (evidence.buttonCount ?? 0) >= 10
+        && (evidence.keyLabels?.length ?? 0) >= 10;
     };
     const orderedRecordingActionBySourceIndex = new Map<number, typeof executableRecordedActions[number]>();
     const completeOrderedSequenceMatches = executableSourceSteps.length > 0
@@ -2314,7 +2329,7 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
         const recorded = executableRecordedActions[index];
         return Boolean(
           recorded
-          && recordedActionMatchesSourceIntent(recorded.action.actionType, source.intent.type)
+          && recordedActionMatchesSourceIntent(recorded.action.actionType, source.intent.type, recorded.action)
           && (
             normalizeText(recorded.action.humanStep ?? "") === normalizeText(source.sourceText)
             || sourceMatchesRecordedVirtualKeyboardAction(source, recorded)
@@ -2432,11 +2447,7 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
               && normalizedKey(targetName) === normalizedKey(sourceIntent.value)
               && normalizedKey(action.semanticField ?? action.associatedField) === normalizedKey(sourceField);
           }
-          return sourceIntent.type === "action_select"
-            && action.actionType === "select"
-            && normalizedKey(action.semanticField ?? action.associatedField) === normalizedKey(sourceField)
-            && Boolean(sourceIntent.value?.trim())
-            && normalizeText(sourceIntent.value!) === normalizeText((action as typeof action & { recordedValue?: string }).recordedValue ?? "");
+          return false;
         }
         if (sourceIntent.type === "action_select") {
           return intent.type === "action_select"
@@ -2446,6 +2457,18 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
         return intent.type === "action_click" && ["click", "check", "uncheck", "press"].includes(action.actionType);
       });
       const orderedMatch = orderedRecordingActionBySourceIndex.get(stepIndex);
+      const orderedMatchField = orderedMatch?.action.associatedField?.trim()
+        || orderedMatch?.action.semanticField?.trim();
+      const orderedMatchValueKey = orderedMatch
+        ? (orderedMatch.action as typeof orderedMatch.action & { valueKey?: string }).valueKey?.trim()
+        : undefined;
+      const orderedMatchMatchesSource = Boolean(
+        orderedMatch
+        && (recordedActionMatchesSourceIntent(orderedMatch.action.actionType, sourceIntent.type, orderedMatch.action)
+          || sourceMatchesRecordedVirtualKeyboardAction({ stepIndex, sourceText, intent: sourceIntent }, orderedMatch))
+        && (!sourceField || !orderedMatchField || normalizedKey(orderedMatchField) === normalizedKey(sourceField))
+        && (!sourceIntent.valueKey || !orderedMatchValueKey || normalizedKey(orderedMatchValueKey) === normalizedKey(sourceIntent.valueKey))
+      );
       // Authored recording steps may contain the concrete value entered during capture,
       // while the execution contract intentionally replaces it with a runtime key such
       // as `[entity_2.celular]`. In that case full-text matching is expected to fail.
@@ -2460,7 +2483,7 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
         // at zero. Accept that one-step offset only when operation and field also
         // match, so repeated fields remain bound to their corresponding row.
         return (actionStepIndex === stepIndex || actionStepIndex === stepIndex - 1)
-          && recordedActionMatchesSourceIntent(action.actionType, sourceIntent.type)
+          && recordedActionMatchesSourceIntent(action.actionType, sourceIntent.type, action)
           && Boolean(sourceField && recordedField)
           && normalizedKey(recordedField) === normalizedKey(sourceField);
       });
@@ -2471,7 +2494,7 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
       // contract match, not target guessing; unmatched or cardinality-mismatched groups still
       // fall through to the existing fail-closed matcher.
       const exactCompatibleMatches = exactTextMatch.filter(({ action }) =>
-        recordedActionMatchesSourceIntent(action.actionType, sourceIntent.type)
+        recordedActionMatchesSourceIntent(action.actionType, sourceIntent.type, action)
       );
       const sameTextSourceSteps = sourceSteps.filter((step) =>
         normalizeText(step.action?.trim() ?? "") === normalizeText(sourceText)
@@ -2500,12 +2523,21 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
       const uniqueSemanticSelectMatch = uniqueSemanticSelectMatches.length === 1
         ? uniqueSemanticSelectMatches[0]
         : undefined;
-      const match = orderedMatch && recordedActionMatchesSourceIntent(orderedMatch.action.actionType, sourceIntent.type)
+      const match = orderedMatchMatchesSource
         ? orderedMatch
         : repeatedExactMatch ?? samePositionFieldMatch ?? uniqueSemanticSelectMatch ?? (compatible.length === 1 ? compatible[0] : undefined);
       if (match) {
         const { action, technicalRoleName } = match;
         item.recordingActionType = action.actionType as ActionTargetItem['recordingActionType'];
+        // A TestRail field-value step can summarize one character entered through a
+        // recorded virtual keyboard. Keep it on the keyboard replay path only when the
+        // complete ordered source/contract sequence validates below; ordinary fills
+        // continue through the editable-field resolver.
+        if (sourceIntent.type === "action_fill"
+          && action.actionType === "click"
+          && action.playwrightRecorderEvidence?.kind === "virtual_keyboard") {
+          item.actionType = "action_click";
+        }
         // The recorded selection intent is authoritative even when the authored
         // projection looked click-shaped (for example, a combobox option emitted
         // as a click by a generic step parser). Keep it on the selection execution
@@ -2598,12 +2630,11 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
           }
         }
         if (sourceIntent.type === "action_select" && matchedAsRecordedOption) {
-          const selectionRequirements = ((recordingContract as typeof recordingContract & {
-            runtimeInputRequirements?: Array<{ valueKey?: string; semanticField?: string; value?: string; valueRole?: string }>;
-          }).runtimeInputRequirements ?? []).filter((requirement) =>
-            Boolean(requirement.valueKey?.trim())
-            && normalizedKey(requirement.semanticField) === normalizedKey(sourceField)
-            && normalizeText(requirement.value ?? "") === normalizeText(sourceIntent.value ?? "")
+          const rawRequirements = (recordingContract as any).runtimeInputRequirements;
+          const selectionRequirements = (Array.isArray(rawRequirements) ? rawRequirements : []).filter((requirement: any) =>
+            typeof requirement?.valueKey === "string" && Boolean(requirement.valueKey.trim())
+            && normalizedKey(typeof requirement.semanticField === "string" ? requirement.semanticField : undefined) === normalizedKey(sourceField)
+            && normalizeText(typeof requirement.value === "string" ? requirement.value : "") === normalizeText(sourceIntent.value ?? "")
           );
           if (selectionRequirements.length === 1) {
             item.valueKey = selectionRequirements[0].valueKey;
@@ -2615,6 +2646,7 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
         if (action.expectedRouteBefore) item.expectedRouteBefore = action.expectedRouteBefore;
         if (action.expectedRouteAfter) item.expectedRouteAfter = action.expectedRouteAfter;
         if (action.expectedOutcomeKind) item.expectedOutcomeKind = action.expectedOutcomeKind;
+        if (action.recordedSameSurfaceAction) item.recordedSameSurfaceAction = true;
         if (action.entityScope) item.entityScope = action.entityScope;
         if (action.rowRelation) item.rowRelation = action.rowRelation;
         if (action.rowScope !== undefined) item.rowScope = action.rowScope;
@@ -2635,10 +2667,86 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
         }
       }
 
+      // Repeated editable fields can leave more than one recording action as a
+      // semantic match when both rows contain the same value. Keep the authored
+      // field relationship, and recover its runtime data key only from the
+      // requirement projected for this exact source-step slot. Source-step
+      // indices are one-based here; runtime input requirements use zero-based
+      // positions. This retains entity/row lineage without choosing by value or
+      // by whichever repeated field happened to resolve first.
+      if (sourceIntent.type === "action_fill" && sourceField) {
+        item.associatedField ??= sourceField;
+        if (!item.valueKey) {
+          const runtimeRequirements = (scenario as any).runtimeInputRequirements
+            ?? (recordingContract as any).runtimeInputRequirements;
+          const slotMatches = (Array.isArray(runtimeRequirements) ? runtimeRequirements : []).filter((requirement: any) => {
+            const key = typeof requirement?.valueKey === "string" ? requirement.valueKey.trim()
+              : typeof requirement?.key === "string" ? requirement.key.trim() : "";
+            return key
+              && Number.isInteger(requirement?.stepIndex)
+              && requirement.stepIndex === stepIndex - 1
+              && normalizedKey(typeof requirement?.semanticField === "string" ? requirement.semanticField : undefined) === normalizedKey(sourceField)
+              && (!sourceIntent.entityScope || requirement.entityScope === sourceIntent.entityScope);
+          });
+          if (slotMatches.length === 1) {
+            const requirement = slotMatches[0];
+            item.valueKey = typeof requirement.valueKey === "string" ? requirement.valueKey.trim() : requirement.key.trim();
+            item.valueSource = "test_data";
+            if (!item.entityScope && typeof requirement.entityScope === "string") item.entityScope = requirement.entityScope;
+            console.log(`[recording-replay] fillRequirementBoundBySourceSlot=true stepIndex=${stepIndex} field=${JSON.stringify(sourceField)} entityScope=${item.entityScope ?? "none"}`);
+          }
+        }
+      }
+
       if (sourceIntent.type === "action_select" && sourceField) {
+        const requestedSelectionValue = sourceIntent.value?.trim() || item.value?.trim();
+        const runtimeRequirements = (scenario as any).runtimeInputRequirements
+          ?? (recordingContract as any).runtimeInputRequirements;
+        const selectionValueMatches = (Array.isArray(runtimeRequirements) ? runtimeRequirements : []).filter((requirement: any) => {
+          const key = typeof requirement?.valueKey === "string" ? requirement.valueKey.trim()
+            : typeof requirement?.key === "string" ? requirement.key.trim() : "";
+          return key
+            && normalizedKey(typeof requirement?.semanticField === "string" ? requirement.semanticField : undefined) === normalizedKey(sourceField)
+            && normalizeText(typeof requirement?.value === "string" ? requirement.value : "") === normalizeText(requestedSelectionValue ?? "");
+        });
+        if (selectionValueMatches.length === 1) {
+          const requirement = selectionValueMatches[0];
+          item.valueKey = typeof requirement.valueKey === "string" ? requirement.valueKey.trim() : requirement.key.trim();
+          item.valueSource = "test_data";
+          if (typeof requirement.entityScope === "string" && requirement.entityScope.trim()) {
+            item.entityScope = requirement.entityScope.trim();
+          }
+          console.log(`[recording-replay] selectionRequirementBoundByFieldValue=true field=${JSON.stringify(sourceField)} entityScope=${item.entityScope ?? "none"} valueKey=${item.valueKey}`);
+        }
+        // Selection values in recorded repeated rows have a source-step slot, just
+        // like fills do. Bind that slot before matching the selector owner so an
+        // earlier row's identical field cannot donate its entity identity to this
+        // step (for example entity_1.Moneda/DOP to entity_2.Moneda/USD).
+        const selectionSlotMatches = (Array.isArray(runtimeRequirements) ? runtimeRequirements : []).filter((requirement: any) => {
+          const key = typeof requirement?.valueKey === "string" ? requirement.valueKey.trim()
+            : typeof requirement?.key === "string" ? requirement.key.trim() : "";
+          return key
+            && Number.isInteger(requirement?.stepIndex)
+            && requirement.stepIndex === stepIndex - 1
+            && normalizedKey(typeof requirement?.semanticField === "string" ? requirement.semanticField : undefined) === normalizedKey(sourceField)
+            && normalizeText(typeof requirement?.value === "string" ? requirement.value : "") === normalizeText(requestedSelectionValue ?? "");
+        });
+        if (selectionSlotMatches.length === 1) {
+          const requirement = selectionSlotMatches[0];
+          item.valueKey = typeof requirement.valueKey === "string" ? requirement.valueKey.trim() : requirement.key.trim();
+          item.valueSource = "test_data";
+          if (typeof requirement.entityScope === "string" && requirement.entityScope.trim()) {
+            item.entityScope = requirement.entityScope.trim();
+          }
+          console.log(`[recording-replay] selectionRequirementBoundBySourceSlot=true stepIndex=${stepIndex} field=${JSON.stringify(sourceField)} entityScope=${item.entityScope ?? "none"} valueKey=${item.valueKey}`);
+        }
         const ownerMatches = actionsWithIntents.filter(({ action, technicalRoleName }) =>
           action.technicalTargetRef?.trim().startsWith("role:combobox|")
-          && normalizedKey(technicalRoleName) === normalizedKey(sourceField)
+          && normalizedKey(action.semanticField ?? action.associatedField) === normalizedKey(sourceField)
+          && (!item.entityScope || action.entityScope === item.entityScope)
+          && (!match?.action.stepIndex || !action.stepIndex
+            || action.stepIndex < match.action.stepIndex
+            || action === match.action)
           && (!match?.action.expectedRouteBefore || !action.expectedRouteBefore || action.expectedRouteBefore === match.action.expectedRouteBefore)
           && (!match?.action.expectedState || !action.expectedState || action.expectedState === match.action.expectedState)
         );
@@ -2651,11 +2759,16 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
           if (owner.playwrightRecorderEvidence) item.playwrightRecorderEvidence = owner.playwrightRecorderEvidence as any;
           if (owner.interactionId) item.sourceInteractionId = owner.interactionId;
 
+          // Some grids render the currency selector inside the income cell.
+          // Preserve the recorded same-state fill field as the activation cell
+          // while keeping the semantic selection field (`Moneda`) for value
+          // ownership and verification.
           const sameRecordedStateFill = recordingContract.actions
             .filter((candidate) => candidate.actionType === "fill"
               && ownerStepIndex !== undefined
               && candidate.stepIndex !== undefined
               && candidate.stepIndex > ownerStepIndex
+              && (!item.entityScope || candidate.entityScope === item.entityScope)
               && Boolean(owner.expectedState?.trim())
               && candidate.expectedState === owner.expectedState
               && (!owner.expectedRouteBefore || !candidate.expectedRouteBefore || candidate.expectedRouteBefore === owner.expectedRouteBefore)
@@ -2664,6 +2777,48 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
           if (sameRecordedStateFill && normalizedKey(sameRecordedStateFill.semanticField) !== normalizedKey(sourceField)) {
             item.selectionActivationField = sameRecordedStateFill.semanticField;
           }
+
+          // A semantic selection action can represent both the recorded
+          // combobox activation and its following option click. Preserve the
+          // exact option event for this same entity/state so runtime replay
+          // can verify the requested value in the owning grid cell.
+          const requestedOption = requestedSelectionValue;
+          const selectionRequirements = (Array.isArray(runtimeRequirements) ? runtimeRequirements : []).filter((requirement: any) => {
+            const key = typeof requirement?.valueKey === "string" ? requirement.valueKey.trim()
+              : typeof requirement?.key === "string" ? requirement.key.trim() : "";
+            return key
+              && normalizedKey(typeof requirement?.semanticField === "string" ? requirement.semanticField : undefined) === normalizedKey(sourceField)
+              && normalizeText(typeof requirement?.value === "string" ? requirement.value : "") === normalizeText(requestedOption ?? "")
+              && (!item.entityScope || requirement.entityScope === item.entityScope);
+          });
+          if (selectionRequirements.length === 1) {
+            const requirement = selectionRequirements[0];
+            item.valueKey = typeof requirement.valueKey === "string" ? requirement.valueKey.trim() : requirement.key.trim();
+            item.valueSource = "test_data";
+            console.log(`[recording-replay] selectionRequirementBoundByFieldEntity=true field=${JSON.stringify(sourceField)} entityScope=${item.entityScope ?? "none"} valueKey=${item.valueKey}`);
+          }
+          const recordedOptions = recordingContract.actions.filter((candidate) => {
+            const optionRef = candidate.technicalTargetRef?.trim() ?? "";
+            const optionName = optionRef.match(/^role:option\|(.*)$/i)?.[1]?.trim();
+            return Boolean(optionName && requestedOption)
+              && candidate.actionType === "click"
+              && (!item.entityScope || candidate.entityScope === item.entityScope)
+              && (!owner.expectedState || candidate.expectedState === owner.expectedState)
+              && (!owner.expectedRouteBefore || !candidate.expectedRouteBefore || candidate.expectedRouteBefore === owner.expectedRouteBefore)
+              && (!ownerStepIndex || !candidate.stepIndex || candidate.stepIndex >= ownerStepIndex)
+              && normalizeText(optionName!) === normalizeText(requestedOption!);
+          });
+          if (recordedOptions.length === 1) {
+            const recordedOption = recordedOptions[0];
+            const optionRef = recordedOption.technicalTargetRef!.trim();
+            item.technicalTargetRefs = [...new Set([...(item.technicalTargetRefs ?? []), optionRef])];
+            if (recordedOption.playwrightRecorderEvidence) {
+              item.playwrightRecorderEvidence = recordedOption.playwrightRecorderEvidence as any;
+            }
+            item.sourceInteractionId ??= recordedOption.interactionId;
+            console.log(`[recording-replay] selectionOptionBoundByFieldEntity=true option=${JSON.stringify(requestedOption)} entityScope=${item.entityScope ?? "none"} optionStep=${recordedOption.stepIndex ?? "none"}`);
+          }
+          console.log(`[recording-replay] selectionOwnerBoundByFieldEntity=true ownerStep=${ownerStepIndex ?? "none"} entityScope=${item.entityScope ?? "none"} activationField=${item.selectionActivationField ?? "none"}`);
         }
       }
     };
@@ -2700,7 +2855,7 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
       if (step.type === "action_fill" || step.type === "action_select" || step.type === "action_click") {
         const projectedItem = projected.actionTargets.find((item) => item.index === step.stepIndex);
         if (projectedItem) {
-          for (const key of ["target", "recordingActionType", "key", "valueKey", "segmentPosition", "value", "valueSource", "selectionField", "selectionActivationField", "associatedField", "entityScope", "rowScope", "rowRelation", "technicalTargetRef", "technicalTargetRefs", "technicalTargetCandidates", "semanticRuntimeEvidence", "playwrightRecorderEvidence", "sourceInteractionId", "expectedRouteBefore", "expectedRouteAfter", "expectedOutcomeKind"] as const) {
+          for (const key of ["target", "recordingActionType", "key", "valueKey", "segmentPosition", "value", "valueSource", "selectionField", "selectionActivationField", "associatedField", "entityScope", "rowScope", "rowRelation", "technicalTargetRef", "technicalTargetRefs", "technicalTargetCandidates", "semanticRuntimeEvidence", "playwrightRecorderEvidence", "sourceInteractionId", "expectedRouteBefore", "expectedRouteAfter", "expectedOutcomeKind", "recordedSameSurfaceAction"] as const) {
             if (projectedItem[key] !== undefined) (step as any)[key] = projectedItem[key];
           }
           if (projectedItem.actionType === "action_press") step.type = "action_press";
@@ -2835,6 +2990,7 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
         ...(structuredAction.expectedRouteBefore ? { expectedRouteBefore: structuredAction.expectedRouteBefore } : {}),
         ...(structuredAction.expectedRouteAfter ? { expectedRouteAfter: structuredAction.expectedRouteAfter } : {}),
         ...(structuredAction.expectedOutcomeKind ? { expectedOutcomeKind: structuredAction.expectedOutcomeKind } : {}),
+        ...(structuredAction.recordedSameSurfaceAction ? { recordedSameSurfaceAction: true } : {}),
         ...(structuredAction.controlIdentity ? { recordedControlIdentity: structuredAction.controlIdentity } : {}),
         ...(structuredAction.dynamicTargetLabel === true ? { dynamicTargetLabel: true } : {}),
         ...(structuredAction.interactionId ? { sourceInteractionId: structuredAction.interactionId } : {}),
@@ -2869,6 +3025,7 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
         ...(structuredAction.expectedRouteBefore ? { expectedRouteBefore: structuredAction.expectedRouteBefore } : {}),
         ...(structuredAction.expectedRouteAfter ? { expectedRouteAfter: structuredAction.expectedRouteAfter } : {}),
         ...(structuredAction.expectedOutcomeKind ? { expectedOutcomeKind: structuredAction.expectedOutcomeKind } : {}),
+        ...(structuredAction.recordedSameSurfaceAction ? { recordedSameSurfaceAction: true } : {}),
         ...(structuredAction.interactionId ? { sourceInteractionId: structuredAction.interactionId } : {}),
       } as ExecutableStep);
       executableActionOrder += 1;
@@ -3023,7 +3180,7 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
             .map((ref) => ref.requirementId),
         });
         Object.assign(item, structuredMetadata);
-        if (intent.valueSource !== undefined) item.valueSource = intent.valueSource;
+        if (intent.valueSource !== undefined) item.valueSource = intent.valueSource as FillValueSource;
         if (intent.valueKey) item.valueKey = intent.valueKey;
         if (intent.value !== undefined) item.value = intent.value;
         actionTargets.push(item);
@@ -3730,6 +3887,16 @@ export type CaseDiscoveryOptions = {
   beforeFinalStatusCalculation?: (steps: DiscoveryStepResult[]) => number | Promise<number>;
   /** This run's job id. Used as `sourceExecutionId` for replay-kind RecordingRouteObservation rows. */
   runId?: string;
+  executionMode?: string;
+  routeProfile?: AppRouteProfile;
+  adaptiveContext?: {
+    targetScreen?: string;
+    knownSteps?: string[];
+    remainingSteps?: string[];
+    expectedScreenSignals?: { allOf?: string[]; anyOf?: string[] };
+    actualChain?: string;
+    requiredChain?: string;
+  };
 };
 
 function resolveControlledAdvanceAssertions(
@@ -3847,7 +4014,7 @@ export function buildCandidateRequiredData(
     source?: string;
     provenance?: string;
     sensitive?: boolean;
-    valueRole?: "runtime_input" | "expected_oracle" | "runtime_derived_oracle";
+    valueRole?: string;
     oracleSource?: string;
     dependsOn?: string[];
   };
@@ -3886,8 +4053,10 @@ export function buildCandidateRequiredData(
     ...(authoritativeRequirements.get(key)?.sensitive !== undefined
       ? { sensitive: authoritativeRequirements.get(key)!.sensitive }
       : {}),
-    ...(authoritativeRequirements.get(key)?.valueRole
-      ? { valueRole: authoritativeRequirements.get(key)!.valueRole }
+    ...((authoritativeRequirements.get(key)?.valueRole === "runtime_input"
+      || authoritativeRequirements.get(key)?.valueRole === "expected_oracle"
+      || authoritativeRequirements.get(key)?.valueRole === "runtime_derived_oracle")
+      ? { valueRole: authoritativeRequirements.get(key)!.valueRole as RequiredDataRef["valueRole"] }
       : {}),
     ...(authoritativeRequirements.get(key)?.oracleSource
       ? { oracleSource: authoritativeRequirements.get(key)!.oracleSource }
@@ -4026,15 +4195,6 @@ async function waitForPrivateMenuReadyBeforeTargetResolution(
       }
 
       // Without configured/runtime landing evidence, remain unresolved.
-      if (!isTransientLoadingScreen(currentSnapshot) && !hasControls && authProfile?.privateLanding) {
-        if (attempt >= maxAttempts - 2) {
-          console.log(
-            `[post-otp-gate] blocked reason="private_landing_lost_during_product_loading" ${safeUrlForLog(currentSnapshot.url)}`
-          );
-          return { status: "blocked", reason: "private_landing_lost_during_product_loading", url: currentSnapshot.url };
-        }
-      }
-
       // If still loading and more attempts available, continue waiting
       if (stillLoading && attempt < maxAttempts) {
         await page.waitForTimeout(1000).catch(() => {});
@@ -5035,7 +5195,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     }
     console.log(
       `[canonical-runtime-observation] scenarioStepIndex=${pending.index} requirementRefs=${refs.length} `
-        + `intent=${pending.canonicalAssertion.intent} subjectLineage=${subjectIdentity ? "available" : "unavailable"} `
+        + `intent=${pending.canonicalAssertion?.intent ?? "unknown"} subjectLineage=${subjectIdentity ? "available" : "unavailable"} `
         + `validationMutation=${mutation.validationMutation} networkEvents=${input.networkEvents?.length ?? 0} associatedError=${after.validationNodes.length > 0}`,
     );
   };
@@ -5217,7 +5377,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   let detailTarget: string | undefined;
   let finalProductClickStepIndex: number | undefined;
   let detailCriticalAssertions: { target?: string; detailSections?: string[]; actionButtons?: string[] } | undefined;
-  let detailTargetSource: "targetPath" | "lastAction" | "productAssertion" | "ordinalAssertionFallback" | undefined;
+  let detailTargetSource: "targetPath" | "lastAction" | "productAssertion" | "ordinalAssertionFallback" | "precedingActionViaAssertion" | "ordinalActionTarget" | "lastActionTarget" | undefined;
 
   console.log(`[detail-runtime] candidates actionTargets=[${parsed.actionTargets.map(t => `"${t.target}"`).join(", ")}]`);
   console.log(`[detail-runtime] candidates assertionTargets=[${parsed.assertionTargets.map(t => `"${t.target}"`).join(", ")}]`);
@@ -5701,7 +5861,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       .map((item) => item.actionTarget!)
       .filter((candidate) => candidate.expectedRouteAfter?.trim())
       .pop();
-    if (!previousAction || !recordedPostActionSurfaceReached(previousAction.expectedRouteAfter, expectedRouteBefore)) {
+    if (!previousAction || !recordedPostActionSurfaceReached(previousAction.expectedRouteAfter ?? "", expectedRouteBefore)) {
       return false;
     }
 
@@ -6730,12 +6890,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       }
 
       // Task 3: Log that auth consumed only the login, next pending target remains
-      const nextPendingItems = orderedItems.filter((item, idx) =>
-        orderedItems.indexOf(currentActionTarget) < idx &&
+      const nextPendingItems = orderedItems.filter((item) =>
+        item.index > currentActionTarget.index &&
         item.type === "action" &&
         item.actionTarget
       );
-      const nextPendingTarget = nextPendingItems[0]?.actionTarget?.target;
+          const nextPendingTarget = nextPendingItems[0]?.actionTarget?.target;
       if (nextPendingTarget) {
         console.log(`[auth-gate] authConsumed=true nextPendingTarget="${nextPendingTarget}"`);
       }
@@ -7780,7 +7940,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             // masked in the existing data-resolution log path just like sensitive runtime data.
             masked: true,
           }
-        : resolveDataKey(normalizedActionTarget.valueKey, {
+        : resolveDataKey(normalizedActionTarget.valueKey ?? "", {
             testData: testDataMap,
             testDataAliases,
             env: envVars,
@@ -7800,8 +7960,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         currentSnapshot = scan.snapshot;
         
         const errorMsg = dataResolution.status === "missing_sensitive"
-          ? `Missing sensitive test data value for key "${normalizedActionTarget.valueKey}". Set APP_TEST_DATA_JSON.${normalizedActionTarget.valueKey} or enable AUTO_GENERATE_SENSITIVE_DATA for test data.`
-          : `Missing test data value for key "${normalizedActionTarget.valueKey}". Set APP_TEST_DATA_JSON.${normalizedActionTarget.valueKey} or APP_${normalizedActionTarget.valueKey.toUpperCase()}`;
+          ? `Missing sensitive test data value for key "${normalizedActionTarget.valueKey ?? ""}". Set APP_TEST_DATA_JSON.${normalizedActionTarget.valueKey ?? ""} or enable AUTO_GENERATE_SENSITIVE_DATA for test data.`
+          : `Missing test data value for key "${normalizedActionTarget.valueKey ?? ""}". Set APP_TEST_DATA_JSON.${normalizedActionTarget.valueKey ?? ""} or APP_${normalizedActionTarget.valueKey?.toUpperCase() ?? ""}`;
         
         steps.push({
           index: actionTarget.index,
@@ -9249,7 +9409,50 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     // Selection steps can be backed by runtime data just like fills. Resolve
     // the value through the same provenance-aware resolver before opening a
     // row-scoped editor; no option is inferred from position or demo data.
-    let selectionValue: string | undefined;
+    // Literal selections from authored/recorded TestRail steps (for example,
+    // `Seleccionar "USD" en "Moneda"`) are the requested option, not only a
+    // descriptive target. Preserve that value so the shared resolver selects
+    // and verifies the option instead of resolving/clicking the field control.
+    // Repeated recorded rows can lose their canonical select match when the
+    // recorder labels the selected option with the previous value (for example,
+    // semanticField="DOP" while the captured option and value are USD). Recover
+    // only from one runtime requirement whose semantic field and literal value
+    // both match the authored selection; this preserves the requirement's row
+    // scope and does not guess between duplicate values.
+    if (actionTarget.actionType === "action_select" && !actionTarget.valueKey) {
+      const parsedSelection = parseStepIntent(actionTarget.action).find((intent) => intent.type === "action_select");
+      const selectionField = actionTarget.selectionField?.trim()
+        || parsedSelection?.selectionField?.trim()
+        || actionTarget.associatedField?.trim()
+        || actionTarget.target?.trim();
+      const requestedValue = actionTarget.value?.trim() || parsedSelection?.value?.trim();
+      const runtimeRequirements = (scenario as any).runtimeInputRequirements
+        ?? (scenario.recordingExecutionContract as any)?.runtimeInputRequirements;
+      const requirementMatches = (Array.isArray(runtimeRequirements) ? runtimeRequirements : []).filter((requirement: any) => {
+        const key = typeof requirement?.valueKey === "string" ? requirement.valueKey.trim()
+          : typeof requirement?.key === "string" ? requirement.key.trim() : "";
+        return key
+          && normalizeText(typeof requirement?.semanticField === "string" ? requirement.semanticField : "") === normalizeText(selectionField ?? "")
+          && normalizeText(typeof requirement?.value === "string" ? requirement.value : "") === normalizeText(requestedValue ?? "");
+      });
+      if (requirementMatches.length === 1) {
+        const requirement = requirementMatches[0];
+        actionTarget.valueKey = typeof requirement.valueKey === "string" ? requirement.valueKey.trim() : requirement.key.trim();
+        actionTarget.valueSource = "test_data";
+        if (typeof requirement.entityScope === "string" && requirement.entityScope.trim()) {
+          actionTarget.entityScope = requirement.entityScope.trim();
+        }
+        console.log(`[recording-replay] selectionValueRequirementRecovered=true field=${JSON.stringify(selectionField)} value=${JSON.stringify(requestedValue)} entityScope=${actionTarget.entityScope ?? "none"} valueKey=${actionTarget.valueKey}`);
+      } else if (requestedValue) {
+        console.log(`[recording-replay] selectionValueRequirementRecoverySkipped=true field=${JSON.stringify(selectionField)} value=${JSON.stringify(requestedValue)} matchCount=${requirementMatches.length}`);
+      }
+    }
+    let selectionValue: string | undefined = actionTarget.actionType === "action_select"
+      && !actionTarget.valueKey
+      && typeof actionTarget.value === "string"
+      && actionTarget.value.trim()
+      ? actionTarget.value.trim()
+      : undefined;
     if (actionTarget.actionType === "action_select" && actionTarget.valueKey) {
       const runtimeEnv = options.env ?? {};
       const envVars: Record<string, string> = {};
@@ -9454,6 +9657,19 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           }
         }
       }
+    }
+    if (actionTarget.actionType === "action_select" && selectionValue?.trim()
+      && resolution.status === "resolved"
+      && (resolution.selectionApplied !== true || resolution.selectionDiagnostics?.stateVerified !== true)) {
+      console.log(`[recorded-selection] resultRejected=true target=${JSON.stringify(actionTarget.target)} valueBacked=true reason=selection_state_not_verified strategy=${resolution.locatorStrategy ?? "none"}`);
+      resolution = {
+        status: "not_found",
+        target: actionTarget.target,
+        confidence: 0,
+        matchReason: "selection_state_not_verified",
+        candidateText: "",
+        candidates: [],
+      };
     }
     console.log(`[critical-path] step=${actionTarget.index} phase=resolver_end durationMs=${Math.round(performance.now() - resolutionStartedAt)} status=${resolution.status}`);
     if (shouldUsePostResumeSnapshot && postResumeCandidates.length > 0) {
@@ -10350,7 +10566,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
               // Provide AI provider if available for scenario generation
               let aiProvider: any = undefined;
               try {
-                const { createScenarioAiProvider } = await import("../scenarios/codex-scenario-generator");
+                const { createScenarioAiProvider } = await import("../ai/ai-provider-factory");
                 aiProvider = await createScenarioAiProvider();
               } catch { /* no AI provider */ }
               const result = await runAdaptiveRouteDiscovery(page, state, visibleTexts, aiProvider);
@@ -11603,6 +11819,23 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     // resolution options are -- reused here read-only, never re-derived.
     const nextActionTarget = (nextExecutableItem as any)?.actionTarget as ActionTargetItem | undefined;
     const nextTargetRequiresRuntimeResolution = nextTargetKnown && crossActionOwnerReadinessRequired(nextActionTarget);
+    const sourceRecordedInteraction = actionTarget.sourceInteractionId
+      ? scenario.canonicalInteractions?.find((interaction: any) => interaction?.id === actionTarget.sourceInteractionId)
+      : undefined;
+    const recordedBeforeScreen = typeof sourceRecordedInteraction?.screenBeforeRef === "string"
+      ? sourceRecordedInteraction.screenBeforeRef.trim()
+      : "";
+    const recordedAfterScreen = typeof sourceRecordedInteraction?.screenAfterRef === "string"
+      ? sourceRecordedInteraction.screenAfterRef.trim()
+      : "";
+    const recordedSameSurfaceAction = actionTarget.recordedSameSurfaceAction === true || (actionTarget.recordingActionType === "click"
+      && sourceRecordedInteraction?.action === "click"
+      && Boolean(recordedBeforeScreen)
+      && recordedBeforeScreen === recordedAfterScreen
+      && !String(sourceRecordedInteraction?.routeAfter ?? sourceRecordedInteraction?.expectedRouteAfter ?? "").trim());
+    if (recordedSameSurfaceAction) {
+      console.log(`[recording-replay] sameSurfaceOutcomeCertified=true interactionIdPresent=${Boolean(actionTarget.sourceInteractionId)} reason=identical_recorded_screen_refs`);
+    }
     // FIRST_LOSS fix: `nextTargetAvailable` was a level check on the POST-click snapshot only --
     // a next target already visible before the click (same static form, unrelated to this
     // action) could satisfy it without this action having caused anything. `next_target_visible`
@@ -11878,6 +12111,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       const synchronization = resolvePostActionSynchronization({
         actionNetworkObserved: progress.responseObserved || progress.pendingCount > 0,
         actionNetworkResponse: progress.responseObserved,
+        actionNetworkFailed: progress.requestFailed,
+        clickCausalEffectDetected,
         applicationError: applicationErrorVisible,
         authGateChanged: authChanged,
         authenticationBoundaryStillActive: authDetectionBeforeClick.detected
@@ -11908,6 +12143,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           && !recordedSurfaceReconcilesWithNextTarget(nextTargetReady),
         recordedPostActionSurfaceReached: recordedPostActionStableProbeCount >= RECORDED_SURFACE_STABLE_PROBES
           || recordedSurfaceReconcilesWithNextTarget(nextTargetReady),
+        recordedSameSurfaceAction,
         // A terminal recorded click is an executed action once its own observer window has
         // settled and shows a completed response or confirmed causal DOM effect. Its captured
         // post-route may be a downstream business outcome (for example, validation feedback),
@@ -11922,6 +12158,16 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       });
       const signal = synchronization.signal;
       if (!synchronization.completed || !signal) return { completed: false };
+      // The recording refs are only a candidate hint. Persist this property for spec
+      // compilation only after the live owner-scoped observer and network watcher proved
+      // this exact click was a same-route no-op.
+      actionTarget.recordedSameSurfaceAction = signal === "recorded_same_surface";
+      const confirmedSourceAction = actionTarget.sourceInteractionId
+        ? options.scenario.recordingExecutionContract?.actions.find((candidate) => candidate.interactionId === actionTarget.sourceInteractionId)
+        : undefined;
+      if (confirmedSourceAction) confirmedSourceAction.recordedSameSurfaceAction = signal === "recorded_same_surface";
+      const confirmedScenarioStep = options.scenario.steps.find((candidate) => candidate.index === actionTarget.index);
+      if (confirmedScenarioStep) confirmedScenarioStep.recordedSameSurfaceAction = signal === "recorded_same_surface";
       postActionSyncSignal = signal;
       markCriticalPath("post_action_sync_returned");
       console.log(`[post-action-sync] phase=after signal=${signal} networkResponse=${progress.responseObserved} pending=${progress.pendingCount} authChanged=${authChanged} nextTargetVisible=${nextTargetVisible} domChanged=${observationDiff?.changed ?? false} applicationError=${applicationErrorVisible}`);
@@ -12122,7 +12368,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       actionType: actionTarget.actionType,
       locatorStrategy: resolution.locatorStrategy,
       transitionDetected: false,
-      selectionApplied: resolution.selectionApplied,
+      selectionApplied: resolution.selectionApplied === true,
       observableOutcome: false,
     }).navigationExpected;
     // An in-place click must reach the existing post-action observer first.
@@ -13135,7 +13381,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       actionType: actionTarget.actionType,
       locatorStrategy: resolution.locatorStrategy,
       transitionDetected,
-      selectionApplied: resolution.selectionApplied,
+      selectionApplied: resolution.selectionApplied === true,
       observableOutcome: initialObservableOutcome,
     });
 
@@ -13815,8 +14061,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             aiAssisted: false,
             repairType: resolution.locatorStrategy === "ordinal_selection" ? "ordinal_selection" : "target_resolution",
             decisionStatus: "resolved",
-            validationStatus: "passed",
-            confidence: resolution.confidence
+            validationStatus: "passed"
           } : undefined
         },
         locatorStrategy: resolution.locatorStrategy,

@@ -169,8 +169,9 @@ export function buildCandidateStructuralIdentity(el: Element, actionableOwner = 
   var diagnosticCandidateOrdinal = 0;
   var diagnosticCandidateLimit = 32;
   var diagnosticCandidatesTruncated = false;
+  var sameTagNodes: ArrayLike<Element> = [];
   try {
-    var sameTagNodes = scopeRoot && typeof scopeRoot.querySelectorAll === "function"
+    sameTagNodes = scopeRoot && typeof scopeRoot.querySelectorAll === "function"
       ? scopeRoot.querySelectorAll(base.owner.tag)
       : document.getElementsByTagName(base.owner.tag);
     for (var i = 0; i < sameTagNodes.length; i++) {
@@ -236,13 +237,13 @@ export function buildCandidateStructuralIdentity(el: Element, actionableOwner = 
             tag: (candidate.tagName || "").toLowerCase(),
             role: attrOf(candidate, "role") || "",
             connected: candidate.isConnected !== false,
-            hidden: Boolean(candidate.hidden),
+            hidden: Boolean((candidate as HTMLElement).hidden),
             ariaHiddenOrInert: Boolean(typeof candidate.closest === "function" && candidate.closest('[aria-hidden="true"], [inert]')),
             display: candidateStyle?.display || "",
             visibility: candidateStyle?.visibility || "",
             opacity: candidateStyle?.opacity || "",
-            widthPositive: Boolean(candidate.offsetWidth),
-            heightPositive: Boolean(candidate.offsetHeight),
+            widthPositive: Boolean((candidate as HTMLElement).offsetWidth),
+            heightPositive: Boolean((candidate as HTMLElement).offsetHeight),
             rectCount: candidateRects ? candidateRects.length : 0,
             eligible,
             fingerprintMatch: true,

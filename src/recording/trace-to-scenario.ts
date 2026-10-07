@@ -15,7 +15,7 @@ import { confirmedCompoundSelectionBefore, logicalCompoundChildValue } from "./c
 import { quoteHumanValue, renderHumanStepValue } from "./human-step-renderer";
 import type { RecordingAiScenarioProposal } from "./ai-scenario-contract";
 import type { SelectorOptionInventory } from "./semantic-recording";
-import { buildCanonicalInteractions, enrichRecordedScenarioContract, evaluateRecordingReadiness, hasExecutionAuthority, hasReusableStructuralClickIdentity, isMaskActivation, materializedSemanticSignature, validateInteractionStateSequence, type CanonicalInteraction, type EntityActionBlock, type MutationOpportunity, type RecordingReadiness, type RuntimeInputRequirement, type ScenarioMutationProposal } from "./canonical-recording-contract";
+import { buildCanonicalInteractions, enrichRecordedScenarioContract, evaluateRecordingReadiness, hasExecutionAuthority, hasReusableStructuralClickIdentity, isMaskActivation, materializedSemanticSignature, reconcileRecordedScenarioOptionOwnerLineage, validateInteractionStateSequence, type CanonicalInteraction, type EntityActionBlock, type MutationOpportunity, type RecordingReadiness, type RuntimeInputRequirement, type ScenarioMutationProposal } from "./canonical-recording-contract";
 
 /**
  * Builds executable scenarios from a recorded walkthrough — deterministically.
@@ -29,7 +29,7 @@ import { buildCanonicalInteractions, enrichRecordedScenarioContract, evaluateRec
 
 /** A step in the web execution plan (`plan.json`), which the promoter turns into a spec. */
 export type RecordedWebStep = {
-  action: "navigate" | "click" | "fill" | "assert" | "wait";
+  action: "navigate" | "click" | "fill" | "select" | "assert" | "wait";
   target?: { strategy: string; value: string };
   value?: string;
   valueKey?: string;
@@ -240,6 +240,42 @@ export type RecordedScenario = {
     generatedAt: string;
   };
 };
+
+/**
+ * Removes the duplicate replay authority for a native select's opening tap while preserving
+ * the raw event and the value-bearing selection. Used both at derivation and hydration, since
+ * hydration rebuilds canonical interactions from the normalized source trace.
+ */
+export function projectNativeSelectionOpeningTaps(
+  events: readonly RecordedEvent[],
+  interactions: readonly CanonicalInteraction[],
+): CanonicalInteraction[] {
+  const openingTapRefs = new Set<string>();
+  for (let index = 0; index < events.length; index += 1) {
+    const tap = events[index];
+    if (tap.kind !== "tap" || tap.target?.tag?.toLocaleLowerCase() !== "select") continue;
+    const selection = events.slice(index + 1).find((event) => event.kind !== "note" && event.kind !== "launch");
+    if ((selection?.kind !== "fill" && selection?.kind !== "tap") || selection.target?.tag?.toLocaleLowerCase() !== "select") continue;
+    const nativeSelection = selection.target.playwrightRecorderEvidence?.nativeSelection;
+    const tapLabel = tap.target.label?.trim().normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase();
+    const selectionLabel = selection.target.label?.trim().normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase();
+    const sameNativeControl = Boolean(tapLabel)
+      && tapLabel === selectionLabel
+      && nativeSelection?.controlIdentity?.strategy === "id"
+      && Boolean(nativeSelection.controlIdentity.value)
+      && nativeSelection.scopeIdentity?.strategy === "css"
+      && Boolean(nativeSelection.scopeIdentity.value)
+      && (nativeSelection.options?.length ?? 0) > 0
+      && Boolean(nativeSelection.clickedOption?.value);
+    if (sameNativeControl) openingTapRefs.add(`event-${index + 1}`);
+  }
+  return interactions.map((interaction) =>
+    openingTapRefs.has(interaction.sourceEventRefs[0] ?? "")
+      && interaction.action === "click"
+      ? { ...interaction, technicalOnly: true, executionAuthority: false }
+      : interaction,
+  );
+}
 
 const MOBILE_STRATEGIES = new Set<MobileLocatorStrategy>([
   "accessibilityId",
@@ -841,8 +877,11 @@ export function buildHappyPathScenario(
   });
   const semanticModel = buildSemanticRecordingModel(trace, eventsWithSelectionTargets);
   const canonicalEvents = buildCanonicalInteractions(eventsWithSelectionTargets, semanticModel.editingSessions);
+  // Opening a native select and choosing an option are separate browser events, but the
+  // value-bearing selection is the only independently replayable business action.
+  const projectedCanonicalEvents = projectNativeSelectionOpeningTaps(eventsWithSelectionTargets, canonicalEvents);
   const editingSessionsByRef = new Map(semanticModel.editingSessions.map((session) => [session.editingSessionId, session]));
-  const canonicalByEvent = new Map(canonicalEvents.flatMap((interaction) => interaction.sourceEventRefs.map((ref) => [ref, interaction] as const)));
+  const canonicalByEvent = new Map(projectedCanonicalEvents.flatMap((interaction) => interaction.sourceEventRefs.map((ref) => [ref, interaction] as const)));
 
   // Group only a consecutive run of one-character clicks that Capture V2 independently
   // recognized as keys on the same visible keyboard and that causally changed the same display.
@@ -1375,6 +1414,79 @@ export function buildHappyPathScenario(
       continue;
     }
 
+    // Native <select> changes are captured as a fill event by the browser, while the
+    // canonical contract promotes their observed option to action=select. Keep that
+    // execution authority through the human step and web plan; treating it as a regular
+    // fill makes Discovery call locator.fill() on a select and fail the recording.
+    const nativeSelectionEvidence = event.target?.playwrightRecorderEvidence?.nativeSelection;
+    const isCapturedNativeSelection = event.kind === "fill"
+      && (canonical?.action === "select"
+        || (event.target?.tag?.toLowerCase() === "select" && Boolean(nativeSelectionEvidence?.clickedOption)));
+    if (isCapturedNativeSelection) {
+      const resolution = fieldForEvent(event, eventIndex + 1);
+      const label = canonical?.semanticField?.trim() || resolution.semanticField || resolution.displayLabel;
+      const valueKey = (canonical?.action === "select" ? canonical.valueKey?.trim() : undefined) || selectionValueKey({
+        ...event,
+        target: { ...event.target!, interactionType: "select", compoundRole: "selection", associatedField: label },
+      }, label);
+      const nativeSelection = canonical?.playwrightRecorderEvidence?.nativeSelection ?? nativeSelectionEvidence;
+      const selectedValue = canonical?.recordedValue
+        ?? event.target?.afterValue
+        ?? nativeSelection?.clickedOption?.label
+        ?? recordedLogicalValue(event, editingSessionsByRef.get(event.target?.editingSessionRef ?? ""));
+      const targetIdentity = nativeSelection?.scopeIdentity;
+      const targetStrategy = targetIdentity?.strategy ?? best.strategy;
+      const targetValue = targetIdentity?.value ?? best.value;
+      const description = `Seleccionar [${valueKey}] en "${label}"`;
+      const allowedValues = nativeSelection?.options
+        ?.filter((option) => !option.disabled)
+        .map((option) => option.label)
+        .filter((option): option is string => Boolean(option?.trim()));
+      requiredData.push({
+        key: valueKey,
+        label,
+        stepIndex: isMobile ? mobileSteps.length : webSteps.length,
+        technicalTargetRefs: canonical?.technicalTargetRefs ?? event.target?.locators?.map((locator) => `${locator.strategy}:${locator.value}`),
+        sourceEventRefs: [`event-${eventIndex + 1}`],
+        ...(selectedValue !== undefined ? { exampleValue: selectedValue } : {}),
+        ...(allowedValues?.length ? { allowedValues: [...new Set(allowedValues)] } : {}),
+        sensitive: false,
+        valueRole: "action_input",
+        source: "RECORDED_CONFIRMED",
+        semanticField: label,
+        confidence: canonical?.confidence,
+        needsReview: false,
+      });
+      if (isMobile) {
+        const mobileTarget = toMobileTarget(event);
+        if (mobileTarget) mobileSteps.push({ action: "click", target: mobileTarget, description });
+      } else {
+        webSteps.push({
+          action: "select",
+          target: { strategy: targetStrategy, value: targetValue },
+          valueKey,
+          description,
+          ...(entityScopeForTarget(event.target) ? { entityScope: entityScopeForTarget(event.target) } : {}),
+          interactionId: `interaction-${eventIndex + 1}`,
+        });
+      }
+      testRailSteps.push({
+        content: description,
+        stepTemplate: description,
+        renderedStep: selectedValue !== undefined ? `Seleccionar ${quoteHumanValue(selectedValue)} en "${label}"` : description,
+        valueKey,
+        sourceEventRefs: [`event-${eventIndex + 1}`],
+        interactionId: `interaction-${eventIndex + 1}`,
+        ...(entityScopeForTarget(event.target) ? { entityScope: entityScopeForTarget(event.target) } : {}),
+        resolutionState: "runtime_resolution_required",
+        playwrightRecorderEvidence: canonical?.playwrightRecorderEvidence ?? event.target?.playwrightRecorderEvidence,
+        sensitive: false,
+        expected: "",
+        classification: "FUNCTIONAL_ACTION",
+      });
+      continue;
+    }
+
     if (event.kind === "fill") {
       const resolution = fieldForEvent(event, eventIndex + 1);
       const label = resolution.displayLabel;
@@ -1457,7 +1569,7 @@ export function buildHappyPathScenario(
     trace.label?.trim() ||
     (lastScreen ? `Recorrido ${trace.platform === "web" ? "web" : "móvil"} observado` : "Recorrido observado");
 
-  const executableCanonical = canonicalEvents.filter((interaction) => hasExecutionAuthority(interaction) && interaction.action !== "system_observation");
+  const executableCanonical = projectedCanonicalEvents.filter((interaction) => hasExecutionAuthority(interaction) && interaction.action !== "system_observation");
   const ownedTestRailSteps = attachStateOwnership(testRailSteps, executableCanonical);
   const numberedTestRailSteps = numberScenarioSteps(ownedTestRailSteps);
   const stepMetrics = scenarioStepMetrics(numberedTestRailSteps);
@@ -1490,7 +1602,7 @@ export function buildHappyPathScenario(
     scenarioGoal: trace.recordingGoal?.declaredGoal ?? trace.recordingGoal?.normalizedGoal,
     stateSequenceValid: stateValidation.stateSequenceValid,
     stateSequenceIssues: stateValidation.stateSequenceIssues,
-    postGoalObservations: canonicalEvents.filter((interaction) => interaction.postGoalObservation).flatMap((interaction) => interaction.sourceEventRefs),
+    postGoalObservations: projectedCanonicalEvents.filter((interaction) => interaction.postGoalObservation).flatMap((interaction) => interaction.sourceEventRefs),
     goalContract: {
       nonGeneric: Boolean(trace.recordingGoal?.declaredGoal?.trim() || trace.recordingGoal?.normalizedGoal?.trim()),
       goalCoherent: Boolean(trace.recordingGoal?.declaredGoal?.trim() || trace.recordingGoal?.normalizedGoal?.trim()),
@@ -1500,7 +1612,8 @@ export function buildHappyPathScenario(
   // Keep navigation/state-transition interactions in the contract so downstream
   // mutations can prove reachability. They remain technical-only and are not
   // rendered as user actions.
-  return enrichRecordedScenarioContract(scenario, canonicalEvents, [], semanticModel);
+  const reconciledScenario = reconcileRecordedScenarioOptionOwnerLineage(scenario);
+  return enrichRecordedScenarioContract(reconciledScenario, reconciledScenario.canonicalInteractions ?? projectedCanonicalEvents, [], semanticModel);
 }
 
 /**

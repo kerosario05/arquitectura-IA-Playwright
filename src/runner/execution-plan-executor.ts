@@ -2,7 +2,7 @@ import { expect, type Locator, type Page } from "@playwright/test";
 import type { DataContext } from "../data/data-context";
 import { assertValidExecutionPlan } from "../plans";
 import type { ExecutionPlan, ExecutionPlanStep } from "../types/execution-plan.types";
-import type { PlanExecutionResult, PlanExecutionStatus, StepExecutionResult } from "../types/plan-execution.types";
+import type { EvidenceKind, PlanExecutionResult, PlanExecutionStatus, StepExecutionResult } from "../types/plan-execution.types";
 import type { FullConfig } from "../types/env.types";
 import { resolveLocatorFromPlanTarget } from "./plan-target-resolver";
 import { resolveStepValue } from "./plan-value-resolver";
@@ -18,13 +18,13 @@ import { AsyncOperationProgressLease } from "./async-operation-progress-lease";
  * Classify scenario evidence kind from its steps — no hardcoded HUs or entities.
  * Determines whether detail screenshots are required.
  */
-function classifyEvidenceKind(steps: ExecutionPlanStep[]): { kind: string; lastActionTarget: string; isDetail: boolean } {
+function classifyEvidenceKind(steps: ExecutionPlanStep[]): { kind: EvidenceKind; lastActionTarget: string; isDetail: boolean } {
   const lastStep = steps[steps.length - 1];
   const lastAction = lastStep?.action ?? "";
   const lastTarget = extractTargetLabel(lastStep?.target);
 
   // Assertion-only scenarios are not detail flows
-  if (lastAction === "assert" || lastAction === "assertVisible" || lastAction === "assertText") {
+  if (lastAction === "assertVisible" || lastAction === "assertText") {
     return { kind: "assertionEvidence", lastActionTarget: lastTarget, isDetail: false };
   }
 

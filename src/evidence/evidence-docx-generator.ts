@@ -5,6 +5,8 @@ import { createHash } from "node:crypto";
 import { promisify } from "node:util";
 import JSZip from "jszip";
 import type { EvidenceScenarioRecord } from "./evidence-types";
+import { buildEvidenceDocumentScreens, type EvidenceDocumentImage, type EvidenceDocumentScreen } from "./evidence-document-model";
+import { formatEvidenceCoverPeriod, replaceEvidenceCoverDash } from "./evidence-cover-period";
 
 const execFileAsync = promisify(execFile);
 const MAX_IMAGE_WIDTH_POINTS = 460;
@@ -18,7 +20,8 @@ type PreparedScenarioDocxInput = {
   scenarioId: string;
   title: string;
   status: string;
-  images: Array<{ path: string; stepText: string }>;
+  images: EvidenceDocumentImage[];
+  screens: EvidenceDocumentScreen[];
   finalImagePath: string | null;
   finalIncluded: boolean;
   finalIsLast: boolean;
@@ -210,10 +213,12 @@ async function tryWordComGeneration(
           path: path.resolve(step.screenshotPath!),
           stepText: step.stepText,
           stepIndex: step.stepIndex,
+          screenId: step.screenId,
+          screenTitle: step.screenTitle,
         }));
 
       // If no functional screenshots, use last screenshot as fallback
-      let images = functionalScreenshots;
+      let images: Array<{ path: string; stepText: string; stepIndex?: number; screenId?: string; screenTitle?: string }> = functionalScreenshots;
       if (images.length === 0) {
         const seenAllPaths = new Set<string>();
         const allScreenshots = sc.steps
@@ -228,6 +233,8 @@ async function tryWordComGeneration(
             path: path.resolve(step.screenshotPath!),
             stepText: step.stepText,
             stepIndex: step.stepIndex,
+            screenId: step.screenId,
+            screenTitle: step.screenTitle,
           }));
         const fallbackImage = allScreenshots.length > 0 ? allScreenshots[allScreenshots.length - 1] : null;
         images = fallbackImage ? [fallbackImage] : [];
@@ -292,7 +299,8 @@ async function tryWordComGeneration(
         if (isImageFile(detailPath) && fs.existsSync(detailPath)) {
           const alreadyInImages = images.some(img => path.resolve(img.path) === detailPath);
           if (!alreadyInImages) {
-            images.push({ path: detailPath, stepText: `Detalle: ${sc.detailEvidence.target || "producto"}` });
+            const detailStep = sc.steps.find(step => step.stepIndex === sc.detailEvidence?.capturedAfterStep);
+            images.push({ path: detailPath, stepText: `Detalle: ${sc.detailEvidence.target || "producto"}`, screenId: detailStep?.screenId, screenTitle: detailStep?.screenTitle });
             console.log(`[evidence-docx] detail screenshot appended scenario=${sc.scenarioId}`);
           } else {
             // Move to last position
@@ -312,7 +320,7 @@ async function tryWordComGeneration(
       if (images.length > 1) {
         const before = images.length;
         const seenPaths = new Set<string>();
-        const deduped: Array<{ path: string; stepText: string }> = [];
+        const deduped: Array<{ path: string; stepText: string; stepIndex?: number; screenId?: string; screenTitle?: string }> = [];
         for (const img of images) {
           const abs = path.resolve(img.path);
           if (seenPaths.has(abs)) {
@@ -342,6 +350,14 @@ async function tryWordComGeneration(
 
       const preparedImages = finalizeScenarioImagesForDocx(sc, images);
       images = preparedImages.images;
+      const docxImages: EvidenceDocumentImage[] = images.map(image => ({
+        path: image.path,
+        stepText: image.stepText,
+        screenId: image.screenId,
+        screenTitle: image.screenTitle,
+      }));
+      const screens = buildEvidenceDocumentScreens(sc, docxImages);
+      const groupedDocxImages = screens.flatMap(screen => screen.images);
       console.log(
         `[evidence-docx] imagesForDocx scenario=${sc.scenarioId} count=${images.length} finalIncluded=${preparedImages.finalIncluded} finalIsLast=${preparedImages.finalIsLast} finalImagePath=${preparedImages.finalImagePath ?? "none"}`,
       );
@@ -350,7 +366,8 @@ async function tryWordComGeneration(
         scenarioId: sc.scenarioId,
         title: scenarioTitle,
         status: scenarioStatus,
-        images,
+        images: groupedDocxImages,
+        screens,
         finalImagePath: preparedImages.finalImagePath,
         finalIncluded: preparedImages.finalIncluded,
         finalIsLast: preparedImages.finalIsLast,
@@ -485,6 +502,8 @@ function prepareScenarioDocxInput(scenario: EvidenceScenarioRecord): PreparedSce
       path: path.resolve(step.screenshotPath!),
       stepText: step.stepText,
       stepIndex: step.stepIndex,
+      screenId: step.screenId,
+      screenTitle: step.screenTitle,
     }));
 
   // Dedup: if the last images are from the same detail phase (same stepIndex or
@@ -520,7 +539,7 @@ function prepareScenarioDocxInput(scenario: EvidenceScenarioRecord): PreparedSce
     }
   }
 
-  let images = functionalScreenshots;
+  let images: Array<{ path: string; stepText: string; stepIndex?: number; screenId?: string; screenTitle?: string }> = functionalScreenshots;
   if (images.length === 0) {
     const seenAllPaths = new Set<string>();
     const allScreenshots = scenario.steps
@@ -534,6 +553,9 @@ function prepareScenarioDocxInput(scenario: EvidenceScenarioRecord): PreparedSce
       .map(step => ({
         path: path.resolve(step.screenshotPath!),
         stepText: step.stepText,
+        stepIndex: step.stepIndex,
+        screenId: step.screenId,
+        screenTitle: step.screenTitle,
       }));
     const fallbackImage = allScreenshots.length > 0 ? allScreenshots[allScreenshots.length - 1] : null;
     images = fallbackImage ? [fallbackImage] : [];
@@ -548,7 +570,13 @@ function prepareScenarioDocxInput(scenario: EvidenceScenarioRecord): PreparedSce
     : null;
   if (finalScreenPath && isImageFile(finalScreenPath) && fs.existsSync(finalScreenPath)) {
     images = images.filter(image => path.resolve(image.path) !== finalScreenPath);
-    images.push({ path: finalScreenPath, stepText: "Pantalla final después del último paso" });
+    const finalStep = scenario.steps.at(-1);
+    images.push({
+      path: finalScreenPath,
+      stepText: "Pantalla final después del último paso",
+      screenId: finalStep?.screenId,
+      screenTitle: finalStep?.screenTitle,
+    });
   }
 
   if (scenario.detailEvidence?.screenshotPath) {
@@ -559,7 +587,13 @@ function prepareScenarioDocxInput(scenario: EvidenceScenarioRecord): PreparedSce
     if (isImageFile(detailPath) && fs.existsSync(detailPath)) {
       const alreadyInImages = images.some(image => path.resolve(image.path) === detailPath);
       if (!alreadyInImages) {
-        images.push({ path: detailPath, stepText: `Detalle: ${scenario.detailEvidence.target || "producto"}` });
+        const detailStep = scenario.steps.find(step => step.stepIndex === scenario.detailEvidence?.capturedAfterStep);
+        images.push({
+          path: detailPath,
+          stepText: `Detalle: ${scenario.detailEvidence.target || "producto"}`,
+          screenId: detailStep?.screenId,
+          screenTitle: detailStep?.screenTitle,
+        });
         console.log(`[evidence-docx] detail screenshot appended scenario=${scenario.scenarioId}`);
       } else {
         const idx = images.findIndex(image => path.resolve(image.path) === detailPath);
@@ -575,6 +609,12 @@ function prepareScenarioDocxInput(scenario: EvidenceScenarioRecord): PreparedSce
   }
 
   const finalizedImages = finalizeScenarioImagesForDocx(scenario, images);
+  const documentImages: EvidenceDocumentImage[] = finalizedImages.images.map(image => ({
+    path: image.path,
+    stepText: image.stepText,
+    screenId: image.screenId,
+    screenTitle: image.screenTitle,
+  }));
   console.log(
     `[evidence-docx] imagesForDocx scenario=${scenario.scenarioId} count=${finalizedImages.images.length} finalIncluded=${finalizedImages.finalIncluded} finalIsLast=${finalizedImages.finalIsLast} finalImagePath=${finalizedImages.finalImagePath ?? "none"}`,
   );
@@ -583,7 +623,8 @@ function prepareScenarioDocxInput(scenario: EvidenceScenarioRecord): PreparedSce
     scenarioId: scenario.scenarioId,
     title: scenarioTitle,
     status: scenarioStatus,
-    images: finalizedImages.images,
+    images: documentImages,
+    screens: buildEvidenceDocumentScreens(scenario, documentImages),
     finalImagePath: finalizedImages.finalImagePath,
     finalIncluded: finalizedImages.finalIncluded,
     finalIsLast: finalizedImages.finalIsLast,
@@ -593,14 +634,14 @@ function prepareScenarioDocxInput(scenario: EvidenceScenarioRecord): PreparedSce
 
 function finalizeScenarioImagesForDocx(
   scenario: EvidenceScenarioRecord,
-  imageCandidates: Array<{ path: string; stepText: string }>,
+  imageCandidates: Array<{ path: string; stepText: string; screenId?: string; screenTitle?: string }>,
 ): {
-  images: Array<{ path: string; stepText: string }>;
+  images: Array<{ path: string; stepText: string; screenId?: string; screenTitle?: string }>;
   finalImagePath: string | null;
   finalIncluded: boolean;
   finalIsLast: boolean;
 } {
-  const dedupedImages: Array<{ path: string; stepText: string }> = [];
+  const dedupedImages: Array<{ path: string; stepText: string; screenId?: string; screenTitle?: string }> = [];
   const seenAbsolutePaths = new Set<string>();
 
   for (const image of imageCandidates) {
@@ -612,6 +653,8 @@ function finalizeScenarioImagesForDocx(
     dedupedImages.push({
       path: absolutePath,
       stepText: image.stepText,
+      screenId: image.screenId,
+      screenTitle: image.screenTitle,
     });
   }
 
@@ -634,6 +677,8 @@ function finalizeScenarioImagesForDocx(
       {
         path: finalImagePath,
         stepText: `Detalle: ${scenario.detailEvidence?.target || "producto"}`,
+        screenId: scenario.steps.at(-1)?.screenId,
+        screenTitle: scenario.steps.at(-1)?.screenTitle,
       };
     images = images
       .filter(image => path.resolve(image.path) !== finalImagePath)
@@ -650,8 +695,8 @@ function finalizeScenarioImagesForDocx(
 
 export function prependInitialScreenImage(
   scenario: EvidenceScenarioRecord,
-  images: Array<{ path: string; stepText: string }>,
-): Array<{ path: string; stepText: string }> {
+  images: Array<{ path: string; stepText: string; screenId?: string; screenTitle?: string }>,
+): Array<{ path: string; stepText: string; screenId?: string; screenTitle?: string }> {
   const initial = scenario.initialScreenEvidence;
   const checkpointPath = initial?.completedFormCheckpointPath;
   const completedFormPath = checkpointPath && isImageFile(checkpointPath) && fs.existsSync(checkpointPath)
@@ -663,12 +708,14 @@ export function prependInitialScreenImage(
   const preferredPath = completedFormPath ?? initialPath;
   if (!preferredPath) return images;
   const preferredImage = completedFormPath
-    ? { path: completedFormPath, stepText: "Formulario completado" }
+    ? { path: completedFormPath, stepText: "Formulario completado", screenId: initial?.screenId, screenTitle: initial?.screenTitle }
     : {
         path: initialPath!,
         stepText: initial?.status === "load_failed"
           ? `ESTADO INICIAL - FALLO DE CARGA: ${initial.reason ?? "initial_load_failure"}`
           : "ESTADO INICIAL",
+        screenId: initial?.screenId,
+        screenTitle: initial?.screenTitle,
       };
   const remaining = images.filter(image => path.resolve(image.path) !== preferredPath);
   return [preferredImage, ...remaining];
@@ -922,6 +969,41 @@ function buildWordComScript(args: {
     "      $insertRange.Collapse($wdCollapseEnd)",
     "    }",
     "",
+    "    # Print the executed actions grouped by the screen where they occurred",
+    "    if ($scenario.screens -and $scenario.screens.Count -gt 0) {",
+    "      $stepHeading = $doc.Range($insertRange.End, $insertRange.End)",
+    "      $stepHeading.InsertAfter('Paso a paso')",
+    "      $stepHeading.Font.Bold = -1",
+    "      $stepHeading.Font.Size = 12",
+    "      $stepHeading.ParagraphFormat.KeepWithNext = -1",
+    "      $insertRange.SetRange($stepHeading.End, $stepHeading.End)",
+    "      $insertRange.InsertParagraphAfter() | Out-Null",
+    "      $insertRange.Collapse($wdCollapseEnd)",
+    "      foreach ($screen in $scenario.screens) {",
+    "        $screenHeading = $doc.Range($insertRange.End, $insertRange.End)",
+    "        $screenHeading.InsertAfter([string]$screen.title)",
+    "        $screenHeading.Font.Bold = -1",
+    "        $screenHeading.Font.Size = 10",
+    "        $screenHeading.ParagraphFormat.KeepWithNext = -1",
+    "        $insertRange.SetRange($screenHeading.End, $screenHeading.End)",
+    "        $insertRange.InsertParagraphAfter() | Out-Null",
+    "        $insertRange.Collapse($wdCollapseEnd)",
+    "        foreach ($action in $screen.steps) {",
+    "          $actionRange = $doc.Range($insertRange.End, $insertRange.End)",
+    "          $actionText = ([string]$action.number) + '. ' + [string]$action.text",
+    "          $actionRange.InsertAfter($actionText)",
+    "          $actionRange.Font.Bold = 0",
+    "          $actionRange.Font.Size = 9",
+    "          $actionRange.ParagraphFormat.KeepTogether = -1",
+    "          $insertRange.SetRange($actionRange.End, $actionRange.End)",
+    "          $insertRange.InsertParagraphAfter() | Out-Null",
+    "          $insertRange.Collapse($wdCollapseEnd)",
+    "        }",
+    "      }",
+    "      $insertRange.InsertParagraphAfter() | Out-Null",
+    "      $insertRange.Collapse($wdCollapseEnd)",
+    "    }",
+    "",
     "    # Insert images with proper path validation",
     "    $scenarioImagesInserted = 0",
     "    $finalImagePathScenario = $declaredFinalImagePath",
@@ -929,8 +1011,21 @@ function buildWordComScript(args: {
     "    $lastInsertedImagePath = $null",
     "    if ($images -ne $null) {",
     "      $scenarioImagesInserted = 0",
+    "      $lastEvidenceScreenId = $null",
     "      foreach ($imgObj in $images) {",
     "        try {",
+    "          $imageScreenId = [string]$imgObj.screenId",
+    "          if ($imageScreenId -and $imageScreenId -ne $lastEvidenceScreenId -and [string]$imgObj.screenTitle) {",
+    "            $evidenceHeading = $doc.Range($insertRange.End, $insertRange.End)",
+    "            $evidenceHeading.InsertAfter('Evidencia: ' + [string]$imgObj.screenTitle)",
+    "            $evidenceHeading.Font.Bold = -1",
+    "            $evidenceHeading.Font.Size = 9",
+    "            $evidenceHeading.ParagraphFormat.KeepWithNext = -1",
+    "            $insertRange.SetRange($evidenceHeading.End, $evidenceHeading.End)",
+    "            $insertRange.InsertParagraphAfter() | Out-Null",
+    "            $insertRange.Collapse($wdCollapseEnd)",
+    "          }",
+    "          if ($imageScreenId) { $lastEvidenceScreenId = $imageScreenId }",
     "          $imgPathOriginal = [string]$imgObj.path",
     "",
     "          # Normalize and validate path",
@@ -1080,6 +1175,9 @@ async function jsZipFallbackGeneration(
 
   let documentXml = await documentXmlFile.async("string");
   documentXml = ensureImageNamespaces(documentXml);
+  const coverPeriodReplacement = replaceEvidenceCoverDash(documentXml, formatEvidenceCoverPeriod());
+  documentXml = coverPeriodReplacement.documentXml;
+  console.log(`[evidence-docx] cover month/year marker replacements=${coverPeriodReplacement.replacedCount}`);
 
   // Remove base table (contains "Estado: Exitoso") — it's only for Word COM cloning
   // The generated scenario tables already include status rows
@@ -1244,6 +1342,9 @@ async function normalizeWordComDocxOutput(
 
   let documentXml = await documentXmlFile.async("string");
   const relsXml = await relsXmlFile.async("string");
+  const coverPeriodReplacement = replaceEvidenceCoverDash(documentXml, formatEvidenceCoverPeriod());
+  documentXml = coverPeriodReplacement.documentXml;
+  console.log(`[evidence-docx] cover month/year marker replacements=${coverPeriodReplacement.replacedCount}`);
 
   // Fix "Estado: Fallido Exitoso" — single element case
   documentXml = documentXml.replace(
@@ -1607,10 +1708,6 @@ async function hashFileIfExists(filePath: string): Promise<string | null> {
 }
 
 /**
- * Build simplified scenario blocks (no step-by-step text).
- * Only metadata table + primary screenshot per scenario.
- */
-/**
  * Returns the next free relationship ID (max numeric rId in the rels XML + 1). Falls
  * back to 100 when the rels can't be parsed, well above any typical template's IDs.
  */
@@ -1762,15 +1859,33 @@ function buildSimplifiedScenarioBlocks(
       console.log(`[evidence-docx] case final image scenario=${sc.scenarioId} path=${lastImg.screenshotPath}`);
     }
 
-    // Insert all functional screenshots
-    for (const screenshot of screenshotsToUse) {
-      const rId = `rId${rIdCounter++}`;
-      // Distinct prefix so generated screenshots never overwrite the template's own
-      // media (e.g. its logo at word/media/image1.png).
-      const filename = `evd_image_${imageCounter++}${path.extname(screenshot.screenshotPath!)}`;
-      images.push({ rId, path: screenshot.screenshotPath!, filename });
+    // Keep the JSZip fallback aligned with the Word COM report: show the actions
+    // grouped by the screen where they were performed, then its evidence images.
+    const documentImages = screenshotsToUse
+      .filter((screenshot) => Boolean(screenshot.screenshotPath))
+      .map(screenshot => ({
+        path: screenshot.screenshotPath!,
+        stepText: screenshot.stepText,
+        screenId: screenshot.screenId,
+        screenTitle: screenshot.screenTitle,
+      }));
+    const documentScreens = buildEvidenceDocumentScreens(sc, documentImages);
 
-      blocks.push(`
+    // Insert each screen's ordered actions and the screenshots captured for it.
+    for (const screen of documentScreens) {
+      blocks.push(`<w:p><w:pPr><w:keepNext/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="1F4E79"/></w:rPr><w:t>${escapeXml(screen.title)}</w:t></w:r></w:p>`);
+      for (const [stepIndex, step] of screen.steps.entries()) {
+        const stepNumber = stepIndex + 1;
+        blocks.push(`<w:p><w:pPr><w:keepLines/></w:pPr><w:r><w:t>${stepNumber}. ${escapeXml(step.text)}</w:t></w:r></w:p>`);
+      }
+      for (const screenshot of screen.images) {
+        const rId = `rId${rIdCounter++}`;
+        // Distinct prefix so generated screenshots never overwrite the template's own
+        // media (e.g. its logo at word/media/image1.png).
+        const filename = `evd_image_${imageCounter++}${path.extname(screenshot.path)}`;
+        images.push({ rId, path: screenshot.path, filename });
+
+        blocks.push(`
 <w:p>
   <w:pPr><w:jc w:val="center"/></w:pPr>
   <w:r>
@@ -1808,6 +1923,7 @@ function buildSimplifiedScenarioBlocks(
     </w:drawing>
   </w:r>
 </w:p>`);
+      }
     }
 
     // Page break after each scenario except the last

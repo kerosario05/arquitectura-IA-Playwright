@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-login-satisfactorio",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Login satisfactorio",
+  "source": "discovery",
+  "appSlug": "portal-empresarial",
+  "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
+  "createdAt": "2026-10-07T12:16:55.967Z"
+}

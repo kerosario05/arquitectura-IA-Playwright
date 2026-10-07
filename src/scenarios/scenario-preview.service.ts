@@ -50,6 +50,7 @@ import type {
   FunctionalBranchEvidenceSource,
   IntermediateRepairResult,
   CanonicalClaim,
+  CatalogOptions,
 } from "./scenario-types";
 
 export function evaluateRequirementDependencyGate(
@@ -2519,13 +2520,13 @@ async function generateScenarioPreviewForIssue(
     const { ensureScenarioGenerationContext } = await import("./scenario-catalog-context");
     catalogOptions = req.catalogOptions ?? {
       useDiscoveredCatalog: process.env.AI_CATALOG_AUTO_DISCOVER === "true",
-      catalogMode: process.env.AI_CATALOG_MODE === "refresh" ? "refresh" : "existing",
+      catalogMode: process.env.AI_CATALOG_MODE === "refresh" ? "refresh" as const : "existing" as const,
       coverageMode: process.env.AI_CATALOG_COVERAGE_MODE as "representative" | "exhaustive" || "representative",
       maxProductsPerCategory: parseInt(process.env.AI_CATALOG_MAX_PER_CATEGORY || "2", 10),
     };
     // Preview generation may consume static route hints and persisted Knowledge,
     // but live catalog discovery belongs to the explicit discovery workflow.
-    const previewCatalogOptions = {
+    const previewCatalogOptions: CatalogOptions = {
       ...catalogOptions,
       useDiscoveredCatalog: false,
     };
@@ -2858,7 +2859,7 @@ async function generateScenarioPreviewForIssue(
       rawScenarios,
       issueContext,
       appInference.appSlug,
-      catalogOptions.coverageMode ?? "representative",
+      (catalogOptions.coverageMode ?? "representative") as "representative" | "exhaustive",
       seedAppConfig
     );
 
@@ -6418,7 +6419,7 @@ function buildPlanBasedScenarios(
       }
 
       // Get targets by category compatibility (not mixed)
-      const targets: Array<{ value: string; source: string; compatible: boolean }> = [];
+      const targets: Array<{ value: string; source: string; compatible: boolean; semanticType?: string }> = [];
       for (const r of reqs) {
         if (r.category === "input_field" || r.category === "acceptance_criteria") {
           for (const f of ((huModel?.requiredFields ?? []) as string[])) {

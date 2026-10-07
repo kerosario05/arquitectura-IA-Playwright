@@ -1,5 +1,6 @@
 import { EventEmitter } from "node:events";
 import type { ChildProcess } from "node:child_process";
+import { spawn as nodeSpawn } from "node:child_process";
 import { expect, test } from "@playwright/test";
 import { config } from "../src/config/env";
 import {
@@ -34,6 +35,12 @@ function createFakeChild(pid: number | undefined): ChildProcess {
   (child as unknown as { killed?: boolean }).killed = false;
   (child as unknown as { kill: (signal?: NodeJS.Signals | number) => boolean }).kill = () => true;
   return child;
+}
+
+function setMockSpawn(fn: (...args: any[]) => ChildProcess): void {
+  // The production seam intentionally accepts Node's overloaded spawn type;
+  // tests only need a child-process double and do not exercise spawn options.
+  __setSpawnForTesting(fn as unknown as typeof nodeSpawn);
 }
 
 test.describe("mobile appium launcher", () => {
@@ -111,7 +118,7 @@ test.describe("mobile appium launcher", () => {
     originalAndroid.appiumBin = "missing-appium-binary";
     __setPlatformForTesting("linux");
     __setHttpStatusCheckerForTesting(async () => ({ ok: false, status: 0 }));
-    __setSpawnForTesting(() => {
+    setMockSpawn(() => {
       const child = createFakeChild(undefined);
       process.nextTick(() => {
         const err = Object.assign(new Error("spawn missing-appium-binary ENOENT"), { code: "ENOENT" });
@@ -128,7 +135,7 @@ test.describe("mobile appium launcher", () => {
     originalAndroid.appiumBin = "appium";
     let spawnCalls = 0;
     __setHttpStatusCheckerForTesting(async () => ({ ok: true, status: 200 }));
-    __setSpawnForTesting(() => {
+    setMockSpawn(() => {
       spawnCalls++;
       return createFakeChild(123);
     });
@@ -146,7 +153,7 @@ test.describe("mobile appium launcher", () => {
     let spawnCalls = 0;
     const invocations: SpawnInvocation[] = [];
     __setHttpStatusCheckerForTesting(async () => ({ ok: false, status: 0 }));
-    __setSpawnForTesting((command, args) => {
+    setMockSpawn((command, args) => {
       spawnCalls++;
       invocations.push({ command, args });
       const child = createFakeChild(9911);
@@ -166,7 +173,7 @@ test.describe("mobile appium launcher", () => {
     originalAndroid.appiumBin = "appium.cmd";
     __setPlatformForTesting("win32");
     __setHttpStatusCheckerForTesting(async () => ({ ok: false, status: 0 }));
-    __setSpawnForTesting(() => {
+    setMockSpawn(() => {
       const child = createFakeChild(undefined);
       process.nextTick(() => {
         const err = Object.assign(new Error("spawn EINVAL"), { code: "EINVAL" });
@@ -183,7 +190,7 @@ test.describe("mobile appium launcher", () => {
     originalAndroid.appiumBin = "appium";
     __setPlatformForTesting("linux");
     __setHttpStatusCheckerForTesting(async () => ({ ok: false, status: 0 }));
-    __setSpawnForTesting(() => {
+    setMockSpawn(() => {
       const child = createFakeChild(undefined);
       process.nextTick(() => {
         const err = Object.assign(new Error("spawn EPERM"), { code: "EPERM" });
@@ -205,7 +212,7 @@ test.describe("mobile appium launcher", () => {
       return { ok: false, status: 0, error: "ECONNREFUSED" };
     });
     __setPortProbeForTesting(async () => false);
-    __setSpawnForTesting(() => {
+    setMockSpawn(() => {
       const child = createFakeChild(7788);
       process.nextTick(() => (child as unknown as EventEmitter).emit("spawn"));
       return child;
@@ -227,7 +234,7 @@ test.describe("mobile appium launcher", () => {
       if (attempts < 35) return { ok: false, status: 0, error: "ECONNREFUSED" };
       return { ok: true, status: 200 };
     });
-    __setSpawnForTesting(() => {
+    setMockSpawn(() => {
       const child = createFakeChild(8899);
       process.nextTick(() => (child as unknown as EventEmitter).emit("spawn"));
       return child;
@@ -243,7 +250,7 @@ test.describe("mobile appium launcher", () => {
     originalAndroid.appiumBin = "appium";
     __setPlatformForTesting("linux");
     __setHttpStatusCheckerForTesting(async () => ({ ok: false, status: 0, error: "ECONNREFUSED" }));
-    __setSpawnForTesting(() => {
+    setMockSpawn(() => {
       const child = createFakeChild(9901);
       process.nextTick(() => {
         (child as unknown as EventEmitter).emit("spawn");
@@ -265,7 +272,7 @@ test.describe("mobile appium launcher", () => {
     __setPlatformForTesting("linux");
     __setHttpStatusCheckerForTesting(async () => ({ ok: false, status: 0, error: "ETIMEDOUT" }));
     __setPortProbeForTesting(async () => false);
-    __setSpawnForTesting(() => {
+    setMockSpawn(() => {
       const child = createFakeChild(9910);
       process.nextTick(() => (child as unknown as EventEmitter).emit("spawn"));
       return child;
@@ -289,7 +296,7 @@ test.describe("mobile appium launcher", () => {
     let spawnCalls = 0;
     __setHttpStatusCheckerForTesting(async () => ({ ok: false, status: 0, error: "ECONNREFUSED" }));
     __setPortProbeForTesting(async () => false);
-    __setSpawnForTesting(() => {
+    setMockSpawn(() => {
       spawnCalls++;
       const child = createFakeChild(10010 + spawnCalls);
       process.nextTick(() => (child as unknown as EventEmitter).emit("spawn"));
@@ -311,7 +318,7 @@ test.describe("mobile appium launcher", () => {
     __setPlatformForTesting("linux");
     __setHttpStatusCheckerForTesting(async () => ({ ok: false, status: 0, error: "ECONNREFUSED" }));
     const logs: string[] = [];
-    __setSpawnForTesting(() => {
+    setMockSpawn(() => {
       const child = createFakeChild(9933);
       process.nextTick(() => {
         (child as unknown as { stdout: EventEmitter }).stdout.emit("data", Buffer.from("token=12345 readying"));

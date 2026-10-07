@@ -30,6 +30,10 @@ export class RunEvidenceRecorder {
     return this.scenarios.length;
   }
 
+  getScenario(scenarioId: string): EvidenceScenarioRecord | undefined {
+    return this.scenarios.find((scenario) => scenario.scenarioId === scenarioId);
+  }
+
   async start(): Promise<void> {
     if (!this.config.enabled) return;
 
@@ -75,7 +79,7 @@ export class RunEvidenceRecorder {
   private normalizeScenarioForConsolidation(scenarioRecord: EvidenceScenarioRecord): EvidenceScenarioRecord {
     const normalized: EvidenceScenarioRecord = {
       ...scenarioRecord,
-      requirement: scenarioRecord.requirement?.trim() || `Automatización - ${this.context.sectionName || this.context.sectionSlug}`,
+      requirement: this.context.requirement?.trim() || scenarioRecord.requirement?.trim() || `Automatización - ${this.context.sectionName || this.context.sectionSlug}`,
       analyst: scenarioRecord.analyst?.trim() || this.context.analystName || this.config.analystName || "Automatización",
     };
 

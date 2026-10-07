@@ -71,9 +71,7 @@ test.describe("Task A: Detail TargetPath Expansion Runtime", () => {
         pendingObjectsPath: path.join(artifactsDir, "pending-objects-prestamo.json"),
         pendingPlansPath: path.join(artifactsDir, "pending-plans-prestamo.json"),
         appBaseUrl: "data:text/html,<html><body><h1>Mock</h1></body></html>",
-        headless: true,
         appSlug: "test-app",
-        config: {} as any
       }).catch(() => {});
     } finally {
       console.log = originalLog;
@@ -137,9 +135,7 @@ test.describe("Task A: Detail TargetPath Expansion Runtime", () => {
         pendingObjectsPath: path.join(artifactsDir, "pending-objects-depositos.json"),
         pendingPlansPath: path.join(artifactsDir, "pending-plans-depositos.json"),
         appBaseUrl: "data:text/html,<html><body><h1>Mock</h1></body></html>",
-        headless: true,
         appSlug: "test-app",
-        config: {} as any
       }).catch(() => {});
     } finally {
       console.log = originalLog;
@@ -197,9 +193,7 @@ test.describe("Task A: Detail TargetPath Expansion Runtime", () => {
         pendingObjectsPath: path.join(artifactsDir, "pending-objects-visa-gold.json"),
         pendingPlansPath: path.join(artifactsDir, "pending-plans-visa-gold.json"),
         appBaseUrl: "data:text/html,<html><body><h1>Mock</h1></body></html>",
-        headless: true,
         appSlug: "test-app",
-        config: {} as any
       }).catch(() => {});
     } finally {
       console.log = originalLog;
@@ -255,9 +249,7 @@ test.describe("Task A: Detail TargetPath Expansion Runtime", () => {
         pendingObjectsPath: path.join(artifactsDir, "pending-objects-cuenta-pesos.json"),
         pendingPlansPath: path.join(artifactsDir, "pending-plans-cuenta-pesos.json"),
         appBaseUrl: "data:text/html,<html><body><h1>Mock</h1></body></html>",
-        headless: true,
         appSlug: "test-app",
-        config: {} as any
       }).catch(() => {});
     } finally {
       console.log = originalLog;
@@ -328,9 +320,7 @@ test.describe("Task A: Detail TargetPath Expansion Runtime", () => {
         pendingObjectsPath: path.join(artifactsDir, "pending-objects-seguro.json"),
         pendingPlansPath: path.join(artifactsDir, "pending-plans-seguro.json"),
         appBaseUrl: "data:text/html,<html><body><h1>Mock</h1></body></html>",
-        headless: true,
         appSlug: "test-app",
-        config: {} as any
       }).catch(() => {});
     } finally {
       console.log = originalLog;

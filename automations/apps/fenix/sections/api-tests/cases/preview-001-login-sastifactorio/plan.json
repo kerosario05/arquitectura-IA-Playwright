@@ -1,0 +1,1374 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-001",
+    "caseId": 0,
+    "title": "Login Sastifactorio"
+  },
+  "requiredData": [
+    {
+      "key": "rnc",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "usuario",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "contrasena",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "sms",
+      "required": true,
+      "resolved": true
+    }
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://qa1.santacruz.do/onlinebanking",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "description": "Presionar \"Empresarial\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Empresarial",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner",
+      "requirementRefs": []
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "Ingresar \"130047596\" en \"RNC:\"",
+      "target": {
+        "strategy": "text",
+        "value": "RNC",
+        "exact": false
+      },
+      "valueKey": "rnc",
+      "requirementRefs": []
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "Ingresar \"jpmota\" en \"Usuario:\"",
+      "target": {
+        "strategy": "text",
+        "value": "Usuario",
+        "exact": false
+      },
+      "valueKey": "usuario",
+      "requirementRefs": []
+    },
+    {
+      "index": 5,
+      "action": "fill",
+      "description": "Ingresar \"qwerty123123\" en \"Contraseña:\"",
+      "target": {
+        "strategy": "text",
+        "value": "Contraseña",
+        "exact": false
+      },
+      "valueKey": "contrasena",
+      "requirementRefs": []
+    },
+    {
+      "index": 6,
+      "action": "press",
+      "description": "Presionar \"Enter\" en \"Contraseña:\"",
+      "target": {
+        "strategy": "text",
+        "value": "Contraseña:",
+        "exact": false
+      },
+      "value": "Enter",
+      "requirementRefs": []
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"SMS\"",
+      "target": {
+        "strategy": "recorded:recorder-text",
+        "value": "SMS",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:recorder-text",
+      "requirementRefs": []
+    },
+    {
+      "index": 8,
+      "action": "fill",
+      "description": "Ingresar [sms] en \"SMS\"",
+      "target": {
+        "strategy": "text",
+        "value": "SMS",
+        "exact": false
+      },
+      "valueKey": "sms",
+      "playwrightRecorderEvidence": {
+        "kind": "segmented_input",
+        "targetTag": "input",
+        "scopeIdentity": {
+          "strategy": "id",
+          "value": "IdentifyUserForm"
+        },
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true,
+        "segmentCount": 6
+      },
+      "resolutionState": "runtime_resolution_required",
+      "requirementRefs": []
+    },
+    {
+      "index": 9,
+      "action": "click",
+      "description": "Presionar \"Continuar\"",
+      "target": {
+        "strategy": "recorded:role",
+        "value": "Continuar",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:role",
+      "requirementRefs": []
+    },
+    {
+      "index": 10,
+      "action": "click",
+      "description": "Presionar el control grabado",
+      "target": {
+        "strategy": "recorded:id",
+        "value": "el control grabado",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:id",
+      "requirementRefs": []
+    },
+    {
+      "index": 11,
+      "action": "click",
+      "description": "Presionar \"Cerrar Sesión\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Cerrar Sesión",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner",
+      "requirementRefs": []
+    },
+    {
+      "index": 12,
+      "action": "click",
+      "description": "Presionar \"Aceptar\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Aceptar",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner",
+      "requirementRefs": []
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-10-05T22:09:44.323Z",
+  "metadata": {
+    "authFlowRequired": false,
+    "authFlowAlias": "defaultClient",
+    "authFlowLanding": "transactions_menu",
+    "authGateDetectedDuringDiscovery": true,
+    "authGateStage": "otp"
+  },
+  "sourceScenario": {
+    "title": "Login Sastifactorio",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Abrir la aplicación configurada del proyecto",
+        "description": "Abrir la aplicación configurada del proyecto"
+      },
+      {
+        "index": 2,
+        "action": "Presionar \"Empresarial\"",
+        "description": "Presionar \"Empresarial\"",
+        "technicalTargetRef": "role:link|Empresarial",
+        "technicalTargetRefs": [
+          "role:link|Empresarial"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Empresarial",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "login-box-parent"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Empresarial",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#empresarial"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "login-box-parent"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#empresarial\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "controlIdentity": "60d370b39a8d|Empresarial|role|link|Empresarial",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 3,
+        "action": "Ingresar \"130047596\" en \"RNC:\"",
+        "description": "Ingresar \"130047596\" en \"RNC:\"",
+        "valueKey": "rnc",
+        "technicalTargetRef": "role:textbox|RNC:",
+        "technicalTargetRefs": [
+          "role:textbox|RNC:",
+          "css:#Enterprise",
+          "id:Enterprise"
+        ],
+        "associatedField": "RNC:",
+        "controlIdentity": "60d370b39a8d|RNC:|role|textbox|RNC:",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 4,
+        "action": "Ingresar \"jpmota\" en \"Usuario:\"",
+        "description": "Ingresar \"jpmota\" en \"Usuario:\"",
+        "valueKey": "usuario",
+        "technicalTargetRef": "role:textbox|Usuario:",
+        "technicalTargetRefs": [
+          "role:textbox|Usuario:",
+          "css:#UserNameE",
+          "id:UserNameE"
+        ],
+        "associatedField": "Usuario:",
+        "controlIdentity": "60d370b39a8d|Usuario:|role|textbox|Usuario:",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 5,
+        "action": "Ingresar \"qwerty123123\" en \"Contraseña:\"",
+        "description": "Ingresar \"qwerty123123\" en \"Contraseña:\"",
+        "valueKey": "contrasena",
+        "technicalTargetRef": "role:textbox|Contraseña:",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña:",
+          "css:#PasswordE",
+          "id:PasswordE"
+        ],
+        "associatedField": "Contraseña:",
+        "controlIdentity": "60d370b39a8d|Contraseña:|role|textbox|Contraseña:",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 6,
+        "action": "Presionar \"Enter\" en \"Contraseña:\"",
+        "description": "Presionar \"Enter\" en \"Contraseña:\"",
+        "technicalTargetRef": "role:textbox|Contraseña:",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña:",
+          "css:#PasswordE",
+          "id:PasswordE"
+        ],
+        "controlIdentity": "60d370b39a8d|Contraseña:|role|textbox|Contraseña:",
+        "recordingActionType": "press"
+      },
+      {
+        "index": 7,
+        "action": "Presionar \"SMS\"",
+        "description": "Presionar \"SMS\"",
+        "valueKey": "sms",
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "SMS",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "associatedField": "SMS",
+        "controlIdentity": "60d370b39a8d|SMS|id|IdentifyUserForm",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 8,
+        "action": "Ingresar \"1\" en \"SMS\"",
+        "description": "Ingresar \"1\" en \"SMS\"",
+        "valueKey": "sms",
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "associatedField": "SMS",
+        "controlIdentity": "60d370b39a8d|SMS|id|IdentifyUserForm",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 9,
+        "action": "Ingresar \"2\" en \"SMS\"",
+        "description": "Ingresar \"2\" en \"SMS\"",
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "associatedField": "SMS"
+      },
+      {
+        "index": 10,
+        "action": "Ingresar \"3\" en \"SMS\"",
+        "description": "Ingresar \"3\" en \"SMS\"",
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "associatedField": "SMS"
+      },
+      {
+        "index": 11,
+        "action": "Ingresar \"4\" en \"SMS\"",
+        "description": "Ingresar \"4\" en \"SMS\"",
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "associatedField": "SMS"
+      },
+      {
+        "index": 12,
+        "action": "Ingresar \"5\" en \"SMS\"",
+        "description": "Ingresar \"5\" en \"SMS\"",
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "associatedField": "SMS"
+      },
+      {
+        "index": 13,
+        "action": "Ingresar \"6\" en \"SMS\"",
+        "description": "Ingresar \"6\" en \"SMS\"",
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "associatedField": "SMS"
+      },
+      {
+        "index": 14,
+        "action": "Presionar \"Continuar\"",
+        "description": "Presionar \"Continuar\"",
+        "valueKey": "continuar",
+        "technicalTargetRef": "role:button|Continuar",
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(a[href=\"/onlinebanking/IdentifyUser/Cancel\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Continuar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "input"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "IdentifyUserForm"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"input\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Continuar",
+        "controlIdentity": "60d370b39a8d|Continuar|role|button|Continuar",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 15,
+        "action": "Presionar el control grabado",
+        "description": "Presionar el control grabado",
+        "technicalTargetRef": "id:profile-name",
+        "technicalTargetRefs": [
+          "id:profile-name"
+        ],
+        "controlIdentity": "60d370b39a8d|Lizardo Jhonatan Mata Burgos|id|profile-name",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 16,
+        "action": "Presionar \"Cerrar Sesión\"",
+        "description": "Presionar \"Cerrar Sesión\"",
+        "technicalTargetRef": "role:link|Cerrar Sesión",
+        "technicalTargetRefs": [
+          "role:link|Cerrar Sesión"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Cerrar Sesión",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "i",
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"i\",1],[\"span\",1]],\"descendantEntries\":[[\"i\",1],[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "profile-dropdown-menu"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#\"},\"stableDescendants\":[],\"semanticShape\":[\"i\",\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"i\\\",1],[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"i\\\",1],[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "controlIdentity": "60d370b39a8d|Cerrar Sesión|role|link|Cerrar Sesión",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 17,
+        "action": "El sistema muestra \"Cerrar sesión\"",
+        "description": "El sistema muestra \"Cerrar sesión\"",
+        "assertionImportance": "optional"
+      },
+      {
+        "index": 18,
+        "action": "Presionar \"Aceptar\"",
+        "description": "Presionar \"Aceptar\"",
+        "technicalTargetRef": "role:link|Aceptar",
+        "technicalTargetRefs": [
+          "role:link|Aceptar"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Aceptar",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(a[href=\"/onlinebanking/Home/Logout\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Aceptar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "/onlinebanking/Home/Logout"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "exit-popup"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"/onlinebanking/Home/Logout\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "controlIdentity": "db24077246b8|Aceptar|role|link|Aceptar",
+        "recordingActionType": "click"
+      }
+    ],
+    "expectedResult": "Se muestra \"Cerrar sesión\"",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "observedAssertions": [
+      "El sistema muestra \"Cerrar sesión\""
+    ],
+    "observableOracles": [
+      {
+        "id": "observed-01",
+        "requirement": "El sistema muestra \"Cerrar sesión\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "target": "Cerrar sesión",
+        "evidence": [
+          "assertion_resolved_during_discovery"
+        ]
+      },
+      {
+        "id": "expected-01",
+        "requirement": "Se muestra \"Cerrar sesión\"",
+        "type": "navigation_transition",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 18,
+        "target": "Aceptar",
+        "polarity": "positive",
+        "evidence": [
+          "transition_observed:true",
+          "click_target:Aceptar",
+          "action_type:Presionar \"Aceptar\"",
+          "after_url:https://qa1.santacruz.do/onlinebanking/",
+          "assertion_polarity:positive"
+        ],
+        "details": {
+          "transitionObserved": true,
+          "clickTarget": "Aceptar",
+          "resolvedTarget": null,
+          "postClickUiChange": null,
+          "sourceActionStepIndex": 18,
+          "expectedUrl": "https://qa1.santacruz.do/onlinebanking/"
+        }
+      }
+    ],
+    "stepStatuses": [
+      {
+        "index": 2,
+        "status": "found"
+      },
+      {
+        "index": 3,
+        "status": "found"
+      },
+      {
+        "index": 4,
+        "status": "found"
+      },
+      {
+        "index": 5,
+        "status": "found"
+      },
+      {
+        "index": 6,
+        "status": "found"
+      },
+      {
+        "index": 7,
+        "status": "found"
+      },
+      {
+        "index": 8,
+        "status": "found"
+      },
+      {
+        "index": 14,
+        "status": "found"
+      },
+      {
+        "index": 15,
+        "status": "found"
+      },
+      {
+        "index": 16,
+        "status": "found"
+      },
+      {
+        "index": 18,
+        "status": "found"
+      },
+      {
+        "index": 17,
+        "status": "found"
+      }
+    ],
+    "auth": {
+      "gateDetected": true,
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    }
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "PREVIEW-001",
+    "title": "Login Sastifactorio",
+    "appSlug": "fenix",
+    "sectionSlug": "api-tests",
+    "auth": {
+      "gateDetected": true,
+      "required": false,
+      "stage": "otp",
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    },
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Abrir la aplicación configurada del proyecto",
+        "operation": "navigate",
+        "target": {
+          "strategy": "url",
+          "value": "APP_BASE_URL"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Presionar \"Empresarial\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Empresarial"
+        },
+        "technicalTargetRef": "role:link|Empresarial",
+        "technicalTargetRefs": [
+          "role:link|Empresarial"
+        ],
+        "controlIdentity": "60d370b39a8d|Empresarial|role|link|Empresarial",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[href=\"#empresarial\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a"
+            },
+            "stableDirectAttributes": {
+              "href": "#empresarial"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "login-box-parent"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#empresarial\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Empresarial",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "login-box-parent"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Ingresar \"130047596\" en \"RNC:\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "RNC:"
+        },
+        "valueKey": "rnc",
+        "associatedField": "RNC:",
+        "technicalTargetRef": "role:textbox|RNC:",
+        "technicalTargetRefs": [
+          "role:textbox|RNC:",
+          "css:#Enterprise",
+          "id:Enterprise"
+        ],
+        "controlIdentity": "60d370b39a8d|RNC:|role|textbox|RNC:",
+        "recordingActionType": "fill",
+        "authGateExpected": true,
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "RNC:",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Ingresar \"jpmota\" en \"Usuario:\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Usuario:"
+        },
+        "valueKey": "usuario",
+        "associatedField": "Usuario:",
+        "technicalTargetRef": "role:textbox|Usuario:",
+        "technicalTargetRefs": [
+          "role:textbox|Usuario:",
+          "css:#UserNameE",
+          "id:UserNameE"
+        ],
+        "controlIdentity": "60d370b39a8d|Usuario:|role|textbox|Usuario:",
+        "recordingActionType": "fill",
+        "authGateExpected": true,
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Usuario:",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 4,
+        "scenarioStepIndex": 5,
+        "originalText": "Ingresar \"qwerty123123\" en \"Contraseña:\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Contraseña:"
+        },
+        "valueKey": "contrasena",
+        "associatedField": "Contraseña:",
+        "technicalTargetRef": "role:textbox|Contraseña:",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña:",
+          "css:#PasswordE",
+          "id:PasswordE"
+        ],
+        "controlIdentity": "60d370b39a8d|Contraseña:|role|textbox|Contraseña:",
+        "recordingActionType": "fill",
+        "authGateExpected": true,
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Contraseña:",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 5,
+        "scenarioStepIndex": 6,
+        "originalText": "Presionar \"Enter\" en \"Contraseña:\"",
+        "operation": "press",
+        "target": {
+          "strategy": "text",
+          "value": "Contraseña:",
+          "exact": false
+        },
+        "value": "Enter",
+        "technicalTargetRef": "role:textbox|Contraseña:",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña:",
+          "css:#PasswordE",
+          "id:PasswordE"
+        ],
+        "controlIdentity": "60d370b39a8d|Contraseña:|role|textbox|Contraseña:",
+        "recordingActionType": "press",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Contraseña:",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "pressPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 6,
+        "scenarioStepIndex": 7,
+        "originalText": "Presionar \"SMS\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "SMS"
+        },
+        "valueKey": "sms",
+        "associatedField": "SMS",
+        "controlIdentity": "60d370b39a8d|SMS|id|IdentifyUserForm",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "SMS",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "SMS",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 7,
+        "scenarioStepIndex": 8,
+        "originalText": "Ingresar \"1\" en \"SMS\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "SMS"
+        },
+        "valueKey": "sms",
+        "associatedField": "SMS",
+        "controlIdentity": "60d370b39a8d|SMS|id|IdentifyUserForm",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "SMS",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 8,
+        "scenarioStepIndex": 14,
+        "originalText": "Presionar \"Continuar\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Continuar"
+        },
+        "valueKey": "continuar",
+        "associatedField": "Continuar",
+        "technicalTargetRef": "role:button|Continuar",
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ],
+        "controlIdentity": "60d370b39a8d|Continuar|role|button|Continuar",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Continuar",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(a[href=\"/onlinebanking/IdentifyUser/Cancel\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 9,
+        "scenarioStepIndex": 15,
+        "originalText": "Presionar el control grabado",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Presionar el control grabado"
+        },
+        "technicalTargetRef": "id:profile-name",
+        "technicalTargetRefs": [
+          "id:profile-name"
+        ],
+        "controlIdentity": "60d370b39a8d|Lizardo Jhonatan Mata Burgos|id|profile-name",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Presionar el control grabado",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 10,
+        "scenarioStepIndex": 16,
+        "originalText": "Presionar \"Cerrar Sesión\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Cerrar Sesión"
+        },
+        "technicalTargetRef": "role:link|Cerrar Sesión",
+        "technicalTargetRefs": [
+          "role:link|Cerrar Sesión"
+        ],
+        "controlIdentity": "60d370b39a8d|Cerrar Sesión|role|link|Cerrar Sesión",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[href=\"#\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a"
+            },
+            "stableDirectAttributes": {
+              "href": "#"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "i",
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "profile-dropdown-menu"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#\"},\"stableDescendants\":[],\"semanticShape\":[\"i\",\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"i\\\",1],[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"i\\\",1],[\\\"span\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 11,
+        "scenarioStepIndex": 17,
+        "originalText": "El sistema muestra \"Cerrar sesión\"",
+        "operation": "assertVisible",
+        "target": {
+          "strategy": "text",
+          "value": "Cerrar sesión"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "literal_visible_text",
+          "backed": true,
+          "implementationKind": "heading_or_control",
+          "requirement": "El sistema muestra \"Cerrar sesión\"",
+          "target": "Cerrar sesión"
+        },
+        "evidenceRefs": [
+          "oracle:observed-01"
+        ]
+      },
+      {
+        "contractStepIndex": 12,
+        "scenarioStepIndex": 18,
+        "originalText": "Presionar \"Aceptar\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Aceptar"
+        },
+        "technicalTargetRef": "role:link|Aceptar",
+        "technicalTargetRefs": [
+          "role:link|Aceptar"
+        ],
+        "controlIdentity": "db24077246b8|Aceptar|role|link|Aceptar",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[href=\"/onlinebanking/Home/Logout\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a"
+            },
+            "stableDirectAttributes": {
+              "href": "/onlinebanking/Home/Logout"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "exit-popup"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"/onlinebanking/Home/Logout\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Aceptar",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(a[href=\"/onlinebanking/Home/Logout\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "oracle": {
+          "type": "navigation_transition",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "url_state",
+          "mechanism": {
+            "source": "url_state",
+            "method": "expectPromotedVisible",
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "navigation_transition",
+              "urlPattern": "https://qa1.santacruz.do/onlinebanking/"
+            }
+          },
+          "sourceActionStepIndex": 18,
+          "requirement": "Se muestra \"Cerrar sesión\"",
+          "target": "Aceptar"
+        },
+        "sourceActionStepIndex": 18,
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 13,
+      "representedScenarioSteps": 13,
+      "missingScenarioSteps": []
+    }
+  }
+}

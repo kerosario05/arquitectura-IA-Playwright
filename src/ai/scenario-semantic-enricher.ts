@@ -185,9 +185,7 @@ export function validateProjectGenerationReferences(
   profile: GenerationProfile,
   config: ProjectGenerationConfig = {},
 ): { valid: boolean; reason?: string } {
-  const safeConfig = "valueSets" in config || "namedProfiles" in config
-    ? toSemanticEnrichmentConfig(config as FullProjectGenerationConfig)
-    : config;
+  const safeConfig = toSemanticEnrichmentConfig(config as FullProjectGenerationConfig);
   if (profile.sourceMode === "configured_values" && !safeConfig.availableValueSetRefs?.includes(profile.valueSetRef ?? "")) {
     return { valid: false, reason: "value_set_reference_not_configured" };
   }
@@ -220,14 +218,12 @@ function semanticInput(requirement: RuntimeInputRequirement, scenarioContext: Re
       steps: scenarioContext.steps,
       expected: scenarioContext.expected,
     },
-    projectGenerationConfig: config,
+    projectGenerationConfig: safeSemanticConfig(config),
   };
 }
 
 function safeSemanticConfig(config: ProjectGenerationConfig): SemanticEnrichmentProjectConfig {
-  return "valueSets" in config || "namedProfiles" in config || "pools" in config || "dictionaries" in config || "moneyProfiles" in config
-    ? toSemanticEnrichmentConfig(config as FullProjectGenerationConfig)
-    : config;
+  return toSemanticEnrichmentConfig(config as FullProjectGenerationConfig);
 }
 
 function stableSerialize(value: unknown): string {

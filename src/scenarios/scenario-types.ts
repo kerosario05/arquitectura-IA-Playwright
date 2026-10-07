@@ -77,6 +77,8 @@ export type CatalogDiagnostics = {
 };
 
 export type ScenarioPreviewRequest = {
+  jiraKey?: string;
+  jiraSummary?: string;
   projectKey?: string;
   sprintId?: number;
   activeSprint?: boolean;
@@ -122,6 +124,54 @@ export type JiraIssueSource = {
   issueType: string;
 };
 
+export type CoverageContractItem = {
+  id: string;
+  type: string;
+  label: string;
+  automatable: boolean;
+  required: boolean;
+  source: string;
+  initialAction?: string;
+  initialScreenElements?: string[];
+  postActionElements?: string[];
+  optionLabel?: string;
+  expectedResult?: string;
+  negativeTerm?: string;
+  postActionQuestion?: string;
+  fieldNames?: string[];
+  requiresAuth?: boolean;
+  manual?: boolean;
+  [key: string]: unknown;
+};
+
+export type CoverageContract = {
+  issueKey: string;
+  functionalScope?: "public_info" | "entry_menu_or_landing" | "private_transactional" | "unknown";
+  initialActions: CoverageContractItem[];
+  blockedWithoutAction: CoverageContractItem[];
+  postActionScreens: CoverageContractItem[];
+  optionFlows: CoverageContractItem[];
+  navigationItems: CoverageContractItem[];
+  listScreens: CoverageContractItem[];
+  selectionFlows: CoverageContractItem[];
+  singleItemShortcuts: CoverageContractItem[];
+  detailFields: CoverageContractItem[];
+  formatRules: CoverageContractItem[];
+  actionOptions: CoverageContractItem[];
+  conditionalAlerts: CoverageContractItem[];
+  failureCases: CoverageContractItem[];
+  selectableOptions?: CoverageContractItem[];
+  visibleMessages?: CoverageContractItem[];
+  confirmationFlows?: CoverageContractItem[];
+  deliveryOptions?: CoverageContractItem[];
+  referenceNumbers?: CoverageContractItem[];
+  negativeRules: CoverageContractItem[];
+  nonExecutable: CoverageContractItem[];
+  authenticatedPrecondition: boolean;
+  totalItems: number;
+  automatedItems: number;
+};
+
 export type McpScenarioStep = string;
 
 export type RecordingExecutionAction = {
@@ -145,6 +195,7 @@ export type RecordingExecutionAction = {
   selectorControlId?: string;
   optionSurfaceId?: string;
   targetRef?: string;
+  rowScope?: number;
   technicalTargetRef?: string;
   technicalTargetRefs?: string[];
   technicalTargetCandidates?: Array<Record<string, unknown>>;
@@ -173,6 +224,8 @@ export type RecordingExecutionAction = {
    */
   expectedRouteAfter?: string;
   expectedOutcomeKind?: "route_transition" | "in_place_transition";
+  /** True only when the source click has matching, non-empty canonical screen refs and no recorded post-route. */
+  recordedSameSurfaceAction?: boolean;
   /** `CanonicalInteraction.controlIdentity` -- content-derived (screen fingerprint + field/locator
    *  identity), never an array/interaction index. Carried through so learned route-family
    *  authority (RecordingRouteObservation) can key observations by the same lineage the
@@ -296,6 +349,18 @@ export type GuidedRouteDiscoveryResponse = Record<string, any> & {
   ok: boolean;
   status: string;
   discoveryTarget?: DiscoveryTarget;
+};
+
+export type GuidedRouteDiscoveryCandidate = {
+  routeName: string;
+  confidence: "high" | "medium" | "low";
+  source: string;
+  entrySteps?: string[];
+  targetHints?: string[];
+  observedLabels?: string[];
+  matchedIntentSignals?: string[];
+  diagnostics?: string[];
+  [key: string]: unknown;
 };
 
 export type ApprovedDiscoveryCandidateExecutionRequest = {
@@ -929,6 +994,9 @@ export type AppKnowledgeItem = {
   destination?: string;
   destinationSignals?: string[];
   destinationUrl?: string;
+  sourceTechnicalScreenKey?: string;
+  destinationTechnicalScreenKey?: string;
+  transitionValidated?: boolean;
   routeFrom?: string;
   actionTarget?: string;
 };

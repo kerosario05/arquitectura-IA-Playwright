@@ -284,6 +284,7 @@ runsRouter.post("/scenario-preview", (req, res) => {
     appSlug?: string;
     targetAppSlug?: string;
     targetAppName?: string;
+    jiraKey?: string;
     sectionName?: string;
     sectionSlug?: string;
     sectionId?: string | number;
@@ -964,7 +965,7 @@ runsRouter.post("/:jobId/rerun", async (req, res) => {
          ? { runtimeEntriesByCase: body.runtimeEntriesByCase as Record<string, DataContextEntry[]> }
          : {}),
        adaptiveScenarios: Array.isArray(body.adaptiveScenarios) ? body.adaptiveScenarios : undefined,
-       publishStrategy: (body.publishStrategy as string) === "use_existing" ? "use_existing" : "always_create",
+       publishStrategy: body.publishStrategy === "use_existing" ? "use_existing" as const : "always_create" as const,
     };
     const result = await launchExecution(launchInput);
 

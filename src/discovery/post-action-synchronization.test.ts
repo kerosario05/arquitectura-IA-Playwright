@@ -802,3 +802,86 @@ test("32/focusOnlyMutationRejected. a focus-only (incidental) DOM mutation with 
     { completed: false },
   );
 });
+
+test("33/recordedSameSurfaceActionCompletesWhenStable. explicit same-screen Recording evidence completes an intermediate click once loading settles", () => {
+  assert.deepEqual(
+    resolvePostActionSynchronization({
+      recordedSameSurfaceAction: true,
+      clickCausalEffectDetected: false,
+      actionNetworkObserved: false,
+      loadingSettled: true,
+      routeChanged: false,
+      nextTargetAvailable: true,
+      nextTargetBecameVisible: false,
+    }),
+    { completed: true, signal: "recorded_same_surface" },
+  );
+});
+
+test("34/recordedSameSurfaceActionStillWaitsForLoading. same-screen recording evidence does not hide an active request", () => {
+  assert.deepEqual(
+    resolvePostActionSynchronization({
+      recordedSameSurfaceAction: true,
+      clickCausalEffectDetected: false,
+      actionNetworkObserved: false,
+      loadingSettled: false,
+      routeChanged: false,
+    }),
+    { completed: false },
+  );
+});
+
+test("35/recordedSameSurfaceActionDoesNotHideFailedRequest", () => {
+  assert.deepEqual(
+    resolvePostActionSynchronization({
+      recordedSameSurfaceAction: true,
+      clickCausalEffectDetected: false,
+      actionNetworkObserved: false,
+      loadingSettled: true,
+      actionNetworkFailed: true,
+      routeChanged: false,
+    }),
+    { completed: false },
+  );
+});
+
+test("36/recordedSameSurfaceActionRespectsStructuredNextOwnerReadiness", () => {
+  assert.deepEqual(
+    resolvePostActionSynchronization({
+      recordedSameSurfaceAction: true,
+      clickCausalEffectDetected: false,
+      actionNetworkObserved: false,
+      loadingSettled: true,
+      routeChanged: false,
+      nextTargetRequiresRuntimeResolution: true,
+      nextTargetReady: false,
+    }),
+    { completed: false },
+  );
+});
+
+test("37/recordedSameSurfaceHintNeedsObservedNoop. identical recording refs cannot complete a click with observed causal effect", () => {
+  assert.deepEqual(
+    resolvePostActionSynchronization({
+      recordedSameSurfaceAction: true,
+      clickCausalEffectDetected: true,
+      actionNetworkObserved: false,
+      loadingSettled: true,
+      routeChanged: false,
+    }),
+    { completed: false },
+  );
+});
+
+test("38/recordedSameSurfaceHintNeedsNoNetwork. identical refs cannot hide an observed action request", () => {
+  assert.deepEqual(
+    resolvePostActionSynchronization({
+      recordedSameSurfaceAction: true,
+      clickCausalEffectDetected: false,
+      actionNetworkObserved: true,
+      loadingSettled: true,
+      routeChanged: false,
+    }),
+    { completed: false },
+  );
+});

@@ -136,6 +136,8 @@ export type SpecExecutionContractStep = {
   target?: SpecStepTarget;
   value?: string;
   valueKey?: string;
+  /** Position of this character in a recorded virtual-keyboard value. */
+  segmentPosition?: number;
   entityScope?: string;
   rowRelation?: "next" | "added";
   selectionField?: string;
@@ -168,6 +170,8 @@ export type SpecExecutionContractStep = {
    * structured authority instead of guessing from a role/label.
    */
   recordingActionType?: "fill" | "select" | "click" | "check" | "uncheck" | "press" | "navigation" | "system_observation";
+  /** Canonical Recording evidence says this action's captured screen is identical before and after. */
+  recordedSameSurfaceAction?: boolean;
   /**
    * The CORE-materialized technical identity for this step (see technical-target-materializer.ts),
    * produced from whichever evidence source built this contract (Recording or Discovery) through
@@ -665,7 +669,7 @@ export function resolveAuthGateFillScenarioStepIndices(
   return result;
 }
 
-export type ScenarioStepLike = { index: number; action: string; description?: string; expected?: string; valueKey?: string; entityScope?: string; rowRelation?: "next" | "added"; selectionField?: string; selectionActivationField?: string; associatedField?: string; technicalTargetRef?: string; technicalTargetRefs?: string[]; technicalTargetCandidates?: Array<Record<string, unknown>>; semanticRuntimeEvidence?: import("../recording/structural-owner-identity").SemanticRuntimeEvidence; playwrightRecorderEvidence?: import("../recording/structural-owner-identity").PlaywrightRecorderEvidence; resolutionState?: "certified" | "runtime_resolution_required" | "unresolved_unrecoverable"; assertionImportance?: "blocking" | "contextual" | "optional"; canonicalAssertion?: import("../scenarios/canonical-scenario").CanonicalAssertion; conditionalAction?: import("../scenarios/canonical-scenario").CanonicalConditionalAction; controlIdentity?: string; recordingActionType?: "fill" | "select" | "click" | "check" | "uncheck" | "press" | "navigation" | "system_observation" };
+export type ScenarioStepLike = { index: number; action: string; description?: string; expected?: string; valueKey?: string; entityScope?: string; rowRelation?: "next" | "added"; selectionField?: string; selectionActivationField?: string; associatedField?: string; technicalTargetRef?: string; technicalTargetRefs?: string[]; technicalTargetCandidates?: Array<Record<string, unknown>>; semanticRuntimeEvidence?: import("../recording/structural-owner-identity").SemanticRuntimeEvidence; playwrightRecorderEvidence?: import("../recording/structural-owner-identity").PlaywrightRecorderEvidence; resolutionState?: "certified" | "runtime_resolution_required" | "unresolved_unrecoverable"; assertionImportance?: "blocking" | "contextual" | "optional"; canonicalAssertion?: import("../scenarios/canonical-scenario").CanonicalAssertion; conditionalAction?: import("../scenarios/canonical-scenario").CanonicalConditionalAction; controlIdentity?: string; recordingActionType?: "fill" | "select" | "click" | "check" | "uncheck" | "press" | "navigation" | "system_observation"; recordedSameSurfaceAction?: boolean };
 
 function deriveRecordedSelectionActivationField(
   scenarioStep: ScenarioStepLike,
@@ -696,6 +700,53 @@ function deriveRecordedSelectionActivationField(
   const latestIndex = Math.max(...owners.map((owner) => owner.index), Number.NEGATIVE_INFINITY);
   const latestOwners = owners.filter((owner) => owner.index === latestIndex);
   return latestOwners.length === 1 ? latestOwners[0].associatedField?.trim() : undefined;
+}
+
+function deriveAdjacentSelectionActivationField(
+  scenarioStep: ScenarioStepLike,
+  scenarioSteps: readonly ScenarioStepLike[],
+): string | undefined {
+  if (classifyScenarioAction(scenarioStep.action, scenarioStep.canonicalAssertion, scenarioStep.conditionalAction) !== "select") {
+    return undefined;
+  }
+  const nextStep = scenarioSteps.find((candidate) => candidate.index === scenarioStep.index + 1);
+  if (!nextStep
+    || classifyScenarioAction(nextStep.action, nextStep.canonicalAssertion, nextStep.conditionalAction) !== "fill"
+    || (scenarioStep.entityScope && nextStep.entityScope && scenarioStep.entityScope !== nextStep.entityScope)) {
+    return undefined;
+  }
+  return nextStep.associatedField?.trim()
+    || parseStepIntent(nextStep.action).find((intent) => intent.type === "action_fill")?.actionTarget?.trim();
+}
+
+function deriveAdjacentPlanEntityScope(
+  selectionStep: ExecutionPlanStep | undefined,
+  planSteps: readonly ExecutionPlanStep[],
+): string | undefined {
+  if (!selectionStep
+    || selectionStep.action !== "click"
+    || !selectionStep.target
+    || typeof selectionStep.target !== "object"
+    || selectionStep.target.strategy !== "selection_keyboard_typeahead") {
+    return undefined;
+  }
+  // A recorded selection embedded in a repeated row can be represented by a
+  // value-only plan step. Preserve the row identity from the immediately
+  // adjacent fill cells so the promoted runtime resolves that selection in the
+  // same row Discovery already certified. Require a unique neighboring entity
+  // scope; never infer from the option text or row position alone.
+  const adjacentScopes = [-1, 1].flatMap((offset) => {
+    const neighbor = planSteps.find((candidate) => candidate.index === selectionStep.index + offset);
+    if (neighbor?.action !== "fill") return [];
+    const entityScope = neighbor.entityScope ?? entityScopeFromValueKey(neighbor.valueKey);
+    return entityScope ? [entityScope] : [];
+  });
+  const uniqueScopes = [...new Set(adjacentScopes)];
+  return uniqueScopes.length === 1 ? uniqueScopes[0] : undefined;
+}
+
+function entityScopeFromValueKey(valueKey?: string): string | undefined {
+  return valueKey?.match(/^(entity_\d+)\./i)?.[1];
 }
 
 function extractQuotedText(value: string | undefined): string | undefined {
@@ -942,6 +993,100 @@ function findCompatiblePlanStep(
 }
 
 /**
+ * A recording may expose a virtual-keyboard value as one authored fill while its validated plan
+ * contains one click per character. Bridge those two representations only when the entire
+ * adjacent source sequence matches a complete, ordered, uniquely captured keyboard sequence.
+ * This is recording evidence, not app-specific behavior or a locator certificate.
+ */
+function bindRecordedVirtualKeyboardFillSequence(
+  scenarioSteps: readonly ScenarioStepLike[],
+  planSteps: readonly ExecutionPlanStep[],
+): Map<number, ExecutionPlanStep> {
+  const bindings = new Map<number, ExecutionPlanStep>();
+  const orderedSteps = [...scenarioSteps].sort((left, right) => left.index - right.index);
+  const planByIndex = new Map(planSteps.map((step) => [step.index, step]));
+  const fillIntent = (step: ScenarioStepLike) => [step.description, step.action]
+    .filter((candidate): candidate is string => typeof candidate === "string" && candidate.trim().length > 0)
+    .flatMap((candidate) => parseStepIntent(candidate))
+    .find((intent) => intent.type === "action_fill" && intent.actionTarget?.trim());
+  const keyboardPlanStep = (step: ScenarioStepLike): ExecutionPlanStep | undefined => {
+    const candidate = planByIndex.get(step.index);
+    const evidence = candidate?.playwrightRecorderEvidence;
+    const sourceField = fillIntent(step)?.actionTarget?.trim();
+    const targetField = candidate ? getStepTargetValue(candidate).trim() : "";
+    if (classifyScenarioAction(step.action, step.canonicalAssertion, step.conditionalAction) !== "fill"
+      || candidate?.action !== "click"
+      || evidence?.kind !== "virtual_keyboard"
+      || evidence.runtimeResolutionRequired !== true
+      || evidence.captureMatchCount !== 1
+      || !Number.isInteger(evidence.buttonCount) || (evidence.buttonCount ?? 0) < 10
+      || !Array.isArray(evidence.keyLabels) || evidence.keyLabels.length < 10
+      || !evidence.fieldLabel?.trim()
+      || !sourceField
+      || normalizeOracleMatch(sourceField) !== normalizeOracleMatch(evidence.fieldLabel)
+      || normalizeOracleMatch(targetField) !== normalizeOracleMatch(evidence.fieldLabel)
+      // The human-facing source step can have its value replaced with a privacy mask before
+      // promotion, which also drops its valueKey. In that shape the complete, ordered recorder
+      // sequence is the lineage authority and the validated plan supplies the binding. If the
+      // source does retain a key, it must still agree exactly.
+      || !candidate.valueKey?.trim()
+      || (step.valueKey?.trim() && candidate.valueKey !== step.valueKey)
+      || !Number.isInteger(candidate.segmentPosition)) return undefined;
+    return candidate;
+  };
+
+  for (let index = 0; index < orderedSteps.length;) {
+    const first = orderedSteps[index];
+    const firstPlanStep = keyboardPlanStep(first);
+    if (!firstPlanStep) {
+      index += 1;
+      continue;
+    }
+    const firstEvidence = firstPlanStep.playwrightRecorderEvidence!;
+    const group: ScenarioStepLike[] = [first];
+    const firstField = fillIntent(first)?.actionTarget?.trim() ?? "";
+    for (let nextIndex = index + 1; nextIndex < orderedSteps.length; nextIndex += 1) {
+      const previous = group[group.length - 1];
+      const candidateSource = orderedSteps[nextIndex];
+      if (classifyScenarioAction(candidateSource.action, candidateSource.canonicalAssertion, candidateSource.conditionalAction) !== "fill"
+        || candidateSource.index !== previous.index + 1
+        || candidateSource.valueKey !== first.valueKey
+        || normalizeOracleMatch(fillIntent(candidateSource)?.actionTarget ?? "") !== normalizeOracleMatch(firstField)) break;
+      group.push(candidateSource);
+    }
+    const orderedPlanSequence = group.map((source) => keyboardPlanStep(source));
+    const completePlanSequence = orderedPlanSequence.filter((candidate): candidate is ExecutionPlanStep => candidate !== undefined);
+    const sequenceIsComplete = group.length >= 2
+      && completePlanSequence.length === group.length
+      && completePlanSequence.every((candidate, position) => {
+        const evidence = candidate.playwrightRecorderEvidence!;
+        return candidate.segmentPosition === position + 1
+          && (evidence.segmentCount === undefined || evidence.segmentCount === group.length)
+          && evidence.fieldLabel === firstEvidence.fieldLabel
+          && evidence.buttonCount === firstEvidence.buttonCount
+          && JSON.stringify(evidence.keyLabels) === JSON.stringify(firstEvidence.keyLabels);
+      })
+      && completePlanSequence[0]?.segmentPosition === 1;
+    const nextPlanStep = planByIndex.get(group[group.length - 1].index + 1);
+    const hasUnmatchedTrailingKeyboardStep = nextPlanStep?.action === "click"
+      && nextPlanStep.valueKey === first.valueKey
+      && nextPlanStep.playwrightRecorderEvidence?.kind === "virtual_keyboard"
+      && normalizeOracleMatch(nextPlanStep.playwrightRecorderEvidence.fieldLabel ?? "") === normalizeOracleMatch(firstEvidence.fieldLabel ?? "");
+    const sequenceValueKey = completePlanSequence[0]?.valueKey;
+    const planSequenceHasSingleValueKey = Boolean(sequenceValueKey?.trim())
+      && completePlanSequence.every((candidate) => candidate.valueKey === sequenceValueKey);
+    if (sequenceIsComplete && planSequenceHasSingleValueKey && !hasUnmatchedTrailingKeyboardStep) {
+      for (let position = 0; position < group.length; position += 1) {
+        bindings.set(group[position].index, completePlanSequence[position]);
+      }
+      console.log(`[execution-contract] recordedVirtualKeyboardSequenceBound=true firstStep=${group[0].index} segmentCount=${group.length} valueKey=${sequenceValueKey}`);
+    }
+    index += group.length;
+  }
+  return bindings;
+}
+
+/**
  * Recording/Discovery can expose one human fill per character for a segmented input even though
  * the validated plan already represents that input as one valueKey-bound action. Collapse only
  * when the recorder marks adjacent per-character actions with the same segmented-input scope and
@@ -1039,7 +1184,7 @@ function resolveResolvedExecutionTarget(
     planStep?.action === "click"
     && planStep.target
     && typeof planStep.target === "object"
-    && planStep.target.strategy === "selection_keyboard_typeahead"
+    && String(planStep.target.strategy) === "selection_keyboard_typeahead"
     && typeof planStep.target.value === "string"
     && planStep.target.value.trim()
   ) {
@@ -1105,6 +1250,7 @@ export function buildSpecExecutionContract(
         expected: step.expected
       }));
   const scenarioSteps = collapseSegmentedScenarioFills(sourceScenarioSteps, plan.steps);
+  const virtualKeyboardFillBindings = bindRecordedVirtualKeyboardFillSequence(sourceScenarioSteps, plan.steps);
 
   const requiredScenarioSteps = scenarioSteps.filter((s) => {
     const action = (s.action ?? "").trim().toLowerCase();
@@ -1117,15 +1263,21 @@ export function buildSpecExecutionContract(
   const steps: SpecExecutionContractStep[] = requiredScenarioSteps.map((scenarioStep, index) => {
     // Operation always comes from the scenario step intent, never from the validated plan.
     let operation = classifyScenarioAction(scenarioStep.action, scenarioStep.canonicalAssertion, scenarioStep.conditionalAction);
-    const selectionActivationField = scenarioStep.selectionActivationField?.trim()
-      || deriveRecordedSelectionActivationField(scenarioStep, scenarioSteps);
+    const virtualKeyboardPlanStep = virtualKeyboardFillBindings.get(scenarioStep.index);
+    let selectionActivationField = scenarioStep.selectionActivationField?.trim()
+      || deriveRecordedSelectionActivationField(scenarioStep, scenarioSteps)
+      || deriveAdjacentSelectionActivationField(scenarioStep, scenarioSteps);
     const isAssertion = operation.startsWith("assert");
 
     // Assertions are never enriched from the validated plan (never substituted with
     // navigate/click). Actions look up a traceable plan step for implementation only.
     let planStep = isAssertion
       ? undefined
-      : findCompatiblePlanStep(scenarioStep, operation, plan.steps);
+      : virtualKeyboardPlanStep ?? findCompatiblePlanStep(scenarioStep, operation, plan.steps);
+    if (virtualKeyboardPlanStep) {
+      operation = "click";
+      console.log(`[execution-contract-step] scenarioStepIndex=${scenarioStep.index} operation=click sourceOperation=fill reason=validated_virtual_keyboard_sequence segmentPosition=${virtualKeyboardPlanStep.segmentPosition}`);
+    }
 
     // A natural-language setup row can describe opening the configured application without
     // carrying a locator. When the validated plan has a navigate operation at the same semantic
@@ -1177,14 +1329,53 @@ export function buildSpecExecutionContract(
       ? resolveImplementationDescriptor(planStep, options.pageObjectRegistry)
       : undefined;
 
-    const target = planBackedNavigation
-      ? planStep?.target === "APP_BASE_URL"
-        ? { strategy: "url", value: "APP_BASE_URL" }
-        : buildSpecStepTarget(planStep?.target)
-      : buildScenarioStepTarget(scenarioStep, operation)
+    const target = virtualKeyboardPlanStep
+      ? buildSpecStepTarget(planStep?.target)
+      : planBackedNavigation
+        ? planStep?.target === "APP_BASE_URL"
+          ? { strategy: "url", value: "APP_BASE_URL" }
+          : buildSpecStepTarget(planStep?.target)
+        : buildScenarioStepTarget(scenarioStep, operation)
         ?? (planStep ? buildSpecStepTarget(planStep.target) : undefined);
 
     const resolvedExecutionTarget = resolveResolvedExecutionTarget(scenarioStep, operation, observableOracles, planStep);
+    // A recording can attach the previous/default option to a selection step when
+    // its option event was associated with the wrong semantic field. The validated
+    // selection value is the authority for an option identity; carrying a different
+    // recorded option into the promoted runtime makes it click that stale option
+    // before the value-backed selection callback can run.
+    const recordedSelectionOptionRefs = (scenarioStep.technicalTargetRefs ?? [])
+      .filter((ref) => /^role:option\|/i.test(ref.trim()));
+    const matchingSelectionOptionRefs = operation === "select" && resolvedExecutionTarget
+      ? recordedSelectionOptionRefs.filter((ref) => normalizeOracleMatch(ref.trim().replace(/^role:option\|/i, ""))
+        === normalizeOracleMatch(resolvedExecutionTarget))
+      : recordedSelectionOptionRefs;
+    const mismatchedSelectionOptionRefs = operation === "select" && resolvedExecutionTarget
+      ? recordedSelectionOptionRefs.filter((ref) => !matchingSelectionOptionRefs.includes(ref))
+      : [];
+    const technicalTargetRefs = mismatchedSelectionOptionRefs.length > 0
+      ? (scenarioStep.technicalTargetRefs ?? []).filter((ref) => !mismatchedSelectionOptionRefs.includes(ref))
+      : scenarioStep.technicalTargetRefs;
+    const technicalTargetRef = operation === "select"
+      && scenarioStep.technicalTargetRef
+      && /^role:option\|/i.test(scenarioStep.technicalTargetRef.trim())
+      && mismatchedSelectionOptionRefs.includes(scenarioStep.technicalTargetRef.trim())
+      ? matchingSelectionOptionRefs[0]
+        ?? technicalTargetRefs?.find((ref) => !/^role:option\|/i.test(ref.trim()))
+      : scenarioStep.technicalTargetRef;
+    const rawRecorderEvidence = scenarioStep.playwrightRecorderEvidence ?? planStep?.playwrightRecorderEvidence;
+    const recorderEvidenceNamesMismatchedOption = operation === "select"
+      && Boolean(resolvedExecutionTarget)
+      && rawRecorderEvidence?.kind === "role"
+      && rawRecorderEvidence.role === "option"
+      && normalizeOracleMatch(rawRecorderEvidence.normalizedName ?? "") !== normalizeOracleMatch(resolvedExecutionTarget!);
+    const playwrightRecorderEvidence = recorderEvidenceNamesMismatchedOption ? undefined : rawRecorderEvidence;
+    if (mismatchedSelectionOptionRefs.length > 0) {
+      console.log(`[selection-target-lineage] staleRecordedOptionsRemoved=true scenarioStepIndex=${scenarioStep.index} resolvedValue=${JSON.stringify(resolvedExecutionTarget)} removedCount=${mismatchedSelectionOptionRefs.length} matchingOptionPresent=${matchingSelectionOptionRefs.length > 0}`);
+    }
+    if (recorderEvidenceNamesMismatchedOption) {
+      console.log(`[selection-target-lineage] staleRecordedOptionEvidenceIgnored=true scenarioStepIndex=${scenarioStep.index} resolvedValue=${JSON.stringify(resolvedExecutionTarget)}`);
+    }
 
     // Priority for assertion steps:
     // 1. backed oracle/evidence -> required=true, executed (never downgraded by an
@@ -1286,10 +1477,23 @@ export function buildSpecExecutionContract(
     // resolved locator (planStep.target). Both are normalized to the SAME shared materializer —
     // never two separate certification paths — so the display label used above for `target`
     // never becomes the step's primary runtime identity when a stronger one exists.
-    const recordingCandidate = Array.isArray(scenarioStep.technicalTargetCandidates)
+    const rawRecordingCandidate = Array.isArray(scenarioStep.technicalTargetCandidates)
       ? (scenarioStep.technicalTargetCandidates.find((c) => (c as Record<string, unknown>).validatedByInteraction === true)
         ?? scenarioStep.technicalTargetCandidates[0])
       : undefined;
+    const rawCandidateOptionRefs = rawRecordingCandidate && typeof rawRecordingCandidate === "object"
+      ? [
+          (rawRecordingCandidate as Record<string, unknown>).technicalTargetRef,
+          ...((rawRecordingCandidate as Record<string, unknown>).locatorCandidates as Array<Record<string, unknown>> | undefined
+            ?? []).map((candidate) => candidate.strategy === "role" && typeof candidate.value === "string"
+              ? `role:${candidate.value}` : undefined),
+        ].filter((ref): ref is string => typeof ref === "string" && /^role:option\|/i.test(ref.trim()))
+      : [];
+    const recordingCandidateHasMismatchedOption = operation === "select"
+      && Boolean(resolvedExecutionTarget)
+      && rawCandidateOptionRefs.length > 0
+      && !rawCandidateOptionRefs.some((ref) => matchingSelectionOptionRefs.includes(ref));
+    const recordingCandidate = recordingCandidateHasMismatchedOption ? undefined : rawRecordingCandidate;
     const displayLabel = target?.value ?? scenarioTargetText;
     const normalizedEvidence = recordingCandidate
       ? normalizeRecordingEvidence(recordingCandidate, { displayLabel, operation })
@@ -1318,8 +1522,8 @@ export function buildSpecExecutionContract(
     // resolutionState field an explicit upstream scenarioStep.resolutionState already
     // populates, and never overrides an explicit upstream value or downgrades stronger
     // already-existing authority.
-    const hasAuthoritativeTechnicalTargetRef = typeof scenarioStep.technicalTargetRef === "string"
-      && scenarioStep.technicalTargetRef.trim().length > 0;
+    const hasAuthoritativeTechnicalTargetRef = typeof technicalTargetRef === "string"
+      && technicalTargetRef.trim().length > 0;
     const certifiedNonAmbiguousStructural = certifiedTechnicalTarget?.targetType === "structural"
       && certifiedTechnicalTarget.structuralContext?.identityAmbiguous !== true
       && !(typeof certifiedTechnicalTarget.structuralContext?.structuralIdentityMatchCount === "number"
@@ -1339,12 +1543,58 @@ export function buildSpecExecutionContract(
       && !certifiedNonAmbiguousStructural
       && (wasResolvedByRuntimePlanStrategy
         || planStep?.playwrightRecorderEvidence?.kind === "segmented_input"
-        || scenarioStep.playwrightRecorderEvidence?.runtimeResolutionRequired === true)
+        || playwrightRecorderEvidence?.runtimeResolutionRequired === true)
       ? "runtime_resolution_required" as const
       : undefined;
     const resolutionState = scenarioStep.resolutionState ?? inferredFromValidatedPlan;
     if (!scenarioStep.resolutionState && inferredFromValidatedPlan) {
       console.log(`[execution-contract-step] scenarioStepIndex=${scenarioStep.index} resolutionState=${inferredFromValidatedPlan} source=validated_plan_recorded_marker planTargetStrategy=${planTargetStrategy}`);
+    }
+
+    // Discovery may resolve a selector embedded in a grid cell by opening the
+    // following fill cell (for example, a currency menu inside the income cell).
+    // Carry that verified activation field into the promoted runtime when the
+    // validated plan explicitly records the keyboard-selection strategy and the
+    // next plan action fills the adjacent cell.
+    const scenarioSelectionValue = resolvedExecutionTarget
+      ?? extractQuotedText(scenarioStep.expected)
+      ?? extractQuotedText(scenarioStep.description);
+    const semanticSelectionPlanMatches = (operation === "select" || operation === "click") && scenarioSelectionValue
+      ? plan.steps.filter((candidate) => candidate.action === "click"
+        && candidate.target && typeof candidate.target === "object"
+        && candidate.target.strategy === "selection_keyboard_typeahead"
+        && normalizeOracleMatch(getStepTargetValue(candidate)) === normalizeOracleMatch(scenarioSelectionValue))
+      : [];
+    const indexedSelectionPlanStep = operation === "select" || operation === "click"
+      ? (planTargetStrategy === "selection_keyboard_typeahead"
+        ? planStep
+        : plan.steps.find((candidate) => candidate.index === scenarioStep.index
+          && candidate.target && typeof candidate.target === "object"
+          && (candidate.target as { strategy?: unknown }).strategy === "selection_keyboard_typeahead")
+          ?? (semanticSelectionPlanMatches.length === 1 ? semanticSelectionPlanMatches[0] : undefined))
+      : undefined;
+    const indexedSelectionPlanStrategy = indexedSelectionPlanStep?.target && typeof indexedSelectionPlanStep.target === "object"
+      ? (indexedSelectionPlanStep.target as { strategy?: unknown }).strategy
+      : planTargetStrategy;
+    const selectionPlanEntityScope = (operation === "select" || operation === "click")
+      ? (indexedSelectionPlanStep || planStep
+        ? deriveAdjacentPlanEntityScope(indexedSelectionPlanStep ?? planStep!, plan.steps)
+        : undefined)
+      : undefined;
+    const entityScope = scenarioStep.entityScope ?? planStep?.entityScope ?? selectionPlanEntityScope;
+    if (!scenarioStep.entityScope && selectionPlanEntityScope) {
+      console.log(`[selection-target-lineage] entityScopeCarriedFromAdjacentPlanCells=true scenarioStepIndex=${scenarioStep.index} entityScope=${selectionPlanEntityScope}`);
+    }
+    if (!selectionActivationField && (operation === "select" || operation === "click")
+      && indexedSelectionPlanStrategy === "selection_keyboard_typeahead" && indexedSelectionPlanStep) {
+      const nextPlanStep = plan.steps.find((candidate) => candidate.index === indexedSelectionPlanStep.index + 1);
+      if (nextPlanStep?.action === "fill") {
+        const activationField = getStepTargetValue(nextPlanStep)?.trim();
+        if (activationField) {
+          selectionActivationField = activationField;
+          console.log(`[selection-target-lineage] activationFieldCarriedFromValidatedPlan=true scenarioStepIndex=${scenarioStep.index} activationField=${JSON.stringify(activationField)}`);
+        }
+      }
     }
 
     return {
@@ -1356,21 +1606,21 @@ export function buildSpecExecutionContract(
       target,
       value: planStep?.value,
       valueKey: planStep?.valueKey ?? scenarioStep.valueKey,
-      ...(scenarioStep.entityScope ? { entityScope: scenarioStep.entityScope } : {}),
-      ...(scenarioStep.rowRelation ? { rowRelation: scenarioStep.rowRelation } : {}),
+      ...(virtualKeyboardPlanStep?.segmentPosition ? { segmentPosition: virtualKeyboardPlanStep.segmentPosition } : {}),
+      ...(entityScope ? { entityScope } : {}),
+      ...((scenarioStep.rowRelation ?? planStep?.rowRelation) ? { rowRelation: scenarioStep.rowRelation ?? planStep?.rowRelation } : {}),
       ...(scenarioStep.selectionField ? { selectionField: scenarioStep.selectionField } : {}),
       ...(selectionActivationField ? { selectionActivationField } : {}),
       ...(scenarioStep.associatedField ? { associatedField: scenarioStep.associatedField } : {}),
-      ...(scenarioStep.technicalTargetRef ? { technicalTargetRef: scenarioStep.technicalTargetRef } : {}),
-      ...(scenarioStep.technicalTargetRefs ? { technicalTargetRefs: [...scenarioStep.technicalTargetRefs] } : {}),
+      ...(technicalTargetRef ? { technicalTargetRef } : {}),
+      ...(technicalTargetRefs ? { technicalTargetRefs: [...technicalTargetRefs] } : {}),
       ...(scenarioStep.controlIdentity ? { controlIdentity: scenarioStep.controlIdentity } : {}),
-      ...(scenarioStep.recordingActionType ? { recordingActionType: scenarioStep.recordingActionType } : {}),
+      ...((virtualKeyboardPlanStep ? "click" : scenarioStep.recordingActionType) ? { recordingActionType: virtualKeyboardPlanStep ? "click" : scenarioStep.recordingActionType } : {}),
+      ...(scenarioStep.recordedSameSurfaceAction ? { recordedSameSurfaceAction: true } : {}),
       ...(operation === "fill" && authGateFillScenarioStepIndices.has(scenarioStep.index) ? { authGateExpected: true } : {}),
       ...(certifiedTechnicalTarget ? { certifiedTechnicalTarget } : {}),
       ...(scenarioStep.semanticRuntimeEvidence ? { semanticRuntimeEvidence: scenarioStep.semanticRuntimeEvidence } : {}),
-      ...(scenarioStep.playwrightRecorderEvidence ?? planStep?.playwrightRecorderEvidence
-        ? { playwrightRecorderEvidence: scenarioStep.playwrightRecorderEvidence ?? planStep?.playwrightRecorderEvidence }
-        : {}),
+      ...(playwrightRecorderEvidence ? { playwrightRecorderEvidence } : {}),
       ...(resolutionState ? { resolutionState } : {}),
       required,
       executionStatus,

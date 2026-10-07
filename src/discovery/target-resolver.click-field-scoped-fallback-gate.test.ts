@@ -79,12 +79,17 @@ test("6/noParallelResolver. no second/duplicate field-scoped resolver was introd
   const fn = resolveActionTargetSource();
   const matches = fn.match(/tryFieldScopedStructuralFallback\(/g) ?? [];
   // The shared helper is invoked from TWO mutually-exclusive branches: the exact-resolution branch
-  // (diagnostic-only accepted-scope marker certification, never a locator) and the not-found
-  // recovery branch. At most ONE executes per resolveActionTarget call -- never a second/parallel
-  // resolver, never a downstream re-resolution.
+  // (diagnostic-only accepted-scope marker certification for non-selection actions, never a
+  // locator) and the not-found recovery branch. At most ONE executes per resolveActionTarget call
+  // -- never a second/parallel resolver, never a downstream re-resolution.
   assert.equal(matches.length, 2, "both call sites reuse the same existing shared fallback");
   assert.doesNotMatch(fn, /function\s+tryFieldScoped\w*Fallback2?\(/i, "no second fallback function defined inline");
   assert.doesNotMatch(fn, /click-field-resolver-v2|associated-button-resolver/i);
+});
+
+test("6a/resolvedSelectionSkipsFieldScope. a verified selection does not start the accepted-scope click diagnostic", () => {
+  const fn = resolveActionTargetSource();
+  assert.match(fn, /if \(opts\.associatedField\?\.trim\(\) && opts\.actionType !== "action_select"\) \{[\s\S]*?const diagnosticScope = await tryFieldScopedStructuralFallback/);
 });
 
 test("7/fillUntouched. resolveFillTarget's own wrapper source is completely unmodified by this fix", () => {

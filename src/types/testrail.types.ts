@@ -92,6 +92,7 @@ export type TestScenarioStep = {
    * action kind, never inferred from step/target text. Paired with `controlIdentity` above.
    */
   recordingActionType?: "fill" | "select" | "click" | "check" | "uncheck" | "press" | "navigation" | "system_observation";
+  recordedSameSurfaceAction?: boolean;
 };
 
 export type TestScenario = {
@@ -119,6 +120,7 @@ export type TestScenario = {
   /** Structured recording identity is carried separately from TestRail prose. */
   recordingId?: string;
   recordedScenarioId?: string;
+  canonicalInteractions?: Array<Record<string, unknown>>;
   recordingExecutionContract?: import("../scenarios/scenario-types").RecordingExecutionContract;
   canonicalScenarioId?: string;
   canonicalRequirements?: import("../scenarios/canonical-scenario").CanonicalRequirement[];

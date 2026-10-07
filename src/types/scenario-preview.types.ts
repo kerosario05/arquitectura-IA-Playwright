@@ -108,6 +108,8 @@ export type CatalogDiagnostics = {
 };
 
 export type ScenarioPreviewRequest = {
+  jiraKey?: string;
+  jiraSummary?: string;
   appSlug: string;
   targetAppSlug?: string;
   targetAppName?: string;
@@ -122,6 +124,8 @@ export type ScenarioPreviewRequest = {
   reportResults?: boolean;
   source?: {
     projectKey: string;
+    jiraKey?: string;
+    jiraSummary?: string;
     sprintId?: number;
     status?: string;
   };
@@ -141,6 +145,7 @@ export type ScenarioPreviewRequest = {
   requestedRejectedCount?: number;
   requestedRejectedScenarioIds?: string[];
   nonRequestedRejectedCandidates?: ReplayAdmissionRejection[];
+  evidenceRequirement?: string;
 };
 
 export type ReplayAdmissionRejection = {

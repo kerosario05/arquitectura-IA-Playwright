@@ -39,6 +39,7 @@ function buildPlan(): ExecutionPlan {
     scenario: {
       source: "manual",
       externalId: "C42940",
+      caseId: 42940,
       title: "Acceder a Transacciones y servicios para iniciar autenticacion"
     },
     requiredData: [],
@@ -64,13 +65,15 @@ test("existing spec is not counted as freshly written when promotion is blocked"
   };
   const automationId = buildAutomationId({
     externalId: plan.scenario.externalId,
-    caseId: plan.scenario.caseId,
+    caseId: plan.scenario.caseId ?? 42940,
     title: plan.scenario.title
   });
   const appPaths = buildAppAutomationPaths(appProfile, automationId, outputRoot, "detalle-kiosko");
+  assert.ok(appPaths.specPath);
+  const specPath = appPaths.specPath;
   const previousSpecContent = "// previous spec should remain untouched\nexport {};\n";
-  await fs.mkdir(path.dirname(appPaths.specPath), { recursive: true });
-  await fs.writeFile(appPaths.specPath, previousSpecContent, "utf-8");
+  await fs.mkdir(path.dirname(specPath), { recursive: true });
+  await fs.writeFile(specPath, previousSpecContent, "utf-8");
 
   await withEnv({ AI_SPEC_GENERATION_ENABLED: "false" }, async () => {
     const result = await promoteExecutionPlan({
@@ -101,7 +104,7 @@ test("existing spec is not counted as freshly written when promotion is blocked"
     assert.ok(typeof metadata?.previousSpec?.hash === "string" && metadata.previousSpec.hash.length > 0);
     assert.ok(typeof metadata?.previousSpec?.lastModifiedAt === "string" && metadata.previousSpec.lastModifiedAt.length > 0);
 
-    const currentSpec = await fs.readFile(appPaths.specPath, "utf-8");
+    const currentSpec = await fs.readFile(specPath, "utf-8");
     assert.strictEqual(currentSpec, previousSpecContent);
   });
 });

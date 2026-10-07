@@ -2,10 +2,8 @@
   "requestedStrategy": "auto",
   "autoPomEnabled": true,
   "selectedStrategy": "pom",
-  "reason": "spec_generation_validation_failed",
-  "blockers": [
-    "spec_generation_validation_failed"
-  ],
+  "reason": "promoted",
+  "blockers": [],
   "availablePageObjects": [
     "ProductListPage",
     "OperationsMenuPage"
@@ -17,6 +15,6 @@
   "fallbackUsed": false,
   "requirePomRuntime": false,
   "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-registro-varios-clientes\\case.spec.ts",
-  "specHash": "5fa1c1a6462c5cb474b86074f23de06ea1381beb1fd98336904b97e56913676d",
-  "specSource": "ai_candidate"
+  "specHash": "5a6c4bf5e98ec137ce01b168562fb0d9df441ced6a6d6c647ecf611b161788cc",
+  "specSource": "generatedSpec"
 }

@@ -120,7 +120,7 @@ test("Fixture 1: every requirement has a terminal status (none disappear silentl
   const { requirements, summary } = buildRequirementAccounting(scenarios, branches, hu, "HU-1");
   const statuses = new Set<RequirementStatus>(["covered", "adaptive", "nonAutomatable", "incompleteRequirement"]);
   for (const r of requirements) {
-    expect(statuses.has(r.status)).toBe(true);
+    expect(statuses.has(r.status!)).toBe(true);
   }
   const sum = summary.covered + summary.adaptive + summary.nonAutomatable + summary.incompleteRequirement;
   expect(sum).toBe(summary.total);
@@ -282,9 +282,9 @@ test("functionalCoverage is deterministic and does not mutate inputs", () => {
 
 test("computeFunctionalCoverage treats adaptive/nonAutomatable as accounted, not missing", () => {
   const requirements = [
-    { id: "branch:a", sourceIssueKey: "H", category: "branch" as const, sourceText: "A", status: "covered" as const },
-    { id: "inactivity:1", sourceIssueKey: "H", category: "inactivity" as const, sourceText: "t", status: "adaptive" as const, reasonCode: "timeout_requirement" },
-    { id: "restart:1", sourceIssueKey: "H", category: "restart" as const, sourceText: "r", status: "nonAutomatable" as const, reasonCode: "non_ui_requirement" },
+    { id: "branch:a", sourceIssueKey: "H", category: "branch" as const, sourceText: "A", expectedBehavior: "A", status: "covered" as const },
+    { id: "inactivity:1", sourceIssueKey: "H", category: "inactivity" as const, sourceText: "t", expectedBehavior: "t", status: "adaptive" as const, reasonCode: "timeout_requirement" },
+    { id: "restart:1", sourceIssueKey: "H", category: "restart" as const, sourceText: "r", expectedBehavior: "r", status: "nonAutomatable" as const, reasonCode: "non_ui_requirement" },
   ];
   const coverage = computeFunctionalCoverage(requirements);
   expect(coverage.required).toBe(1);

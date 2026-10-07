@@ -114,7 +114,7 @@ function validatePhone(entry: Record<string, unknown>, path: string, errors: Pro
     addError(errors, `${path}.totalDigits`, "total_digits_invalid", "totalDigits must be a positive integer");
   } else if (Array.isArray(prefixes)) {
     prefixes.forEach((prefix, index) => {
-      if (typeof prefix === "string" && prefix.length >= entry.totalDigits as number) {
+      if (typeof prefix === "string" && typeof entry.totalDigits === "number" && prefix.length >= entry.totalDigits) {
         addError(errors, `${path}.allowedPrefixes.${index}`, "prefix_too_long", "totalDigits must exceed prefix length");
       }
     });
@@ -148,7 +148,7 @@ function profileCapability(profile: GenerationProfile): { kind: "number" | "tel"
   if (profile.valueKind === "number") return { kind: "number" };
   if (profile.valueKind === "date") return { kind: "date" };
   if (profile.valueKind === "datetime") return { kind: "datetime" } as never;
-  if (["money", "quantity", "percentage"].includes(profile.semanticType)) return { kind: "number" };
+  if (typeof profile.semanticType === "string" && ["money", "quantity", "percentage"].includes(profile.semanticType)) return { kind: "number" };
   if (profile.semanticType === "phone") return { kind: "tel" };
   if (profile.semanticType === "email") return { kind: "email" };
   if (profile.semanticType === "date") return { kind: "date" };
@@ -173,7 +173,8 @@ export function validateProjectGenerationConfig(config: unknown): ProjectGenerat
     const profile = entry as GenerationProfile;
     const result = validateGenerationProfile({ fieldCapability: profileCapability(profile), generationProfile: profile });
     if (!result.valid) addError(errors, path, "generation_profile_invalid", result.reason ?? "Generation profile is invalid");
-    if (profile.sourceMode === "configured_values" && !config.valueSets?.[profile.valueSetRef ?? ""]) {
+    const valueSets = isRecord(config.valueSets) ? config.valueSets : {};
+    if (profile.sourceMode === "configured_values" && (!profile.valueSetRef || !valueSets[profile.valueSetRef])) {
       addError(errors, `${path}.valueSetRef`, "value_set_reference_not_configured", "valueSetRef must exist in valueSets");
     }
   });

@@ -1,0 +1,3256 @@
+{
+  "recordingId": "18027080-f0ca-452a-a648-9611867aaf5e",
+  "projectSlug": "portal-empresarial",
+  "appSlug": "portal-empresarial",
+  "platform": "web",
+  "baseUrl": "https://172.27.4.31/login",
+  "label": "Agregar un empleado manualmente con cédula",
+  "recordingGoal": {
+    "declaredGoal": "Agregar un empleado manualmente con cédula",
+    "normalizedGoal": "Agregar un empleado manualmente con cédula",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-10-06T11:53:17.969Z",
+  "status": "stopped",
+  "events": [
+    {
+      "t": 5134,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://172.27.4.31/login",
+      "seq": 0
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "3e7b2674871e",
+      "url": "https://172.27.4.31/login",
+      "seq": 1
+    },
+    {
+      "t": 5472,
+      "kind": "navigate",
+      "screenKey": "3e7b2674871e",
+      "url": "https://172.27.4.31/login",
+      "seq": 2
+    },
+    {
+      "t": 11582,
+      "interactionId": "pointer-1",
+      "kind": "note",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://172.27.4.31/login",
+      "target": {
+        "label": "RNC de la empresa*",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"RNC de la empresa*\"",
+      "observationType": "pointer",
+      "seq": 3
+    },
+    {
+      "t": 16199,
+      "interactionId": "pointer-2",
+      "kind": "note",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://172.27.4.31/login",
+      "target": {
+        "label": "Nombre de usuario*",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Nombre de usuario*\"",
+      "observationType": "pointer",
+      "seq": 4
+    },
+    {
+      "t": 16213,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://172.27.4.31/login",
+      "target": {
+        "label": "RNC de la empresa*",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|RNC de la empresa*",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#rnc",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "rnc",
+            "confidence": 0.8
+          }
+        ],
+        "rawTypedValue": "130598983",
+        "sensitive": false
+      },
+      "value": "130598983",
+      "valueSource": "user",
+      "seq": 5
+    },
+    {
+      "t": 19862,
+      "interactionId": "pointer-3",
+      "kind": "note",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://172.27.4.31/login",
+      "target": {
+        "label": "Contraseña*",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Contraseña*\"",
+      "observationType": "pointer",
+      "seq": 6
+    },
+    {
+      "t": 19879,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://172.27.4.31/login",
+      "target": {
+        "label": "Nombre de usuario*",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Nombre de usuario*",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#email",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "email",
+            "confidence": 0.8
+          }
+        ],
+        "rawTypedValue": "olivam",
+        "sensitive": false
+      },
+      "value": "olivam",
+      "valueSource": "user",
+      "seq": 7
+    },
+    {
+      "t": 20725,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://172.27.4.31/login",
+      "target": {
+        "label": "Contraseña*",
+        "role": "input",
+        "tag": "input",
+        "inputType": "password",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Contraseña*",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#password",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "password",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": true
+      },
+      "redactedKey": "contrasena*",
+      "valueSource": "user",
+      "seq": 8
+    },
+    {
+      "t": 20734,
+      "kind": "press",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://172.27.4.31/login",
+      "target": {
+        "label": "Contraseña*",
+        "role": "textbox",
+        "tag": "input",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Contraseña*",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#password",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "password",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "note": "Enter",
+      "seq": 9
+    },
+    {
+      "t": 32337,
+      "kind": "navigate",
+      "screenKey": "3e7b2674871e",
+      "url": "https://172.27.4.31/dashboard",
+      "seq": 10
+    },
+    {
+      "t": 36841,
+      "interactionId": "pointer-4",
+      "kind": "note",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://172.27.4.31/dashboard",
+      "target": {
+        "label": "Gestión de Nóminas",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Gestión de Nóminas",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Gestión de Nóminas\"",
+      "observationType": "pointer",
+      "seq": 11
+    },
+    {
+      "t": 37063,
+      "interactionId": "pointer-4",
+      "kind": "tap",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://172.27.4.31/dashboard",
+      "target": {
+        "label": "Gestión de Nóminas",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Gestión de Nóminas",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Gestión de Nóminas",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "img",
+                  "stableAttributes": {
+                    "alt": "user",
+                    "src": "/images/payroll.svg"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "img",
+                "p"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"img\",1],[\"p\",1]],\"descendantEntries\":[[\"img\",1],[\"p\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Gestión de Nóminas",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 12
+    },
+    {
+      "t": 37109,
+      "kind": "navigate",
+      "screenKey": "3e7b2674871e",
+      "url": "https://172.27.4.31/payroll/electronicPayroll",
+      "seq": 13
+    },
+    {
+      "t": 45332,
+      "interactionId": "pointer-5",
+      "kind": "note",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "4060e6087d9acd8a7adf0a9eb978b3a3b3ca8404f7128364290461aa51a1f6f0",
+      "url": "https://172.27.4.31/payroll/electronicPayroll",
+      "target": {
+        "label": "Crear Manualmente",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Crear Manualmente",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Crear Manualmente\"",
+      "observationType": "pointer",
+      "seq": 14
+    },
+    {
+      "t": 45594,
+      "interactionId": "pointer-5",
+      "kind": "tap",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "4060e6087d9acd8a7adf0a9eb978b3a3b3ca8404f7128364290461aa51a1f6f0",
+      "url": "https://172.27.4.31/payroll/electronicPayroll",
+      "target": {
+        "label": "Crear Manualmente",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Crear Manualmente",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Crear Manualmente",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "img",
+                  "stableAttributes": {
+                    "alt": "icon-plus",
+                    "src": "/images/feather-plus-white.svg"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "img",
+                "p"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"img\",1],[\"p\",1]],\"descendantEntries\":[[\"img\",1],[\"p\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Crear Manualmente",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 15
+    },
+    {
+      "t": 45634,
+      "kind": "navigate",
+      "screenKey": "3e7b2674871e",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "seq": 16
+    },
+    {
+      "t": 47478,
+      "interactionId": "pointer-6",
+      "kind": "note",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "c6072c5f3458bdc3e22dcbe6872bcd399b87e383b5e67f11fab033e013ccee4d",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "Close",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Close",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "radix-_r_11_"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Close\"",
+      "observationType": "pointer",
+      "seq": 17
+    },
+    {
+      "t": 48134,
+      "interactionId": "pointer-6",
+      "kind": "tap",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "c6072c5f3458bdc3e22dcbe6872bcd399b87e383b5e67f11fab033e013ccee4d",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "Close",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Close",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Close",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span",
+                "svg"
+              ],
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",1],[\"svg\",1]],\"descendantEntries\":[[\"path\",2],[\"span\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "radix-_r_11_"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\",\"svg\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1],[\\\"svg\\\",1]],\\\"descendantEntries\\\":[[\\\"path\\\",2],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Close",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "radix-_r_11_"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Close",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "radix-_r_11_"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 18
+    },
+    {
+      "t": 51204,
+      "interactionId": "pointer-7",
+      "kind": "note",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "79b1f8ab20187c8d36b65e0773fb90b79c8b56d6911fd49c4f61e4bcf8a6e588",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "Seleccionar fila",
+        "role": "checkbox",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "checkbox",
+          "normalizedName": "Seleccionar fila",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Seleccionar fila\"",
+      "observationType": "pointer",
+      "seq": 19
+    },
+    {
+      "t": 51423,
+      "interactionId": "pointer-7",
+      "kind": "tap",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "79b1f8ab20187c8d36b65e0773fb90b79c8b56d6911fd49c4f61e4bcf8a6e588",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "Seleccionar fila",
+        "role": "checkbox",
+        "tag": "button",
+        "locators": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button",
+                "role": "checkbox"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Seleccionar fila",
+                "role": "checkbox"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "checkbox",
+          "normalizedName": "Seleccionar fila",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 20
+    },
+    {
+      "t": 52464,
+      "interactionId": "pointer-8",
+      "kind": "note",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "79b1f8ab20187c8d36b65e0773fb90b79c8b56d6911fd49c4f61e4bcf8a6e588",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "button",
+        "tag": "button",
+        "associatedField": "Tipo de ID",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"control\"",
+      "observationType": "pointer",
+      "seq": 21
+    },
+    {
+      "t": 52827,
+      "interactionId": "pointer-8",
+      "kind": "tap",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "79b1f8ab20187c8d36b65e0773fb90b79c8b56d6911fd49c4f61e4bcf8a6e588",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "button",
+        "tag": "button",
+        "associatedField": "Tipo de ID",
+        "locators": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 9
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 22
+    },
+    {
+      "t": 53699,
+      "interactionId": "pointer-9",
+      "kind": "tap",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "29b7be4775a38de63700123b8c13f2dcf0ba991b425b44ec3ba1a1a78c102d16",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "cédula",
+        "role": "option",
+        "tag": "div",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "option|cédula",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "option|cédula",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "div",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-labelledby": "radix-_r_1i_",
+                "role": "option"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "span",
+                  "stableAttributes": {
+                    "id": "radix-_r_1i_"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "radix-_r_1g_"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"div\",\"role\":\"option\"},\"stableDirectAttributes\":{\"role\":\"option\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"span\",\"stableAttributes\":{\"id\":\"radix-_r_1i_\"}}],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 23
+    },
+    {
+      "t": 53710,
+      "interactionId": "pointer-9",
+      "kind": "note",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "29b7be4775a38de63700123b8c13f2dcf0ba991b425b44ec3ba1a1a78c102d16",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "cédula",
+        "role": "option",
+        "tag": "div",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"cédula\"",
+      "observationType": "pointer",
+      "seq": 24
+    },
+    {
+      "t": 55396,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "75e1e20ffae262c14358ea28e86cc36f4495815b644bd495cc83ba128bc34340",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Colaborador",
+        "locators": [],
+        "rawTypedValue": "4",
+        "sensitive": false
+      },
+      "value": "4",
+      "valueSource": "user",
+      "seq": 25
+    },
+    {
+      "t": 55667,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "75e1e20ffae262c14358ea28e86cc36f4495815b644bd495cc83ba128bc34340",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Colaborador",
+        "locators": [],
+        "rawTypedValue": "40",
+        "sensitive": false
+      },
+      "value": "40",
+      "valueSource": "user",
+      "seq": 26
+    },
+    {
+      "t": 57782,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "75e1e20ffae262c14358ea28e86cc36f4495815b644bd495cc83ba128bc34340",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Colaborador",
+        "locators": [],
+        "rawTypedValue": "402",
+        "sensitive": false
+      },
+      "value": "402",
+      "valueSource": "user",
+      "seq": 27
+    },
+    {
+      "t": 57916,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "75e1e20ffae262c14358ea28e86cc36f4495815b644bd495cc83ba128bc34340",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Colaborador",
+        "locators": [],
+        "rawTypedValue": "4022",
+        "sensitive": false
+      },
+      "value": "4022",
+      "valueSource": "user",
+      "seq": 28
+    },
+    {
+      "t": 58149,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "75e1e20ffae262c14358ea28e86cc36f4495815b644bd495cc83ba128bc34340",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Colaborador",
+        "locators": [],
+        "rawTypedValue": "402-24",
+        "sensitive": false
+      },
+      "value": "402-24",
+      "valueSource": "user",
+      "seq": 29
+    },
+    {
+      "t": 58619,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "75e1e20ffae262c14358ea28e86cc36f4495815b644bd495cc83ba128bc34340",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Colaborador",
+        "locators": [],
+        "rawTypedValue": "402-246",
+        "sensitive": false
+      },
+      "value": "402-246",
+      "valueSource": "user",
+      "seq": 30
+    },
+    {
+      "t": 58921,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "75e1e20ffae262c14358ea28e86cc36f4495815b644bd495cc83ba128bc34340",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Colaborador",
+        "locators": [],
+        "rawTypedValue": "402-2467",
+        "sensitive": false
+      },
+      "value": "402-2467",
+      "valueSource": "user",
+      "seq": 31
+    },
+    {
+      "t": 59146,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "75e1e20ffae262c14358ea28e86cc36f4495815b644bd495cc83ba128bc34340",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Colaborador",
+        "locators": [],
+        "rawTypedValue": "402-24679",
+        "sensitive": false
+      },
+      "value": "402-24679",
+      "valueSource": "user",
+      "seq": 32
+    },
+    {
+      "t": 59613,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "75e1e20ffae262c14358ea28e86cc36f4495815b644bd495cc83ba128bc34340",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Colaborador",
+        "locators": [],
+        "rawTypedValue": "402-246795",
+        "sensitive": false
+      },
+      "value": "402-246795",
+      "valueSource": "user",
+      "seq": 33
+    },
+    {
+      "t": 59790,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "75e1e20ffae262c14358ea28e86cc36f4495815b644bd495cc83ba128bc34340",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Colaborador",
+        "locators": [],
+        "rawTypedValue": "402-2467955",
+        "sensitive": false
+      },
+      "value": "402-2467955",
+      "valueSource": "user",
+      "seq": 34
+    },
+    {
+      "t": 59963,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "75e1e20ffae262c14358ea28e86cc36f4495815b644bd495cc83ba128bc34340",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Colaborador",
+        "locators": [],
+        "rawTypedValue": "402-24679551",
+        "sensitive": false
+      },
+      "value": "402-24679551",
+      "valueSource": "user",
+      "seq": 35
+    },
+    {
+      "t": 65246,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "75e1e20ffae262c14358ea28e86cc36f4495815b644bd495cc83ba128bc34340",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Puesto",
+        "locators": [],
+        "rawTypedValue": "Analista",
+        "sensitive": false
+      },
+      "value": "Analista",
+      "valueSource": "user",
+      "seq": 36
+    },
+    {
+      "t": 67933,
+      "interactionId": "pointer-10",
+      "kind": "tap",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "75e1e20ffae262c14358ea28e86cc36f4495815b644bd495cc83ba128bc34340",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "Moneda",
+        "role": "combobox",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "combobox|Moneda",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "combobox|Moneda",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button",
+                "role": "combobox"
+              },
+              "stableDirectAttributes": {
+                "role": "combobox"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span",
+                "svg"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1],[\"svg\",1]],\"descendantEntries\":[[\"path\",1],[\"span\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "combobox",
+          "normalizedName": "Moneda",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
+        "coveredByFunctionalSelection": true
+      },
+      "seq": 37
+    },
+    {
+      "t": 67996,
+      "interactionId": "pointer-10",
+      "kind": "note",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "75e1e20ffae262c14358ea28e86cc36f4495815b644bd495cc83ba128bc34340",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "Moneda",
+        "role": "combobox",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "combobox",
+          "normalizedName": "Moneda",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Moneda\"",
+      "observationType": "pointer",
+      "seq": 38
+    },
+    {
+      "t": 68672,
+      "interactionId": "pointer-11",
+      "kind": "tap",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "75e1e20ffae262c14358ea28e86cc36f4495815b644bd495cc83ba128bc34340",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "DOP",
+        "role": "option",
+        "tag": "div",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "option|DOP",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "option|DOP",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "div",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-labelledby": "radix-_r_29_",
+                "role": "option"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "span",
+                  "stableAttributes": {
+                    "id": "radix-_r_29_"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "radix-_r_25_"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"div\",\"role\":\"option\"},\"stableDirectAttributes\":{\"role\":\"option\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"span\",\"stableAttributes\":{\"id\":\"radix-_r_29_\"}}],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "DOP",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(div[aria-labelledby=\"radix-_r_29_\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "coveredByFunctionalSelection": true
+      },
+      "seq": 39
+    },
+    {
+      "t": 68683,
+      "kind": "tap",
+      "observationType": "pointer",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "75e1e20ffae262c14358ea28e86cc36f4495815b644bd495cc83ba128bc34340",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "DOP",
+        "role": "option",
+        "interactionType": "select",
+        "afterValue": "DOP",
+        "compoundRole": "selection",
+        "associatedField": "Moneda",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "option|DOP",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "option|DOP",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "div",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-labelledby": "radix-_r_29_",
+                "role": "option"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "span",
+                  "stableAttributes": {
+                    "id": "radix-_r_29_"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "radix-_r_25_"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"div\",\"role\":\"option\"},\"stableDirectAttributes\":{\"role\":\"option\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"span\",\"stableAttributes\":{\"id\":\"radix-_r_29_\"}}],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "DOP",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(div[aria-labelledby=\"radix-_r_29_\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "sourceTechnicalEventSeqs": [
+          37,
+          39
+        ]
+      },
+      "seq": 40
+    },
+    {
+      "t": 68694,
+      "interactionId": "pointer-11",
+      "kind": "note",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "75e1e20ffae262c14358ea28e86cc36f4495815b644bd495cc83ba128bc34340",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "DOP",
+        "role": "option",
+        "tag": "div",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "DOP",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(div[aria-labelledby=\"radix-_r_29_\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"DOP\"",
+      "observationType": "pointer",
+      "seq": 41
+    },
+    {
+      "t": 69436,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "14c43b54eeef5e392d57c50750ecb8b43d6a3f09f11699b3cdf338c64036e7c4",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Ingresos",
+        "locators": [],
+        "rawTypedValue": "DOP 2",
+        "sensitive": false
+      },
+      "value": "DOP 2",
+      "valueSource": "user",
+      "seq": 42
+    },
+    {
+      "t": 69816,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "14c43b54eeef5e392d57c50750ecb8b43d6a3f09f11699b3cdf338c64036e7c4",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Ingresos",
+        "locators": [],
+        "rawTypedValue": "DOP 25",
+        "sensitive": false
+      },
+      "value": "DOP 25",
+      "valueSource": "user",
+      "seq": 43
+    },
+    {
+      "t": 70106,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "14c43b54eeef5e392d57c50750ecb8b43d6a3f09f11699b3cdf338c64036e7c4",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Ingresos",
+        "locators": [],
+        "rawTypedValue": "DOP 250",
+        "sensitive": false
+      },
+      "value": "DOP 250",
+      "valueSource": "user",
+      "seq": 44
+    },
+    {
+      "t": 70447,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "14c43b54eeef5e392d57c50750ecb8b43d6a3f09f11699b3cdf338c64036e7c4",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Ingresos",
+        "locators": [],
+        "rawTypedValue": "DOP 2500",
+        "sensitive": false
+      },
+      "value": "DOP 2500",
+      "valueSource": "user",
+      "seq": 45
+    },
+    {
+      "t": 70976,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "14c43b54eeef5e392d57c50750ecb8b43d6a3f09f11699b3cdf338c64036e7c4",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Ingresos",
+        "locators": [],
+        "rawTypedValue": "DOP 2,5000",
+        "sensitive": false
+      },
+      "value": "DOP 2,5000",
+      "valueSource": "user",
+      "seq": 46
+    },
+    {
+      "t": 72057,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "14c43b54eeef5e392d57c50750ecb8b43d6a3f09f11699b3cdf338c64036e7c4",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Ingresos",
+        "locators": [],
+        "rawTypedValue": "DOP 25,0000",
+        "sensitive": false
+      },
+      "value": "DOP 25,0000",
+      "valueSource": "user",
+      "seq": 47
+    },
+    {
+      "t": 245623,
+      "interactionId": "pointer-12",
+      "kind": "note",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "14c43b54eeef5e392d57c50750ecb8b43d6a3f09f11699b3cdf338c64036e7c4",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "button",
+        "tag": "button",
+        "associatedField": "Correo electrónico",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"control\"",
+      "observationType": "pointer",
+      "seq": 48
+    },
+    {
+      "t": 245699,
+      "interactionId": "pointer-13",
+      "kind": "note",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "14c43b54eeef5e392d57c50750ecb8b43d6a3f09f11699b3cdf338c64036e7c4",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "button",
+        "tag": "button",
+        "associatedField": "Correo electrónico",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"control\"",
+      "observationType": "pointer",
+      "seq": 49
+    },
+    {
+      "t": 245829,
+      "interactionId": "pointer-13",
+      "kind": "tap",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "14c43b54eeef5e392d57c50750ecb8b43d6a3f09f11699b3cdf338c64036e7c4",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "button",
+        "tag": "button",
+        "associatedField": "Correo electrónico",
+        "locators": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 8
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 50
+    },
+    {
+      "t": 245948,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "14c43b54eeef5e392d57c50750ecb8b43d6a3f09f11699b3cdf338c64036e7c4",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Correo electrónico",
+        "locators": [],
+        "rawTypedValue": "calidad@test.com",
+        "sensitive": false
+      },
+      "value": "calidad@test.com",
+      "valueSource": "user",
+      "seq": 51
+    },
+    {
+      "t": 246060,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "14c43b54eeef5e392d57c50750ecb8b43d6a3f09f11699b3cdf338c64036e7c4",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Teléfono residencial",
+        "locators": [],
+        "rawTypedValue": "829255123221",
+        "sensitive": false
+      },
+      "value": "829-255-1232",
+      "valueSource": "user",
+      "seq": 52
+    },
+    {
+      "t": 246145,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "14c43b54eeef5e392d57c50750ecb8b43d6a3f09f11699b3cdf338c64036e7c4",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Celular",
+        "locators": [],
+        "rawTypedValue": "829251212121",
+        "sensitive": false
+      },
+      "value": "829-251-2121",
+      "valueSource": "user",
+      "seq": 53
+    },
+    {
+      "t": 246360,
+      "kind": "fill",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "14c43b54eeef5e392d57c50750ecb8b43d6a3f09f11699b3cdf338c64036e7c4",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "date",
+        "associatedField": "Fecha de Ingreso",
+        "locators": [],
+        "rawTypedValue": "",
+        "sensitive": false
+      },
+      "value": "2020-08-02",
+      "valueSource": "user",
+      "seq": 54
+    },
+    {
+      "t": 246414,
+      "interactionId": "pointer-14",
+      "kind": "note",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "14c43b54eeef5e392d57c50750ecb8b43d6a3f09f11699b3cdf338c64036e7c4",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "Validar",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Validar\"",
+      "observationType": "pointer",
+      "seq": 55
+    },
+    {
+      "t": 246477,
+      "interactionId": "pointer-14",
+      "kind": "tap",
+      "screenKey": "3e7b2674871e",
+      "fingerprint": "14c43b54eeef5e392d57c50750ecb8b43d6a3f09f11699b3cdf338c64036e7c4",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "target": {
+        "label": "Validar",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Validar",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Validar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "img",
+                  "stableAttributes": {
+                    "alt": "validate",
+                    "src": "/images/feather-arrow-right.svg"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "img",
+                "p"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"img\",1],[\"p\",1]],\"descendantEntries\":[[\"img\",1],[\"p\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 56
+    },
+    {
+      "t": 246495,
+      "kind": "navigate",
+      "screenKey": "3e7b2674871e",
+      "url": "https://172.27.4.31/payroll/loadingList",
+      "seq": 57
+    },
+    {
+      "t": 246506,
+      "kind": "navigate",
+      "screenKey": "3e7b2674871e",
+      "url": "https://172.27.4.31/payroll/personValidation",
+      "seq": 58
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "3e7b2674871e",
+      "title": "3e7b2674871e",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://172.27.4.31/login",
+      "firstSeenAt": 5262,
+      "controls": [],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "7104389fcb16",
+      "title": "¿Cómo configurar la nómina?",
+      "fingerprint": "4060e6087d9acd8a7adf0a9eb978b3a3b3ca8404f7128364290461aa51a1f6f0",
+      "url": "https://172.27.4.31/payroll/electronicPayroll",
+      "firstSeenAt": 37179,
+      "controls": [
+        {
+          "label": "Crear Manualmente",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Crear Manualmente",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "click aquí para descargar",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "click aquí para descargar",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Quiénes Somos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Quiénes Somos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Productos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Productos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Contactos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Contactos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Pasos Reclamación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Pasos Reclamación",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "¿Cómo configurar la nómina?"
+      ],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "54579a477d51",
+      "title": "¡Atención!",
+      "fingerprint": "c6072c5f3458bdc3e22dcbe6872bcd399b87e383b5e67f11fab033e013ccee4d",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "firstSeenAt": 45727,
+      "controls": [
+        {
+          "label": "Volver al inicio",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Volver al inicio"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Volver al inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cargar archivo",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cargar archivo",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Añadir otro",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Añadir otro",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Validar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Validar ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Seleccionar fila",
+          "role": "checkbox",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Seleccionar fila",
+            "role": "checkbox"
+          },
+          "rowIdentity": "1",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Seleccionar fila",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Indicar...",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "headerContext": "Tipo de ID",
+          "rowIdentity": "1",
+          "associatedField": "Tipo de ID",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Indicar...",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "000-000-0000",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "headerContext": "Teléfono residencial",
+          "rowIdentity": "1",
+          "associatedField": "Teléfono residencial",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "000-000-0000",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "•••",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "rowIdentity": "1",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "•••",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Quiénes Somos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Quiénes Somos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Productos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Productos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Contactos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Contactos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Pasos Reclamación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Pasos Reclamación",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Close",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Close",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "¡Atención!"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 1,
+        "rows": 2,
+        "cells": 22,
+        "headers": [
+          "Tipo de ID",
+          "Colaborador",
+          "Puesto",
+          "Ingresos",
+          "Correo electrónico",
+          "Teléfono residencial",
+          "Celular",
+          "Fecha de Nacimiento",
+          "Fecha de Ingreso"
+        ],
+        "headerRelationships": [
+          {
+            "header": "Tipo de ID",
+            "field": "Tipo de ID"
+          },
+          {
+            "header": "Teléfono residencial",
+            "field": "Teléfono residencial"
+          }
+        ]
+      },
+      "headerRelationships": [
+        {
+          "header": "Tipo de ID",
+          "field": "Tipo de ID"
+        },
+        {
+          "header": "Teléfono residencial",
+          "field": "Teléfono residencial"
+        }
+      ]
+    },
+    {
+      "screenKey": "ee556c152738",
+      "title": "ee556c152738",
+      "fingerprint": "79b1f8ab20187c8d36b65e0773fb90b79c8b56d6911fd49c4f61e4bcf8a6e588",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "firstSeenAt": 48322,
+      "controls": [
+        {
+          "label": "Volver al inicio",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Volver al inicio"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Volver al inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cargar archivo",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cargar archivo",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Añadir otro",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Añadir otro",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Validar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Validar ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Seleccionar fila",
+          "role": "checkbox",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Seleccionar fila",
+            "role": "checkbox"
+          },
+          "rowIdentity": "1",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Seleccionar fila",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Indicar...",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "headerContext": "Tipo de ID",
+          "rowIdentity": "1",
+          "associatedField": "Tipo de ID",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Indicar...",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "000-000-0000",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "headerContext": "Teléfono residencial",
+          "rowIdentity": "1",
+          "associatedField": "Teléfono residencial",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "000-000-0000",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "•••",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "rowIdentity": "1",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "•••",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Quiénes Somos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Quiénes Somos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Productos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Productos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Contactos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Contactos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Pasos Reclamación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Pasos Reclamación",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 1,
+        "rows": 2,
+        "cells": 22,
+        "headers": [
+          "Tipo de ID",
+          "Colaborador",
+          "Puesto",
+          "Ingresos",
+          "Correo electrónico",
+          "Teléfono residencial",
+          "Celular",
+          "Fecha de Nacimiento",
+          "Fecha de Ingreso"
+        ],
+        "headerRelationships": [
+          {
+            "header": "Tipo de ID",
+            "field": "Tipo de ID"
+          },
+          {
+            "header": "Teléfono residencial",
+            "field": "Teléfono residencial"
+          }
+        ]
+      },
+      "headerRelationships": [
+        {
+          "header": "Tipo de ID",
+          "field": "Tipo de ID"
+        },
+        {
+          "header": "Teléfono residencial",
+          "field": "Teléfono residencial"
+        }
+      ]
+    },
+    {
+      "screenKey": "a94bc61aab2c",
+      "title": "a94bc61aab2c",
+      "fingerprint": "29b7be4775a38de63700123b8c13f2dcf0ba991b425b44ec3ba1a1a78c102d16",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "firstSeenAt": 53046,
+      "controls": [
+        {
+          "label": "Volver al inicio",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Volver al inicio"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Volver al inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cargar archivo",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cargar archivo",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Añadir otro",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Añadir otro",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Validar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Validar ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Seleccionar fila",
+          "role": "checkbox",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Seleccionar fila",
+            "role": "checkbox"
+          },
+          "rowIdentity": "1",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Seleccionar fila",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "seleccione",
+          "role": "combobox",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "role": "combobox"
+          },
+          "headerContext": "Tipo de ID",
+          "rowIdentity": "1",
+          "associatedField": "Tipo de ID",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "seleccione  ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Indicar...",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "headerContext": "Colaborador",
+          "rowIdentity": "1",
+          "associatedField": "Colaborador",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Indicar...",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "000-000-0000",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "headerContext": "Teléfono residencial",
+          "rowIdentity": "1",
+          "associatedField": "Teléfono residencial",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "000-000-0000",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "•••",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "rowIdentity": "1",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "•••",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Quiénes Somos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Quiénes Somos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Productos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Productos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Contactos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Contactos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Pasos Reclamación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Pasos Reclamación",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 1,
+        "rows": 2,
+        "cells": 22,
+        "headers": [
+          "Tipo de ID",
+          "Colaborador",
+          "Puesto",
+          "Ingresos",
+          "Correo electrónico",
+          "Teléfono residencial",
+          "Celular",
+          "Fecha de Nacimiento",
+          "Fecha de Ingreso"
+        ],
+        "headerRelationships": [
+          {
+            "header": "Tipo de ID",
+            "field": "Tipo de ID"
+          },
+          {
+            "header": "Colaborador",
+            "field": "Colaborador"
+          },
+          {
+            "header": "Teléfono residencial",
+            "field": "Teléfono residencial"
+          }
+        ]
+      },
+      "headerRelationships": [
+        {
+          "header": "Tipo de ID",
+          "field": "Tipo de ID"
+        },
+        {
+          "header": "Colaborador",
+          "field": "Colaborador"
+        },
+        {
+          "header": "Teléfono residencial",
+          "field": "Teléfono residencial"
+        }
+      ]
+    },
+    {
+      "screenKey": "a6979159960e",
+      "title": "a6979159960e",
+      "fingerprint": "75e1e20ffae262c14358ea28e86cc36f4495815b644bd495cc83ba128bc34340",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "firstSeenAt": 54373,
+      "controls": [
+        {
+          "label": "Volver al inicio",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Volver al inicio"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Volver al inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cargar archivo",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cargar archivo",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Añadir otro",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Añadir otro",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Validar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Validar ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Seleccionar fila",
+          "role": "checkbox",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Seleccionar fila",
+            "role": "checkbox"
+          },
+          "rowIdentity": "1",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Seleccionar fila",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "cédula",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "headerContext": "Tipo de ID",
+          "rowIdentity": "1",
+          "associatedField": "Tipo de ID",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "cédula",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "000-0000000-0",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "000-0000000-0",
+          "attributes": {
+            "type": "text",
+            "placeholder": "000-0000000-0"
+          },
+          "headerContext": "Colaborador",
+          "rowIdentity": "1",
+          "associatedField": "Colaborador",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "000-0000000-0",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Indicar...",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "headerContext": "Puesto",
+          "rowIdentity": "1",
+          "associatedField": "Puesto",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Indicar...",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "000-000-0000",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "headerContext": "Teléfono residencial",
+          "rowIdentity": "1",
+          "associatedField": "Teléfono residencial",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "000-000-0000",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "•••",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "rowIdentity": "1",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "•••",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Quiénes Somos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Quiénes Somos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Productos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Productos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Contactos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Contactos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Pasos Reclamación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Pasos Reclamación",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 1,
+        "rows": 2,
+        "cells": 22,
+        "headers": [
+          "Tipo de ID",
+          "Colaborador",
+          "Puesto",
+          "Ingresos",
+          "Correo electrónico",
+          "Teléfono residencial",
+          "Celular",
+          "Fecha de Nacimiento",
+          "Fecha de Ingreso"
+        ],
+        "headerRelationships": [
+          {
+            "header": "Tipo de ID",
+            "field": "Tipo de ID"
+          },
+          {
+            "header": "Colaborador",
+            "field": "Colaborador"
+          },
+          {
+            "header": "Puesto",
+            "field": "Puesto"
+          },
+          {
+            "header": "Teléfono residencial",
+            "field": "Teléfono residencial"
+          }
+        ]
+      },
+      "headerRelationships": [
+        {
+          "header": "Tipo de ID",
+          "field": "Tipo de ID"
+        },
+        {
+          "header": "Colaborador",
+          "field": "Colaborador"
+        },
+        {
+          "header": "Puesto",
+          "field": "Puesto"
+        },
+        {
+          "header": "Teléfono residencial",
+          "field": "Teléfono residencial"
+        }
+      ]
+    },
+    {
+      "screenKey": "51e60f5ff826",
+      "title": "51e60f5ff826",
+      "fingerprint": "14c43b54eeef5e392d57c50750ecb8b43d6a3f09f11699b3cdf338c64036e7c4",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "firstSeenAt": 68899,
+      "controls": [
+        {
+          "label": "Volver al inicio",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Volver al inicio"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Volver al inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cargar archivo",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cargar archivo",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Añadir otro",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Añadir otro",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Validar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Validar ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Seleccionar fila",
+          "role": "checkbox",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Seleccionar fila",
+            "role": "checkbox"
+          },
+          "rowIdentity": "1",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Seleccionar fila",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "cédula",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "headerContext": "Tipo de ID",
+          "rowIdentity": "1",
+          "associatedField": "Tipo de ID",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "cédula",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "JOHN JOHN DOE DOE",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "headerContext": "Colaborador",
+          "rowIdentity": "1",
+          "associatedField": "Colaborador",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "JOHN JOHN DOE DOE 402-2467955-1",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Analista",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "headerContext": "Puesto",
+          "rowIdentity": "1",
+          "associatedField": "Puesto",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Analista",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "DOP",
+          "role": "combobox",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "role": "combobox"
+          },
+          "headerContext": "Ingresos",
+          "rowIdentity": "1",
+          "associatedField": "Ingresos",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "DOP  ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Indicar...",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "headerContext": "Correo electrónico",
+          "rowIdentity": "1",
+          "associatedField": "Correo electrónico",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Indicar...",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "000-000-0000",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "headerContext": "Teléfono residencial",
+          "rowIdentity": "1",
+          "associatedField": "Teléfono residencial",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "000-000-0000",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "30/01/1820",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "headerContext": "Fecha de Nacimiento",
+          "rowIdentity": "1",
+          "associatedField": "Fecha de Nacimiento",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "30/01/1820",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "•••",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "rowIdentity": "1",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "•••",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Quiénes Somos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Quiénes Somos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Productos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Productos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Contactos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Contactos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Pasos Reclamación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Pasos Reclamación",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 1,
+        "rows": 2,
+        "cells": 22,
+        "headers": [
+          "Tipo de ID",
+          "Colaborador",
+          "Puesto",
+          "Ingresos",
+          "Correo electrónico",
+          "Teléfono residencial",
+          "Celular",
+          "Fecha de Nacimiento",
+          "Fecha de Ingreso"
+        ],
+        "headerRelationships": [
+          {
+            "header": "Tipo de ID",
+            "field": "Tipo de ID"
+          },
+          {
+            "header": "Colaborador",
+            "field": "Colaborador"
+          },
+          {
+            "header": "Puesto",
+            "field": "Puesto"
+          },
+          {
+            "header": "Ingresos",
+            "field": "Ingresos"
+          },
+          {
+            "header": "Correo electrónico",
+            "field": "Correo electrónico"
+          },
+          {
+            "header": "Teléfono residencial",
+            "field": "Teléfono residencial"
+          },
+          {
+            "header": "Fecha de Nacimiento",
+            "field": "Fecha de Nacimiento"
+          }
+        ]
+      },
+      "headerRelationships": [
+        {
+          "header": "Tipo de ID",
+          "field": "Tipo de ID"
+        },
+        {
+          "header": "Colaborador",
+          "field": "Colaborador"
+        },
+        {
+          "header": "Puesto",
+          "field": "Puesto"
+        },
+        {
+          "header": "Ingresos",
+          "field": "Ingresos"
+        },
+        {
+          "header": "Correo electrónico",
+          "field": "Correo electrónico"
+        },
+        {
+          "header": "Teléfono residencial",
+          "field": "Teléfono residencial"
+        },
+        {
+          "header": "Fecha de Nacimiento",
+          "field": "Fecha de Nacimiento"
+        }
+      ]
+    },
+    {
+      "screenKey": "564e66e13528",
+      "title": "564e66e13528",
+      "fingerprint": "f3a5fdd761af3aecd8f185cfecccd1738e251ddec9b934f7c00b83ecbb8473b2",
+      "url": "https://172.27.4.31/payroll/personValidation",
+      "firstSeenAt": 246534,
+      "controls": [
+        {
+          "label": "Quiénes Somos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Quiénes Somos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Productos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Productos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Contactos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Contactos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Pasos Reclamación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Pasos Reclamación",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    }
+  ],
+  "endedAt": "2026-10-06T11:57:25.870Z",
+  "durationMs": 247901
+}

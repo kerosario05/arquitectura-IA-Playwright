@@ -1,9 +1,24 @@
 {
-  "name": "KIOSKO",
+  "appProfile": {
+    "appSlug": "kiosko",
+    "source": "default",
+    "name": "4",
+    "baseUrl": "https://172.27.4.50/",
+    "baseUrlHash": "74df3c0e992c",
+    "createdAt": "2026-10-07T03:16:58.200Z",
+    "updatedAt": "2026-10-07T03:16:58.201Z",
+    "ignoreHTTPSErrors": false
+  },
   "baseUrl": "https://172.27.4.50/",
-  "loginMode": "no_login",
+  "loginMode": "password",
   "testData": {},
   "testDataAliases": {},
-  "missingInputBehavior": "fail",
-  "ignoreHTTPSErrors": false
+  "testDataRefs": {},
+  "username": "adminr",
+  "password": "admin123",
+  "usernameRef": "APP_USERNAME",
+  "passwordRef": "APP_PASSWORD",
+  "missingInputBehavior": "auto_generate",
+  "ignoreHTTPSErrors": false,
+  "updatedAt": "2026-10-07T03:16:58.201Z"
 }

@@ -204,6 +204,8 @@ export type ProposedObjectCandidate = {
 export type DiscoveryStepResult = {
   index: number;
   action: string;
+  target?: string;
+  pendingDiscovery?: boolean;
   status:
     | "found"
     | "not_found"
@@ -226,7 +228,8 @@ export type DiscoveryStepResult = {
     | "skipped_redundant"
     | "optional_confirmation_detail_missing"
     | "satisfied_by_previous_assertion"
-    | "precondition_unresolved";
+    | "precondition_unresolved"
+    | "blocked";
   targetText?: string;
   snapshotUrl?: string;
   snapshotTitle?: string;
@@ -292,7 +295,7 @@ export type DiscoveryStepResult = {
   // Recovery metadata — set when segmented route recovery resolves a failed step
   originalStatus?: string;
   recoveryStatus?: "recovered" | "repaired";
-  recoveredBy?: "segmented_route_recovery" | "route_completion" | "contextual_intermediate_already_satisfied" | "ordinal_selection" | "auth_flow" | "page_stability" | "later_success" | "retry_after_navigation";
+  recoveredBy?: "segmented_route_recovery" | "route_completion" | "contextual_intermediate_already_satisfied" | "ordinal_selection" | "auth_flow" | "page_stability" | "later_success" | "retry_after_navigation" | "assertion_pass";
   recoveryMetadata?: {
     selectedCandidateId?: string;
     selectedCandidateText?: string;
@@ -315,7 +318,7 @@ export type DiscoveryStepResult = {
     // Assertion recovery tracking
     originalFailureReason?: string;
     recoveredAfterStep?: number;
-    recoveredBecause?: "auth_gate_completed" | "page_stabilized" | "target_used_successfully_later" | "action_on_target_succeeded";
+    recoveredBecause?: "auth_gate_completed" | "page_stabilized" | "target_used_successfully_later" | "action_on_target_succeeded" | "same_assertion_passed" | "backed_observable_oracle";
     blocking?: boolean;
     ordinalSelectionDiagnostics?: {
       selectionPatternDetected: boolean;
@@ -416,6 +419,8 @@ export type CaseDiscoveryResult = {
   version: "1.0";
   caseId: number;
   caseTitle: string;
+  name?: string;
+  scenarioId?: string;
   discoveredAt: string;
   status:
     | "discovered_passed"

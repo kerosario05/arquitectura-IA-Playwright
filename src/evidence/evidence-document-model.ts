@@ -1,24 +1,48 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { EvidenceScenarioRecord } from "./evidence-types";
+import type { EvidenceScenarioRecord, EvidenceStepRecord } from "./evidence-types";
 
 /**
  * Format-independent content of an evidence document: the global header fields and, per
  * scenario, the title/status and the ordered screenshots. Both renderers (Word COM → DOCX and
  * Chromium → PDF) consume this, so a PDF and a DOCX of the same run carry the same images.
  */
-export type EvidenceDocumentImage = { path: string; stepText: string };
+export type EvidenceDocumentImage = { path: string; stepText: string; screenId?: string; screenTitle?: string };
+export type EvidenceDocumentStep = { number: number; text: string; status: string };
+export type EvidenceDocumentScreen = {
+  id: string;
+  title: string;
+  steps: EvidenceDocumentStep[];
+  images: EvidenceDocumentImage[];
+};
 
 export type EvidenceDocumentScenario = {
   scenarioId: string;
   title: string;
   status: string;
+  screens: EvidenceDocumentScreen[];
   images: EvidenceDocumentImage[];
   finalImagePath: string | null;
   finalIncluded: boolean;
   finalIsLast: boolean;
   validateFinalImage: boolean;
 };
+
+function describeEvidenceStep(step: EvidenceStepRecord): string {
+  const validation = step.stepText.match(/^\s*Validar que se muestre\s+["“]?(.+?)["”]?\.?\s*$/i);
+  const target = (step.target || validation?.[1] || "").toLocaleLowerCase("es").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const screen = (step.screenTitle || "").toLocaleLowerCase("es").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const isAuthenticationField = /(?:^|[^a-z])(password|contrasena|usuario|username|user name|rnc|identificacion|correo|email|otp|token)(?:$|[^a-z])/.test(target);
+  const isMainScreen = /dashboard|\bhome\b|inicio|menu|principal|landing/.test(screen);
+
+  // A credential field can be the technical target retained by a post-login assertion.
+  // Once the captured screen is the authenticated landing page, the evidence should name
+  // the observed destination rather than claim that the login field is still displayed.
+  if (validation && isAuthenticationField && isMainScreen) {
+    return "Validar que se muestre la pantalla principal.";
+  }
+  return step.stepText;
+}
 
 export type EvidenceDocumentModel = {
   requerimiento: string;
@@ -27,7 +51,7 @@ export type EvidenceDocumentModel = {
   scenarios: EvidenceDocumentScenario[];
 };
 
-type CandidateImage = { path: string; stepText: string; stepIndex?: number };
+type CandidateImage = { path: string; stepText: string; stepIndex?: number; screenId?: string; screenTitle?: string };
 
 export function buildEvidenceDocumentModel(scenarios: EvidenceScenarioRecord[]): EvidenceDocumentModel {
   const firstScenario = scenarios[0];
@@ -86,6 +110,8 @@ function buildEvidenceDocumentScenario(sc: EvidenceScenarioRecord): EvidenceDocu
       path: path.resolve(step.screenshotPath!),
       stepText: step.stepText,
       stepIndex: step.stepIndex,
+      screenId: step.screenId,
+      screenTitle: step.screenTitle,
     }));
 
   // If no functional screenshots, use last screenshot as fallback
@@ -104,6 +130,8 @@ function buildEvidenceDocumentScenario(sc: EvidenceScenarioRecord): EvidenceDocu
         path: path.resolve(step.screenshotPath!),
         stepText: step.stepText,
         stepIndex: step.stepIndex,
+        screenId: step.screenId,
+        screenTitle: step.screenTitle,
       }));
     const fallbackImage = allScreenshots.length > 0 ? allScreenshots[allScreenshots.length - 1] : null;
     images = fallbackImage ? [fallbackImage] : [];
@@ -120,7 +148,8 @@ function buildEvidenceDocumentScenario(sc: EvidenceScenarioRecord): EvidenceDocu
     : null;
   if (finalScreenPath && isImageFile(finalScreenPath) && fs.existsSync(finalScreenPath)) {
     images = images.filter(image => path.resolve(image.path) !== finalScreenPath);
-    images.push({ path: finalScreenPath, stepText: "Pantalla final después del último paso" });
+    const finalStep = sc.steps.at(-1);
+    images.push({ path: finalScreenPath, stepText: "Pantalla final después del último paso", screenId: finalStep?.screenId, screenTitle: finalStep?.screenTitle });
   }
 
   // Dedup final-phase images: keep only the dominant final screenshot per scenario.
@@ -180,7 +209,8 @@ function buildEvidenceDocumentScenario(sc: EvidenceScenarioRecord): EvidenceDocu
     if (isImageFile(detailPath) && fs.existsSync(detailPath)) {
       const alreadyInImages = images.some(img => path.resolve(img.path) === detailPath);
       if (!alreadyInImages) {
-        images.push({ path: detailPath, stepText: `Detalle: ${sc.detailEvidence.target || "producto"}` });
+        const detailStep = sc.steps.find(step => step.stepIndex === sc.detailEvidence?.capturedAfterStep);
+        images.push({ path: detailPath, stepText: `Detalle: ${sc.detailEvidence.target || "producto"}`, screenId: detailStep?.screenId, screenTitle: detailStep?.screenTitle });
         console.log(`[evidence-docx] detail screenshot appended scenario=${sc.scenarioId}`);
       } else {
         // Move to last position
@@ -238,6 +268,7 @@ function buildEvidenceDocumentScenario(sc: EvidenceScenarioRecord): EvidenceDocu
     title: scenarioTitle,
     status: scenarioStatus,
     images: prepared.images,
+    screens: buildEvidenceDocumentScreens(sc, prepared.images),
     finalImagePath: prepared.finalImagePath,
     finalIncluded: prepared.finalIncluded,
     finalIsLast: prepared.finalIsLast,
@@ -266,6 +297,8 @@ export function finalizeScenarioImages(
     dedupedImages.push({
       path: absolutePath,
       stepText: image.stepText,
+      screenId: image.screenId,
+      screenTitle: image.screenTitle,
     });
   }
 
@@ -319,15 +352,85 @@ export function prependInitialScreenImage<T extends EvidenceDocumentImage>(
   const preferredPath = completedFormPath ?? initialPath;
   if (!preferredPath) return images;
   const preferredImage: EvidenceDocumentImage = completedFormPath
-    ? { path: completedFormPath, stepText: "Formulario completado" }
+    ? { path: completedFormPath, stepText: "Formulario completado", screenId: initial?.screenId, screenTitle: initial?.screenTitle }
     : {
         path: initialPath!,
         stepText: initial?.status === "load_failed"
           ? `ESTADO INICIAL - FALLO DE CARGA: ${initial.reason ?? "initial_load_failure"}`
           : "ESTADO INICIAL",
+        screenId: initial?.screenId,
+        screenTitle: initial?.screenTitle,
       };
   const remaining = images.filter((image) => path.resolve(image.path) !== preferredPath);
   return [preferredImage, ...remaining];
+}
+
+/** Groups the executed actions by their captured UI screen and attaches that screen's evidence. */
+export function buildEvidenceDocumentScreens(
+  scenario: EvidenceScenarioRecord,
+  images: EvidenceDocumentImage[],
+): EvidenceDocumentScreen[] {
+  const screens: EvidenceDocumentScreen[] = [];
+  const stepScreenIndexes = new Map<EvidenceStepRecord, number>();
+  const screenOccurrences = new Map<string, number>();
+
+  for (const step of scenario.steps) {
+    if (!step.stepText.trim() || /^pantalla resultante tras el último paso$/i.test(step.stepText.trim())) continue;
+    const screenshotPath = step.screenshotPath ? path.resolve(step.screenshotPath) : "";
+    const key = step.screenId || (screenshotPath ? `path:${screenshotPath}` : `step:${step.index}`);
+    let screen = screens.at(-1);
+    if (!screen || screen.id !== key) {
+      const occurrence = (screenOccurrences.get(key) ?? 0) + 1;
+      screenOccurrences.set(key, occurrence);
+      screen = {
+        id: occurrence === 1 ? key : `${key}#${occurrence}`,
+        title: step.screenTitle?.trim() || `Pantalla ${screens.length + 1}`,
+        steps: [],
+        images: [],
+      };
+      screens.push(screen);
+    }
+    screen.steps.push({ number: screen.steps.length + 1, text: describeEvidenceStep(step).trim(), status: step.status });
+    stepScreenIndexes.set(step, screens.length - 1);
+  }
+
+  for (const image of images) {
+    const absolutePath = path.resolve(image.path);
+    const sourceStep = scenario.steps.find(step => step.screenshotPath && path.resolve(step.screenshotPath) === absolutePath);
+    const isFinalCheckpoint = /^pantalla final después del último paso$/i.test(image.stepText.trim());
+    const lastScreen = screens.at(-1);
+    const finalScreenTitle = image.screenTitle?.trim().toLocaleLowerCase("es");
+    const finalCheckpointContinuesLastScreen = Boolean(
+      isFinalCheckpoint
+      && lastScreen
+      && finalScreenTitle
+      && lastScreen.title.trim().toLocaleLowerCase("es") === finalScreenTitle,
+    );
+    // Keep the final checkpoint after all executed screens. When it represents the same
+    // final screen as the last step, attach its image there instead of creating a second
+    // screenshot-only section with a repeated title. If the title differs, keep a separate
+    // final section so a final screen that returns to an earlier route stays last.
+    let screenIndex = isFinalCheckpoint
+      ? finalCheckpointContinuesLastScreen ? screens.length - 1 : screens.length
+      : sourceStep ? stepScreenIndexes.get(sourceStep) ?? -1 : -1;
+    if (screenIndex < 0 && image.screenId) {
+      const matchingScreens = screens
+        .map((screen, index) => ({ screen, index }))
+        .filter(({ screen }) => screen.id === image.screenId || screen.id.startsWith(`${image.screenId}#`));
+      screenIndex = matchingScreens[0]?.index ?? -1;
+    }
+    if (screenIndex < 0) screenIndex = screens.length > 0 ? screens.length - 1 : 0;
+    if (!screens[screenIndex]) {
+      screens.push({ id: image.screenId || "screen-1", title: image.screenTitle || "Pantalla 1", steps: [], images: [] });
+      screenIndex = screens.length - 1;
+    }
+    const screen = screens[screenIndex];
+    if (!screen.images.some(existing => path.resolve(existing.path) === absolutePath)) {
+      screen.images.push({ ...image, path: absolutePath, screenId: screen.id, screenTitle: screen.title });
+    }
+  }
+
+  return screens;
 }
 
 export function isImageFile(filepath: string): boolean {

@@ -10,7 +10,7 @@
   },
   "invocations": 0,
   "invocationsConsumed": 0,
-  "durationMs": 87617,
+  "durationMs": 72628,
   "usage": {
     "inputTokens": null,
     "cachedInputTokens": null,
@@ -46,10 +46,7 @@
   ],
   "errors": [],
   "warnings": [
-    "step_index_not_explicit_in_spec:9",
-    "step_index_not_explicit_in_spec:10",
-    "step_index_not_explicit_in_spec:11",
-    "step_index_not_explicit_in_spec:12"
+    "step_index_not_explicit_in_spec:9"
   ],
   "finalSpec": {
     "origin": "deterministic_compiler",

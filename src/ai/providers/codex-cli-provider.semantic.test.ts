@@ -6,7 +6,7 @@ test("routes canonical semantic normalization through generic JSON output withou
   let receivedPurpose = "";
   __setRunCodexCliForTesting(async (input) => {
     receivedPurpose = input.purpose ?? "";
-    return { stdout: JSON.stringify({ status: "resolved", confidence: "high", requirements: [], branches: [], stepRequirementLinks: [], unresolved: [] }), stderr: "", exitCode: 0, timedOut: false };
+    return { stdout: JSON.stringify({ status: "resolved", confidence: "high", requirements: [], branches: [], stepRequirementLinks: [], unresolved: [] }), stderr: "", exitCode: 0, timedOut: false, durationMs: 0 };
   });
   const provider = new CodexCliProvider({
     enabled: true,

@@ -1,0 +1,20 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",
+  "specHash": "962fcda5b9da877baf20550f93c9728b131329bed08a9118eca76e189828aade",
+  "specSource": "generatedSpec"
+}

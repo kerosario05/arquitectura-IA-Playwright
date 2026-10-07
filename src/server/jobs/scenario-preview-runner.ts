@@ -50,6 +50,7 @@ import {
 } from "../services/testrail-run-reporter";
 import { publishScenariosToTestRail, readPersistedScenarioMappings } from "../services/testrail-case-publisher";
 import { buildScenarioPreviewScenarioId, type ScenarioPreviewTestRailResult } from "../services/testrail-sync-types";
+import { syncDiscoveryResultToTestRail } from "./testrail-result-sync";
 import { buildStructuredDefectDescription, buildDefectTitle, inferDefectSeverity } from "../services/defect-content-builder";
 import { learnEntryStepsFromSnapshot } from "../services/entry-steps-learner";
 import { RunEvidenceRecorder } from "../../evidence/run-evidence-recorder";
@@ -90,6 +91,7 @@ export async function consolidateRunEvidence(
   sectionName: string | undefined,
   caseOutcomeMap?: Map<string, CaseOutcomeEntry>,
   additionalScenarios: EvidenceScenarioRecord[] = [],
+  evidenceRequirement?: string,
 ): Promise<{ docxPath?: string; evidenceJsonPath?: string } | undefined> {
   try {
     const evidenceConfig = loadEvidenceConfig();
@@ -105,6 +107,7 @@ export async function consolidateRunEvidence(
       appSlug,
       sectionSlug: sectionSlug || "default-section",
       sectionName,
+      requirement: evidenceRequirement,
       runId: jobId,
       outputRoot: evidenceRoot,
     });
@@ -170,21 +173,11 @@ export async function consolidateRunEvidence(
         console.log(`[evidence:run] applying ${caseOutcomeMap.size} status overrides from case_finished events`);
         for (const [scenarioId, outcome] of caseOutcomeMap.entries()) {
           // Get recorded scenario - handle both Map and object/array structures
-          let recordedScenario: any = null;
-          if (runRecorder.scenarios instanceof Map) {
-            recordedScenario = runRecorder.scenarios.get(scenarioId);
-          } else if (Array.isArray(runRecorder.scenarios)) {
-            recordedScenario = runRecorder.scenarios.find((s: any) => s?.scenarioId === scenarioId || s?.id === scenarioId);
-          } else if (typeof runRecorder.scenarios === "object" && runRecorder.scenarios !== null) {
-            recordedScenario = runRecorder.scenarios[scenarioId];
-          }
+          const recordedScenario = runRecorder.getScenario(scenarioId);
 
           // Check if this scenario was previously marked as failed by evidence gate
           const currentEvidenceStatus = recordedScenario?.status;
-           const isEvidenceGateFailed = currentEvidenceStatus === "Fallido" &&
-             (recordedScenario?.failureReasons?.some((r: string) =>
-               r.includes("evidence_gate") || r.includes("missing_detail_screenshot") || r.includes("promotion_gate")
-             ) ?? false);
+           const isEvidenceGateFailed = currentEvidenceStatus === "Fallido";
            const isValidPartialOutcome = outcome.status === "failed"
              && outcome.discoveryStatus === "discovered_partial"
              && (outcome.stepResults?.length ?? 0) > 0
@@ -438,6 +431,7 @@ export async function startReuseExistingPromotedSpecRun(
   // above. Absent (the default, every existing caller), behavior is unchanged.
   const executionContext = job.params.executionContext as { evidenceRunId?: string; suppressEvidenceConsolidation?: boolean } | undefined;
   const evidenceRunId = executionContext?.evidenceRunId ?? jobId;
+  const testRunId = Number(job.params.testRunId) || undefined;
   const caseOutcomeMap = new Map<string, CaseOutcomeEntry>();
 
   jobStore.update(jobId, {
@@ -452,6 +446,8 @@ export async function startReuseExistingPromotedSpecRun(
       requested: total,
       executed: 0,
       scenarioCount: total,
+      ...(testRunId ? { testRailRunId: testRunId } : {}),
+      ...(typeof job.summary?.testRailRunUrl === "string" ? { testRailRunUrl: job.summary.testRailRunUrl } : {}),
     },
   });
   jobStore.appendLog(
@@ -461,6 +457,8 @@ export async function startReuseExistingPromotedSpecRun(
 
   let passed = 0;
   let failed = 0;
+  let synced = 0;
+  let syncFailed = 0;
   for (let index = 0; index < scenarios.length; index++) {
     const scenario = scenarios[index];
     jobStore.update(jobId, {
@@ -522,6 +520,22 @@ export async function startReuseExistingPromotedSpecRun(
     const status: "passed" | "failed" = verification.status === "passed" ? "passed" : "failed";
     if (status === "passed") passed += 1;
     else failed += 1;
+    if (testRunId && Number.isInteger(scenario.caseId) && scenario.caseId > 0) {
+      const sync = await syncDiscoveryResultToTestRail({
+        runId: testRunId,
+        caseId: scenario.caseId,
+        scenarioId: scenario.scenarioId,
+        discoveryStatus: status,
+        title: scenario.title,
+        launchId: jobId,
+        appSlug,
+        sectionSlug,
+        errorMessage: verification.error,
+      });
+      if (sync.syncStatus === "synced") synced += 1;
+      else syncFailed += 1;
+      jobStore.appendLog(jobId, `[testrail-sync] scenario=${scenario.scenarioId} caseId=${scenario.caseId} runId=${testRunId} status=${sync.syncStatus}${sync.error ? ` error="${sync.error.slice(0, 200)}"` : ""}`);
+    }
     // Functional result is fixed above, before evidence is ever touched — consolidation below
     // can only annotate/report this outcome, never alter it.
     caseOutcomeMap.set(scenario.scenarioId, { status });
@@ -541,6 +555,8 @@ export async function startReuseExistingPromotedSpecRun(
         executed: index + 1,
         passed,
         failed,
+        synced,
+        syncFailed,
         scenarioCount: total,
         totalStories: total,
       }),
@@ -557,7 +573,15 @@ export async function startReuseExistingPromotedSpecRun(
   // orchestrator owns consolidation for the parent run this subset belongs to.
   const consolidation = executionContext?.suppressEvidenceConsolidation
     ? undefined
-    : await consolidateRunEvidence(evidenceRunId, appSlug, sectionSlug, sectionName, caseOutcomeMap);
+    : await consolidateRunEvidence(
+        evidenceRunId,
+        appSlug,
+        sectionSlug,
+        sectionName,
+        caseOutcomeMap,
+        [],
+        typeof job.params.evidenceRequirement === "string" ? job.params.evidenceRequirement : undefined,
+      );
   // Only claim a document exists if the DOCX was actually written to disk — a consolidation
   // pass with zero scenario evidence.json files (or one that threw) never fabricates one.
   const evidenceDir = consolidation?.docxPath && fs.existsSync(consolidation.docxPath)
@@ -1377,7 +1401,16 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   if (entrySteps.length > 0) {
     jobStore.appendLog(jobId, `[run:scenario-preview] applying ${entrySteps.length} entrySteps`);
     applyEntryStepsToScenarios(validScenarios, entrySteps, (scenario) =>
-      isEntryStepInsertionAuthorized(scenario, validScenarios
+      isEntryStepInsertionAuthorized({
+        stepRequirementRefs: scenario.stepRequirementRefs?.map(({ stepIndex, requirementId, facet }) => ({
+          stepIndex,
+          requirementId,
+          ...(facet === "action" || facet === "activation" || facet === "destination" || facet === "visibility" || facet === "technical"
+            ? { facet }
+            : {}),
+        })),
+        requirementDependencies: scenario.requirementDependencies,
+      }, validScenarios
         .map((candidate) => candidate.functionalBranch)
         .filter((branch): branch is NonNullable<typeof branch> => Boolean(branch))),
       (diagnostic) => jobStore.appendLog(jobId, diagnostic),
@@ -2063,13 +2096,19 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
           throw new Error("No TestRail caseIds available. Publish scenarios to TestRail first or reuse existing mappings.");
         }
         const runName = buildTestRailRunName(appSlug, selectedSectionId, normalizedCases.length);
+        const jiraKey = typeof p.jiraKey === "string" ? p.jiraKey.trim() : "";
         const run = await testRailClient.addRun({
           projectId: String(selectedProjectId),
           suiteId: String(selectedSuiteId),
-          name: runName,
-          description: `QA Lab scenario preview run for ${appSlug} / section ${selectedSectionId}`,
+          name: `${jiraKey ? `${jiraKey} - ` : ""}${runName}`,
+          description: `QA Lab scenario preview run for ${appSlug} / section ${selectedSectionId}${jiraKey ? ` / Jira ${jiraKey}` : ""}`,
           caseIds: publishedCaseIds,
+          ...(jiraKey ? { refs: jiraKey } : {}),
         });
+        if (jiraKey) {
+          await testRailClient.updateRun(run.id, { refs: jiraKey });
+          jobStore.appendLog(jobId, `[run:scenario-preview] linkedTestRun id=${run.id} jiraKey=${jiraKey}`);
+        }
         testRailRunId = run.id;
         testRailRunUrl = run.url;
         jobStore.appendLog(jobId, `[run:scenario-preview] createdTestRun id=${run.id} ${safeUrlForLog(run.url)}`);
@@ -2216,6 +2255,34 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
     }
   }
 
+  // Recording batches create their TestRun before discovery and carry the canonical
+  // scenario -> case association on the job. Discovery emits PREVIEW-nnn IDs, so map those
+  // runtime IDs back to the selected TestRail case by the same stable scenario position.
+  const recordingCaseIdsByScenarioId = pRecord.testRailCaseIdsByScenarioId && typeof pRecord.testRailCaseIdsByScenarioId === "object"
+    ? pRecord.testRailCaseIdsByScenarioId as Record<string, unknown>
+    : undefined;
+  if (testRunId && recordingCaseIdsByScenarioId && normalizedCases.length > 0) {
+    let recordingMappings = 0;
+    for (let index = 0; index < normalizedCases.length; index += 1) {
+      const scenario = normalizedScenarios[index];
+      const candidateIds = [scenario?.scenarioId, scenario?.sourceIssueKey]
+        .filter((id): id is string => typeof id === "string" && id.length > 0);
+      const rawCaseId = candidateIds.map((id) => recordingCaseIdsByScenarioId[id]).find((id) => Number.isInteger(id) && Number(id) > 0);
+      const caseId = Number(rawCaseId);
+      if (!Number.isInteger(caseId) || caseId <= 0) continue;
+
+      const runtimeIds = [
+        normalizedCases[index]?.displayId,
+        `PREVIEW-${String(index + 1).padStart(3, "0")}`,
+      ].filter((id): id is string => typeof id === "string" && id.length > 0);
+      for (const runtimeId of runtimeIds) scenarioToCaseMap.set(runtimeId, caseId);
+      for (const scenarioId of candidateIds) scenarioToCaseMap.set(scenarioId, caseId);
+      recordingMappings += 1;
+      jobStore.appendLog(jobId, `[testrail-sync] recording mapping scenario=${candidateIds[0] ?? runtimeIds[0]} execution=${runtimeIds.join(",")} caseId=${caseId} runId=${testRunId}`);
+    }
+    jobStore.appendLog(jobId, `[testrail-sync] recording mappings ready count=${recordingMappings} mapSize=${scenarioToCaseMap.size}`);
+  }
+
   jobStore.appendLog(jobId, `[run:scenario-preview] spawning discovery:preview`);
   jobStore.appendLog(jobId, `[run:scenario-preview] scenarios=${normalizedCases.length} appSlug=${appSlug}`);
   jobStore.appendLog(jobId, `[run:scenario-preview] artifactsDir=${artifactDir}`);
@@ -2298,10 +2365,6 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
           } catch {
             // ignore
           }
-          jobStore.appendLog(jobId, `[defect-checklist] completed issueKey=${issueKey} defectCount=${list.defects.length}`);
-          jobStore.update(jobId, { defectCount: list.defects.length } as any);
-        } else {
-          jobStore.appendLog(jobId, `[defect-checklist] skipped reason=missing_issue_key jobId=${jobId}`);
         }
       }
     }, firstCaseTimeoutMs);
@@ -2337,6 +2400,12 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
       appSlug: _p.appSlug,
     });
     jobStore.appendLog(_jobId, `[testrail-sync] scenario=${json.caseId} caseId=${_caseId} status=${syncResult.syncStatus}`);
+    if (syncResult.syncStatus === "synced") {
+      const currentSummary = jobStore.get(_jobId)?.summary;
+      jobStore.update(_jobId, {
+        summary: mergeScenarioPreviewSummary(currentSummary, { synced: (currentSummary?.synced ?? 0) + 1 }),
+      });
+    }
     if (_launchId) {
       updateLaunchManifestWithResult(_launchId, {
         scenarioId: json.caseId as string,
@@ -3003,7 +3072,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
     // Consolidate run evidence into single DOCX — skipped when a mixed-rerun orchestrator owns
     // consolidation for the parent run this subset belongs to.
     if (!executionContext?.suppressEvidenceConsolidation) {
-      await consolidateRunEvidence(evidenceRunId, appSlug, sectionSlug, p.sectionName, caseOutcomeMap);
+      await consolidateRunEvidence(evidenceRunId, appSlug, sectionSlug, p.sectionName, caseOutcomeMap, [], p.evidenceRequirement);
     }
     recordQaLabDiagnosticPhase(diagnosticManifestPath, "completed", finalStatus, {
       resultPath: finalResultsPath,

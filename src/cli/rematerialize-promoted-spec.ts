@@ -1,6 +1,5 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { deriveAppProfile, loadPromotedAppConfigSync } from "../automations/app-profile";
 import { promoteExecutionPlan } from "../automations/promote-plan";
 import { buildSpecExecutionContract } from "../automations/spec-execution-contract";
@@ -66,7 +65,7 @@ export async function rematerializePersistedPromotedSpec(args: Rematerialization
     promotionPolicy: DEFAULT_PROMOTION_POLICY,
     appProfileObject: deriveAppProfile({
       appProfile: args.appSlug,
-      appName: config.name,
+      appName: config.appProfile.name,
       baseUrl: config.baseUrl,
     }),
     sectionSlug: args.sectionSlug,
@@ -81,7 +80,7 @@ async function main(): Promise<void> {
   await rematerializePersistedPromotedSpec(parseRematerializationArgs(process.argv.slice(2)));
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url))) {
+if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(__filename)) {
   main().catch((error) => {
     console.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;

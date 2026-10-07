@@ -128,8 +128,8 @@ describe("functional branch enumeration", () => {
       [],
       [],
     );
-    expect(branches.some(b => b.sourceLabel.includes("Canje"))).toBe(true);
-    expect(branches.some(b => b.sourceLabel.includes("Consulta"))).toBe(true);
+    expect(branches.some(b => b.sourceLabel?.includes("Canje"))).toBe(true);
+    expect(branches.some(b => b.sourceLabel?.includes("Consulta"))).toBe(true);
   });
 
   it("T8: no explicit list → no invented branches from visibleOptions", () => {
@@ -178,7 +178,7 @@ describe("functional branch enumeration", () => {
 
   it("creates one semantic destination claim and keeps technical claims separate", () => {
     const destination = extractRequirements("El sistema debe redirigir al Portal.", []);
-    const destinationClaims = buildCanonicalClaims(destination);
+    const destinationClaims = buildCanonicalClaims(destination.map((requirement) => ({ ...requirement, expectedBehavior: requirement.sourceText })));
     expect(destination[0]?.facets).toEqual(["destination"]);
     expect(destinationClaims[0]).toMatchObject({ facet: "destination", claimType: "semantic_destination_assertion" });
 
@@ -196,7 +196,7 @@ describe("functional branch enumeration", () => {
 
   it("keeps visibility claims when the same semantic text is also a destination", () => {
     const requirements = extractRequirements("El sistema debe redirigir al Portal y mostrar Portal.", []);
-    const claims = buildCanonicalClaims(requirements);
+    const claims = buildCanonicalClaims(requirements.map((requirement) => ({ ...requirement, expectedBehavior: requirement.sourceText })));
     expect(requirements.some((requirement) => requirement.category === "destination")).toBe(true);
     expect(requirements.some((requirement) => requirement.category === "visibility")).toBe(true);
     expect(claims.filter((claim) => claim.facet === "visibility")).toHaveLength(1);
@@ -212,7 +212,7 @@ describe("functional branch enumeration", () => {
       accessIntent: "unknown" as const,
       evidenceSource: "user_story" as const,
     }));
-    const claims = buildCanonicalClaims(extractRequirements("", branches));
+    const claims = buildCanonicalClaims(extractRequirements("", branches).map((requirement) => ({ ...requirement, expectedBehavior: requirement.sourceText })));
     expect(claims.filter((claim) => claim.facet === "visibility")).toHaveLength(3);
   });
 
@@ -285,6 +285,7 @@ describe("functional branch enumeration", () => {
 
     const validScenarios = branches.map((branch) => applyWebRuntimeReadiness({
       semanticValidity: "valid",
+      executionReadiness: "ready",
       mcpExecutable: true,
       functionalBranch: { branchId: branch.branchId },
       stepRequirementRefs: [{ stepIndex: 0, requirementId: branch.sourceRequirementId ?? branch.branchId }],

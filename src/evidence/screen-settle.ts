@@ -77,10 +77,18 @@ export async function readScreenSignature(page: Page): Promise<string> {
         const controls = controlsIn(row);
         if (controls.length > 0) {
           const filled = controls.filter(isFilled).length;
-          return filled > 0 && filled / controls.length >= 0.8;
+          // A row checkpoint must represent a finished row. A percentage threshold can capture
+          // too early when the last business field (often a date) is still an untouched placeholder.
+          return filled === controls.length;
         }
         const cells = Array.from(row.querySelectorAll('td,[role="cell"],[role="gridcell"]')).filter(visible);
-        return cells.length > 1 && cells.filter(function (cell) { return meaningful(cell.innerText); }).length / cells.length >= 0.8;
+        const dataCells = cells.filter(function (cell) {
+          if (cell.querySelector('input[type="checkbox"],[role="checkbox"],[aria-label*="seleccionar fila" i]')) return false;
+          const text = normalized(cell.innerText);
+          const actionOnly = /^(?:\.{3,}|…+|•{2,}|⋮|more options|más opciones)$/i.test(text);
+          return !(actionOnly && cell.querySelector('button,[role="button"]'));
+        });
+        return dataCells.length > 1 && dataCells.every(function (cell) { return meaningful(cell.innerText); });
       }).length;
     return location.pathname + '|' + marks.join('¦') + '|completeForms=' + completeFormGroups + '|completeRows=' + completeRows;
   })()`;

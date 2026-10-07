@@ -316,8 +316,8 @@ const browser = await chromium.launch({ headless: headlessMode });
           let authSuccess = false;
           try {
             if (loginMode === "password") {
-              const username = appConfig?.username || process.env.APP_USERNAME || "";
-              const password = appConfig?.password || process.env.APP_PASSWORD || "";
+              const username = (typeof appConfig?.username === "string" ? appConfig.username : undefined) || process.env.APP_USERNAME || "";
+              const password = (typeof appConfig?.password === "string" ? appConfig.password : undefined) || process.env.APP_PASSWORD || "";
               if (username && password) {
                 // Try common login patterns
                 const usernameLocators = [page.getByLabel(/usuario|username|email|c.dula|identificac/i), page.locator('input[type="text"]').first(), page.locator('input[name*="user" i], input[name*="email" i], input[name*="ident" i]').first()];

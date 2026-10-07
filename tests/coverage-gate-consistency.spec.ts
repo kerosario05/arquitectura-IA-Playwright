@@ -85,10 +85,10 @@ test.describe("evaluateGenerationSuccess", () => {
       true,
       baseBranchCoverage,
       true,
-      fc(6, 4, ["action:1", "visibility:1"]),
+      { functionalCoverageValid: fc(6, 4, ["action:1", "visibility:1"]).valid },
     );
     expect(result.generationSuccess).toBe(false);
-    expect(result.blockedReasons).toContain("functional_coverage_incomplete");
+    expect(result.blockedReasons).toContain("requirement_coverage_incomplete");
   });
 
   test("functionalCoverage valid + all other checks pass => generationSuccess true", () => {
@@ -96,7 +96,7 @@ test.describe("evaluateGenerationSuccess", () => {
       true,
       baseBranchCoverage,
       true,
-      fc(6, 6, []),
+      { functionalCoverageValid: fc(6, 6, []).valid },
     );
     expect(result.generationSuccess).toBe(true);
     expect(result.blockedReasons).toHaveLength(0);
@@ -107,11 +107,11 @@ test.describe("evaluateGenerationSuccess", () => {
       true,
       bc({ required: 2, covered: 1, missing: ["branch-B"], valid: false }),
       true,
-      fc(6, 6, []),
+      { functionalCoverageValid: fc(6, 6, []).valid },
     );
     expect(result.generationSuccess).toBe(false);
     expect(result.blockedReasons).toContain("branch_coverage_invalid");
-    expect(result.blockedReasons).not.toContain("functional_coverage_incomplete");
+    expect(result.blockedReasons).not.toContain("requirement_coverage_incomplete");
   });
 
   test("functionalCoverage invalid AND branchCoverage invalid => both reasons", () => {
@@ -119,11 +119,11 @@ test.describe("evaluateGenerationSuccess", () => {
       true,
       bc({ required: 2, covered: 1, missing: ["branch-B"], valid: false }),
       true,
-      fc(6, 4, ["action:1", "visibility:1"]),
+      { functionalCoverageValid: fc(6, 4, ["action:1", "visibility:1"]).valid },
     );
     expect(result.generationSuccess).toBe(false);
     expect(result.blockedReasons).toContain("branch_coverage_invalid");
-    expect(result.blockedReasons).toContain("functional_coverage_incomplete");
+    expect(result.blockedReasons).toContain("requirement_coverage_incomplete");
   });
 
   test("coverageRequirementsAvailable false => separate reason", () => {
@@ -131,7 +131,7 @@ test.describe("evaluateGenerationSuccess", () => {
       true,
       baseBranchCoverage,
       false,
-      fc(0, 0, []),
+      { functionalCoverageValid: fc(0, 0, []).valid },
     );
     expect(result.generationSuccess).toBe(false);
     expect(result.blockedReasons).toContain("coverage_requirements_unavailable");
@@ -289,7 +289,7 @@ test.describe("missing requirements are observable via requirementAccounting", (
       branches[0],
       { mcpExecutable: false, executionMode: "adaptive" },
     );
-    scenario.validation = { valid: false, errors: ["mcpExecutable must be true"] };
+    scenario.validation = { valid: false, errors: ["mcpExecutable must be true"], warnings: [] };
     scenario.stepRequirementRefs = [
       { stepIndex: 0, requirementId: "branch:A", facet: "activation" },
     ];

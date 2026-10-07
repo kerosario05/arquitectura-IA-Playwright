@@ -1,0 +1,4375 @@
+{
+  "version": "1.0",
+  "recordingId": "2b6162d6-fa93-4eb9-bd93-d237d0eaa115",
+  "projectSlug": "portal-empresarial",
+  "appSlug": "portal-empresarial",
+  "platform": "web",
+  "recordingGoal": {
+    "declaredGoal": "Validar cédula con formato erróneo al agregar empleado manualmente",
+    "normalizedGoal": "Validar cédula con formato erróneo al agregar empleado manualmente",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "selectorOptionInventories": [],
+  "semanticScreens": [
+    {
+      "screenIdentity": "3e7b2674871e",
+      "url": "https://172.27.4.31/login",
+      "classification": "SAME_SCREEN_MUTATION",
+      "sourceScreenKey": "3e7b2674871e"
+    },
+    {
+      "screenIdentity": "220acbf65cf8",
+      "url": "https://172.27.4.31/login",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "220acbf65cf8"
+    },
+    {
+      "screenIdentity": "7104389fcb16",
+      "title": "¿Cómo configurar la nómina?",
+      "url": "https://172.27.4.31/payroll/electronicPayroll",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "7104389fcb16"
+    },
+    {
+      "screenIdentity": "54579a477d51",
+      "title": "¡Atención!",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "54579a477d51"
+    },
+    {
+      "screenIdentity": "ee556c152738",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "ee556c152738"
+    },
+    {
+      "screenIdentity": "a94bc61aab2c",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "a94bc61aab2c"
+    },
+    {
+      "screenIdentity": "a6979159960e",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "a6979159960e"
+    },
+    {
+      "screenIdentity": "1fd7c8d8cc9d",
+      "url": "https://172.27.4.31/payroll/manualCreationTable",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "1fd7c8d8cc9d"
+    }
+  ],
+  "semanticComponents": [
+    {
+      "componentId": "3e7b2674871e:control:3e7b2674871e|RNC de la empresa*|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "3e7b2674871e",
+      "label": "RNC de la empresa*",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-6"
+      ]
+    },
+    {
+      "componentId": "3e7b2674871e:control:3e7b2674871e|Nombre de usuario*|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "3e7b2674871e",
+      "label": "Nombre de usuario*",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-8"
+      ]
+    },
+    {
+      "componentId": "3e7b2674871e:control:3e7b2674871e|Contraseña*|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "3e7b2674871e",
+      "label": "Contraseña*",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-10"
+      ]
+    },
+    {
+      "componentId": "3e7b2674871e:control:3e7b2674871e|Continuar|button",
+      "componentType": "button",
+      "screenIdentity": "3e7b2674871e",
+      "label": "Continuar",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-11"
+      ]
+    },
+    {
+      "componentId": "3e7b2674871e:control:3e7b2674871e|Gestión de Nóminas|button",
+      "componentType": "button",
+      "screenIdentity": "3e7b2674871e",
+      "label": "Gestión de Nóminas",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-14"
+      ]
+    },
+    {
+      "componentId": "3e7b2674871e:control:3e7b2674871e|Crear Manualmente|button",
+      "componentType": "button",
+      "screenIdentity": "3e7b2674871e",
+      "label": "Crear Manualmente",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-17"
+      ]
+    },
+    {
+      "componentId": "3e7b2674871e:control:3e7b2674871e|Close|button",
+      "componentType": "button",
+      "screenIdentity": "3e7b2674871e",
+      "label": "Close",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-20"
+      ]
+    },
+    {
+      "componentId": "3e7b2674871e:control:3e7b2674871e|Seleccionar fila|checkbox",
+      "componentType": "checkbox",
+      "screenIdentity": "3e7b2674871e",
+      "label": "Seleccionar fila",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-22"
+      ]
+    },
+    {
+      "componentId": "3e7b2674871e:control:3e7b2674871e|Tipo de ID|button",
+      "componentType": "button",
+      "screenIdentity": "3e7b2674871e",
+      "label": "control",
+      "associatedField": "Tipo de ID",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-23",
+        "obs-24"
+      ]
+    },
+    {
+      "componentId": "3e7b2674871e:control:3e7b2674871e|cédula|option",
+      "componentType": "option",
+      "screenIdentity": "3e7b2674871e",
+      "label": "cédula",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-25"
+      ]
+    },
+    {
+      "componentId": "3e7b2674871e:control:3e7b2674871e|Colaborador|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "3e7b2674871e",
+      "label": "control",
+      "associatedField": "Colaborador",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-27",
+        "obs-28"
+      ]
+    },
+    {
+      "componentId": "3e7b2674871e:control:3e7b2674871e|Puesto|button",
+      "componentType": "button",
+      "screenIdentity": "3e7b2674871e",
+      "label": "control",
+      "associatedField": "Puesto",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-29",
+        "obs-30",
+        "obs-31"
+      ]
+    },
+    {
+      "componentId": "a94bc61aab2c:editable-grid",
+      "componentType": "editable_grid",
+      "screenIdentity": "a94bc61aab2c",
+      "observationRefs": [
+        "screen-a94bc61aab2c-control-1",
+        "screen-a94bc61aab2c-control-2",
+        "screen-a94bc61aab2c-control-3",
+        "screen-a94bc61aab2c-control-4",
+        "screen-a94bc61aab2c-control-5",
+        "screen-a94bc61aab2c-control-6",
+        "screen-a94bc61aab2c-control-7",
+        "screen-a94bc61aab2c-control-8",
+        "screen-a94bc61aab2c-control-9",
+        "screen-a94bc61aab2c-control-10",
+        "screen-a94bc61aab2c-control-11",
+        "screen-a94bc61aab2c-control-12",
+        "screen-a94bc61aab2c-control-13"
+      ]
+    }
+  ],
+  "semanticEvents": [
+    {
+      "eventRef": "event-1",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-2",
+      "action": "observe",
+      "screenIdentity": "3e7b2674871e",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-3",
+      "action": "navigate",
+      "screenIdentity": "3e7b2674871e",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-4",
+      "action": "observe",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "textbox",
+      "controlAffordance": "editable",
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|RNC de la empresa*|amount_or_text",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-5",
+      "action": "observe",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "textbox",
+      "controlAffordance": "editable",
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Nombre de usuario*|amount_or_text",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-6",
+      "action": "fill",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "textbox",
+      "field": "RNC de la empresa*",
+      "controlAffordance": "editable",
+      "valueKey": "rnc_de_la_empresa",
+      "valueRole": "action_input",
+      "technicalTargetRef": "3e7b2674871e:control:role:textbox|RNC de la empresa*",
+      "afterState": "130598983",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-7",
+      "action": "observe",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "textbox",
+      "controlAffordance": "editable",
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Contraseña*|amount_or_text",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-8",
+      "action": "fill",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "textbox",
+      "field": "Nombre de usuario*",
+      "controlAffordance": "editable",
+      "valueKey": "nombre_de_usuario",
+      "valueRole": "action_input",
+      "technicalTargetRef": "3e7b2674871e:control:role:textbox|Nombre de usuario*",
+      "afterState": "olivam",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-9",
+      "action": "observe",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Continuar|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-10",
+      "action": "fill",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "textbox",
+      "field": "Contraseña*",
+      "controlAffordance": "editable",
+      "valueKey": "contrasena",
+      "valueRole": "secure_input",
+      "technicalTargetRef": "3e7b2674871e:control:role:textbox|Contraseña*",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-11",
+      "action": "click",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "3e7b2674871e:control:role:button|Continuar",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-12",
+      "action": "navigate",
+      "screenIdentity": "3e7b2674871e",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-13",
+      "action": "observe",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Gestión de Nóminas|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-14",
+      "action": "click",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "3e7b2674871e:control:role:button|Gestión de Nóminas",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-15",
+      "action": "navigate",
+      "screenIdentity": "3e7b2674871e",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-16",
+      "action": "observe",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Crear Manualmente|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-17",
+      "action": "click",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "3e7b2674871e:control:role:button|Crear Manualmente",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-18",
+      "action": "navigate",
+      "screenIdentity": "3e7b2674871e",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-19",
+      "action": "observe",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Close|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-20",
+      "action": "click",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "3e7b2674871e:control:role:button|Close",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-21",
+      "action": "observe",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "checkbox",
+      "controlAffordance": "observable_control",
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Seleccionar fila|checkbox",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-22",
+      "action": "activate",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "checkbox",
+      "controlAffordance": "observable_control",
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Seleccionar fila|checkbox",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-23",
+      "action": "observe",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "associatedField": "Tipo de ID",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Tipo de ID|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-24",
+      "action": "click",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "associatedField": "Tipo de ID",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Tipo de ID|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-25",
+      "action": "activate",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "option",
+      "controlAffordance": "selectable",
+      "technicalTargetRef": "3e7b2674871e:control:role:option|cédula",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-26",
+      "action": "observe",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "option",
+      "controlAffordance": "selectable",
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|cédula|option",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-27",
+      "action": "observe",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "textbox",
+      "associatedField": "Colaborador",
+      "controlAffordance": "editable",
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Colaborador|amount_or_text",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-28",
+      "action": "fill",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "textbox",
+      "field": "Colaborador",
+      "associatedField": "Colaborador",
+      "controlAffordance": "editable",
+      "valueKey": "colaborador",
+      "valueRole": "action_input",
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Colaborador|amount_or_text",
+      "afterState": "402-245754",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-29",
+      "action": "observe",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "associatedField": "Puesto",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Puesto|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-30",
+      "action": "observe",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "associatedField": "Puesto",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Puesto|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-31",
+      "action": "click",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "associatedField": "Puesto",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Puesto|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    }
+  ],
+  "datasets": [
+    {
+      "valueKey": "rnc_de_la_empresa",
+      "semanticField": "RNC de la empresa*",
+      "valueRole": "action_input",
+      "value": "130598983",
+      "rawTypedValue": "130598983",
+      "committedValue": "130598983",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "3e7b2674871e:control:role:textbox|RNC de la empresa*",
+      "recordingId": "2b6162d6-fa93-4eb9-bd93-d237d0eaa115",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "nombre_de_usuario",
+      "semanticField": "Nombre de usuario*",
+      "valueRole": "action_input",
+      "value": "olivam",
+      "rawTypedValue": "olivam",
+      "committedValue": "olivam",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "3e7b2674871e:control:role:textbox|Nombre de usuario*",
+      "recordingId": "2b6162d6-fa93-4eb9-bd93-d237d0eaa115",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "contrasena",
+      "semanticField": "Contraseña*",
+      "valueRole": "secure_input",
+      "source": "secure",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": true,
+      "generated": false,
+      "instanceIdentity": "3e7b2674871e:control:role:textbox|Contraseña*",
+      "recordingId": "2b6162d6-fa93-4eb9-bd93-d237d0eaa115",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "colaborador",
+      "semanticField": "Colaborador",
+      "valueRole": "action_input",
+      "value": "402-245754",
+      "rawTypedValue": "402-245754",
+      "committedValue": "402-245754",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "3e7b2674871e:control:3e7b2674871e|Colaborador|amount_or_text",
+      "recordingId": "2b6162d6-fa93-4eb9-bd93-d237d0eaa115",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label"
+    }
+  ],
+  "technicalObservations": [
+    {
+      "observationId": "obs-4",
+      "status": "OBSERVED",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "textbox",
+      "label": "RNC de la empresa*",
+      "tag": "input",
+      "role": "textbox",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|RNC de la empresa*|amount_or_text",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-5",
+      "status": "OBSERVED",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "textbox",
+      "label": "Nombre de usuario*",
+      "tag": "input",
+      "role": "textbox",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Nombre de usuario*|amount_or_text",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-6",
+      "status": "VALIDATED",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "textbox",
+      "label": "RNC de la empresa*",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "130598983",
+      "semanticField": "RNC de la empresa*",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|RNC de la empresa*",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#rnc",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "rnc",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "3e7b2674871e:control:role:textbox|RNC de la empresa*",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-1",
+      "inputValue": "130598983",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-7",
+      "status": "OBSERVED",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "textbox",
+      "label": "Contraseña*",
+      "tag": "input",
+      "role": "textbox",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Contraseña*|amount_or_text",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-8",
+      "status": "VALIDATED",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "textbox",
+      "label": "Nombre de usuario*",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "olivam",
+      "semanticField": "Nombre de usuario*",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Nombre de usuario*",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#email",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "email",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "3e7b2674871e:control:role:textbox|Nombre de usuario*",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-2",
+      "inputValue": "olivam",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-9",
+      "status": "OBSERVED",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "label": "Continuar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Continuar|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-10",
+      "status": "VALIDATED",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "textbox",
+      "label": "Contraseña*",
+      "tag": "input",
+      "role": "input",
+      "semanticField": "Contraseña*",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Contraseña*",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#password",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "password",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "3e7b2674871e:control:role:textbox|Contraseña*",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-3",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-11",
+      "status": "VALIDATED",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "label": "Continuar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Continuar",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Continuar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "div"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"div\",1]]}",
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "3e7b2674871e:control:role:button|Continuar",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-13",
+      "status": "OBSERVED",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "label": "Gestión de Nóminas",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Gestión de Nóminas|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-14",
+      "status": "VALIDATED",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "label": "Gestión de Nóminas",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Gestión de Nóminas",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Gestión de Nóminas",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "img",
+                "stableAttributes": {
+                  "alt": "user",
+                  "src": "/images/payroll.svg"
+                }
+              }
+            ],
+            "semanticShape": [
+              "img",
+              "p"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"img\",1],[\"p\",1]],\"descendantEntries\":[[\"img\",1],[\"p\",1]]}",
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "3e7b2674871e:control:role:button|Gestión de Nóminas",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-16",
+      "status": "OBSERVED",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "label": "Crear Manualmente",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Crear Manualmente|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-17",
+      "status": "VALIDATED",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "label": "Crear Manualmente",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Crear Manualmente",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Crear Manualmente",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "img",
+                "stableAttributes": {
+                  "alt": "icon-plus",
+                  "src": "/images/feather-plus-white.svg"
+                }
+              }
+            ],
+            "semanticShape": [
+              "img",
+              "p"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"img\",1],[\"p\",1]],\"descendantEntries\":[[\"img\",1],[\"p\",1]]}",
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "3e7b2674871e:control:role:button|Crear Manualmente",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-19",
+      "status": "OBSERVED",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "label": "Close",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Close|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-20",
+      "status": "VALIDATED",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "label": "Close",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Close",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Close",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "span",
+              "svg"
+            ],
+            "deterministicStructuralIdentity": false,
+            "topologySignature": "{\"childEntries\":[[\"span\",1],[\"svg\",1]],\"descendantEntries\":[[\"path\",2],[\"span\",1],[\"svg\",1]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "radix-_r_11_"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\",\"svg\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1],[\\\"svg\\\",1]],\\\"descendantEntries\\\":[[\\\"path\\\",2],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "3e7b2674871e:control:role:button|Close",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-21",
+      "status": "OBSERVED",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "checkbox",
+      "label": "Seleccionar fila",
+      "tag": "button",
+      "role": "checkbox",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Seleccionar fila|checkbox",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-22",
+      "status": "VALIDATED",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "checkbox",
+      "label": "Seleccionar fila",
+      "tag": "button",
+      "role": "checkbox",
+      "locatorCandidates": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "button",
+              "role": "checkbox"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Seleccionar fila",
+              "role": "checkbox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.4,
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Seleccionar fila|checkbox",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-23",
+      "status": "OBSERVED",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "label": "control",
+      "tag": "button",
+      "role": "button",
+      "associatedField": "Tipo de ID",
+      "semanticField": "Tipo de ID",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Tipo de ID|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-24",
+      "status": "VALIDATED",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "label": "control",
+      "tag": "button",
+      "role": "button",
+      "associatedField": "Tipo de ID",
+      "semanticField": "Tipo de ID",
+      "locatorCandidates": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 9
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.4,
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Tipo de ID|button",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-25",
+      "status": "VALIDATED",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "option",
+      "label": "cédula",
+      "tag": "div",
+      "role": "option",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "option|cédula",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "option|cédula",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-labelledby": "radix-_r_1i_",
+              "role": "option"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "span",
+                "stableAttributes": {
+                  "id": "radix-_r_1i_"
+                }
+              }
+            ],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "radix-_r_1g_"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"div\",\"role\":\"option\"},\"stableDirectAttributes\":{\"role\":\"option\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"span\",\"stableAttributes\":{\"id\":\"radix-_r_1i_\"}}],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "3e7b2674871e:control:role:option|cédula",
+      "validatedByInteraction": true,
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-26",
+      "status": "OBSERVED",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "option",
+      "label": "cédula",
+      "tag": "div",
+      "role": "option",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|cédula|option",
+      "validatedByInteraction": false,
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-27",
+      "status": "OBSERVED",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "textbox",
+      "label": "control",
+      "tag": "input",
+      "role": "textbox",
+      "associatedField": "Colaborador",
+      "semanticField": "Colaborador",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Colaborador|amount_or_text",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-28",
+      "status": "VALIDATED",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "textbox",
+      "label": "control",
+      "tag": "input",
+      "role": "input",
+      "associatedField": "Colaborador",
+      "afterValue": "402-245754",
+      "semanticField": "Colaborador",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Colaborador|amount_or_text",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-5",
+      "inputValue": "402-245754",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-29",
+      "status": "OBSERVED",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "label": "control",
+      "tag": "button",
+      "role": "button",
+      "associatedField": "Puesto",
+      "semanticField": "Puesto",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Puesto|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-30",
+      "status": "OBSERVED",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "label": "control",
+      "tag": "button",
+      "role": "button",
+      "associatedField": "Puesto",
+      "semanticField": "Puesto",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Puesto|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-31",
+      "status": "VALIDATED",
+      "screenIdentity": "3e7b2674871e",
+      "componentType": "button",
+      "label": "control",
+      "tag": "button",
+      "role": "button",
+      "associatedField": "Puesto",
+      "semanticField": "Puesto",
+      "locatorCandidates": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 9
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.4,
+      "technicalTargetRef": "3e7b2674871e:control:3e7b2674871e|Puesto|button",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-220acbf65cf8-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "220acbf65cf8",
+      "componentType": "textbox",
+      "label": "RNC de la empresa*",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "rnc",
+        "name": "userRnc",
+        "type": "text",
+        "placeholder": "Escribir aquí el RNC"
+      },
+      "placeholder": "Escribir aquí el RNC",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "rnc",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "220acbf65cf8:control:1",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-220acbf65cf8-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "220acbf65cf8",
+      "componentType": "textbox",
+      "label": "Nombre de usuario*",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "email",
+        "name": "userName",
+        "type": "text",
+        "placeholder": "Usuario"
+      },
+      "placeholder": "Usuario",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "email",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "220acbf65cf8:control:2",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-220acbf65cf8-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "220acbf65cf8",
+      "componentType": "textbox",
+      "label": "Contraseña*",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "password",
+        "name": "password",
+        "type": "password",
+        "placeholder": "Clave"
+      },
+      "placeholder": "Clave",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "password",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "220acbf65cf8:control:3",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-220acbf65cf8-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "220acbf65cf8",
+      "componentType": "a",
+      "label": "Registro Digital Nuevos Colaboradores",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Registro Digital Nuevos Colaboradores",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "220acbf65cf8:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-220acbf65cf8-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "220acbf65cf8",
+      "componentType": "button",
+      "label": "Iniciando sesión...",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "submit"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Iniciando sesión...",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "220acbf65cf8:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-220acbf65cf8-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "220acbf65cf8",
+      "componentType": "a",
+      "label": "Quiénes Somos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Quiénes Somos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "220acbf65cf8:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-220acbf65cf8-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "220acbf65cf8",
+      "componentType": "a",
+      "label": "Productos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Productos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "220acbf65cf8:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-220acbf65cf8-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "220acbf65cf8",
+      "componentType": "a",
+      "label": "Contactos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Contactos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "220acbf65cf8:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-220acbf65cf8-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "220acbf65cf8",
+      "componentType": "a",
+      "label": "Pasos Reclamación",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Pasos Reclamación",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "220acbf65cf8:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-7104389fcb16-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "7104389fcb16",
+      "componentType": "button",
+      "label": "Crear Manualmente",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": " Crear Manualmente",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "7104389fcb16:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-7104389fcb16-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "7104389fcb16",
+      "componentType": "a",
+      "label": "click aquí para descargar",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "click aquí para descargar",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "7104389fcb16:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-7104389fcb16-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "7104389fcb16",
+      "componentType": "a",
+      "label": "Quiénes Somos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Quiénes Somos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "7104389fcb16:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-7104389fcb16-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "7104389fcb16",
+      "componentType": "a",
+      "label": "Productos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Productos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "7104389fcb16:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-7104389fcb16-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "7104389fcb16",
+      "componentType": "a",
+      "label": "Contactos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Contactos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "7104389fcb16:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-7104389fcb16-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "7104389fcb16",
+      "componentType": "a",
+      "label": "Pasos Reclamación",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Pasos Reclamación",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "7104389fcb16:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-54579a477d51-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "54579a477d51",
+      "componentType": "button",
+      "label": "Volver al inicio",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button",
+        "aria-label": "Volver al inicio"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Volver al inicio",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "54579a477d51:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-54579a477d51-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "54579a477d51",
+      "componentType": "button",
+      "label": "Cargar archivo",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Cargar archivo",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "54579a477d51:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-54579a477d51-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "54579a477d51",
+      "componentType": "button",
+      "label": "Añadir otro",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Añadir otro",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "54579a477d51:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-54579a477d51-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "54579a477d51",
+      "componentType": "button",
+      "label": "Validar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Validar ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "54579a477d51:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-54579a477d51-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "54579a477d51",
+      "componentType": "checkbox",
+      "label": "Seleccionar fila",
+      "tag": "button",
+      "role": "checkbox",
+      "attributes": {
+        "type": "button",
+        "aria-label": "Seleccionar fila",
+        "role": "checkbox"
+      },
+      "rowIdentity": "1",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Seleccionar fila",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "54579a477d51:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-54579a477d51-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "54579a477d51",
+      "componentType": "button",
+      "label": "Indicar...",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "headerContext": "Tipo de ID",
+      "rowIdentity": "1",
+      "associatedField": "Tipo de ID",
+      "semanticField": "Tipo de ID",
+      "needsReview": false,
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Indicar...",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "54579a477d51:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-54579a477d51-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "54579a477d51",
+      "componentType": "button",
+      "label": "000-000-0000",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "headerContext": "Teléfono residencial",
+      "rowIdentity": "1",
+      "associatedField": "Teléfono residencial",
+      "semanticField": "Teléfono residencial",
+      "needsReview": false,
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "000-000-0000",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "54579a477d51:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-54579a477d51-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "54579a477d51",
+      "componentType": "button",
+      "label": "•••",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "rowIdentity": "1",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "•••",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "54579a477d51:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-54579a477d51-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "54579a477d51",
+      "componentType": "a",
+      "label": "Quiénes Somos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Quiénes Somos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "54579a477d51:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-54579a477d51-control-10",
+      "status": "OBSERVED",
+      "screenIdentity": "54579a477d51",
+      "componentType": "a",
+      "label": "Productos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Productos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "54579a477d51:control:10",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-54579a477d51-control-11",
+      "status": "OBSERVED",
+      "screenIdentity": "54579a477d51",
+      "componentType": "a",
+      "label": "Contactos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Contactos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "54579a477d51:control:11",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-54579a477d51-control-12",
+      "status": "OBSERVED",
+      "screenIdentity": "54579a477d51",
+      "componentType": "a",
+      "label": "Pasos Reclamación",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Pasos Reclamación",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "54579a477d51:control:12",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-54579a477d51-control-13",
+      "status": "OBSERVED",
+      "screenIdentity": "54579a477d51",
+      "componentType": "button",
+      "label": "Close",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Close",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "54579a477d51:control:13",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-ee556c152738-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "ee556c152738",
+      "componentType": "button",
+      "label": "Volver al inicio",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button",
+        "aria-label": "Volver al inicio"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Volver al inicio",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "ee556c152738:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-ee556c152738-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "ee556c152738",
+      "componentType": "button",
+      "label": "Cargar archivo",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Cargar archivo",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "ee556c152738:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-ee556c152738-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "ee556c152738",
+      "componentType": "button",
+      "label": "Añadir otro",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Añadir otro",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "ee556c152738:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-ee556c152738-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "ee556c152738",
+      "componentType": "button",
+      "label": "Validar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Validar ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "ee556c152738:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-ee556c152738-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "ee556c152738",
+      "componentType": "checkbox",
+      "label": "Seleccionar fila",
+      "tag": "button",
+      "role": "checkbox",
+      "attributes": {
+        "type": "button",
+        "aria-label": "Seleccionar fila",
+        "role": "checkbox"
+      },
+      "rowIdentity": "1",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Seleccionar fila",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "ee556c152738:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-ee556c152738-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "ee556c152738",
+      "componentType": "button",
+      "label": "Indicar...",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "headerContext": "Tipo de ID",
+      "rowIdentity": "1",
+      "associatedField": "Tipo de ID",
+      "semanticField": "Tipo de ID",
+      "needsReview": false,
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Indicar...",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "ee556c152738:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-ee556c152738-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "ee556c152738",
+      "componentType": "button",
+      "label": "000-000-0000",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "headerContext": "Teléfono residencial",
+      "rowIdentity": "1",
+      "associatedField": "Teléfono residencial",
+      "semanticField": "Teléfono residencial",
+      "needsReview": false,
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "000-000-0000",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "ee556c152738:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-ee556c152738-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "ee556c152738",
+      "componentType": "button",
+      "label": "•••",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "rowIdentity": "1",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "•••",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "ee556c152738:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-ee556c152738-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "ee556c152738",
+      "componentType": "a",
+      "label": "Quiénes Somos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Quiénes Somos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "ee556c152738:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-ee556c152738-control-10",
+      "status": "OBSERVED",
+      "screenIdentity": "ee556c152738",
+      "componentType": "a",
+      "label": "Productos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Productos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "ee556c152738:control:10",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-ee556c152738-control-11",
+      "status": "OBSERVED",
+      "screenIdentity": "ee556c152738",
+      "componentType": "a",
+      "label": "Contactos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Contactos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "ee556c152738:control:11",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-ee556c152738-control-12",
+      "status": "OBSERVED",
+      "screenIdentity": "ee556c152738",
+      "componentType": "a",
+      "label": "Pasos Reclamación",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Pasos Reclamación",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "ee556c152738:control:12",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a94bc61aab2c-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "a94bc61aab2c",
+      "componentType": "button",
+      "label": "Volver al inicio",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button",
+        "aria-label": "Volver al inicio"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Volver al inicio",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a94bc61aab2c:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a94bc61aab2c-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "a94bc61aab2c",
+      "componentType": "button",
+      "label": "Cargar archivo",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Cargar archivo",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a94bc61aab2c:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a94bc61aab2c-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "a94bc61aab2c",
+      "componentType": "button",
+      "label": "Añadir otro",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Añadir otro",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a94bc61aab2c:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a94bc61aab2c-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "a94bc61aab2c",
+      "componentType": "button",
+      "label": "Validar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Validar ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a94bc61aab2c:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a94bc61aab2c-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "a94bc61aab2c",
+      "componentType": "checkbox",
+      "label": "Seleccionar fila",
+      "tag": "button",
+      "role": "checkbox",
+      "attributes": {
+        "type": "button",
+        "aria-label": "Seleccionar fila",
+        "role": "checkbox"
+      },
+      "rowIdentity": "1",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Seleccionar fila",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a94bc61aab2c:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a94bc61aab2c-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "a94bc61aab2c",
+      "componentType": "select/combobox",
+      "label": "seleccione",
+      "tag": "button",
+      "role": "combobox",
+      "attributes": {
+        "type": "button",
+        "role": "combobox"
+      },
+      "headerContext": "Tipo de ID",
+      "rowIdentity": "1",
+      "associatedField": "Tipo de ID",
+      "semanticField": "Tipo de ID",
+      "needsReview": false,
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "seleccione  ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a94bc61aab2c:control:6",
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a94bc61aab2c-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "a94bc61aab2c",
+      "componentType": "button",
+      "label": "Indicar...",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "headerContext": "Colaborador",
+      "rowIdentity": "1",
+      "associatedField": "Colaborador",
+      "semanticField": "Colaborador",
+      "needsReview": false,
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Indicar...",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a94bc61aab2c:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a94bc61aab2c-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "a94bc61aab2c",
+      "componentType": "button",
+      "label": "000-000-0000",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "headerContext": "Teléfono residencial",
+      "rowIdentity": "1",
+      "associatedField": "Teléfono residencial",
+      "semanticField": "Teléfono residencial",
+      "needsReview": false,
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "000-000-0000",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a94bc61aab2c:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a94bc61aab2c-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "a94bc61aab2c",
+      "componentType": "button",
+      "label": "•••",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "rowIdentity": "1",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "•••",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a94bc61aab2c:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a94bc61aab2c-control-10",
+      "status": "OBSERVED",
+      "screenIdentity": "a94bc61aab2c",
+      "componentType": "a",
+      "label": "Quiénes Somos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Quiénes Somos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a94bc61aab2c:control:10",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a94bc61aab2c-control-11",
+      "status": "OBSERVED",
+      "screenIdentity": "a94bc61aab2c",
+      "componentType": "a",
+      "label": "Productos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Productos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a94bc61aab2c:control:11",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a94bc61aab2c-control-12",
+      "status": "OBSERVED",
+      "screenIdentity": "a94bc61aab2c",
+      "componentType": "a",
+      "label": "Contactos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Contactos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a94bc61aab2c:control:12",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a94bc61aab2c-control-13",
+      "status": "OBSERVED",
+      "screenIdentity": "a94bc61aab2c",
+      "componentType": "a",
+      "label": "Pasos Reclamación",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Pasos Reclamación",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a94bc61aab2c:control:13",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a6979159960e-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "a6979159960e",
+      "componentType": "button",
+      "label": "Volver al inicio",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button",
+        "aria-label": "Volver al inicio"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Volver al inicio",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a6979159960e:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a6979159960e-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "a6979159960e",
+      "componentType": "button",
+      "label": "Cargar archivo",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Cargar archivo",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a6979159960e:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a6979159960e-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "a6979159960e",
+      "componentType": "button",
+      "label": "Añadir otro",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Añadir otro",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a6979159960e:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a6979159960e-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "a6979159960e",
+      "componentType": "button",
+      "label": "Validar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Validar ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a6979159960e:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a6979159960e-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "a6979159960e",
+      "componentType": "checkbox",
+      "label": "Seleccionar fila",
+      "tag": "button",
+      "role": "checkbox",
+      "attributes": {
+        "type": "button",
+        "aria-label": "Seleccionar fila",
+        "role": "checkbox"
+      },
+      "rowIdentity": "1",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Seleccionar fila",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a6979159960e:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a6979159960e-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "a6979159960e",
+      "componentType": "button",
+      "label": "cédula",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "headerContext": "Tipo de ID",
+      "rowIdentity": "1",
+      "associatedField": "Tipo de ID",
+      "semanticField": "Tipo de ID",
+      "needsReview": false,
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "cédula",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a6979159960e:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a6979159960e-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "a6979159960e",
+      "componentType": "textbox",
+      "label": "000-0000000-0",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "type": "text",
+        "placeholder": "000-0000000-0"
+      },
+      "placeholder": "000-0000000-0",
+      "headerContext": "Colaborador",
+      "rowIdentity": "1",
+      "associatedField": "Colaborador",
+      "semanticField": "Colaborador",
+      "needsReview": false,
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "000-0000000-0",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a6979159960e:control:7",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-a6979159960e-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "a6979159960e",
+      "componentType": "button",
+      "label": "Indicar...",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "headerContext": "Puesto",
+      "rowIdentity": "1",
+      "associatedField": "Puesto",
+      "semanticField": "Puesto",
+      "needsReview": false,
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Indicar...",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a6979159960e:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a6979159960e-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "a6979159960e",
+      "componentType": "button",
+      "label": "000-000-0000",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "headerContext": "Teléfono residencial",
+      "rowIdentity": "1",
+      "associatedField": "Teléfono residencial",
+      "semanticField": "Teléfono residencial",
+      "needsReview": false,
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "000-000-0000",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a6979159960e:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a6979159960e-control-10",
+      "status": "OBSERVED",
+      "screenIdentity": "a6979159960e",
+      "componentType": "button",
+      "label": "•••",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "rowIdentity": "1",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "•••",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a6979159960e:control:10",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a6979159960e-control-11",
+      "status": "OBSERVED",
+      "screenIdentity": "a6979159960e",
+      "componentType": "a",
+      "label": "Quiénes Somos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Quiénes Somos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a6979159960e:control:11",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a6979159960e-control-12",
+      "status": "OBSERVED",
+      "screenIdentity": "a6979159960e",
+      "componentType": "a",
+      "label": "Productos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Productos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a6979159960e:control:12",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a6979159960e-control-13",
+      "status": "OBSERVED",
+      "screenIdentity": "a6979159960e",
+      "componentType": "a",
+      "label": "Contactos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Contactos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a6979159960e:control:13",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a6979159960e-control-14",
+      "status": "OBSERVED",
+      "screenIdentity": "a6979159960e",
+      "componentType": "a",
+      "label": "Pasos Reclamación",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Pasos Reclamación",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a6979159960e:control:14",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1fd7c8d8cc9d-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "1fd7c8d8cc9d",
+      "componentType": "button",
+      "label": "Volver al inicio",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button",
+        "aria-label": "Volver al inicio"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Volver al inicio",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1fd7c8d8cc9d:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1fd7c8d8cc9d-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "1fd7c8d8cc9d",
+      "componentType": "button",
+      "label": "Cargar archivo",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Cargar archivo",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1fd7c8d8cc9d:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1fd7c8d8cc9d-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "1fd7c8d8cc9d",
+      "componentType": "button",
+      "label": "Añadir otro",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Añadir otro",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1fd7c8d8cc9d:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1fd7c8d8cc9d-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "1fd7c8d8cc9d",
+      "componentType": "button",
+      "label": "Validar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Validar ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1fd7c8d8cc9d:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1fd7c8d8cc9d-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "1fd7c8d8cc9d",
+      "componentType": "checkbox",
+      "label": "Seleccionar fila",
+      "tag": "button",
+      "role": "checkbox",
+      "attributes": {
+        "type": "button",
+        "aria-label": "Seleccionar fila",
+        "role": "checkbox"
+      },
+      "rowIdentity": "1",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Seleccionar fila",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1fd7c8d8cc9d:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1fd7c8d8cc9d-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "1fd7c8d8cc9d",
+      "componentType": "button",
+      "label": "cédula",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "headerContext": "Tipo de ID",
+      "rowIdentity": "1",
+      "associatedField": "Tipo de ID",
+      "semanticField": "Tipo de ID",
+      "needsReview": false,
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "cédula",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1fd7c8d8cc9d:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1fd7c8d8cc9d-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "1fd7c8d8cc9d",
+      "componentType": "button",
+      "label": "402-245754",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "headerContext": "Colaborador",
+      "rowIdentity": "1",
+      "associatedField": "Colaborador",
+      "semanticField": "Colaborador",
+      "needsReview": false,
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "402-245754",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1fd7c8d8cc9d:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1fd7c8d8cc9d-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "1fd7c8d8cc9d",
+      "componentType": "textbox",
+      "label": "Indicar...",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "type": "text",
+        "placeholder": "Indicar..."
+      },
+      "placeholder": "Indicar...",
+      "headerContext": "Puesto",
+      "rowIdentity": "1",
+      "associatedField": "Puesto",
+      "semanticField": "Puesto",
+      "needsReview": false,
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Indicar...",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1fd7c8d8cc9d:control:8",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-1fd7c8d8cc9d-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "1fd7c8d8cc9d",
+      "componentType": "button",
+      "label": "Indicar...",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "headerContext": "Ingresos",
+      "rowIdentity": "1",
+      "associatedField": "Ingresos",
+      "semanticField": "Ingresos",
+      "needsReview": false,
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Indicar...",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1fd7c8d8cc9d:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1fd7c8d8cc9d-control-10",
+      "status": "OBSERVED",
+      "screenIdentity": "1fd7c8d8cc9d",
+      "componentType": "button",
+      "label": "000-000-0000",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "headerContext": "Teléfono residencial",
+      "rowIdentity": "1",
+      "associatedField": "Teléfono residencial",
+      "semanticField": "Teléfono residencial",
+      "needsReview": false,
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "000-000-0000",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1fd7c8d8cc9d:control:10",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1fd7c8d8cc9d-control-11",
+      "status": "OBSERVED",
+      "screenIdentity": "1fd7c8d8cc9d",
+      "componentType": "button",
+      "label": "•••",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "rowIdentity": "1",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "•••",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1fd7c8d8cc9d:control:11",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1fd7c8d8cc9d-control-12",
+      "status": "OBSERVED",
+      "screenIdentity": "1fd7c8d8cc9d",
+      "componentType": "a",
+      "label": "Quiénes Somos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Quiénes Somos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1fd7c8d8cc9d:control:12",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1fd7c8d8cc9d-control-13",
+      "status": "OBSERVED",
+      "screenIdentity": "1fd7c8d8cc9d",
+      "componentType": "a",
+      "label": "Productos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Productos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1fd7c8d8cc9d:control:13",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1fd7c8d8cc9d-control-14",
+      "status": "OBSERVED",
+      "screenIdentity": "1fd7c8d8cc9d",
+      "componentType": "a",
+      "label": "Contactos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Contactos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1fd7c8d8cc9d:control:14",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1fd7c8d8cc9d-control-15",
+      "status": "OBSERVED",
+      "screenIdentity": "1fd7c8d8cc9d",
+      "componentType": "a",
+      "label": "Pasos Reclamación",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Pasos Reclamación",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1fd7c8d8cc9d:control:15",
+      "selectable": false,
+      "editable": false
+    }
+  ],
+  "editingSessions": [
+    {
+      "editingSessionId": "edit-1",
+      "controlIdentity": "3e7b2674871e|RNC de la empresa*|amount_or_text",
+      "screenIdentity": "3e7b2674871e",
+      "startedAt": 11510,
+      "endedAt": 15076,
+      "rawEventRefs": [
+        "event-4",
+        "event-6"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "3e7b2674871e:3e7b2674871e|RNC de la empresa*|amount_or_text",
+        "3e7b2674871e:role:textbox|RNC de la empresa*"
+      ],
+      "inputValue": "130598983",
+      "rawTypedValue": "130598983",
+      "finalValue": "130598983"
+    },
+    {
+      "editingSessionId": "edit-2",
+      "controlIdentity": "3e7b2674871e|Nombre de usuario*|amount_or_text",
+      "screenIdentity": "3e7b2674871e",
+      "startedAt": 15064,
+      "endedAt": 18043,
+      "rawEventRefs": [
+        "event-5",
+        "event-8"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "3e7b2674871e:3e7b2674871e|Nombre de usuario*|amount_or_text",
+        "3e7b2674871e:role:textbox|Nombre de usuario*"
+      ],
+      "inputValue": "olivam",
+      "rawTypedValue": "olivam",
+      "finalValue": "olivam"
+    },
+    {
+      "editingSessionId": "edit-3",
+      "controlIdentity": "3e7b2674871e|Contraseña*|amount_or_text",
+      "screenIdentity": "3e7b2674871e",
+      "startedAt": 18031,
+      "endedAt": 18974,
+      "rawEventRefs": [
+        "event-7",
+        "event-10"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "3e7b2674871e:3e7b2674871e|Contraseña*|amount_or_text",
+        "3e7b2674871e:role:textbox|Contraseña*"
+      ]
+    },
+    {
+      "editingSessionId": "edit-4",
+      "controlIdentity": "3e7b2674871e|cédula|option",
+      "screenIdentity": "3e7b2674871e",
+      "startedAt": 40419,
+      "endedAt": 40419,
+      "rawEventRefs": [
+        "event-26"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "3e7b2674871e:3e7b2674871e|cédula|option"
+      ]
+    },
+    {
+      "editingSessionId": "edit-5",
+      "controlIdentity": "3e7b2674871e|Colaborador|amount_or_text",
+      "screenIdentity": "3e7b2674871e",
+      "startedAt": 59073,
+      "endedAt": 63568,
+      "rawEventRefs": [
+        "event-27",
+        "event-28",
+        "event-29",
+        "event-30",
+        "event-31",
+        "event-32",
+        "event-33",
+        "event-34",
+        "event-35",
+        "event-36"
+      ],
+      "intermediateValues": [
+        "4",
+        "40",
+        "402",
+        "4022",
+        "402-24",
+        "402-245",
+        "402-2457",
+        "402-24575"
+      ],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "3e7b2674871e:3e7b2674871e|Colaborador|amount_or_text"
+      ],
+      "semanticField": "Colaborador",
+      "inputValue": "402-245754",
+      "rawTypedValue": "402-245754",
+      "finalValue": "402-245754"
+    }
+  ],
+  "scenarioSuggestions": [],
+  "canonicalInteractions": [
+    {
+      "id": "interaction-1",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-1"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "https://172.27.4.31/login",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-3",
+      "controlIdentity": "3e7b2674871e",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-3"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "3e7b2674871e",
+      "screenAfterRef": "3e7b2674871e",
+      "routeBefore": "https://172.27.4.31/login",
+      "stateScope": "3e7b2674871e",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-6",
+      "controlIdentity": "3e7b2674871e|RNC de la empresa*|role|textbox|RNC de la empresa*",
+      "semanticField": "RNC de la empresa*",
+      "action": "fill",
+      "valueKey": "rnc_de_la_empresa",
+      "recordedValue": "130598983",
+      "rawTypedValue": "130598983",
+      "sourceEventRefs": [
+        "event-6"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|RNC de la empresa*",
+        "css:#rnc",
+        "id:rnc"
+      ],
+      "editingSessionRef": "edit-1",
+      "description": "Ingresar en \"RNC de la empresa*\"",
+      "screenBeforeRef": "3e7b2674871e",
+      "screenAfterRef": "3e7b2674871e",
+      "routeBefore": "https://172.27.4.31/login",
+      "stateScope": "3e7b2674871e",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-8",
+      "controlIdentity": "3e7b2674871e|Nombre de usuario*|role|textbox|Nombre de usuario*",
+      "semanticField": "Nombre de usuario*",
+      "action": "fill",
+      "valueKey": "nombre_de_usuario",
+      "recordedValue": "olivam",
+      "rawTypedValue": "olivam",
+      "sourceEventRefs": [
+        "event-8"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Nombre de usuario*",
+        "css:#email",
+        "id:email"
+      ],
+      "editingSessionRef": "edit-2",
+      "description": "Ingresar en \"Nombre de usuario*\"",
+      "screenBeforeRef": "3e7b2674871e",
+      "screenAfterRef": "3e7b2674871e",
+      "routeBefore": "https://172.27.4.31/login",
+      "stateScope": "3e7b2674871e",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-10",
+      "controlIdentity": "3e7b2674871e|Contraseña*|role|textbox|Contraseña*",
+      "semanticField": "Contraseña*",
+      "action": "fill",
+      "valueKey": "contrasena",
+      "sourceEventRefs": [
+        "event-10"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Contraseña*",
+        "css:#password",
+        "id:password"
+      ],
+      "editingSessionRef": "edit-3",
+      "description": "Ingresar en \"Contraseña*\"",
+      "screenBeforeRef": "3e7b2674871e",
+      "screenAfterRef": "3e7b2674871e",
+      "routeBefore": "https://172.27.4.31/login",
+      "stateScope": "3e7b2674871e",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-11",
+      "controlIdentity": "3e7b2674871e|Continuar|role|button|Continuar",
+      "semanticField": "Continuar",
+      "action": "click",
+      "valueKey": "continuar",
+      "sourceEventRefs": [
+        "event-11"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Continuar"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Continuar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "div"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"div\",1]]}",
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "playwrightRecorderEvidence": {
+        "kind": "role",
+        "role": "button",
+        "normalizedName": "Continuar",
+        "targetTag": "button",
+        "runtimeResolutionRequired": true
+      },
+      "description": "Ingresar en \"Continuar\"",
+      "screenBeforeRef": "3e7b2674871e",
+      "screenAfterRef": "3e7b2674871e",
+      "routeBefore": "https://172.27.4.31/login",
+      "routeAfter": "https://172.27.4.31/dashboard",
+      "stateScope": "3e7b2674871e",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-14",
+      "controlIdentity": "3e7b2674871e|Gestión de Nóminas|role|button|Gestión de Nóminas",
+      "semanticField": "Gestión de Nóminas",
+      "action": "click",
+      "valueKey": "gestion_de_nominas",
+      "sourceEventRefs": [
+        "event-14"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Gestión de Nóminas"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Gestión de Nóminas",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "img",
+                "stableAttributes": {
+                  "alt": "user",
+                  "src": "/images/payroll.svg"
+                }
+              }
+            ],
+            "semanticShape": [
+              "img",
+              "p"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"img\",1],[\"p\",1]],\"descendantEntries\":[[\"img\",1],[\"p\",1]]}",
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Gestión de Nóminas\"",
+      "screenBeforeRef": "3e7b2674871e",
+      "screenAfterRef": "3e7b2674871e",
+      "routeBefore": "https://172.27.4.31/dashboard",
+      "routeAfter": "https://172.27.4.31/payroll/electronicPayroll",
+      "stateScope": "3e7b2674871e",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-17",
+      "controlIdentity": "3e7b2674871e|Crear Manualmente|role|button|Crear Manualmente",
+      "semanticField": "Crear Manualmente",
+      "action": "click",
+      "valueKey": "crear_manualmente",
+      "sourceEventRefs": [
+        "event-17"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Crear Manualmente"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Crear Manualmente",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "img",
+                "stableAttributes": {
+                  "alt": "icon-plus",
+                  "src": "/images/feather-plus-white.svg"
+                }
+              }
+            ],
+            "semanticShape": [
+              "img",
+              "p"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"img\",1],[\"p\",1]],\"descendantEntries\":[[\"img\",1],[\"p\",1]]}",
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "playwrightRecorderEvidence": {
+        "kind": "role",
+        "role": "button",
+        "normalizedName": "Crear Manualmente",
+        "targetTag": "button",
+        "runtimeResolutionRequired": true
+      },
+      "description": "Ingresar en \"Crear Manualmente\"",
+      "screenBeforeRef": "3e7b2674871e",
+      "screenAfterRef": "3e7b2674871e",
+      "routeBefore": "https://172.27.4.31/payroll/electronicPayroll",
+      "routeAfter": "https://172.27.4.31/payroll/manualCreationTable",
+      "stateScope": "3e7b2674871e",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-20",
+      "controlIdentity": "3e7b2674871e|Close|role|button|Close",
+      "semanticField": "Close",
+      "action": "click",
+      "valueKey": "close",
+      "sourceEventRefs": [
+        "event-20"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Close"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Close",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "span",
+              "svg"
+            ],
+            "deterministicStructuralIdentity": false,
+            "topologySignature": "{\"childEntries\":[[\"span\",1],[\"svg\",1]],\"descendantEntries\":[[\"path\",2],[\"span\",1],[\"svg\",1]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "radix-_r_11_"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\",\"svg\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1],[\\\"svg\\\",1]],\\\"descendantEntries\\\":[[\\\"path\\\",2],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "semanticRuntimeEvidence": {
+        "source": "accessible_name",
+        "normalizedValue": "Close",
+        "role": "button",
+        "targetTag": "button",
+        "scopeAlternatives": [
+          {
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "radix-_r_11_"
+            },
+            "captureMatchCount": 1
+          }
+        ],
+        "captureUniqueTarget": true
+      },
+      "playwrightRecorderEvidence": {
+        "kind": "role",
+        "role": "button",
+        "normalizedName": "Close",
+        "targetTag": "button",
+        "scopeIdentity": {
+          "strategy": "id",
+          "value": "radix-_r_11_"
+        },
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true
+      },
+      "description": "Ingresar en \"Close\"",
+      "screenBeforeRef": "3e7b2674871e",
+      "screenAfterRef": "3e7b2674871e",
+      "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+      "stateScope": "3e7b2674871e",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-22",
+      "controlIdentity": "3e7b2674871e|Seleccionar fila",
+      "action": "check",
+      "sourceEventRefs": [
+        "event-22"
+      ],
+      "technicalTargetRefs": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "button",
+              "role": "checkbox"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Seleccionar fila",
+              "role": "checkbox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "playwrightRecorderEvidence": {
+        "kind": "role",
+        "role": "checkbox",
+        "normalizedName": "Seleccionar fila",
+        "targetTag": "button",
+        "runtimeResolutionRequired": true
+      },
+      "screenBeforeRef": "3e7b2674871e",
+      "screenAfterRef": "3e7b2674871e",
+      "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+      "stateScope": "3e7b2674871e",
+      "admissionStatus": "unresolved",
+      "admissionReason": "generic_label_without_technical_identity",
+      "resolutionState": "runtime_resolution_required",
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-24",
+      "controlIdentity": "3e7b2674871e|Tipo de ID",
+      "semanticField": "Tipo de ID",
+      "action": "click",
+      "valueKey": "tipo_de_id",
+      "sourceEventRefs": [
+        "event-24"
+      ],
+      "technicalTargetRefs": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 9
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Tipo de ID\"",
+      "screenBeforeRef": "3e7b2674871e",
+      "screenAfterRef": "3e7b2674871e",
+      "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+      "stateScope": "3e7b2674871e",
+      "admissionStatus": "accepted",
+      "resolutionState": "runtime_resolution_required",
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-25",
+      "controlIdentity": "3e7b2674871e|cédula|role|option|cédula",
+      "semanticField": "cédula",
+      "action": "click",
+      "valueKey": "cedula",
+      "sourceEventRefs": [
+        "event-25"
+      ],
+      "technicalTargetRefs": [
+        "role:option|cédula"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "option|cédula",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-labelledby": "radix-_r_1i_",
+              "role": "option"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "span",
+                "stableAttributes": {
+                  "id": "radix-_r_1i_"
+                }
+              }
+            ],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "radix-_r_1g_"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"div\",\"role\":\"option\"},\"stableDirectAttributes\":{\"role\":\"option\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"span\",\"stableAttributes\":{\"id\":\"radix-_r_1i_\"}}],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "playwrightRecorderEvidence": {
+        "kind": "role",
+        "role": "option",
+        "normalizedName": "cédula",
+        "targetTag": "div",
+        "scopeIdentity": {
+          "strategy": "css",
+          "value": "div:has(div[aria-labelledby=\"radix-_r_1i_\"])"
+        },
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true
+      },
+      "description": "Ingresar en \"cédula\"",
+      "screenBeforeRef": "3e7b2674871e",
+      "screenAfterRef": "3e7b2674871e",
+      "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+      "stateScope": "3e7b2674871e",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-28",
+      "controlIdentity": "3e7b2674871e|Colaborador",
+      "semanticField": "Colaborador",
+      "action": "fill",
+      "valueKey": "colaborador",
+      "recordedValue": "402-245754",
+      "rawTypedValue": "402-245754",
+      "sourceEventRefs": [
+        "event-28"
+      ],
+      "technicalTargetRefs": [],
+      "editingSessionRef": "edit-5",
+      "description": "Ingresar en \"Colaborador\"",
+      "screenBeforeRef": "3e7b2674871e",
+      "screenAfterRef": "3e7b2674871e",
+      "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+      "stateScope": "3e7b2674871e",
+      "admissionStatus": "accepted",
+      "resolutionState": "runtime_resolution_required",
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-31",
+      "controlIdentity": "3e7b2674871e|Puesto",
+      "semanticField": "Puesto",
+      "action": "click",
+      "valueKey": "puesto",
+      "recordedValue": "402-245754",
+      "sourceEventRefs": [
+        "event-31"
+      ],
+      "technicalTargetRefs": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 9
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Puesto\"",
+      "screenBeforeRef": "3e7b2674871e",
+      "screenAfterRef": "3e7b2674871e",
+      "routeBefore": "https://172.27.4.31/payroll/manualCreationTable",
+      "stateScope": "3e7b2674871e",
+      "admissionStatus": "accepted",
+      "resolutionState": "runtime_resolution_required",
+      "confidence": 0.7
+    }
+  ],
+  "gridMetadata": {
+    "detected": true,
+    "grids": 5,
+    "rows": 10,
+    "cells": 110,
+    "headers": [
+      "Tipo de ID",
+      "Colaborador",
+      "Puesto",
+      "Ingresos",
+      "Correo electrónico",
+      "Teléfono residencial",
+      "Celular",
+      "Fecha de Nacimiento",
+      "Fecha de Ingreso"
+    ],
+    "headerRelationships": [
+      {
+        "header": "Tipo de ID",
+        "field": "Tipo de ID"
+      },
+      {
+        "header": "Teléfono residencial",
+        "field": "Teléfono residencial"
+      },
+      {
+        "header": "Colaborador",
+        "field": "Colaborador"
+      },
+      {
+        "header": "Puesto",
+        "field": "Puesto"
+      },
+      {
+        "header": "Ingresos",
+        "field": "Ingresos"
+      }
+    ]
+  },
+  "source": "SessionTrace"
+}

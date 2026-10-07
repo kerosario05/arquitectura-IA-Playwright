@@ -1,0 +1,333 @@
+{
+  "appSlug": "recording-regression-f716f42c",
+  "sectionSlug": "motor-de-grabacion",
+  "scenarioId": "REC-ENGINE-001",
+  "scenarioTitle": "Captura web completa",
+  "stepCount": 6,
+  "sourceExpectedResultPresent": false,
+  "requiredAssertionCount": 0,
+  "observableOracles": [],
+  "oracleTypes": [],
+  "availablePageObjectCount": 2,
+  "mode": "deterministic",
+  "functionalExecutionEnabled": true,
+  "provider": null,
+  "model": null,
+  "skill": {
+    "name": null,
+    "version": null,
+    "hash": null,
+    "loaded": false
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "REC-ENGINE-001",
+    "title": "Captura web completa",
+    "appSlug": "recording-regression-f716f42c",
+    "sectionSlug": "motor-de-grabacion",
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Abrir la aplicación configurada del proyecto",
+        "operation": "navigate",
+        "target": {
+          "strategy": "url",
+          "value": "APP_BASE_URL"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Presionar \"Crear perfil\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Crear perfil"
+        },
+        "technicalTargetRef": "data-testid:open-form",
+        "technicalTargetRefs": [
+          "data-testid:open-form",
+          "role:link|Crear perfil"
+        ],
+        "controlIdentity": "1444f362a837|Crear perfil|data-testid|open-form",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[data-testid=\"open-form\"][href=\"/form\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a"
+            },
+            "stableDirectAttributes": {
+              "data-testid": "open-form",
+              "href": "/form"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Crear perfil",
+          "targetTag": "a",
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Ingresar \"Regression User\" en \"Nombre\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Nombre"
+        },
+        "valueKey": "nombre",
+        "associatedField": "Nombre",
+        "technicalTargetRef": "role:textbox|Nombre",
+        "technicalTargetRefs": [
+          "role:textbox|Nombre",
+          "css:#profile-name",
+          "id:profile-name"
+        ],
+        "controlIdentity": "1444f362a837|Nombre|role|textbox|Nombre",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Nombre",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Ingresar \"••••••\" en \"Contraseña\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Contraseña"
+        },
+        "valueKey": "contrasena",
+        "associatedField": "Contraseña",
+        "technicalTargetRef": "role:textbox|Contraseña",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#profile-password",
+          "id:profile-password"
+        ],
+        "controlIdentity": "1444f362a837|Contraseña|role|textbox|Contraseña",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Contraseña",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 4,
+        "scenarioStepIndex": 5,
+        "originalText": "Seleccionar \"USD\" en \"Moneda\"",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "USD"
+        },
+        "valueKey": "moneda_seleccion",
+        "associatedField": "Moneda",
+        "controlIdentity": "1444f362a837|Moneda|css|select[id=\"profile-currency\"]",
+        "recordingActionType": "select",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "USD",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "USD",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "select[id=\"profile-currency\"]"
+          },
+          "runtimeResolutionRequired": true,
+          "nativeSelection": {
+            "controlIdentity": {
+              "strategy": "id",
+              "value": "profile-currency"
+            },
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "select[id=\"profile-currency\"]"
+            },
+            "fieldLabel": "Moneda",
+            "options": [
+              {
+                "value": "DOP",
+                "label": "DOP",
+                "disabled": false
+              },
+              {
+                "value": "USD",
+                "label": "USD",
+                "disabled": false
+              }
+            ],
+            "selectedValue": "USD",
+            "clickedOption": {
+              "value": "USD",
+              "label": "USD"
+            },
+            "selectionMode": "index",
+            "selectedOptionIndex": 1
+          },
+          "captureMatchCount": 1
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 5,
+        "scenarioStepIndex": 6,
+        "originalText": "Presionar \"Guardar perfil\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Guardar perfil"
+        },
+        "valueKey": "guardar_perfil",
+        "associatedField": "Guardar perfil",
+        "technicalTargetRef": "role:button|Guardar perfil",
+        "technicalTargetRefs": [
+          "role:button|Guardar perfil"
+        ],
+        "controlIdentity": "1444f362a837|Guardar perfil|role|button|Guardar perfil",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Guardar perfil",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Guardar perfil",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 6,
+      "representedScenarioSteps": 6,
+      "missingScenarioSteps": []
+    }
+  },
+  "executionContractChars": 5774,
+  "promptChars": null,
+  "specGenerationAttempts": 0,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": true,
+  "promotionAllowed": true,
+  "failedGatesAttempt1": [],
+  "finalSpec": {
+    "origin": "deterministic_compiler",
+    "generatedBy": "core",
+    "strategy": "deterministic_compiler",
+    "fallback": null
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-10-06T19:26:04.141Z",
+  "entries": [
+    {
+      "key": "rnc",
+      "source": "unknown",
+      "fieldName": "RNC",
+      "stepIndex": 3,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "usuario",
+      "source": "unknown",
+      "fieldName": "Usuario",
+      "stepIndex": 4,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "contrasena",
+      "source": "unknown",
+      "fieldName": "Contraseña",
+      "stepIndex": 5,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "sms",
+      "source": "unknown",
+      "fieldName": "SMS",
+      "stepIndex": 8,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "reenviar_codigo_en_29_segundos",
+      "source": "unknown",
+      "fieldName": "Reenviar código en 29 segundos",
+      "stepIndex": 19,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

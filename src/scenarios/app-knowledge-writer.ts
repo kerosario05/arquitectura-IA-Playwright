@@ -816,10 +816,10 @@ export function writeAppKnowledge(
           return !allowedKnowledgeTerms.clicks.some(ct => tn.includes(ct) || ct.includes(tn));
         });
         const outContractTitle = item.scenarioTitle ? !allowedKnowledgeTerms.assertions.some(at => {
-          const tn = normalizeCompare(item.scenarioTitle);
+          const tn = normalizeCompare(item.scenarioTitle ?? "");
           return tn.includes(at) || at.includes(tn);
         }) && !allowedKnowledgeTerms.clicks.some(ct => {
-          const tn = normalizeCompare(item.scenarioTitle);
+          const tn = normalizeCompare(item.scenarioTitle ?? "");
           return tn.includes(ct) || ct.includes(tn);
         }) : false;
         const allBad = [...outContractAssertions, ...outContractNegatives, ...outContractClicks];
@@ -911,7 +911,7 @@ export function writeAppKnowledge(
     const semanticMap = new Map<string, AppKnowledgeItem>();
     let removedDuplicates = 0;
     for (const item of blockedFilteredItems) {
-      const sk = semanticStepsKey(item.issueKey, item.steps);
+      const sk = semanticStepsKey(item.issueKey ?? "", item.steps);
       const existing = semanticMap.get(sk);
       if (existing) {
         // Prefer item with non-empty coverageRefs; otherwise keep first
@@ -1696,7 +1696,7 @@ export function writeAppKnowledge(
   const entryActionNorm = contract?.initialActions?.map(a => a.initialAction).find(Boolean)?.normalize("NFC").toLowerCase().trim();
 
   for (const item of preDedupItems) {
-    const key = finalDedupKey(appSlug, item.issueKey, item.coverageRefs, item.steps);
+    const key = finalDedupKey(appSlug, item.issueKey ?? "", item.coverageRefs, item.steps);
     const existing = finalDedupMap.get(key);
     if (existing) {
       // Prefer more complete route (has entry action)

@@ -83,6 +83,8 @@ export type RouteObservation = {
   riskyAction?: boolean;
   transitionDetected?: boolean;
   transitionValidated?: boolean;
+  beforeTechnicalScreenKey?: string;
+  afterTechnicalScreenKey?: string;
   observedContext?: RouteProfileSuggestion["observedContext"];
 };
 

@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Validar cédula con formato erróneo al agregar empleado manualmente",
+  "source": "discovery",
+  "appSlug": "portal-empresarial",
+  "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
+  "createdAt": "2026-10-07T03:53:47.144Z"
+}

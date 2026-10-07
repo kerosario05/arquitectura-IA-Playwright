@@ -170,7 +170,8 @@ export function applyDataOverrides(
     }
     const field = fieldByStep.get(idx);
 
-    if (step.action === "click" && field?.kind === "select" && field.applyTargetTemplate) {
+    const applyTargetTemplate = field?.applyTargetTemplate;
+    if (step.action === "click" && field?.kind === "select" && applyTargetTemplate) {
       const buildOption = (base?: MobileStep): MobileStep => ({
         ...(base ?? { action: "click" as const }),
         action: "click",
@@ -178,7 +179,7 @@ export function applyDataOverrides(
         expectedState: "option_selected",
         requiredNextTarget: base?.requiredNextTarget ?? steps[idx + 1]?.target,
         description: `Seleccionar ${field.label}: ${override}`,
-        target: { strategy: field.applyTargetTemplate.strategy, value: renderedFor(field, override) },
+        target: { strategy: applyTargetTemplate.strategy, value: renderedFor(field, override) },
       });
 
       const anchorIsOption = isOptionStep(step, field);

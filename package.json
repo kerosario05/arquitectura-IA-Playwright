@@ -43,6 +43,7 @@
     "discovery:batch": "tsx src/cli/discovery-batch.ts",
     "discovery:catalog": "tsx src/cli/discovery-catalog.ts",
     "discovery:preview": "tsx src/cli/discovery-preview.ts",
+    "recording:regression": "tsx src/cli/recording-engine-regression.ts",
     "promoted:inspect": "tsx src/cli/promoted-inspect.ts",
     "promoted:validate-runtime": "tsx src/cli/promoted-validate-runtime.ts",
     "ai:validate": "tsx scripts/validate-ai-repair.ts",

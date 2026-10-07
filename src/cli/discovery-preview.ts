@@ -9,6 +9,7 @@ export { resolveWebBaseUrl, resolveRuntimeWebBaseUrl } from "./runtime-web-confi
 import type { McpRouteProfile } from "../scenarios/scenario-types";
 import type { VirtualCase } from "../types/scenario-preview.types";
 import type { TestScenario } from "../types/testrail.types";
+import type { DiscoveryStepResult } from "../types/discovery.types";
 import { RunEvidenceRecorder } from "../evidence/run-evidence-recorder";
 import { loadEvidenceConfig } from "../evidence/evidence-types";
 import { MAX_SCENARIO_ATTEMPTS, shouldRetryScenario } from "../discovery/pre-business-retry-policy";
@@ -608,6 +609,19 @@ export function virtualCaseToTestScenario(vc: VirtualCase, routeProfile?: McpRou
       .map((interaction) => typeof interaction.id === "string" ? interaction.id : undefined)
       .filter((id): id is string => Boolean(id)),
   );
+  const canonicalInteractionsById = new Map(
+    (vc.canonicalInteractions ?? [])
+      .filter((interaction) => typeof interaction?.id === "string" && interaction.id.trim())
+      .map((interaction) => [interaction.id as string, interaction]),
+  );
+  // Retain canonical interactions so Discovery can inspect same-screen candidates against
+  // live click/network observations. Screen refs alone do not establish a no-op.
+  const recordingExecutionContract = vc.recordingExecutionContract
+    ? {
+        ...vc.recordingExecutionContract,
+        actions: vc.recordingExecutionContract.actions,
+      }
+    : undefined;
   const authoredBusinessSteps = (vc.steps ?? []).map((step, index) => {
     // Keep the authored execution sequence, while restoring recording authority
     // only when its recorded human action semantically identifies this row. If
@@ -800,13 +814,14 @@ export function virtualCaseToTestScenario(vc: VirtualCase, routeProfile?: McpRou
     expectedResultRequirementRefs: vc.expectedResultRequirementRefs,
     recordingId: vc.recordingId,
     recordedScenarioId: vc.recordedScenarioId,
+    canonicalInteractions: vc.canonicalInteractions,
     raw: {
       custom_preconds: (vc.preconditions ?? []).join("\n"),
       custom_expected: vc.expectedResult,
       custom_steps: (vc.steps ?? []).join("\n"),
       custom_steps_separated: (vc.steps ?? []).map((step) => ({ content: step }))
     },
-    ...(vc.recordingExecutionContract ? { recordingExecutionContract: vc.recordingExecutionContract } : {}),
+    ...(recordingExecutionContract ? { recordingExecutionContract } : {}),
   } as any;
 }
 
@@ -982,7 +997,7 @@ async function runPreviewCase(
 
     // Build compact step results projection (no secrets, no form values)
     const cr = workflowResult.caseResult;
-    const stepResults = (cr.steps || []).map(s => ({
+    const stepResults = ((cr.steps || []) as DiscoveryStepResult[]).map(s => ({
       stepIndex: s.index,
       action: s.action ?? undefined,
       target: s.targetText ?? undefined,
@@ -1025,7 +1040,7 @@ async function runPreviewCase(
 
     console.log(`[discovery:preview] completed ${vc.displayId} status=${eventStatus} discoveryStatus=${discoveryStatus}`);
 
-    const failedSteps = workflowResult.caseResult.steps.filter(
+    const failedSteps = (workflowResult.caseResult.steps as DiscoveryStepResult[]).filter(
       (s) => s.status !== "found" && s.status !== "satisfied_by_previous_assertion" && s.status !== "satisfied_by_children" && s.status !== "skipped" && s.status !== "skipped_after_completion" && s.status !== "skipped_redundant"
     );
 
@@ -1262,7 +1277,9 @@ async function consolidateRunEvidence(
       for (const result of results) {
         const scenarioId = result.displayId ?? result.caseId;
         if (!scenarioId || !result.status) continue;
-        runRecorder.overrideScenarioStatus(scenarioId, result.status, "case_finished");
+        if (["skipped", "passed", "failed", "review_needed"].includes(result.status)) {
+          runRecorder.overrideScenarioStatus(scenarioId, result.status as "skipped" | "passed" | "failed" | "review_needed", "case_finished");
+        }
       }
     }
 

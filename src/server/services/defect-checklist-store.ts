@@ -162,10 +162,6 @@ class DefectChecklistStore {
     return defect;
   }
 
-  get(issueKey: string): Checklist | undefined {
-    return this.load().find(c => c.issueKey === issueKey);
-  }
-
   updateDefectStatus(issueKey: string, defectId: string, status: DefectStatus): Defect | null {
     if (!VALID_DEFECT_STATUSES.includes(status)) return null;
     const list = this.load().find(c => c.issueKey === issueKey);

@@ -37,6 +37,7 @@ test("rerun preview continues loading preview-scenarios.json", async () => {
     expect(prepared.ok).toBe(true);
     if (!prepared.ok) return;
     expect(prepared.jobType).toBe("scenario-preview");
+    if (prepared.jobType !== "scenario-preview") return;
     expect(prepared.selectedCount).toBe(1);
     expect(prepared.scenarios[0]?.title).toBe("Preview scenario");
   } finally {
@@ -54,8 +55,8 @@ test("rerun mobile loads original scenarios and data overrides from mobile manif
     apkPath: "C:\\apps\\mobile.apk",
     appPackage: "com.example.app",
     publishedCases: [
-      { caseId: 101, scenarioId: "MOBILE-AA-1-001" },
-      { caseId: 102, scenarioId: "MOBILE-AA-1-002" },
+      { caseId: 101, scenarioId: "MOBILE-AA-1-001", title: "Escenario 1" },
+      { caseId: 102, scenarioId: "MOBILE-AA-1-002", title: "Escenario 2" },
     ],
     scenarios: [
       {
@@ -110,6 +111,7 @@ test("rerun mobile loads original scenarios and data overrides from mobile manif
   expect(preparedAll.ok).toBe(true);
   if (!preparedAll.ok) return;
   expect(preparedAll.jobType).toBe("mobile-launch-execution");
+  if (preparedAll.jobType !== "mobile-launch-execution") return;
   expect(preparedAll.mobileParams.scenarios).toHaveLength(2);
   expect(preparedAll.mobileParams.dataOverrides?.["MOBILE-AA-1-001"]?.[0]).toBe("valor 1");
   expect(preparedAll.mobileParams.scenarios[0]?.steps[0]?.target?.value).toBe("¿Aún no tienes usuario o cuenta?");
@@ -121,6 +123,7 @@ test("rerun mobile loads original scenarios and data overrides from mobile manif
   expect(preparedFailed.ok).toBe(true);
   if (!preparedFailed.ok) return;
   expect(preparedFailed.jobType).toBe("mobile-launch-execution");
+  if (preparedFailed.jobType !== "mobile-launch-execution") return;
   expect(preparedFailed.mobileParams.scenarios).toHaveLength(1);
   expect(preparedFailed.mobileParams.scenarios[0]?.scenarioId).toBe("MOBILE-AA-1-001");
   expect(Object.keys(preparedFailed.mobileParams.dataOverrides ?? {})).toEqual(["MOBILE-AA-1-001"]);
@@ -144,7 +147,7 @@ test("mobile rerun enriches missing select requiredData from route profile even 
     appSlug: "app-conversacional-bsc",
     apkPath: "C:\\apps\\mobile.apk",
     appPackage: "com.example.app",
-    publishedCases: [{ caseId: 201, scenarioId: "MOBILE-AA-94-001" }],
+    publishedCases: [{ caseId: 201, scenarioId: "MOBILE-AA-94-001", title: "Escenario con selector mojibake" }],
     scenarios: [
       {
         scenarioId: "MOBILE-AA-94-001",
@@ -163,6 +166,7 @@ test("mobile rerun enriches missing select requiredData from route profile even 
   const prepared = await prepareRerun(sourceJobId, "all", "mobile-launch-execution");
   expect(prepared.ok).toBe(true);
   if (!prepared.ok) return;
+  if (prepared.jobType !== "mobile-launch-execution") return;
   const scenario = prepared.mobileParams.scenarios[0];
   expect(scenario?.requiredData?.some((field) => field.kind === "select" && field.stepIndex === 0)).toBe(true);
   cleanupDir(path.join(ROOT, ".artifacts", "mobile-launch-runs", sourceJobId));

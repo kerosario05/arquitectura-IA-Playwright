@@ -1167,6 +1167,8 @@ test("evaluateGenerationSuccess blocks success when branchCoverage is invalid ev
       requiredBranchIds: ["branch-alfa", "branch-beta"],
       coveredBranchIds: ["branch-alfa"],
       valid: false,
+      pending: [],
+      pendingBranchIds: [],
     },
     true,
   );
@@ -1185,6 +1187,8 @@ test("evaluateGenerationSuccess requires visibility + branch coverage + coverage
       requiredBranchIds: ["branch-alfa", "branch-beta"],
       coveredBranchIds: ["branch-alfa", "branch-beta"],
       valid: true,
+      pending: [],
+      pendingBranchIds: [],
     },
     true,
   );
@@ -1203,6 +1207,8 @@ test("evaluateGenerationSuccess blocks success when omitted or category integrit
       requiredBranchIds: ["branch-alfa"],
       coveredBranchIds: ["branch-alfa"],
       valid: true,
+      pending: [],
+      pendingBranchIds: [],
     },
     true,
     {
@@ -1270,6 +1276,8 @@ test("markScenariosAsCoverageDiagnostics makes response scenarios non-selectable
       unexpected: [],
       requiredBranchIds: ["branch-alfa", "branch-beta"],
       coveredBranchIds: ["branch-alfa"],
+      pending: [],
+      pendingBranchIds: [],
       valid: false,
     },
   );

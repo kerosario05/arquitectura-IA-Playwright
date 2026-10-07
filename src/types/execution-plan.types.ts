@@ -37,7 +37,8 @@ export type LocatorStrategy =
   | "css"
   | "xpath"
   | "semantic"
-  | "registry";
+  | "registry"
+  | "selection_keyboard_typeahead";
 
 export type PlanTarget = {
   strategy: LocatorStrategy;
@@ -159,6 +160,7 @@ export type ExecutionPlan = {
   scenario: ExecutionPlanScenarioRef;
   requiredData: RequiredDataRef[];
   steps: ExecutionPlanStep[];
+  executionContract?: Record<string, unknown>;
   notes?: string[];
   createdAt: string;
   // Metadata for auth flow insertion and other cross-cutting concerns

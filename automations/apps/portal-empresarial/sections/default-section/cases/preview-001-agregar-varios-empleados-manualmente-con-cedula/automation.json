@@ -1,0 +1,127 @@
+{
+  "id": "preview-001-agregar-varios-empleados-manualmente-con-cedula",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Agregar varios empleados manualmente con cédula",
+  "planPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\plan.json",
+  "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",
+  "appSlug": "portal-empresarial",
+  "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
+  "status": "spec_failed",
+  "source": "discovery",
+  "appProfile": "portal-empresarial",
+  "createdAt": "2026-10-07T03:35:29.210Z",
+  "updatedAt": "2026-10-07T03:35:29.210Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T03-30-47-291Z\\discovered-plans.pending.json",
+  "pomStatus": "needs_manual_review",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "failed",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T03-30-47-291Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "specGeneration": {
+      "mode": "deterministic",
+      "provider": null,
+      "model": null,
+      "skill": {
+        "name": null,
+        "version": null,
+        "hash": null,
+        "loaded": false
+      },
+      "invocations": 0,
+      "invocationsConsumed": 0,
+      "durationMs": 98584,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "skipped",
+        "structure": "passed",
+        "traceFidelity": "skipped",
+        "typescript": "passed",
+        "playwrightDiscovery": "passed",
+        "semanticCoverage": "passed",
+        "functionalExecution": "failed"
+      },
+      "promotionAllowed": false,
+      "specsRequested": 1,
+      "specsValidated": 0,
+      "specsRejected": 1,
+      "specGenerationAttempts": 0,
+      "specRepairAttempts": 0,
+      "firstPassPromotion": false,
+      "failedGatesAttempt1": [
+        "functionalExecution"
+      ],
+      "regressedGates": [],
+      "missingRequirements": [],
+      "oracleTypes": [],
+      "errors": [
+        "functional_execution_failed:exitCode=1",
+        "functional_execution_error:Error: Promoted fill failed at step 15 field=\"Ingresos\" value=\"150000\". fillPath=failed nativeFillAttempted=true nativeFillSucceeded=false callbackAttempted=true callbackSucceeded=false diagnostics={\"currentUrl\":\"https://172.27.4.31/payroll/manualCreationTable\",\"actionIntent\":\"fill\",\"target\":\"Ingresos\",\"stepIndex\":15,\"timeoutMs\":15000,\"retryAttempted\":false,\"previousActiveContainer\":\"none\",\"refreshedActiveContainer\":\"none\",\"matchingFieldFound\":false,\"fallbackUsed\":\"none\",\"searchedContainers\":1,\"discardedReason\":\"stale_or_not_matching_field\",\"matchedLocatorStrategy\":\"unknown\",\"valueKey\":\"ingresos\",\"technicalTargetRefs\":[],\"fieldCandidateCount\":0,\"fillPath\":\"failed\",\"nativeFillAttempted\":true,\"nativeFillSucceeded\":false,\"callbackAttempted\":true,\"callbackSucceeded\":false,\"callbackError\":\"Fill callback failed: fill action timed out after 15000ms\",\"verificationAttempted\":false,\"verificationSucceeded\":false,\"screenshotPath\":\"C:\\\\MisProyectos\\\\arquitectura-IA-Playwright-feature-auth-gate\\\\.artifacts\\\\promoted-runtime\\\\step-015.png\"}"
+      ],
+      "warnings": [
+        "functional_execution_screenshots=11",
+        "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 15)."
+      ],
+      "finalSpec": {
+        "origin": "deterministic_compiler",
+        "generatedBy": "core",
+        "strategy": "deterministic_compiler",
+        "fallback": null
+      },
+      "runtimeGate": {
+        "decision": "block",
+        "promotionStatus": "blocked",
+        "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 15)."
+      },
+      "specWritten": false,
+      "previousSpec": {
+        "existed": false,
+        "hash": null,
+        "lastModifiedAt": null
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "spec_generation_validation_failed",
+      "blockers": [
+        "spec_generation_validation_failed"
+      ],
+      "availablePageObjects": [
+        "ProductListPage",
+        "OperationsMenuPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false,
+      "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",
+      "specHash": "390b6eeb65e73b55b9178d5ce770364b00ab4e16d6db19423211ca36cd6717b2",
+      "specSource": "ai_candidate"
+    }
+  }
+}

@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { buildCanonicalInteractions, hasExecutionAuthority, evaluateRecordedScenarioExecutionReadiness } from "./canonical-recording-contract";
 import { buildHappyPathScenario, materializeObservedPrimaryScenario } from "./trace-to-scenario";
+import { hydratePersistedScenarios } from "./persisted-scenario-hydration";
+import { buildSemanticRecordingModel } from "./semantic-recording";
 import type { RecordedEvent, SessionTrace } from "./session-trace.types";
 
 /**
@@ -105,4 +107,60 @@ test("5/nonSelectionClickUnaffected. an ordinary click with a certified technica
   assert.ok(scenario, "ordinary click with a technical target still materializes");
   const canonical = buildCanonicalInteractions(events);
   assert.equal(hasExecutionAuthority(canonical[0]), true);
+});
+
+test("6/nativeSelectOpeningTapIsCoalesced. a captured select control is replayed as one value-bearing selection", () => {
+  const tap = {
+    seq: 0, t: 100, kind: "tap", screenKey: "s", url: "/form",
+    target: {
+      label: "Moneda", role: "combobox", tag: "select", interactionType: "click",
+      locators: [{ strategy: "role", value: "combobox|Moneda", confidence: 0.8 }],
+    },
+  } as unknown as RecordedEvent;
+  const nativeSelection = {
+    controlIdentity: { strategy: "id", value: "profile-currency" },
+    scopeIdentity: { strategy: "css", value: 'select[id="profile-currency"]' },
+    fieldLabel: "Moneda",
+    options: [
+      { value: "DOP", label: "DOP", disabled: false },
+      { value: "USD", label: "USD", disabled: false },
+    ],
+    selectedValue: "USD",
+    clickedOption: { value: "USD", label: "USD" },
+    selectionMode: "index",
+    selectedOptionIndex: 1,
+  };
+  const selection = {
+    seq: 1, t: 110, kind: "fill", screenKey: "s", url: "/form",
+    target: {
+      label: "Moneda", role: "input", tag: "select", interactionType: "select", afterValue: "USD",
+      locators: [{ strategy: "role", value: "combobox|Moneda", confidence: 0.85 }],
+      playwrightRecorderEvidence: { kind: "text", normalizedName: "USD", runtimeResolutionRequired: true, nativeSelection },
+    },
+  } as unknown as RecordedEvent;
+  const events = [tap, selection];
+  const scenario = buildHappyPathScenario(trace(events), events);
+  const projectedSelection = scenario.webSteps.filter((step) => step.action === "select");
+  const projectedClicks = scenario.webSteps.filter((step) => step.description.includes("Moneda"));
+  const openingTap = scenario.canonicalInteractions?.find((interaction) => interaction.sourceEventRefs.includes("event-1"));
+  const committedSelection = scenario.canonicalInteractions?.find((interaction) => interaction.sourceEventRefs.includes("event-2"));
+
+  assert.equal(projectedSelection.length, 1);
+  assert.equal(projectedSelection[0].valueKey, "moneda_seleccion");
+  assert.equal(projectedSelection[0].target?.value, 'select[id="profile-currency"]');
+  assert.equal(projectedClicks.length, 1, "only the selection step mentions the native select");
+  assert.equal(openingTap?.technicalOnly, true);
+  assert.equal(hasExecutionAuthority(openingTap!), false);
+  assert.equal(committedSelection?.action, "fill", "the captured event stays auditable in its original trace classification");
+  assert.equal(hasExecutionAuthority(committedSelection!), true);
+  assert.equal(scenario.testRailSteps.some((step) => step.content === 'Presionar "Moneda"'), false);
+
+  const hydrated = hydratePersistedScenarios(
+    [scenario],
+    buildSemanticRecordingModel(trace(events), events),
+    trace(events),
+  )[0];
+  const hydratedOpeningTap = hydrated.canonicalInteractions?.find((interaction) => interaction.action === "click" && interaction.technicalOnly);
+  assert.equal(hydratedOpeningTap?.technicalOnly, true, "hydration must preserve the same projection as fresh derivation");
+  assert.equal(hasExecutionAuthority(hydratedOpeningTap!), false);
 });

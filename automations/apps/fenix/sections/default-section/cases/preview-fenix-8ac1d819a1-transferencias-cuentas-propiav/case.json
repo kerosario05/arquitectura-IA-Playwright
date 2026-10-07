@@ -1,0 +1,10 @@
+{
+  "id": "preview-fenix-8ac1d819a1-transferencias-cuentas-propiav",
+  "externalId": "PREVIEW-FENIX-8ac1d819a1",
+  "caseId": 0,
+  "title": "Transferencias Cuentas Propiav",
+  "source": "discovery",
+  "appSlug": "fenix",
+  "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+  "createdAt": "2026-10-02T20:09:12.928Z"
+}

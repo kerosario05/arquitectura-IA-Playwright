@@ -8,7 +8,10 @@
  * Reuses the selector's output (buildDeclaredOrderedPathsFromKnowledge) and the
  * existing "Clic en \"<target>\"" step format. No new labels, no re-parsing.
  */
-import type { DeclaredOrderedPath } from "./knowledge-context-resolver";
+type DeclaredOrderedPath = {
+  steps: Array<{ order: number; actionTarget: string }>;
+  [key: string]: unknown;
+};
 
 export type DeclaredPathMergeResult = {
   steps: string[];

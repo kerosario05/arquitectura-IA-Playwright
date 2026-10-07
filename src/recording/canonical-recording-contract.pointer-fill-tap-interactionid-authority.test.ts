@@ -173,3 +173,21 @@ test("12/noTemporalHeuristic. ownership is decided by interactionId identity, no
   const tap = interactions.find((i) => i.action === "click");
   assert.equal(tap?.causedTransition, true, "identity match holds regardless of the large time gap");
 });
+
+test("13/reusedInteractionId. an old pointer id cannot reclaim a prior route across later form actions", () => {
+  const events = [
+    ev({ seq: 0, t: 1, kind: "note", observationType: "pointer", interactionId: "pointer-1", screenKey: "app", url: "/" }),
+    ev({ seq: 1, t: 2, kind: "tap", interactionId: "pointer-1", screenKey: "app", url: "/", target: { role: "link", associatedField: "Crear", locators: [{ strategy: "role", value: "link[name=Crear]" }] } }),
+    ev({ seq: 2, t: 3, kind: "navigate", screenKey: "app", url: "/form" }),
+    ev({ seq: 3, t: 4, kind: "fill", screenKey: "app", url: "/form", target: { role: "textbox", associatedField: "Nombre", locators: [{ strategy: "css", value: "#name" }] }, value: "name" }),
+    // A native select confirmation can arrive as a tap without a fresh pointerdown. If the
+    // recorder carries the last pointer id, it must not inherit the earlier route.
+    ev({ seq: 4, t: 5, kind: "tap", interactionId: "pointer-1", screenKey: "app", url: "/form", target: { role: "combobox", associatedField: "Moneda", locators: [{ strategy: "css", value: "#currency" }] } }),
+  ];
+
+  const interactions = buildCanonicalInteractions(events);
+  const selectControlTap = interactions.find((interaction) => interaction.semanticField === "Moneda");
+  assert.equal(selectControlTap?.routeBefore, "/form");
+  assert.equal(selectControlTap?.routeAfter, undefined);
+  assert.equal(selectControlTap?.causedTransition, undefined);
+});

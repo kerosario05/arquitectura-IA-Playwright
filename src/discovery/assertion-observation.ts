@@ -1,13 +1,9 @@
 import { createHash } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import type { Page } from "@playwright/test";
 
-export type AssertionObservationPage = {
-  url(): string;
-  evaluate<T>(pageFunction: () => T): Promise<T>;
-  on?: (event: string, listener: (...args: unknown[]) => void) => void;
-  off?: (event: string, listener: (...args: unknown[]) => void) => void;
-};
+export type AssertionObservationPage = Pick<Page, "url" | "evaluate">;
 
 export type ObservationControlState = {
   identity: string;

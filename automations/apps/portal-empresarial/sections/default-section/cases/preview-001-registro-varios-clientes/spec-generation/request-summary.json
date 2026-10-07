@@ -427,6 +427,8 @@
           "strategy": "text",
           "value": "Presionar el control indicado"
         },
+        "controlIdentity": "3e7b2674871e|Seleccionar fila",
+        "recordingActionType": "check",
         "certifiedTechnicalTarget": {
           "interactionEvidence": [],
           "validatedByInteraction": true,
@@ -484,6 +486,7 @@
           "value": "Tipo de ID"
         },
         "valueKey": "entity_1.tipo_de_id",
+        "entityScope": "entity_1",
         "associatedField": "Tipo de ID",
         "controlIdentity": "3e7b2674871e|entity_1|Tipo de ID",
         "recordingActionType": "click",
@@ -535,11 +538,16 @@
           "strategy": "text",
           "value": "cédula"
         },
+        "valueKey": "entity_1.cedula",
+        "entityScope": "entity_1",
+        "selectionActivationField": "Tipo de ID",
         "associatedField": "cédula",
         "technicalTargetRef": "role:option|cédula",
         "technicalTargetRefs": [
           "role:option|cédula"
         ],
+        "controlIdentity": "3e7b2674871e|entity_1|cédula|role|option|cédula",
+        "recordingActionType": "click",
         "certifiedTechnicalTarget": {
           "interactionEvidence": [],
           "validatedByInteraction": true,
@@ -585,6 +593,7 @@
           "value": "Colaborador"
         },
         "valueKey": "entity_1.colaborador",
+        "entityScope": "entity_1",
         "associatedField": "Colaborador",
         "controlIdentity": "3e7b2674871e|entity_1|Colaborador",
         "recordingActionType": "fill",
@@ -621,6 +630,7 @@
           "value": "Puesto"
         },
         "valueKey": "entity_1.puesto",
+        "entityScope": "entity_1",
         "associatedField": "Puesto",
         "controlIdentity": "3e7b2674871e|entity_1|Puesto",
         "recordingActionType": "fill",
@@ -656,14 +666,11 @@
           "strategy": "text",
           "value": "DOP"
         },
-        "valueKey": "entity_1.moneda",
         "associatedField": "Moneda",
         "technicalTargetRef": "role:combobox|Moneda",
         "technicalTargetRefs": [
           "role:combobox|Moneda"
         ],
-        "controlIdentity": "3e7b2674871e|entity_1|Moneda|role|combobox|Moneda",
-        "recordingActionType": "click",
         "certifiedTechnicalTarget": {
           "interactionEvidence": [],
           "validatedByInteraction": true,
@@ -705,6 +712,7 @@
           "value": "Ingresos"
         },
         "valueKey": "entity_1.ingresos",
+        "entityScope": "entity_1",
         "associatedField": "Ingresos",
         "controlIdentity": "3e7b2674871e|entity_1|Ingresos",
         "recordingActionType": "fill",
@@ -741,6 +749,7 @@
           "value": "Correo electrónico"
         },
         "valueKey": "entity_1.correo_electronico",
+        "entityScope": "entity_1",
         "associatedField": "Correo electrónico",
         "controlIdentity": "3e7b2674871e|entity_1|Correo electrónico",
         "recordingActionType": "fill",
@@ -777,6 +786,7 @@
           "value": "Teléfono residencial"
         },
         "valueKey": "entity_1.telefono_residencial",
+        "entityScope": "entity_1",
         "associatedField": "Teléfono residencial",
         "controlIdentity": "3e7b2674871e|entity_1|Teléfono residencial",
         "recordingActionType": "fill",
@@ -813,6 +823,7 @@
           "value": "Celular"
         },
         "valueKey": "entity_1.celular",
+        "entityScope": "entity_1",
         "associatedField": "Celular",
         "controlIdentity": "3e7b2674871e|entity_1|Celular",
         "recordingActionType": "fill",
@@ -849,6 +860,7 @@
           "value": "Fecha de Ingreso"
         },
         "valueKey": "entity_1.fecha_de_ingreso",
+        "entityScope": "entity_1",
         "associatedField": "Fecha de Ingreso",
         "controlIdentity": "3e7b2674871e|entity_1|Fecha de Ingreso",
         "recordingActionType": "fill",
@@ -885,6 +897,7 @@
           "value": "Añadir otro"
         },
         "valueKey": "entity_1.anadir_otro",
+        "entityScope": "entity_1",
         "associatedField": "Añadir otro",
         "technicalTargetRef": "role:button|Añadir otro",
         "technicalTargetRefs": [
@@ -924,6 +937,7 @@
           "strategy": "text",
           "value": "Presionar el control indicado"
         },
+        "entityScope": "entity_2",
         "controlIdentity": "3e7b2674871e|entity_2|Seleccionar fila",
         "recordingActionType": "check",
         "certifiedTechnicalTarget": {
@@ -983,6 +997,7 @@
           "value": "Tipo de ID"
         },
         "valueKey": "entity_2.tipo_de_id",
+        "entityScope": "entity_2",
         "associatedField": "Tipo de ID",
         "controlIdentity": "3e7b2674871e|entity_2|Tipo de ID",
         "recordingActionType": "click",
@@ -1035,6 +1050,7 @@
           "value": "cédula"
         },
         "valueKey": "entity_2.cedula",
+        "entityScope": "entity_2",
         "selectionActivationField": "Tipo de ID",
         "associatedField": "cédula",
         "technicalTargetRef": "role:option|cédula",
@@ -1088,6 +1104,7 @@
           "value": "Colaborador"
         },
         "valueKey": "entity_2.colaborador",
+        "entityScope": "entity_2",
         "associatedField": "Colaborador",
         "controlIdentity": "3e7b2674871e|entity_2|Colaborador",
         "recordingActionType": "fill",
@@ -1124,6 +1141,7 @@
           "value": "Puesto"
         },
         "valueKey": "entity_2.puesto",
+        "entityScope": "entity_2",
         "associatedField": "Puesto",
         "controlIdentity": "3e7b2674871e|entity_2|Puesto",
         "recordingActionType": "fill",
@@ -1160,6 +1178,7 @@
           "value": "Ingresos"
         },
         "valueKey": "entity_2.ingresos",
+        "entityScope": "entity_2",
         "associatedField": "Ingresos",
         "controlIdentity": "3e7b2674871e|entity_2|Ingresos",
         "recordingActionType": "fill",
@@ -1196,6 +1215,7 @@
           "value": "Correo electrónico"
         },
         "valueKey": "entity_2.correo_electronico",
+        "entityScope": "entity_2",
         "associatedField": "Correo electrónico",
         "controlIdentity": "3e7b2674871e|entity_2|Correo electrónico",
         "recordingActionType": "fill",
@@ -1232,6 +1252,7 @@
           "value": "Teléfono residencial"
         },
         "valueKey": "entity_2.telefono_residencial",
+        "entityScope": "entity_2",
         "associatedField": "Teléfono residencial",
         "controlIdentity": "3e7b2674871e|entity_2|Teléfono residencial",
         "recordingActionType": "fill",
@@ -1268,6 +1289,7 @@
           "value": "Celular"
         },
         "valueKey": "entity_2.celular",
+        "entityScope": "entity_2",
         "associatedField": "Celular",
         "controlIdentity": "3e7b2674871e|entity_2|Celular",
         "recordingActionType": "fill",
@@ -1304,6 +1326,7 @@
           "value": "Fecha de Nacimiento"
         },
         "valueKey": "entity_2.fecha_de_nacimiento",
+        "entityScope": "entity_2",
         "associatedField": "Fecha de Nacimiento",
         "controlIdentity": "3e7b2674871e|entity_2|Fecha de Nacimiento",
         "recordingActionType": "fill",
@@ -1340,6 +1363,7 @@
           "value": "Fecha de Ingreso"
         },
         "valueKey": "entity_2.fecha_de_ingreso",
+        "entityScope": "entity_2",
         "associatedField": "Fecha de Ingreso",
         "controlIdentity": "3e7b2674871e|entity_2|Fecha de Ingreso",
         "recordingActionType": "fill",
@@ -1376,6 +1400,7 @@
           "value": "Validar"
         },
         "valueKey": "entity_2.validar",
+        "entityScope": "entity_2",
         "associatedField": "Validar",
         "technicalTargetRef": "role:button|Validar",
         "technicalTargetRefs": [
@@ -1421,15 +1446,13 @@
       "missingScenarioSteps": []
     }
   },
-  "executionContractChars": 28460,
+  "executionContractChars": 29128,
   "promptChars": null,
   "specGenerationAttempts": 0,
   "specRepairAttempts": 0,
-  "firstPassPromotion": false,
-  "promotionAllowed": false,
-  "failedGatesAttempt1": [
-    "functionalExecution"
-  ],
+  "firstPassPromotion": true,
+  "promotionAllowed": true,
+  "failedGatesAttempt1": [],
   "finalSpec": {
     "origin": "deterministic_compiler",
     "generatedBy": "core",

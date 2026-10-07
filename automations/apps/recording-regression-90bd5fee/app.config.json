@@ -1,0 +1,18 @@
+{
+  "appProfile": {
+    "appSlug": "recording-regression-90bd5fee",
+    "source": "cli",
+    "name": "Regression fixture",
+    "baseUrl": "http://127.0.0.1:51428/",
+    "createdAt": "2026-10-07T03:06:36.279Z",
+    "updatedAt": "2026-10-07T03:06:36.279Z"
+  },
+  "baseUrl": "http://127.0.0.1:51428/",
+  "loginMode": "no_login",
+  "testData": {},
+  "testDataAliases": {},
+  "testDataRefs": {},
+  "missingInputBehavior": "fail",
+  "ignoreHTTPSErrors": false,
+  "updatedAt": "2026-10-07T03:06:36.279Z"
+}

@@ -16,6 +16,7 @@ function makeReq(
     sourceIssueKey: "HU-1",
     category,
     sourceText,
+    expectedBehavior: sourceText,
     status: "covered",
     ...opts,
   };

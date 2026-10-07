@@ -116,6 +116,8 @@ export type ActionTargetItem = {
   expectedRouteBefore?: string;
   expectedRouteAfter?: string;
   expectedOutcomeKind?: "route_transition" | "in_place_transition";
+  /** Recording same-screen candidate, retained only when live Discovery confirms an observed no-op. */
+  recordedSameSurfaceAction?: boolean;
   /** `CanonicalInteraction.controlIdentity` (content-derived string) carried through for learned
    *  route-family authority lookups -- distinct from the `controlIdentity` field above, which is
    *  an unrelated runtime DOM fingerprint used for live target matching. */
@@ -128,6 +130,7 @@ export type ActionTargetItem = {
    * projections of the SAME source event. Absent for legacy/scenario-step sources.
    */
   sourceInteractionId?: string;
+  metadata?: Record<string, unknown>;
 };
 
 export type FillValueSource = "literal" | "test_data" | "unknown";

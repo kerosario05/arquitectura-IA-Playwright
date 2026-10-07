@@ -895,7 +895,7 @@ export type GridEditorResolutionOptions = {
 export type SelectionSurfaceDiagnostics = {
   triggerResolved: boolean;
   triggerStrategy: string;
-  ariaRelationshipFound: boolean;
+  ariaRelationshipFound?: boolean;
   surfaceType?: string;
   surfacePortalized?: boolean;
   surfaceCausallyBound: boolean;
@@ -937,7 +937,7 @@ export type SelectionSurfaceDiagnostics = {
   optionsFirstObservedAtMs?: number;
   candidateDropReason?: string;
   openingMethod?: "CLICK_OPENS" | "FOCUS_THEN_CLICK_OPENS" | "KEYBOARD_OPENS" | "NO_OPENING_METHOD_OBSERVED";
-  failureReason?: "selection_surface_not_observed" | "option_not_supported" | "ambiguous_option" | "selection_state_not_verified" | "captured_selection_key_not_unique_or_present" | "dynamic_selection_rule_invalid_or_unbound" | "dynamic_selection_rule_no_matching_position";
+  failureReason?: "selection_surface_not_observed" | "option_not_supported" | "ambiguous_option" | "selection_state_not_verified" | "captured_selection_key_not_unique_or_present" | "dynamic_selection_rule_invalid_or_unbound" | "dynamic_selection_rule_no_matching_position" | "recorded_scoped_selection_owner_unresolved" | "recorded_option_did_not_close_surface" | "selection_owner_unresolved";
 };
 
 export type GridCollectionSnapshot = {
@@ -2193,6 +2193,7 @@ async function resolveAndApplySelectionSurfaceOnce(
   triggerStrategy: string,
   gridDiagnostics?: GridEditorResolution["diagnostics"],
   activationAlreadyPerformed = false,
+  recordedOptionAuthority = false,
 ): Promise<TargetResolutionResult> {
   const beforeSurfaces = await inspectSelectionSurfaces(page);
   // Reuse a custom menu opened by the immediately preceding recorded action;
@@ -2260,7 +2261,7 @@ async function resolveAndApplySelectionSurfaceOnce(
   if (!preopenedSurface && directControlledSurface) {
     afterSurfaces = [directControlledSurface];
     causalSurfaces = findCausalSurfaces(afterSurfaces, {
-      controls: [...new Set([...relationshipBefore.controls, controlledDiagnostics.meta.ariaControls].filter(Boolean))],
+      controls: [...new Set([...relationshipBefore.controls, controlledDiagnostics?.meta.ariaControls].filter((value): value is string => Boolean(value)))],
       owns: relationshipBefore.owns,
     });
   }
@@ -2572,9 +2573,10 @@ async function resolveAndApplySelectionSurface(
   triggerStrategy: string,
   gridDiagnostics?: GridEditorResolution["diagnostics"],
   cellOverride?: Locator,
+  recordedOptionAuthority = false,
 ): Promise<TargetResolutionResult> {
   const cell = cellOverride ?? await resolveStableSelectionCell(page, trigger);
-  if (!cell) return resolveAndApplySelectionSurfaceOnce(page, trigger, optionTarget, triggerStrategy, gridDiagnostics);
+  if (!cell) return resolveAndApplySelectionSurfaceOnce(page, trigger, optionTarget, triggerStrategy, gridDiagnostics, false, recordedOptionAuthority);
 
   let currentTrigger = trigger;
   let before = await captureDynamicEditorSnapshot(cell, currentTrigger);
@@ -2597,7 +2599,8 @@ async function resolveAndApplySelectionSurface(
     // typeahead before its popup is mounted. Prefer that state-backed path
     // once, before clicking a control whose React subtree may immediately be
     // replaced by the application.
-    if (attempt === 0 && (before.targetRole === "combobox" || before.targetTag === "select")) {
+    if (attempt === 0 && (before.targetRole === "combobox" || before.targetTag === "select"
+      || (recordedOptionAuthority && before.targetTag === "button" && Boolean(before.ariaControls)))) {
       keyboardFallbackAttempted = true;
       const beforeKeyboardState = await captureSelectionTriggerState(currentTrigger);
       const beforeKeyboardCellText = await cell.innerText().catch(() => "");
@@ -2633,7 +2636,66 @@ async function resolveAndApplySelectionSurface(
         };
       }
     }
-    lastResult = await resolveAndApplySelectionSurfaceOnce(page, currentTrigger, optionTarget, triggerStrategy, gridDiagnostics);
+    lastResult = await resolveAndApplySelectionSurfaceOnce(page, currentTrigger, optionTarget, triggerStrategy, gridDiagnostics, false, recordedOptionAuthority);
+    if (lastResult.matchReason === "selection_surface_not_observed" && before.ariaControls) {
+      if (before.targetTag === "button" && before.targetRole !== "combobox") {
+        // A plain recorded button may open its options only through keyboard
+        // navigation. ArrowDown is noncommitting; the option is still clicked
+        // only after a unique visible exact-text match and verified cell change.
+        await currentTrigger.press("ArrowDown").catch(() => undefined);
+        await page.waitForTimeout(100).catch(() => undefined);
+      }
+      // Some recorded custom selects render a plain-text option without role or
+      // listbox semantics. After the row-scoped trigger activation, accept only
+      // one newly visible exact option and still require the same cell to show
+      // the requested value after the click.
+      const exactTextOption = page.getByText(optionTarget, { exact: true });
+      const exactTextCount = await exactTextOption.count().catch(() => 0);
+      const exactTextVisible = exactTextCount === 1 && await exactTextOption.isVisible().catch(() => false);
+      const exactText = exactTextVisible ? await exactTextOption.innerText().catch(() => "") : "";
+      console.log(`[selection-text-option-fallback] unique=${exactTextCount === 1} visible=${exactTextVisible} desiredTextMatches=${selectionOptionMatches(optionTarget, exactText)}`);
+      if (exactTextVisible && selectionOptionMatches(optionTarget, exactText)) {
+        const beforeTextOptionState = await captureSelectionTriggerState(currentTrigger);
+        const beforeTextOptionCell = await cell.innerText().catch(() => "");
+        await exactTextOption.click().catch(() => undefined);
+        const verification = await verifySelectionState(currentTrigger, optionTarget, beforeTextOptionState, beforeTextOptionCell, [], cell);
+        console.log(`[selection-text-option-fallback] stateVerified=${verification.verified} overlayClosed=${verification.overlayClosed}`);
+        if (verification.verified) {
+          return {
+            status: "resolved",
+            target: optionTarget,
+            locator: exactTextOption,
+            locatorStrategy: "selection_option_exact_text_causal_cell",
+            confidence: 0.98,
+            matchReason: "selection_option_state_verified",
+            candidateText: exactText,
+            candidates: [],
+            selectionApplied: true,
+            gridDiagnostics,
+            selectionDiagnostics: {
+              triggerResolved: true,
+              triggerStrategy,
+              surfaceCausallyBound: true,
+              optionCandidateCount: 1,
+              desiredOptionFound: true,
+              optionResolutionStrategy: "exact_text_after_row_scoped_trigger",
+              stateVerified: true,
+              overlayClosed: verification.overlayClosed,
+            },
+          };
+        }
+        return selectionFailureResult(optionTarget, "selection_state_not_verified", {
+          triggerResolved: true,
+          triggerStrategy,
+          surfaceCausallyBound: true,
+          optionCandidateCount: 1,
+          desiredOptionFound: true,
+          stateVerified: false,
+          optionResolutionStrategy: "exact_text_after_row_scoped_trigger",
+          failureReason: "selection_state_not_verified",
+        }, gridDiagnostics);
+      }
+    }
     // Some rematerialized controls accept typeahead only after their first
     // activation. Keep this bounded to the already observed combobox state
     // and the same structural cell; do not re-resolve page-wide candidates.
@@ -2863,6 +2925,73 @@ async function tryResolveSelectionOptionViaField(
     candidateText: target,
     candidates: []
   });
+  const applyRecordedNativeSelect = async (
+    select: Locator,
+    cell: Locator | undefined,
+    strategy: string,
+    diagnostics?: GridEditorResolution["diagnostics"],
+  ): Promise<TargetResolutionResult | undefined> => {
+    if (!selectionValue?.trim()) return undefined;
+    const options = await select.locator("option").evaluateAll((elements) => elements
+      .filter((element) => !(element as HTMLOptionElement).disabled)
+      .map((element) => ({
+        value: (element as HTMLOptionElement).value,
+        label: (element as HTMLOptionElement).label || element.textContent || "",
+      }))).catch(() => [] as Array<{ value: string; label: string }>);
+    const matches = options.filter((option) => selectionOptionMatches(selectionValue, `${option.label} ${option.value}`)
+      && normalizeText(`${option.label} ${option.value}`).includes(normalizeText(selectionValue)));
+    if (matches.length !== 1) {
+      return selectionFailureResult(optionTarget, matches.length > 1 ? "ambiguous_option" : "option_not_supported", {
+        triggerResolved: true,
+        triggerStrategy: strategy,
+        surfaceCausallyBound: Boolean(cell),
+        optionCandidateCount: options.length,
+        desiredOptionFound: matches.length > 0,
+        stateVerified: false,
+        failureReason: matches.length > 1 ? "ambiguous_option" : "option_not_supported",
+      }, diagnostics);
+    }
+    await select.selectOption(matches[0].value, { force: true, timeout: 5000 }).catch(() => undefined);
+    const selectedValue = await select.inputValue().catch(() => "");
+    const selectedLabel = await select.locator("option:checked").evaluate((element) =>
+      (element as HTMLOptionElement).label || element.textContent || "").catch(() => "");
+    const verified = selectedValue === matches[0].value
+      && selectionOptionMatches(selectionValue, `${selectedLabel} ${selectedValue}`);
+    if (!verified) {
+      return selectionFailureResult(optionTarget, "selection_state_not_verified", {
+        triggerResolved: true,
+        triggerStrategy: strategy,
+        surfaceCausallyBound: Boolean(cell),
+        optionCandidateCount: options.length,
+        desiredOptionFound: true,
+        stateVerified: false,
+        optionResolutionStrategy: "grid_native_select_stable_identity",
+        failureReason: "selection_state_not_verified",
+      }, diagnostics);
+    }
+    return {
+      status: "resolved",
+      target: optionTarget,
+      locator: select,
+      locatorStrategy: "grid_native_select_option",
+      confidence: 0.98,
+      matchReason: "selection_option_state_verified",
+      candidateText: selectedLabel,
+      candidates: [],
+      selectionApplied: true,
+      gridDiagnostics: diagnostics,
+      selectionDiagnostics: {
+        triggerResolved: true,
+        triggerStrategy: strategy,
+        surfaceCausallyBound: Boolean(cell),
+        optionCandidateCount: options.length,
+        desiredOptionFound: true,
+        optionResolutionStrategy: "grid_native_select_stable_identity",
+        stateVerified: true,
+        overlayClosed: true,
+      },
+    };
+  };
 
   // A scoped grid row has authority over any page-wide accessible-label match.
   // Resolve its cell before trying generic form labels so another row cannot
@@ -2894,10 +3023,19 @@ async function tryResolveSelectionOptionViaField(
       if (!grid.locator) continue;
       const tagName = await grid.locator.evaluate((element) => element.tagName.toLowerCase()).catch(() => "");
       if (tagName === "select") {
+        const applied = await applyRecordedNativeSelect(grid.locator, grid.cell, grid.strategy ?? "grid_cell_select", grid.diagnostics);
+        if (applied) return applied;
         return {
           ...buildResult(grid.locator, grid.strategy ?? "grid_cell_select", "grid_cell_editor_resolved"),
           gridDiagnostics: grid.diagnostics,
         };
+      }
+      if (selectionValue?.trim() && grid.cell) {
+        const cellNativeSelects = grid.cell.locator("select");
+        if (await cellNativeSelects.count().catch(() => 0) === 1) {
+          const applied = await applyRecordedNativeSelect(cellNativeSelects, grid.cell, `${grid.strategy ?? "grid_cell_selection_control"}:cell_native_select`, grid.diagnostics);
+          if (applied) return applied;
+        }
       }
       // A selection without a runtime value is an exploratory/action step.
       // Preserve its existing behavior: activate the resolved trigger and
@@ -3602,9 +3740,16 @@ async function resolveActionTargetCore(
       || (gridContext.rowScope !== undefined && gridContext.rowScope > 1)
       || gridContext.rowRelation === "added"
     );
-  const priorSelectionField = opts.previousTarget?.trim()
-    || opts.selectionActivationField?.trim()
-    || opts.associatedField?.trim();
+  const recordedOptionName = opts.playwrightRecorderEvidence?.normalizedName?.trim()
+    || recordedOptionRef?.trim().replace(/^role:option\|/i, "").trim()
+    || target;
+  const associatedField = opts.associatedField?.trim();
+  const associatedFieldNamesOption = Boolean(associatedField)
+    && normalizeText(associatedField!) === normalizeText(recordedOptionName);
+  const priorSelectionField = opts.selectionActivationField?.trim()
+    || (associatedFieldNamesOption ? undefined : associatedField)
+    || opts.previousTarget?.trim()
+    || associatedField;
   if (recordedScopedOption && priorSelectionField) {
     const scopedTrigger = await resolveGridEditor(page, priorSelectionField, gridContext, {
       includeInteractiveControls: true,
@@ -3612,31 +3757,68 @@ async function resolveActionTargetCore(
       allowActivation: false,
     });
     if (scopedTrigger.locator && scopedTrigger.cell) {
-      const optionName = opts.playwrightRecorderEvidence?.normalizedName?.trim()
-        || recordedOptionRef?.trim().replace(/^role:option\|/i, "").trim()
-        || target;
       console.log("[recording-replay] scopedRecordedOptionOwnerResolved=true entityScopePresent=" + Boolean(gridContext.entityScope) + " triggerField=" + JSON.stringify(priorSelectionField) + " optionRole=option");
       const appliedOption = await resolveAndApplySelectionSurface(
         page,
         scopedTrigger.locator,
-        optionName,
+        recordedOptionName,
         scopedTrigger.strategy ?? "grid_cell_selection_control",
         scopedTrigger.diagnostics,
         scopedTrigger.cell,
+        true,
       );
       console.log("[recording-replay] scopedRecordedOptionApplied=" + Boolean(appliedOption.selectionApplied) + " stateVerified=" + Boolean(appliedOption.selectionDiagnostics?.stateVerified) + " entityScopePresent=" + Boolean(gridContext.entityScope));
       return appliedOption;
     }
     console.log("[recording-replay] scopedRecordedOptionOwnerResolved=false entityScopePresent=" + Boolean(gridContext.entityScope) + " triggerFieldPresent=true");
-    return selectionFailureResult(target, "recorded_scoped_selection_owner_unresolved", {
-      triggerResolved: false,
-      triggerStrategy: "recorded:associated_field",
-      surfaceCausallyBound: false,
-      optionCandidateCount: 0,
-      desiredOptionFound: false,
-      stateVerified: false,
-      failureReason: "recorded_scoped_selection_owner_unresolved",
-    });
+    // The immediately preceding recorded action can open a portaled menu whose
+    // trigger is no longer represented by the grid editor (and whose captured
+    // Radix scope id is ephemeral). The exact recorded role/name is still
+    // authoritative when it resolves to one visible option on the live page.
+    // Click only that unique option and require the menu option to disappear;
+    // otherwise keep the action unresolved.
+    const visibleRecordedOption = page.getByRole("option", { name: recordedOptionName, exact: true });
+    const visibleOptionCount = await visibleRecordedOption.count().catch(() => 0);
+    const visibleOption = visibleOptionCount === 1 && await visibleRecordedOption.isVisible().catch(() => false);
+    const enabledOption = visibleOption && await visibleRecordedOption.isEnabled().catch(() => true);
+    if (visibleOptionCount === 1 && visibleOption && enabledOption) {
+      await visibleRecordedOption.click().catch(() => undefined);
+      const optionClosed = await visibleRecordedOption.waitFor({ state: "hidden", timeout: 2000 }).then(() => true).catch(() => false);
+      console.log(`[recording-replay] liveRecordedOptionApplied=${optionClosed} exactRoleName=true uniqueVisible=true entityScopePresent=${Boolean(gridContext.entityScope)}`);
+      if (optionClosed) {
+        return {
+          status: "resolved",
+          target,
+          locator: visibleRecordedOption,
+          locatorStrategy: "recorded:unique-live-option",
+          confidence: 0.95,
+          matchReason: "recorded_exact_option_clicked_and_menu_closed",
+          candidateText: recordedOptionName,
+          candidates: [],
+          selectionApplied: true,
+          selectionDiagnostics: {
+            triggerResolved: true,
+            triggerStrategy: "recorded:preceding-selection-action",
+            surfaceCausallyBound: true,
+            optionCandidateCount: 1,
+            desiredOptionFound: true,
+            optionResolutionStrategy: "recorded_exact_live_role_option",
+            stateVerified: true,
+            overlayClosed: true,
+          },
+        };
+      }
+      return selectionFailureResult(target, "recorded_option_did_not_close_surface", {
+        triggerResolved: true,
+        triggerStrategy: "recorded:preceding-selection-action",
+        surfaceCausallyBound: true,
+        optionCandidateCount: visibleOptionCount,
+        desiredOptionFound: true,
+        stateVerified: false,
+        failureReason: "recorded_option_did_not_close_surface",
+      });
+    }
+    console.log(`[recording-replay] scopedRecordedOptionFallback=unavailable uniqueVisible=${visibleOptionCount === 1 && visibleOption} enabled=${enabledOption}`);
   }
   // A recorded owner locator (combobox/button) proves where the selection lives,
   // but clicking it only opens the menu. Resolve and apply the requested option
@@ -3976,6 +4158,22 @@ async function resolveActionTargetCore(
       opts.playwrightRecorderEvidence,
     );
     if (fieldSelectionResult) return fieldSelectionResult;
+    if (desiredSelection) {
+      // A value-backed selection must never degrade to clicking the field label
+      // or a generic control. That can produce a false "found" result while the
+      // requested option remains unchanged in a repeated row.
+      console.log(`[recorded-selection] applicationFailedClosed=true target=${JSON.stringify(target)} desiredValuePresent=true reason=selection_owner_unresolved`);
+      return selectionFailureResult(target, "selection_owner_unresolved", {
+        triggerResolved: false,
+        triggerStrategy: "recorded-selection-owner",
+        ariaRelationshipFound: false,
+        surfaceCausallyBound: false,
+        optionCandidateCount: 0,
+        desiredOptionFound: false,
+        stateVerified: false,
+        failureReason: "selection_owner_unresolved",
+      });
+    }
   }
   const recorded = surfaceCompatibility.hardIncompatibility
     ? undefined
@@ -5597,7 +5795,11 @@ export async function resolveActionTarget(
     // Fail-closed: if no valid scope certifies, no marker is attached (relatedAuthority stays
     // "insufficient"), exactly as before this change.
     const opts = options ?? {};
-    if (opts.associatedField?.trim()) {
+    // Selection resolution already certifies its option and selected state. The
+    // accepted-scope marker is only consumed by click/fill mutation diagnostics;
+    // running a second field-scope scan after an applied selection adds latency
+    // and can keep the promoted selection step open after its value is verified.
+    if (opts.associatedField?.trim() && opts.actionType !== "action_select") {
       const requiredCompatibility: "editable" | "actionable" =
         opts.recordingActionType === "fill" || opts.recordingActionType === "press" ? "editable" : "actionable";
       const diagnosticScope = await tryFieldScopedStructuralFallback(page, opts.associatedField, requiredCompatibility, "action").catch(() => undefined);
@@ -5610,6 +5812,13 @@ export async function resolveActionTarget(
 
   const opts = options ?? {};
   if (opts.actionType === "action_select" && opts.playwrightRecorderEvidence?.nativeSelection) return result;
+  if (opts.actionType === "action_select" && opts.selectionValue?.trim()) {
+    // Preserve the core selection failure. A field-scoped target fallback can
+    // return the visible trigger as a resolved locator, which the caller would
+    // click and incorrectly record as a successful value selection.
+    console.log(`[recorded-selection] semanticFallbackSuppressed=true valueBacked=true coreStatus=${result.status} coreReason=${result.matchReason ?? "none"}`);
+    return result;
+  }
   const recordedTargetWasSupplied =
     (opts.recordedTechnicalTargetRefs?.length ?? 0) > 0 || (opts.recordedTechnicalTargets?.length ?? 0) > 0;
   // candidateTargets=[] is the ORIGINAL trigger condition this fallback exists for -- unaffected
@@ -5955,6 +6164,8 @@ export type FillTargetResolutionResult = {
   matchReason: string;
   matchedTag?: string;
   matchedText?: string;
+  candidateText?: string;
+  selectionDiagnostics?: SelectionSurfaceDiagnostics;
   attemptedLocators: string[];
   editableCandidatesCount: number;
   nonEditableMatch?: { text: string; tag: string; reason: string };
@@ -6121,6 +6332,7 @@ export function recordedLocatorFactory(page: Page | Locator, candidate: Recorded
   if (!value) return undefined;
   const strategy = candidate.strategy.trim().toLowerCase();
   if (strategy === "css") return page.locator(value);
+  if (strategy === "id") return page.locator(`[id="${cssAttributeValue(value)}"]`);
   if (strategy === "data-testid") return page.getByTestId(value);
   if (strategy === "aria-label") return page.locator(`[aria-label="${value.replace(/"/g, '\\"')}"]`);
   if (strategy === "placeholder") return page.getByPlaceholder(value, { exact });
@@ -6764,7 +6976,7 @@ export async function resolvePlaywrightRecorderTarget(
 /** Result of a segmented-input (multi-box OTP/token) fill attempt during live discovery. */
 export type SegmentedInputFillResult =
   | { ok: true; segmentCount: number }
-  | { ok: false; reason: "evidence_incomplete" | "value_length_mismatch" | "scope_not_unique" | "segment_count_mismatch" | "segment_not_actionable" };
+  | { ok: false; reason: "evidence_incomplete" | "value_length_mismatch" | "scope_not_unique" | "segment_count_mismatch" | "segment_not_actionable" | "segment_value_not_committed" };
 
 /**
  * FIRST_LOSS fix (jobId 6d871693-...): `resolvePlaywrightRecorderTarget` above deliberately never
@@ -6826,7 +7038,7 @@ export async function attemptSegmentedInputFill(
     await segment.pressSequentially(expectedCharacter);
     const actualCharacter = await segment.evaluate((element) => {
       if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) return element.value;
-      return element.isContentEditable ? element.textContent ?? "" : "";
+      return "isContentEditable" in element && element.isContentEditable ? element.textContent ?? "" : "";
     }).catch(() => "");
     if (actualCharacter !== expectedCharacter) {
       return { ok: false, reason: "segment_value_not_committed" };
@@ -6842,7 +7054,7 @@ export async function attemptSegmentedInputFill(
     }
     const committedCharacter = await segment.evaluate((element) => {
       if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) return element.value;
-      return element.isContentEditable ? element.textContent ?? "" : "";
+      return "isContentEditable" in element && element.isContentEditable ? element.textContent ?? "" : "";
     }).catch(() => "");
     if (committedCharacter !== value[index]) {
       return { ok: false, reason: "segment_value_not_committed" };
@@ -7470,9 +7682,11 @@ async function resolveRecordedTechnicalTarget(
             || element.getAttribute("contenteditable") === "true";
         }).catch(() => false);
       if (!compatible) continue;
-      const stableRecordedCssIdentity = candidate.strategy === "css"
+      const stableRecordedCssIdentity = candidate.strategy.trim().toLowerCase() === "css"
         && !/:nth-(?:child|of-type)|:first-child|:last-child/i.test(candidate.value)
         && /(?:#[A-Za-z_][A-Za-z0-9_-]*|\[(?:id|data-testid)\s*=\s*["'][^"']+["']\])/i.test(candidate.value);
+      const stableRecordedIdIdentity = candidate.strategy.trim().toLowerCase() === "id"
+        && Boolean(candidate.value.trim());
       const structuralCompatibility = actionIntent === "press"
         ? true
         : Boolean(technicalTarget?.structuralContext || technicalTarget?.stableAttributes)
@@ -7481,7 +7695,10 @@ async function resolveRecordedTechnicalTarget(
           // when the older recording format carries refs without a full structural fingerprint.
           // The candidate is already required to resolve uniquely and pass runtime visibility
           // and actionability checks above; positional CSS remains excluded.
-          || stableRecordedCssIdentity;
+          || stableRecordedCssIdentity
+          // A captured id ref carries the same stable identity directly, without CSS syntax.
+          // It reaches this point only after exact runtime uniqueness and visibility checks.
+          || stableRecordedIdIdentity;
       // A unique role/name ref is only a locator match; it does not certify that the
       // current control is the recorded control. Keep searching the same recorded authority
       // list for a persisted structural locator (for example, CSS/ID) before failing closed.

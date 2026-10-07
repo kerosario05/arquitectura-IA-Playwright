@@ -1,0 +1,2357 @@
+{
+  "recordingId": "88a2b3ed-6c07-458e-b2d1-0358b5f40742",
+  "projectSlug": "fenix",
+  "appSlug": "fenix",
+  "platform": "web",
+  "baseUrl": "https://qa1.santacruz.do/onlinebanking",
+  "label": "Login Sastifactorio",
+  "recordingGoal": {
+    "declaredGoal": "Login Sastifactorio",
+    "normalizedGoal": "Login Sastifactorio",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-10-05T20:59:55.283Z",
+  "status": "stopped",
+  "events": [
+    {
+      "t": 2114,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://qa1.santacruz.do/onlinebanking",
+      "seq": 0
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "60d370b39a8d",
+      "url": "https://qa1.santacruz.do/onlinebanking",
+      "seq": 1
+    },
+    {
+      "t": 7941,
+      "interactionId": "pointer-1",
+      "kind": "note",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "a27ed165c47d0cf6f7738045f89a6d706ef3524eec0782fd1bcd6888da5d7a86",
+      "url": "https://qa1.santacruz.do/onlinebanking",
+      "target": {
+        "label": "Empresarial",
+        "role": "link",
+        "tag": "a",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Empresarial",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "login-box-parent"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Empresarial\"",
+      "observationType": "pointer",
+      "seq": 2
+    },
+    {
+      "t": 8034,
+      "interactionId": "pointer-1",
+      "kind": "tap",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "a27ed165c47d0cf6f7738045f89a6d706ef3524eec0782fd1bcd6888da5d7a86",
+      "url": "https://qa1.santacruz.do/onlinebanking",
+      "target": {
+        "label": "Empresarial",
+        "role": "link",
+        "tag": "a",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "link|Empresarial",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Empresarial",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#empresarial"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "login-box-parent"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#empresarial\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Empresarial",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "login-box-parent"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 3
+    },
+    {
+      "t": 8660,
+      "interactionId": "pointer-2",
+      "kind": "note",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "88a6a9bc01d0060a6c3d2ea9c821fd9c246860f77e3760f338dce3d6ed2f943c",
+      "url": "https://qa1.santacruz.do/onlinebanking",
+      "target": {
+        "label": "RNC:",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"RNC:\"",
+      "observationType": "pointer",
+      "seq": 4
+    },
+    {
+      "t": 11940,
+      "interactionId": "pointer-3",
+      "kind": "note",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "88a6a9bc01d0060a6c3d2ea9c821fd9c246860f77e3760f338dce3d6ed2f943c",
+      "url": "https://qa1.santacruz.do/onlinebanking",
+      "target": {
+        "label": "Usuario:",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Usuario:\"",
+      "observationType": "pointer",
+      "seq": 5
+    },
+    {
+      "t": 11974,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "88a6a9bc01d0060a6c3d2ea9c821fd9c246860f77e3760f338dce3d6ed2f943c",
+      "url": "https://qa1.santacruz.do/onlinebanking",
+      "target": {
+        "label": "RNC:",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|RNC:",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#Enterprise",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "Enterprise",
+            "confidence": 0.8
+          }
+        ],
+        "rawTypedValue": "130047596",
+        "sensitive": false
+      },
+      "value": "130047596",
+      "valueSource": "user",
+      "seq": 6
+    },
+    {
+      "t": 14911,
+      "interactionId": "pointer-4",
+      "kind": "note",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "88a6a9bc01d0060a6c3d2ea9c821fd9c246860f77e3760f338dce3d6ed2f943c",
+      "url": "https://qa1.santacruz.do/onlinebanking",
+      "target": {
+        "label": "Contraseña:",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Contraseña:\"",
+      "observationType": "pointer",
+      "seq": 7
+    },
+    {
+      "t": 14917,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "88a6a9bc01d0060a6c3d2ea9c821fd9c246860f77e3760f338dce3d6ed2f943c",
+      "url": "https://qa1.santacruz.do/onlinebanking",
+      "target": {
+        "label": "Usuario:",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Usuario:",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#UserNameE",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "UserNameE",
+            "confidence": 0.8
+          }
+        ],
+        "rawTypedValue": "jpmota",
+        "sensitive": false
+      },
+      "value": "jpmota",
+      "valueSource": "user",
+      "seq": 8
+    },
+    {
+      "t": 20326,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "88a6a9bc01d0060a6c3d2ea9c821fd9c246860f77e3760f338dce3d6ed2f943c",
+      "url": "https://qa1.santacruz.do/onlinebanking",
+      "target": {
+        "label": "Contraseña:",
+        "role": "input",
+        "tag": "input",
+        "inputType": "password",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Contraseña:",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#PasswordE",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "PasswordE",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": true
+      },
+      "redactedKey": "contrasena:",
+      "valueSource": "user",
+      "seq": 9
+    },
+    {
+      "t": 20330,
+      "kind": "press",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "88a6a9bc01d0060a6c3d2ea9c821fd9c246860f77e3760f338dce3d6ed2f943c",
+      "url": "https://qa1.santacruz.do/onlinebanking",
+      "target": {
+        "label": "Contraseña:",
+        "role": "textbox",
+        "tag": "input",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Contraseña:",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#PasswordE",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "PasswordE",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "note": "Enter",
+      "seq": 10
+    },
+    {
+      "t": 26876,
+      "kind": "navigate",
+      "screenKey": "60d370b39a8d",
+      "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+      "seq": 11
+    },
+    {
+      "t": 28199,
+      "interactionId": "pointer-1",
+      "kind": "tap",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "88a6a9bc01d0060a6c3d2ea9c821fd9c246860f77e3760f338dce3d6ed2f943c",
+      "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+      "target": {
+        "label": "SMS",
+        "tag": "div",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "IdentifyUserForm",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "SMS",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 12
+    },
+    {
+      "t": 54185,
+      "interactionId": "pointer-2",
+      "kind": "note",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
+      "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+      "target": {
+        "label": "control",
+        "role": "textbox",
+        "tag": "input",
+        "associatedField": "SMS",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"control\"",
+      "observationType": "pointer",
+      "seq": 13
+    },
+    {
+      "t": 55523,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
+      "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "SMS",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "IdentifyUserForm",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "sensitive": false
+      },
+      "valueSource": "user",
+      "seq": 14
+    },
+    {
+      "t": 55999,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
+      "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "SMS",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "IdentifyUserForm",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "sensitive": false
+      },
+      "valueSource": "user",
+      "seq": 15
+    },
+    {
+      "t": 56435,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
+      "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "SMS",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "IdentifyUserForm",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "sensitive": false
+      },
+      "valueSource": "user",
+      "seq": 16
+    },
+    {
+      "t": 56871,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
+      "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "SMS",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "IdentifyUserForm",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "sensitive": false
+      },
+      "valueSource": "user",
+      "seq": 17
+    },
+    {
+      "t": 57233,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
+      "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "SMS",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "IdentifyUserForm",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "sensitive": false
+      },
+      "valueSource": "user",
+      "seq": 18
+    },
+    {
+      "t": 59074,
+      "interactionId": "pointer-3",
+      "kind": "note",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
+      "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "input",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(a[href=\"/onlinebanking/IdentifyUser/Cancel\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Continuar\"",
+      "observationType": "pointer",
+      "seq": 19
+    },
+    {
+      "t": 59080,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
+      "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "SMS",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "IdentifyUserForm",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "sensitive": false
+      },
+      "valueSource": "user",
+      "seq": 20
+    },
+    {
+      "t": 59162,
+      "interactionId": "pointer-3",
+      "kind": "tap",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
+      "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "input",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Continuar",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Continuar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "input"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "IdentifyUserForm"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"input\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Continuar",
+          "role": "button",
+          "targetTag": "input",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(a[href=\"/onlinebanking/IdentifyUser/Cancel\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "IdentifyUserForm"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(form[id=\"IdentifyUserForm\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "right-content-main"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(a[href=\"/onlinebanking/IdentifyUser/Cancel\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 21
+    },
+    {
+      "t": 59749,
+      "kind": "navigate",
+      "screenKey": "60d370b39a8d",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "seq": 22
+    },
+    {
+      "t": 71963,
+      "interactionId": "pointer-1",
+      "kind": "tap",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "Lizardo Jhonatan Mata Burgos",
+        "tag": "div",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "profile-name",
+            "confidence": 0.55
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Lizardo Jhonatan Mata Burgos",
+          "targetTag": "div",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "profile-name"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "profile-dropdown"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "profile-dd-menu-container"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Lizardo Jhonatan Mata Burgos",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "profile-name"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 23
+    },
+    {
+      "t": 73644,
+      "interactionId": "pointer-2",
+      "kind": "note",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "237a5fe030783adf063c87193135b927e02e63ff32d334409f32866e7611db6e",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "Cerrar Sesión",
+        "role": "link",
+        "tag": "a",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Cerrar Sesión\"",
+      "observationType": "pointer",
+      "seq": 24
+    },
+    {
+      "t": 73758,
+      "interactionId": "pointer-2",
+      "kind": "tap",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "237a5fe030783adf063c87193135b927e02e63ff32d334409f32866e7611db6e",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "Cerrar Sesión",
+        "role": "link",
+        "tag": "a",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "link|Cerrar Sesión",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Cerrar Sesión",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "i",
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"i\",1],[\"span\",1]],\"descendantEntries\":[[\"i\",1],[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "profile-dropdown-menu"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#\"},\"stableDescendants\":[],\"semanticShape\":[\"i\",\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"i\\\",1],[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"i\\\",1],[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 25
+    },
+    {
+      "t": 73767,
+      "kind": "navigate",
+      "screenKey": "60d370b39a8d",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary#",
+      "seq": 26
+    },
+    {
+      "t": 73944,
+      "kind": "screen_change",
+      "screenKey": "60d370b39a8d",
+      "toScreenKey": "db24077246b8",
+      "fingerprint": "1339678419a1a44ee03738db53b32031a47b13e8279d56ec26cfd8b5ff001322",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary#",
+      "seq": 27
+    },
+    {
+      "t": 75191,
+      "interactionId": "pointer-3",
+      "kind": "note",
+      "screenKey": "db24077246b8",
+      "fingerprint": "1339678419a1a44ee03738db53b32031a47b13e8279d56ec26cfd8b5ff001322",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary#",
+      "target": {
+        "label": "Aceptar",
+        "role": "link",
+        "tag": "a",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Aceptar",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(a[href=\"/onlinebanking/Home/Logout\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Aceptar\"",
+      "observationType": "pointer",
+      "seq": 28
+    },
+    {
+      "t": 75255,
+      "interactionId": "pointer-3",
+      "kind": "tap",
+      "screenKey": "db24077246b8",
+      "fingerprint": "1339678419a1a44ee03738db53b32031a47b13e8279d56ec26cfd8b5ff001322",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary#",
+      "target": {
+        "label": "Aceptar",
+        "role": "link",
+        "tag": "a",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "link|Aceptar",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Aceptar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "/onlinebanking/Home/Logout"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "exit-popup"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"/onlinebanking/Home/Logout\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Aceptar",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(a[href=\"/onlinebanking/Home/Logout\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 29
+    },
+    {
+      "t": 75519,
+      "kind": "navigate",
+      "screenKey": "db24077246b8",
+      "url": "https://qa1.santacruz.do/onlinebanking/",
+      "seq": 30
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "60d370b39a8d",
+      "title": "60d370b39a8d",
+      "fingerprint": "88a6a9bc01d0060a6c3d2ea9c821fd9c246860f77e3760f338dce3d6ed2f943c",
+      "url": "https://qa1.santacruz.do/onlinebanking",
+      "firstSeenAt": 3190,
+      "controls": [
+        {
+          "label": "\n             Personal\n        ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n             Personal\n        ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n             Empresarial\n        ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n             Empresarial\n        ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "RNC:",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "RNC",
+          "attributes": {
+            "id": "Enterprise",
+            "name": "Enterprise",
+            "type": "text",
+            "placeholder": "RNC"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "Enterprise",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Usuario:",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Usuario",
+          "attributes": {
+            "id": "UserNameE",
+            "name": "UserName",
+            "type": "text",
+            "placeholder": "Usuario"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "UserNameE",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Contraseña:",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Contraseña",
+          "attributes": {
+            "id": "PasswordE",
+            "name": "Password",
+            "type": "password",
+            "placeholder": "Contraseña"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "PasswordE",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "¿Olvidó su contraseña?",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "forgotPasswordLnk"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "forgotPasswordLnk",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Iniciar sesión",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "submit"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Iniciar sesión",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Regístrate",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Regístrate",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Derechos y Deberes como usuarios financieros",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Derechos y Deberes como usuarios financieros",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n             \n        ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n             \n        ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio -",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Inicio - ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Quiénes Somos -",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Quiénes Somos - ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Productos -",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Productos - ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Contactos -",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Contactos -",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Tarifas de Servicio -",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Tarifas de Servicio -",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Pasos Reclamación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Pasos Reclamación ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "© 2026 Banco Santa Cruz, República Dominicana",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "© 2026 Banco Santa Cruz, República Dominicana",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Powered by Sistemas Integrados de Informática",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Powered by Sistemas Integrados de Informática",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "6e9c348d2f25",
+      "title": "6e9c348d2f25",
+      "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
+      "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+      "firstSeenAt": 28320,
+      "controls": [
+        {
+          "label": "Cancelar",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cancelar",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio -",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Inicio - ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Quiénes Somos -",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Quiénes Somos - ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Productos -",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Productos - ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Contactos -",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Contactos -",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Tarifas de Servicio -",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Tarifas de Servicio -",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Pasos Reclamación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Pasos Reclamación ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "© 2026 Banco Santa Cruz, República Dominicana",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "© 2026 Banco Santa Cruz, República Dominicana",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Powered by Sistemas Integrados de Informática",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Powered by Sistemas Integrados de Informática",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 1,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "ccb38a8db01c",
+      "title": "Resumen",
+      "fingerprint": "237a5fe030783adf063c87193135b927e02e63ff32d334409f32866e7611db6e",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "firstSeenAt": 72105,
+      "controls": [
+        {
+          "label": "\n             \n        ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n             \n        ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n             \n             Resumen\n        ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n             \n             Resumen\n        ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n                                 \n                                 Dashboard\n                            ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "CASHMAN_DASHBOARD"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "CASHMAN_DASHBOARD",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                 \n                                 Cuenta Mi Bolsillo\n                            ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "MYPOCKET_PARENT"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "MYPOCKET_PARENT",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                 \n                                 Pendientes\n                            ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "PENDING_TRANSACTIONS"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "PENDING_TRANSACTIONS",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                 \n                                 Solicitudes Digitales\n                            ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "DIGITAL_REQUEST"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "DIGITAL_REQUEST",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n             \n             Cerrar Sesión\n        ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n             \n             Cerrar Sesión\n        ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n                         \n                         \n                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "LinkPendingMessage"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "LinkPendingMessage",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                         \n                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n                         \n                    ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n                     \n                ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "ib-header-detail-btn"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "ib-header-detail-btn",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Mi Perfil",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "ib-header-detail-btn2"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "ib-header-detail-btn2",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Ayuda",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n                Ayuda\n            ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n                         \n                         Español DO\n                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n                         \n                         Español DO\n                    ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n                         \n                         English US\n                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n                         \n                         English US\n                    ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n                 \n                 Cerrar Sesión\n            ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n                 \n                 Cerrar Sesión\n            ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Todos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "all-t0"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "all-t0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Cuentas",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "account-tab-t1"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "account-tab-t1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Tarjetas",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "creditcard-tab-t2"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "creditcard-tab-t2",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Préstamos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "loan-tab-t3"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "loan-tab-t3",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Certificados de Depósito",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "moneymarket-tab-t4"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "moneymarket-tab-t4",
+              "confidence": 0.9
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Resumen"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 3,
+        "rows": 42,
+        "cells": 258,
+        "headers": [
+          "Alias",
+          "Número",
+          "Tipo",
+          "Moneda",
+          "Balance Actual",
+          "Balance Disponible",
+          "Estatus"
+        ],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "80a02ad2b033",
+      "title": "Resumen",
+      "fingerprint": "ce07017d5dd2a012330792c969f1c61c5c76870957d3eee081f815d7f76cd8fb",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary#",
+      "firstSeenAt": 73893,
+      "controls": [
+        {
+          "label": "\n             \n        ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n             \n        ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n             \n             Resumen\n        ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n             \n             Resumen\n        ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n                                 \n                                 Dashboard\n                            ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "CASHMAN_DASHBOARD"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "CASHMAN_DASHBOARD",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                 \n                                 Cuenta Mi Bolsillo\n                            ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "MYPOCKET_PARENT"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "MYPOCKET_PARENT",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                 \n                                 Pendientes\n                            ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "PENDING_TRANSACTIONS"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "PENDING_TRANSACTIONS",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                 \n                                 Solicitudes Digitales\n                            ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "DIGITAL_REQUEST"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "DIGITAL_REQUEST",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n             \n             Cerrar Sesión\n        ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n             \n             Cerrar Sesión\n        ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n                         \n                         \n                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "LinkPendingMessage"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "LinkPendingMessage",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                         \n                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n                         \n                    ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n                     \n                ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "ib-header-detail-btn"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "ib-header-detail-btn",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Todos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "all-t0"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "all-t0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Cuentas",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "account-tab-t1"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "account-tab-t1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Tarjetas",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "creditcard-tab-t2"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "creditcard-tab-t2",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Préstamos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "loan-tab-t3"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "loan-tab-t3",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Certificados de Depósito",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "moneymarket-tab-t4"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "moneymarket-tab-t4",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Cuenta de Ahorro",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n                                                Cuenta de Ahorro\n                                            ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "21082020000619",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n                                                21082020000619\n                                            ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n                                                     \n                                                ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "editar"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "editar",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Cuenta Corriente",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n                                                Cuenta Corriente\n                                            ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "11081020001299",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n                                                11081020001299\n                                            ",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Resumen"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 3,
+        "rows": 42,
+        "cells": 258,
+        "headers": [
+          "Alias",
+          "Número",
+          "Tipo",
+          "Moneda",
+          "Balance Actual",
+          "Balance Disponible",
+          "Estatus"
+        ],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "db24077246b8",
+      "title": "Cerrar sesión",
+      "fingerprint": "1339678419a1a44ee03738db53b32031a47b13e8279d56ec26cfd8b5ff001322",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary#",
+      "firstSeenAt": 73940,
+      "controls": [
+        {
+          "label": "Aceptar",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Aceptar",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cancelar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cancelar",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n             \n        ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n             \n        ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n             \n             Resumen\n        ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n             \n             Resumen\n        ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n                                 \n                                 Dashboard\n                            ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "CASHMAN_DASHBOARD"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "CASHMAN_DASHBOARD",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                 \n                                 Cuenta Mi Bolsillo\n                            ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "MYPOCKET_PARENT"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "MYPOCKET_PARENT",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                 \n                                 Pendientes\n                            ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "PENDING_TRANSACTIONS"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "PENDING_TRANSACTIONS",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                 \n                                 Solicitudes Digitales\n                            ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "DIGITAL_REQUEST"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "DIGITAL_REQUEST",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n             \n             Cerrar Sesión\n        ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n             \n             Cerrar Sesión\n        ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n                         \n                         \n                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "LinkPendingMessage"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "LinkPendingMessage",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                         \n                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n                         \n                    ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n                     \n                ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "ib-header-detail-btn"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "ib-header-detail-btn",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Todos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "all-t0"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "all-t0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Cuentas",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "account-tab-t1"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "account-tab-t1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Tarjetas",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "creditcard-tab-t2"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "creditcard-tab-t2",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Préstamos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "loan-tab-t3"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "loan-tab-t3",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Certificados de Depósito",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "moneymarket-tab-t4"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "moneymarket-tab-t4",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Cuenta de Ahorro",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n                                                Cuenta de Ahorro\n                                            ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "21082020000619",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n                                                21082020000619\n                                            ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n                                                     \n                                                ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "editar"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "editar",
+              "confidence": 0.9
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Cerrar sesión",
+        "Resumen"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 3,
+        "rows": 42,
+        "cells": 258,
+        "headers": [
+          "Alias",
+          "Número",
+          "Tipo",
+          "Moneda",
+          "Balance Actual",
+          "Balance Disponible",
+          "Estatus"
+        ],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    }
+  ],
+  "endedAt": "2026-10-05T21:01:17.130Z",
+  "durationMs": 81847
+}

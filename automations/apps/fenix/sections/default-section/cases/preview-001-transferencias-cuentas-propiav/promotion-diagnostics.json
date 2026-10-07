@@ -17,6 +17,6 @@
   "fallbackUsed": false,
   "requirePomRuntime": false,
   "specPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-transferencias-cuentas-propiav\\case.spec.ts",
-  "specHash": "b6d2f257635a11784117b28a1563d7a0812e577210dc5ac0bcf8ab61f86e19a4",
+  "specHash": "b169803063612afde15909e553ba0984b49b8639253e41e85ef1df4b64da4d5d",
   "specSource": "ai_candidate"
 }

@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-transferencias-entre-cuantas-propias",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Transferencias entre cuantas propias",
+  "source": "discovery",
+  "appSlug": "fenix",
+  "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+  "createdAt": "2026-10-07T02:54:09.272Z"
+}

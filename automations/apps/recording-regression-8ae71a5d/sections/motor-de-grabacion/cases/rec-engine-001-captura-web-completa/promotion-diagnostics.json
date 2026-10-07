@@ -1,0 +1,20 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\recording-regression-8ae71a5d\\sections\\motor-de-grabacion\\cases\\rec-engine-001-captura-web-completa\\case.spec.ts",
+  "specHash": "59f67dbc20e003f078f9b073ba43927bfdcc9380f4611689ee70efb03d8e050f",
+  "specSource": "generatedSpec"
+}

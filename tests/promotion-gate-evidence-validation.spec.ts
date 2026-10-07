@@ -43,8 +43,11 @@ test.describe("Promotion Gate - Evidence Validation", () => {
       discoveredObjects: [],
       candidatePlan: {
         version: "1.0",
+          source: "discovery_generated",
         caseId: 39286,
-        title: "Test plan",
+          scenario: { source: "testrail", externalId: "39286", title: "Test plan" },
+          createdAt: new Date().toISOString(),
+          title: "Test plan",
         status: "validated",
         steps: [],
         requiredData: []
@@ -103,8 +106,11 @@ test.describe("Promotion Gate - Evidence Validation", () => {
       discoveredObjects: [],
       candidatePlan: {
         version: "1.0",
+          source: "discovery_generated",
         caseId: 39286,
-        title: "Test plan",
+          scenario: { source: "testrail", externalId: "39286", title: "Test plan" },
+          createdAt: new Date().toISOString(),
+          title: "Test plan",
         status: "validated",
         steps: [],
         requiredData: []
@@ -165,8 +171,11 @@ test.describe("Promotion Gate - Evidence Validation", () => {
       discoveredObjects: [],
       candidatePlan: {
         version: "1.0",
+          source: "discovery_generated",
         caseId: 39286,
-        title: "Test plan",
+          scenario: { source: "testrail", externalId: "39286", title: "Test plan" },
+          createdAt: new Date().toISOString(),
+          title: "Test plan",
         status: "validated",
         steps: [],
         requiredData: []
@@ -198,8 +207,11 @@ test.describe("Promotion Gate - Evidence Validation", () => {
       discoveredObjects: [],
       candidatePlan: {
         version: "1.0",
+          source: "discovery_generated",
         caseId: 39286,
-        title: "Test plan",
+          scenario: { source: "testrail", externalId: "39286", title: "Test plan" },
+          createdAt: new Date().toISOString(),
+          title: "Test plan",
         status: "validated",
         steps: [],
         requiredData: []
@@ -238,8 +250,11 @@ test.describe("Promotion Gate - Evidence Validation", () => {
       discoveredObjects: [],
       candidatePlan: {
         version: "1.0",
+          source: "discovery_generated",
         caseId: 39286,
-        title: "Test plan",
+          scenario: { source: "testrail", externalId: "39286", title: "Test plan" },
+          createdAt: new Date().toISOString(),
+          title: "Test plan",
         status: "validated",
         steps: [],
         requiredData: []

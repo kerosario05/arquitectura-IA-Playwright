@@ -34,17 +34,8 @@ export async function getConnection(): Promise<DbConnection> {
   return driver().getConnection();
 }
 
-export async function withConnection<T>(fn: (conn: odbc.Connection) => Promise<T>): Promise<T> {
-  const conn = await odbc.connect(connectionString);
-  try {
-    return await fn(conn);
-  } finally {
-    try {
-      await conn.close();
-    } catch {
-      // preserve the operation result or error
-    }
-  }
+export async function withConnection<T>(fn: (conn: DbConnection) => Promise<T>): Promise<T> {
+  return driver().withConnection(fn);
 }
 
 export async function closeConnection(): Promise<void> {

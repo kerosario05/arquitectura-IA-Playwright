@@ -997,15 +997,12 @@ function transitionAfter(events: readonly RecordedEvent[], index: number, exclud
  * to the previous action. This is structural (kind/observationType/screen), never textual.
  *
  * Explicit interactionId (Capture V2) is the sole authority over the naive event-kind stop
- * below, same principle as `nextPointerBoundaryT`: when this action carries an interactionId,
- * an intervening fill/tap/back with no interactionId of its own (or the SAME one) is never this
- * action's actual boundary -- it is scanned past, not treated as a cut -- because it cannot
- * contradict an identity this action does not share. An intervening fill/tap/back that carries
- * a DIFFERENT explicit interactionId is a genuine boundary and still stops the scan (fail
- * closed). A pointer note that itself carries an interactionId is only accepted when it matches
- * this action's own id -- it is never handed to an action with no id or a conflicting one (a
- * fill with no interactionId can never claim a pointer that explicitly belongs to another
- * action). Legacy recordings with no interactionId anywhere keep the exact prior behavior.
+ * below, same principle as `nextPointerBoundaryT`: an intervening fill/back without an id can
+ * be scanned past because it may be part of the same observed physical sequence. A preceding
+ * tap with this same id is different: it proves the pointer id was already consumed, so a later
+ * tap that reuses it must not reclaim that old pointerdown or its route. Conflicting explicit
+ * ids remain a fail-closed boundary. Legacy recordings with no interactionId keep the prior
+ * behavior.
  */
 function actionablePointerAnchor(events: readonly RecordedEvent[], index: number): RecordedEvent | undefined {
   const event = events[index];
@@ -1018,6 +1015,7 @@ function actionablePointerAnchor(events: readonly RecordedEvent[], index: number
     // A navigation is part of the transition, not a user-action boundary: keep scanning
     // past it so a pointerdown that precedes the navigation still anchors its action.
     if (candidate.kind === "tap" || candidate.kind === "fill" || candidate.kind === "back") {
+      if (event.interactionId && candidate.kind === "tap" && candidate.interactionId === event.interactionId) return undefined;
       if (event.interactionId && (!candidate.interactionId || candidate.interactionId === event.interactionId)) continue;
       return undefined;
     }
@@ -1418,14 +1416,28 @@ export function buildCanonicalInteractions(
     // the live field-scoped resolver, it was just never offered as a candidate field name. Two
     // more exclusions, both required to avoid reopening bugs earlier tickets fixed: (1) a
     // post-transition uncorroborated owner (ownerRecertificationRequired) never contributes a
-    // field name here, however real-looking — that data is exactly what is untrustworthy right
-    // after a surface change, independent of this ticket's runtime-resolution evidence question;
+    // certified structural field name here, however real-looking — that data is exactly what is
+    // untrustworthy right after a surface change. The narrow editable-fill hint below remains
+    // unresolved and only permits the live resolver to attempt a fresh unique match;
     // (2) a generic-shaped associatedField/headerContext/columnIdentity value ("control", "campo",
     // ...) is never treated as a real field name either.
     const rawStructuralFieldCandidate = clean(target?.associatedField ?? target?.headerContext ?? target?.columnIdentity ?? "") || undefined;
     const structuralFieldName = !ownerRecertificationRequired && rawStructuralFieldCandidate && !isGenericUnresolvedLabel(rawStructuralFieldCandidate)
       ? rawStructuralFieldCandidate
       : undefined;
+    // A post-transition fill can lose its locator even though Capture V2 observed the actual
+    // editable element, its associated field label, and the value entered into that element.
+    // Keep the identity unresolved (the live resolver must still prove one current match), but
+    // let that captured field relation serve as a field-scoped re-resolution hint. This is only
+    // for value-bearing fills on editable targets; it does not admit a stale label as certified
+    // identity and does not enable post-transition clicks/selections from display text.
+    const postTransitionEditableFieldHint = ownerRecertificationRequired
+      && action === "fill"
+      && (["input", "textbox", "textarea"].includes((target?.role ?? "").toLocaleLowerCase())
+        || ["input", "textarea"].includes((target?.tag ?? "").toLocaleLowerCase()))
+      && Boolean(value)
+      && Boolean(rawStructuralFieldCandidate)
+      && !isGenericUnresolvedLabel(rawStructuralFieldCandidate);
     // Recording Replay admission (this is NOT execution authority): a required interaction whose
     // field/owner identity the admission gate rejected can still be worth handing to the EXISTING
     // runtime/MCP resolver (resolveActionTarget) rather than being blocked outright, but only when
@@ -1441,7 +1453,9 @@ export function buildCanonicalInteractions(
     // guard against, and this ticket must never reopen it. A genuinely non-textual technical
     // signal (a structural/data-testid/aria-label locator, or a captured field-owner diagnostic
     // attempt) carries no such risk even post-transition, because the EXISTING runtime resolver
-    // independently re-verifies route/surface compatibility live before trusting it.
+    // independently re-verifies route/surface compatibility live before trusting it. The direct
+    // editable-fill hint below is passed as a runtime candidate only and must also be resolved
+    // against the current surface.
     const nonTextualTechnicalEvidencePresent = technicalTargetRefsForEvent.some((ref) => !ref.startsWith("text:"));
     // A missing required fill is a PRECONDITION gap, never an identity-resolution one: no
     // technical target evidence on the click itself can substitute for a value that was simply
@@ -1537,7 +1551,7 @@ export function buildCanonicalInteractions(
       && !missingPressKey
       && (!recordedValueRequiredAsEvidence || Boolean(value))
       && (ownerRecertificationRequired
-        ? nonTextualTechnicalEvidencePresent
+        ? nonTextualTechnicalEvidencePresent || postTransitionEditableFieldHint
         : (technicalTargetRefsForEvent.length > 0 || Boolean(structuralFieldName) || Boolean(target?.fieldOwnerDiagnostic) || deterministicStructuralOwnerEvidence || scopedStructuralEvidencePresent || semanticRuntimeEligible || recorderRuntimeEligible));
     // A SECOND, independent runtime-resolution case: admission ACCEPTED the field/owner identity
     // (a real, non-generic associatedField/role) but the recorder never captured any technical
@@ -1663,7 +1677,7 @@ export function buildCanonicalInteractions(
         ? undefined
       : !admissionRejected
         ? fieldOf(target)
-        : (resolutionState === "runtime_resolution_required" ? structuralFieldName : undefined);
+        : (resolutionState === "runtime_resolution_required" ? structuralFieldName ?? (postTransitionEditableFieldHint ? rawStructuralFieldCandidate : undefined) : undefined);
     const scope = scopeOf(target);
     const selectorControlId = selectorControlOf(event, target, events, index);
     // Opening a selector is a click/navigation action; only the committed option is a
@@ -1936,7 +1950,17 @@ export function buildCanonicalInteractions(
  * raw recording trace -- can re-apply the CURRENT reconciliation rules to data it already has,
  * without re-running Discovery or losing any already-captured technicalTargetRefs/recordedValue.
  */
-export function reconcileOptionOwnerLineage<T extends { id?: string; action: string; semanticField?: string; recordedValue?: string; screenBeforeRef?: string }>(
+export function reconcileOptionOwnerLineage<T extends {
+  id?: string;
+  action: string;
+  semanticField?: string;
+  valueKey?: string;
+  recordedValue?: string;
+  screenBeforeRef?: string;
+  entityScope?: string;
+  stateScope?: string;
+  technicalTargetRefs?: string[];
+}>(
   interactions: readonly T[],
 ): T[] {
   const selectSiblingsByValue = new Map<string, T[]>();
@@ -1950,19 +1974,174 @@ export function reconcileOptionOwnerLineage<T extends { id?: string; action: str
     selectSiblingsByValue.set(key, bucket);
   }
   return interactions.map((interaction) => {
-    if (interaction.action === "select" || !interaction.semanticField) return interaction;
+    if (!interaction.semanticField) return interaction;
     const key = `${interaction.screenBeforeRef ?? ""}|${clean(interaction.semanticField) ?? ""}`;
-    const siblings = selectSiblingsByValue.get(key);
+    const siblings = interaction.action === "select" ? undefined : selectSiblingsByValue.get(key);
     // Only when EXACTLY one same-screen select sibling recorded this exact value is the owner
     // unambiguous -- more than one candidate owner, or none, leaves semanticField untouched
     // rather than guessing.
-    if (siblings?.length !== 1) return interaction;
-    const owner = siblings[0];
-    if (owner.semanticField && owner.semanticField !== interaction.semanticField) {
-      return { ...interaction, semanticField: owner.semanticField };
+    if (siblings?.length === 1) {
+      const owner = siblings[0];
+      if (owner.semanticField && owner.semanticField !== interaction.semanticField) {
+        return withReconciledOptionOwner(interaction, owner.semanticField);
+      }
+    }
+    if ((siblings?.length ?? 0) > 1) return interaction;
+
+    // A second captured shape has no synthesized `select` sibling: the recording keeps the
+    // owner click and the option click as separate actions. The option's accessible field name
+    // can then be the control's current value (for example, a combobox named "USD" whose
+    // semantic field is "Moneda"). Rebind only when the option click's exact semantic name is
+    // also the exact accessible name of one recorded combobox in the same entity, state and
+    // screen. This uses the recording's explicit owner/option technical identities; it never
+    // picks the preceding action by position or infers an application field from page text.
+    const optionTargetRef = interaction.action === "click" || interaction.action === "select"
+      ? interaction.technicalTargetRefs?.find((ref) => /^role:option\|/i.test(ref.trim()))
+      : undefined;
+    const hasRecordedScope = Boolean(
+      interaction.entityScope?.trim()
+      && interaction.stateScope?.trim()
+      && interaction.screenBeforeRef?.trim(),
+    );
+    if (!optionTargetRef || !hasRecordedScope) return interaction;
+    const expectedOwnerRef = `role:combobox|${clean(interaction.semanticField)}`.toLocaleLowerCase();
+    const structuralOwners = interactions.filter((candidate) => candidate !== interaction
+      && candidate.action === "click"
+      && Boolean(candidate.semanticField?.trim())
+      && candidate.semanticField !== interaction.semanticField
+      && candidate.entityScope === interaction.entityScope
+      && candidate.stateScope === interaction.stateScope
+      && candidate.screenBeforeRef === interaction.screenBeforeRef
+      && candidate.technicalTargetRefs?.some((ref) => ref.trim().toLocaleLowerCase() === expectedOwnerRef));
+    if (structuralOwners.length === 1) {
+      return withReconciledOptionOwner(interaction, structuralOwners[0].semanticField!);
     }
     return interaction;
   });
+}
+
+function withReconciledOptionOwner<T extends { semanticField?: string; valueKey?: string; entityScope?: string }>(
+  interaction: T,
+  semanticField: string,
+): T {
+  const oldField = interaction.semanticField?.trim();
+  const entityScope = interaction.entityScope?.trim();
+  const oldSelectionKey = oldField && entityScope
+    ? `${entityScope}.${keyPart(oldField)}_seleccion`
+    : undefined;
+  const newSelectionKey = entityScope ? `${entityScope}.${keyPart(semanticField)}_seleccion` : undefined;
+  return {
+    ...interaction,
+    semanticField,
+    // Only replace a key that was deterministically generated from the mistaken field label.
+    // Preserve custom keys and all captured values.
+    ...(oldSelectionKey && newSelectionKey && interaction.valueKey === oldSelectionKey
+      ? { valueKey: newSelectionKey }
+      : {}),
+  };
+}
+
+/** Reconciles a persisted scenario's field identity and all projections keyed from it. */
+export function reconcileRecordedScenarioOptionOwnerLineage(scenario: RecordedScenario): RecordedScenario {
+  const previous = scenario.canonicalInteractions ?? [];
+  if (!previous.length) return scenario;
+  const optionOwnerInteractions = reconcileOptionOwnerLineage(previous);
+  const canonicalInteractions = optionOwnerInteractions.map((interaction) => {
+    if (interaction.action !== "fill"
+      || interaction.resolutionState !== "unresolved_unrecoverable"
+      || interaction.admissionReason !== "post_transition_owner_not_recertified"
+      || interaction.semanticField) return interaction;
+    const matchingSteps = scenario.testRailSteps.filter((step) => step.interactionId === interaction.id
+      && Boolean(step.valueKey)
+      && Boolean(step.sourceEventRefs?.some((ref) => interaction.sourceEventRefs.includes(ref))));
+    if (matchingSteps.length !== 1) return interaction;
+    const step = matchingSteps[0];
+    const fields = scenario.requiredData.filter((field) => field.key === step.valueKey
+      && Boolean(field.sourceEventRefs?.some((ref) => interaction.sourceEventRefs.includes(ref)))
+      && (!step.entityScope || !field.entityScope || step.entityScope === field.entityScope));
+    if (fields.length !== 1) return interaction;
+    const fieldName = clean(fields[0].semanticField ?? fields[0].label);
+    if (!fieldName || isGenericUnresolvedLabel(fieldName)) return interaction;
+    // The persisted human step and required-data entry both point to this exact interaction and
+    // source event. Preserve that captured field relationship only as a runtime hint; the owner
+    // stays admission-unresolved and the live resolver must re-count the current field match.
+    return {
+      ...interaction,
+      semanticField: fieldName,
+      valueKey: fields[0].key,
+      description: `Ingresar en "${fieldName}"`,
+      resolutionState: "runtime_resolution_required" as const,
+    };
+  });
+  const previousById = new Map(previous.map((interaction) => [interaction.id, interaction] as const));
+  const changes = new Map<string, { oldKey?: string; newKey?: string; oldField: string; newField: string; value?: string }>();
+  for (const interaction of canonicalInteractions) {
+    const before = previousById.get(interaction.id);
+    if (interaction.action !== "select" || !before || !before.semanticField || !interaction.semanticField || before.semanticField === interaction.semanticField) continue;
+    changes.set(interaction.id, {
+      oldKey: before.valueKey,
+      newKey: interaction.valueKey,
+      oldField: before.semanticField,
+      newField: interaction.semanticField,
+      value: interaction.recordedValue,
+    });
+  }
+  if (!changes.size) return { ...scenario, canonicalInteractions };
+
+  const remapKey = (key: string | undefined, change: { oldKey?: string; newKey?: string }) =>
+    key && change.oldKey && key === change.oldKey ? change.newKey ?? key : key;
+  const replaceStepText = (text: string, change: { oldKey?: string; newKey?: string; oldField: string; newField: string; value?: string }) =>
+    text.replaceAll(`${change.oldKey ? `[${change.oldKey}]` : "\u0000"}`, change.newKey ? `[${change.newKey}]` : "")
+      .replaceAll(`en "${change.oldField}"`, `en "${change.newField}"`);
+  const testRailSteps = scenario.testRailSteps.map((step) => {
+    const change = step.interactionId ? changes.get(step.interactionId) : undefined;
+    if (!change) return step;
+    const content = replaceStepText(step.content, change);
+    const stepTemplate = step.stepTemplate ? replaceStepText(step.stepTemplate, change) : content;
+    const valueKey = remapKey(step.valueKey, change);
+    const renderedStep = change.value !== undefined && valueKey
+      ? `Seleccionar ${JSON.stringify(change.value)} en "${change.newField}"`
+      : step.renderedStep ? replaceStepText(step.renderedStep, change) : undefined;
+    return { ...step, content, stepTemplate, ...(renderedStep ? { renderedStep } : {}), ...(valueKey ? { valueKey } : {}) };
+  });
+  const webSteps = scenario.webSteps.map((step) => {
+    const change = step.interactionId ? changes.get(step.interactionId) : undefined;
+    if (!change) return step;
+    return { ...step, ...(step.valueKey ? { valueKey: remapKey(step.valueKey, change) } : {}), ...(step.description ? { description: replaceStepText(step.description, change) } : {}) };
+  });
+  const updateRequirement = <T extends { valueKey: string; semanticField?: string | null }>(item: T): T => {
+    const change = [...changes.values()].find((candidate) => candidate.oldKey === item.valueKey);
+    return change ? { ...item, valueKey: change.newKey ?? item.valueKey, semanticField: change.newField } : item;
+  };
+  const requiredData = scenario.requiredData.map((field) => {
+    const change = [...changes.values()].find((candidate) => candidate.oldKey === field.key);
+    return change ? { ...field, key: change.newKey ?? field.key, label: change.newField, semanticField: change.newField } : field;
+  });
+  const runtimeInputRequirements = scenario.runtimeInputRequirements?.map(updateRequirement);
+  const runtimeDataset = scenario.runtimeDataset ? (() => {
+    const resolvedValues = { ...scenario.runtimeDataset!.resolvedValues };
+    for (const change of changes.values()) {
+      if (change.oldKey && change.newKey && Object.hasOwn(resolvedValues, change.oldKey)) {
+        if (!Object.hasOwn(resolvedValues, change.newKey)) resolvedValues[change.newKey] = resolvedValues[change.oldKey];
+        delete resolvedValues[change.oldKey];
+      }
+    }
+    return {
+      ...scenario.runtimeDataset!,
+      resolvedValues,
+      requirements: scenario.runtimeDataset!.requirements.map(updateRequirement),
+      missingValues: scenario.runtimeDataset!.missingValues.map(updateRequirement),
+    };
+  })() : undefined;
+  return {
+    ...scenario,
+    canonicalInteractions,
+    testRailSteps,
+    webSteps,
+    requiredData,
+    ...(runtimeInputRequirements ? { runtimeInputRequirements } : {}),
+    ...(runtimeDataset ? { runtimeDataset } : {}),
+  };
 }
 
 /**
@@ -1980,7 +2159,16 @@ export function reconcileOptionOwnerLineage<T extends { id?: string; action: str
  * caller at the true read boundary (`loadScenarios`) covers every consumer.
  */
 export function reconcileRecordingExecutionContractLineage<
-  I extends { id?: string; action: string; semanticField?: string; recordedValue?: string; screenBeforeRef?: string },
+  I extends {
+    id?: string;
+    action: string;
+    semanticField?: string;
+    recordedValue?: string;
+    screenBeforeRef?: string;
+    entityScope?: string;
+    stateScope?: string;
+    technicalTargetRefs?: string[];
+  },
   A extends { interactionId?: string; semanticField?: string; associatedField?: string },
 >(
   canonicalInteractions: readonly I[] | undefined,
@@ -2261,6 +2449,25 @@ export function applyRuntimeDatasetValues(
   );
   const testRailSteps = scenario.testRailSteps.map((step) => {
     if (!step.valueKey) return step;
+    const requirement = validatedRuntimeInputRequirements.find((candidate) => candidate.valueKey === step.valueKey);
+    const sensitive = step.sensitive === true
+      || requirement?.sensitive === true
+      || requirement?.valueRole === "secure_input";
+    if (sensitive) {
+      // Runtime values belong to the execution dataset only. In particular, never feed a
+      // secure value through renderHumanStepValue: QA Lab's step-by-step view consumes
+      // renderedStep and must stay safe even when hydrating older persisted recordings.
+      const fieldLabel = requirement?.semanticField?.trim()
+        || scenario.requiredData.find((field) => field.key === step.valueKey)?.label?.trim()
+        || step.valueKey;
+      const safeTemplate = `Ingresar [${step.valueKey}] en "${fieldLabel}"`;
+      return {
+        ...step,
+        content: safeTemplate,
+        stepTemplate: safeTemplate,
+        renderedStep: `Ingresar "••••••" en "${fieldLabel}"`,
+      };
+    }
     const value = valuesByKey.get(step.valueKey);
     if (value === undefined) return step;
     const template = step.stepTemplate ?? step.content;
@@ -3326,6 +3533,14 @@ export function toSharedMcpScenario(
             : interaction.transitionObserved
               ? { expectedOutcomeKind: "in_place_transition" as const }
               : {}),
+          ...(interaction.action === "click"
+            && Boolean(interaction.screenBeforeRef?.trim())
+            && interaction.screenBeforeRef === interaction.screenAfterRef
+            && !interaction.routeAfter?.trim()
+            && interaction.transitionObserved !== true
+            && interaction.causedTransition !== true
+            ? { recordedSameSurfaceAction: true }
+            : {}),
         };
       });
   const recordingExecutionContract: RecordingExecutionContract = {

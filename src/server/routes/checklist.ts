@@ -1,11 +1,12 @@
 import { Router, Request, Response } from "express";
 import { defectChecklistStore } from "../services/defect-checklist-store";
+import type { DefectStatus } from "../services/defect-checklist-store";
 
 const router = Router();
 
 // POST /api/user-stories/:issueKey/checklist-url — get or create checklist URL for an issue
 router.post("/api/user-stories/:issueKey/checklist-url", (req: Request, res: Response) => {
-  const { issueKey } = req.params;
+  const issueKey = Array.isArray(req.params.issueKey) ? req.params.issueKey[0] ?? "" : req.params.issueKey;
   if (!issueKey || typeof issueKey !== "string" || issueKey.trim().length === 0) {
     return res.status(400).json({ ok: false, error: "invalid_issue_key" });
   }
@@ -18,7 +19,7 @@ router.post("/api/user-stories/:issueKey/checklist-url", (req: Request, res: Res
 // GET /api/checklists/:issueKey — get checklist with defects. Filter strictly by ?runId= when
 // present (execution isolation; no fallback to issueKey), otherwise optionally by ?jobId=.
 router.get("/api/checklists/:issueKey", (req: Request, res: Response) => {
-  const { issueKey } = req.params;
+  const issueKey = Array.isArray(req.params.issueKey) ? req.params.issueKey[0] ?? "" : req.params.issueKey;
   const jobId = typeof req.query.jobId === "string" ? req.query.jobId : undefined;
   const runId = typeof req.query.runId === "string" ? req.query.runId : undefined;
   const list = defectChecklistStore.get(issueKey);
@@ -39,7 +40,7 @@ router.get("/api/checklists/:issueKey", (req: Request, res: Response) => {
 
 // POST /api/checklists/:issueKey/defects — add a defect
 router.post("/api/checklists/:issueKey/defects", (req: Request, res: Response) => {
-  const { issueKey } = req.params;
+  const issueKey = Array.isArray(req.params.issueKey) ? req.params.issueKey[0] ?? "" : req.params.issueKey;
   const { description, severity, scenarioId, scenarioTitle, title, evidenceUrl } = req.body || {};
   if (!description || typeof description !== "string" || description.trim().length === 0) {
     return res.status(400).json({ ok: false, error: "description_required" });
@@ -47,9 +48,12 @@ router.post("/api/checklists/:issueKey/defects", (req: Request, res: Response) =
   if (!severity || typeof severity !== "string") {
     return res.status(400).json({ ok: false, error: "severity_required" });
   }
+  if (!["low", "medium", "high", "critical"].includes(severity)) {
+    return res.status(400).json({ ok: false, error: "severity_invalid" });
+  }
   const defect = defectChecklistStore.addDefect(issueKey, {
     description: description.trim(),
-    severity,
+    severity: severity as "low" | "medium" | "high" | "critical",
     scenarioId: scenarioId || undefined,
     scenarioTitle: scenarioTitle || undefined,
     title: (typeof title === "string" && title.trim()) ? title.trim() : undefined,
@@ -63,9 +67,11 @@ router.post("/api/checklists/:issueKey/defects", (req: Request, res: Response) =
 
 // PATCH /api/checklists/:issueKey/defects/:defectId — update defect status
 router.patch("/api/checklists/:issueKey/defects/:defectId", (req: Request, res: Response) => {
-  const { issueKey, defectId } = req.params;
+  const issueKey = Array.isArray(req.params.issueKey) ? req.params.issueKey[0] ?? "" : req.params.issueKey;
+  const defectId = Array.isArray(req.params.defectId) ? req.params.defectId[0] ?? "" : req.params.defectId;
   const { status } = req.body || {};
-  if (!status || typeof status !== "string") {
+  const validStatuses: DefectStatus[] = ["pending_review", "accepted", "rejected", "fixed"];
+  if (!validStatuses.includes(status as DefectStatus)) {
     return res.status(400).json({ ok: false, error: "status_required" });
   }
   const updated = defectChecklistStore.updateDefectStatus(issueKey, defectId, status);

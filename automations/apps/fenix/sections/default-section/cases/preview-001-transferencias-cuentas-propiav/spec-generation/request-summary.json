@@ -313,7 +313,10 @@
           "strategy": "text",
           "value": "SMS"
         },
+        "valueKey": "sms",
         "associatedField": "SMS",
+        "controlIdentity": "60d370b39a8d|SMS|id|IdentifyUserForm",
+        "recordingActionType": "click",
         "certifiedTechnicalTarget": {
           "interactionEvidence": [],
           "validatedByInteraction": false,
@@ -351,7 +354,7 @@
       {
         "contractStepIndex": 7,
         "scenarioStepIndex": 8,
-        "originalText": "Ingresar \"1\" en \"SMS\"",
+        "originalText": "Ingresar \"9\" en \"SMS\"",
         "operation": "fill",
         "target": {
           "strategy": "label",
@@ -405,11 +408,14 @@
           "strategy": "text",
           "value": "Continuar"
         },
+        "valueKey": "continuar",
         "associatedField": "Continuar",
         "technicalTargetRef": "role:button|Continuar",
         "technicalTargetRefs": [
           "role:button|Continuar"
         ],
+        "controlIdentity": "60d370b39a8d|Continuar|role|button|Continuar",
+        "recordingActionType": "click",
         "certifiedTechnicalTarget": {
           "interactionEvidence": [],
           "validatedByInteraction": true,
@@ -577,13 +583,14 @@
       {
         "contractStepIndex": 11,
         "scenarioStepIndex": 17,
-        "originalText": "Seleccionar \"Cuenta Corrientes / 11311000003156 / RD$168,967.94\" en \"account-from-select-input\"",
+        "originalText": "Seleccionar opción que contiene Cuenta Corrientes (coincidencia 1) en el campo \"account-from-select-input\"",
         "operation": "select",
         "target": {
           "strategy": "text",
-          "value": "Cuenta Corrientes / 11311000003156 / RD$168,967.94"
+          "value": "account-from-select-input"
         },
         "associatedField": "account-from-select-input",
+        "technicalTargetRefs": [],
         "certifiedTechnicalTarget": {
           "interactionEvidence": [],
           "validatedByInteraction": false,
@@ -592,7 +599,7 @@
           "locatorCandidates": [
             {
               "strategy": "text",
-              "value": "Cuenta Corrientes / 11311000003156 / RD$168,967.94",
+              "value": "account-from-select-input",
               "confidence": 0.5
             }
           ],
@@ -704,8 +711,8 @@
           "confidence": 0.85,
           "certificationTier": 3
         },
-        "required": true,
-        "executionStatus": "executed",
+        "required": false,
+        "executionStatus": "skipped",
         "implementation": {
           "kind": "runtime",
           "runtimeMethod": "clickPromotedTarget"
@@ -715,13 +722,14 @@
       {
         "contractStepIndex": 13,
         "scenarioStepIndex": 19,
-        "originalText": "Seleccionar \"Cuenta de Ahorro / 21312020003368 / US$1,385.71\" en \"account-to-select-input\"",
+        "originalText": "Seleccionar opción que contiene US$ (coincidencia 1) en el campo \"account-to-select-input\"",
         "operation": "select",
         "target": {
           "strategy": "text",
-          "value": "Cuenta de Ahorro / 21312020003368 / US$1,385.71"
+          "value": "account-to-select-input"
         },
         "associatedField": "account-to-select-input",
+        "technicalTargetRefs": [],
         "certifiedTechnicalTarget": {
           "interactionEvidence": [],
           "validatedByInteraction": false,
@@ -730,7 +738,7 @@
           "locatorCandidates": [
             {
               "strategy": "text",
-              "value": "Cuenta de Ahorro / 21312020003368 / US$1,385.71",
+              "value": "account-to-select-input",
               "confidence": 0.5
             }
           ],
@@ -851,11 +859,14 @@
           "strategy": "text",
           "value": "Continuar"
         },
+        "valueKey": "continuar",
         "associatedField": "Continuar",
         "technicalTargetRef": "role:button|Continuar",
         "technicalTargetRefs": [
           "role:button|Continuar"
         ],
+        "controlIdentity": "60d370b39a8d|Continuar|role|button|Continuar",
+        "recordingActionType": "click",
         "certifiedTechnicalTarget": {
           "interactionEvidence": [],
           "validatedByInteraction": true,
@@ -906,6 +917,8 @@
           "css:#frmContinue",
           "id:frmContinue"
         ],
+        "controlIdentity": "60d370b39a8d|Continuar|role|button|Continuar",
+        "recordingActionType": "click",
         "certifiedTechnicalTarget": {
           "interactionEvidence": [],
           "validatedByInteraction": true,
@@ -1038,7 +1051,10 @@
           "strategy": "text",
           "value": "SMS"
         },
+        "valueKey": "sms",
         "associatedField": "SMS",
+        "controlIdentity": "60d370b39a8d|SMS|css|div:has(a[id=\"token-resend-btn\"])",
+        "recordingActionType": "click",
         "playwrightRecorderEvidence": {
           "kind": "text",
           "normalizedName": "SMS",
@@ -1240,6 +1256,7 @@
           "strategy": "text",
           "value": "Continuar"
         },
+        "valueKey": "continuar",
         "associatedField": "Continuar",
         "technicalTargetRef": "role:button|Continuar",
         "technicalTargetRefs": [
@@ -1247,6 +1264,8 @@
           "css:#validate_submit_token",
           "id:validate_submit_token"
         ],
+        "controlIdentity": "60d370b39a8d|Continuar|role|button|Continuar",
+        "recordingActionType": "click",
         "certifiedTechnicalTarget": {
           "interactionEvidence": [],
           "validatedByInteraction": true,
@@ -1324,12 +1343,12 @@
     ],
     "unresolvedRequiredOracles": [],
     "diagnostics": {
-      "requiredScenarioSteps": 26,
-      "representedScenarioSteps": 26,
+      "requiredScenarioSteps": 25,
+      "representedScenarioSteps": 25,
       "missingScenarioSteps": []
     }
   },
-  "executionContractChars": 27995,
+  "executionContractChars": 28631,
   "promptChars": null,
   "specGenerationAttempts": 0,
   "specRepairAttempts": 0,

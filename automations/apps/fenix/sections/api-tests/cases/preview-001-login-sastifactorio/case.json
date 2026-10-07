@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-login-sastifactorio",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Login Sastifactorio",
+  "source": "discovery",
+  "appSlug": "fenix",
+  "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+  "createdAt": "2026-10-05T22:11:26.232Z"
+}

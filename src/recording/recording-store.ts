@@ -4,7 +4,7 @@ import type { RecordingSummary, SessionTrace } from "./session-trace.types";
 import type { RecordedScenario } from "./trace-to-scenario";
 import type { SemanticRecordingModel } from "./semantic-recording";
 import { normalizeEvents, summarizeTrace } from "./trace-normalizer";
-import { reconcileOptionOwnerLineage } from "./canonical-recording-contract";
+import { reconcileRecordedScenarioOptionOwnerLineage } from "./canonical-recording-contract";
 import { writeRecordingJson } from "./atomic-json-store";
 
 /**
@@ -23,8 +23,14 @@ import { writeRecordingJson } from "./atomic-json-store";
  * leave screenshots of a banking app on disk indefinitely; the server calls it at startup.
  */
 
-const RECORDINGS_ROOT = path.join("automations", "apps");
+const DEFAULT_RECORDINGS_ROOT = path.join("automations", "apps");
 const FRAMES_ROOT = path.join(".artifacts", "tmp", "recordings");
+
+export type RecordingStoreOptions = { rootDir?: string };
+
+function recordingsRoot(options?: RecordingStoreOptions): string {
+  return options?.rootDir ? path.resolve(options.rootDir) : DEFAULT_RECORDINGS_ROOT;
+}
 
 function sanitize(segment: string): string {
   if (segment.includes("..") || segment.includes("/") || segment.includes("\\")) {
@@ -35,8 +41,8 @@ function sanitize(segment: string): string {
   return clean;
 }
 
-export function recordingDir(appSlug: string, recordingId: string): string {
-  return path.join(RECORDINGS_ROOT, sanitize(appSlug), "recordings", sanitize(recordingId));
+export function recordingDir(appSlug: string, recordingId: string, options?: RecordingStoreOptions): string {
+  return path.join(recordingsRoot(options), sanitize(appSlug), "recordings", sanitize(recordingId));
 }
 
 /** Frames never live under the app profile — they are temporary by contract. */
@@ -44,26 +50,26 @@ export function framesDir(recordingId: string): string {
   return path.join(FRAMES_ROOT, sanitize(recordingId));
 }
 
-function tracePath(appSlug: string, recordingId: string): string {
-  return path.join(recordingDir(appSlug, recordingId), "trace.json");
+function tracePath(appSlug: string, recordingId: string, options?: RecordingStoreOptions): string {
+  return path.join(recordingDir(appSlug, recordingId, options), "trace.json");
 }
 
-function scenariosPath(appSlug: string, recordingId: string): string {
-  return path.join(recordingDir(appSlug, recordingId), "scenarios.json");
+function scenariosPath(appSlug: string, recordingId: string, options?: RecordingStoreOptions): string {
+  return path.join(recordingDir(appSlug, recordingId, options), "scenarios.json");
 }
 
-function semanticPath(appSlug: string, recordingId: string): string {
-  return path.join(recordingDir(appSlug, recordingId), "semantic-recording.json");
+function semanticPath(appSlug: string, recordingId: string, options?: RecordingStoreOptions): string {
+  return path.join(recordingDir(appSlug, recordingId, options), "semantic-recording.json");
 }
 
-export function saveTrace(trace: SessionTrace): void {
-  const dir = recordingDir(trace.appSlug, trace.recordingId);
+export function saveTrace(trace: SessionTrace, options?: RecordingStoreOptions): void {
+  const dir = recordingDir(trace.appSlug, trace.recordingId, options);
   fs.mkdirSync(dir, { recursive: true });
-  writeRecordingJson(tracePath(trace.appSlug, trace.recordingId), trace);
+  writeRecordingJson(tracePath(trace.appSlug, trace.recordingId, options), trace);
 }
 
-export function loadTrace(appSlug: string, recordingId: string): SessionTrace | null {
-  const file = tracePath(appSlug, recordingId);
+export function loadTrace(appSlug: string, recordingId: string, options?: RecordingStoreOptions): SessionTrace | null {
+  const file = tracePath(appSlug, recordingId, options);
   if (!fs.existsSync(file)) return null;
   try {
     return JSON.parse(fs.readFileSync(file, "utf8")) as SessionTrace;
@@ -78,22 +84,23 @@ export function loadTrace(appSlug: string, recordingId: string): SessionTrace | 
  * that is genuinely stopped, just filed under a sibling app folder. Scans every app profile for
  * this recordingId instead of trusting the caller's assumed appSlug.
  */
-export function findOwningAppSlug(recordingId: string): string | null {
+export function findOwningAppSlug(recordingId: string, options?: RecordingStoreOptions): string | null {
   const safeId = sanitize(recordingId);
-  if (!fs.existsSync(RECORDINGS_ROOT)) return null;
-  for (const entry of fs.readdirSync(RECORDINGS_ROOT, { withFileTypes: true })) {
+  const root = recordingsRoot(options);
+  if (!fs.existsSync(root)) return null;
+  for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
-    if (fs.existsSync(path.join(RECORDINGS_ROOT, entry.name, "recordings", safeId, "trace.json"))) {
+    if (fs.existsSync(path.join(root, entry.name, "recordings", safeId, "trace.json"))) {
       return entry.name;
     }
   }
   return null;
 }
 
-export function saveScenarios(appSlug: string, recordingId: string, scenarios: RecordedScenario[]): void {
-  const dir = recordingDir(appSlug, recordingId);
+export function saveScenarios(appSlug: string, recordingId: string, scenarios: RecordedScenario[], options?: RecordingStoreOptions): void {
+  const dir = recordingDir(appSlug, recordingId, options);
   fs.mkdirSync(dir, { recursive: true });
-  const file = scenariosPath(appSlug, recordingId);
+  const file = scenariosPath(appSlug, recordingId, options);
   writeRecordingJson(file, scenarios);
   // TEMPORARY DIAGNOSTIC (this ticket only): no dataset value/secret is logged -- only ids,
   // counts and the store path, so a historical recording found with scenarios=[] can be traced
@@ -101,20 +108,20 @@ export function saveScenarios(appSlug: string, recordingId: string, scenarios: R
   console.info("[recording-scenario-store]", { recordingId, appSlug, operation: "save", scenarioCount: scenarios.length, scenarioIds: scenarios.map((s) => s.scenarioId), storePathOrKey: file });
 }
 
-export function saveSemanticRecording(model: SemanticRecordingModel): void {
-  const dir = recordingDir(model.appSlug, model.recordingId);
+export function saveSemanticRecording(model: SemanticRecordingModel, options?: RecordingStoreOptions): void {
+  const dir = recordingDir(model.appSlug, model.recordingId, options);
   fs.mkdirSync(dir, { recursive: true });
-  writeRecordingJson(semanticPath(model.appSlug, model.recordingId), model);
+  writeRecordingJson(semanticPath(model.appSlug, model.recordingId, options), model);
 }
 
-export function loadSemanticRecording(appSlug: string, recordingId: string): SemanticRecordingModel | null {
-  const file = semanticPath(appSlug, recordingId);
+export function loadSemanticRecording(appSlug: string, recordingId: string, options?: RecordingStoreOptions): SemanticRecordingModel | null {
+  const file = semanticPath(appSlug, recordingId, options);
   if (!fs.existsSync(file)) return null;
   try { return JSON.parse(fs.readFileSync(file, "utf8")) as SemanticRecordingModel; } catch { return null; }
 }
 
-export function loadScenarios(appSlug: string, recordingId: string): RecordedScenario[] {
-  const file = scenariosPath(appSlug, recordingId);
+export function loadScenarios(appSlug: string, recordingId: string, options?: RecordingStoreOptions): RecordedScenario[] {
+  const file = scenariosPath(appSlug, recordingId, options);
   if (!fs.existsSync(file)) {
     // Never derived (or derive/observed-primary materialization legitimately produced nothing)
     // is indistinguishable from "the file was deleted" at this layer -- both are simply "no
@@ -137,11 +144,7 @@ export function loadScenarios(appSlug: string, recordingId: string): RecordedSce
     // from this (now-reconciled) `canonicalInteractions` (`toSharedMcpScenario`/
     // `enrichRecordedScenarioContract`) picks up the correction automatically -- that field is
     // computed downstream, never stored on `RecordedScenario` itself.
-    const scenarios = rawScenarios.map((scenario) => {
-      if (!scenario.canonicalInteractions?.length) return scenario;
-      const canonicalInteractions = reconcileOptionOwnerLineage(scenario.canonicalInteractions);
-      return canonicalInteractions === scenario.canonicalInteractions ? scenario : { ...scenario, canonicalInteractions };
-    });
+    const scenarios = rawScenarios.map(reconcileRecordedScenarioOptionOwnerLineage);
     console.info("[recording-scenario-store]", {
       recordingId,
       appSlug,
@@ -221,20 +224,20 @@ export function toSummary(trace: SessionTrace, scenarioCount = 0): RecordingSumm
 }
 
 /** Lists recordings for one app, newest first. */
-export function listRecordings(appSlug: string): RecordingSummary[] {
-  const dir = path.join(RECORDINGS_ROOT, sanitize(appSlug), "recordings");
+export function listRecordings(appSlug: string, options?: RecordingStoreOptions): RecordingSummary[] {
+  const dir = path.join(recordingsRoot(options), sanitize(appSlug), "recordings");
   if (!fs.existsSync(dir)) return [];
   const summaries: RecordingSummary[] = [];
   for (const entry of fs.readdirSync(dir)) {
-    const trace = loadTrace(appSlug, entry);
+    const trace = loadTrace(appSlug, entry, options);
     if (!trace) continue;
-    summaries.push(toSummary(trace, loadScenarios(appSlug, entry).length));
+    summaries.push(toSummary(trace, loadScenarios(appSlug, entry, options).length));
   }
   return summaries.sort((a, b) => b.startedAt.localeCompare(a.startedAt));
 }
 
-export function deleteRecording(appSlug: string, recordingId: string): boolean {
-  const dir = recordingDir(appSlug, recordingId);
+export function deleteRecording(appSlug: string, recordingId: string, options?: RecordingStoreOptions): boolean {
+  const dir = recordingDir(appSlug, recordingId, options);
   if (!fs.existsSync(dir)) return false;
   fs.rmSync(dir, { recursive: true, force: true });
   fs.rmSync(framesDir(recordingId), { recursive: true, force: true });

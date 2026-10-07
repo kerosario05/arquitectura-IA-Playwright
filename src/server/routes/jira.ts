@@ -21,6 +21,37 @@ jiraRouter.get("/projects", async (_req, res, next) => {
   }
 });
 
+jiraRouter.get("/issues/search", async (req, res, next) => {
+  try {
+    const query = String(req.query.q ?? "").trim();
+    if (query.length < 2) {
+      res.status(400).json({ error: "Query must be at least 2 characters" });
+      return;
+    }
+
+    const escapedQuery = query.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+    const exactKey = /^[A-Za-z][A-Za-z0-9_]*-\d+$/.test(query)
+      ? `key = ${query.toUpperCase()} OR `
+      : "";
+    const issues = await client().searchIssues(
+      `(${exactKey}text ~ "${escapedQuery}") ORDER BY updated DESC`,
+      ["summary", "status", "issuetype"],
+      30,
+    );
+    res.json({
+      issues: issues.map((issue) => ({
+        id: issue.id,
+        key: issue.key,
+        summary: issue.fields?.summary ?? "",
+        status: issue.fields?.status?.name ?? "",
+        issueType: issue.fields?.issuetype?.name ?? "",
+      })),
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 jiraRouter.get("/projects/:key/sprints", async (req, res, next) => {
   try {
     const jira = client();

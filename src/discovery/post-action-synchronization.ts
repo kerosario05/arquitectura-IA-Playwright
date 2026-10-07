@@ -1,6 +1,9 @@
 export type PostActionSynchronizationInput = {
   actionNetworkObserved?: boolean;
   actionNetworkResponse?: boolean;
+  actionNetworkFailed?: boolean;
+  /** A same-screen recording hint is actionable only after observers prove the click had no effect. */
+  clickCausalEffectDetected?: boolean;
   applicationError?: boolean;
   authGateChanged?: boolean;
   /** A detected auth gate is still present after its submit action; generic progress is not completion. */
@@ -54,6 +57,8 @@ export type PostActionSynchronizationInput = {
   recordedPostActionSurfaceRequired?: boolean;
   /** The observed surface has reached the recorded post-action authority. */
   recordedPostActionSurfaceReached?: boolean;
+  /** The source recording explicitly captured this action on the same non-empty screen before and after. */
+  recordedSameSurfaceAction?: boolean;
   /**
    * A final, recording-owned click has settled and produced action-scoped terminal feedback
    * (a completed relevant response or a confirmed causal mutation). This can complete the
@@ -103,7 +108,7 @@ export type PostActionSynchronizationInput = {
 
 export type PostActionSynchronizationResult = {
   completed: boolean;
-  signal?: "application_error" | "network_response" | "auth_gate_changed" | "next_target_visible" | "next_target_resolver_ready" | "dom_navigation_mutation" | "dom_validation_mutation" | "target_selection_state_changed" | "structured_state_mutation" | "click_effect_next_target_visible" | "owner_subtree_mutation" | "terminal_feedback" | "download";
+  signal?: "application_error" | "network_response" | "auth_gate_changed" | "next_target_visible" | "next_target_resolver_ready" | "dom_navigation_mutation" | "dom_validation_mutation" | "target_selection_state_changed" | "structured_state_mutation" | "click_effect_next_target_visible" | "owner_subtree_mutation" | "terminal_feedback" | "download" | "recorded_same_surface";
 };
 
 /**
@@ -145,6 +150,17 @@ export function resolvePostActionSynchronization(
   // already-confirmed recorded post-action surface is stronger authority and is never blocked by
   // this check.
   const nextOwnerBlocking = Boolean(input.nextTargetRequiresRuntimeResolution) && !input.nextTargetReady && !recordedSurfaceConfirmed;
+
+  // A Recording contract can explicitly show that an action left the page on the same
+  // captured screen. When that evidence is present, a stable, same-route replay with no
+  // pending or failed action request is the recorded outcome; waiting for a newly-visible
+  // target would deadlock when that target was already present before the click. Keep the
+  // structured next-owner readiness guard and authentication boundary above intact.
+  if (input.recordedSameSurfaceAction && input.clickCausalEffectDetected === false
+    && !input.actionNetworkObserved && input.loadingSettled && !input.actionNetworkFailed
+    && !input.routeChanged && !nextOwnerBlocking) {
+    return { completed: true, signal: "recorded_same_surface" };
+  }
 
   // FIRST_LOSS fix: a same-surface, structured selection/toggle action (e.g. a radio/checkbox-like
   // control with no network request, no route change, and no DOM signal the shared observers

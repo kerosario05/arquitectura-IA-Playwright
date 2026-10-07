@@ -1,0 +1,10 @@
+{
+  "id": "preview-005-descargar-plantilla-para-carga-de-nomina",
+  "externalId": "PREVIEW-005",
+  "caseId": 0,
+  "title": "Descargar plantilla para carga de nómina",
+  "source": "discovery",
+  "appSlug": "portal-empresarial",
+  "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
+  "createdAt": "2026-10-06T21:44:03.016Z"
+}

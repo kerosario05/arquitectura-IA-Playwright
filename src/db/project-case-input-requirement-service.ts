@@ -1,4 +1,4 @@
-import type { Connection } from "odbc";
+import type { DbConnection } from "./sql-connection";
 import { withConnection, withTransaction } from "./sql-connection";
 import { validateProjectGenerationConfig, type ProjectGenerationConfig } from "../data/project-generation-config";
 import { validateGenerationProfile, type GenerationProfile } from "../testrail/generation-profile";
@@ -116,7 +116,7 @@ function mapRow(row: RequirementRow): InputRequirement {
   return entry;
 }
 
-async function resolveProjectId(conn: Connection, projectSlug: string): Promise<string> {
+async function resolveProjectId(conn: DbConnection, projectSlug: string): Promise<string> {
   const rows = await conn.query<{ id: string }>("SELECT id FROM dbo.Projects WHERE slug = ?", [projectSlug]);
   if (!rows || rows.length === 0) {
     throw new Error(`project not found: ${projectSlug}`);
@@ -131,7 +131,7 @@ function profileCapability(profile: GenerationProfile): { kind: "number" | "date
   return { kind: "text" };
 }
 
-async function validateNamedProfileReference(conn: Connection, projectId: string, ref: string): Promise<void> {
+async function validateNamedProfileReference(conn: DbConnection, projectId: string, ref: string): Promise<void> {
   const rows = await conn.query<{ version: string; configJson: string }>(
     "SELECT version, configJson FROM dbo.ProjectGenerationConfig WHERE projectId = ?", [projectId],
   );
@@ -150,7 +150,7 @@ async function validateNamedProfileReference(conn: Connection, projectId: string
 }
 
 async function runReplace(
-  conn: Connection,
+  conn: DbConnection,
   projectSlug: string,
   caseId: number,
   requirements: InputRequirement[],
@@ -216,9 +216,9 @@ async function runReplace(
 export async function getByProjectAndCase(
   projectSlug: string,
   caseId: number,
-  conn?: Connection,
+  conn?: DbConnection,
 ): Promise<InputRequirement[]> {
-  const read = async (c: Connection): Promise<InputRequirement[]> => {
+  const read = async (c: DbConnection): Promise<InputRequirement[]> => {
     const projectId = await resolveProjectId(c, projectSlug);
     const rows = await c.query<RequirementRow>(
        `SELECT [key], label, controlType, required, sensitive, namedProfileRef, allowedValues
@@ -235,9 +235,9 @@ export async function getByProjectAndCase(
 export async function getByProjectIdAndCase(
   projectId: string,
   caseId: number,
-  conn?: Connection,
+  conn?: DbConnection,
 ): Promise<InputRequirement[]> {
-  const read = async (c: Connection): Promise<InputRequirement[]> => {
+  const read = async (c: DbConnection): Promise<InputRequirement[]> => {
     const rows = await c.query<RequirementRow>(
       `SELECT [key], label, controlType, required, sensitive, namedProfileRef, allowedValues
        FROM dbo.ProjectCaseInputRequirement
@@ -254,7 +254,7 @@ export async function replaceForProjectAndCase(
   projectSlug: string,
   caseId: number,
   requirements: InputRequirement[],
-  conn?: Connection,
+  conn?: DbConnection,
 ): Promise<void> {
   const normalized = normalizeInputRequirements(requirements);
   if (conn) {

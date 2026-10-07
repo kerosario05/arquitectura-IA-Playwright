@@ -852,7 +852,6 @@ function serializeArgs(args: BatchCliArgs): BatchResult["args"] {
     to: args.to,
     limit: args.limit,
     headed: args.headed,
-    contextOnly: args.contextOnly,
     autoPromote: args.autoPromote,
     promotionDryRun: args.promotionDryRun,
     promotionStrict: args.promotionStrict,

@@ -254,8 +254,9 @@ export function sanitizeOracleMessage(input: {
   sanitized = redactSecret(sanitized, input.runtime.connectString);
   sanitized = redactSecret(sanitized, input.runtime.user);
   sanitized = redactSecret(sanitized, input.runtime.password);
-  if (input.maskedIdentity) {
-    sanitized = sanitized.replace(/\d{6,}/g, (match) => (match.endsWith(input.maskedIdentity.slice(-4)) ? input.maskedIdentity : "[redacted]"));
+  const maskedIdentity = input.maskedIdentity;
+  if (typeof maskedIdentity === "string" && maskedIdentity.length > 0) {
+    sanitized = sanitized.replace(/\d{6,}/g, (match) => (match.endsWith(maskedIdentity.slice(-4)) ? maskedIdentity : "[redacted]"));
   }
   if (!sanitized) return "Oracle operation failed.";
   return sanitized.slice(0, 240);

@@ -123,16 +123,16 @@ test("derives functional routes only from validated trusted semantic transitions
     trustedForReuse: true,
   };
   const profile = deriveRouteProfileFromKnowledge([snapshot, destinationSnapshot, transition]);
-  expect(profile?.targetPaths.destination).toBeDefined();
-  expect(deriveRouteProfileFromKnowledge([snapshot, destinationSnapshot, { ...transition, validationStatus: "pending" }])?.targetPaths.leaf).toBeUndefined();
-  expect(deriveRouteProfileFromKnowledge([snapshot, destinationSnapshot, { ...transition, trustedForReuse: false }])?.targetPaths.leaf).toBeUndefined();
+  expect(profile?.targetPaths?.destination).toBeDefined();
+  expect(deriveRouteProfileFromKnowledge([snapshot, destinationSnapshot, { ...transition, validationStatus: "pending" }])?.targetPaths?.leaf).toBeUndefined();
+  expect(deriveRouteProfileFromKnowledge([snapshot, destinationSnapshot, { ...transition, trustedForReuse: false }])?.targetPaths?.leaf).toBeUndefined();
   expect(deriveRouteProfileFromKnowledge([snapshot, destinationSnapshot, {
     knowledgeKind: "route_transition",
     validationStatus: "validated",
     trustedForReuse: true,
     sourceTechnicalScreenKey: "tech-A",
     destinationTechnicalScreenKey: "tech-B",
-  }])?.targetPaths.leaf).toBeUndefined();
+  }])?.targetPaths?.leaf).toBeUndefined();
 });
 
 test("learns intermediate_step from Route Completion with retrySucceeded", () => {

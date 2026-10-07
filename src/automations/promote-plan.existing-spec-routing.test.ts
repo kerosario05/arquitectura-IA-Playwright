@@ -1,16 +1,17 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { tryPromoteExistingSpecBeforeGeneration } from "./promote-plan";
+import type { SpecGenerationObservableOracle, SpecGenerationScenarioStep, SpecGenerationSourceScenario } from "./spec-generation-hybrid";
 
-const sourceScenario = {
+const sourceScenario: SpecGenerationSourceScenario = {
   title: "current",
   steps: [{ index: 1, action: "click", description: "Salir" }],
-  observableOracles: [{ id: "o1", requirement: "Salir is visible", type: "visible", backed: true, evidence: [] }],
+  observableOracles: [{ id: "o1", requirement: "Salir is visible", type: "heading_or_control", backed: true, source: "scenario", evidence: [] }],
 };
-const semanticContext = {
+const semanticContext: { requiredAssertions: string[]; observableOracles: SpecGenerationObservableOracle[]; scenarioSteps: SpecGenerationScenarioStep[]; semanticErrors: string[] } = {
   requiredAssertions: ["Salir is visible"],
-  observableOracles: sourceScenario.observableOracles,
-  scenarioSteps: sourceScenario.steps,
+  observableOracles: sourceScenario.observableOracles!,
+  scenarioSteps: sourceScenario.steps!,
   semanticErrors: [],
 };
 

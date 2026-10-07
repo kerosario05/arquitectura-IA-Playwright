@@ -43,6 +43,7 @@ export type SnapshotElement = {
   dataHints: string[];
   href?: string;
   ariaLabel?: string;
+  accessibleName?: string;
   title?: string;
   alt?: string;
   dataTestid?: string;

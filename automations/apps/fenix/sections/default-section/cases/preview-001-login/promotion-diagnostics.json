@@ -15,6 +15,6 @@
   "fallbackUsed": false,
   "requirePomRuntime": false,
   "specPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-login\\case.spec.ts",
-  "specHash": "ab8a3a3b543223ea47dfc59e561b9e484ad034add2df0cfd339125d8497a876a",
+  "specHash": "07d8ab15fa364a5fe6fb74a9a5d6586c38e4c712f572d196d59dcd51f227a541",
   "specSource": "generatedSpec"
 }

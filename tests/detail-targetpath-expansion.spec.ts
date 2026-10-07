@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { ensureDetailScenarioHasItemSelection } from "../src/automations/scenario-normalizer";
-import type { McpRouteProfile, EntryStepConfig } from "../src/scenarios/scenario-types";
+import type { McpRouteProfile } from "../src/scenarios/scenario-types";
+import type { EntryStepConfig } from "../src/server/services/entry-steps-learner";
 
 test.describe("Detail Scenario TargetPath Expansion", () => {
   const entrySteps: EntryStepConfig[] = [
@@ -185,7 +186,7 @@ test.describe("Detail Scenario TargetPath Expansion", () => {
       entrySteps: [{ action: "click", target: "Iniciar", when: "before_first_functional_step" }],
       aliases: {},
       intermediates: {},
-      domainTerms: { producto: 5, item: 2 },
+      domainTerms: { producto: "5", item: "2" },
       visibleControls: ["Tarjetas", "Cuentas"],
       representativeFixture: {},
       notes: [],
@@ -225,7 +226,7 @@ test.describe("Detail Scenario TargetPath Expansion", () => {
       entrySteps: [{ action: "click", target: "Iniciar", when: "before_first_functional_step" }],
       aliases: {},
       intermediates: {},
-      domainTerms: { producto: 3 },
+      domainTerms: { producto: "3" },
       visibleControls: ["Tarjetas"],
       representativeFixture: {},
       notes: [],

@@ -1,6 +1,7 @@
 import type { SemanticRecordingModel } from "./semantic-recording";
 import type { SessionTrace } from "./session-trace.types";
 import type { RecordedScenario } from "./trace-to-scenario";
+import { projectNativeSelectionOpeningTaps } from "./trace-to-scenario";
 import { normalizeEvents } from "./trace-normalizer";
 import {
   applyRuntimeDatasetValues,
@@ -45,9 +46,16 @@ export function hydratePersistedScenarios(
   semanticModel?: SemanticRecordingModel | null,
   trace?: SessionTrace | null,
 ): RecordedScenario[] {
-  if (!semanticModel) return [...scenarios];
-  const freshCanonicalInteractions = trace
-    ? buildCanonicalInteractions(normalizeEvents(trace.events), semanticModel.editingSessions)
+  // The runtime dataset renderer also owns sensitive-step presentation. Run it even for
+  // legacy recordings without a semantic model so opening their step list cannot surface a
+  // previously persisted rendered password value.
+  if (!semanticModel) return scenarios.map((scenario) => applyRuntimeDatasetValues(scenario, {}));
+  const normalizedTraceEvents = trace ? normalizeEvents(trace.events) : undefined;
+  const freshCanonicalInteractions = trace && normalizedTraceEvents
+    ? projectNativeSelectionOpeningTaps(
+      normalizedTraceEvents,
+      buildCanonicalInteractions(normalizedTraceEvents, semanticModel.editingSessions),
+    )
     : undefined;
   return scenarios.map((scenario) => {
     const withFreshCanonical = freshCanonicalInteractions && scenario.sourceRecordingId === trace?.recordingId

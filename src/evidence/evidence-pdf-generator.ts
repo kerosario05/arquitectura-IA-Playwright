@@ -6,6 +6,7 @@ import { chromium } from "@playwright/test";
 import JSZip from "jszip";
 import type { EvidenceScenarioRecord } from "./evidence-types";
 import { buildEvidenceDocumentModel, type EvidenceDocumentModel } from "./evidence-document-model";
+import { formatEvidenceCoverPeriod } from "./evidence-cover-period";
 
 /**
  * Evidence document as PDF, rendered by the Chromium that Playwright already ships — no Office
@@ -129,7 +130,12 @@ async function dropRepeatedScreenshots(model: EvidenceDocumentModel): Promise<Ev
       seen.add(hash);
       images.push(image);
     }
-    scenarios.push({ ...scenario, images });
+    const retainedPaths = new Set(images.map(image => path.resolve(image.path)));
+    const screens = scenario.screens.map(screen => ({
+      ...screen,
+      images: screen.images.filter(image => retainedPaths.has(path.resolve(image.path))),
+    }));
+    scenarios.push({ ...scenario, images, screens });
   }
   return { ...model, scenarios };
 }
@@ -170,9 +176,21 @@ export function buildEvidenceHtml(
   const logo = (cls: string) => assets.logoUrl ? `<img class="${cls}" src="${escapeHtml(assets.logoUrl)}" alt="">` : "";
 
   const scenarios = model.scenarios.map((scenario, index) => {
-    const images = scenario.images
-      .map(image => `<p class="shot"><img src="${escapeHtml(pathToFileURL(image.path).href)}" alt=""></p>`)
-      .join("\n");
+    const screens = scenario.screens.map((screen, screenIndex) => {
+      const title = screen.title || `Pantalla ${screenIndex + 1}`;
+      const escapedTitle = escapeHtml(title);
+      const parallelRows = Math.ceil(screen.steps.length / 2);
+      const parallelClass = screen.steps.length >= 8 ? " parallel" : "";
+      const steps = screen.steps.length > 0
+        ? `<ol class="screen-steps${parallelClass}" style="--step-rows:${parallelRows}">${screen.steps.map(step =>
+            `<li class="screen-step">${escapeHtml(step.text)}</li>`,
+          ).join("\n")}</ol>`
+        : "";
+      const images = screen.images.map(image =>
+        `<p class="shot"><img src="${escapeHtml(pathToFileURL(image.path).href)}" alt=""></p>`,
+      ).join("\n");
+      return `<section class="screen-evidence" data-screen-title="${escapedTitle}"><div class="screen-step-block"><h3 class="screen-title">${escapedTitle}</h3>${steps}</div>${images}</section>`;
+    }).join("\n");
     return `
 <section class="scenario" data-index="${index}">
   <table class="case">
@@ -180,7 +198,7 @@ export function buildEvidenceHtml(
     <tr><td colspan="2">Caso de prueba: ${escapeHtml(scenario.title)}</td></tr>
     <tr><td>Fecha: ${escapeHtml(model.fecha)}</td><td>Estado: ${escapeHtml(scenario.status)}</td></tr>
   </table>
-  ${images}
+  ${screens}
 </section>`;
   }).join("\n");
 
@@ -206,8 +224,8 @@ body { font-family: "EvidenceAptos", "Aptos", sans-serif; font-size: 16px; color
 /* Cover page (first-page header/footer + cover content). */
 .cover-logo { position: absolute; left: 48px; top: 101.9px; width: 232px; height: 91.2px; }
 .cover-title { position: absolute; left: 172.2px; top: 490.3px; width: 547.7px; padding: 4.8px 9.6px; font-family: "EvidenceAptosDisplay", "Aptos Display", sans-serif; font-size: 48px; line-height: normal; text-transform: uppercase; color: #2C7FCE; font-kerning: none; }
-.cover-meta { position: absolute; left: 186.1px; top: 642px; width: 514.7px; height: 46.2px; border: 0.667px dashed #F2F2F2; font-size: 18.667px; line-height: normal; color: #808080; display: flex; flex-direction: column; justify-content: flex-end; }
-.cover-meta div { position: relative; top: 1.3px; white-space: nowrap; }
+.cover-meta { position: absolute; left: 186.1px; top: 642px; width: 514.7px; min-height: 46.2px; border: 0.667px dashed #F2F2F2; font-size: 18.667px; line-height: normal; color: #808080; display: flex; flex-direction: column; justify-content: flex-end; }
+.cover-meta div { position: relative; top: 1.3px; min-width: 0; white-space: normal; overflow-wrap: anywhere; }
 .cover-dash { position: absolute; left: 446.9px; top: 742.3px; width: 253.7px; padding: 4.8px 9.6px; text-align: right; font-family: "EvidenceAptosDisplay", "Aptos Display", sans-serif; font-weight: 700; font-size: 24px; line-height: normal; color: #808080; }
 
 /* Content pages (default header/footer). */
@@ -218,7 +236,13 @@ body { font-family: "EvidenceAptos", "Aptos", sans-serif; font-size: 16px; color
 
 table.case { margin-top: 7.2px; border-collapse: collapse; width: 672px; table-layout: fixed; font-family: "EvidenceCalibri", "Calibri", sans-serif; font-weight: 700; font-size: 18.667px; color: #808080; }
 table.case td { border: 0.667px solid #BFBFBF; padding: 0 7.2px; line-height: normal; vertical-align: top; }
-p.shot { margin: 0 0 10.667px 0; text-align: center; line-height: 0; }
+.screen-evidence { margin: 11px 0 8px; break-inside: avoid; page-break-inside: avoid; }
+.screen-step-block { margin: 0 0 6px; break-inside: avoid; page-break-inside: avoid; }
+.screen-title { margin: 0 0 4px; font-size: 14px; font-weight: 700; color: #156082; }
+.screen-steps { margin: 0 0 6px; padding-left: 27px; font-size: 13px; line-height: 1.25; }
+.screen-steps.parallel { display: grid; grid-auto-flow: column; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: repeat(var(--step-rows), max-content); column-gap: 20px; row-gap: 1px; padding-left: 27px; font-size: 12px; line-height: 1.2; }
+.screen-step { min-width: 0; margin: 1px 0; padding-left: 2px; break-inside: avoid-page; page-break-inside: avoid; orphans: 2; widows: 2; overflow-wrap: anywhere; }
+p.shot { margin: 4px 0 10.667px 0; text-align: center; line-height: 0; break-inside: avoid; page-break-inside: avoid; }
 p.shot img { display: inline-block; }
 .first-gap { height: var(--first-gap); }
 #source { display: none; }
@@ -230,7 +254,7 @@ p.shot img { display: inline-block; }
   ${logo("cover-logo")}
   <div class="cover-title">Formato evidencia EJECUCIÓN de pruebas</div>
   <div class="cover-meta"><div>Requerimiento: ${escapeHtml(model.requerimiento)}</div><div>Analista: ${escapeHtml(model.analista)}</div></div>
-  <div class="cover-dash">-</div>
+  <div class="cover-dash">${escapeHtml(formatEvidenceCoverPeriod())}</div>
   <div class="classification bottom">Clasificación: Información Interna</div>
 </div>
 <template id="content-page">
@@ -255,7 +279,7 @@ const FIRST_SCENARIO_GAP = 99.7;
 // Screenshots end up 432pt wide in the Word document (normalizeZeroImageExtents), whatever their
 // height. Word then clips a screenshot taller than the page; here it is shrunk to fit instead.
 const IMAGE_WIDTH = 432 * 96 / 72;
-const IMAGE_MAX_HEIGHT = BODY_BOTTOM - BODY_TOP;
+const IMAGE_MAX_HEIGHT = BODY_BOTTOM - BODY_TOP - 38;
 
 window.__layoutEvidence = function () {
   document.documentElement.style.setProperty("--body-top", BODY_TOP + "px");
@@ -282,13 +306,31 @@ window.__layoutEvidence = function () {
     body = page.querySelector(".body");
     return body;
   };
-  // Word moves a block to the next page when its content (not its space-after) would cross
-  // the bottom of the body area, unless it is already the first block on the page.
   const place = (block) => {
     body.appendChild(block);
     const bottom = block.offsetTop + block.offsetHeight;
     if (bottom > body.clientHeight && body.children.length > 1) {
+      body.removeChild(block);
       newPage().appendChild(block);
+    }
+  };
+  const placeScreen = (screen, firstScreenOnScenario) => {
+    const stepBlock = screen.querySelector(".screen-step-block");
+    if (!firstScreenOnScenario) newPage();
+    if (stepBlock) {
+      place(stepBlock);
+      const steps = stepBlock.querySelector(".screen-steps");
+      if (stepBlock.offsetTop + stepBlock.offsetHeight > body.clientHeight && steps && !steps.classList.contains("parallel")) {
+        steps.classList.add("parallel");
+      }
+    }
+    for (const screenshot of Array.from(screen.querySelectorAll(".shot"))) {
+      body.appendChild(screenshot);
+      if (screenshot.offsetTop + screenshot.offsetHeight > body.clientHeight) {
+        body.removeChild(screenshot);
+        newPage();
+        body.appendChild(screenshot);
+      }
     }
   };
 
@@ -300,7 +342,15 @@ window.__layoutEvidence = function () {
       gap.className = "first-gap";
       body.appendChild(gap);
     }
-    for (const block of Array.from(section.children)) place(block);
+    let firstScreenOnScenario = true;
+    for (const block of Array.from(section.children)) {
+      if (block.matches(".screen-evidence")) {
+        placeScreen(block, firstScreenOnScenario);
+        firstScreenOnScenario = false;
+      } else {
+        place(block);
+      }
+    }
   });
   document.getElementById("source").remove();
 

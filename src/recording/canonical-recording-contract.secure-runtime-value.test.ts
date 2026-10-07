@@ -70,11 +70,13 @@ async function buildSensitiveScenario(fieldKey: string) {
 test("17/20. a sensitive field with no captured literal produces a required, UNRESOLVED valueKey -- fail closed (unresolved_runtime_value), never silently marked ready, no plaintext anywhere", async () => {
   const scenario = await buildSensitiveScenario("clavesecreta");
   const contract = toSharedMcpScenario(scenario, "app", {});
+  const readinessAudit = contract.executionReadinessAudit;
+  assert.ok(readinessAudit, "execution readiness audit must be present for the generated fixture");
   const requirement = (contract.runtimeInputRequirements ?? []).find((r: any) => r.sensitive === true);
   assert.ok(requirement, "a sensitive requirement must exist for this fixture");
   assert.equal(requirement.resolved, false, "never auto-resolved from a captured literal");
   assert.equal(requirement.value, null);
-  const action = contract.executionReadinessAudit.actions.find((a: any) => a.valueKey === requirement.valueKey);
+  const action = readinessAudit.actions.find((a: any) => a.valueKey === requirement.valueKey);
   assert.equal(action?.runtimeValueResolved, false);
   assert.equal(action?.ready, false);
   assert.ok(action?.blockReasons?.some((r: string) => r.startsWith("unresolved_runtime_value")));
@@ -85,11 +87,14 @@ test("18/19. valueKey resolved through the generic runtime-data mechanism (datas
   const scenario = await buildSensitiveScenario("clavesecreta");
   const withoutValue = toSharedMcpScenario(scenario, "app", {});
   const valueKey = (withoutValue.runtimeInputRequirements ?? []).find((r: any) => r.sensitive === true)!.valueKey;
+  if (typeof valueKey !== "string") throw new Error("sensitive requirement must expose its stable value key");
 
   const withValue = toSharedMcpScenario(scenario, "app", { [valueKey]: "supplied-secure-value" });
+  const readinessAudit = withValue.executionReadinessAudit;
+  assert.ok(readinessAudit, "execution readiness audit must be present for the generated fixture");
   const requirement = (withValue.runtimeInputRequirements ?? []).find((r: any) => r.valueKey === valueKey);
   assert.equal(requirement?.resolved, true, "the generic key->value mechanism resolves the requirement");
-  const action = withValue.executionReadinessAudit.actions.find((a: any) => a.valueKey === valueKey);
+  const action = readinessAudit.actions.find((a: any) => a.valueKey === valueKey);
   assert.equal(action?.runtimeValueResolved, true);
   assert.equal(action?.ready, true);
 });
@@ -99,14 +104,21 @@ test("22. an arbitrary, non-Fenix valueKey works identically -- no app/field-spe
   const withoutValue = toSharedMcpScenario(scenario, "app", {});
   const requirement = (withoutValue.runtimeInputRequirements ?? []).find((r: any) => r.sensitive === true);
   assert.ok(requirement);
-  const withValue = toSharedMcpScenario(scenario, "app", { [requirement!.valueKey]: "any-secret-value" });
-  const action = withValue.executionReadinessAudit.actions.find((a: any) => a.valueKey === requirement!.valueKey);
+  const valueKey = requirement!.valueKey;
+  if (typeof valueKey !== "string") throw new Error("sensitive requirement must expose its stable value key");
+  const withValue = toSharedMcpScenario(scenario, "app", { [valueKey]: "any-secret-value" });
+  const readinessAudit = withValue.executionReadinessAudit;
+  assert.ok(readinessAudit, "execution readiness audit must be present for the generated fixture");
+  const action = readinessAudit.actions.find((a: any) => a.valueKey === valueKey);
   assert.equal(action?.ready, true);
 });
 
 test("21/23. the supplied secure value transports only through the intentional key->value execution channel, never into the diagnostic-only readiness surface", async () => {
   const scenario = await buildSensitiveScenario("clavesecreta");
   const requirement = (toSharedMcpScenario(scenario, "app", {}).runtimeInputRequirements ?? []).find((r: any) => r.sensitive === true);
-  const contract = toSharedMcpScenario(scenario, "app", { [requirement!.valueKey]: "must-not-leak-into-diagnostics" });
+  assert.ok(requirement);
+  const valueKey = requirement!.valueKey;
+  if (typeof valueKey !== "string") throw new Error("sensitive requirement must expose its stable value key");
+  const contract = toSharedMcpScenario(scenario, "app", { [valueKey]: "must-not-leak-into-diagnostics" });
   assert.doesNotMatch(JSON.stringify(contract.executionReadinessAudit ?? {}), /must-not-leak-into-diagnostics/);
 });

@@ -42,6 +42,10 @@ export interface EvidenceStepRecord {
   index: number;
   stepIndex?: number;
   stepText: string;
+  /** Stable identity of the UI screen where this action was performed. */
+  screenId?: string;
+  /** Visible primary heading for the screen, when one was available. */
+  screenTitle?: string;
   target?: string;
   status: EvidenceStepStatus;
   screenshotPath?: string;
@@ -55,6 +59,8 @@ export interface InitialScreenEvidence {
   captured: boolean;
   path: string | null;
   capturedAt: string;
+  screenId?: string;
+  screenTitle?: string;
   reason?: string;
   /** Settled form checkpoint on the same screen, e.g. credentials filled before submit. */
   completedFormCheckpointPath?: string;
@@ -180,6 +186,7 @@ export interface EvidenceRunContext {
   appSlug: string;
   sectionSlug: string;
   sectionName?: string;
+  requirement?: string;
   runId: string;
   outputRoot?: string;
   analystName?: string;

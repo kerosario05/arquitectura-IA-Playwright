@@ -53,7 +53,9 @@ export type ExecutionSummary = {
   project: { appSlug?: string };
   testRail: {
     projectId?: number | string;
+    projectName?: string;
     suiteId?: number | string;
+    suiteName?: string;
     sectionId?: number | string;
     sectionName?: string;
     sectionSlug?: string;
@@ -91,7 +93,7 @@ type ManifestShape = {
   sectionName?: string;
   sectionId?: number | string;
   jira?: { key?: string; title?: string };
-  testRail?: { projectId?: number | string; suiteId?: number | string; sectionId?: number | string; runId?: number | string };
+  testRail?: { projectId?: number | string; projectName?: string; suiteId?: number | string; suiteName?: string; sectionId?: number | string; sectionName?: string; runId?: number | string };
   publishedCases?: Array<{
     scenarioId?: string; caseId?: number; title?: string;
     executionScenarioId?: string; launchScenarioId?: string; testrailCustomScenarioId?: string;
@@ -109,8 +111,30 @@ type PreviewRunShape = {
   targetAppSlug?: string;
 };
 type PersistedJobHistoryShape = {
+  id?: string;
+  type?: string;
+  status?: string;
+  createdAt?: string;
+  completedAt?: string;
+  currentCase?: string;
+  currentCaseTitle?: string;
   params?: Record<string, unknown>;
   summary?: Record<string, unknown>;
+};
+type EvidenceRunShape = {
+  runId?: string;
+  appSlug?: string;
+  sectionSlug?: string;
+  scenarios?: Array<{
+    scenarioId?: string;
+    scenarioTitle?: string;
+    title?: string;
+    status?: string;
+    functionalStatus?: string;
+  }>;
+  totalScenarios?: number;
+  passedScenarios?: number;
+  failedScenarios?: number;
 };
 
 type PreviewScenarioShape = { title?: string; appSlug?: string } | Array<{ title?: string; appSlug?: string }>;
@@ -148,6 +172,37 @@ function readPreviewRun(jobId: string): PreviewRunShape | null {
 
 function readPersistedJobHistory(jobId: string): PersistedJobHistoryShape | null {
   return readJsonFile<PersistedJobHistoryShape>(path.join(RUN_HISTORY_DIR, `${jobId}.json`));
+}
+
+function readEvidenceRun(jobId: string): EvidenceRunShape | null {
+  const stack = [EVIDENCE_ROOT];
+  while (stack.length > 0) {
+    const dir = stack.pop()!;
+    let entries: fs.Dirent[];
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      const child = path.join(dir, entry.name);
+      if (entry.name === jobId) {
+        const evidenceRun = readJsonFile<EvidenceRunShape>(path.join(child, "evidence-run.json"));
+        if (evidenceRun?.runId === jobId) return evidenceRun;
+      }
+      stack.push(child);
+    }
+  }
+  return null;
+}
+
+function historyScenarioResult(status?: string, functionalStatus?: string): "passed" | "failed" | "pending" {
+  const normalizedFunctional = (functionalStatus ?? "").trim().toLowerCase();
+  const normalizedStatus = (status ?? "").trim().toLowerCase();
+  if (normalizedFunctional === "passed" || normalizedStatus === "exitoso" || normalizedStatus === "passed") return "passed";
+  if (normalizedFunctional === "failed" || normalizedStatus === "fallido" || normalizedStatus === "failed") return "failed";
+  return "pending";
 }
 
 function optionalId(...values: unknown[]): number | string | undefined {
@@ -304,8 +359,76 @@ export function buildExecutionSummary(launchId: string): ExecutionSummary | null
   const manifest = readManifest(launchId);
   if (!manifest) {
     const preview = readPreviewRun(launchId);
-    if (!preview || !isTerminalPreviewStatus(preview.status)) return null;
     const persistedJob = readPersistedJobHistory(launchId);
+    if (!preview) {
+      // The execution list can outlive the in-memory JobStore and rotated preview-run files.
+      // Rebuild its detail view from the durable history plus the evidence manifest, which is
+      // already the source used to prove that the report files exist.
+      if (!persistedJob || !isTerminalPreviewStatus(persistedJob.status)) return null;
+      const params = persistedJob.params ?? {};
+      const persistedSummary = persistedJob.summary ?? {};
+      const evidenceRun = readEvidenceRun(launchId);
+      const evidenceScenarios = evidenceRun?.scenarios ?? [];
+      const summaryTotal = optionalId(
+        persistedSummary.totalCases,
+        persistedSummary.scenarioCount,
+        persistedSummary.totalStories,
+        persistedSummary.total,
+      );
+      const total = typeof summaryTotal === "number" ? summaryTotal : Number(summaryTotal ?? 0);
+      const passed = nonNegativeCount(persistedSummary.passed ?? evidenceRun?.passedScenarios);
+      const failed = nonNegativeCount(persistedSummary.failed ?? evidenceRun?.failedScenarios);
+      const appSlug = [params.appSlug, params.projectSlug, params.targetAppSlug, evidenceRun?.appSlug]
+        .find((value): value is string => typeof value === "string" && value.trim().length > 0);
+      const runId = optionalId(persistedSummary.testRailRunId, params.testRunId);
+      const previewTitle = [persistedJob.currentCaseTitle, persistedJob.currentCase, params.huTitle, params.title]
+        .find((value): value is string => typeof value === "string" && value.trim().length > 0)
+        ?? evidenceScenarios[0]?.scenarioTitle
+        ?? evidenceScenarios[0]?.title;
+
+      return {
+        launchId,
+        jobId: launchId,
+        createdAt: persistedJob.createdAt,
+        completedAt: persistedJob.completedAt,
+        status: persistedJob.status === "done"
+          ? (failed > 0 ? "completed_with_failures" : "completed")
+          : persistedJob.status,
+        hu: {
+          key: typeof params.jiraKey === "string" ? params.jiraKey : typeof params.huKey === "string" ? params.huKey : undefined,
+          title: typeof params.jiraTitle === "string" ? params.jiraTitle : typeof params.huTitle === "string" ? params.huTitle : previewTitle,
+        },
+        project: { appSlug },
+        testRail: {
+          projectId: optionalId(params.testrailProjectId),
+          projectName: typeof params.testrailProjectName === "string" ? params.testrailProjectName : undefined,
+          suiteId: optionalId(params.testrailSuiteId),
+          suiteName: typeof params.testrailSuiteName === "string" ? params.testrailSuiteName : undefined,
+          sectionId: optionalId(params.testrailSectionId, params.sectionId),
+          sectionName: typeof params.sectionName === "string" ? params.sectionName : undefined,
+          sectionSlug: typeof params.sectionSlug === "string" ? params.sectionSlug : evidenceRun?.sectionSlug,
+          runId,
+          runUrl: typeof persistedSummary.testRailRunUrl === "string"
+            ? persistedSummary.testRailRunUrl
+            : buildTestRailRunUrl(runId),
+        },
+        scenarios: evidenceScenarios.map((scenario) => ({
+          scenarioId: scenario.scenarioId || "unknown",
+          title: scenario.scenarioTitle || scenario.title || scenario.scenarioId || "escenario",
+          result: historyScenarioResult(scenario.status, scenario.functionalStatus),
+        })),
+        summary: {
+          total: total || evidenceScenarios.length || passed + failed,
+          passed,
+          failed,
+          synced: typeof persistedSummary.synced === "number" ? persistedSummary.synced : undefined,
+          syncFailed: typeof persistedSummary.syncFailed === "number" ? persistedSummary.syncFailed : undefined,
+        },
+        defects: [],
+        evidenceAvailable: hasEvidenceDocx(launchId),
+      };
+    }
+    if (!isTerminalPreviewStatus(preview.status)) return null;
     const params = persistedJob?.params ?? {};
     const persistedSummary = persistedJob?.summary ?? {};
 
@@ -332,11 +455,16 @@ export function buildExecutionSummary(launchId: string): ExecutionSummary | null
       createdAt: preview.createdAt,
       completedAt: preview.completedAt,
       status,
-      hu: { title: previewRunTitle(launchId) },
+      hu: {
+        key: typeof params.jiraKey === "string" ? params.jiraKey : typeof params.huKey === "string" ? params.huKey : undefined,
+        title: typeof params.jiraTitle === "string" ? params.jiraTitle : typeof params.huTitle === "string" ? params.huTitle : previewRunTitle(launchId),
+      },
       project: { appSlug: preview.appSlug ?? preview.targetAppSlug },
       testRail: {
         projectId: optionalId(params.testrailProjectId),
+        projectName: typeof params.testrailProjectName === "string" ? params.testrailProjectName : undefined,
         suiteId: optionalId(params.testrailSuiteId),
+        suiteName: typeof params.testrailSuiteName === "string" ? params.testrailSuiteName : undefined,
         sectionId: optionalId(params.testrailSectionId, params.sectionId),
         sectionName: typeof params.sectionName === "string" ? params.sectionName : undefined,
         runId: optionalId(persistedSummary.testRailRunId, params.testRunId),
@@ -372,7 +500,9 @@ export function buildExecutionSummary(launchId: string): ExecutionSummary | null
     project: { appSlug: manifest.appSlug },
     testRail: {
       projectId: manifest.testRail?.projectId,
+      projectName: manifest.testRail?.projectName,
       suiteId: manifest.testRail?.suiteId,
+      suiteName: manifest.testRail?.suiteName,
       sectionId: manifest.testRail?.sectionId ?? manifest.sectionId,
       sectionName: manifest.sectionName,
       sectionSlug: manifest.sectionSlug,

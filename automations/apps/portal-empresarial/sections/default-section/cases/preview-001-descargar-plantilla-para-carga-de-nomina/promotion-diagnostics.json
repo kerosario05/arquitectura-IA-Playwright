@@ -1,0 +1,20 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-descargar-plantilla-para-carga-de-nomina\\case.spec.ts",
+  "specHash": "da5aae187897b97ee62c1b07a65bc8db97fd6329a4b3e13024cae28fdca341a4",
+  "specSource": "generatedSpec"
+}

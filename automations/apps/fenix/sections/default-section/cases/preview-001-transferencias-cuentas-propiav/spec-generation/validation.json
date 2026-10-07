@@ -10,7 +10,7 @@
   },
   "invocations": 0,
   "invocationsConsumed": 0,
-  "durationMs": 138193,
+  "durationMs": 301750,
   "usage": {
     "inputTokens": null,
     "cachedInputTokens": null,
@@ -48,7 +48,7 @@
   ],
   "errors": [
     "functional_execution_failed:exitCode=1",
-    "functional_execution_error:Error: Promoted click failed at step 18 target=\"role:div|[href=\"#\"]\". reason=structural_authority_not_unique_or_unresolved structuralFailureReason=scoped_scope_not_unique structuralFailureMatchCount=0 suggestedFix=\"Certified structural authority did not resolve to exactly one visible, enabled element -- never falls back to a weaker locator, text match, or position.\""
+    "functional_execution_error:\u001b[31mTest timeout of 268000ms exceeded.\u001b[39m"
   ],
   "warnings": [
     "step_index_not_explicit_in_spec:9",
@@ -56,8 +56,9 @@
     "step_index_not_explicit_in_spec:11",
     "step_index_not_explicit_in_spec:12",
     "step_index_not_explicit_in_spec:13",
-    "functional_execution_screenshots=4",
-    "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 18)."
+    "step_index_not_explicit_in_spec:18",
+    "functional_execution_screenshots=6",
+    "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 2)."
   ],
   "finalSpec": {
     "origin": "deterministic_compiler",
@@ -68,6 +69,6 @@
   "runtimeGate": {
     "decision": "block",
     "promotionStatus": "blocked",
-    "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 18)."
+    "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 2)."
   }
 }

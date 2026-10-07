@@ -26,7 +26,7 @@ function visibilityStatus(hu: string, scenarios: McpScenario[]): string {
   const { requirements } = buildRequirementAccounting(scenarios, [], hu, "HU-VIS");
   const vis = requirements.find((r) => r.category === "visibility");
   expect(vis, "visibility requirement must exist").toBeTruthy();
-  return vis!.status;
+  return vis!.status!;
 }
 
 test("typo-near + morphological variant: 'apntalla de inicio' covered by 'pantalla inicial'", () => {

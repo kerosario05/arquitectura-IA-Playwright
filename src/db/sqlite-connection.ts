@@ -158,6 +158,10 @@ export async function getConnection(): Promise<DbConnection> {
   return sharedConnection;
 }
 
+export async function withConnection<T>(fn: (conn: DbConnection) => Promise<T>): Promise<T> {
+  return fn(await getConnection());
+}
+
 export async function closeConnection(): Promise<void> {
   if (db) {
     db.close();

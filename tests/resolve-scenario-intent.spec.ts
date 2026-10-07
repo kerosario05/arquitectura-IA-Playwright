@@ -1,26 +1,28 @@
 import { test, expect } from "@playwright/test";
-import { resolveScenarioIntent } from "../src/scenarios/scenario-preview.service";
+import { resolveCanonicalHuIntent } from "../src/scenarios/canonical-hu-intent";
 
-test("resolved specific intent wins over huModel reclassification and clears conflicting subIntent", () => {
-  const { intent, subIntent } = resolveScenarioIntent("A", "B", "B1");
-  expect(intent).toBe("A");
-  expect(subIntent).toBeUndefined();
+test("canonical intent retains transactional intent and classifies it", () => {
+  const resolution = resolveCanonicalHuIntent(
+    { intent: "transactional_document_flow", confidence: "high", reason: "transaction", matchedSignals: ["transfer"] },
+    "payment_transfer",
+  );
+  expect(resolution.primaryClassifierIntent).toBe("transactional_document_flow");
+  expect(resolution.transactionalRelevant).toBe(true);
+  expect(resolution.dominantIntent).toBe("payment_transfer");
 });
 
-test("unknown resolved intent falls back to huModel and preserves compatible subIntent", () => {
-  const { intent, subIntent } = resolveScenarioIntent("B", "B", "B1");
-  expect(intent).toBe("B");
-  expect(subIntent).toBe("B1");
-});
-
-test("resolved intent matching huModel keeps existing subIntent", () => {
-  const { intent, subIntent } = resolveScenarioIntent("A", "A", "A1");
-  expect(intent).toBe("A");
-  expect(subIntent).toBe("A1");
-});
-
-test("fallback to huModel mainIntent when resolved intent is unknown", () => {
-  const { intent, subIntent } = resolveScenarioIntent("unknown_flow", "B", "B1");
-  expect(intent).toBe("B");
-  expect(subIntent).toBe("B1");
+test("canonical intent keeps branch-specific access intent", () => {
+  const resolution = resolveCanonicalHuIntent(
+    { intent: "unknown_flow", confidence: "low", reason: "no signals", matchedSignals: [] },
+    "generic",
+    [{
+      branchId: "private",
+      sourceLabel: "Private area",
+      actionIntent: "navigate",
+      accessIntent: "authenticated",
+      evidenceSource: "user_story",
+    }],
+  );
+  expect(resolution.privateNavigationRelevant).toBe(true);
+  expect(resolution.branchIntents.private.privateNavigationRelevant).toBe(true);
 });

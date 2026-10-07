@@ -4,6 +4,7 @@ import { TestRailClient } from "../clients/testrail.client";
 async function main(): Promise<void> {
   const client = new TestRailClient(requireTestRailConfig(config));
   const testRail = config.integrations.testRail;
+  if (!testRail) throw new Error("TestRail configuration is required");
   const cases = await client.getCases(String(testRail.projectId), String(testRail.suiteId), String(testRail.sectionId));
   for (const item of cases) {
     const text = [item.custom_preconds, item.custom_steps, item.custom_expected]

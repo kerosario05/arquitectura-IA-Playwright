@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-agregar-varios-empleados-manualmente-con-cedula",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Agregar varios empleados manualmente con cédula",
+  "source": "discovery",
+  "appSlug": "portal-empresarial",
+  "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
+  "createdAt": "2026-10-07T11:17:44.604Z"
+}
