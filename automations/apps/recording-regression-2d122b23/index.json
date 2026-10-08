@@ -1,0 +1,128 @@
+{
+  "version": "1.0",
+  "updatedAt": "2026-10-07T17:51:37.397Z",
+  "automations": [
+    {
+      "id": "rec-engine-001-captura-web-completa",
+      "externalId": "REC-ENGINE-001",
+      "caseId": 0,
+      "title": "Captura web completa",
+      "planPath": "automations\\apps\\recording-regression-2d122b23\\sections\\motor-de-grabacion\\cases\\rec-engine-001-captura-web-completa\\plan.json",
+      "specPath": "automations\\apps\\recording-regression-2d122b23\\sections\\motor-de-grabacion\\cases\\rec-engine-001-captura-web-completa\\case.spec.ts",
+      "appSlug": "recording-regression-2d122b23",
+      "appConfigPath": "automations\\apps\\recording-regression-2d122b23\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "recording-regression-2d122b23",
+      "createdAt": "2026-10-07T17:51:37.396Z",
+      "updatedAt": "2026-10-07T17:51:37.397Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\REC-ENGINE-001\\2026-10-07T17-50-49-765Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\REC-ENGINE-001\\2026-10-07T17-50-49-765Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 26516,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [],
+          "errors": [],
+          "warnings": [
+            "step_index_not_explicit_in_spec:1"
+          ],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\recording-regression-2d122b23\\sections\\motor-de-grabacion\\cases\\rec-engine-001-captura-web-completa\\case.spec.ts",
+          "specHash": "6c082d4c57d433c320bd60d392e66617cf213151b062eaa0ea13db9b1ee3b75b",
+          "specSource": "generatedSpec"
+        }
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\recording-regression-2d122b23\\sections\\motor-de-grabacion\\cases\\rec-engine-001-captura-web-completa\\case.spec.ts",
+      "promotedSpecHash": "6c082d4c57d433c320bd60d392e66617cf213151b062eaa0ea13db9b1ee3b75b"
+    }
+  ]
+}

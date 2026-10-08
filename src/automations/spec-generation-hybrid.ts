@@ -4292,6 +4292,10 @@ const PROMOTED_SUCCESS_TELEMETRY_PREFIXES = [
   "[recording-replay]",
   "[runtime:",
   "[async-wait]",
+  // Internal breadcrumbs identify the currently executing operation, not a
+  // failure. In particular, a Playwright outer test timeout must not inherit
+  // the first breadcrumb's stepIndex as though that action had failed.
+  "[TRACE-",
 ];
 
 function isPromotedSuccessTelemetryLine(line: string): boolean {

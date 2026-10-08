@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "recordingId": "5f2e57cd-e688-4ed4-8bf3-d137ae458a52",
+  "recordingId": "510ceb25-d237-4846-bcc0-3fc2d4ea3c87",
   "projectSlug": "portal-comercial",
   "appSlug": "portal-comercial",
   "platform": "web",
@@ -30,10 +30,10 @@
       "sourceScreenKey": "9b3ed654dc84"
     },
     {
-      "screenIdentity": "be2cbf7ba150",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "screenIdentity": "8e0940f99d11",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "classification": "SCREEN_TRANSITION",
-      "sourceScreenKey": "be2cbf7ba150"
+      "sourceScreenKey": "8e0940f99d11"
     }
   ],
   "semanticComponents": [
@@ -214,8 +214,7 @@
       "label": "Aceptar",
       "needsReview": false,
       "observationRefs": [
-        "obs-38",
-        "obs-69"
+        "obs-38"
       ]
     },
     {
@@ -313,10 +312,10 @@
       ]
     },
     {
-      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx|option",
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|U5xjq 2wxuwñ5 Sws5wzw|option",
       "componentType": "option",
       "screenIdentity": "fbf08c6ecee9",
-      "label": "Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx",
+      "label": "U5xjq 2wxuwñ5 Sws5wzw",
       "needsReview": false,
       "observationRefs": [
         "obs-57"
@@ -335,8 +334,8 @@
       ]
     },
     {
-      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Firma autorizada 2|control",
-      "componentType": "control",
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Firma autorizada 2|combobox",
+      "componentType": "select/combobox",
       "screenIdentity": "fbf08c6ecee9",
       "label": "control",
       "associatedField": "Firma autorizada 2",
@@ -347,33 +346,25 @@
       ]
     },
     {
-      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|R5xjzjq Zwnw445 Pj5zw4s5 4wywjp|option",
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx|option",
       "componentType": "option",
       "screenIdentity": "fbf08c6ecee9",
-      "label": "R5xjzjq Zwnw445 Pj5zw4s5 4wywjp",
+      "label": "Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx",
       "needsReview": false,
       "observationRefs": [
         "obs-62"
       ]
     },
     {
-      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Crear certificado|button",
-      "componentType": "button",
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Firma autorizada 2|selection",
+      "componentType": "select/combobox",
       "screenIdentity": "fbf08c6ecee9",
-      "label": "Crear certificado",
+      "label": "Firma autorizada 2",
+      "associatedField": "Firma autorizada 2",
       "needsReview": false,
+      "reviewReason": "explicit_associated_label",
       "observationRefs": [
-        "obs-65"
-      ]
-    },
-    {
-      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Cancelar|button",
-      "componentType": "button",
-      "screenIdentity": "fbf08c6ecee9",
-      "label": "Cancelar",
-      "needsReview": false,
-      "observationRefs": [
-        "obs-67"
+        "obs-63"
       ]
     }
   ],
@@ -404,15 +395,15 @@
     },
     {
       "eventRef": "event-4",
-      "action": "navigate",
-      "screenIdentity": "inicio",
+      "action": "observe",
+      "screenIdentity": "fbf08c6ecee9",
       "provenance": "OBSERVED",
       "confidence": 0.4,
       "classification": "TECHNICAL_NOISE"
     },
     {
       "eventRef": "event-5",
-      "action": "observe",
+      "action": "navigate",
       "screenIdentity": "fbf08c6ecee9",
       "provenance": "OBSERVED",
       "confidence": 0.4,
@@ -1029,7 +1020,7 @@
       "screenIdentity": "fbf08c6ecee9",
       "componentType": "option",
       "controlAffordance": "selectable",
-      "technicalTargetRef": "fbf08c6ecee9:control:role:option|Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx",
+      "technicalTargetRef": "fbf08c6ecee9:control:role:option|U5xjq 2wxuwñ5 Sws5wzw",
       "provenance": "OBSERVED",
       "confidence": 0.9,
       "classification": "FUNCTIONAL_ACTION"
@@ -1043,8 +1034,8 @@
       "associatedField": "Firma autorizada 1",
       "controlAffordance": "selectable",
       "valueKey": "firma_autorizada_1_seleccion",
-      "technicalTargetRef": "fbf08c6ecee9:selection:role:option|Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx",
-      "afterState": "Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx",
+      "technicalTargetRef": "fbf08c6ecee9:selection:role:option|U5xjq 2wxuwñ5 Sws5wzw",
+      "afterState": "U5xjq 2wxuwñ5 Sws5wzw",
       "provenance": "OBSERVED",
       "confidence": 0.9,
       "classification": "FUNCTIONAL_ACTION"
@@ -1055,34 +1046,34 @@
       "screenIdentity": "fbf08c6ecee9",
       "componentType": "option",
       "controlAffordance": "selectable",
-      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx|option",
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|U5xjq 2wxuwñ5 Sws5wzw|option",
       "provenance": "OBSERVED",
       "confidence": 0.4,
       "classification": "TECHNICAL_NOISE"
     },
     {
       "eventRef": "event-60",
-      "action": "observe",
+      "action": "activate",
       "screenIdentity": "fbf08c6ecee9",
-      "componentType": "control",
+      "componentType": "select/combobox",
       "associatedField": "Firma autorizada 2",
-      "controlAffordance": "observable_control",
-      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Firma autorizada 2|control",
+      "controlAffordance": "selectable",
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Firma autorizada 2|combobox",
       "provenance": "OBSERVED",
       "confidence": 0.4,
-      "classification": "TECHNICAL_NOISE"
+      "classification": "FUNCTIONAL_ACTION"
     },
     {
       "eventRef": "event-61",
-      "action": "activate",
+      "action": "observe",
       "screenIdentity": "fbf08c6ecee9",
-      "componentType": "control",
+      "componentType": "select/combobox",
       "associatedField": "Firma autorizada 2",
-      "controlAffordance": "observable_control",
-      "technicalTargetRef": "fbf08c6ecee9:control:css:#pv_id_143",
+      "controlAffordance": "selectable",
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Firma autorizada 2|combobox",
       "provenance": "OBSERVED",
-      "confidence": 0.9,
-      "classification": "FUNCTIONAL_ACTION"
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
     },
     {
       "eventRef": "event-62",
@@ -1090,90 +1081,39 @@
       "screenIdentity": "fbf08c6ecee9",
       "componentType": "option",
       "controlAffordance": "selectable",
-      "technicalTargetRef": "fbf08c6ecee9:control:role:option|R5xjzjq Zwnw445 Pj5zw4s5 4wywjp",
+      "technicalTargetRef": "fbf08c6ecee9:control:role:option|Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx",
       "provenance": "OBSERVED",
       "confidence": 0.9,
       "classification": "FUNCTIONAL_ACTION"
     },
     {
       "eventRef": "event-63",
-      "action": "observe",
+      "action": "select",
       "screenIdentity": "fbf08c6ecee9",
-      "componentType": "option",
+      "componentType": "select/combobox",
+      "field": "Firma autorizada 2",
+      "associatedField": "Firma autorizada 2",
       "controlAffordance": "selectable",
-      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|R5xjzjq Zwnw445 Pj5zw4s5 4wywjp|option",
+      "valueKey": "firma_autorizada_2_seleccion",
+      "technicalTargetRef": "fbf08c6ecee9:selection:role:option|Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx",
+      "afterState": "Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx",
       "provenance": "OBSERVED",
-      "confidence": 0.4,
-      "classification": "TECHNICAL_NOISE"
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
     },
     {
       "eventRef": "event-64",
       "action": "observe",
       "screenIdentity": "fbf08c6ecee9",
-      "componentType": "button",
-      "controlAffordance": "clickable",
-      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Crear certificado|button",
+      "componentType": "option",
+      "controlAffordance": "selectable",
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx|option",
       "provenance": "OBSERVED",
       "confidence": 0.4,
       "classification": "TECHNICAL_NOISE"
     },
     {
       "eventRef": "event-65",
-      "action": "click",
-      "screenIdentity": "fbf08c6ecee9",
-      "componentType": "button",
-      "controlAffordance": "clickable",
-      "technicalTargetRef": "fbf08c6ecee9:control:role:button|Crear certificado",
-      "provenance": "OBSERVED",
-      "confidence": 0.9,
-      "classification": "FUNCTIONAL_ACTION"
-    },
-    {
-      "eventRef": "event-66",
-      "action": "observe",
-      "screenIdentity": "fbf08c6ecee9",
-      "componentType": "button",
-      "controlAffordance": "clickable",
-      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Cancelar|button",
-      "provenance": "OBSERVED",
-      "confidence": 0.4,
-      "classification": "TECHNICAL_NOISE"
-    },
-    {
-      "eventRef": "event-67",
-      "action": "click",
-      "screenIdentity": "fbf08c6ecee9",
-      "componentType": "button",
-      "controlAffordance": "clickable",
-      "technicalTargetRef": "fbf08c6ecee9:control:role:button|Cancelar",
-      "provenance": "OBSERVED",
-      "confidence": 0.9,
-      "classification": "FUNCTIONAL_ACTION"
-    },
-    {
-      "eventRef": "event-68",
-      "action": "observe",
-      "screenIdentity": "fbf08c6ecee9",
-      "componentType": "button",
-      "controlAffordance": "clickable",
-      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Aceptar|button",
-      "provenance": "OBSERVED",
-      "confidence": 0.4,
-      "classification": "TECHNICAL_NOISE"
-    },
-    {
-      "eventRef": "event-69",
-      "action": "click",
-      "screenIdentity": "fbf08c6ecee9",
-      "componentType": "button",
-      "controlAffordance": "clickable",
-      "technicalTargetRef": "fbf08c6ecee9:control:role:button|Aceptar",
-      "provenance": "OBSERVED",
-      "confidence": 0.9,
-      "classification": "FUNCTIONAL_ACTION"
-    },
-    {
-      "eventRef": "event-70",
       "action": "navigate",
       "screenIdentity": "fbf08c6ecee9",
       "provenance": "OBSERVED",
@@ -1195,7 +1135,7 @@
       "sensitive": false,
       "generated": false,
       "instanceIdentity": "fbf08c6ecee9:control:role:textbox|Usuario",
-      "recordingId": "5f2e57cd-e688-4ed4-8bf3-d137ae458a52",
+      "recordingId": "510ceb25-d237-4846-bcc0-3fc2d4ea3c87",
       "needsReview": false,
       "reviewReason": "stable_business_label"
     },
@@ -1209,7 +1149,7 @@
       "sensitive": true,
       "generated": false,
       "instanceIdentity": "fbf08c6ecee9:control:role:textbox|Contraseña",
-      "recordingId": "5f2e57cd-e688-4ed4-8bf3-d137ae458a52",
+      "recordingId": "510ceb25-d237-4846-bcc0-3fc2d4ea3c87",
       "needsReview": false,
       "reviewReason": "stable_business_label"
     },
@@ -1218,7 +1158,7 @@
       "semanticField": "Número de identificación",
       "valueRole": "action_input",
       "value": "056-0154046-0",
-      "rawTypedValue": "056-0154046-0\r\n",
+      "rawTypedValue": "056-0154046-0",
       "committedValue": "056-0154046-0",
       "source": "RECORDED_CONFIRMED",
       "verified": true,
@@ -1226,7 +1166,7 @@
       "sensitive": false,
       "generated": false,
       "instanceIdentity": "fbf08c6ecee9:control:fbf08c6ecee9|Número de identificación|amount_or_text",
-      "recordingId": "5f2e57cd-e688-4ed4-8bf3-d137ae458a52",
+      "recordingId": "510ceb25-d237-4846-bcc0-3fc2d4ea3c87",
       "needsReview": false,
       "reviewReason": "explicit_associated_label"
     },
@@ -1241,7 +1181,7 @@
       "sensitive": false,
       "generated": false,
       "instanceIdentity": "fbf08c6ecee9:selection:role:option|Certificados de Deposito",
-      "recordingId": "5f2e57cd-e688-4ed4-8bf3-d137ae458a52",
+      "recordingId": "510ceb25-d237-4846-bcc0-3fc2d4ea3c87",
       "needsReview": false,
       "reviewReason": "explicit_associated_label"
     },
@@ -1256,7 +1196,7 @@
       "sensitive": false,
       "generated": false,
       "instanceIdentity": "fbf08c6ecee9:selection:role:option|300 - Depósito a plazo Financiero Personal Capitalizable DOP",
-      "recordingId": "5f2e57cd-e688-4ed4-8bf3-d137ae458a52",
+      "recordingId": "510ceb25-d237-4846-bcc0-3fc2d4ea3c87",
       "needsReview": false,
       "reviewReason": "explicit_associated_label"
     },
@@ -1273,7 +1213,7 @@
       "sensitive": false,
       "generated": false,
       "instanceIdentity": "fbf08c6ecee9:control:fbf08c6ecee9|Monto|amount_or_text",
-      "recordingId": "5f2e57cd-e688-4ed4-8bf3-d137ae458a52",
+      "recordingId": "510ceb25-d237-4846-bcc0-3fc2d4ea3c87",
       "needsReview": true,
       "reviewReason": "aggregate_compound_text_without_separate_control_evidence"
     },
@@ -1290,7 +1230,7 @@
       "sensitive": false,
       "generated": false,
       "instanceIdentity": "fbf08c6ecee9:control:fbf08c6ecee9|Plazo|amount_or_text",
-      "recordingId": "5f2e57cd-e688-4ed4-8bf3-d137ae458a52",
+      "recordingId": "510ceb25-d237-4846-bcc0-3fc2d4ea3c87",
       "needsReview": false,
       "reviewReason": "explicit_associated_label"
     },
@@ -1305,7 +1245,7 @@
       "sensitive": false,
       "generated": false,
       "instanceIdentity": "fbf08c6ecee9:selection:role:option|Ahorros Personales",
-      "recordingId": "5f2e57cd-e688-4ed4-8bf3-d137ae458a52",
+      "recordingId": "510ceb25-d237-4846-bcc0-3fc2d4ea3c87",
       "needsReview": false,
       "reviewReason": "explicit_associated_label"
     },
@@ -1320,13 +1260,28 @@
       "sensitive": false,
       "generated": false,
       "instanceIdentity": "fbf08c6ecee9:selection:role:option|Efectivo",
-      "recordingId": "5f2e57cd-e688-4ed4-8bf3-d137ae458a52",
+      "recordingId": "510ceb25-d237-4846-bcc0-3fc2d4ea3c87",
       "needsReview": false,
       "reviewReason": "explicit_associated_label"
     },
     {
       "valueKey": "firma_autorizada_1_seleccion",
       "semanticField": "Firma autorizada 1",
+      "valueRole": "action_input",
+      "value": "U5xjq 2wxuwñ5 Sws5wzw",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "fbf08c6ecee9:selection:role:option|U5xjq 2wxuwñ5 Sws5wzw",
+      "recordingId": "510ceb25-d237-4846-bcc0-3fc2d4ea3c87",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label"
+    },
+    {
+      "valueKey": "firma_autorizada_2_seleccion",
+      "semanticField": "Firma autorizada 2",
       "valueRole": "action_input",
       "value": "Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx",
       "source": "RECORDED_CONFIRMED",
@@ -1335,7 +1290,7 @@
       "sensitive": false,
       "generated": false,
       "instanceIdentity": "fbf08c6ecee9:selection:role:option|Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx",
-      "recordingId": "5f2e57cd-e688-4ed4-8bf3-d137ae458a52",
+      "recordingId": "510ceb25-d237-4846-bcc0-3fc2d4ea3c87",
       "needsReview": false,
       "reviewReason": "explicit_associated_label"
     }
@@ -1832,7 +1787,7 @@
             "structuralIdentityMatchCount": 1,
             "scopeIdentity": {
               "strategy": "id",
-              "value": "pv_id_126"
+              "value": "pv_id_125"
             },
             "targetFingerprint": "{\"owner\":{\"tag\":\"span\",\"role\":\"combobox\"},\"stableDirectAttributes\":{\"role\":\"combobox\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
             "captureScopeUnique": true,
@@ -1884,12 +1839,12 @@
         },
         {
           "strategy": "css",
-          "value": "#pv_id_126_1",
+          "value": "#pv_id_125_1",
           "confidence": 0.8
         },
         {
           "strategy": "id",
-          "value": "pv_id_126_1",
+          "value": "pv_id_125_1",
           "confidence": 0.8
         }
       ],
@@ -1899,7 +1854,7 @@
           "locatorCandidates": [
             {
               "strategy": "css",
-              "value": "#pv_id_126_1",
+              "value": "#pv_id_125_1",
               "confidence": 0.8
             }
           ],
@@ -1910,7 +1865,7 @@
             },
             "stableDirectAttributes": {
               "aria-label": "Certificados de Deposito",
-              "id": "pv_id_126_1",
+              "id": "pv_id_125_1",
               "role": "option"
             },
             "stableDescendants": [],
@@ -1922,9 +1877,9 @@
             "structuralIdentityMatchCount": 1,
             "scopeIdentity": {
               "strategy": "id",
-              "value": "pv_id_126_list"
+              "value": "pv_id_125_list"
             },
-            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_126_1\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_125_1\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
             "captureScopeUnique": true,
             "captureTargetMatchCount": 1
           },
@@ -1962,12 +1917,12 @@
         },
         {
           "strategy": "css",
-          "value": "#pv_id_126_1",
+          "value": "#pv_id_125_1",
           "confidence": 0.8
         },
         {
           "strategy": "id",
-          "value": "pv_id_126_1",
+          "value": "pv_id_125_1",
           "confidence": 0.8
         }
       ],
@@ -1977,7 +1932,7 @@
           "locatorCandidates": [
             {
               "strategy": "css",
-              "value": "#pv_id_126_1",
+              "value": "#pv_id_125_1",
               "confidence": 0.8
             }
           ],
@@ -1988,7 +1943,7 @@
             },
             "stableDirectAttributes": {
               "aria-label": "Certificados de Deposito",
-              "id": "pv_id_126_1",
+              "id": "pv_id_125_1",
               "role": "option"
             },
             "stableDescendants": [],
@@ -2000,9 +1955,9 @@
             "structuralIdentityMatchCount": 1,
             "scopeIdentity": {
               "strategy": "id",
-              "value": "pv_id_126_list"
+              "value": "pv_id_125_list"
             },
-            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_126_1\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_125_1\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
             "captureScopeUnique": true,
             "captureTargetMatchCount": 1
           },
@@ -2069,7 +2024,7 @@
             "structuralIdentityMatchCount": 1,
             "scopeIdentity": {
               "strategy": "id",
-              "value": "pv_id_127"
+              "value": "pv_id_126"
             },
             "targetFingerprint": "{\"owner\":{\"tag\":\"span\",\"role\":\"combobox\"},\"stableDirectAttributes\":{\"role\":\"combobox\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
             "captureScopeUnique": true,
@@ -2121,12 +2076,12 @@
         },
         {
           "strategy": "css",
-          "value": "#pv_id_127_0",
+          "value": "#pv_id_126_0",
           "confidence": 0.8
         },
         {
           "strategy": "id",
-          "value": "pv_id_127_0",
+          "value": "pv_id_126_0",
           "confidence": 0.8
         }
       ],
@@ -2136,7 +2091,7 @@
           "locatorCandidates": [
             {
               "strategy": "css",
-              "value": "#pv_id_127_0",
+              "value": "#pv_id_126_0",
               "confidence": 0.8
             }
           ],
@@ -2147,7 +2102,7 @@
             },
             "stableDirectAttributes": {
               "aria-label": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
-              "id": "pv_id_127_0",
+              "id": "pv_id_126_0",
               "role": "option"
             },
             "stableDescendants": [],
@@ -2159,9 +2114,9 @@
             "structuralIdentityMatchCount": 1,
             "scopeIdentity": {
               "strategy": "id",
-              "value": "pv_id_127_list"
+              "value": "pv_id_126_list"
             },
-            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_127_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_126_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
             "captureScopeUnique": true,
             "captureTargetMatchCount": 1
           },
@@ -2199,12 +2154,12 @@
         },
         {
           "strategy": "css",
-          "value": "#pv_id_127_0",
+          "value": "#pv_id_126_0",
           "confidence": 0.8
         },
         {
           "strategy": "id",
-          "value": "pv_id_127_0",
+          "value": "pv_id_126_0",
           "confidence": 0.8
         }
       ],
@@ -2214,7 +2169,7 @@
           "locatorCandidates": [
             {
               "strategy": "css",
-              "value": "#pv_id_127_0",
+              "value": "#pv_id_126_0",
               "confidence": 0.8
             }
           ],
@@ -2225,7 +2180,7 @@
             },
             "stableDirectAttributes": {
               "aria-label": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
-              "id": "pv_id_127_0",
+              "id": "pv_id_126_0",
               "role": "option"
             },
             "stableDescendants": [],
@@ -2237,9 +2192,9 @@
             "structuralIdentityMatchCount": 1,
             "scopeIdentity": {
               "strategy": "id",
-              "value": "pv_id_127_list"
+              "value": "pv_id_126_list"
             },
-            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_127_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_126_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
             "captureScopeUnique": true,
             "captureTargetMatchCount": 1
           },
@@ -2770,7 +2725,7 @@
             "structuralIdentityMatchCount": 1,
             "scopeIdentity": {
               "strategy": "id",
-              "value": "pv_id_134_content"
+              "value": "pv_id_133_content"
             },
             "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
             "captureScopeUnique": true,
@@ -3076,7 +3031,7 @@
             "structuralIdentityMatchCount": 2,
             "scopeIdentity": {
               "strategy": "id",
-              "value": "pv_id_135_content"
+              "value": "pv_id_134_content"
             },
             "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
             "captureScopeUnique": true,
@@ -3127,7 +3082,7 @@
             "structuralIdentityMatchCount": 1,
             "scopeIdentity": {
               "strategy": "id",
-              "value": "pv_id_142"
+              "value": "pv_id_141"
             },
             "targetFingerprint": "{\"owner\":{\"tag\":\"span\",\"role\":\"combobox\"},\"stableDirectAttributes\":{\"role\":\"combobox\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
             "captureScopeUnique": true,
@@ -3165,6 +3120,243 @@
     },
     {
       "observationId": "obs-57",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "option",
+      "label": "U5xjq 2wxuwñ5 Sws5wzw",
+      "tag": "li",
+      "role": "option",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "option|U5xjq 2wxuwñ5 Sws5wzw",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#pv_id_141_0",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "pv_id_141_0",
+          "confidence": 0.8
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#pv_id_141_0",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "U5xjq 2wxuwñ5 Sws5wzw ",
+              "id": "pv_id_141_0",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "pv_id_141_list"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_141_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "fbf08c6ecee9:control:role:option|U5xjq 2wxuwñ5 Sws5wzw",
+      "validatedByInteraction": true,
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-58",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "select/combobox",
+      "label": "U5xjq 2wxuwñ5 Sws5wzw",
+      "role": "option",
+      "associatedField": "Firma autorizada 1",
+      "afterValue": "U5xjq 2wxuwñ5 Sws5wzw",
+      "compoundRole": "selection",
+      "semanticField": "Firma autorizada 1",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "option|U5xjq 2wxuwñ5 Sws5wzw",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#pv_id_141_0",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "pv_id_141_0",
+          "confidence": 0.8
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#pv_id_141_0",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "U5xjq 2wxuwñ5 Sws5wzw ",
+              "id": "pv_id_141_0",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "pv_id_141_list"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_141_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "fbf08c6ecee9:selection:role:option|U5xjq 2wxuwñ5 Sws5wzw",
+      "validatedByInteraction": true,
+      "selectorControlId": "fbf08c6ecee9|Firma autorizada 1|selection",
+      "optionSurfaceId": "fbf08c6ecee9|fbf08c6ecee9|Firma autorizada 1|selection|option-surface",
+      "selectedOptionObserved": "U5xjq 2wxuwñ5 Sws5wzw",
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-59",
+      "status": "OBSERVED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "option",
+      "label": "U5xjq 2wxuwñ5 Sws5wzw",
+      "tag": "li",
+      "role": "option",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|U5xjq 2wxuwñ5 Sws5wzw|option",
+      "validatedByInteraction": false,
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-60",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "select/combobox",
+      "label": "control",
+      "tag": "span",
+      "role": "combobox",
+      "associatedField": "Firma autorizada 2",
+      "semanticField": "Firma autorizada 2",
+      "locatorCandidates": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "span",
+              "role": "combobox"
+            },
+            "stableDirectAttributes": {
+              "role": "combobox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "pv_id_142"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"span\",\"role\":\"combobox\"},\"stableDirectAttributes\":{\"role\":\"combobox\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.4,
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Firma autorizada 2|combobox",
+      "validatedByInteraction": true,
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-61",
+      "status": "OBSERVED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "select/combobox",
+      "label": "control",
+      "tag": "span",
+      "role": "combobox",
+      "associatedField": "Firma autorizada 2",
+      "semanticField": "Firma autorizada 2",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Firma autorizada 2|combobox",
+      "validatedByInteraction": false,
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-62",
       "status": "VALIDATED",
       "screenIdentity": "fbf08c6ecee9",
       "componentType": "option",
@@ -3237,16 +3429,16 @@
       "editable": false
     },
     {
-      "observationId": "obs-58",
+      "observationId": "obs-63",
       "status": "VALIDATED",
       "screenIdentity": "fbf08c6ecee9",
       "componentType": "select/combobox",
       "label": "Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx",
       "role": "option",
-      "associatedField": "Firma autorizada 1",
+      "associatedField": "Firma autorizada 2",
       "afterValue": "Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx",
       "compoundRole": "selection",
-      "semanticField": "Firma autorizada 1",
+      "semanticField": "Firma autorizada 2",
       "needsReview": false,
       "reviewReason": "explicit_associated_label",
       "locatorCandidates": [
@@ -3311,14 +3503,14 @@
       "confidence": 0.85,
       "technicalTargetRef": "fbf08c6ecee9:selection:role:option|Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx",
       "validatedByInteraction": true,
-      "selectorControlId": "fbf08c6ecee9|Firma autorizada 1|selection",
-      "optionSurfaceId": "fbf08c6ecee9|fbf08c6ecee9|Firma autorizada 1|selection|option-surface",
+      "selectorControlId": "fbf08c6ecee9|Firma autorizada 2|selection",
+      "optionSurfaceId": "fbf08c6ecee9|fbf08c6ecee9|Firma autorizada 2|selection|option-surface",
       "selectedOptionObserved": "Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx",
       "selectable": true,
       "editable": false
     },
     {
-      "observationId": "obs-59",
+      "observationId": "obs-64",
       "status": "OBSERVED",
       "screenIdentity": "fbf08c6ecee9",
       "componentType": "option",
@@ -3330,414 +3522,6 @@
       "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx|option",
       "validatedByInteraction": false,
       "selectable": true,
-      "editable": false
-    },
-    {
-      "observationId": "obs-60",
-      "status": "OBSERVED",
-      "screenIdentity": "fbf08c6ecee9",
-      "componentType": "control",
-      "label": "control",
-      "tag": "div",
-      "associatedField": "Firma autorizada 2",
-      "semanticField": "Firma autorizada 2",
-      "locatorCandidates": [],
-      "confidence": 0.4,
-      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Firma autorizada 2|control",
-      "validatedByInteraction": false,
-      "selectable": false,
-      "editable": false
-    },
-    {
-      "observationId": "obs-61",
-      "status": "VALIDATED",
-      "screenIdentity": "fbf08c6ecee9",
-      "componentType": "control",
-      "label": "control",
-      "tag": "div",
-      "associatedField": "Firma autorizada 2",
-      "semanticField": "Firma autorizada 2",
-      "locatorCandidates": [
-        {
-          "strategy": "css",
-          "value": "#pv_id_143",
-          "confidence": 0.8
-        },
-        {
-          "strategy": "id",
-          "value": "pv_id_143",
-          "confidence": 0.8
-        }
-      ],
-      "technicalTargetCandidates": [
-        {
-          "targetType": "structural",
-          "locatorCandidates": [
-            {
-              "strategy": "css",
-              "value": "#pv_id_143",
-              "confidence": 0.8
-            }
-          ],
-          "structuralContext": {
-            "owner": {
-              "tag": "div"
-            },
-            "stableDirectAttributes": {
-              "id": "pv_id_143"
-            },
-            "stableDescendants": [
-              {
-                "relation": "descendant",
-                "tag": "span",
-                "role": "combobox",
-                "stableAttributes": {
-                  "role": "combobox"
-                }
-              }
-            ],
-            "semanticShape": [
-              "div",
-              "span:combobox"
-            ],
-            "landmarkAncestor": {
-              "tag": "main"
-            },
-            "deterministicStructuralIdentity": true,
-            "topologySignature": "{\"childEntries\":[[\"div\",1],[\"span\",1]],\"descendantEntries\":[[\"div\",1],[\"path\",1],[\"span\",1],[\"svg\",1]]}",
-            "structuralIdentityMatchCount": 1,
-            "scopeIdentity": {
-              "strategy": "id",
-              "value": "pv_id_135_content"
-            },
-            "targetFingerprint": "{\"owner\":{\"tag\":\"div\"},\"stableDirectAttributes\":{\"id\":\"pv_id_143\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"span\",\"role\":\"combobox\",\"stableAttributes\":{\"role\":\"combobox\"}}],\"semanticShape\":[\"div\",\"span:combobox\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1],[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",1],[\\\"path\\\",1],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
-            "captureScopeUnique": true,
-            "captureTargetMatchCount": 1
-          },
-          "interactionEvidence": [
-            "v2_click_owner",
-            "v2_framework_actionable_owner"
-          ],
-          "confidence": 0.85,
-          "validatedByInteraction": true
-        }
-      ],
-      "confidence": 0.8,
-      "technicalTargetRef": "fbf08c6ecee9:control:css:#pv_id_143",
-      "validatedByInteraction": true,
-      "selectable": false,
-      "editable": false
-    },
-    {
-      "observationId": "obs-62",
-      "status": "VALIDATED",
-      "screenIdentity": "fbf08c6ecee9",
-      "componentType": "option",
-      "label": "R5xjzjq Zwnw445 Pj5zw4s5 4wywjp",
-      "tag": "li",
-      "role": "option",
-      "locatorCandidates": [
-        {
-          "strategy": "role",
-          "value": "option|R5xjzjq Zwnw445 Pj5zw4s5 4wywjp",
-          "confidence": 0.85
-        },
-        {
-          "strategy": "css",
-          "value": "#pv_id_143_5",
-          "confidence": 0.8
-        },
-        {
-          "strategy": "id",
-          "value": "pv_id_143_5",
-          "confidence": 0.8
-        }
-      ],
-      "technicalTargetCandidates": [
-        {
-          "targetType": "structural",
-          "locatorCandidates": [
-            {
-              "strategy": "css",
-              "value": "#pv_id_143_5",
-              "confidence": 0.8
-            }
-          ],
-          "structuralContext": {
-            "owner": {
-              "tag": "li",
-              "role": "option"
-            },
-            "stableDirectAttributes": {
-              "aria-label": "R5xjzjq Zwnw445 Pj5zw4s5 4wywjp",
-              "id": "pv_id_143_5",
-              "role": "option"
-            },
-            "stableDescendants": [],
-            "semanticShape": [
-              "span"
-            ],
-            "deterministicStructuralIdentity": true,
-            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
-            "structuralIdentityMatchCount": 1,
-            "scopeIdentity": {
-              "strategy": "id",
-              "value": "pv_id_143_list"
-            },
-            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_143_5\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
-            "captureScopeUnique": true,
-            "captureTargetMatchCount": 1
-          },
-          "interactionEvidence": [
-            "v2_click_owner"
-          ],
-          "confidence": 0.85,
-          "validatedByInteraction": true
-        }
-      ],
-      "confidence": 0.85,
-      "technicalTargetRef": "fbf08c6ecee9:control:role:option|R5xjzjq Zwnw445 Pj5zw4s5 4wywjp",
-      "validatedByInteraction": true,
-      "selectable": true,
-      "editable": false
-    },
-    {
-      "observationId": "obs-63",
-      "status": "OBSERVED",
-      "screenIdentity": "fbf08c6ecee9",
-      "componentType": "option",
-      "label": "R5xjzjq Zwnw445 Pj5zw4s5 4wywjp",
-      "tag": "li",
-      "role": "option",
-      "locatorCandidates": [],
-      "confidence": 0.4,
-      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|R5xjzjq Zwnw445 Pj5zw4s5 4wywjp|option",
-      "validatedByInteraction": false,
-      "selectable": true,
-      "editable": false
-    },
-    {
-      "observationId": "obs-64",
-      "status": "OBSERVED",
-      "screenIdentity": "fbf08c6ecee9",
-      "componentType": "button",
-      "label": "Crear certificado",
-      "tag": "button",
-      "role": "button",
-      "locatorCandidates": [],
-      "confidence": 0.4,
-      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Crear certificado|button",
-      "validatedByInteraction": false,
-      "selectable": false,
-      "editable": false
-    },
-    {
-      "observationId": "obs-65",
-      "status": "VALIDATED",
-      "screenIdentity": "fbf08c6ecee9",
-      "componentType": "button",
-      "label": "Crear certificado",
-      "tag": "button",
-      "role": "button",
-      "locatorCandidates": [
-        {
-          "strategy": "role",
-          "value": "button|Crear certificado",
-          "confidence": 0.85
-        }
-      ],
-      "technicalTargetCandidates": [
-        {
-          "targetType": "structural",
-          "locatorCandidates": [
-            {
-              "strategy": "role",
-              "value": "button|Crear certificado",
-              "confidence": 0.85
-            }
-          ],
-          "structuralContext": {
-            "owner": {
-              "tag": "button"
-            },
-            "stableDirectAttributes": {
-              "aria-label": "Crear certificado"
-            },
-            "stableDescendants": [],
-            "semanticShape": [
-              "span"
-            ],
-            "landmarkAncestor": {
-              "tag": "main"
-            },
-            "deterministicStructuralIdentity": true,
-            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
-            "structuralIdentityMatchCount": 1,
-            "scopeIdentity": {
-              "strategy": "id",
-              "value": "pv_id_136_content"
-            },
-            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
-            "captureScopeUnique": true,
-            "captureTargetMatchCount": 1
-          },
-          "interactionEvidence": [
-            "v2_click_owner"
-          ],
-          "confidence": 0.85,
-          "validatedByInteraction": true
-        }
-      ],
-      "confidence": 0.85,
-      "technicalTargetRef": "fbf08c6ecee9:control:role:button|Crear certificado",
-      "validatedByInteraction": true,
-      "selectable": false,
-      "editable": false
-    },
-    {
-      "observationId": "obs-66",
-      "status": "OBSERVED",
-      "screenIdentity": "fbf08c6ecee9",
-      "componentType": "button",
-      "label": "Cancelar",
-      "tag": "button",
-      "role": "button",
-      "locatorCandidates": [],
-      "confidence": 0.4,
-      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Cancelar|button",
-      "validatedByInteraction": false,
-      "selectable": false,
-      "editable": false
-    },
-    {
-      "observationId": "obs-67",
-      "status": "VALIDATED",
-      "screenIdentity": "fbf08c6ecee9",
-      "componentType": "button",
-      "label": "Cancelar",
-      "tag": "button",
-      "role": "button",
-      "locatorCandidates": [
-        {
-          "strategy": "role",
-          "value": "button|Cancelar",
-          "confidence": 0.85
-        }
-      ],
-      "technicalTargetCandidates": [
-        {
-          "targetType": "structural",
-          "locatorCandidates": [
-            {
-              "strategy": "role",
-              "value": "button|Cancelar",
-              "confidence": 0.85
-            }
-          ],
-          "structuralContext": {
-            "owner": {
-              "tag": "button"
-            },
-            "stableDirectAttributes": {
-              "aria-label": "Cancelar"
-            },
-            "stableDescendants": [],
-            "semanticShape": [
-              "span"
-            ],
-            "landmarkAncestor": {
-              "tag": "main"
-            },
-            "deterministicStructuralIdentity": true,
-            "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
-            "structuralIdentityMatchCount": 1,
-            "scopeIdentity": {
-              "strategy": "id",
-              "value": "__nuxt"
-            },
-            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
-            "captureScopeUnique": true,
-            "captureTargetMatchCount": 1
-          },
-          "interactionEvidence": [
-            "v2_click_owner"
-          ],
-          "confidence": 0.85,
-          "validatedByInteraction": true
-        }
-      ],
-      "confidence": 0.85,
-      "technicalTargetRef": "fbf08c6ecee9:control:role:button|Cancelar",
-      "validatedByInteraction": true,
-      "selectable": false,
-      "editable": false
-    },
-    {
-      "observationId": "obs-68",
-      "status": "OBSERVED",
-      "screenIdentity": "fbf08c6ecee9",
-      "componentType": "button",
-      "label": "Aceptar",
-      "tag": "button",
-      "role": "button",
-      "locatorCandidates": [],
-      "confidence": 0.4,
-      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Aceptar|button",
-      "validatedByInteraction": false,
-      "selectable": false,
-      "editable": false
-    },
-    {
-      "observationId": "obs-69",
-      "status": "VALIDATED",
-      "screenIdentity": "fbf08c6ecee9",
-      "componentType": "button",
-      "label": "Aceptar",
-      "tag": "button",
-      "role": "button",
-      "locatorCandidates": [
-        {
-          "strategy": "role",
-          "value": "button|Aceptar",
-          "confidence": 0.85
-        }
-      ],
-      "technicalTargetCandidates": [
-        {
-          "targetType": "structural",
-          "locatorCandidates": [
-            {
-              "strategy": "role",
-              "value": "button|Aceptar",
-              "confidence": 0.85
-            }
-          ],
-          "structuralContext": {
-            "owner": {
-              "tag": "button"
-            },
-            "stableDirectAttributes": {
-              "aria-label": "Aceptar"
-            },
-            "stableDescendants": [],
-            "semanticShape": [
-              "span"
-            ],
-            "deterministicStructuralIdentity": true,
-            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
-            "structuralIdentityMatchCount": 1
-          },
-          "interactionEvidence": [
-            "v2_click_owner"
-          ],
-          "confidence": 0.85,
-          "validatedByInteraction": true
-        }
-      ],
-      "confidence": 0.85,
-      "technicalTargetRef": "fbf08c6ecee9:control:role:button|Aceptar",
-      "validatedByInteraction": true,
-      "selectable": false,
       "editable": false
     },
     {
@@ -4368,9 +4152,9 @@
       "editable": false
     },
     {
-      "observationId": "screen-be2cbf7ba150-control-1",
+      "observationId": "screen-8e0940f99d11-control-1",
       "status": "OBSERVED",
-      "screenIdentity": "be2cbf7ba150",
+      "screenIdentity": "8e0940f99d11",
       "componentType": "a",
       "label": "Portal Comercial",
       "tag": "a",
@@ -4387,14 +4171,14 @@
         }
       ],
       "confidence": 0.7,
-      "technicalTargetRef": "be2cbf7ba150:control:1",
+      "technicalTargetRef": "8e0940f99d11:control:1",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-be2cbf7ba150-control-2",
+      "observationId": "screen-8e0940f99d11-control-2",
       "status": "OBSERVED",
-      "screenIdentity": "be2cbf7ba150",
+      "screenIdentity": "8e0940f99d11",
       "componentType": "button",
       "label": "Configuración",
       "tag": "button",
@@ -4411,14 +4195,14 @@
         }
       ],
       "confidence": 0.7,
-      "technicalTargetRef": "be2cbf7ba150:control:2",
+      "technicalTargetRef": "8e0940f99d11:control:2",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-be2cbf7ba150-control-3",
+      "observationId": "screen-8e0940f99d11-control-3",
       "status": "OBSERVED",
-      "screenIdentity": "be2cbf7ba150",
+      "screenIdentity": "8e0940f99d11",
       "componentType": "button",
       "label": "Sesión",
       "tag": "button",
@@ -4435,14 +4219,14 @@
         }
       ],
       "confidence": 0.7,
-      "technicalTargetRef": "be2cbf7ba150:control:3",
+      "technicalTargetRef": "8e0940f99d11:control:3",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-be2cbf7ba150-control-4",
+      "observationId": "screen-8e0940f99d11-control-4",
       "status": "OBSERVED",
-      "screenIdentity": "be2cbf7ba150",
+      "screenIdentity": "8e0940f99d11",
       "componentType": "menuitem",
       "label": "Inicio",
       "tag": "li",
@@ -4463,14 +4247,14 @@
         }
       ],
       "confidence": 0.9,
-      "technicalTargetRef": "be2cbf7ba150:control:4",
+      "technicalTargetRef": "8e0940f99d11:control:4",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-be2cbf7ba150-control-5",
+      "observationId": "screen-8e0940f99d11-control-5",
       "status": "OBSERVED",
-      "screenIdentity": "be2cbf7ba150",
+      "screenIdentity": "8e0940f99d11",
       "componentType": "a",
       "label": "Inicio",
       "tag": "a",
@@ -4487,14 +4271,14 @@
         }
       ],
       "confidence": 0.7,
-      "technicalTargetRef": "be2cbf7ba150:control:5",
+      "technicalTargetRef": "8e0940f99d11:control:5",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-be2cbf7ba150-control-6",
+      "observationId": "screen-8e0940f99d11-control-6",
       "status": "OBSERVED",
-      "screenIdentity": "be2cbf7ba150",
+      "screenIdentity": "8e0940f99d11",
       "componentType": "menuitem",
       "label": "Información",
       "tag": "li",
@@ -4515,14 +4299,14 @@
         }
       ],
       "confidence": 0.9,
-      "technicalTargetRef": "be2cbf7ba150:control:6",
+      "technicalTargetRef": "8e0940f99d11:control:6",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-be2cbf7ba150-control-7",
+      "observationId": "screen-8e0940f99d11-control-7",
       "status": "OBSERVED",
-      "screenIdentity": "be2cbf7ba150",
+      "screenIdentity": "8e0940f99d11",
       "componentType": "a",
       "label": "Información",
       "tag": "a",
@@ -4539,14 +4323,14 @@
         }
       ],
       "confidence": 0.7,
-      "technicalTargetRef": "be2cbf7ba150:control:7",
+      "technicalTargetRef": "8e0940f99d11:control:7",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-be2cbf7ba150-control-8",
+      "observationId": "screen-8e0940f99d11-control-8",
       "status": "OBSERVED",
-      "screenIdentity": "be2cbf7ba150",
+      "screenIdentity": "8e0940f99d11",
       "componentType": "menuitem",
       "label": "Campañas",
       "tag": "li",
@@ -4567,14 +4351,14 @@
         }
       ],
       "confidence": 0.9,
-      "technicalTargetRef": "be2cbf7ba150:control:8",
+      "technicalTargetRef": "8e0940f99d11:control:8",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-be2cbf7ba150-control-9",
+      "observationId": "screen-8e0940f99d11-control-9",
       "status": "OBSERVED",
-      "screenIdentity": "be2cbf7ba150",
+      "screenIdentity": "8e0940f99d11",
       "componentType": "a",
       "label": "Campañas",
       "tag": "a",
@@ -4591,14 +4375,14 @@
         }
       ],
       "confidence": 0.7,
-      "technicalTargetRef": "be2cbf7ba150:control:9",
+      "technicalTargetRef": "8e0940f99d11:control:9",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-be2cbf7ba150-control-10",
+      "observationId": "screen-8e0940f99d11-control-10",
       "status": "OBSERVED",
-      "screenIdentity": "be2cbf7ba150",
+      "screenIdentity": "8e0940f99d11",
       "componentType": "menuitem",
       "label": "Solicitud multiproducto",
       "tag": "li",
@@ -4619,14 +4403,14 @@
         }
       ],
       "confidence": 0.9,
-      "technicalTargetRef": "be2cbf7ba150:control:10",
+      "technicalTargetRef": "8e0940f99d11:control:10",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-be2cbf7ba150-control-11",
+      "observationId": "screen-8e0940f99d11-control-11",
       "status": "OBSERVED",
-      "screenIdentity": "be2cbf7ba150",
+      "screenIdentity": "8e0940f99d11",
       "componentType": "a",
       "label": "Solicitud multiproducto",
       "tag": "a",
@@ -4643,14 +4427,14 @@
         }
       ],
       "confidence": 0.7,
-      "technicalTargetRef": "be2cbf7ba150:control:11",
+      "technicalTargetRef": "8e0940f99d11:control:11",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-be2cbf7ba150-control-12",
+      "observationId": "screen-8e0940f99d11-control-12",
       "status": "OBSERVED",
-      "screenIdentity": "be2cbf7ba150",
+      "screenIdentity": "8e0940f99d11",
       "componentType": "menuitem",
       "label": "Solicitudes en curso",
       "tag": "li",
@@ -4671,14 +4455,14 @@
         }
       ],
       "confidence": 0.9,
-      "technicalTargetRef": "be2cbf7ba150:control:12",
+      "technicalTargetRef": "8e0940f99d11:control:12",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-be2cbf7ba150-control-13",
+      "observationId": "screen-8e0940f99d11-control-13",
       "status": "OBSERVED",
-      "screenIdentity": "be2cbf7ba150",
+      "screenIdentity": "8e0940f99d11",
       "componentType": "a",
       "label": "Solicitudes en curso",
       "tag": "a",
@@ -4695,14 +4479,14 @@
         }
       ],
       "confidence": 0.7,
-      "technicalTargetRef": "be2cbf7ba150:control:13",
+      "technicalTargetRef": "8e0940f99d11:control:13",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-be2cbf7ba150-control-14",
+      "observationId": "screen-8e0940f99d11-control-14",
       "status": "OBSERVED",
-      "screenIdentity": "be2cbf7ba150",
+      "screenIdentity": "8e0940f99d11",
       "componentType": "menuitem",
       "label": "Usuarios",
       "tag": "li",
@@ -4723,14 +4507,14 @@
         }
       ],
       "confidence": 0.9,
-      "technicalTargetRef": "be2cbf7ba150:control:14",
+      "technicalTargetRef": "8e0940f99d11:control:14",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-be2cbf7ba150-control-15",
+      "observationId": "screen-8e0940f99d11-control-15",
       "status": "OBSERVED",
-      "screenIdentity": "be2cbf7ba150",
+      "screenIdentity": "8e0940f99d11",
       "componentType": "a",
       "label": "Usuarios",
       "tag": "a",
@@ -4747,14 +4531,14 @@
         }
       ],
       "confidence": 0.7,
-      "technicalTargetRef": "be2cbf7ba150:control:15",
+      "technicalTargetRef": "8e0940f99d11:control:15",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-be2cbf7ba150-control-16",
+      "observationId": "screen-8e0940f99d11-control-16",
       "status": "OBSERVED",
-      "screenIdentity": "be2cbf7ba150",
+      "screenIdentity": "8e0940f99d11",
       "componentType": "menuitem",
       "label": "Roles",
       "tag": "li",
@@ -4775,14 +4559,14 @@
         }
       ],
       "confidence": 0.9,
-      "technicalTargetRef": "be2cbf7ba150:control:16",
+      "technicalTargetRef": "8e0940f99d11:control:16",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-be2cbf7ba150-control-17",
+      "observationId": "screen-8e0940f99d11-control-17",
       "status": "OBSERVED",
-      "screenIdentity": "be2cbf7ba150",
+      "screenIdentity": "8e0940f99d11",
       "componentType": "a",
       "label": "Roles",
       "tag": "a",
@@ -4799,14 +4583,14 @@
         }
       ],
       "confidence": 0.7,
-      "technicalTargetRef": "be2cbf7ba150:control:17",
+      "technicalTargetRef": "8e0940f99d11:control:17",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-be2cbf7ba150-control-18",
+      "observationId": "screen-8e0940f99d11-control-18",
       "status": "OBSERVED",
-      "screenIdentity": "be2cbf7ba150",
+      "screenIdentity": "8e0940f99d11",
       "componentType": "menuitem",
       "label": "Permisos",
       "tag": "li",
@@ -4827,14 +4611,14 @@
         }
       ],
       "confidence": 0.9,
-      "technicalTargetRef": "be2cbf7ba150:control:18",
+      "technicalTargetRef": "8e0940f99d11:control:18",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-be2cbf7ba150-control-19",
+      "observationId": "screen-8e0940f99d11-control-19",
       "status": "OBSERVED",
-      "screenIdentity": "be2cbf7ba150",
+      "screenIdentity": "8e0940f99d11",
       "componentType": "a",
       "label": "Permisos",
       "tag": "a",
@@ -4851,14 +4635,14 @@
         }
       ],
       "confidence": 0.7,
-      "technicalTargetRef": "be2cbf7ba150:control:19",
+      "technicalTargetRef": "8e0940f99d11:control:19",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-be2cbf7ba150-control-20",
+      "observationId": "screen-8e0940f99d11-control-20",
       "status": "OBSERVED",
-      "screenIdentity": "be2cbf7ba150",
+      "screenIdentity": "8e0940f99d11",
       "componentType": "menuitem",
       "label": "Auditorías",
       "tag": "li",
@@ -4879,7 +4663,7 @@
         }
       ],
       "confidence": 0.9,
-      "technicalTargetRef": "be2cbf7ba150:control:20",
+      "technicalTargetRef": "8e0940f99d11:control:20",
       "selectable": false,
       "editable": false
     }
@@ -4889,8 +4673,8 @@
       "editingSessionId": "edit-1",
       "controlIdentity": "fbf08c6ecee9|Usuario|amount_or_text",
       "screenIdentity": "fbf08c6ecee9",
-      "startedAt": 16030,
-      "endedAt": 18187,
+      "startedAt": 5053,
+      "endedAt": 8035,
       "rawEventRefs": [
         "event-6",
         "event-7"
@@ -4909,8 +4693,8 @@
       "editingSessionId": "edit-2",
       "controlIdentity": "fbf08c6ecee9|Contraseña|amount_or_text",
       "screenIdentity": "fbf08c6ecee9",
-      "startedAt": 23629,
-      "endedAt": 23629,
+      "startedAt": 15742,
+      "endedAt": 15742,
       "rawEventRefs": [
         "event-8"
       ],
@@ -4924,8 +4708,8 @@
       "editingSessionId": "edit-3",
       "controlIdentity": "fbf08c6ecee9|Número de identificación|amount_or_text",
       "screenIdentity": "fbf08c6ecee9",
-      "startedAt": 28906,
-      "endedAt": 43727,
+      "startedAt": 37961,
+      "endedAt": 44851,
       "rawEventRefs": [
         "event-15",
         "event-17"
@@ -4937,15 +4721,15 @@
       ],
       "semanticField": "Número de identificación",
       "inputValue": "056-0154046-0",
-      "rawTypedValue": "056-0154046-0\r\n",
+      "rawTypedValue": "056-0154046-0",
       "finalValue": "056-0154046-0"
     },
     {
       "editingSessionId": "edit-4",
       "controlIdentity": "fbf08c6ecee9|Categoría de producto|combobox",
       "screenIdentity": "fbf08c6ecee9",
-      "startedAt": 81600,
-      "endedAt": 81600,
+      "startedAt": 66929,
+      "endedAt": 66929,
       "rawEventRefs": [
         "event-25"
       ],
@@ -4960,8 +4744,8 @@
       "editingSessionId": "edit-5",
       "controlIdentity": "fbf08c6ecee9|Categoría de producto|selection",
       "screenIdentity": "fbf08c6ecee9",
-      "startedAt": 83274,
-      "endedAt": 83274,
+      "startedAt": 68431,
+      "endedAt": 68431,
       "rawEventRefs": [
         "event-27"
       ],
@@ -4978,8 +4762,8 @@
       "editingSessionId": "edit-6",
       "controlIdentity": "fbf08c6ecee9|Certificados de Deposito|option",
       "screenIdentity": "fbf08c6ecee9",
-      "startedAt": 83277,
-      "endedAt": 83277,
+      "startedAt": 68435,
+      "endedAt": 68435,
       "rawEventRefs": [
         "event-28"
       ],
@@ -4993,8 +4777,8 @@
       "editingSessionId": "edit-7",
       "controlIdentity": "fbf08c6ecee9|Producto|combobox",
       "screenIdentity": "fbf08c6ecee9",
-      "startedAt": 84378,
-      "endedAt": 84378,
+      "startedAt": 69854,
+      "endedAt": 69854,
       "rawEventRefs": [
         "event-30"
       ],
@@ -5009,8 +4793,8 @@
       "editingSessionId": "edit-8",
       "controlIdentity": "fbf08c6ecee9|Producto|selection",
       "screenIdentity": "fbf08c6ecee9",
-      "startedAt": 97643,
-      "endedAt": 97643,
+      "startedAt": 75509,
+      "endedAt": 75509,
       "rawEventRefs": [
         "event-32"
       ],
@@ -5027,8 +4811,8 @@
       "editingSessionId": "edit-9",
       "controlIdentity": "fbf08c6ecee9|300 - Depósito a plazo Financiero Personal Capitalizable DOP|option",
       "screenIdentity": "fbf08c6ecee9",
-      "startedAt": 97648,
-      "endedAt": 97648,
+      "startedAt": 75513,
+      "endedAt": 75513,
       "rawEventRefs": [
         "event-33"
       ],
@@ -5042,8 +4826,8 @@
       "editingSessionId": "edit-10",
       "controlIdentity": "fbf08c6ecee9|Monto|amount_or_text",
       "screenIdentity": "fbf08c6ecee9",
-      "startedAt": 99420,
-      "endedAt": 105133,
+      "startedAt": 76824,
+      "endedAt": 79645,
       "rawEventRefs": [
         "event-34",
         "event-35"
@@ -5061,8 +4845,8 @@
       "editingSessionId": "edit-11",
       "controlIdentity": "fbf08c6ecee9|Plazo|amount_or_text",
       "screenIdentity": "fbf08c6ecee9",
-      "startedAt": 106707,
-      "endedAt": 106707,
+      "startedAt": 80666,
+      "endedAt": 80666,
       "rawEventRefs": [
         "event-36"
       ],
@@ -5079,8 +4863,8 @@
       "editingSessionId": "edit-12",
       "controlIdentity": "fbf08c6ecee9|Propósito|combobox",
       "screenIdentity": "fbf08c6ecee9",
-      "startedAt": 122406,
-      "endedAt": 122406,
+      "startedAt": 100009,
+      "endedAt": 100009,
       "rawEventRefs": [
         "event-42"
       ],
@@ -5095,8 +4879,8 @@
       "editingSessionId": "edit-13",
       "controlIdentity": "fbf08c6ecee9|Propósito|selection",
       "screenIdentity": "fbf08c6ecee9",
-      "startedAt": 124185,
-      "endedAt": 124185,
+      "startedAt": 101254,
+      "endedAt": 101254,
       "rawEventRefs": [
         "event-44"
       ],
@@ -5113,8 +4897,8 @@
       "editingSessionId": "edit-14",
       "controlIdentity": "fbf08c6ecee9|Ahorros Personales|option",
       "screenIdentity": "fbf08c6ecee9",
-      "startedAt": 124189,
-      "endedAt": 124189,
+      "startedAt": 101258,
+      "endedAt": 101258,
       "rawEventRefs": [
         "event-45"
       ],
@@ -5128,8 +4912,8 @@
       "editingSessionId": "edit-15",
       "controlIdentity": "fbf08c6ecee9|Instrumento|combobox",
       "screenIdentity": "fbf08c6ecee9",
-      "startedAt": 128871,
-      "endedAt": 128871,
+      "startedAt": 104696,
+      "endedAt": 104696,
       "rawEventRefs": [
         "event-49"
       ],
@@ -5144,8 +4928,8 @@
       "editingSessionId": "edit-16",
       "controlIdentity": "fbf08c6ecee9|Instrumento|selection",
       "screenIdentity": "fbf08c6ecee9",
-      "startedAt": 129834,
-      "endedAt": 129834,
+      "startedAt": 105773,
+      "endedAt": 105773,
       "rawEventRefs": [
         "event-51"
       ],
@@ -5162,8 +4946,8 @@
       "editingSessionId": "edit-17",
       "controlIdentity": "fbf08c6ecee9|Efectivo|option",
       "screenIdentity": "fbf08c6ecee9",
-      "startedAt": 129838,
-      "endedAt": 129838,
+      "startedAt": 105777,
+      "endedAt": 105777,
       "rawEventRefs": [
         "event-52"
       ],
@@ -5177,8 +4961,8 @@
       "editingSessionId": "edit-18",
       "controlIdentity": "fbf08c6ecee9|Firma autorizada 1|combobox",
       "screenIdentity": "fbf08c6ecee9",
-      "startedAt": 132397,
-      "endedAt": 132397,
+      "startedAt": 107748,
+      "endedAt": 107748,
       "rawEventRefs": [
         "event-56"
       ],
@@ -5193,10 +4977,59 @@
       "editingSessionId": "edit-19",
       "controlIdentity": "fbf08c6ecee9|Firma autorizada 1|selection",
       "screenIdentity": "fbf08c6ecee9",
-      "startedAt": 133982,
-      "endedAt": 133982,
+      "startedAt": 108954,
+      "endedAt": 108954,
       "rawEventRefs": [
         "event-58"
+      ],
+      "intermediateValues": [],
+      "commitReason": "change",
+      "technicalTargetRefs": [
+        "fbf08c6ecee9:role:option|U5xjq 2wxuwñ5 Sws5wzw"
+      ],
+      "compoundRole": "selection",
+      "semanticField": "Firma autorizada 1",
+      "finalValue": "U5xjq 2wxuwñ5 Sws5wzw"
+    },
+    {
+      "editingSessionId": "edit-20",
+      "controlIdentity": "fbf08c6ecee9|U5xjq 2wxuwñ5 Sws5wzw|option",
+      "screenIdentity": "fbf08c6ecee9",
+      "startedAt": 108960,
+      "endedAt": 108960,
+      "rawEventRefs": [
+        "event-59"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "fbf08c6ecee9:fbf08c6ecee9|U5xjq 2wxuwñ5 Sws5wzw|option"
+      ]
+    },
+    {
+      "editingSessionId": "edit-21",
+      "controlIdentity": "fbf08c6ecee9|Firma autorizada 2|combobox",
+      "screenIdentity": "fbf08c6ecee9",
+      "startedAt": 109467,
+      "endedAt": 109467,
+      "rawEventRefs": [
+        "event-61"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "fbf08c6ecee9:fbf08c6ecee9|Firma autorizada 2|combobox"
+      ],
+      "semanticField": "Firma autorizada 2"
+    },
+    {
+      "editingSessionId": "edit-22",
+      "controlIdentity": "fbf08c6ecee9|Firma autorizada 2|selection",
+      "screenIdentity": "fbf08c6ecee9",
+      "startedAt": 110293,
+      "endedAt": 110293,
+      "rawEventRefs": [
+        "event-63"
       ],
       "intermediateValues": [],
       "commitReason": "change",
@@ -5204,37 +5037,22 @@
         "fbf08c6ecee9:role:option|Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx"
       ],
       "compoundRole": "selection",
-      "semanticField": "Firma autorizada 1",
+      "semanticField": "Firma autorizada 2",
       "finalValue": "Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx"
     },
     {
-      "editingSessionId": "edit-20",
+      "editingSessionId": "edit-23",
       "controlIdentity": "fbf08c6ecee9|Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx|option",
       "screenIdentity": "fbf08c6ecee9",
-      "startedAt": 133988,
-      "endedAt": 133988,
+      "startedAt": 110297,
+      "endedAt": 110297,
       "rawEventRefs": [
-        "event-59"
+        "event-64"
       ],
       "intermediateValues": [],
       "commitReason": "stabilization_timeout",
       "technicalTargetRefs": [
         "fbf08c6ecee9:fbf08c6ecee9|Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx|option"
-      ]
-    },
-    {
-      "editingSessionId": "edit-21",
-      "controlIdentity": "fbf08c6ecee9|R5xjzjq Zwnw445 Pj5zw4s5 4wywjp|option",
-      "screenIdentity": "fbf08c6ecee9",
-      "startedAt": 136304,
-      "endedAt": 136304,
-      "rawEventRefs": [
-        "event-63"
-      ],
-      "intermediateValues": [],
-      "commitReason": "stabilization_timeout",
-      "technicalTargetRefs": [
-        "fbf08c6ecee9:fbf08c6ecee9|R5xjzjq Zwnw445 Pj5zw4s5 4wywjp|option"
       ]
     }
   ],
@@ -5286,17 +5104,17 @@
       "confidence": 0.9
     },
     {
-      "id": "interaction-4",
-      "controlIdentity": "inicio",
+      "id": "interaction-5",
+      "controlIdentity": "fbf08c6ecee9",
       "action": "navigation",
       "sourceEventRefs": [
-        "event-4"
+        "event-5"
       ],
       "technicalTargetRefs": [],
-      "screenBeforeRef": "inicio",
-      "screenAfterRef": "inicio",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
       "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
-      "stateScope": "inicio",
+      "stateScope": "fbf08c6ecee9",
       "technicalOnly": true,
       "confidence": 0.9
     },
@@ -5428,6 +5246,18 @@
         }
       ],
       "validatedByInteraction": true,
+      "playwrightRecorderEvidence": {
+        "kind": "role",
+        "role": "link",
+        "normalizedName": "Solicitud multiproducto",
+        "targetTag": "a",
+        "scopeIdentity": {
+          "strategy": "id",
+          "value": "pv_id_4_0_1"
+        },
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true
+      },
       "screenBeforeRef": "fbf08c6ecee9",
       "screenAfterRef": "fbf08c6ecee9",
       "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/",
@@ -5447,7 +5277,7 @@
       "action": "fill",
       "valueKey": "numero_de_identificacion",
       "recordedValue": "056-0154046-0",
-      "rawTypedValue": "056-0154046-0\r\n",
+      "rawTypedValue": "056-0154046-0",
       "sourceEventRefs": [
         "event-17"
       ],
@@ -5585,7 +5415,7 @@
       "screenBeforeRef": "fbf08c6ecee9",
       "screenAfterRef": "fbf08c6ecee9",
       "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
-      "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "stateScope": "fbf08c6ecee9",
       "transitionObserved": true,
       "causedTransition": true,
@@ -5647,21 +5477,9 @@
         }
       ],
       "validatedByInteraction": true,
-      "playwrightRecorderEvidence": {
-        "kind": "role",
-        "role": "button",
-        "normalizedName": "Continuar",
-        "targetTag": "button",
-        "scopeIdentity": {
-          "strategy": "css",
-          "value": "div:has(button[aria-label=\"Continuar\"])"
-        },
-        "captureMatchCount": 1,
-        "runtimeResolutionRequired": true
-      },
       "screenBeforeRef": "fbf08c6ecee9",
       "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "stateScope": "fbf08c6ecee9",
       "admissionStatus": "accepted",
       "resolutionState": "certified",
@@ -5698,7 +5516,7 @@
             "structuralIdentityMatchCount": 1,
             "scopeIdentity": {
               "strategy": "id",
-              "value": "pv_id_126"
+              "value": "pv_id_125"
             },
             "targetFingerprint": "{\"owner\":{\"tag\":\"span\",\"role\":\"combobox\"},\"stableDirectAttributes\":{\"role\":\"combobox\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
             "captureScopeUnique": true,
@@ -5715,7 +5533,7 @@
       "description": "Ingresar en \"Categoría de producto\"",
       "screenBeforeRef": "fbf08c6ecee9",
       "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "stateScope": "fbf08c6ecee9",
       "admissionStatus": "accepted",
       "resolutionState": "runtime_resolution_required",
@@ -5734,8 +5552,8 @@
       ],
       "technicalTargetRefs": [
         "role:option|Certificados de Deposito",
-        "css:#pv_id_126_1",
-        "id:pv_id_126_1"
+        "css:#pv_id_125_1",
+        "id:pv_id_125_1"
       ],
       "technicalTargetCandidates": [
         {
@@ -5743,7 +5561,7 @@
           "locatorCandidates": [
             {
               "strategy": "css",
-              "value": "#pv_id_126_1",
+              "value": "#pv_id_125_1",
               "confidence": 0.8
             }
           ],
@@ -5754,7 +5572,7 @@
             },
             "stableDirectAttributes": {
               "aria-label": "Certificados de Deposito",
-              "id": "pv_id_126_1",
+              "id": "pv_id_125_1",
               "role": "option"
             },
             "stableDescendants": [],
@@ -5766,9 +5584,9 @@
             "structuralIdentityMatchCount": 1,
             "scopeIdentity": {
               "strategy": "id",
-              "value": "pv_id_126_list"
+              "value": "pv_id_125_list"
             },
-            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_126_1\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_125_1\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
             "captureScopeUnique": true,
             "captureTargetMatchCount": 1
           },
@@ -5787,7 +5605,7 @@
         "targetTag": "li",
         "scopeIdentity": {
           "strategy": "id",
-          "value": "pv_id_126_list"
+          "value": "pv_id_125_list"
         },
         "captureMatchCount": 1,
         "runtimeResolutionRequired": true
@@ -5795,7 +5613,7 @@
       "description": "Ingresar en \"Certificados de Deposito\"",
       "screenBeforeRef": "fbf08c6ecee9",
       "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "stateScope": "fbf08c6ecee9",
       "admissionStatus": "accepted",
       "resolutionState": "certified",
@@ -5815,8 +5633,8 @@
       ],
       "technicalTargetRefs": [
         "role:option|Certificados de Deposito",
-        "css:#pv_id_126_1",
-        "id:pv_id_126_1"
+        "css:#pv_id_125_1",
+        "id:pv_id_125_1"
       ],
       "selectorControlId": "fbf08c6ecee9|||Categoría de producto",
       "optionSurfaceId": "fbf08c6ecee9|fbf08c6ecee9|||Categoría de producto|option-surface",
@@ -5826,7 +5644,7 @@
           "locatorCandidates": [
             {
               "strategy": "css",
-              "value": "#pv_id_126_1",
+              "value": "#pv_id_125_1",
               "confidence": 0.8
             }
           ],
@@ -5837,7 +5655,7 @@
             },
             "stableDirectAttributes": {
               "aria-label": "Certificados de Deposito",
-              "id": "pv_id_126_1",
+              "id": "pv_id_125_1",
               "role": "option"
             },
             "stableDescendants": [],
@@ -5849,9 +5667,9 @@
             "structuralIdentityMatchCount": 1,
             "scopeIdentity": {
               "strategy": "id",
-              "value": "pv_id_126_list"
+              "value": "pv_id_125_list"
             },
-            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_126_1\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_125_1\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
             "captureScopeUnique": true,
             "captureTargetMatchCount": 1
           },
@@ -5870,7 +5688,7 @@
         "targetTag": "li",
         "scopeIdentity": {
           "strategy": "id",
-          "value": "pv_id_126_list"
+          "value": "pv_id_125_list"
         },
         "captureMatchCount": 1,
         "runtimeResolutionRequired": true
@@ -5878,7 +5696,7 @@
       "description": "Seleccionar en \"Categoría de producto\"",
       "screenBeforeRef": "fbf08c6ecee9",
       "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "stateScope": "fbf08c6ecee9",
       "admissionStatus": "accepted",
       "resolutionState": "certified",
@@ -5916,7 +5734,7 @@
             "structuralIdentityMatchCount": 1,
             "scopeIdentity": {
               "strategy": "id",
-              "value": "pv_id_127"
+              "value": "pv_id_126"
             },
             "targetFingerprint": "{\"owner\":{\"tag\":\"span\",\"role\":\"combobox\"},\"stableDirectAttributes\":{\"role\":\"combobox\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
             "captureScopeUnique": true,
@@ -5933,7 +5751,7 @@
       "description": "Ingresar en \"Producto\"",
       "screenBeforeRef": "fbf08c6ecee9",
       "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "stateScope": "fbf08c6ecee9",
       "admissionStatus": "accepted",
       "resolutionState": "runtime_resolution_required",
@@ -5952,8 +5770,8 @@
       ],
       "technicalTargetRefs": [
         "role:option|300 - Depósito a plazo Financiero Personal Capitalizable DOP",
-        "css:#pv_id_127_0",
-        "id:pv_id_127_0"
+        "css:#pv_id_126_0",
+        "id:pv_id_126_0"
       ],
       "technicalTargetCandidates": [
         {
@@ -5961,7 +5779,7 @@
           "locatorCandidates": [
             {
               "strategy": "css",
-              "value": "#pv_id_127_0",
+              "value": "#pv_id_126_0",
               "confidence": 0.8
             }
           ],
@@ -5972,7 +5790,7 @@
             },
             "stableDirectAttributes": {
               "aria-label": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
-              "id": "pv_id_127_0",
+              "id": "pv_id_126_0",
               "role": "option"
             },
             "stableDescendants": [],
@@ -5984,9 +5802,9 @@
             "structuralIdentityMatchCount": 1,
             "scopeIdentity": {
               "strategy": "id",
-              "value": "pv_id_127_list"
+              "value": "pv_id_126_list"
             },
-            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_127_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_126_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
             "captureScopeUnique": true,
             "captureTargetMatchCount": 1
           },
@@ -5998,10 +5816,22 @@
         }
       ],
       "validatedByInteraction": true,
+      "playwrightRecorderEvidence": {
+        "kind": "role",
+        "role": "option",
+        "normalizedName": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+        "targetTag": "li",
+        "scopeIdentity": {
+          "strategy": "id",
+          "value": "pv_id_126_list"
+        },
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true
+      },
       "description": "Ingresar en \"300 - Depósito a plazo Financiero Personal Capitalizable DOP\"",
       "screenBeforeRef": "fbf08c6ecee9",
       "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "stateScope": "fbf08c6ecee9",
       "admissionStatus": "accepted",
       "resolutionState": "certified",
@@ -6021,8 +5851,8 @@
       ],
       "technicalTargetRefs": [
         "role:option|300 - Depósito a plazo Financiero Personal Capitalizable DOP",
-        "css:#pv_id_127_0",
-        "id:pv_id_127_0"
+        "css:#pv_id_126_0",
+        "id:pv_id_126_0"
       ],
       "selectorControlId": "fbf08c6ecee9|||Producto",
       "optionSurfaceId": "fbf08c6ecee9|fbf08c6ecee9|||Producto|option-surface",
@@ -6032,7 +5862,7 @@
           "locatorCandidates": [
             {
               "strategy": "css",
-              "value": "#pv_id_127_0",
+              "value": "#pv_id_126_0",
               "confidence": 0.8
             }
           ],
@@ -6043,7 +5873,7 @@
             },
             "stableDirectAttributes": {
               "aria-label": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
-              "id": "pv_id_127_0",
+              "id": "pv_id_126_0",
               "role": "option"
             },
             "stableDescendants": [],
@@ -6055,9 +5885,9 @@
             "structuralIdentityMatchCount": 1,
             "scopeIdentity": {
               "strategy": "id",
-              "value": "pv_id_127_list"
+              "value": "pv_id_126_list"
             },
-            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_127_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_126_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
             "captureScopeUnique": true,
             "captureTargetMatchCount": 1
           },
@@ -6069,10 +5899,22 @@
         }
       ],
       "validatedByInteraction": true,
+      "playwrightRecorderEvidence": {
+        "kind": "role",
+        "role": "option",
+        "normalizedName": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+        "targetTag": "li",
+        "scopeIdentity": {
+          "strategy": "id",
+          "value": "pv_id_126_list"
+        },
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true
+      },
       "description": "Seleccionar en \"Producto\"",
       "screenBeforeRef": "fbf08c6ecee9",
       "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "stateScope": "fbf08c6ecee9",
       "admissionStatus": "accepted",
       "resolutionState": "certified",
@@ -6094,7 +5936,7 @@
       "description": "Ingresar en \"Monto\"",
       "screenBeforeRef": "fbf08c6ecee9",
       "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "stateScope": "fbf08c6ecee9",
       "admissionStatus": "accepted",
       "resolutionState": "runtime_resolution_required",
@@ -6115,7 +5957,7 @@
       "description": "Ingresar en \"Plazo\"",
       "screenBeforeRef": "fbf08c6ecee9",
       "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "stateScope": "fbf08c6ecee9",
       "admissionStatus": "accepted",
       "resolutionState": "runtime_resolution_required",
@@ -6169,7 +6011,7 @@
       "validatedByInteraction": true,
       "screenBeforeRef": "fbf08c6ecee9",
       "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "stateScope": "fbf08c6ecee9",
       "admissionStatus": "accepted",
       "resolutionState": "certified",
@@ -6242,7 +6084,7 @@
       },
       "screenBeforeRef": "fbf08c6ecee9",
       "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "stateScope": "fbf08c6ecee9",
       "admissionStatus": "accepted",
       "resolutionState": "certified",
@@ -6296,7 +6138,7 @@
       "description": "Ingresar en \"Propósito\"",
       "screenBeforeRef": "fbf08c6ecee9",
       "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "stateScope": "fbf08c6ecee9",
       "admissionStatus": "accepted",
       "resolutionState": "runtime_resolution_required",
@@ -6364,7 +6206,7 @@
       "description": "Ingresar en \"Ahorros Personales\"",
       "screenBeforeRef": "fbf08c6ecee9",
       "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "stateScope": "fbf08c6ecee9",
       "admissionStatus": "accepted",
       "resolutionState": "certified",
@@ -6435,7 +6277,7 @@
       "description": "Seleccionar en \"Propósito\"",
       "screenBeforeRef": "fbf08c6ecee9",
       "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "stateScope": "fbf08c6ecee9",
       "admissionStatus": "accepted",
       "resolutionState": "certified",
@@ -6473,7 +6315,7 @@
             "structuralIdentityMatchCount": 1,
             "scopeIdentity": {
               "strategy": "id",
-              "value": "pv_id_134_content"
+              "value": "pv_id_133_content"
             },
             "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
             "captureScopeUnique": true,
@@ -6490,7 +6332,7 @@
       "description": "Ingresar en \"Reintentar buscar lista\"",
       "screenBeforeRef": "fbf08c6ecee9",
       "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "stateScope": "fbf08c6ecee9",
       "admissionStatus": "accepted",
       "resolutionState": "runtime_resolution_required",
@@ -6544,7 +6386,7 @@
       "description": "Ingresar en \"Instrumento\"",
       "screenBeforeRef": "fbf08c6ecee9",
       "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "stateScope": "fbf08c6ecee9",
       "admissionStatus": "accepted",
       "resolutionState": "runtime_resolution_required",
@@ -6624,7 +6466,7 @@
       "description": "Ingresar en \"Efectivo\"",
       "screenBeforeRef": "fbf08c6ecee9",
       "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "stateScope": "fbf08c6ecee9",
       "admissionStatus": "accepted",
       "resolutionState": "certified",
@@ -6707,7 +6549,7 @@
       "description": "Seleccionar en \"Instrumento\"",
       "screenBeforeRef": "fbf08c6ecee9",
       "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "stateScope": "fbf08c6ecee9",
       "admissionStatus": "accepted",
       "resolutionState": "certified",
@@ -6746,7 +6588,7 @@
             "structuralIdentityMatchCount": 2,
             "scopeIdentity": {
               "strategy": "id",
-              "value": "pv_id_135_content"
+              "value": "pv_id_134_content"
             },
             "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
             "captureScopeUnique": true,
@@ -6763,7 +6605,7 @@
       "description": "Ingresar en \"Reintentar buscar lista\"",
       "screenBeforeRef": "fbf08c6ecee9",
       "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "stateScope": "fbf08c6ecee9",
       "admissionStatus": "accepted",
       "resolutionState": "runtime_resolution_required",
@@ -6777,6 +6619,200 @@
       "valueKey": "firma_autorizada_1",
       "sourceEventRefs": [
         "event-55"
+      ],
+      "technicalTargetRefs": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "span",
+              "role": "combobox"
+            },
+            "stableDirectAttributes": {
+              "role": "combobox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "pv_id_141"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"span\",\"role\":\"combobox\"},\"stableDirectAttributes\":{\"role\":\"combobox\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Firma autorizada 1\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "runtime_resolution_required",
+      "technicalOnly": true,
+      "executionAuthority": true,
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-57",
+      "controlIdentity": "fbf08c6ecee9|U5xjq 2wxuwñ5 Sws5wzw|role|option|U5xjq 2wxuwñ5 Sws5wzw",
+      "semanticField": "Firma autorizada 1",
+      "action": "click",
+      "valueKey": "u5xjq_2wxuwn5_sws5wzw",
+      "sourceEventRefs": [
+        "event-57"
+      ],
+      "technicalTargetRefs": [
+        "role:option|U5xjq 2wxuwñ5 Sws5wzw",
+        "css:#pv_id_141_0",
+        "id:pv_id_141_0"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#pv_id_141_0",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "U5xjq 2wxuwñ5 Sws5wzw ",
+              "id": "pv_id_141_0",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "pv_id_141_list"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_141_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"U5xjq 2wxuwñ5 Sws5wzw\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "technicalOnly": true,
+      "executionAuthority": true,
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-58",
+      "controlIdentity": "fbf08c6ecee9|Firma autorizada 1|role|option|U5xjq 2wxuwñ5 Sws5wzw",
+      "semanticField": "Firma autorizada 1",
+      "action": "select",
+      "valueKey": "firma_autorizada_1_seleccion",
+      "recordedValue": "U5xjq 2wxuwñ5 Sws5wzw",
+      "sourceEventRefs": [
+        "event-58"
+      ],
+      "technicalTargetRefs": [
+        "role:option|U5xjq 2wxuwñ5 Sws5wzw",
+        "css:#pv_id_141_0",
+        "id:pv_id_141_0"
+      ],
+      "selectorControlId": "fbf08c6ecee9|||Firma autorizada 1",
+      "optionSurfaceId": "fbf08c6ecee9|fbf08c6ecee9|||Firma autorizada 1|option-surface",
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#pv_id_141_0",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "U5xjq 2wxuwñ5 Sws5wzw ",
+              "id": "pv_id_141_0",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "pv_id_141_list"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_141_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Seleccionar en \"Firma autorizada 1\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "executionAuthority": false,
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-60",
+      "controlIdentity": "fbf08c6ecee9|Firma autorizada 2",
+      "semanticField": "Firma autorizada 2",
+      "action": "click",
+      "valueKey": "firma_autorizada_2",
+      "sourceEventRefs": [
+        "event-60"
       ],
       "technicalTargetRefs": [],
       "technicalTargetCandidates": [
@@ -6814,10 +6850,10 @@
         }
       ],
       "validatedByInteraction": true,
-      "description": "Ingresar en \"Firma autorizada 1\"",
+      "description": "Ingresar en \"Firma autorizada 2\"",
       "screenBeforeRef": "fbf08c6ecee9",
       "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "stateScope": "fbf08c6ecee9",
       "admissionStatus": "accepted",
       "resolutionState": "runtime_resolution_required",
@@ -6826,12 +6862,12 @@
       "confidence": 0.7
     },
     {
-      "id": "interaction-57",
+      "id": "interaction-62",
       "controlIdentity": "fbf08c6ecee9|Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx|role|option|Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx",
       "action": "click",
       "dynamicTargetLabel": true,
       "sourceEventRefs": [
-        "event-57"
+        "event-62"
       ],
       "technicalTargetRefs": [
         "css:#pv_id_142_1",
@@ -6882,7 +6918,7 @@
       "validatedByInteraction": true,
       "screenBeforeRef": "fbf08c6ecee9",
       "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "stateScope": "fbf08c6ecee9",
       "admissionStatus": "accepted",
       "resolutionState": "certified",
@@ -6891,22 +6927,22 @@
       "confidence": 0.85
     },
     {
-      "id": "interaction-58",
-      "controlIdentity": "fbf08c6ecee9|Firma autorizada 1|role|option|Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx",
-      "semanticField": "Firma autorizada 1",
+      "id": "interaction-63",
+      "controlIdentity": "fbf08c6ecee9|Firma autorizada 2|role|option|Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx",
+      "semanticField": "Firma autorizada 2",
       "action": "select",
-      "valueKey": "firma_autorizada_1_seleccion",
+      "valueKey": "firma_autorizada_2_seleccion",
       "recordedValue": "Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx",
       "sourceEventRefs": [
-        "event-58"
+        "event-63"
       ],
       "technicalTargetRefs": [
         "role:option|Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx",
         "css:#pv_id_142_1",
         "id:pv_id_142_1"
       ],
-      "selectorControlId": "fbf08c6ecee9|||Firma autorizada 1",
-      "optionSurfaceId": "fbf08c6ecee9|fbf08c6ecee9|||Firma autorizada 1|option-surface",
+      "selectorControlId": "fbf08c6ecee9|||Firma autorizada 2",
+      "optionSurfaceId": "fbf08c6ecee9|fbf08c6ecee9|||Firma autorizada 2|option-surface",
       "technicalTargetCandidates": [
         {
           "targetType": "structural",
@@ -6950,10 +6986,10 @@
         }
       ],
       "validatedByInteraction": true,
-      "description": "Seleccionar en \"Firma autorizada 1\"",
+      "description": "Seleccionar en \"Firma autorizada 2\"",
       "screenBeforeRef": "fbf08c6ecee9",
       "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "stateScope": "fbf08c6ecee9",
       "admissionStatus": "accepted",
       "resolutionState": "certified",
@@ -6961,319 +6997,24 @@
       "confidence": 0.85
     },
     {
-      "id": "interaction-61",
-      "controlIdentity": "fbf08c6ecee9|css|#pv_id_143",
-      "action": "click",
-      "recordedValue": "radames",
-      "sourceEventRefs": [
-        "event-61"
-      ],
-      "technicalTargetRefs": [
-        "css:#pv_id_143",
-        "id:pv_id_143"
-      ],
-      "technicalTargetCandidates": [
-        {
-          "targetType": "structural",
-          "locatorCandidates": [
-            {
-              "strategy": "css",
-              "value": "#pv_id_143",
-              "confidence": 0.8
-            }
-          ],
-          "structuralContext": {
-            "owner": {
-              "tag": "div"
-            },
-            "stableDirectAttributes": {
-              "id": "pv_id_143"
-            },
-            "stableDescendants": [
-              {
-                "relation": "descendant",
-                "tag": "span",
-                "role": "combobox",
-                "stableAttributes": {
-                  "role": "combobox"
-                }
-              }
-            ],
-            "semanticShape": [
-              "div",
-              "span:combobox"
-            ],
-            "landmarkAncestor": {
-              "tag": "main"
-            },
-            "deterministicStructuralIdentity": true,
-            "topologySignature": "{\"childEntries\":[[\"div\",1],[\"span\",1]],\"descendantEntries\":[[\"div\",1],[\"path\",1],[\"span\",1],[\"svg\",1]]}",
-            "structuralIdentityMatchCount": 1,
-            "scopeIdentity": {
-              "strategy": "id",
-              "value": "pv_id_135_content"
-            },
-            "targetFingerprint": "{\"owner\":{\"tag\":\"div\"},\"stableDirectAttributes\":{\"id\":\"pv_id_143\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"span\",\"role\":\"combobox\",\"stableAttributes\":{\"role\":\"combobox\"}}],\"semanticShape\":[\"div\",\"span:combobox\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1],[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",1],[\\\"path\\\",1],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
-            "captureScopeUnique": true,
-            "captureTargetMatchCount": 1
-          },
-          "interactionEvidence": [
-            "v2_click_owner",
-            "v2_framework_actionable_owner"
-          ],
-          "confidence": 0.85,
-          "validatedByInteraction": true
-        }
-      ],
-      "validatedByInteraction": true,
-      "screenBeforeRef": "fbf08c6ecee9",
-      "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
-      "stateScope": "fbf08c6ecee9",
-      "admissionStatus": "accepted",
-      "resolutionState": "certified",
-      "confidence": 0.8
-    },
-    {
-      "id": "interaction-62",
-      "controlIdentity": "fbf08c6ecee9|R5xjzjq Zwnw445 Pj5zw4s5 4wywjp|role|option|R5xjzjq Zwnw445 Pj5zw4s5 4wywjp",
-      "action": "click",
-      "dynamicTargetLabel": true,
-      "sourceEventRefs": [
-        "event-62"
-      ],
-      "technicalTargetRefs": [
-        "css:#pv_id_143_5",
-        "id:pv_id_143_5"
-      ],
-      "technicalTargetCandidates": [
-        {
-          "targetType": "structural",
-          "locatorCandidates": [
-            {
-              "strategy": "css",
-              "value": "#pv_id_143_5",
-              "confidence": 0.8
-            }
-          ],
-          "structuralContext": {
-            "owner": {
-              "tag": "li",
-              "role": "option"
-            },
-            "stableDirectAttributes": {
-              "aria-label": "R5xjzjq Zwnw445 Pj5zw4s5 4wywjp",
-              "id": "pv_id_143_5",
-              "role": "option"
-            },
-            "stableDescendants": [],
-            "semanticShape": [
-              "span"
-            ],
-            "deterministicStructuralIdentity": true,
-            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
-            "structuralIdentityMatchCount": 1,
-            "scopeIdentity": {
-              "strategy": "id",
-              "value": "pv_id_143_list"
-            },
-            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_143_5\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
-            "captureScopeUnique": true,
-            "captureTargetMatchCount": 1
-          },
-          "interactionEvidence": [
-            "v2_click_owner"
-          ],
-          "confidence": 0.85,
-          "validatedByInteraction": true
-        }
-      ],
-      "validatedByInteraction": true,
-      "screenBeforeRef": "fbf08c6ecee9",
-      "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
-      "stateScope": "fbf08c6ecee9",
-      "admissionStatus": "accepted",
-      "resolutionState": "certified",
-      "confidence": 0.85
-    },
-    {
       "id": "interaction-65",
-      "controlIdentity": "fbf08c6ecee9|Crear certificado|role|button|Crear certificado",
-      "action": "click",
+      "controlIdentity": "fbf08c6ecee9",
+      "action": "navigation",
       "sourceEventRefs": [
         "event-65"
       ],
-      "technicalTargetRefs": [
-        "role:button|Crear certificado"
-      ],
-      "technicalTargetCandidates": [
-        {
-          "targetType": "structural",
-          "locatorCandidates": [
-            {
-              "strategy": "role",
-              "value": "button|Crear certificado",
-              "confidence": 0.85
-            }
-          ],
-          "structuralContext": {
-            "owner": {
-              "tag": "button"
-            },
-            "stableDirectAttributes": {
-              "aria-label": "Crear certificado"
-            },
-            "stableDescendants": [],
-            "semanticShape": [
-              "span"
-            ],
-            "landmarkAncestor": {
-              "tag": "main"
-            },
-            "deterministicStructuralIdentity": true,
-            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
-            "structuralIdentityMatchCount": 1,
-            "scopeIdentity": {
-              "strategy": "id",
-              "value": "pv_id_136_content"
-            },
-            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
-            "captureScopeUnique": true,
-            "captureTargetMatchCount": 1
-          },
-          "interactionEvidence": [
-            "v2_click_owner"
-          ],
-          "confidence": 0.85,
-          "validatedByInteraction": true
-        }
-      ],
-      "validatedByInteraction": true,
+      "technicalTargetRefs": [],
       "screenBeforeRef": "fbf08c6ecee9",
       "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "stateScope": "fbf08c6ecee9",
-      "admissionStatus": "accepted",
-      "resolutionState": "certified",
-      "confidence": 0.85
-    },
-    {
-      "id": "interaction-67",
-      "controlIdentity": "fbf08c6ecee9|Cancelar|role|button|Cancelar",
-      "action": "click",
-      "sourceEventRefs": [
-        "event-67"
-      ],
-      "technicalTargetRefs": [
-        "role:button|Cancelar"
-      ],
-      "technicalTargetCandidates": [
-        {
-          "targetType": "structural",
-          "locatorCandidates": [
-            {
-              "strategy": "role",
-              "value": "button|Cancelar",
-              "confidence": 0.85
-            }
-          ],
-          "structuralContext": {
-            "owner": {
-              "tag": "button"
-            },
-            "stableDirectAttributes": {
-              "aria-label": "Cancelar"
-            },
-            "stableDescendants": [],
-            "semanticShape": [
-              "span"
-            ],
-            "landmarkAncestor": {
-              "tag": "main"
-            },
-            "deterministicStructuralIdentity": true,
-            "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
-            "structuralIdentityMatchCount": 1,
-            "scopeIdentity": {
-              "strategy": "id",
-              "value": "__nuxt"
-            },
-            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
-            "captureScopeUnique": true,
-            "captureTargetMatchCount": 1
-          },
-          "interactionEvidence": [
-            "v2_click_owner"
-          ],
-          "confidence": 0.85,
-          "validatedByInteraction": true
-        }
-      ],
-      "validatedByInteraction": true,
-      "screenBeforeRef": "fbf08c6ecee9",
-      "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
-      "stateScope": "fbf08c6ecee9",
-      "admissionStatus": "accepted",
-      "resolutionState": "certified",
-      "confidence": 0.85
-    },
-    {
-      "id": "interaction-69",
-      "controlIdentity": "fbf08c6ecee9|Aceptar|role|button|Aceptar",
-      "action": "click",
-      "sourceEventRefs": [
-        "event-69"
-      ],
-      "technicalTargetRefs": [
-        "role:button|Aceptar"
-      ],
-      "technicalTargetCandidates": [
-        {
-          "targetType": "structural",
-          "locatorCandidates": [
-            {
-              "strategy": "role",
-              "value": "button|Aceptar",
-              "confidence": 0.85
-            }
-          ],
-          "structuralContext": {
-            "owner": {
-              "tag": "button"
-            },
-            "stableDirectAttributes": {
-              "aria-label": "Aceptar"
-            },
-            "stableDescendants": [],
-            "semanticShape": [
-              "span"
-            ],
-            "deterministicStructuralIdentity": true,
-            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
-            "structuralIdentityMatchCount": 1
-          },
-          "interactionEvidence": [
-            "v2_click_owner"
-          ],
-          "confidence": 0.85,
-          "validatedByInteraction": true
-        }
-      ],
-      "validatedByInteraction": true,
-      "screenBeforeRef": "fbf08c6ecee9",
-      "screenAfterRef": "fbf08c6ecee9",
-      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
-      "stateScope": "fbf08c6ecee9",
-      "admissionStatus": "accepted",
-      "resolutionState": "certified",
-      "confidence": 0.85
+      "technicalOnly": true,
+      "confidence": 0.9
     }
   ],
   "gridMetadata": {
     "detected": true,
-    "grids": 3,
+    "grids": 5,
     "rows": 0,
     "cells": 0,
     "headers": [],

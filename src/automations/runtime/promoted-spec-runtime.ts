@@ -17,6 +17,7 @@ import { hasCausalSelectionTransition, type InteractiveState } from "../../disco
 import type { RecordedLocator, RecordedTechnicalTarget } from "../../recording/session-trace.types";
 import type { PlaywrightRecorderEvidence, SemanticRuntimeEvidence } from "../../recording/structural-owner-identity";
 import { scanCurrentPage } from "../../explorer/page-scanner";
+import { findUniqueSelectionListRecoveryControl } from "../../scenarios/selection-list-recovery";
 import {
   parseTechnicalTargetRefs,
   resolvePromotedFieldIdentityFromPersistedContract,
@@ -41,7 +42,7 @@ import {
  * process is provably running a cached/stale copy of this module and must be restarted -- no
  * further code change in this file can fix that from the inside.
  */
-export const PROMOTED_SPEC_RUNTIME_MODULE_VERSION = "2026-10-05T12-positive-completion-outcome-v1";
+export const PROMOTED_SPEC_RUNTIME_MODULE_VERSION = "2026-10-07T01-selection-list-recovery-v1";
 console.log(
   `[runtime:module-loaded] file=src/automations/runtime/promoted-spec-runtime.ts ` +
   `version=${PROMOTED_SPEC_RUNTIME_MODULE_VERSION} loadedAt=${new Date().toISOString()} pid=${process.pid}`,
@@ -701,6 +702,47 @@ async function resolvePromotedSelectionOption(
     }
   }
   return undefined;
+}
+
+async function recoverPromotedSelectionList(
+  page: Page,
+  selectionField: string,
+  selectionValue: string,
+  timeoutMs: number,
+): Promise<{ status: "not_applicable" | "recovered" | "not_ready"; option?: { locator: any; strategy: string } }> {
+  const snapshot = await scanCurrentPage(page).catch(() => undefined);
+  const control = snapshot
+    ? findUniqueSelectionListRecoveryControl(snapshot.elements, selectionField)
+    : undefined;
+  if (!control) return { status: "not_applicable" };
+
+  const controlName = [control.accessibleName, control.ariaLabel, control.label, control.name, control.text, control.title]
+    .find((value) => Boolean(value?.trim()))?.trim();
+  if (!controlName) return { status: "not_applicable" };
+
+  const locator = page.getByRole("button", { name: controlName, exact: true });
+  const count = await locator.count().catch(() => 0);
+  if (count !== 1 || !await locator.isVisible().catch(() => false) || !await locator.isEnabled().catch(() => false)) {
+    console.log(`[selection-list-recovery] status=not_unique_or_actionable fieldPresent=true candidateCount=${count}`);
+    return { status: "not_applicable" };
+  }
+
+  console.log(`[selection-list-recovery] status=retry_started fieldPresent=true`);
+  await locator.click({ timeout: timeoutMs });
+  const roleOption = page.getByRole("option", { name: selectionValue, exact: true });
+  await roleOption.waitFor({ state: "visible", timeout: timeoutMs }).catch(() => undefined);
+  let option = await resolvePromotedSelectionOption(page, selectionValue, timeoutMs);
+  if (!option) {
+    const textOption = page.getByText(selectionValue, { exact: true });
+    await textOption.waitFor({ state: "visible", timeout: timeoutMs }).catch(() => undefined);
+    option = await resolvePromotedSelectionOption(page, selectionValue, timeoutMs);
+  }
+  if (!option) {
+    console.log(`[selection-list-recovery] status=retry_completed_option_unavailable fieldPresent=true`);
+    return { status: "not_ready" };
+  }
+  console.log(`[selection-list-recovery] status=option_ready fieldPresent=true`);
+  return { status: "recovered", option };
 }
 
 export type PromotedAssertOptions = {
@@ -5162,6 +5204,21 @@ export class PromotedSpecRuntime {
       const previousUrl = this.page.url();
       let option = await resolvePromotedSelectionOption(this.page, runtimeValue, this.config.actionTimeoutMs);
       let openerStrategy = "already-open";
+      if (!option) {
+        const listRecovery = selectionField
+          ? await recoverPromotedSelectionList(this.page, selectionField, runtimeValue, this.config.actionTimeoutMs)
+          : { status: "not_applicable" as const };
+        if (listRecovery.status === "not_ready") {
+          throw new Error(
+            `selection_list_recovery_not_ready: stepIndex=${options.stepIndex} `
+            + `selectionFieldPresent=${Boolean(selectionField)} retryControlFound=true optionAvailable=false`,
+          );
+        }
+        if (listRecovery.status === "recovered") {
+          option = listRecovery.option;
+          openerStrategy = "conditional_list_retry";
+        }
+      }
       if (!option) {
         const opener = await resolvePromotedClickableLocator(this.page, options.target, {
           targetIdentity,

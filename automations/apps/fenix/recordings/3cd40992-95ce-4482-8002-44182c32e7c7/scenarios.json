@@ -2145,7 +2145,7 @@
       "oracleReadiness": true,
       "reviewReadiness": true,
       "publicationContentReadiness": true,
-      "executionReadiness": true,
+      "executionReadiness": false,
       "publicationReadiness": true,
       "missingInputs": [],
       "datasetAuthorityMismatches": [],
@@ -2567,11 +2567,11 @@
     },
     "promotedSpec": {
       "appSlug": "fenix",
-      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\default-section\\cases\\preview-002-transferencias-entre-cuantas-propias\\case.spec.ts",
-      "specHash": "4aa0b9aa757731e0194777284da1eda570ab16e87b592069e5757d1483af89df",
-      "automationId": "preview-002-transferencias-entre-cuantas-propias",
-      "sectionSlug": "default-section",
-      "generatedAt": "2026-10-07T02:07:25.990Z"
+      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\api-tests\\cases\\preview-001-transferencias-entre-cuantas-propias\\case.spec.ts",
+      "specHash": "796ba2eeaadf123f7e99b54c17b9f3c7f84704f0744bc6230222f206fa86e8d8",
+      "automationId": "preview-001-transferencias-entre-cuantas-propias",
+      "sectionSlug": "api-tests",
+      "generatedAt": "2026-10-07T21:35:04.270Z"
     },
     "selectorOptionInventories": [
       {

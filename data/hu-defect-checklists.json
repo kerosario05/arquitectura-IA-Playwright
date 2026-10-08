@@ -3015,30 +3015,28 @@
         "description": "Paso fallido:\nPaso 2: Continuar\n\nQué pasó:\nNo se encontró el elemento necesario para continuar la ejecución.\n\nResultado esperado:\nEl flujo de dado que se completa exitosamente.\n\nEvidencia:\nEvidencia técnica disponible.",
         "severity": "medium",
         "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
-        "jobId": "69567ebb-f75c-4794-879e-d09a681d7d08",
+        "jobId": "3315c5f3-a3ff-4f9e-a7e3-c53e4518f385",
         "status": "pending_review",
         "scenarioId": "PREVIEW-001",
         "scenarioTitle": "Ejecutar flujo completo de dado que",
         "title": "[Media] No se encontró \"Continuar\" (paso 2) — Ejecutar flujo completo de dado que",
         "technicalContext": {
-          "reasonCode": "locator_resolution_failed",
+          "reasonCode": "target_not_found",
           "discoveryStatus": "exploration_failed",
-          "failedAtStep": 2,
-          "failedTarget": "Continuar",
-          "expectedResult": "El flujo de dado que se completa exitosamente.",
-          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-08-13T18-06-01-848Z\\evidence",
-          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-08-13T18-06-01-848Z\\evidence\\step-1-snapshot.json",
+          "failedAtStep": 5,
+          "failedTarget": "Solicitud multiproducto",
+          "expectedResult": "La aplicación carga su pantalla inicial",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T15-59-02-565Z\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T15-59-02-565Z\\evidence\\step-4-snapshot.json",
           "lastSuccessfulStep": {
-            "stepIndex": 1,
-            "action": "Clic en \"transacciones y servicios\".",
-            "target": "transacciones y servicios",
-            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-08-13T18-06-01-848Z\\evidence\\step-1-snapshot.json"
-          },
-          "testRailCaseId": 43527,
-          "testRailRunId": 3940
+            "stepIndex": 4,
+            "action": "Presionar \"Enter\" en \"Contraseña\"",
+            "target": "Contraseña",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T15-59-02-565Z\\evidence\\step-4-snapshot.json"
+          }
         },
         "createdAt": "2026-08-13T18:10:00.872Z",
-        "updatedAt": "2026-08-13T18:10:00.872Z"
+        "updatedAt": "2026-10-07T15:59:42.912Z"
       },
       {
         "id": "1786644600888-dwarokl",
@@ -14802,5 +14800,81 @@
     ],
     "createdAt": "2026-10-06T13:39:41.161Z",
     "updatedAt": "2026-10-06T13:39:41.174Z"
+  },
+  {
+    "id": "1791389076619-2vap6jl",
+    "issueKey": "REC-510CEB25",
+    "urlSlug": "REC-510CEB25",
+    "defects": [
+      {
+        "id": "1791389143218-06gztpa",
+        "description": "Paso fallido:\nPaso 8: Depurar\n\nQué pasó:\nLa ejecución falló con código: click_no_causal_effect_detected\n\nResultado esperado:\nLa aplicación carga su pantalla inicial\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "8d3c87b2-2d02-46e8-9de0-c0362efdd048",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Registro deposito a plazo cliente existente",
+        "title": "[Media] No se encontró \"Depurar\" (paso 8) — Registro deposito a plazo cliente existente",
+        "technicalContext": {
+          "reasonCode": "CLICK_NO_CAUSAL_EFFECT_DETECTED",
+          "discoveryStatus": "exploration_failed",
+          "failedAtStep": 8,
+          "failedTarget": "Depurar",
+          "expectedResult": "La aplicación carga su pantalla inicial",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T16-04-40-957Z\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T16-04-40-957Z\\evidence\\step-7-snapshot.json",
+          "lastSuccessfulStep": {
+            "stepIndex": 7,
+            "action": "Presionar botón asociado a \"Número de identificación\"",
+            "target": "Número de identificación",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T16-04-40-957Z\\evidence\\step-7-snapshot.json"
+          }
+        },
+        "createdAt": "2026-10-07T16:05:43.218Z",
+        "updatedAt": "2026-10-07T16:05:43.218Z"
+      }
+    ],
+    "createdAt": "2026-10-07T16:04:36.619Z",
+    "updatedAt": "2026-10-07T16:05:43.218Z"
+  },
+  {
+    "id": "1791399853425-lg2pkfq",
+    "issueKey": "GDD-1364",
+    "urlSlug": "GDD-1364",
+    "defects": [
+      {
+        "id": "1791399853435-0b9tf9e",
+        "description": "Paso fallido:\nPaso 6: Número de identificación\n\nQué pasó:\nLa ejecución falló con código: fill_target_not_editable\n\nResultado esperado:\nLa aplicación carga su pantalla inicial\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "03f4ea11-a532-4816-bac5-3c5b22530e49",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Registro deposito a plazo cliente existente",
+        "title": "[Media] No se encontró \"Número de identificación\" (paso 6) — Registro deposito a plazo cliente existente",
+        "technicalContext": {
+          "reasonCode": "fill_target_not_editable",
+          "discoveryStatus": "exploration_failed",
+          "failedAtStep": 6,
+          "failedTarget": "Número de identificación",
+          "expectedResult": "La aplicación carga su pantalla inicial",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T19-03-18-733Z\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T19-03-18-733Z\\evidence\\step-5-snapshot.json",
+          "lastSuccessfulStep": {
+            "stepIndex": 5,
+            "action": "Presionar \"Solicitud multiproducto\"",
+            "target": "Solicitud multiproducto",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T19-03-18-733Z\\evidence\\step-5-snapshot.json"
+          },
+          "testRailCaseId": 53166,
+          "testRailRunId": 4592
+        },
+        "createdAt": "2026-10-07T19:04:13.435Z",
+        "updatedAt": "2026-10-07T19:04:13.435Z"
+      }
+    ],
+    "createdAt": "2026-10-07T19:04:13.425Z",
+    "updatedAt": "2026-10-07T19:04:13.435Z"
   }
 ]

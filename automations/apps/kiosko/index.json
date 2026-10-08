@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-10-07T03:16:58.243Z",
+  "updatedAt": "2026-10-08T12:29:02.113Z",
   "automations": [
     {
       "id": "preview-001-kiosko2",
@@ -881,13 +881,13 @@
       "source": "discovery",
       "appProfile": "kiosko",
       "createdAt": "2026-10-02T19:15:25.723Z",
-      "updatedAt": "2026-10-07T03:16:58.243Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T03-13-55-468Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-08T12:29:02.113Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-08T12-25-29-406Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T03-13-55-468Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-08T12-25-29-406Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -911,7 +911,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 77418,
+          "durationMs": 84563,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -961,8 +961,8 @@
           "specWritten": true,
           "previousSpec": {
             "existed": true,
-            "hash": "73a2b4158a09dd65460eb308c45455ba179eeaac57206f49b79e257f52824f6d",
-            "lastModifiedAt": "2026-10-02T19:15:25.691Z"
+            "hash": "e2c8ad70f1c9494714d80e19a1c6cb6af2d85ef505d2122706bea56a6cf0a05c",
+            "lastModifiedAt": "2026-10-07T22:14:05.809Z"
           }
         },
         "promotionStrategyDiagnostics": {
@@ -988,7 +988,7 @@
         },
         "overwritten": true,
         "previousAutomationPath": "automations\\apps\\kiosko\\sections\\default-section\\cases\\preview-001-consultar-tarjeta-visa-clasica\\plan.json",
-        "previousStatus": "spec_failed"
+        "previousStatus": "active"
       },
       "promotionPersisted": true,
       "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\kiosko\\sections\\default-section\\cases\\preview-001-consultar-tarjeta-visa-clasica\\case.spec.ts",
@@ -1256,13 +1256,13 @@
       "source": "discovery",
       "appProfile": "kiosko",
       "createdAt": "2026-10-06T20:12:02.278Z",
-      "updatedAt": "2026-10-07T03:03:44.203Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T03-00-34-174Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-08T12:19:26.586Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-08T12-16-05-342Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T03-00-34-174Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-08T12-16-05-342Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -1286,7 +1286,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 79902,
+          "durationMs": 79447,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -1337,7 +1337,7 @@
           "previousSpec": {
             "existed": true,
             "hash": "be823c5d787955aaaaac988d6314b3786956d597aceedee4961a94b034cda6e5",
-            "lastModifiedAt": "2026-10-07T02:18:10.032Z"
+            "lastModifiedAt": "2026-10-07T22:02:37.267Z"
           }
         },
         "promotionStrategyDiagnostics": {

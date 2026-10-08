@@ -10,7 +10,7 @@
   },
   "invocations": 0,
   "invocationsConsumed": 0,
-  "durationMs": 98584,
+  "durationMs": 118462,
   "usage": {
     "inputTokens": null,
     "cachedInputTokens": null,
@@ -29,29 +29,21 @@
     "typescript": "passed",
     "playwrightDiscovery": "passed",
     "semanticCoverage": "passed",
-    "functionalExecution": "failed"
+    "functionalExecution": "passed"
   },
-  "promotionAllowed": false,
+  "promotionAllowed": true,
   "specsRequested": 1,
-  "specsValidated": 0,
-  "specsRejected": 1,
+  "specsValidated": 1,
+  "specsRejected": 0,
   "specGenerationAttempts": 0,
   "specRepairAttempts": 0,
-  "firstPassPromotion": false,
-  "failedGatesAttempt1": [
-    "functionalExecution"
-  ],
+  "firstPassPromotion": true,
+  "failedGatesAttempt1": [],
   "regressedGates": [],
   "missingRequirements": [],
   "oracleTypes": [],
-  "errors": [
-    "functional_execution_failed:exitCode=1",
-    "functional_execution_error:Error: Promoted fill failed at step 15 field=\"Ingresos\" value=\"150000\". fillPath=failed nativeFillAttempted=true nativeFillSucceeded=false callbackAttempted=true callbackSucceeded=false diagnostics={\"currentUrl\":\"https://172.27.4.31/payroll/manualCreationTable\",\"actionIntent\":\"fill\",\"target\":\"Ingresos\",\"stepIndex\":15,\"timeoutMs\":15000,\"retryAttempted\":false,\"previousActiveContainer\":\"none\",\"refreshedActiveContainer\":\"none\",\"matchingFieldFound\":false,\"fallbackUsed\":\"none\",\"searchedContainers\":1,\"discardedReason\":\"stale_or_not_matching_field\",\"matchedLocatorStrategy\":\"unknown\",\"valueKey\":\"ingresos\",\"technicalTargetRefs\":[],\"fieldCandidateCount\":0,\"fillPath\":\"failed\",\"nativeFillAttempted\":true,\"nativeFillSucceeded\":false,\"callbackAttempted\":true,\"callbackSucceeded\":false,\"callbackError\":\"Fill callback failed: fill action timed out after 15000ms\",\"verificationAttempted\":false,\"verificationSucceeded\":false,\"screenshotPath\":\"[REDACTED]\"}"
-  ],
-  "warnings": [
-    "functional_execution_screenshots=11",
-    "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 15)."
-  ],
+  "errors": [],
+  "warnings": [],
   "finalSpec": {
     "origin": "deterministic_compiler",
     "generatedBy": "core",
@@ -59,8 +51,8 @@
     "fallback": null
   },
   "runtimeGate": {
-    "decision": "block",
-    "promotionStatus": "blocked",
-    "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 15)."
+    "decision": "promote",
+    "promotionStatus": "promoted",
+    "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
   }
 }

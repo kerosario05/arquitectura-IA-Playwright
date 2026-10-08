@@ -1,0 +1,10 @@
+{
+  "id": "rec-engine-001-captura-web-completa",
+  "externalId": "REC-ENGINE-001",
+  "caseId": 0,
+  "title": "Captura web completa",
+  "source": "discovery",
+  "appSlug": "recording-regression-2d122b23",
+  "appConfigPath": "automations\\apps\\recording-regression-2d122b23\\app.config.json",
+  "createdAt": "2026-10-07T17:51:37.078Z"
+}

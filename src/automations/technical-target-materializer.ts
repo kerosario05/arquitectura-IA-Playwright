@@ -480,6 +480,12 @@ export type FieldScopedMaterializationInput = {
   candidates: readonly FieldScopedOwnerCandidate[];
   requiredCompatibility: "editable" | "actionable";
   /**
+   * Optional owner tag preserved by a validated recorded interaction. When present, a live
+   * field scope may only materialize that same kind of owner; it cannot substitute the field
+   * wrapper merely because the wrapper is also clickable.
+   */
+  requiredOwnerTag?: string;
+  /**
    * Required to certify a scoped target when the winning candidate carries no strong evidence of
    * its own (see `materializeFieldScopedTechnicalTarget`'s own doc comment for why). Absent for
    * now in every real caller (live field-container discovery does not exist yet) -- tests supply
@@ -547,7 +553,10 @@ export function materializeFieldScopedTechnicalTarget(
   // certifying case (own evidence first, when it is not known to be ambiguous).
   options?: { requireContainerScope?: boolean },
 ): FieldScopedMaterializationResult {
-  const resolution = resolveFieldScopedOwner(input.candidates, input.requiredCompatibility);
+  const candidates = input.requiredOwnerTag?.trim()
+    ? input.candidates.filter((candidate) => candidate.tag.toLowerCase() === input.requiredOwnerTag!.trim().toLowerCase())
+    : input.candidates;
+  const resolution = resolveFieldScopedOwner(candidates, input.requiredCompatibility);
   if (resolution.status !== "unique") return resolution;
   const candidate = resolution.candidate;
 

@@ -1185,7 +1185,7 @@
       "oracleReadiness": true,
       "reviewReadiness": true,
       "publicationContentReadiness": true,
-      "executionReadiness": true,
+      "executionReadiness": false,
       "publicationReadiness": true,
       "missingInputs": [],
       "datasetAuthorityMismatches": [],
@@ -1421,7 +1421,7 @@
       "specHash": "ec6e2f7f49de1f01753548edb1af844a190b289f079bd839d43d173ce592960b",
       "automationId": "preview-001-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente",
       "sectionSlug": "default-section",
-      "generatedAt": "2026-10-07T03:54:14.923Z"
+      "generatedAt": "2026-10-07T20:33:46.859Z"
     }
   }
 ]

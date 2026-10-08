@@ -10,14 +10,14 @@
   "status": "active",
   "source": "discovery",
   "appProfile": "portal-empresarial",
-  "createdAt": "2026-10-07T03:53:47.186Z",
-  "updatedAt": "2026-10-07T03:53:47.186Z",
-  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T03-51-11-752Z\\discovered-plans.pending.json",
+  "createdAt": "2026-10-07T20:33:22.541Z",
+  "updatedAt": "2026-10-07T20:33:22.541Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T20-30-43-820Z\\discovered-plans.pending.json",
   "pomStatus": "promoted",
   "inlineDebugMode": false,
   "specVerificationStatus": "passed",
   "metadata": {
-    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T03-51-11-752Z",
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T20-30-43-820Z",
     "pomDiagnostics": {
       "status": "promoted",
       "inlineFallbackUsed": false,
@@ -41,7 +41,7 @@
       },
       "invocations": 0,
       "invocationsConsumed": 0,
-      "durationMs": 69217,
+      "durationMs": 60040,
       "usage": {
         "inputTokens": null,
         "cachedInputTokens": null,
@@ -90,9 +90,9 @@
       },
       "specWritten": true,
       "previousSpec": {
-        "existed": false,
-        "hash": null,
-        "lastModifiedAt": null
+        "existed": true,
+        "hash": "ec6e2f7f49de1f01753548edb1af844a190b289f079bd839d43d173ce592960b",
+        "lastModifiedAt": "2026-10-07T03:53:47.157Z"
       }
     },
     "promotionStrategyDiagnostics": {
@@ -114,7 +114,10 @@
       "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente\\case.spec.ts",
       "specHash": "ec6e2f7f49de1f01753548edb1af844a190b289f079bd839d43d173ce592960b",
       "specSource": "generatedSpec"
-    }
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente\\plan.json",
+    "previousStatus": "active"
   },
   "promotionPersisted": true,
   "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente\\case.spec.ts",

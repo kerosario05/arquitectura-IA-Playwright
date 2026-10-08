@@ -91,6 +91,17 @@ test("5/SUCCESS_TELEMETRY_NOT_ERROR: routine success telemetry (locator.press, f
   assert.equal(extractFailedPromotedStepIndex(output), undefined, "no step index may be fabricated from success telemetry alone");
 });
 
+test("7/OUTER_TIMEOUT_HAS_NO_STEP: a Playwright test timeout does not inherit the first internal trace step", () => {
+  const output = withLines(
+    "[TRACE-1] stepIndex=2 about_to_call=ensureInitialEvidence",
+    "[promoted-click-structural] stepIndex=2 strategy=recorded:structural-owner matchCount=1",
+    "[promoted-click-structural] stepIndex=2 phase=complete currentUrl=https://example.test/",
+    "Error: Test timeout of 300000ms exceeded.",
+  );
+  assert.equal(extractPromotedFunctionalFailure(output), undefined);
+  assert.equal(extractFailedPromotedStepIndex(output), undefined, "an outer timeout has no proven failed step");
+});
+
 test("6/GENERIC_NON_PROMOTED_ERROR: a real Playwright error with no 'Promoted ... failed' text still surfaces via the generic fallback (not this ticket's structured extractor, but must not be masked)", () => {
   const output = withLines(
     "[promoted-fill-state] stepIndex=1 targetResolved=true valueResolved=true valueNonEmpty=true fieldHasValueAfterFill=true targetVisible=true targetEnabled=true targetEditable=true",

@@ -4824,7 +4824,7 @@
       "oracleReadiness": true,
       "reviewReadiness": true,
       "publicationContentReadiness": true,
-      "executionReadiness": true,
+      "executionReadiness": false,
       "publicationReadiness": true,
       "missingInputs": [],
       "datasetAuthorityMismatches": [],
@@ -5836,11 +5836,11 @@
     },
     "promotedSpec": {
       "appSlug": "portal-empresarial",
-      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",
-      "specHash": "962fcda5b9da877baf20550f93c9728b131329bed08a9118eca76e189828aade",
+      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",
+      "specHash": "390b6eeb65e73b55b9178d5ce770364b00ab4e16d6db19423211ca36cd6717b2",
       "automationId": "preview-001-agregar-varios-empleados-manualmente-con-cedula",
-      "sectionSlug": "api-tests",
-      "generatedAt": "2026-10-07T11:18:11.211Z"
+      "sectionSlug": "default-section",
+      "generatedAt": "2026-10-07T20:19:13.594Z"
     }
   }
 ]

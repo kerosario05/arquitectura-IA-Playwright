@@ -48,6 +48,39 @@ test("1/scopedButton. one button in one field, unique locally, WITH real contain
   }
 });
 
+test("1a/recordedOwnerTag. a validated recorded button cannot be replaced by a clickable field wrapper", () => {
+  const wrapper = candidate({ tag: "div", role: "button", actionable: true, stableDirectAttributes: { id: "field-wrapper" } });
+  const button = candidate({ tag: "button", role: "button", actionable: true });
+  const result = materializeFieldScopedTechnicalTarget({
+    associatedField: "Identification",
+    candidates: [wrapper, button],
+    requiredCompatibility: "actionable",
+    requiredOwnerTag: "button",
+    fieldContainerEvidence: fieldA(),
+  });
+  assert.equal(result.status, "certified");
+  if (result.status === "certified") {
+    assert.match(result.target.locatorCandidates[0].value, /\[data-field="field-a"\] button/);
+    assert.doesNotMatch(result.target.locatorCandidates[0].value, /field-wrapper/);
+  }
+});
+
+test("1b/recordedOwnerTagFailClosed. missing or ambiguous recorded owner tags do not fall back to a wrapper", () => {
+  const wrapper = candidate({ tag: "div", role: "button", actionable: true, stableDirectAttributes: { id: "field-wrapper" } });
+  const missing = materializeFieldScopedTechnicalTarget({
+    associatedField: "Identification", candidates: [wrapper], requiredCompatibility: "actionable",
+    requiredOwnerTag: "button", fieldContainerEvidence: fieldA(),
+  });
+  assert.equal(missing.status, "not_materializable");
+
+  const ambiguous = materializeFieldScopedTechnicalTarget({
+    associatedField: "Identification",
+    candidates: [candidate({ tag: "button", actionable: true }), candidate({ tag: "button", actionable: true })],
+    requiredCompatibility: "actionable", requiredOwnerTag: "button", fieldContainerEvidence: fieldA(),
+  });
+  assert.equal(ambiguous.status, "ambiguous");
+});
+
 test("2/twoFields. the same owner tag/shape in two different field containers yields two distinct, differently-scoped targets", () => {
   const button = candidate({ tag: "button", role: "button", actionable: true });
   const resultA = materializeFieldScopedTechnicalTarget({ associatedField: "Field A", candidates: [button], requiredCompatibility: "actionable", fieldContainerEvidence: fieldA() });

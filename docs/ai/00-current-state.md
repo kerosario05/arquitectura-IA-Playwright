@@ -2,6 +2,222 @@
 
 ## Current task checkpoint
 
+### 2026-10-07 -- Retire promoted Fenix spec for a fresh QA Lab launch
+The user requested removal of the Fenix transfer spec after successful job
+`56892d00-0fd5-43a0-8bf6-59dab26451fd`, so it can be launched again in QA Lab. Verified the
+active spec's SHA-256 matched the promotion lineage in `automation.json`, archived it with a
+manifest under `.artifacts/spec-archives/manual-qa-rerun-fenix-20261007-180635-166/`, then removed
+only the active `case.spec.ts`. Verified the active path is absent and archived copy still hashes
+to `796ba2eeaadf123f7e99b54c17b9f3c7f84704f0744bc6230222f206fa86e8d8`. No job was active or
+launched. Recording, plan, data, and other specs were not modified. Next: the user can launch this
+scenario in QA Lab; the fresh generated spec will be created through its normal workflow.
+
+### 2026-10-07 -- Rerun and promote Fenix case from TestRail run 4597
+At the user's explicit request, restarted only this repository's QA Lab backend on port 3002 after
+confirming there were no active jobs, then POSTed `/api/runs/19492189-96ab-44d1-99e8-9b9494ed28dc/rerun`
+with mode `all`. New job `56892d00-0fd5-43a0-8bf6-59dab26451fd` completed `done`, 1/1 passed,
+0 failed, in 393265 ms. Scenario `REC-3CD40992-01` completed Discovery and deterministic candidate
+functional validation; all 29 required actions were resolved (including source account, recorded
+control, and destination account), the functional gate passed, and promotion persisted. Verified
+`automation.json` reports `pomStatus=promoted`, `specVerificationStatus=passed`,
+`promotionPersisted=true`, and the active `case.spec.ts` exists with hash
+`796ba2eeaadf123f7e99b54c17b9f3c7f84704f0744bc6230222f206fa86e8d8`.
+
+The earlier telemetry-classification fix remains in `src/automations/spec-generation-hybrid.ts`
+with focused regression coverage in
+`src/automations/spec-generation-hybrid.promoted-functional-failure-extraction.test.ts` (7/7
+passed). `npm run typecheck` still reports unresolved diagnostics in test/fixture files; no clean
+baseline comparison was done. Job artifacts are under
+`.artifacts/scenario-preview-runs/56892d00-0fd5-43a0-8bf6-59dab26451fd`; evidence is under
+`.artifacts/evidence/fenix/api-tests/runs/56892d00-0fd5-43a0-8bf6-59dab26451fd`. No TestRail run
+was created or published by this rerun. Live verification is complete for this one Fenix case;
+other projects/cases are not covered by this run.
+
+### 2026-10-07 -- Retire two failed regression specs for isolated QA Lab reruns
+The user asked to remove the two specs shown as failed in regression: Portal Empresarial `REC-18027080-01` and Fenix `REC-3CD40992-01`. Resolved each active path from its recording's persisted `promotedSpec` metadata and verified both SHA-256 hashes exactly matched that lineage before action. Archived both specs with a manifest under `.artifacts/spec-archives/manual-qa-rerun-2026-10-07T20-55-34-355Z/`, verified the copies, then removed the active specs. Persisted recordings, plans, and other specs were not changed. No QA job was launched; user can now select and rerun these scenarios from QA Lab.
+
+
+### 2026-10-07 -- Set regression cap to five cases per selected project
+The user clarified that the regression dashboard should run up to five cases **per selected project**, not five cases globally. Updated the Desktop launcher selector to preserve selected project order and take the first five cases within each project. Updated the dashboard instructions and selection summary to show the per-project limit. The focused PowerShell fixture verifies two selected projects yield ten cases (five each), excludes an unselected project, and keeps a single project capped at five.
+
+Validation passed: `pwsh -NoLogo -NoProfile -File 'C:/Users/radames/Desktop/Regresion QA Lab/QA-Lab-Regresion-Dashboard-Server.test.ps1'` and `node --check 'C:/Users/radames/Desktop/Regresion QA Lab/QA-Lab-Regresion-Dashboard-Server.js'`. No QA jobs were launched. Existing dashboard server processes were left untouched; to load the updated embedded page and launcher behavior, close and reopen the regression launcher when the current run is no longer active.
+
+
+### 2026-10-07 -- Preserve the recorded button for Portal Comercial identification lookup
+The user asked to repair the failed Portal Comercial case and run its QA Lab job. In TestRail run
+4591 / engine job `9d239f35-36bf-4a89-998c-0ca5e75ce89e`, the recording retained a validated
+structural owner tag `button` for the click associated with the identification field, but the
+recorded target could not be re-resolved and field-scope recovery certified the clickable wrapper.
+
+Changed `src/automations/technical-target-materializer.ts` and `src/discovery/target-resolver.ts`
+so a validated recorded click owner tag constrains field-scoped recovery; wrappers cannot replace
+the recorded button. If the recorded owner is missing or ambiguous, recovery fails closed.
+Added coverage in `src/automations/technical-target-materializer.field-scoped.test.ts` and
+`src/discovery/target-resolver.click-field-scoped-fallback-gate.test.ts`. Focused command passed
+35/35:
+`node --import tsx --test src/automations/technical-target-materializer.field-scoped.test.ts src/discovery/target-resolver.click-field-scoped-fallback-gate.test.ts src/discovery/case-discovery-workflow.standard-click-associated-field.test.ts`.
+
+`npm run typecheck` currently reports 97 diagnostics; one is at `src/discovery/target-resolver.ts:6351`,
+outside the changed lines. Baseline comparison was not available, so these are unresolved current
+diagnostics, not asserted to be pre-existing. The QA Lab engine URL is `localhost:3002`; its in-memory
+job list reports no running or queued jobs. Attempting to restart the engine so it would load this
+fix was rejected by the local command policy (both Stop-Process and Start-Process were blocked).
+Therefore no QA rerun was launched, and live behavior is not verified. Next: restart the engine on
+port 3002 through the user's running QA Lab/backend session, then rerun source job
+`9d239f35-36bf-4a89-998c-0ca5e75ce89e` with mode `all`; inspect that the lookup button is resolved
+and that the run advances beyond the identification lookup.
+
+### 2026-10-07 -- Diagnose Portal Comercial identification lookup step
+The user suspected that step 7, “Presionar botón asociado a Número de identificación,” did not
+actually run in TestRail run 4591 / preview job
+`9d239f35-36bf-4a89-998c-0ca5e75ce89e`. The log confirms a click was dispatched, but the recorded
+button locator was rejected (`matchCount=5`, `visible=false`) and field-scoped fallback clicked a
+`div` wrapper (`clickedOwnerKind=div`, no clickable ancestor), not the lookup button. No network
+request was observed. The runner nevertheless marked step 7 passed because the next target was
+already visible and `postClickReason=form_opened`.
+
+The first proven loss is therefore step 7 target resolution/outcome certification. The later step 8
+`Depurar` failure (`CLICK_NO_CAUSAL_EFFECT_DETECTED`, last successful step 7) follows from the
+lookup not populating the required fields. Final screenshot retains the filled ID and empty required
+fields. No code changed and no new job launched. Next: repair the shared recorded field-associated
+button resolution so it must click a structurally certified button and require a lookup-specific
+observable result; add a focused regression fixture before changing runtime behavior.
+
+### 2026-10-07 -- Recording-engine regression completed successfully
+The user supplied the post-fix local motor-regression dashboard/log for job
+`2d122b23-2124-40d4-9e2a-47c23d09b220`. Verified its report at
+`.artifacts/recording-regression/2d122b23-2124-40d4-9e2a-47c23d09b220/report.json`: status
+completed, fixture 1/1 passed and promoted; trace/semantic readback, hydration, sensitive-value
+masking, native-selection projection, Discovery, AutoPOM and promotion all passed. No TestRail
+writes and source recordings untouched; hashes verified. Corpus audit covered 19 recordings: 10
+passed, 9 blocked (7 not stopped, 2 unsupported platform), 0 failed. Thus the fixture pipeline is
+green, but the nine blocked recordings were not semantically validated. No additional job was run.
+Next: if broad corpus validation is desired, decide whether to address blocked legacy/mobile
+recording eligibility separately; do not label those 9 as passing.
+
+### 2026-10-07 -- Initialize RepoRoot in the all-project recording-engine launcher
+The user retried after the Node executable scope fix; the same generic stage error remained. Static
+inspection found the next first loss under StrictMode: the combined launcher referenced `$RepoRoot`
+for `tsx` and the process working directory but never declared or initialized it. The standalone
+motor launcher already provides the repository default.
+
+Added a `RepoRoot` parameter with that same default, normalized it at script startup, and validate
+`package.json` exists before launching the runner. Extended the focused PowerShell test with the
+RepoRoot contract. Validation passed:
+`pwsh -NoLogo -NoProfile -File 'C:/Users/radames/Desktop/Regresion QA Lab/QA-Lab-Regresion-Dashboard-Server.test.ps1'`.
+No job was launched. Next: retry the dashboard's recording-engine mode; expected first execution
+evidence is a new `.artifacts/recording-regression/<jobId>` directory and runner events.
+
+### 2026-10-07 -- Retain Node executable for the recording-engine child process
+After the previous `reportPath` StrictMode fix, the user supplied another launcher failure during
+`motor de grabación`. The first-loss boundary was the child process launch: `Start-Dashboard`
+resolved Node into a function-local `$node`, while the motor branch later referenced `$node.Source`
+from script scope. The process therefore could not reliably launch; no new recording-regression
+artifact directory was created in this attempt.
+
+Saved the resolved executable as `$script:NodeExecutable`, used it for the runner, and added a
+guard for an unset path. Extended the focused Desktop PowerShell test to check script-scope
+transport and optional `reportPath` reads. Validation passed:
+`pwsh -NoLogo -NoProfile -File 'C:/Users/radames/Desktop/Regresion QA Lab/QA-Lab-Regresion-Dashboard-Server.test.ps1'`.
+No job was launched. Next: user can retry the local engine mode; the expected next boundary is
+creation of a new `.artifacts/recording-regression/<jobId>/report.json` and Live log events.
+
+### 2026-10-07 -- Make recording-engine launcher tolerate absent reportPath
+The user repeated the recording-engine launcher error and needs a reliable explanation of the
+mode. In `QA-Lab-Regresion-Todos-Proyectos.ps1`, direct access to optional `reportPath` properties
+violated PowerShell StrictMode and obscured the child process result. Replaced both reads with
+`Get-OptionalProperty`, report the child exit code when nonzero, and make the stage message explain
+that the engine fixture is local (the initial inventory still uses QA Lab APIs). Extended the
+Desktop focused PowerShell test to assert missing `reportPath` is safe.
+
+Validation passed:
+`pwsh -NoLogo -NoProfile -File 'C:/Users/radames/Desktop/Regresion QA Lab/QA-Lab-Regresion-Dashboard-Server.test.ps1'`.
+No job was run. The previous attempt's runner state was not found, so its underlying child outcome
+remains unknown. Recording-engine mode inventories 10 persisted scenarios, audits recording source
+hashes read-only, then captures one synthetic local fixture and runs Discovery/AutoPOM/promotion
+against an isolated temporary app profile; it does not replay those 10 real app scenarios or write
+to TestRail. Next: run the local engine mode again only when requested; now the launcher should
+surface the child result instead of failing on an absent optional field.
+
+### 2026-10-07 -- Diagnose recording-engine regression launcher reportPath failure
+The user asked what the recording-engine regression does after the Desktop launcher printed an
+error during `motor de grabación`, followed by PowerShell StrictMode reporting a missing
+`reportPath` property. The launcher reads `recordingState.reportPath` as a required property even
+though the CLI declares it optional; the catch then emits a generic launcher error, obscuring the
+underlying child-process outcome. The exact run state/job was not available in the inspected temp
+files, so whether this attempt completed its local fixture is physically unknown.
+
+The code path first enumerates persisted scenarios, then recording-engine mode runs a read-only
+integrity/hash audit of source recordings, captures one synthetic recorrido against a local HTTP
+fixture, persists it only under `.artifacts/recording-regression/<jobId>`, hydrates it, and invokes
+Discovery + AutoPOM + promotion against a unique isolated app slug. It is not a replay of the ten
+real scenarios or their real applications; TestRail writes are disabled and source recordings are
+checked for unchanged hashes. No code changes or live jobs were made. Next: if asked to repair,
+make optional `reportPath` reads StrictMode-safe and preserve/display the child's real exit/error
+status; rerun only the local deterministic motor-regression fixture.
+
+### 2026-10-07 -- Archive the exact promoted spec so QA Lab starts this case in Discovery
+The user clarified that the regression dashboard must retire the spec that QA Lab actually maps
+to the persisted recording, so launching it from QA Lab starts from scratch. For Fenix
+`REC-3CD40992-01`, the recording `3cd40992-95ce-4482-8002-44182c32e7c7` maps its promoted spec
+to `sections/api-tests/.../case.spec.ts`; the earlier dashboard action had archived only the
+homonymous `sections/default-section/.../case.spec.ts`. QA Lab therefore still saw the persisted
+spec and could select reuse instead of Discovery.
+
+Updated the Desktop regression dashboard server to resolve the failure's exact scenario against
+the project's persisted recording metadata, validate the recorded spec hash, and archive that
+physical file with a verified backup/manifest. The source recording and its metadata remain
+unchanged. Also archived the exact mapped Fenix spec after verifying its SHA-256 matched the
+recording; backup is under
+`.artifacts/spec-archives/manual-qa-discovery-3cd40992-95ce-4482-8002-44182c32e7c7-1791394223271/`.
+Focused dashboard tests passed 4/4. Resolver/rerun contract tests passed:
+`node --import tsx --test src/automations/recording-automation-resolution.test.ts src/automations/promoted-spec-rerun-orchestration.test.ts`.
+No live QA job was launched. Next: launch this case through QA Lab; it should now see the mapped
+spec as missing and route to Discovery/spec generation, while preserving the original recording.
+
+### 2026-10-07 -- Prevent regression launcher finalization from failing under StrictMode
+The user supplied output from a five-case desktop QA Lab regression: four cases passed and were
+promoted; Fenix “Transferencias entre cuentas propias” failed. After all cases completed, the
+launcher then exited with a PowerShell property error for missing `DashboardState.mode`, preventing
+normal final reporting. `Set-StrictMode -Version Latest` was enabled, and `mode` was only assigned
+for the recording-engine branch.
+
+Initialized `mode=$null` in the regression launcher's initial dashboard state in
+`C:\Users\radames\Desktop\Regresion QA Lab\QA-Lab-Regresion-Todos-Proyectos.ps1`. Added a focused
+guard to `QA-Lab-Regresion-Dashboard-Server.test.ps1` that checks this StrictMode-sensitive state
+contract. Validation passed:
+`pwsh -NoLogo -NoProfile -File 'C:/Users/radames/Desktop/Regresion QA Lab/QA-Lab-Regresion-Dashboard-Server.test.ps1'`.
+No QA jobs were relaunched. Next: use the `.bat` for a future regression; the finalizer should now
+write the report without failing on the optional mode field.
+
+### 2026-10-07 -- Recover recorded navigation link within its captured landmark
+The user supplied rerun source `33ad0bdf-54fc-46af-99c7-76c9e117fefe` for Portal Comercial and
+asked for a safe fix plus a live rerun. The failure was at step 5 (“Solicitud multiproducto”):
+recorded structural matching rejected the changed DOM landmark. The fallback added in the previous
+checkpoint correctly found the recorded same-origin href, but failed closed because QA rendered two
+visible anchors with the same name and href (sidebar and content card).
+
+Extended `src/discovery/target-resolver.ts` so a recorded, supported semantic landmark scopes the
+same strict link recovery. It still requires the exact recorded link name, same-origin href, visible
+and enabled state, one landmark, and one matching link inside that landmark. Without landmark
+authority, page-wide uniqueness remains required. Updated
+`src/discovery/target-resolver.recorded-navigation-link-href.test.ts` with a two-anchor fixture that
+resolves only when the duplicate is outside the recorded landmark; duplicates within the scope,
+changed destinations, external hrefs, and non-links remain rejected. No recording or promoted spec
+was edited; the discovery run did not generate a spec.
+
+Focused command passed 18/18:
+`node --import tsx --test src/discovery/target-resolver.recorded-navigation-link-href.test.ts src/discovery/target-resolver.landmark-scoped-owner.test.ts src/recording/trace-to-scenario.conditional-list-recovery.test.ts src/automations/runtime/promoted-spec-runtime.selection-list-recovery.test.ts`.
+`git diff --check` passed. Relaunched via QA Lab `POST /api/runs/33ad0bdf-54fc-46af-99c7-76c9e117fefe/rerun`
+(`mode=all`); new job `8d3c87b2-2d02-46e8-9de0-c0362efdd048` ended `completed_with_failures`.
+The physical logs prove the link fix: `recordedNavigationLinkRecovered=true` at step 5. The next
+failure is step 8 (“Depurar”): the click was resolved/dispatched, but no request or route transition
+occurred; the page showed required-field validation errors and stayed on the creation form. This is
+the next first-loss boundary, likely test data/application validation, not the link resolver or list
+retry path. The job therefore did not reach the asynchronous list steps, so their live behavior is
+still unverified. Next: inspect whether the identity lookup in step 7 populated the recorded
+requester's required fields; do not bypass validation or alter project-specific execution behavior.
+
 ### 2026-10-07 -- Keep final dashboard evidence with its existing screen heading
 The user reported that the final dashboard screenshot appeared on the next PDF page and repeated
 “Pantalla dashboard”. The rerun passed and reached the dashboard; the source screenshot itself
@@ -1771,3 +1987,23 @@ Change in sibling frontend/BFF repo `C:\MisProyectos\QA-lab-main`: `server/route
 Validation: `npx vitest run server/routes/runs.test.ts --reporter=verbose --pool=forks --maxWorkers=1` passed 24/24; `npx tsc -b tsconfig.node.json --pretty false` passed. No live QA job was launched. The frontend auth interceptor adds the browser token to same-origin `/api/` calls and the BFF forwards request auth through `engineHeaders()`, but the supplied screenshot/log does not identify which layer returned 401.
 
 Next action: retry the report preview after restarting the QA Lab BFF so the query-forwarding change is loaded. If 401 remains, inspect sanitized browser Network status/response and BFF/engine auth configuration at the preview request boundary; never log bearer/API key values.
+
+### 2026-10-07 -- Integrate recording-engine regression into the shared desktop dashboard
+User reported the regression page showed only the multiproject execution flow, not the recording-engine regression. First-loss boundary: the local recording runner and dashboard rendering existed, but the all-project dashboard selection UI and its PowerShell launcher only accepted `start` actions for execution. The recording runner was reachable only from a separate `.bat`.
+
+Change: `C:\Users\radames\Desktop\Regresion QA Lab\QA-Lab-Regresion-Dashboard-Server.js` now shows a separate explicit “Iniciar regresión del motor de grabación” button and posts a distinct local action. `QA-Lab-Regresion-Todos-Proyectos.ps1` dispatches that action to the existing `src/cli/recording-engine-regression.ts` with the same dashboard state path; thus phase/log updates appear in the shared page. It still audits persisted source recordings read-only and runs Discovery/AutoPOM only against the isolated local fixture. The multiproject start path remains separate. Desktop dashboard tests were updated.
+
+Validation: `node --check` for dashboard JS and tests passed; `node --test ...QA-Lab-Regresion-Dashboard-Server.test.js` passed 4/4, including no start on page open, distinct recording-engine request, and unchanged project filtering/five-case limit. PowerShell parser/helper test passed. No regression runner, QA job, or source recording was launched or changed.
+
+Next action: relaunch the existing “Iniciar Regresion QA Lab” desktop shortcut so it loads the updated dashboard; choose the new motor de grabación button to start that mode. The previous already-open page will not load the updated static page until relaunched.
+
+### 2026-10-07 -- Conditional recovery for asynchronous list selections
+Active objective: prevent flaky list loads from turning a transient retry button into a mandatory recorded click. User constraint: preserve existing successful selection behavior and keep the fix multiproject; do not mutate official recordings or launch a live QA job.
+
+First-loss boundary: `trace.json` for recording `510ceb25-d237-4846-bcc0-3fc2d4ea3c87` contains retry-button taps with no technical locator; `trace-to-scenario.ts` projected them as required clicks. Promoted `selectPromotedItem` searched for the desired option and opened its selector, but had no field-scoped recovery path for a retry button that appears only at execution time.
+
+Changes: `src/scenarios/selection-list-recovery.ts` recognizes generic Spanish/English retry-list labels and admits only a unique visible button whose local snapshot text contains the selected field. `src/recording/trace-to-scenario.ts` carries observed retry taps as optional conditional actions in plan/review steps. `src/automations/runtime/promoted-spec-runtime.ts` checks for a field-associated recovery button only after the desired option is unavailable; it clicks only a unique visible/enabled button, waits on the requested option visibility, and returns a specific bounded failure if the option remains unavailable. Ordinary loaded selections continue through the existing path. The shared runtime version marker was advanced. Added focused tests in `src/scenarios/selection-list-recovery.test.ts`, `src/recording/trace-to-scenario.conditional-list-recovery.test.ts`, and `src/automations/runtime/promoted-spec-runtime.selection-list-recovery.test.ts`.
+
+Validation: focused recovery/conditional parser/contract tests passed 11/11; `git diff --check` passed. Full `npm run typecheck -- --pretty false` exits 2 with 94 diagnostics and none in changed production files; this matches the known repository test/fixture baseline. Adjacent tests exposed 3 stale runtime source assertions and 1 recorder display assertion; comparison shows the differing production expressions are already present in `HEAD`. No live QA job, TestRail write, spec replacement, or official recording edit was performed.
+
+Unverified: no browser-backed run was started, so field-local snapshot association and real Portal Comercial timing still need live confirmation. A separately running user workflow may have changed Fenix files/spec artifacts while this work was in progress; those unrelated files were left untouched. Next action: user can run the isolated Portal Comercial case; confirm an already-loaded list skips retry, a runtime-only retry button is clicked once and options load, and an unrelated/ambiguous retry control is never clicked.

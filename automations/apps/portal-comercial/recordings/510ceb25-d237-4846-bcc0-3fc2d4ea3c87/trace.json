@@ -1,5 +1,5 @@
 {
-  "recordingId": "5f2e57cd-e688-4ed4-8bf3-d137ae458a52",
+  "recordingId": "510ceb25-d237-4846-bcc0-3fc2d4ea3c87",
   "projectSlug": "portal-comercial",
   "appSlug": "portal-comercial",
   "platform": "web",
@@ -17,46 +17,46 @@
     "includeQaCredentialsInTestRail": true
   },
   "captureAuthority": "v2",
-  "startedAt": "2026-10-05T14:17:48.935Z",
+  "startedAt": "2026-10-07T14:02:27.713Z",
   "status": "stopped",
   "events": [
     {
-      "t": 6760,
+      "t": 1702,
       "kind": "navigate",
       "screenKey": "inicio",
       "url": "https://srvqacgowb01.local.bsc.com:5000/login",
       "seq": 0
     },
     {
-      "t": 8756,
+      "t": 2433,
       "kind": "navigate",
       "screenKey": "inicio",
       "url": "https://srvqacgowb01.local.bsc.com:5000/login",
       "seq": 1
     },
     {
-      "t": 9244,
+      "t": 2441,
       "kind": "navigate",
       "screenKey": "inicio",
       "url": "https://srvqacgowb01.local.bsc.com:5000/login",
       "seq": 2
     },
     {
-      "t": 9303,
-      "kind": "navigate",
-      "screenKey": "inicio",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
-      "seq": 3
-    },
-    {
       "t": 0,
       "kind": "launch",
       "screenKey": "fbf08c6ecee9",
       "url": "https://srvqacgowb01.local.bsc.com:5000/",
+      "seq": 3
+    },
+    {
+      "t": 2480,
+      "kind": "navigate",
+      "screenKey": "fbf08c6ecee9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
       "seq": 4
     },
     {
-      "t": 16030,
+      "t": 5053,
       "interactionId": "pointer-1",
       "kind": "note",
       "screenKey": "fbf08c6ecee9",
@@ -73,7 +73,7 @@
       "seq": 5
     },
     {
-      "t": 18187,
+      "t": 8035,
       "kind": "fill",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "77080fb3ce69141cbca23d05b1cebb6be9b05d61fbd10f1e39f7ce07031141a4",
@@ -107,7 +107,7 @@
       "seq": 6
     },
     {
-      "t": 23629,
+      "t": 15742,
       "kind": "fill",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "77080fb3ce69141cbca23d05b1cebb6be9b05d61fbd10f1e39f7ce07031141a4",
@@ -141,7 +141,7 @@
       "seq": 7
     },
     {
-      "t": 23633,
+      "t": 15746,
       "kind": "press",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "77080fb3ce69141cbca23d05b1cebb6be9b05d61fbd10f1e39f7ce07031141a4",
@@ -172,14 +172,14 @@
       "seq": 8
     },
     {
-      "t": 24288,
+      "t": 16215,
       "kind": "navigate",
       "screenKey": "fbf08c6ecee9",
       "url": "https://srvqacgowb01.local.bsc.com:5000/",
       "seq": 9
     },
     {
-      "t": 25632,
+      "t": 29719,
       "interactionId": "pointer-2",
       "kind": "note",
       "screenKey": "fbf08c6ecee9",
@@ -189,14 +189,26 @@
         "label": "Solicitud multiproducto",
         "role": "link",
         "tag": "a",
-        "locators": []
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Solicitud multiproducto",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_4_0_1"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
       },
       "note": "Observación técnica (pointer) sobre \"Solicitud multiproducto\"",
       "observationType": "pointer",
       "seq": 10
     },
     {
-      "t": 26400,
+      "t": 29828,
       "interactionId": "pointer-2",
       "kind": "tap",
       "screenKey": "fbf08c6ecee9",
@@ -254,26 +266,38 @@
             "confidence": 0.85,
             "validatedByInteraction": true
           }
-        ]
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Solicitud multiproducto",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_4_0_1"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
       },
       "seq": 11
     },
     {
-      "t": 26457,
+      "t": 29843,
       "kind": "navigate",
       "screenKey": "fbf08c6ecee9",
       "url": "https://srvqacgowb01.local.bsc.com:5000/",
       "seq": 12
     },
     {
-      "t": 26466,
+      "t": 29850,
       "kind": "navigate",
       "screenKey": "fbf08c6ecee9",
       "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
       "seq": 13
     },
     {
-      "t": 28906,
+      "t": 37961,
       "interactionId": "pointer-3",
       "kind": "note",
       "screenKey": "fbf08c6ecee9",
@@ -291,7 +315,7 @@
       "seq": 14
     },
     {
-      "t": 43717,
+      "t": 44845,
       "interactionId": "pointer-4",
       "kind": "note",
       "screenKey": "fbf08c6ecee9",
@@ -309,7 +333,7 @@
       "seq": 15
     },
     {
-      "t": 43727,
+      "t": 44851,
       "kind": "fill",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
@@ -320,7 +344,7 @@
         "tag": "input",
         "associatedField": "Número de identificación",
         "locators": [],
-        "rawTypedValue": "056-0154046-0\r\n",
+        "rawTypedValue": "056-0154046-0",
         "sensitive": false
       },
       "value": "056-0154046-0",
@@ -328,7 +352,7 @@
       "seq": 16
     },
     {
-      "t": 44047,
+      "t": 45085,
       "interactionId": "pointer-4",
       "kind": "tap",
       "screenKey": "fbf08c6ecee9",
@@ -378,7 +402,7 @@
       "seq": 17
     },
     {
-      "t": 60147,
+      "t": 48815,
       "interactionId": "pointer-5",
       "kind": "note",
       "screenKey": "fbf08c6ecee9",
@@ -407,7 +431,7 @@
       "seq": 18
     },
     {
-      "t": 60287,
+      "t": 48937,
       "interactionId": "pointer-5",
       "kind": "tap",
       "screenKey": "fbf08c6ecee9",
@@ -482,48 +506,36 @@
       "seq": 19
     },
     {
-      "t": 66720,
+      "t": 55884,
       "kind": "navigate",
       "screenKey": "fbf08c6ecee9",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "seq": 20
     },
     {
-      "t": 71638,
+      "t": 61804,
       "interactionId": "pointer-6",
       "kind": "note",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "Continuar",
         "role": "button",
         "tag": "button",
-        "locators": [],
-        "playwrightRecorderEvidence": {
-          "kind": "role",
-          "role": "button",
-          "normalizedName": "Continuar",
-          "targetTag": "button",
-          "scopeIdentity": {
-            "strategy": "css",
-            "value": "div:has(button[aria-label=\"Continuar\"])"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true
-        }
+        "locators": []
       },
       "note": "Observación técnica (pointer) sobre \"Continuar\"",
       "observationType": "pointer",
       "seq": 21
     },
     {
-      "t": 71822,
+      "t": 62169,
       "interactionId": "pointer-6",
       "kind": "tap",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "Continuar",
         "role": "button",
@@ -576,34 +588,298 @@
             "confidence": 0.85,
             "validatedByInteraction": true
           }
-        ],
-        "playwrightRecorderEvidence": {
-          "kind": "role",
-          "role": "button",
-          "normalizedName": "Continuar",
-          "targetTag": "button",
-          "scopeIdentity": {
-            "strategy": "css",
-            "value": "div:has(button[aria-label=\"Continuar\"])"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true
-        }
+        ]
       },
       "seq": 22
     },
     {
-      "t": 81595,
+      "t": 66923,
       "interactionId": "pointer-7",
       "kind": "tap",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "control",
         "role": "combobox",
         "tag": "span",
         "associatedField": "Categoría de producto",
+        "locators": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "span",
+                "role": "combobox"
+              },
+              "stableDirectAttributes": {
+                "role": "combobox"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "pv_id_125"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"span\",\"role\":\"combobox\"},\"stableDirectAttributes\":{\"role\":\"combobox\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "coveredByFunctionalSelection": true
+      },
+      "seq": 23
+    },
+    {
+      "t": 66929,
+      "interactionId": "pointer-7",
+      "kind": "note",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
+      "target": {
+        "label": "control",
+        "role": "combobox",
+        "tag": "span",
+        "associatedField": "Categoría de producto",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"control\"",
+      "observationType": "pointer",
+      "seq": 24
+    },
+    {
+      "t": 68426,
+      "interactionId": "pointer-8",
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
+      "target": {
+        "label": "Certificados de Deposito",
+        "role": "option",
+        "tag": "li",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "option|Certificados de Deposito",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#pv_id_125_1",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "pv_id_125_1",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#pv_id_125_1",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Certificados de Deposito",
+                "id": "pv_id_125_1",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "pv_id_125_list"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_125_1\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "Certificados de Deposito",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_125_list"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "coveredByFunctionalSelection": true
+      },
+      "seq": 25
+    },
+    {
+      "t": 68431,
+      "kind": "tap",
+      "observationType": "pointer",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
+      "target": {
+        "label": "Certificados de Deposito",
+        "role": "option",
+        "interactionType": "select",
+        "afterValue": "Certificados de Deposito",
+        "compoundRole": "selection",
+        "associatedField": "Categoría de producto",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "option|Certificados de Deposito",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#pv_id_125_1",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "pv_id_125_1",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#pv_id_125_1",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Certificados de Deposito",
+                "id": "pv_id_125_1",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "pv_id_125_list"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_125_1\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "Certificados de Deposito",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_125_list"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "sourceTechnicalEventSeqs": [
+          23,
+          25
+        ]
+      },
+      "seq": 26
+    },
+    {
+      "t": 68435,
+      "interactionId": "pointer-8",
+      "kind": "note",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
+      "target": {
+        "label": "Certificados de Deposito",
+        "role": "option",
+        "tag": "li",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "Certificados de Deposito",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_125_list"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Certificados de Deposito\"",
+      "observationType": "pointer",
+      "seq": 27
+    },
+    {
+      "t": 69848,
+      "interactionId": "pointer-9",
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
+      "target": {
+        "label": "control",
+        "role": "combobox",
+        "tag": "span",
+        "associatedField": "Producto",
         "locators": [],
         "technicalTargetCandidates": [
           {
@@ -641,291 +917,15 @@
         ],
         "coveredByFunctionalSelection": true
       },
-      "seq": 23
-    },
-    {
-      "t": 81600,
-      "interactionId": "pointer-7",
-      "kind": "note",
-      "screenKey": "fbf08c6ecee9",
-      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
-      "target": {
-        "label": "control",
-        "role": "combobox",
-        "tag": "span",
-        "associatedField": "Categoría de producto",
-        "locators": []
-      },
-      "note": "Observación técnica (pointer) sobre \"control\"",
-      "observationType": "pointer",
-      "seq": 24
-    },
-    {
-      "t": 83269,
-      "interactionId": "pointer-8",
-      "kind": "tap",
-      "screenKey": "fbf08c6ecee9",
-      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
-      "target": {
-        "label": "Certificados de Deposito",
-        "role": "option",
-        "tag": "li",
-        "locators": [
-          {
-            "strategy": "role",
-            "value": "option|Certificados de Deposito",
-            "confidence": 0.85
-          },
-          {
-            "strategy": "css",
-            "value": "#pv_id_126_1",
-            "confidence": 0.8
-          },
-          {
-            "strategy": "id",
-            "value": "pv_id_126_1",
-            "confidence": 0.8
-          }
-        ],
-        "technicalTargetCandidates": [
-          {
-            "targetType": "structural",
-            "locatorCandidates": [
-              {
-                "strategy": "css",
-                "value": "#pv_id_126_1",
-                "confidence": 0.8
-              }
-            ],
-            "structuralContext": {
-              "owner": {
-                "tag": "li",
-                "role": "option"
-              },
-              "stableDirectAttributes": {
-                "aria-label": "Certificados de Deposito",
-                "id": "pv_id_126_1",
-                "role": "option"
-              },
-              "stableDescendants": [],
-              "semanticShape": [
-                "span"
-              ],
-              "deterministicStructuralIdentity": true,
-              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
-              "structuralIdentityMatchCount": 1,
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "pv_id_126_list"
-              },
-              "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_126_1\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
-              "captureScopeUnique": true,
-              "captureTargetMatchCount": 1
-            },
-            "interactionEvidence": [
-              "v2_click_owner"
-            ],
-            "confidence": 0.85,
-            "validatedByInteraction": true
-          }
-        ],
-        "playwrightRecorderEvidence": {
-          "kind": "role",
-          "role": "option",
-          "normalizedName": "Certificados de Deposito",
-          "targetTag": "li",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "pv_id_126_list"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true
-        },
-        "coveredByFunctionalSelection": true
-      },
-      "seq": 25
-    },
-    {
-      "t": 83274,
-      "kind": "tap",
-      "observationType": "pointer",
-      "screenKey": "fbf08c6ecee9",
-      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
-      "target": {
-        "label": "Certificados de Deposito",
-        "role": "option",
-        "interactionType": "select",
-        "afterValue": "Certificados de Deposito",
-        "compoundRole": "selection",
-        "associatedField": "Categoría de producto",
-        "locators": [
-          {
-            "strategy": "role",
-            "value": "option|Certificados de Deposito",
-            "confidence": 0.85
-          },
-          {
-            "strategy": "css",
-            "value": "#pv_id_126_1",
-            "confidence": 0.8
-          },
-          {
-            "strategy": "id",
-            "value": "pv_id_126_1",
-            "confidence": 0.8
-          }
-        ],
-        "technicalTargetCandidates": [
-          {
-            "targetType": "structural",
-            "locatorCandidates": [
-              {
-                "strategy": "css",
-                "value": "#pv_id_126_1",
-                "confidence": 0.8
-              }
-            ],
-            "structuralContext": {
-              "owner": {
-                "tag": "li",
-                "role": "option"
-              },
-              "stableDirectAttributes": {
-                "aria-label": "Certificados de Deposito",
-                "id": "pv_id_126_1",
-                "role": "option"
-              },
-              "stableDescendants": [],
-              "semanticShape": [
-                "span"
-              ],
-              "deterministicStructuralIdentity": true,
-              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
-              "structuralIdentityMatchCount": 1,
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "pv_id_126_list"
-              },
-              "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_126_1\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
-              "captureScopeUnique": true,
-              "captureTargetMatchCount": 1
-            },
-            "interactionEvidence": [
-              "v2_click_owner"
-            ],
-            "confidence": 0.85,
-            "validatedByInteraction": true
-          }
-        ],
-        "playwrightRecorderEvidence": {
-          "kind": "role",
-          "role": "option",
-          "normalizedName": "Certificados de Deposito",
-          "targetTag": "li",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "pv_id_126_list"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true
-        },
-        "sourceTechnicalEventSeqs": [
-          23,
-          25
-        ]
-      },
-      "seq": 26
-    },
-    {
-      "t": 83277,
-      "interactionId": "pointer-8",
-      "kind": "note",
-      "screenKey": "fbf08c6ecee9",
-      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
-      "target": {
-        "label": "Certificados de Deposito",
-        "role": "option",
-        "tag": "li",
-        "locators": [],
-        "playwrightRecorderEvidence": {
-          "kind": "role",
-          "role": "option",
-          "normalizedName": "Certificados de Deposito",
-          "targetTag": "li",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "pv_id_126_list"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true
-        }
-      },
-      "note": "Observación técnica (pointer) sobre \"Certificados de Deposito\"",
-      "observationType": "pointer",
-      "seq": 27
-    },
-    {
-      "t": 84373,
-      "interactionId": "pointer-9",
-      "kind": "tap",
-      "screenKey": "fbf08c6ecee9",
-      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
-      "target": {
-        "label": "control",
-        "role": "combobox",
-        "tag": "span",
-        "associatedField": "Producto",
-        "locators": [],
-        "technicalTargetCandidates": [
-          {
-            "targetType": "structural",
-            "locatorCandidates": [],
-            "structuralContext": {
-              "owner": {
-                "tag": "span",
-                "role": "combobox"
-              },
-              "stableDirectAttributes": {
-                "role": "combobox"
-              },
-              "stableDescendants": [],
-              "semanticShape": [],
-              "landmarkAncestor": {
-                "tag": "main"
-              },
-              "deterministicStructuralIdentity": true,
-              "structuralIdentityMatchCount": 1,
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "pv_id_127"
-              },
-              "targetFingerprint": "{\"owner\":{\"tag\":\"span\",\"role\":\"combobox\"},\"stableDirectAttributes\":{\"role\":\"combobox\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
-              "captureScopeUnique": true,
-              "captureTargetMatchCount": 1
-            },
-            "interactionEvidence": [
-              "v2_click_owner"
-            ],
-            "confidence": 0.85,
-            "validatedByInteraction": true
-          }
-        ],
-        "coveredByFunctionalSelection": true
-      },
       "seq": 28
     },
     {
-      "t": 84378,
+      "t": 69854,
       "interactionId": "pointer-9",
       "kind": "note",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "control",
         "role": "combobox",
@@ -938,12 +938,12 @@
       "seq": 29
     },
     {
-      "t": 97639,
+      "t": 75502,
       "interactionId": "pointer-10",
       "kind": "tap",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
         "role": "option",
@@ -956,12 +956,12 @@
           },
           {
             "strategy": "css",
-            "value": "#pv_id_127_0",
+            "value": "#pv_id_126_0",
             "confidence": 0.8
           },
           {
             "strategy": "id",
-            "value": "pv_id_127_0",
+            "value": "pv_id_126_0",
             "confidence": 0.8
           }
         ],
@@ -971,7 +971,7 @@
             "locatorCandidates": [
               {
                 "strategy": "css",
-                "value": "#pv_id_127_0",
+                "value": "#pv_id_126_0",
                 "confidence": 0.8
               }
             ],
@@ -982,7 +982,7 @@
               },
               "stableDirectAttributes": {
                 "aria-label": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
-                "id": "pv_id_127_0",
+                "id": "pv_id_126_0",
                 "role": "option"
               },
               "stableDescendants": [],
@@ -994,9 +994,9 @@
               "structuralIdentityMatchCount": 1,
               "scopeIdentity": {
                 "strategy": "id",
-                "value": "pv_id_127_list"
+                "value": "pv_id_126_list"
               },
-              "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_127_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+              "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_126_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
               "captureScopeUnique": true,
               "captureTargetMatchCount": 1
             },
@@ -1007,17 +1007,29 @@
             "validatedByInteraction": true
           }
         ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_126_list"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
         "coveredByFunctionalSelection": true
       },
       "seq": 30
     },
     {
-      "t": 97643,
+      "t": 75509,
       "kind": "tap",
       "observationType": "pointer",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
         "role": "option",
@@ -1033,12 +1045,12 @@
           },
           {
             "strategy": "css",
-            "value": "#pv_id_127_0",
+            "value": "#pv_id_126_0",
             "confidence": 0.8
           },
           {
             "strategy": "id",
-            "value": "pv_id_127_0",
+            "value": "pv_id_126_0",
             "confidence": 0.8
           }
         ],
@@ -1048,7 +1060,7 @@
             "locatorCandidates": [
               {
                 "strategy": "css",
-                "value": "#pv_id_127_0",
+                "value": "#pv_id_126_0",
                 "confidence": 0.8
               }
             ],
@@ -1059,7 +1071,7 @@
               },
               "stableDirectAttributes": {
                 "aria-label": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
-                "id": "pv_id_127_0",
+                "id": "pv_id_126_0",
                 "role": "option"
               },
               "stableDescendants": [],
@@ -1071,9 +1083,9 @@
               "structuralIdentityMatchCount": 1,
               "scopeIdentity": {
                 "strategy": "id",
-                "value": "pv_id_127_list"
+                "value": "pv_id_126_list"
               },
-              "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_127_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+              "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_126_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
               "captureScopeUnique": true,
               "captureTargetMatchCount": 1
             },
@@ -1084,6 +1096,18 @@
             "validatedByInteraction": true
           }
         ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_126_list"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
         "sourceTechnicalEventSeqs": [
           28,
           30
@@ -1092,29 +1116,41 @@
       "seq": 31
     },
     {
-      "t": 97648,
+      "t": 75513,
       "interactionId": "pointer-10",
       "kind": "note",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
         "role": "option",
         "tag": "li",
-        "locators": []
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_126_list"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
       },
       "note": "Observación técnica (pointer) sobre \"300 - Depósito a plazo Financiero Personal Capitalizable DOP\"",
       "observationType": "pointer",
       "seq": 32
     },
     {
-      "t": 99420,
+      "t": 76824,
       "interactionId": "pointer-11",
       "kind": "note",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "control",
         "role": "spinbutton",
@@ -1127,11 +1163,11 @@
       "seq": 33
     },
     {
-      "t": 105133,
+      "t": 79645,
       "kind": "fill",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "control",
         "role": "input",
@@ -1146,11 +1182,11 @@
       "seq": 34
     },
     {
-      "t": 106707,
+      "t": 80666,
       "kind": "fill",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "control",
         "role": "input",
@@ -1165,12 +1201,12 @@
       "seq": 35
     },
     {
-      "t": 112681,
+      "t": 85759,
       "interactionId": "pointer-12",
       "kind": "note",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "Aceptar",
         "role": "button",
@@ -1182,12 +1218,12 @@
       "seq": 36
     },
     {
-      "t": 112817,
+      "t": 85945,
       "interactionId": "pointer-12",
       "kind": "tap",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "Aceptar",
         "role": "button",
@@ -1238,12 +1274,12 @@
       "seq": 37
     },
     {
-      "t": 115302,
+      "t": 89659,
       "interactionId": "pointer-13",
       "kind": "note",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "Continuar",
         "role": "button",
@@ -1267,12 +1303,12 @@
       "seq": 38
     },
     {
-      "t": 115518,
+      "t": 89884,
       "interactionId": "pointer-13",
       "kind": "tap",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "Continuar",
         "role": "button",
@@ -1342,12 +1378,12 @@
       "seq": 39
     },
     {
-      "t": 122402,
+      "t": 100005,
       "interactionId": "pointer-14",
       "kind": "tap",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "control",
         "role": "combobox",
@@ -1393,12 +1429,12 @@
       "seq": 40
     },
     {
-      "t": 122406,
+      "t": 100009,
       "interactionId": "pointer-14",
       "kind": "note",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "control",
         "role": "combobox",
@@ -1411,12 +1447,12 @@
       "seq": 41
     },
     {
-      "t": 124181,
+      "t": 101250,
       "interactionId": "pointer-15",
       "kind": "tap",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "Ahorros Personales",
         "role": "option",
@@ -1485,12 +1521,12 @@
       "seq": 42
     },
     {
-      "t": 124185,
+      "t": 101254,
       "kind": "tap",
       "observationType": "pointer",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "Ahorros Personales",
         "role": "option",
@@ -1565,12 +1601,12 @@
       "seq": 43
     },
     {
-      "t": 124189,
+      "t": 101258,
       "interactionId": "pointer-15",
       "kind": "note",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "Ahorros Personales",
         "role": "option",
@@ -1582,12 +1618,12 @@
       "seq": 44
     },
     {
-      "t": 126206,
+      "t": 102860,
       "interactionId": "pointer-16",
       "kind": "note",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "control",
         "role": "button",
@@ -1600,12 +1636,12 @@
       "seq": 45
     },
     {
-      "t": 126708,
+      "t": 102997,
       "interactionId": "pointer-16",
       "kind": "tap",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "control",
         "role": "button",
@@ -1633,7 +1669,7 @@
               "structuralIdentityMatchCount": 1,
               "scopeIdentity": {
                 "strategy": "id",
-                "value": "pv_id_134_content"
+                "value": "pv_id_133_content"
               },
               "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
               "captureScopeUnique": true,
@@ -1650,12 +1686,12 @@
       "seq": 46
     },
     {
-      "t": 128866,
+      "t": 104690,
       "interactionId": "pointer-17",
       "kind": "tap",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "control",
         "role": "combobox",
@@ -1701,12 +1737,12 @@
       "seq": 47
     },
     {
-      "t": 128871,
+      "t": 104696,
       "interactionId": "pointer-17",
       "kind": "note",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "control",
         "role": "combobox",
@@ -1719,12 +1755,12 @@
       "seq": 48
     },
     {
-      "t": 129829,
+      "t": 105769,
       "interactionId": "pointer-18",
       "kind": "tap",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "Efectivo",
         "role": "option",
@@ -1805,12 +1841,12 @@
       "seq": 49
     },
     {
-      "t": 129834,
+      "t": 105773,
       "kind": "tap",
       "observationType": "pointer",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "Efectivo",
         "role": "option",
@@ -1897,12 +1933,12 @@
       "seq": 50
     },
     {
-      "t": 129838,
+      "t": 105777,
       "interactionId": "pointer-18",
       "kind": "note",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "Efectivo",
         "role": "option",
@@ -1926,12 +1962,12 @@
       "seq": 51
     },
     {
-      "t": 131171,
+      "t": 106502,
       "interactionId": "pointer-19",
       "kind": "note",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "control",
         "role": "button",
@@ -1944,12 +1980,12 @@
       "seq": 52
     },
     {
-      "t": 131327,
+      "t": 106627,
       "interactionId": "pointer-19",
       "kind": "tap",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "control",
         "role": "button",
@@ -1978,7 +2014,7 @@
               "structuralIdentityMatchCount": 2,
               "scopeIdentity": {
                 "strategy": "id",
-                "value": "pv_id_135_content"
+                "value": "pv_id_134_content"
               },
               "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
               "captureScopeUnique": true,
@@ -1995,17 +2031,257 @@
       "seq": 53
     },
     {
-      "t": 132391,
+      "t": 107744,
       "interactionId": "pointer-20",
       "kind": "tap",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "control",
         "role": "combobox",
         "tag": "span",
         "associatedField": "Firma autorizada 1",
+        "locators": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "span",
+                "role": "combobox"
+              },
+              "stableDirectAttributes": {
+                "role": "combobox"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "pv_id_141"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"span\",\"role\":\"combobox\"},\"stableDirectAttributes\":{\"role\":\"combobox\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "coveredByFunctionalSelection": true
+      },
+      "seq": 54
+    },
+    {
+      "t": 107748,
+      "interactionId": "pointer-20",
+      "kind": "note",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
+      "target": {
+        "label": "control",
+        "role": "combobox",
+        "tag": "span",
+        "associatedField": "Firma autorizada 1",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"control\"",
+      "observationType": "pointer",
+      "seq": 55
+    },
+    {
+      "t": 108947,
+      "interactionId": "pointer-21",
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
+      "target": {
+        "label": "U5xjq 2wxuwñ5 Sws5wzw",
+        "role": "option",
+        "tag": "li",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "option|U5xjq 2wxuwñ5 Sws5wzw",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#pv_id_141_0",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "pv_id_141_0",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#pv_id_141_0",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "U5xjq 2wxuwñ5 Sws5wzw ",
+                "id": "pv_id_141_0",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "pv_id_141_list"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_141_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "coveredByFunctionalSelection": true
+      },
+      "seq": 56
+    },
+    {
+      "t": 108954,
+      "kind": "tap",
+      "observationType": "pointer",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
+      "target": {
+        "label": "U5xjq 2wxuwñ5 Sws5wzw",
+        "role": "option",
+        "interactionType": "select",
+        "afterValue": "U5xjq 2wxuwñ5 Sws5wzw",
+        "compoundRole": "selection",
+        "associatedField": "Firma autorizada 1",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "option|U5xjq 2wxuwñ5 Sws5wzw",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#pv_id_141_0",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "pv_id_141_0",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#pv_id_141_0",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "U5xjq 2wxuwñ5 Sws5wzw ",
+                "id": "pv_id_141_0",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "pv_id_141_list"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_141_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "sourceTechnicalEventSeqs": [
+          54,
+          56
+        ]
+      },
+      "seq": 57
+    },
+    {
+      "t": 108960,
+      "interactionId": "pointer-21",
+      "kind": "note",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
+      "target": {
+        "label": "U5xjq 2wxuwñ5 Sws5wzw",
+        "role": "option",
+        "tag": "li",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"U5xjq 2wxuwñ5 Sws5wzw\"",
+      "observationType": "pointer",
+      "seq": 58
+    },
+    {
+      "t": 109464,
+      "interactionId": "pointer-22",
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
+      "target": {
+        "label": "control",
+        "role": "combobox",
+        "tag": "span",
+        "associatedField": "Firma autorizada 2",
         "locators": [],
         "technicalTargetCandidates": [
           {
@@ -2043,33 +2319,33 @@
         ],
         "coveredByFunctionalSelection": true
       },
-      "seq": 54
+      "seq": 59
     },
     {
-      "t": 132397,
-      "interactionId": "pointer-20",
+      "t": 109467,
+      "interactionId": "pointer-22",
       "kind": "note",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "control",
         "role": "combobox",
         "tag": "span",
-        "associatedField": "Firma autorizada 1",
+        "associatedField": "Firma autorizada 2",
         "locators": []
       },
       "note": "Observación técnica (pointer) sobre \"control\"",
       "observationType": "pointer",
-      "seq": 55
+      "seq": 60
     },
     {
-      "t": 133976,
-      "interactionId": "pointer-21",
+      "t": 110288,
+      "interactionId": "pointer-23",
       "kind": "tap",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx",
         "role": "option",
@@ -2135,22 +2411,22 @@
         ],
         "coveredByFunctionalSelection": true
       },
-      "seq": 56
+      "seq": 61
     },
     {
-      "t": 133982,
+      "t": 110293,
       "kind": "tap",
       "observationType": "pointer",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx",
         "role": "option",
         "interactionType": "select",
         "afterValue": "Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx",
         "compoundRole": "selection",
-        "associatedField": "Firma autorizada 1",
+        "associatedField": "Firma autorizada 2",
         "locators": [
           {
             "strategy": "role",
@@ -2211,19 +2487,19 @@
           }
         ],
         "sourceTechnicalEventSeqs": [
-          54,
-          56
+          59,
+          61
         ]
       },
-      "seq": 57
+      "seq": 62
     },
     {
-      "t": 133988,
-      "interactionId": "pointer-21",
+      "t": 110297,
+      "interactionId": "pointer-23",
       "kind": "note",
       "screenKey": "fbf08c6ecee9",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
       "target": {
         "label": "Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx",
         "role": "option",
@@ -2232,430 +2508,14 @@
       },
       "note": "Observación técnica (pointer) sobre \"Mc5zuwzw S54n5ppj Y4wz25x25 Xwzcjp Xj42jsjx\"",
       "observationType": "pointer",
-      "seq": 58
-    },
-    {
-      "t": 134815,
-      "interactionId": "pointer-22",
-      "kind": "note",
-      "screenKey": "fbf08c6ecee9",
-      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
-      "target": {
-        "label": "control",
-        "tag": "div",
-        "associatedField": "Firma autorizada 2",
-        "locators": []
-      },
-      "note": "Observación técnica (pointer) sobre \"control\"",
-      "observationType": "pointer",
-      "seq": 59
-    },
-    {
-      "t": 135087,
-      "interactionId": "pointer-22",
-      "kind": "tap",
-      "screenKey": "fbf08c6ecee9",
-      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
-      "target": {
-        "label": "control",
-        "tag": "div",
-        "associatedField": "Firma autorizada 2",
-        "locators": [
-          {
-            "strategy": "css",
-            "value": "#pv_id_143",
-            "confidence": 0.8
-          },
-          {
-            "strategy": "id",
-            "value": "pv_id_143",
-            "confidence": 0.8
-          }
-        ],
-        "technicalTargetCandidates": [
-          {
-            "targetType": "structural",
-            "locatorCandidates": [
-              {
-                "strategy": "css",
-                "value": "#pv_id_143",
-                "confidence": 0.8
-              }
-            ],
-            "structuralContext": {
-              "owner": {
-                "tag": "div"
-              },
-              "stableDirectAttributes": {
-                "id": "pv_id_143"
-              },
-              "stableDescendants": [
-                {
-                  "relation": "descendant",
-                  "tag": "span",
-                  "role": "combobox",
-                  "stableAttributes": {
-                    "role": "combobox"
-                  }
-                }
-              ],
-              "semanticShape": [
-                "div",
-                "span:combobox"
-              ],
-              "landmarkAncestor": {
-                "tag": "main"
-              },
-              "deterministicStructuralIdentity": true,
-              "topologySignature": "{\"childEntries\":[[\"div\",1],[\"span\",1]],\"descendantEntries\":[[\"div\",1],[\"path\",1],[\"span\",1],[\"svg\",1]]}",
-              "structuralIdentityMatchCount": 1,
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "pv_id_135_content"
-              },
-              "targetFingerprint": "{\"owner\":{\"tag\":\"div\"},\"stableDirectAttributes\":{\"id\":\"pv_id_143\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"span\",\"role\":\"combobox\",\"stableAttributes\":{\"role\":\"combobox\"}}],\"semanticShape\":[\"div\",\"span:combobox\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1],[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",1],[\\\"path\\\",1],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
-              "captureScopeUnique": true,
-              "captureTargetMatchCount": 1
-            },
-            "interactionEvidence": [
-              "v2_click_owner",
-              "v2_framework_actionable_owner"
-            ],
-            "confidence": 0.85,
-            "validatedByInteraction": true
-          }
-        ]
-      },
-      "seq": 60
-    },
-    {
-      "t": 136297,
-      "interactionId": "pointer-23",
-      "kind": "tap",
-      "screenKey": "fbf08c6ecee9",
-      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
-      "target": {
-        "label": "R5xjzjq Zwnw445 Pj5zw4s5 4wywjp",
-        "role": "option",
-        "tag": "li",
-        "locators": [
-          {
-            "strategy": "role",
-            "value": "option|R5xjzjq Zwnw445 Pj5zw4s5 4wywjp",
-            "confidence": 0.85
-          },
-          {
-            "strategy": "css",
-            "value": "#pv_id_143_5",
-            "confidence": 0.8
-          },
-          {
-            "strategy": "id",
-            "value": "pv_id_143_5",
-            "confidence": 0.8
-          }
-        ],
-        "technicalTargetCandidates": [
-          {
-            "targetType": "structural",
-            "locatorCandidates": [
-              {
-                "strategy": "css",
-                "value": "#pv_id_143_5",
-                "confidence": 0.8
-              }
-            ],
-            "structuralContext": {
-              "owner": {
-                "tag": "li",
-                "role": "option"
-              },
-              "stableDirectAttributes": {
-                "aria-label": "R5xjzjq Zwnw445 Pj5zw4s5 4wywjp",
-                "id": "pv_id_143_5",
-                "role": "option"
-              },
-              "stableDescendants": [],
-              "semanticShape": [
-                "span"
-              ],
-              "deterministicStructuralIdentity": true,
-              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
-              "structuralIdentityMatchCount": 1,
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "pv_id_143_list"
-              },
-              "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_143_5\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
-              "captureScopeUnique": true,
-              "captureTargetMatchCount": 1
-            },
-            "interactionEvidence": [
-              "v2_click_owner"
-            ],
-            "confidence": 0.85,
-            "validatedByInteraction": true
-          }
-        ]
-      },
-      "seq": 61
-    },
-    {
-      "t": 136304,
-      "interactionId": "pointer-23",
-      "kind": "note",
-      "screenKey": "fbf08c6ecee9",
-      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
-      "target": {
-        "label": "R5xjzjq Zwnw445 Pj5zw4s5 4wywjp",
-        "role": "option",
-        "tag": "li",
-        "locators": []
-      },
-      "note": "Observación técnica (pointer) sobre \"R5xjzjq Zwnw445 Pj5zw4s5 4wywjp\"",
-      "observationType": "pointer",
-      "seq": 62
-    },
-    {
-      "t": 137907,
-      "interactionId": "pointer-24",
-      "kind": "note",
-      "screenKey": "fbf08c6ecee9",
-      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
-      "target": {
-        "label": "Crear certificado",
-        "role": "button",
-        "tag": "button",
-        "locators": []
-      },
-      "note": "Observación técnica (pointer) sobre \"Crear certificado\"",
-      "observationType": "pointer",
       "seq": 63
     },
     {
-      "t": 138347,
-      "interactionId": "pointer-24",
-      "kind": "tap",
-      "screenKey": "fbf08c6ecee9",
-      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
-      "target": {
-        "label": "Crear certificado",
-        "role": "button",
-        "tag": "button",
-        "locators": [
-          {
-            "strategy": "role",
-            "value": "button|Crear certificado",
-            "confidence": 0.85
-          }
-        ],
-        "technicalTargetCandidates": [
-          {
-            "targetType": "structural",
-            "locatorCandidates": [
-              {
-                "strategy": "role",
-                "value": "button|Crear certificado",
-                "confidence": 0.85
-              }
-            ],
-            "structuralContext": {
-              "owner": {
-                "tag": "button"
-              },
-              "stableDirectAttributes": {
-                "aria-label": "Crear certificado"
-              },
-              "stableDescendants": [],
-              "semanticShape": [
-                "span"
-              ],
-              "landmarkAncestor": {
-                "tag": "main"
-              },
-              "deterministicStructuralIdentity": true,
-              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
-              "structuralIdentityMatchCount": 1,
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "pv_id_136_content"
-              },
-              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
-              "captureScopeUnique": true,
-              "captureTargetMatchCount": 1
-            },
-            "interactionEvidence": [
-              "v2_click_owner"
-            ],
-            "confidence": 0.85,
-            "validatedByInteraction": true
-          }
-        ]
-      },
-      "seq": 64
-    },
-    {
-      "t": 149422,
-      "interactionId": "pointer-25",
-      "kind": "note",
-      "screenKey": "fbf08c6ecee9",
-      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
-      "target": {
-        "label": "Cancelar",
-        "role": "button",
-        "tag": "button",
-        "locators": []
-      },
-      "note": "Observación técnica (pointer) sobre \"Cancelar\"",
-      "observationType": "pointer",
-      "seq": 65
-    },
-    {
-      "t": 150381,
-      "interactionId": "pointer-25",
-      "kind": "tap",
-      "screenKey": "fbf08c6ecee9",
-      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
-      "target": {
-        "label": "Cancelar",
-        "role": "button",
-        "tag": "button",
-        "locators": [
-          {
-            "strategy": "role",
-            "value": "button|Cancelar",
-            "confidence": 0.85
-          }
-        ],
-        "technicalTargetCandidates": [
-          {
-            "targetType": "structural",
-            "locatorCandidates": [
-              {
-                "strategy": "role",
-                "value": "button|Cancelar",
-                "confidence": 0.85
-              }
-            ],
-            "structuralContext": {
-              "owner": {
-                "tag": "button"
-              },
-              "stableDirectAttributes": {
-                "aria-label": "Cancelar"
-              },
-              "stableDescendants": [],
-              "semanticShape": [
-                "span"
-              ],
-              "landmarkAncestor": {
-                "tag": "main"
-              },
-              "deterministicStructuralIdentity": true,
-              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
-              "structuralIdentityMatchCount": 1,
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "__nuxt"
-              },
-              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
-              "captureScopeUnique": true,
-              "captureTargetMatchCount": 1
-            },
-            "interactionEvidence": [
-              "v2_click_owner"
-            ],
-            "confidence": 0.85,
-            "validatedByInteraction": true
-          }
-        ]
-      },
-      "seq": 66
-    },
-    {
-      "t": 150563,
-      "interactionId": "pointer-26",
-      "kind": "note",
-      "screenKey": "fbf08c6ecee9",
-      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
-      "target": {
-        "label": "Aceptar",
-        "role": "button",
-        "tag": "button",
-        "locators": []
-      },
-      "note": "Observación técnica (pointer) sobre \"Aceptar\"",
-      "observationType": "pointer",
-      "seq": 67
-    },
-    {
-      "t": 150654,
-      "interactionId": "pointer-26",
-      "kind": "tap",
-      "screenKey": "fbf08c6ecee9",
-      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
-      "target": {
-        "label": "Aceptar",
-        "role": "button",
-        "tag": "button",
-        "locators": [
-          {
-            "strategy": "role",
-            "value": "button|Aceptar",
-            "confidence": 0.85
-          }
-        ],
-        "technicalTargetCandidates": [
-          {
-            "targetType": "structural",
-            "locatorCandidates": [
-              {
-                "strategy": "role",
-                "value": "button|Aceptar",
-                "confidence": 0.85
-              }
-            ],
-            "structuralContext": {
-              "owner": {
-                "tag": "button"
-              },
-              "stableDirectAttributes": {
-                "aria-label": "Aceptar"
-              },
-              "stableDescendants": [],
-              "semanticShape": [
-                "span"
-              ],
-              "deterministicStructuralIdentity": true,
-              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
-              "structuralIdentityMatchCount": 1
-            },
-            "interactionEvidence": [
-              "v2_click_owner"
-            ],
-            "confidence": 0.85,
-            "validatedByInteraction": true
-          }
-        ]
-      },
-      "seq": 68
-    },
-    {
-      "t": 163046,
+      "t": 114209,
       "kind": "navigate",
       "screenKey": "fbf08c6ecee9",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
-      "seq": 69
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
+      "seq": 64
     }
   ],
   "screens": [
@@ -2664,7 +2524,7 @@
       "title": "fbf08c6ecee9",
       "fingerprint": "77080fb3ce69141cbca23d05b1cebb6be9b05d61fbd10f1e39f7ce07031141a4",
       "url": "https://srvqacgowb01.local.bsc.com:5000/login",
-      "firstSeenAt": 9422,
+      "firstSeenAt": 2470,
       "controls": [
         {
           "label": "Usuario",
@@ -2750,7 +2610,7 @@
       "title": "9b3ed654dc84",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
       "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
-      "firstSeenAt": 26565,
+      "firstSeenAt": 29929,
       "controls": [
         {
           "label": "Portal Comercial",
@@ -3061,11 +2921,11 @@
       "headerRelationships": []
     },
     {
-      "screenKey": "be2cbf7ba150",
-      "title": "be2cbf7ba150",
+      "screenKey": "8e0940f99d11",
+      "title": "8e0940f99d11",
       "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
-      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10416/edit",
-      "firstSeenAt": 71955,
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10465/edit",
+      "firstSeenAt": 62318,
       "controls": [
         {
           "label": "Portal Comercial",
@@ -3366,8 +3226,8 @@
       ],
       "texts": [],
       "gridMetadata": {
-        "detected": false,
-        "grids": 0,
+        "detected": true,
+        "grids": 2,
         "rows": 0,
         "cells": 0,
         "headers": [],
@@ -3376,6 +3236,6 @@
       "headerRelationships": []
     }
   ],
-  "endedAt": "2026-10-05T14:20:32.307Z",
-  "durationMs": 163372
+  "endedAt": "2026-10-07T14:04:22.346Z",
+  "durationMs": 114633
 }

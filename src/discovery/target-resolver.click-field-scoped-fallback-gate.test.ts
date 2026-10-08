@@ -125,3 +125,10 @@ test("11/noDatasetLogging. the new click diagnostic log carries no dataset value
   assert.ok(logMatch, "expected a [field-scope-click] diagnostic log");
   assert.doesNotMatch(logMatch![0], /\$\{opts\.associatedField\}/, "must not log the raw associatedField value");
 });
+
+test("12/validatedRecordedOwnerConstrainsFallback. only a validated recorded click owner tag is passed to the existing field-scoped fallback", () => {
+  const fn = resolveActionTargetSource();
+  assert.match(fn, /opts\.recordingActionType === "click"[\s\S]*?candidate\.validatedByInteraction === true[\s\S]*?candidate\.structuralContext\?\.owner\?\.tag/);
+  assert.match(fn, /tryFieldScopedStructuralFallback\(page, opts\.associatedField, requiredCompatibility, "action", recordedOwnerTag\)/);
+  assert.doesNotMatch(fn, /portal-comercial|Número de identificación/i, "the owner constraint must remain project and field agnostic");
+});

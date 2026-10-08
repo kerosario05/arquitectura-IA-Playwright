@@ -4292,6 +4292,29 @@ async function resolveActionTargetCore(
       return gridTarget;
     }
   }
+  // A recorded navigation link can move between landmarks (for example, from main content to
+  // the application's sidebar) while retaining its exact destination. Recover only from the
+  // recorded anchor href plus exact link name, and require one visible/enabled live anchor with
+  // that exact text and destination. This does not relax admission for buttons, selections, or
+  // arbitrary semantic targets, and it never runs across an origin/route incompatibility.
+  if (!recorded && !expectedSurfaceMismatch && !surfaceCompatibility.hardIncompatibility
+    && opts.actionType === "action_click"
+    && (opts.recordingActionType === undefined || opts.recordingActionType === "click" || opts.recordingActionType === "navigation")) {
+    const navigationLink = await resolveRecordedNavigationLinkByHref(page, snapshot, target, opts.recordedTechnicalTargets);
+    if (navigationLink) {
+      console.log(`[recording-replay] recordedNavigationLinkRecovered=true strategy=${navigationLink.strategy} currentMatchCount=${navigationLink.currentMatchCount}`);
+      return {
+        status: "resolved",
+        target,
+        locator: navigationLink.locator,
+        locatorStrategy: navigationLink.strategy,
+        confidence: navigationLink.confidence,
+        matchReason: "recorded_navigation_link_current_dom_href",
+        candidateText: target,
+        candidates: [],
+      };
+    }
+  }
   if ((opts.recordedTechnicalTargetRefs?.length ?? 0) > 0 || (opts.recordedTechnicalTargets?.length ?? 0) > 0) {
     const candidateDetails = snapshot.elements
       .filter((element) => element.visible && (
@@ -5371,6 +5394,7 @@ export async function tryFieldScopedStructuralFallback(
   associatedField: string | undefined,
   requiredCompatibility: "editable" | "actionable",
   recordedMode: "fill" | "action",
+  requiredOwnerTag?: string,
 ): Promise<RecordedLocatorResolution | undefined> {
   if (!associatedField?.trim()) return undefined;
 
@@ -5451,14 +5475,18 @@ export async function tryFieldScopedStructuralFallback(
     return failClosed();
   }
 
-  const compatibleCandidateCount = evidence.candidates.filter((candidate) =>
+  const ownerConstrainedCandidates = requiredOwnerTag?.trim()
+    ? evidence.candidates.filter((candidate) => candidate.tag.toLowerCase() === requiredOwnerTag.trim().toLowerCase())
+    : evidence.candidates;
+  const compatibleCandidateCount = ownerConstrainedCandidates.filter((candidate) =>
     candidate.visible !== false && candidate.disabled !== true &&
     (requiredCompatibility === "editable" ? candidate.editable === true : candidate.actionable === true),
   ).length;
   const materialization = materializeFieldScopedTechnicalTarget({
     associatedField,
-    candidates: evidence.candidates,
+    candidates: ownerConstrainedCandidates,
     requiredCompatibility,
+    ...(requiredOwnerTag?.trim() ? { requiredOwnerTag } : {}),
     fieldContainerEvidence: evidence.container,
   });
   console.log(
@@ -5497,7 +5525,7 @@ export async function tryFieldScopedStructuralFallback(
     );
     if (materialization.target.certificationTier === 1 && containerAvailable) {
       const containerScoped = materializeFieldScopedTechnicalTarget(
-        { associatedField, candidates: evidence.candidates, requiredCompatibility, fieldContainerEvidence: evidence.container },
+        { associatedField, candidates: ownerConstrainedCandidates, requiredCompatibility, ...(requiredOwnerTag?.trim() ? { requiredOwnerTag } : {}), fieldContainerEvidence: evidence.container },
         { requireContainerScope: true },
       );
       // Diagnostic instrumentation only: the retry's own outcome (attempted, what it built, and
@@ -5542,7 +5570,7 @@ export async function tryFieldScopedStructuralFallback(
     const scopeContainer = evidence.scopeContainer;
     if (scopeContainer && !evidence.container?.fromAcceptedFieldScope) {
       const scopeScoped = materializeFieldScopedTechnicalTarget(
-        { associatedField, candidates: evidence.candidates, requiredCompatibility, fieldContainerEvidence: scopeContainer },
+        { associatedField, candidates: ownerConstrainedCandidates, requiredCompatibility, ...(requiredOwnerTag?.trim() ? { requiredOwnerTag } : {}), fieldContainerEvidence: scopeContainer },
         { requireContainerScope: true },
       );
       console.log(
@@ -5839,13 +5867,23 @@ export async function resolveActionTarget(
 
   const requiredCompatibility: "editable" | "actionable" =
     opts.recordingActionType === "fill" || opts.recordingActionType === "press" ? "editable" : "actionable";
+  // A validated recording may carry the actual clicked owner (for example, a button with no
+  // serializable locator). Preserve its tag when recovering inside the associated field. This
+  // prevents a clickable field wrapper from standing in for the recorded button. The constraint
+  // is applied only to validated recorded owner evidence; ordinary field-scoped clicks keep the
+  // existing candidate set and behavior.
+  const recordedOwnerTag = opts.recordingActionType === "click"
+    ? opts.recordedTechnicalTargets?.find((candidate) =>
+      candidate.validatedByInteraction === true && Boolean(candidate.structuralContext?.owner?.tag),
+    )?.structuralContext?.owner?.tag
+    : undefined;
   if (recordedTargetWasSupplied) {
     console.log(
       `[field-scope-click] associatedFieldPresent=true recordedTargetFailedReason=not_present_or_unique ` +
       `requiredCompatibility=${requiredCompatibility} recordingActionType=${opts.recordingActionType ?? "unknown"}`
     );
   }
-  const fallback = await tryFieldScopedStructuralFallback(page, opts.associatedField, requiredCompatibility, "action");
+  const fallback = await tryFieldScopedStructuralFallback(page, opts.associatedField, requiredCompatibility, "action", recordedOwnerTag);
   if (!fallback) return result;
 
   // INVARIANT: for an option-like recorded action the field-scoped owner is a selection-surface
@@ -6236,6 +6274,103 @@ type RecordedLocatorResolution = {
    *  the caller MUST release it after the click attempt, never before. */
   acceptedScopeRuntimeMarker?: string;
 };
+
+function exactWhitespaceName(value: string | undefined): string | undefined {
+  const normalized = value?.replace(/\s+/g, " ").trim();
+  return normalized || undefined;
+}
+
+function normalizedSameOriginHref(href: string | undefined, baseUrl: string): string | undefined {
+  if (!href?.trim()) return undefined;
+  try {
+    const base = new URL(baseUrl);
+    const resolved = new URL(href, base);
+    if (resolved.origin !== base.origin) return undefined;
+    return `${resolved.origin}${resolved.pathname}${resolved.search}${resolved.hash}`;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Recover a recorded anchor only when its recorded accessible role/name and stable href agree
+ * with a current, visible anchor, and a live DOM locator independently confirms that same rendered
+ * text and destination. When recording captured a semantic landmark, use that landmark as scope;
+ * otherwise require page-wide uniqueness. The fallback excludes generic buttons, fuzzy names,
+ * and duplicate controls within the recorded scope.
+ */
+async function resolveRecordedNavigationLinkByHref(
+  page: Page,
+  snapshot: PageSnapshot,
+  target: string,
+  recordedTargets: RecordedTechnicalTarget[] | undefined,
+): Promise<{ locator: Locator; strategy: string; confidence: number; currentMatchCount: number } | undefined> {
+  const exactTargetName = exactWhitespaceName(target);
+  if (!exactTargetName) return undefined;
+
+  const authorities = (recordedTargets ?? []).flatMap((recordedTarget) => {
+    const owner = recordedTarget.structuralContext?.owner;
+    if (owner?.tag?.toLowerCase() !== "a") return [];
+    const recordedLinkName = (recordedTarget.locatorCandidates ?? []).some((candidate) => {
+      if (candidate.strategy.trim().toLowerCase() !== "role") return false;
+      const separator = candidate.value.indexOf("|");
+      return separator > 0
+        && candidate.value.slice(0, separator).trim().toLowerCase() === "link"
+        && exactWhitespaceName(candidate.value.slice(separator + 1)) === exactTargetName;
+    });
+    if (!recordedLinkName) return [];
+    const href = recordedTarget.structuralContext?.stableDirectAttributes?.href
+      ?? recordedTarget.stableAttributes?.href;
+    const normalizedHref = normalizedSameOriginHref(href, page.url());
+    const landmarkTag = recordedTarget.structuralContext?.landmarkAncestor?.tag?.trim().toLowerCase();
+    const supportedLandmark = landmarkTag && ["main", "nav", "header", "footer", "aside"].includes(landmarkTag)
+      ? landmarkTag
+      : undefined;
+    return normalizedHref ? [{ recordedTarget, normalizedHref, landmarkTag: supportedLandmark }] : [];
+  });
+  if (authorities.length !== 1) return undefined;
+
+  const authority = authorities[0];
+  const snapshotMatches = snapshot.elements.filter((element) => {
+    const name = exactWhitespaceName(element.accessibleName ?? element.ariaLabel ?? element.label ?? element.name ?? element.text);
+    return element.tagName?.toLowerCase() === "a"
+      && (element.role?.toLowerCase() === "link" || element.type === "link")
+      && element.visible
+      && !element.disabled
+      && name === exactTargetName
+      && exactWhitespaceName(element.text) === exactTargetName
+      && normalizedSameOriginHref(element.href, snapshot.url) === authority.normalizedHref;
+  });
+  if (snapshotMatches.length === 0 || (!authority.landmarkTag && snapshotMatches.length !== 1)) {
+    console.log(`[recording-replay] recordedNavigationLinkFallback=not_unique snapshotMatches=${snapshotMatches.length}`);
+    return undefined;
+  }
+
+  const exactRenderedText = new RegExp(`^\\s*${exactTargetName.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}\\s*$`);
+  const candidateScope = authority.landmarkTag ? page.locator(authority.landmarkTag) : page;
+  const scopeCount = authority.landmarkTag ? await candidateScope.count().catch(() => 0) : 1;
+  if (scopeCount !== 1) {
+    console.log(`[recording-replay] recordedNavigationLinkFallback=landmark_scope_not_unique landmark=${authority.landmarkTag} count=${scopeCount}`);
+    return undefined;
+  }
+  const locator = candidateScope.locator("a").filter({ hasText: exactRenderedText });
+  const count = await locator.count().catch(() => 0);
+  const visible = count === 1 && await locator.isVisible().catch(() => false);
+  const enabled = visible && await locator.isEnabled().catch(() => false);
+  const liveHref = count === 1 ? await locator.getAttribute("href").catch(() => null) : null;
+  const liveHrefMatches = normalizedSameOriginHref(liveHref ?? undefined, page.url()) === authority.normalizedHref;
+  if (count !== 1 || !visible || !enabled || !liveHrefMatches) {
+    console.log(`[recording-replay] recordedNavigationLinkFallback=rejected matchCount=${count} visible=${visible} enabled=${enabled} hrefMatched=${liveHrefMatches}`);
+    return undefined;
+  }
+  console.log("[recording-replay] recordedNavigationLinkFallback=certified exactName=true exactHref=true unique=true");
+  return {
+    locator,
+    strategy: "recorded:link-exact-name-href",
+    confidence: Math.min(authority.recordedTarget.confidence, 0.95),
+    currentMatchCount: 1,
+  };
+}
 
 export type StructuredTargetCandidate = {
   id: string;

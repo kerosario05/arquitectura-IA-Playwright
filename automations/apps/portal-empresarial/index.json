@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-10-07T12:16:56.004Z",
+  "updatedAt": "2026-10-07T20:44:35.372Z",
   "automations": [
     {
       "id": "preview-001-grabar-el-recorrido",
@@ -516,13 +516,13 @@
       "source": "discovery",
       "appProfile": "portal-empresarial",
       "createdAt": "2026-10-03T22:42:39.350Z",
-      "updatedAt": "2026-10-07T04:16:49.949Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T04-15-18-015Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-07T20:44:35.372Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T20-43-11-471Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T04-15-18-015Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T20-43-11-471Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -546,7 +546,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 53731,
+          "durationMs": 35674,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -597,9 +597,9 @@
           },
           "specWritten": true,
           "previousSpec": {
-            "existed": false,
-            "hash": null,
-            "lastModifiedAt": null
+            "existed": true,
+            "hash": "da5aae187897b97ee62c1b07a65bc8db97fd6329a4b3e13024cae28fdca341a4",
+            "lastModifiedAt": "2026-10-07T04:16:49.920Z"
           }
         },
         "promotionStrategyDiagnostics": {
@@ -1010,21 +1010,21 @@
       "externalId": "PREVIEW-001",
       "caseId": 0,
       "title": "Agregar varios empleados manualmente con cédula",
-      "planPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\plan.json",
-      "specPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",
+      "planPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\plan.json",
+      "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",
       "appSlug": "portal-empresarial",
       "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
       "status": "active",
       "source": "discovery",
       "appProfile": "portal-empresarial",
       "createdAt": "2026-10-06T16:03:06.707Z",
-      "updatedAt": "2026-10-07T11:17:44.641Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T11-11-46-128Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-07T20:18:48.381Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T20-13-38-911Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T11-11-46-128Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T20-13-38-911Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -1048,7 +1048,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 162227,
+          "durationMs": 118462,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -1095,9 +1095,9 @@
           },
           "specWritten": true,
           "previousSpec": {
-            "existed": false,
-            "hash": null,
-            "lastModifiedAt": null
+            "existed": true,
+            "hash": "390b6eeb65e73b55b9178d5ce770364b00ab4e16d6db19423211ca36cd6717b2",
+            "lastModifiedAt": "2026-10-07T16:51:57.627Z"
           }
         },
         "promotionStrategyDiagnostics": {
@@ -1116,38 +1116,38 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false,
-          "specPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",
-          "specHash": "962fcda5b9da877baf20550f93c9728b131329bed08a9118eca76e189828aade",
+          "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",
+          "specHash": "390b6eeb65e73b55b9178d5ce770364b00ab4e16d6db19423211ca36cd6717b2",
           "specSource": "generatedSpec"
         },
         "overwritten": true,
-        "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\plan.json",
-        "previousStatus": "spec_failed"
+        "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\plan.json",
+        "previousStatus": "active"
       },
       "promotionPersisted": true,
-      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",
-      "promotedSpecHash": "962fcda5b9da877baf20550f93c9728b131329bed08a9118eca76e189828aade"
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",
+      "promotedSpecHash": "390b6eeb65e73b55b9178d5ce770364b00ab4e16d6db19423211ca36cd6717b2"
     },
     {
       "id": "preview-001-login-satisfactorio",
       "externalId": "PREVIEW-001",
       "caseId": 0,
       "title": "Login satisfactorio",
-      "planPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-login-satisfactorio\\plan.json",
-      "specPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-login-satisfactorio\\case.spec.ts",
+      "planPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-login-satisfactorio\\plan.json",
+      "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-login-satisfactorio\\case.spec.ts",
       "appSlug": "portal-empresarial",
       "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
       "status": "active",
       "source": "discovery",
       "appProfile": "portal-empresarial",
       "createdAt": "2026-10-07T03:48:26.524Z",
-      "updatedAt": "2026-10-07T12:16:56.004Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T12-15-33-742Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-07T20:28:56.849Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T20-27-44-608Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T12-15-33-742Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T20-27-44-608Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -1171,7 +1171,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 54468,
+          "durationMs": 34436,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -1243,14 +1243,17 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false,
-          "specPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-login-satisfactorio\\case.spec.ts",
-          "specHash": "d7b31a7000d10d52732f43d2e83784c99e96034ace4d6ac8e1ca7ebde1eb4801",
+          "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-login-satisfactorio\\case.spec.ts",
+          "specHash": "4ee0ea7766f09da68977d7ffc5bf22cdca9bae990dbd898de4fa1cd23bb9db3c",
           "specSource": "generatedSpec"
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-login-satisfactorio\\plan.json",
+        "previousStatus": "active"
       },
       "promotionPersisted": true,
-      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-login-satisfactorio\\case.spec.ts",
-      "promotedSpecHash": "d7b31a7000d10d52732f43d2e83784c99e96034ace4d6ac8e1ca7ebde1eb4801"
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-login-satisfactorio\\case.spec.ts",
+      "promotedSpecHash": "4ee0ea7766f09da68977d7ffc5bf22cdca9bae990dbd898de4fa1cd23bb9db3c"
     },
     {
       "id": "preview-001-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente",
@@ -1265,13 +1268,13 @@
       "source": "discovery",
       "appProfile": "portal-empresarial",
       "createdAt": "2026-10-07T03:53:47.186Z",
-      "updatedAt": "2026-10-07T03:53:47.187Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T03-51-11-752Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-07T20:33:22.541Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T20-30-43-820Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T03-51-11-752Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T20-30-43-820Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -1295,7 +1298,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 69217,
+          "durationMs": 60040,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -1344,9 +1347,9 @@
           },
           "specWritten": true,
           "previousSpec": {
-            "existed": false,
-            "hash": null,
-            "lastModifiedAt": null
+            "existed": true,
+            "hash": "ec6e2f7f49de1f01753548edb1af844a190b289f079bd839d43d173ce592960b",
+            "lastModifiedAt": "2026-10-07T03:53:47.157Z"
           }
         },
         "promotionStrategyDiagnostics": {
@@ -1368,7 +1371,10 @@
           "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente\\case.spec.ts",
           "specHash": "ec6e2f7f49de1f01753548edb1af844a190b289f079bd839d43d173ce592960b",
           "specSource": "generatedSpec"
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente\\plan.json",
+        "previousStatus": "active"
       },
       "promotionPersisted": true,
       "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente\\case.spec.ts",

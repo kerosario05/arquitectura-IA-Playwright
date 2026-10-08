@@ -1,0 +1,621 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "REC-ENGINE-001",
+    "caseId": 0,
+    "title": "Captura web completa"
+  },
+  "requiredData": [
+    {
+      "key": "nombre",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "contrasena",
+      "required": true,
+      "resolved": true
+    }
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to http://127.0.0.1:54842/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "description": "Presionar \"Crear perfil\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Crear perfil",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner",
+      "requirementRefs": []
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "Ingresar \"Regression User\" en \"Nombre\"",
+      "target": {
+        "strategy": "text",
+        "value": "Nombre",
+        "exact": false
+      },
+      "valueKey": "nombre",
+      "requirementRefs": []
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "Ingresar \"••••••\" en \"Contraseña\"",
+      "target": {
+        "strategy": "text",
+        "value": "Contraseña",
+        "exact": false
+      },
+      "valueKey": "contrasena",
+      "requirementRefs": []
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Seleccionar \"USD\" en \"Moneda\"",
+      "target": {
+        "strategy": "recorded_native_select_option",
+        "value": "USD",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Moneda",
+          "resolvedTargetName": "USD",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "recorded_native_select_option",
+      "requirementRefs": []
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Presionar \"Guardar perfil\"",
+      "target": {
+        "strategy": "recorded:role",
+        "value": "Guardar perfil",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:role",
+      "requirementRefs": []
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-10-07T17:51:10.075Z",
+  "sourceScenario": {
+    "title": "Captura web completa",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Abrir la aplicación configurada del proyecto",
+        "description": "Abrir la aplicación configurada del proyecto"
+      },
+      {
+        "index": 2,
+        "action": "Presionar \"Crear perfil\"",
+        "description": "Presionar \"Crear perfil\"",
+        "technicalTargetRef": "data-testid:open-form",
+        "technicalTargetRefs": [
+          "data-testid:open-form",
+          "role:link|Crear perfil"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Crear perfil",
+          "targetTag": "a",
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "data-testid",
+                "value": "open-form",
+                "confidence": 0.98
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "data-testid": "open-form",
+                "href": "/form"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "controlIdentity": "6f5d696ccd2e|Crear perfil|data-testid|open-form",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 3,
+        "action": "Ingresar \"Regression User\" en \"Nombre\"",
+        "description": "Ingresar \"Regression User\" en \"Nombre\"",
+        "valueKey": "nombre",
+        "technicalTargetRef": "role:textbox|Nombre",
+        "technicalTargetRefs": [
+          "role:textbox|Nombre",
+          "css:#profile-name",
+          "id:profile-name"
+        ],
+        "associatedField": "Nombre",
+        "controlIdentity": "6f5d696ccd2e|Nombre|role|textbox|Nombre",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 4,
+        "action": "Ingresar \"••••••\" en \"Contraseña\"",
+        "description": "Ingresar \"••••••\" en \"Contraseña\"",
+        "valueKey": "contrasena",
+        "technicalTargetRef": "role:textbox|Contraseña",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#profile-password",
+          "id:profile-password"
+        ],
+        "associatedField": "Contraseña",
+        "controlIdentity": "6f5d696ccd2e|Contraseña|role|textbox|Contraseña",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 5,
+        "action": "Seleccionar \"USD\" en \"Moneda\"",
+        "description": "Seleccionar \"USD\" en \"Moneda\"",
+        "valueKey": "moneda_seleccion",
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "USD",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "select[id=\"profile-currency\"]"
+          },
+          "runtimeResolutionRequired": true,
+          "nativeSelection": {
+            "controlIdentity": {
+              "strategy": "id",
+              "value": "profile-currency"
+            },
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "select[id=\"profile-currency\"]"
+            },
+            "fieldLabel": "Moneda",
+            "options": [
+              {
+                "value": "DOP",
+                "label": "DOP",
+                "disabled": false
+              },
+              {
+                "value": "USD",
+                "label": "USD",
+                "disabled": false
+              }
+            ],
+            "selectedValue": "USD",
+            "clickedOption": {
+              "value": "USD",
+              "label": "USD"
+            },
+            "selectionMode": "index",
+            "selectedOptionIndex": 1
+          },
+          "captureMatchCount": 1
+        },
+        "associatedField": "Moneda",
+        "controlIdentity": "6f5d696ccd2e|Moneda|css|select[id=\"profile-currency\"]",
+        "recordingActionType": "select"
+      },
+      {
+        "index": 6,
+        "action": "Presionar \"Guardar perfil\"",
+        "description": "Presionar \"Guardar perfil\"",
+        "valueKey": "guardar_perfil",
+        "technicalTargetRef": "role:button|Guardar perfil",
+        "technicalTargetRefs": [
+          "role:button|Guardar perfil"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Guardar perfil",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Guardar perfil",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Guardar perfil",
+        "controlIdentity": "6f5d696ccd2e|Guardar perfil|role|button|Guardar perfil",
+        "recordingActionType": "click"
+      }
+    ],
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "observedAssertions": [],
+    "observableOracles": [],
+    "stepStatuses": [
+      {
+        "index": 2,
+        "status": "found"
+      },
+      {
+        "index": 3,
+        "status": "found"
+      },
+      {
+        "index": 4,
+        "status": "found"
+      },
+      {
+        "index": 5,
+        "status": "found"
+      },
+      {
+        "index": 6,
+        "status": "found"
+      }
+    ],
+    "auth": {}
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "REC-ENGINE-001",
+    "title": "Captura web completa",
+    "appSlug": "recording-regression-2d122b23",
+    "sectionSlug": "motor-de-grabacion",
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Abrir la aplicación configurada del proyecto",
+        "operation": "navigate",
+        "target": {
+          "strategy": "url",
+          "value": "APP_BASE_URL"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Presionar \"Crear perfil\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Crear perfil"
+        },
+        "technicalTargetRef": "data-testid:open-form",
+        "technicalTargetRefs": [
+          "data-testid:open-form",
+          "role:link|Crear perfil"
+        ],
+        "controlIdentity": "6f5d696ccd2e|Crear perfil|data-testid|open-form",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[data-testid=\"open-form\"][href=\"/form\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a"
+            },
+            "stableDirectAttributes": {
+              "data-testid": "open-form",
+              "href": "/form"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Crear perfil",
+          "targetTag": "a",
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Ingresar \"Regression User\" en \"Nombre\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Nombre"
+        },
+        "valueKey": "nombre",
+        "associatedField": "Nombre",
+        "technicalTargetRef": "role:textbox|Nombre",
+        "technicalTargetRefs": [
+          "role:textbox|Nombre",
+          "css:#profile-name",
+          "id:profile-name"
+        ],
+        "controlIdentity": "6f5d696ccd2e|Nombre|role|textbox|Nombre",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Nombre",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Ingresar \"••••••\" en \"Contraseña\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Contraseña"
+        },
+        "valueKey": "contrasena",
+        "associatedField": "Contraseña",
+        "technicalTargetRef": "role:textbox|Contraseña",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#profile-password",
+          "id:profile-password"
+        ],
+        "controlIdentity": "6f5d696ccd2e|Contraseña|role|textbox|Contraseña",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Contraseña",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 4,
+        "scenarioStepIndex": 5,
+        "originalText": "Seleccionar \"USD\" en \"Moneda\"",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "USD"
+        },
+        "valueKey": "moneda_seleccion",
+        "associatedField": "Moneda",
+        "controlIdentity": "6f5d696ccd2e|Moneda|css|select[id=\"profile-currency\"]",
+        "recordingActionType": "select",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "USD",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "USD",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "select[id=\"profile-currency\"]"
+          },
+          "runtimeResolutionRequired": true,
+          "nativeSelection": {
+            "controlIdentity": {
+              "strategy": "id",
+              "value": "profile-currency"
+            },
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "select[id=\"profile-currency\"]"
+            },
+            "fieldLabel": "Moneda",
+            "options": [
+              {
+                "value": "DOP",
+                "label": "DOP",
+                "disabled": false
+              },
+              {
+                "value": "USD",
+                "label": "USD",
+                "disabled": false
+              }
+            ],
+            "selectedValue": "USD",
+            "clickedOption": {
+              "value": "USD",
+              "label": "USD"
+            },
+            "selectionMode": "index",
+            "selectedOptionIndex": 1
+          },
+          "captureMatchCount": 1
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 5,
+        "scenarioStepIndex": 6,
+        "originalText": "Presionar \"Guardar perfil\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Guardar perfil"
+        },
+        "valueKey": "guardar_perfil",
+        "associatedField": "Guardar perfil",
+        "technicalTargetRef": "role:button|Guardar perfil",
+        "technicalTargetRefs": [
+          "role:button|Guardar perfil"
+        ],
+        "controlIdentity": "6f5d696ccd2e|Guardar perfil|role|button|Guardar perfil",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Guardar perfil",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Guardar perfil",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 6,
+      "representedScenarioSteps": 6,
+      "missingScenarioSteps": []
+    }
+  }
+}

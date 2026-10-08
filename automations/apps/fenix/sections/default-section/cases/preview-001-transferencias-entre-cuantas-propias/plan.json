@@ -180,11 +180,11 @@
       "description": "Seleccionar opción que contiene Cuenta Corrientes (coincidencia 1) en el campo \"account-from-select-input\"",
       "target": {
         "strategy": "recorded_visible_option_identity",
-        "value": "Cuenta Corrientes / 11311000003156 / RD$155,657.94",
+        "value": "Cuenta Corrientes / 11311000003156 / RD$151,725.44",
         "exact": false,
         "metadata": {
           "originalTarget": "account-from-select-input",
-          "resolvedTargetName": "Cuenta Corrientes / 11311000003156 / RD$155,657.94",
+          "resolvedTargetName": "Cuenta Corrientes / 11311000003156 / RD$151,725.44",
           "aiAssisted": false,
           "repairType": "target_resolution",
           "decisionStatus": "resolved",
@@ -212,11 +212,11 @@
       "description": "Seleccionar opción que contiene Cuenta de Ahorro (coincidencia 1) en el campo \"account-to-select-input\"",
       "target": {
         "strategy": "recorded_visible_option_identity",
-        "value": "Cuenta de Ahorro / 21312020003368 / US$1,605.71",
+        "value": "Cuenta de Ahorro / 21312020003368 / US$1,670.71",
         "exact": false,
         "metadata": {
           "originalTarget": "account-to-select-input",
-          "resolvedTargetName": "Cuenta de Ahorro / 21312020003368 / US$1,605.71",
+          "resolvedTargetName": "Cuenta de Ahorro / 21312020003368 / US$1,670.71",
           "aiAssisted": false,
           "repairType": "target_resolution",
           "decisionStatus": "resolved",
@@ -314,7 +314,7 @@
   "notes": [
     "Discovery completed successfully. All targets and concrete assertions passed."
   ],
-  "createdAt": "2026-10-07T02:47:37.683Z",
+  "createdAt": "2026-10-07T21:50:51.930Z",
   "metadata": {
     "authFlowRequired": false,
     "authFlowAlias": "defaultClient",

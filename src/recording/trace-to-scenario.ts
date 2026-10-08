@@ -15,6 +15,8 @@ import { confirmedCompoundSelectionBefore, logicalCompoundChildValue } from "./c
 import { quoteHumanValue, renderHumanStepValue } from "./human-step-renderer";
 import type { RecordingAiScenarioProposal } from "./ai-scenario-contract";
 import type { SelectorOptionInventory } from "./semantic-recording";
+import type { ConditionalAction } from "../discovery/step-intent-parser";
+import { isSelectionListRecoveryControlLabel } from "../scenarios/selection-list-recovery";
 import { buildCanonicalInteractions, enrichRecordedScenarioContract, evaluateRecordingReadiness, hasExecutionAuthority, hasReusableStructuralClickIdentity, isMaskActivation, materializedSemanticSignature, reconcileRecordedScenarioOptionOwnerLineage, validateInteractionStateSequence, type CanonicalInteraction, type EntityActionBlock, type MutationOpportunity, type RecordingReadiness, type RuntimeInputRequirement, type ScenarioMutationProposal } from "./canonical-recording-contract";
 
 /**
@@ -43,6 +45,7 @@ export type RecordedWebStep = {
   routeBefore?: string;
   routeAfter?: string;
   stateScope?: string;
+  conditionalAction?: ConditionalAction;
 };
 
 export type RecordedScenarioStep = {
@@ -74,6 +77,7 @@ export type RecordedScenarioStep = {
   /** 1-based position within a segmented (OTP-style) input group; tells the renderer which
    * character of the group's single shared value this step's placeholder stands for. */
   segmentPosition?: number;
+  conditionalAction?: ConditionalAction;
 };
 
 export type ScenarioStepMetrics = {
@@ -1239,11 +1243,25 @@ export function buildHappyPathScenario(
         const hasRealAccessibleName = Boolean(realLabel) && !isGenericUnresolvedLabel(realLabel!);
         const frameworkOwner = semanticIdentityFromFrameworkOwnerEvidence(event.target);
         const associatedField = event.target?.associatedField?.trim();
+        const recoveryLabel = associatedField || realLabel || "";
+        const listRecoveryAction: ConditionalAction | undefined = event.target?.role?.toLowerCase() === "button"
+          && isSelectionListRecoveryControlLabel(recoveryLabel)
+          ? {
+            operation: "click",
+            actionTarget: recoveryLabel,
+            condition: { type: "visibility", target: recoveryLabel },
+            required: false,
+            conditionalRequired: true,
+            skipAllowedWhenConditionFalse: true,
+          }
+          : undefined;
         const unresolvedSemanticDisplay = !targetLocatorsForPlan.length
           && associatedField
           && !isGenericUnresolvedLabel(associatedField);
         const canonicalInteraction = canonicalByEvent.get(`event-${eventIndex + 1}`);
-        const description = canonicalInteraction?.dynamicTargetLabel
+        const description = listRecoveryAction
+          ? `Si el botón "${recoveryLabel}" está visible, presionar el botón "${recoveryLabel}".`
+          : canonicalInteraction?.dynamicTargetLabel
           ? hasReusableStructuralClickIdentity(canonicalInteraction) ? "Presionar el control grabado" : "Presionar el control indicado"
           : hasRealAccessibleName
           ? unresolvedSemanticDisplay
@@ -1262,6 +1280,7 @@ export function buildHappyPathScenario(
           sourceEventRefs: [`event-${eventIndex + 1}`],
           renderedStep: description,
           interactionId: `interaction-${eventIndex + 1}`,
+          ...(listRecoveryAction ? { conditionalAction: listRecoveryAction } : {}),
           expected: "",
           classification: "FUNCTIONAL_ACTION",
         });
@@ -1277,6 +1296,7 @@ export function buildHappyPathScenario(
           webSteps.push({
             action: "click",
             description,
+            ...(listRecoveryAction ? { conditionalAction: listRecoveryAction } : {}),
             ...(entityScopeForTarget(event.target) ? { entityScope: entityScopeForTarget(event.target) } : {}),
             interactionId: `interaction-${eventIndex + 1}`,
           });
@@ -1347,6 +1367,18 @@ export function buildHappyPathScenario(
 
     if (event.kind === "tap") {
       const label = target.label?.trim() || "el control";
+      const recoveryLabel = target.associatedField?.trim() || target.label?.trim() || "";
+      const listRecoveryAction: ConditionalAction | undefined = target.role?.toLowerCase() === "button"
+        && isSelectionListRecoveryControlLabel(recoveryLabel)
+        ? {
+          operation: "click",
+          actionTarget: recoveryLabel,
+          condition: { type: "visibility", target: recoveryLabel },
+          required: false,
+          conditionalRequired: true,
+          skipAllowedWhenConditionFalse: true,
+        }
+        : undefined;
       const selection = (target.interactionType === "select" && target.afterValue !== undefined) || target.afterValue !== undefined;
       const checkbox = target.role?.toLowerCase() === "checkbox";
       const checkboxChecked = target.afterState?.selected !== false && target.afterState?.aria?.["aria-checked"] !== "false" && target.stateDelta?.checked !== false;
@@ -1356,7 +1388,9 @@ export function buildHappyPathScenario(
         : selection ? `${label} · selección` : label;
       const selectionKey = selection ? selectionValueKey(event, selectionResolution?.semanticField ?? label) : undefined;
       const canonicalInteraction = canonicalByEvent.get(`event-${eventIndex + 1}`);
-      const description = canonicalInteraction?.dynamicTargetLabel
+      const description = listRecoveryAction
+        ? `Si el botón "${recoveryLabel}" está visible, presionar el botón "${recoveryLabel}".`
+        : canonicalInteraction?.dynamicTargetLabel
         ? hasReusableStructuralClickIdentity(canonicalInteraction) ? "Presionar el control grabado" : "Presionar el control indicado"
         : selection ? `Seleccionar [${selectionKey}] en "${selectionLabel}"` : checkbox ? `${checkboxChecked ? "Marcar" : "Desmarcar"} "${label}"` : describeTap(event);
       const renderedStep = selection ? describeSelectionRendered(event, selectionLabel, description) : description;
@@ -1384,6 +1418,7 @@ export function buildHappyPathScenario(
         webSteps.push({
           action: "click",
           target: { strategy: best.strategy, value: best.value },
+          ...(listRecoveryAction ? { conditionalAction: listRecoveryAction } : {}),
           ...(selectionKey ? { valueKey: selectionKey } : {}),
           description,
            ...(entityScopeForTarget(target) ? { entityScope: entityScopeForTarget(target) } : {}),
@@ -1405,6 +1440,7 @@ export function buildHappyPathScenario(
         renderedStep: selection ? renderedStep : description,
         valueKey: selectionKey,
         interactionId: `interaction-${eventIndex + 1}`,
+        ...(listRecoveryAction ? { conditionalAction: listRecoveryAction } : {}),
         sensitive: false,
         expected: target.enabled === false
           ? "El control permanece deshabilitado hasta cumplir su condición"

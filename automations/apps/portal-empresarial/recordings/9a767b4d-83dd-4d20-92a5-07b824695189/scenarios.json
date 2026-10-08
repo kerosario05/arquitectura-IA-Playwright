@@ -624,11 +624,11 @@
     },
     "promotedSpec": {
       "appSlug": "portal-empresarial",
-      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-login-satisfactorio\\case.spec.ts",
-      "specHash": "d7b31a7000d10d52732f43d2e83784c99e96034ace4d6ac8e1ca7ebde1eb4801",
+      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-login-satisfactorio\\case.spec.ts",
+      "specHash": "4ee0ea7766f09da68977d7ffc5bf22cdca9bae990dbd898de4fa1cd23bb9db3c",
       "automationId": "preview-001-login-satisfactorio",
-      "sectionSlug": "api-tests",
-      "generatedAt": "2026-10-07T12:17:16.695Z"
+      "sectionSlug": "default-section",
+      "generatedAt": "2026-10-07T20:29:18.440Z"
     }
   }
 ]
