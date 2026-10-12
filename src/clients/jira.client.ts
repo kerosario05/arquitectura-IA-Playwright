@@ -26,6 +26,8 @@ type JiraSprintsResponse = {
 
 const DEFAULT_FIELDS = ["summary", "description", "status", "issuetype", "priority"];
 
+export type JiraIssueTypeRef = { id: string; name: string; subtask?: boolean };
+
 export class JiraClient {
   private readonly baseApiUrl: string;
   private readonly agileApiUrl: string;
@@ -184,6 +186,44 @@ export class JiraClient {
     }
   }
 
+  /** Issue types of the project that are sub-tasks, as Jira's create screen offers them. */
+  async getSubtaskIssueTypes(projectKey: string): Promise<JiraIssueTypeRef[]> {
+    const payload = await this.requestJson<{
+      issueTypes?: JiraIssueTypeRef[];
+      values?: JiraIssueTypeRef[];
+    }>(`issue/createmeta/${encodeURIComponent(projectKey)}/issuetypes?maxResults=200`);
+    const types = payload.issueTypes ?? payload.values ?? [];
+    return types
+      .filter((t) => t.subtask === true)
+      .map((t) => ({ id: String(t.id), name: t.name, subtask: true }));
+  }
+
+  /** Creates an issue from raw fields (ADF description, parent, issuetype by id). */
+  async createIssueWithFields(fields: Record<string, unknown>): Promise<{ key: string; id: string }> {
+    const response = await this.requestJson<{ key: string; id: string }>("issue", "POST", { fields });
+    if (!response?.key) throw new Error("Invalid create issue response from Jira.");
+    return { key: response.key, id: response.id };
+  }
+
+  async updateIssueFields(issueKey: string, fields: Record<string, unknown>): Promise<void> {
+    await this.requestJson(`issue/${encodeURIComponent(issueKey)}`, "PUT", { fields });
+  }
+
+  /** False only when Jira answers 404 (deleted or never existed); other errors propagate. */
+  async issueExists(issueKey: string): Promise<boolean> {
+    try {
+      await this.requestJson(`issue/${encodeURIComponent(issueKey)}?fields=summary`);
+      return true;
+    } catch (err) {
+      if (err instanceof Error && /HTTP 404/.test(err.message)) return false;
+      throw err;
+    }
+  }
+
+  browseUrl(issueKey: string): string {
+    return `${this.config.baseUrl.replace(/\/+$/, "")}/browse/${issueKey}`;
+  }
+
   async testConnection(): Promise<{ ok: boolean; displayName?: string; email?: string }> {
     const payload = await this.requestJson<{ displayName?: string; emailAddress?: string }>("myself");
     return { ok: true, displayName: payload.displayName, email: payload.emailAddress };
@@ -236,7 +276,7 @@ export class JiraClient {
 
   private async requestJson<T>(
     endpoint: string,
-    method: "GET" | "POST" = "GET",
+    method: "GET" | "POST" | "PUT" = "GET",
     body?: Record<string, unknown>
   ): Promise<T> {
     return this.fetch<T>(this.baseApiUrl, endpoint, method, body);
@@ -244,7 +284,7 @@ export class JiraClient {
 
   private async requestAgileJson<T>(
     endpoint: string,
-    method: "GET" | "POST" = "GET",
+    method: "GET" | "POST" | "PUT" = "GET",
     body?: Record<string, unknown>
   ): Promise<T> {
     return this.fetch<T>(this.agileApiUrl, endpoint, method, body);
@@ -253,7 +293,7 @@ export class JiraClient {
   private async fetch<T>(
     baseUrl: string,
     endpoint: string,
-    method: "GET" | "POST" = "GET",
+    method: "GET" | "POST" | "PUT" = "GET",
     body?: Record<string, unknown>
   ): Promise<T> {
     const url = `${baseUrl}/${endpoint.replace(/^\/+/, "")}`;

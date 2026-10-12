@@ -35,28 +35,39 @@ export async function loadJiraIssues(
   const jql = buildJql(projectKey, sprintId, status);
   const rawIssues = await jira.searchIssues(jql, undefined, maxResults);
 
-  return rawIssues.map((issue: RawJiraIssue) => {
-    const description = issue.fields.description
-      ? extractFieldText(issue.fields.description)
-      : "";
+  return rawIssues.map((issue) => toJiraIssueSource(issue, jiraConfig.acceptanceCriteriaField));
+}
 
-    const labels: string[] = Array.isArray(issue.fields.labels)
-      ? issue.fields.labels
-      : [];
+/** Loads one issue by key, in the same shape as `loadJiraIssues`. */
+export async function loadJiraIssue(
+  jiraConfig: RequiredJiraRuntimeConfig,
+  issueKey: string,
+): Promise<JiraIssueSource> {
+  const issue = await new JiraClient(jiraConfig).getIssue(issueKey);
+  return toJiraIssueSource(issue, jiraConfig.acceptanceCriteriaField);
+}
 
-    const components: string[] = Array.isArray(issue.fields.components)
-      ? issue.fields.components.map((c: any) => c.name).filter(Boolean)
-      : [];
+export function toJiraIssueSource(issue: RawJiraIssue, acceptanceCriteriaField: string): JiraIssueSource {
+  const description = issue.fields.description
+    ? extractFieldText(issue.fields.description)
+    : "";
 
-    return {
-      key: issue.key,
-      summary: issue.fields.summary?.trim() || issue.key,
-      description,
-      acceptanceCriteria: extractAcceptanceCriteria(issue, jiraConfig.acceptanceCriteriaField),
-      labels,
-      components,
-      status: issue.fields.status?.name || "",
-      issueType: issue.fields.issuetype?.name || "",
-    };
-  });
+  const labels: string[] = Array.isArray(issue.fields.labels)
+    ? issue.fields.labels
+    : [];
+
+  const components: string[] = Array.isArray(issue.fields.components)
+    ? issue.fields.components.map((c: any) => c.name).filter(Boolean)
+    : [];
+
+  return {
+    key: issue.key,
+    summary: issue.fields.summary?.trim() || issue.key,
+    description,
+    acceptanceCriteria: extractAcceptanceCriteria(issue, acceptanceCriteriaField),
+    labels,
+    components,
+    status: issue.fields.status?.name || "",
+    issueType: issue.fields.issuetype?.name || "",
+  };
 }

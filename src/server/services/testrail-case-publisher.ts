@@ -577,6 +577,11 @@ function buildCustomFields(): Record<string, unknown> {
   return customFields;
 }
 
+/** The configured required case fields (TESTRAIL_REQUIRED_CASE_FIELDS_JSON), for other publishers. */
+export function testRailRequiredCaseCustomFields(): Record<string, unknown> {
+  return buildCustomFields();
+}
+
 function sanitizeText(value: string | undefined): string | undefined {
   const trimmed = value?.trim();
   return trimmed ? trimmed : undefined;

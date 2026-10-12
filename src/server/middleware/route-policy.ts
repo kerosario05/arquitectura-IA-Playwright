@@ -29,6 +29,8 @@ export type RoutePolicy = {
   path: string;
   /** All of these are required. Empty means "any authenticated caller". */
   permissions: PermissionKey[];
+  /** At least one of these is required, on top of `permissions`. */
+  anyPermissions?: PermissionKey[];
   project: ProjectScopeMode;
   /** The router enforces its own policy (auth, users, roles). */
   skip?: boolean;
@@ -40,6 +42,14 @@ const R = (
   permissions: PermissionKey[],
   project: ProjectScopeMode = "none",
 ): RoutePolicy => ({ method, path, permissions, project });
+
+/** Like `R`, but any one of `anyPermissions` is enough. */
+const ANY = (
+  method: string,
+  path: string,
+  anyPermissions: PermissionKey[],
+  project: ProjectScopeMode = "none",
+): RoutePolicy => ({ method, path, permissions: [], anyPermissions, project });
 
 const SKIP = (path: string): RoutePolicy => ({
   method: "*",
@@ -141,10 +151,27 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   R("GET", "/api/mobile/scenarios/generation/:generationJobId", ["executions.view"]),
   R("*", "/api/mobile/*", ["tests.launch"], "optional"),
 
+  // --- test design (scenario authoring, publish to TestRail / Jira) --------
+  // Drafts are not tied to an automation project; the handlers narrow by the
+  // draft's own project when one is set.
+  R("GET", "/api/test-design/jira/*", ["testdesign.view"]),
+  R("GET", "/api/test-design/drafts", ["testdesign.view"], "optional"),
+  R("POST", "/api/test-design/drafts", ["testdesign.generate"], "optional"),
+  R("GET", "/api/test-design/drafts/:draftId", ["testdesign.view"]),
+  R("PUT", "/api/test-design/drafts/:draftId", ["testdesign.generate"]),
+  R("DELETE", "/api/test-design/drafts/:draftId", ["testdesign.generate"]),
+  R("PUT", "/api/test-design/drafts/:draftId/stories/:storyId/scenarios", ["testdesign.generate"]),
+  R("POST", "/api/test-design/drafts/:draftId/stories/:storyId/regenerate", ["testdesign.generate"]),
+  R("POST", "/api/test-design/drafts/:draftId/generate", ["testdesign.generate"]),
+  R("POST", "/api/test-design/drafts/:draftId/publish/testrail", ["testdesign.publish_testrail"]),
+  R("POST", "/api/test-design/drafts/:draftId/publish/jira", ["testdesign.publish_jira"]),
+
   // --- external catalogues (read-only reference data) ---------------------
-  R("GET", "/api/jira/*", ["dashboard.view"]),
+  // Test design picks its Jira project and TestRail destination from these
+  // same catalogues, so a role holding only that module can still read them.
+  ANY("GET", "/api/jira/*", ["dashboard.view", "testdesign.view"]),
   R("POST", "/api/jira/*", ["tests.launch"]),
-  R("GET", "/api/testrail/*", ["dashboard.view"]),
+  ANY("GET", "/api/testrail/*", ["dashboard.view", "testdesign.view"]),
   R("POST", "/api/testrail/*", ["tests.launch"]),
 
   // --- checklists / defects ----------------------------------------------
@@ -317,6 +344,15 @@ export function enforceRoutePolicy(): RequestHandler {
       deny(res, 403, "forbidden", "No tienes permiso para esta acción", {
         requiredPermissions: policy.permissions,
         missingPermissions: missing,
+      });
+      return;
+    }
+
+    const anyOf = policy.anyPermissions ?? [];
+    if (anyOf.length > 0 && !anyOf.some((permission) => hasPermission(principal, permission))) {
+      deny(res, 403, "forbidden", "No tienes permiso para esta acción", {
+        requiredAnyPermissions: anyOf,
+        missingPermissions: anyOf,
       });
       return;
     }

@@ -148,6 +148,30 @@ async function main(): Promise<void> {
     "BetoSeguro12345",
   );
 
+  // A custom role that only authors scenarios: no dashboard, no publishing.
+  const roleRepo = await import("../db/role-repository");
+  const designerRole = await roleRepo.createRole(
+    { slug: "test-designer", name: "Diseñador de pruebas", description: "", isSystem: false },
+    conn,
+  );
+  await roleRepo.replaceRolePermissions(
+    designerRole.id,
+    ["testdesign.view", "testdesign.generate"],
+    conn,
+  );
+  const designerCreated = await call("POST", "/api/users", adminToken, {
+    username: "dora.design",
+    fullName: "Dora Diseño",
+    roles: ["test-designer"],
+    projects: [{ slug: "kiosko", accessLevel: 2 }],
+  });
+  assert.strictEqual(designerCreated.status, 201, JSON.stringify(designerCreated.body));
+  const designerToken = await activate(
+    "dora.design",
+    designerCreated.body.temporaryPassword,
+    "DoraSegura12345",
+  );
+
   // ------------------------------------------------------------------------
   console.log("\nmapeo de permisos por ruta");
 
@@ -235,6 +259,51 @@ async function main(): Promise<void> {
       const res = await call("GET", route, viewerToken);
       assert.strictEqual(res.status, 200, `${route} -> ${JSON.stringify(res.body)}`);
     }
+  });
+
+  await test("a test designer authors drafts and reads the Jira/TestRail catalogues", async () => {
+    for (const [method, route] of [
+      ["GET", "/api/test-design/drafts"],
+      ["POST", "/api/test-design/drafts"],
+      ["GET", "/api/test-design/drafts/d-1"],
+      ["PUT", "/api/test-design/drafts/d-1/stories/s-1/scenarios"],
+      ["POST", "/api/test-design/drafts/d-1/generate"],
+      ["GET", "/api/test-design/jira/issues/search"],
+      ["GET", "/api/jira/projects"],
+      ["GET", "/api/testrail/projects"],
+    ] as const) {
+      const res = await call(method, route, designerToken, {});
+      assert.strictEqual(res.status, 200, `${method} ${route} -> ${JSON.stringify(res.body)}`);
+    }
+  });
+
+  await test("a test designer without publish permissions cannot publish", async () => {
+    const testrail = await call("POST", "/api/test-design/drafts/d-1/publish/testrail", designerToken, {});
+    assert.strictEqual(testrail.status, 403);
+    assert.deepStrictEqual(testrail.body.missingPermissions, ["testdesign.publish_testrail"]);
+
+    const jira = await call("POST", "/api/test-design/drafts/d-1/publish/jira", designerToken, {});
+    assert.strictEqual(jira.status, 403);
+    assert.deepStrictEqual(jira.body.missingPermissions, ["testdesign.publish_jira"]);
+
+    // Still outside the modules its role does not hold.
+    assert.strictEqual((await call("GET", "/api/executions", designerToken)).status, 403);
+    assert.strictEqual((await call("POST", "/api/jira/issues/upload-defects", designerToken, {})).status, 403);
+  });
+
+  await test("an admin may publish test designs", async () => {
+    for (const route of [
+      "/api/test-design/drafts/d-1/publish/testrail",
+      "/api/test-design/drafts/d-1/publish/jira",
+    ]) {
+      assert.strictEqual((await call("POST", route, adminToken, {})).status, 200, route);
+    }
+  });
+
+  await test("a catalogue read needs dashboard or test design access", async () => {
+    // The engineer holds dashboard.view; the designer only testdesign.view.
+    assert.strictEqual((await call("GET", "/api/testrail/projects", engineerToken)).status, 200);
+    assert.strictEqual((await call("GET", "/api/testrail/projects", designerToken)).status, 200);
   });
 
   await test("nobody but an admin reaches the debug routes", async () => {

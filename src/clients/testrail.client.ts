@@ -58,6 +58,8 @@ type ApiErrorPayload = {
   errorId?: string;
 };
 
+export type TestRailPriority = { id: number; name: string; short_name?: string; priority: number; is_default?: boolean };
+
 export class TestRailApiError extends Error {
   constructor(message: string, public readonly status: number, public readonly errorId?: string) {
     super(message);
@@ -275,6 +277,12 @@ export class TestRailClient {
   async getProjects(): Promise<TestRailProject[]> {
     const payload = await this.requestJson<TestRailProject[] | { projects?: TestRailProject[] }>("get_projects");
     return Array.isArray(payload) ? payload : (payload.projects ?? []);
+  }
+
+  /** The instance's case priorities; `priority` orders them (higher = more important). */
+  async getPriorities(): Promise<TestRailPriority[]> {
+    const payload = await this.requestJson<TestRailPriority[] | { priorities?: TestRailPriority[] }>("get_priorities");
+    return Array.isArray(payload) ? payload : (payload.priorities ?? []);
   }
 
   async getSuites(projectId: string): Promise<TestRailSuite[]> {

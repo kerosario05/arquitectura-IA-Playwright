@@ -1,6 +1,6 @@
 import { AiProviderError, type AiProviderConfig, type CodexReasoningEffort } from "./ai-provider.types";
 
-export type AiPurpose = "scenario_generation" | "scenario_data_semantic_enrichment" | "canonical_scenario_semantic_normalization" | "repair" | "spec_generation" | "general";
+export type AiPurpose = "scenario_generation" | "scenario_data_semantic_enrichment" | "canonical_scenario_semantic_normalization" | "repair" | "spec_generation" | "test_design" | "general";
 
 function parseBool(value: string | undefined, defaultValue = false): boolean {
   if (!value) return defaultValue;
@@ -79,6 +79,10 @@ export function resolveAiConfig(purpose: AiPurpose): AiProviderConfig {
   } else if (purpose === "spec_generation") {
     provider = env.AI_SPEC_PROVIDER?.trim();
     providerSource = "AI_SPEC_PROVIDER";
+  } else if (purpose === "test_design") {
+    // Manual test design falls back to the scenario generator's provider before the global one.
+    provider = env.AI_TEST_DESIGN_PROVIDER?.trim() || env.AI_SCENARIO_PROVIDER?.trim();
+    providerSource = env.AI_TEST_DESIGN_PROVIDER?.trim() ? "AI_TEST_DESIGN_PROVIDER" : "AI_SCENARIO_PROVIDER";
   }
 
   if (!provider) {
@@ -124,6 +128,9 @@ export function resolveAiConfig(purpose: AiPurpose): AiProviderConfig {
   } else if (purpose === "spec_generation") {
     model = env.AI_SPEC_MODEL?.trim();
     modelSource = "AI_SPEC_MODEL";
+  } else if (purpose === "test_design") {
+    model = env.AI_TEST_DESIGN_MODEL?.trim() || env.AI_SCENARIO_MODEL?.trim();
+    modelSource = env.AI_TEST_DESIGN_MODEL?.trim() ? "AI_TEST_DESIGN_MODEL" : "AI_SCENARIO_MODEL";
   }
 
   if (!model && purpose !== "scenario_data_semantic_enrichment" && purpose !== "canonical_scenario_semantic_normalization") {
@@ -149,6 +156,11 @@ export function resolveAiConfig(purpose: AiPurpose): AiProviderConfig {
     timeoutMs = parsePositiveInt(env.AI_CANONICAL_SEMANTIC_TIMEOUT_MS, parsePositiveInt(env.AI_TIMEOUT_MS, 30000));
   } else if (purpose === "spec_generation") {
     timeoutMs = parsePositiveInt(env.AI_SPEC_TIMEOUT_MS, parsePositiveInt(env.AI_TIMEOUT_MS, 360000));
+  } else if (purpose === "test_design") {
+    timeoutMs = parsePositiveInt(
+      env.AI_TEST_DESIGN_TIMEOUT_MS,
+      parsePositiveInt(env.AI_SCENARIO_TIMEOUT_MS, parsePositiveInt(env.AI_TIMEOUT_MS, 240000)),
+    );
   } else {
     timeoutMs = parsePositiveInt(env.AI_TIMEOUT_MS, 30000);
   }
@@ -310,6 +322,13 @@ export function resolveRepairAiConfig(): AiProviderConfig {
  */
 export function resolveSpecGenerationAiConfig(): AiProviderConfig {
   return resolveAiConfig("spec_generation");
+}
+
+/**
+ * Shorthand for resolving general AI config.
+ */
+export function resolveTestDesignAiConfig(): AiProviderConfig {
+  return resolveAiConfig("test_design");
 }
 
 /**

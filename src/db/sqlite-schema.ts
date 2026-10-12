@@ -240,4 +240,45 @@ CREATE TABLE IF NOT EXISTS UserAuditLog (
 );
 
 CREATE INDEX IF NOT EXISTS IX_UserAuditLog_target ON UserAuditLog (targetUserId, createdAt);
+
+-- ---------------------------------------------------------------------------
+-- Test design: scenario drafts authored from Jira stories (src/test-design).
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS TestDesignDraft (
+  id                TEXT    PRIMARY KEY COLLATE NOCASE DEFAULT (${UUID_DEFAULT_EXPR}),
+  title             TEXT,
+  projectSlug       TEXT    COLLATE NOCASE,        -- optional automation project
+  jiraProjectKey    TEXT    NOT NULL COLLATE NOCASE,
+  testRailProjectId INTEGER,
+  testRailSuiteId   INTEGER,
+  testRailSectionId INTEGER,
+  instructions      TEXT,
+  status            TEXT    NOT NULL DEFAULT 'draft', -- draft | partially_published | published | archived
+  createdBy         TEXT    COLLATE NOCASE,        -- Users.id; no FK so drafts outlive their author
+  createdByName     TEXT,
+  createdAt         TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  updatedAt         TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR})
+);
+
+CREATE INDEX IF NOT EXISTS IX_TestDesignDraft_createdBy ON TestDesignDraft (createdBy, updatedAt);
+CREATE INDEX IF NOT EXISTS IX_TestDesignDraft_jiraProject ON TestDesignDraft (jiraProjectKey, updatedAt);
+
+CREATE TABLE IF NOT EXISTS TestDesignDraftStory (
+  id                  TEXT    PRIMARY KEY COLLATE NOCASE DEFAULT (${UUID_DEFAULT_EXPR}),
+  draftId             TEXT    NOT NULL COLLATE NOCASE
+                              REFERENCES TestDesignDraft(id) ON DELETE CASCADE,
+  issueKey            TEXT    NOT NULL COLLATE NOCASE,
+  issueSummary        TEXT    NOT NULL DEFAULT '',
+  position            INTEGER NOT NULL DEFAULT 0,
+  generationStatus    TEXT    NOT NULL DEFAULT 'pending', -- pending | generating | ready | failed
+  generationError     TEXT,
+  scenariosJson       TEXT    NOT NULL DEFAULT '[]',
+  jiraSubtaskKey      TEXT,
+  jiraPublishedAt     TEXT,
+  testRailPublishedAt TEXT,
+  createdAt           TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  updatedAt           TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  UNIQUE (draftId, issueKey)
+);
 `;
