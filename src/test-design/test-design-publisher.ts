@@ -3,6 +3,7 @@ import type { TestRailPriority } from "../clients/testrail.client";
 import type { AddCaseInput, RawTestRailCase, UpdateCaseInput } from "../types/testrail.types";
 import * as repo from "../db/test-design-repository";
 import { buildSubtaskDescription, buildSubtaskSummary, testRailCaseUrl } from "./jira-subtask-formatter";
+import { describeTestData, renderWithData } from "./test-data";
 import { resolveSubtaskType } from "./jira-subtask-type";
 import type {
   TestDesignDraftStatus,
@@ -78,13 +79,24 @@ export function toCaseInput(
   deps: Pick<TestRailPublishDeps, "requiredCustomFields" | "caseOracle">,
   priorityId?: number,
 ): AddCaseInput {
+  const render = (text: string) => renderWithData(text, scenario.data);
+  const dataLines = describeTestData(scenario.data);
+  const preconditions = [
+    render(scenario.preconditions),
+    dataLines.length > 0 ? ["Datos de prueba:", ...dataLines].join("\n") : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
   return {
     title: scenario.title,
     refs: issueKey,
     priorityId,
-    preconditions: scenario.preconditions || undefined,
-    stepsSeparated: scenario.steps.map((step) => ({ content: step.action, expected: step.expected || undefined })),
-    customExpected: scenario.expectedResult || undefined,
+    preconditions: preconditions || undefined,
+    stepsSeparated: scenario.steps.map((step) => ({
+      content: render(step.action),
+      expected: render(step.expected) || undefined,
+    })),
+    customExpected: render(scenario.expectedResult) || undefined,
     customCaseOracle: deps.caseOracle,
     customFields: deps.requiredCustomFields,
   };
@@ -330,17 +342,30 @@ export async function publishDraftToJira(
 // ---------------------------------------------------------------------------
 
 /**
- * "published" once every story is out to each destination it has scenarios for
- * (for TestRail: every selected scenario has its case); "partially_published"
- * once anything is; otherwise unchanged.
+ * Jira publishing (one sub-task per story) is built but hidden in the panel for
+ * now (JIRA_PUBLISH_ENABLED in QA-lab). While it is off, the Jira selection a
+ * scenario carries by default must not keep a draft from counting as published.
  */
-export function computeDraftStatus(draft: TestDesignDraftWithStories): TestDesignDraftStatus {
+export function jiraPublishingEnabled(): boolean {
+  return process.env.TEST_DESIGN_JIRA_PUBLISH_ENABLED?.trim().toLowerCase() === "true";
+}
+
+/**
+ * "published" once every story is out to each destination it has scenarios for
+ * (for TestRail: every selected scenario has its case; Jira only while it is
+ * enabled); "partially_published" once anything is; otherwise unchanged.
+ */
+export function computeDraftStatus(
+  draft: TestDesignDraftWithStories,
+  options: { jira?: boolean } = {},
+): TestDesignDraftStatus {
+  const jira = options.jira ?? jiraPublishingEnabled();
   if (draft.status === "archived") return "archived";
   let any = false;
   let all = true;
   for (const story of draft.stories) {
     const needsTestRail = story.scenarios.some((s) => s.selectedForTestRail);
-    const needsJira = story.scenarios.some((s) => s.selectedForJira);
+    const needsJira = jira && story.scenarios.some((s) => s.selectedForJira);
     if (story.testRailPublishedAt || story.jiraPublishedAt) any = true;
     const testRailPending = story.scenarios.some((s) => s.selectedForTestRail && s.testRailCaseId === null);
     if ((needsTestRail && (!story.testRailPublishedAt || testRailPending)) || (needsJira && !story.jiraPublishedAt)) {

@@ -17,6 +17,8 @@ export type TestDesignPromptOptions = {
   instructions?: string | null;
   /** Titles already kept in the story; the model must not repeat them. */
   existingTitles?: string[];
+  /** Condensed project knowledge (project-knowledge-context.ts): screens, texts, validated flows. */
+  projectContext?: string | null;
 };
 
 export const TEST_DESIGN_OUTPUT_EXAMPLE = {
@@ -25,12 +27,20 @@ export const TEST_DESIGN_OUTPUT_EXAMPLE = {
       title: "Registrar un pago con tarjeta válida",
       type: "functional",
       priority: "high",
-      preconditions: "El usuario tiene sesión iniciada y un pedido pendiente de pago.",
+      preconditions: "El usuario {{usuario}} tiene sesión iniciada y un pedido pendiente de pago.",
       steps: [
         { action: "Abrir el pedido pendiente y pulsar \"Pagar\".", expected: "Se muestra el formulario de pago." },
-        { action: "Ingresar una tarjeta válida y confirmar.", expected: "El sistema procesa el pago sin errores." },
+        {
+          action: "Ingresar el número de tarjeta {{numero_tarjeta}} y el CVV {{cvv}} y pulsar \"Confirmar\".",
+          expected: "El sistema procesa el pago sin errores.",
+        },
       ],
       expectedResult: "El pedido queda en estado \"Pagado\" y se muestra el comprobante.",
+      data: [
+        { key: "usuario", label: "Usuario", description: "Usuario registrado con un pedido pendiente", sensitive: false },
+        { key: "numero_tarjeta", label: "Número de tarjeta", description: "Tarjeta vigente con fondos", sensitive: true },
+        { key: "cvv", label: "CVV", description: "Código de seguridad de la tarjeta", sensitive: true },
+      ],
     },
   ],
 };
@@ -49,7 +59,8 @@ Reglas:
 - Las precondiciones describen el estado necesario antes del primer paso (usuario, datos, configuración).
 - Cada paso es una acción concreta y atómica, con su resultado esperado observable por quien ejecuta la prueba.
 - expectedResult resume el resultado final del caso.
-- No inventes reglas de negocio, valores ni pantallas que la historia no mencione. Si falta un dato usa un marcador como <usuario válido> o <monto mayor al límite>.
+- No inventes reglas de negocio, valores ni pantallas que la historia no mencione.
+- Datos de prueba: cuando un paso o precondición requiera un valor que quien prueba debe ingresar o tener (usuario, contraseña, cédula, correo, teléfono, monto, OTP, número de cuenta o tarjeta...), NO inventes el valor: escribe un marcador {{clave}} (minúsculas y guiones bajos) y decláralo en "data" con key, label (como se ve en pantalla), description (qué características debe tener, p. ej. "cliente con cuenta bloqueada") y sensitive (true para contraseñas, PIN, OTP, tokens, CVV y datos de tarjeta). Usa la misma clave en todos los casos que necesiten el mismo dato; si un caso necesita un valor distinto (p. ej. una contraseña incorrecta), usa otra clave. No incluyas "value": lo completa el analista.
 - Genera entre 3 y 12 casos según la complejidad de la historia. No repitas casos.
 - type es uno de: functional, negative, edge, regression.
 - priority es uno de: low, medium, high, critical.
@@ -69,7 +80,15 @@ export function buildTestDesignMessages(
   issue: JiraIssueSource,
   options: TestDesignPromptOptions = {},
 ): AiMessage[] {
+  const context = options.projectContext?.trim();
   const parts = [
+    ...(context
+      ? [
+          "Conocimiento del proyecto (úsalo para nombrar pantallas, campos, botones y mensajes tal como aparecen en la aplicación; no inventes otros. Si la historia contradice este conocimiento, manda la historia):",
+          context,
+          "",
+        ]
+      : []),
     `Historia: ${issue.key} — ${issue.summary}`,
     issue.issueType ? `Tipo: ${issue.issueType}` : "",
     issue.components.length > 0 ? `Componentes: ${issue.components.join(", ")}` : "",

@@ -14,6 +14,8 @@ process.env.DB_DRIVER = "sqlite";
 process.env.SQLITE_DB_PATH = path.join(tempDir, "routes.db");
 process.env.AUTH_ENABLED = "true";
 process.env.TEST_DESIGN_MAX_STORIES = "3";
+// The suite exercises Jira publishing too, so the draft status must account for it.
+process.env.TEST_DESIGN_JIRA_PUBLISH_ENABLED = "true";
 delete process.env.API_KEY;
 for (const key of ["AUTH_BOOTSTRAP_USERNAME", "AUTH_BOOTSTRAP_PASSWORD", "AUTH_BOOTSTRAP_FULLNAME"]) {
   delete process.env[key];
@@ -90,6 +92,26 @@ async function main(): Promise<void> {
   for (const slug of ["kiosko", "portal"]) {
     await conn.query(`INSERT INTO dbo.Projects (slug, name, projectType, status, enabled) VALUES (?, ?, 1, 1, 1)`, [slug, slug]);
   }
+  const [kiosko] = await conn.query<{ id: string }>(`SELECT id FROM dbo.Projects WHERE slug = 'kiosko'`);
+  await conn.query(`INSERT INTO dbo.ProjectJiraConfiguration (projectId, projectKey) VALUES (?, 'PAY')`, [kiosko.id]);
+  await conn.query(
+    `INSERT INTO dbo.ProjectTestRailConfiguration (projectId, projectIdTr, suiteId, sectionId) VALUES (?, '3', '12', '400')`,
+    [kiosko.id],
+  );
+  const knowledge = {
+    version: 1,
+    items: [
+      {
+        knowledgeKind: "route_menu_snapshot",
+        screenKey: "pago",
+        assertionTargets: ["Pagar pedido", "Número de tarjeta"],
+        clickTargets: ["Confirmar pago"],
+        trustedForReuse: true,
+      },
+      { knowledgeKind: "hu_declared", expectedBehavior: "Rechazar tarjetas vencidas", sourceIssueKey: "PAY-2" },
+    ],
+  };
+  await conn.query(`INSERT INTO dbo.ProjectKnowledge (projectId, knowledgeJson) VALUES (?, ?)`, [kiosko.id, JSON.stringify(knowledge)]);
 
   async function engineer(username: string, projects: { slug: string; accessLevel: number }[]) {
     const created = await call("POST", "/api/users", adminToken, {
@@ -133,17 +155,18 @@ async function main(): Promise<void> {
   });
 
   await test("rejects stories from another project, bad keys and too many stories", async () => {
-    const other = await call("POST", "/api/test-design/drafts", anaToken, { jiraProjectKey: "PAY", issues: ["OPS-1"] });
+    const other = await call("POST", "/api/test-design/drafts", anaToken, { projectSlug: "kiosko", jiraProjectKey: "PAY", issues: ["OPS-1"] });
     assert.strictEqual(other.status, 400);
     assert.match(other.body.message, /no pertenece/);
 
-    const bad = await call("POST", "/api/test-design/drafts", anaToken, { jiraProjectKey: "PAY", issues: ["PAY"] });
+    const bad = await call("POST", "/api/test-design/drafts", anaToken, { projectSlug: "kiosko", jiraProjectKey: "PAY", issues: ["PAY"] });
     assert.strictEqual(bad.status, 400);
 
-    const empty = await call("POST", "/api/test-design/drafts", anaToken, { jiraProjectKey: "PAY", issues: [] });
+    const empty = await call("POST", "/api/test-design/drafts", anaToken, { projectSlug: "kiosko", jiraProjectKey: "PAY", issues: [] });
     assert.strictEqual(empty.status, 400);
 
     const many = await call("POST", "/api/test-design/drafts", anaToken, {
+      projectSlug: "kiosko",
       jiraProjectKey: "PAY",
       issues: ["PAY-1", "PAY-2", "PAY-3", "PAY-4"],
     });
@@ -235,8 +258,12 @@ async function main(): Promise<void> {
     assert.deepStrictEqual(list.body.drafts, []);
   });
 
-  await test("a draft without a project is private to its author", async () => {
-    const created = await call("POST", "/api/test-design/drafts", evaToken, { jiraProjectKey: "OPS", issues: ["OPS-1"] });
+  await test("a draft always names its project, and only members of that project see it", async () => {
+    const missing = await call("POST", "/api/test-design/drafts", adminToken, { jiraProjectKey: "PAY", issues: ["PAY-1"] });
+    assert.strictEqual(missing.status, 400);
+    assert.match(missing.body.message, /proyecto/);
+
+    const created = await call("POST", "/api/test-design/drafts", evaToken, { projectSlug: "portal", jiraProjectKey: "OPS", issues: ["OPS-1"] });
     assert.strictEqual(created.status, 201);
     const id = created.body.draft.id;
     assert.strictEqual((await call("GET", `/api/test-design/drafts/${id}`, anaToken)).status, 404);
@@ -255,6 +282,35 @@ async function main(): Promise<void> {
   });
 
   // ------------------------------------------------------------------------
+  console.log("\nproyecto");
+
+  await test("lists only the projects the user may access, with their defaults and knowledge", async () => {
+    const res = await call("GET", "/api/test-design/projects", anaToken);
+    assert.strictEqual(res.status, 200, JSON.stringify(res.body));
+    assert.deepStrictEqual(res.body.projects.map((p: any) => p.slug), ["kiosko"]);
+    const [project] = res.body.projects;
+    assert.strictEqual(project.jiraProjectKey, "PAY");
+    assert.deepStrictEqual(project.testRail, { projectId: 3, suiteId: 12, sectionId: 400 });
+    assert.deepStrictEqual(project.knowledge, { screens: 1, flows: 0, behaviours: 1, total: 2 });
+
+    const all = await call("GET", "/api/test-design/projects", adminToken);
+    assert.deepStrictEqual(all.body.projects.map((p: any) => p.slug).sort(), ["kiosko", "portal"]);
+  });
+
+  await test("a new draft takes Jira and TestRail from the project configuration", async () => {
+    const res = await call("POST", "/api/test-design/drafts", anaToken, { projectSlug: "kiosko", issues: ["PAY-40"] });
+    assert.strictEqual(res.status, 201, JSON.stringify(res.body));
+    assert.strictEqual(res.body.draft.jiraProjectKey, "PAY");
+    assert.deepStrictEqual(res.body.draft.testRail, { projectId: 3, suiteId: 12, sectionId: 400 });
+  });
+
+  await test("a project without Jira configured needs the Jira project explicitly", async () => {
+    const res = await call("POST", "/api/test-design/drafts", adminToken, { projectSlug: "portal", issues: ["PAY-41"] });
+    assert.strictEqual(res.status, 400);
+    assert.match(res.body.message, /Jira/);
+  });
+
+  // ------------------------------------------------------------------------
   console.log("\ngeneración");
 
   const { setGenerationDepsForTesting } = await import("./test-design");
@@ -270,7 +326,10 @@ async function main(): Promise<void> {
     "PAY-5": ["Pagar con tarjeta vigente", "Rechazar tarjeta vencida"],
     "PAY-6": ["Emitir reembolso total"],
   };
+  const { loadProjectContext } = await import("../../test-design/project-knowledge-context");
+  const prompts: string[] = [];
   setGenerationDepsForTesting({
+    loadProjectContext: async (slug, issueKey) => (await loadProjectContext(slug, issueKey))?.text ?? null,
     loadIssue: async (key) => {
       await gate;
       if (key === "PAY-404") throw new Error("Issue does not exist");
@@ -282,6 +341,7 @@ async function main(): Promise<void> {
       model: "fake",
       async completeJson(request) {
         await gate;
+        prompts.push(request.messages[1].content);
         const key = /Historia: (\S+)/.exec(request.messages[1].content)?.[1] ?? "";
         const titles = aiTitles[key] ?? ["Caso genérico"];
         const parsedJson = {
@@ -321,6 +381,15 @@ async function main(): Promise<void> {
     assert.strictEqual(byKey["PAY-6"].generationStatus, "ready");
     assert.strictEqual(byKey["PAY-404"].generationStatus, "failed");
     assert.match(byKey["PAY-404"].generationError, /does not exist/);
+  });
+
+  await test("the prompt carries the project knowledge, before the story", async () => {
+    const prompt = prompts.find((p) => p.includes("Historia: PAY-5"));
+    assert.ok(prompt, "PAY-5 was generated");
+    assert.match(prompt!, /Conocimiento del proyecto/);
+    assert.match(prompt!, /pago: Pagar pedido \| Número de tarjeta \| Confirmar pago/);
+    assert.match(prompt!, /Rechazar tarjetas vencidas \(PAY-2\)/);
+    assert.ok(prompt!.indexOf("Conocimiento del proyecto") < prompt!.indexOf("Historia: PAY-5"));
   });
 
   await test("a second generate only retries the failed story", async () => {
@@ -463,6 +532,7 @@ async function main(): Promise<void> {
   let pubStories: any[] = [];
   await test("prepares a draft with scenarios for both destinations", async () => {
     const created = await call("POST", "/api/test-design/drafts", adminToken, {
+      projectSlug: "portal",
       jiraProjectKey: "PAY",
       testRail: { projectId: 3, sectionId: 400 },
       issues: ["PAY-20", "PAY-21"],
@@ -588,7 +658,7 @@ async function main(): Promise<void> {
   });
 
   await test("TestRail publishing needs a section on the draft", async () => {
-    const created = await call("POST", "/api/test-design/drafts", adminToken, { jiraProjectKey: "PAY", issues: ["PAY-30"] });
+    const created = await call("POST", "/api/test-design/drafts", adminToken, { projectSlug: "portal", jiraProjectKey: "PAY", testRail: {}, issues: ["PAY-30"] });
     const res = await call("POST", `/api/test-design/drafts/${created.body.draft.id}/publish/testrail`, adminToken, {});
     assert.strictEqual(res.status, 400);
     assert.match(res.body.message, /sección/);
@@ -600,6 +670,112 @@ async function main(): Promise<void> {
   });
 
   setPublishDepsForTesting(null);
+
+  // ------------------------------------------------------------------------
+  console.log("\nfiltro por proyecto");
+
+  await test("drafts can be filtered by project, only within the projects the user was granted", async () => {
+    const mineKiosko = await call("GET", "/api/test-design/drafts?projectSlug=kiosko", anaToken);
+    assert.strictEqual(mineKiosko.status, 200);
+    assert.ok(mineKiosko.body.drafts.length > 0);
+    assert.ok(mineKiosko.body.drafts.every((d: any) => d.projectSlug === "kiosko"));
+
+    const forbidden = await call("GET", "/api/test-design/drafts?projectSlug=portal", anaToken);
+    assert.strictEqual(forbidden.status, 403);
+    assert.strictEqual(forbidden.body.error, "project_forbidden");
+
+    // A read-only member of kiosko sees its drafts, including ones other people created.
+    const luis = await call("GET", "/api/test-design/drafts?projectSlug=kiosko", luisToken);
+    assert.deepStrictEqual(
+      luis.body.drafts.map((d: any) => d.id).sort(),
+      mineKiosko.body.drafts.map((d: any) => d.id).sort(),
+    );
+
+    const portal = await call("GET", "/api/test-design/drafts?projectSlug=portal", adminToken);
+    assert.ok(portal.body.drafts.length > 0);
+    assert.ok(portal.body.drafts.every((d: any) => d.projectSlug === "portal"));
+  });
+
+  await test("each project reports how many active drafts it has", async () => {
+    const all = await call("GET", "/api/test-design/drafts", adminToken);
+    const expected: Record<string, number> = {};
+    for (const d of all.body.drafts) expected[d.projectSlug] = (expected[d.projectSlug] ?? 0) + 1;
+    const projects = (await call("GET", "/api/test-design/projects", adminToken)).body.projects;
+    for (const p of projects) assert.strictEqual(p.draftCount, expected[p.slug] ?? 0, p.slug);
+  });
+
+  const { normalizeScenarios: normalizeForTest } = await import("../../test-design/test-design.validation");
+  const normalize = (raw: unknown[], origin: "ai" | "manual") => normalizeForTest(raw, { origin });
+
+  // ------------------------------------------------------------------------
+  console.log("\nmétricas");
+
+  await test("a legacy draft without history is rebuilt once into the metrics", async () => {
+    // Created straight in the repository, as drafts made before the event log were.
+    const { normalizeScenarios } = await import("../../test-design/test-design.validation");
+    const legacy = await repo.createDraft({
+      jiraProjectKey: "PAY",
+      projectSlug: "kiosko",
+      createdBy: null,
+      createdByName: "legado",
+      issues: [{ issueKey: "PAY-77" }],
+    });
+    const story = legacy.stories[0];
+    const [published] = normalizeScenarios([{ title: "Caso heredado", steps: ["Hacer"], expectedResult: "Ok" }], { origin: "ai" });
+    await repo.setStoryGeneration(legacy.id, story.id, { status: "ready", scenarios: [published] });
+    await repo.markStoryPublished(legacy.id, story.id, {
+      destination: "testrail",
+      scenarios: [{ ...published, testRailCaseId: 777 }],
+    });
+
+    const first = await call("GET", "/api/test-design/metrics", adminToken);
+    assert.strictEqual(first.status, 200, JSON.stringify(first.body));
+    const occurrences = (m: any) => m.recent.filter((r: any) => r.caseId === 777).length;
+    assert.strictEqual(occurrences(first.body.metrics), 1);
+
+    const second = await call("GET", "/api/test-design/metrics", adminToken);
+    assert.strictEqual(occurrences(second.body.metrics), 1, "the backfill runs once");
+  });
+
+  await test("metrics count what reached TestRail and how the AI contributed", async () => {
+    const res = await call("GET", "/api/test-design/metrics?days=30", adminToken);
+    const m = res.body.metrics;
+    assert.strictEqual(m.period.days, 30);
+    assert.ok(m.testRail.casesNew >= 5, JSON.stringify(m.testRail));
+    assert.ok(m.testRail.casesUpdated >= 3);
+    assert.ok(m.testRail.casesFailed >= 1, "the rejected case is counted");
+    assert.strictEqual(m.ai.unchanged + m.ai.edited + m.ai.manual, m.testRail.casesNew);
+    assert.ok(m.ai.generated > 0, "generations were recorded");
+    assert.ok(m.usage.drafts > 0 && m.usage.people > 0);
+    const portal = m.byProject.find((p: any) => p.projectSlug === "portal");
+    assert.ok(portal && portal.casesNew > 0);
+  });
+
+  await test("a scoped user only sees metrics of its projects", async () => {
+    const mine = await call("GET", "/api/test-design/metrics", anaToken);
+    assert.strictEqual(mine.status, 200);
+    assert.ok(mine.body.metrics.byProject.every((p: any) => p.projectSlug === "kiosko"));
+    assert.ok(mine.body.metrics.usage.drafts > 0);
+
+    const other = await call("GET", "/api/test-design/metrics?projectSlug=portal", anaToken);
+    assert.strictEqual(other.status, 403);
+  });
+
+  await test("removing an unpublished scenario is recorded as discarded", async () => {
+    const before = (await call("GET", "/api/test-design/metrics", adminToken)).body.metrics.ai.discarded;
+    const created = await call("POST", "/api/test-design/drafts", anaToken, { projectSlug: "kiosko", issues: ["PAY-78"] });
+    const draft = created.body.draft;
+    const story = draft.stories[0];
+    await repo.setStoryGeneration(draft.id, story.id, {
+      status: "ready",
+      scenarios: normalize([{ id: "x1", title: "Uno", steps: ["a"] }, { id: "x2", title: "Dos", steps: ["b"] }], "ai"),
+    });
+    await call("PUT", `/api/test-design/drafts/${draft.id}/stories/${story.id}/scenarios`, anaToken, {
+      scenarios: [{ id: "x1", title: "Uno", steps: ["a"], origin: "ai" }],
+    });
+    const after = (await call("GET", "/api/test-design/metrics", adminToken)).body.metrics.ai.discarded;
+    assert.strictEqual(after, before + 1);
+  });
 
   // ------------------------------------------------------------------------
   console.log("\njira");

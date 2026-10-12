@@ -281,4 +281,22 @@ CREATE TABLE IF NOT EXISTS TestDesignDraftStory (
   updatedAt           TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
   UNIQUE (draftId, issueKey)
 );
+
+-- Append-only usage history for the dashboard. No foreign keys: the history must
+-- outlive archived or deleted drafts.
+CREATE TABLE IF NOT EXISTS TestDesignEvent (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  eventType   TEXT    NOT NULL,   -- draft_created | generation_completed | scenario_removed | published_testrail | backfill_done
+  draftId     TEXT    COLLATE NOCASE,
+  storyId     TEXT    COLLATE NOCASE,
+  projectSlug TEXT    COLLATE NOCASE,
+  issueKey    TEXT    COLLATE NOCASE,
+  userId      TEXT    COLLATE NOCASE,
+  userName    TEXT,
+  occurredAt  TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  detailsJson TEXT
+);
+
+CREATE INDEX IF NOT EXISTS IX_TestDesignEvent_time ON TestDesignEvent (occurredAt, eventType);
+CREATE INDEX IF NOT EXISTS IX_TestDesignEvent_project ON TestDesignEvent (projectSlug, occurredAt);
 `;

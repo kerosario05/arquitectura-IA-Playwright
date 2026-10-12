@@ -11,6 +11,19 @@ export type TestDesignStep = {
   expected: string;
 };
 
+/**
+ * A value the case needs typed in (user, password, id number, amount, OTP...).
+ * Steps reference it as `{{key}}`; the AI declares the field and leaves `value`
+ * empty for the user to fill. Sensitive values are never published.
+ */
+export type TestDesignDataField = {
+  key: string;
+  label: string;
+  description: string;
+  value: string;
+  sensitive: boolean;
+};
+
 export type TestDesignPriority = "low" | "medium" | "high" | "critical";
 
 export type TestDesignScenarioType = "functional" | "negative" | "edge" | "regression" | "other";
@@ -22,6 +35,8 @@ export type TestDesignScenario = {
   preconditions: string;
   steps: TestDesignStep[];
   expectedResult: string;
+  /** Inputs the steps reference as {{key}}. */
+  data: TestDesignDataField[];
   priority: TestDesignPriority;
   type: TestDesignScenarioType;
   /** The two destinations are chosen independently per scenario. */

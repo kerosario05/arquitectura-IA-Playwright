@@ -3,6 +3,7 @@ import type { JiraIssueSource } from "../scenarios/scenario-types";
 import { buildTestDesignMessages, type TestDesignPromptOptions } from "./test-design-prompt";
 import type { TestDesignScenario } from "./test-design.types";
 import { normalizeScenario, TestDesignValidationError } from "./test-design.validation";
+import { carryOverDataValues } from "./test-data";
 
 /**
  * Turns one Jira story into manual test scenarios with the configured AI provider.
@@ -44,6 +45,22 @@ function str(value: unknown): string {
   return typeof value === "string" ? value : "";
 }
 
+/** Data fields as declared by the model. Any value it suggests is dropped: the analyst fills it in. */
+function coerceData(raw: unknown): Array<Record<string, unknown>> {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((f) => f && typeof f === "object")
+    .map((f) => {
+      const v = f as Record<string, unknown>;
+      return {
+        key: str(v.key) || str(v.clave),
+        label: str(v.label) || str(v.nombre) || str(v.etiqueta),
+        description: str(v.description) || str(v.descripcion),
+        sensitive: typeof v.sensitive === "boolean" ? v.sensitive : undefined,
+      };
+    });
+}
+
 /** Accepts the field spellings models drift into (`step`/`expectedResult` per step, Spanish enums). */
 function coerceRaw(raw: unknown): Record<string, unknown> | null {
   if (!raw || typeof raw !== "object") return null;
@@ -68,6 +85,7 @@ function coerceRaw(raw: unknown): Record<string, unknown> | null {
     preconditions,
     steps,
     expectedResult: str(s.expectedResult) || str(s.expected),
+    data: coerceData(s.data ?? s.testData ?? s.datos),
     type: TYPE_ALIASES[type] ?? type,
     priority: PRIORITY_ALIASES[priority] ?? priority,
   };
@@ -146,14 +164,18 @@ export function mergeRegenerated(
   existing: TestDesignScenario[],
   generated: TestDesignScenario[],
 ): TestDesignScenario[] {
-  const kept = existing.filter((s) => s.origin === "manual" || s.edited || s.testRailCaseId !== null);
+  const kept = existing.filter(isKeptOnRegeneration);
   const keptTitles = new Set(kept.map((s) => s.title.trim().toLowerCase()));
   const fresh = generated.filter((s) => !keptTitles.has(s.title.trim().toLowerCase()));
-  return [...kept, ...fresh];
+  // Values the user already typed for a key carry over to the new scenarios that use it.
+  return [...kept, ...carryOverDataValues(existing, fresh)];
+}
+
+/** Scenarios a regeneration keeps: written by a person, edited, or already in TestRail. */
+export function isKeptOnRegeneration(s: TestDesignScenario): boolean {
+  return s.origin === "manual" || s.edited || s.testRailCaseId !== null;
 }
 
 export function keptScenarioTitles(existing: TestDesignScenario[]): string[] {
-  return existing
-    .filter((s) => s.origin === "manual" || s.edited || s.testRailCaseId !== null)
-    .map((s) => s.title);
+  return existing.filter(isKeptOnRegeneration).map((s) => s.title);
 }

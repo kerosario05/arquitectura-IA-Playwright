@@ -1,4 +1,5 @@
 import { PRIORITY_LABELS, TYPE_LABELS } from "./test-design-labels";
+import { describeTestData, renderWithData } from "./test-data";
 import type { TestDesignScenario } from "./test-design.types";
 
 /**
@@ -80,7 +81,15 @@ export function buildSubtaskDescription(scenarios: TestDesignScenario[], ctx: Su
     ),
   ];
 
-  scenarios.forEach((scenario, index) => {
+  scenarios.forEach((source, index) => {
+    // Placeholders become their values; sensitive ones stay as <Label>.
+    const render = (value: string) => renderWithData(value, source.data);
+    const scenario = {
+      ...source,
+      preconditions: render(source.preconditions),
+      expectedResult: render(source.expectedResult),
+      steps: source.steps.map((step) => ({ action: render(step.action), expected: render(step.expected) })),
+    };
     const heading: AdfNode[] = text(`${index + 1}. ${scenario.title}`);
     if (scenario.testRailCaseId !== null) {
       const label = `C${scenario.testRailCaseId}`;
@@ -102,6 +111,9 @@ export function buildSubtaskDescription(scenarios: TestDesignScenario[], ctx: Su
       ),
     );
     if (scenario.preconditions) content.push(paragraph(strong("Precondiciones: "), text(scenario.preconditions)));
+    if (scenario.data.length > 0) {
+      content.push(paragraph(strong("Datos de prueba:"), [{ type: "hardBreak" }], text(describeTestData(scenario.data).join("\n"))));
+    }
     if (scenario.steps.length > 0) content.push(stepsTable(scenario));
     if (scenario.expectedResult) content.push(paragraph(strong("Resultado esperado: "), text(scenario.expectedResult)));
   });

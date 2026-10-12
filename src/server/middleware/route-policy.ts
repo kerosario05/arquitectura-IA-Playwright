@@ -156,7 +156,10 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   // draft's own project when one is set.
   R("GET", "/api/test-design/jira/*", ["testdesign.view"]),
   R("GET", "/api/test-design/drafts", ["testdesign.view"], "optional"),
-  R("POST", "/api/test-design/drafts", ["testdesign.generate"], "optional"),
+  R("GET", "/api/test-design/projects", ["testdesign.view"], "optional"),
+  // Dashboard summary: readable from the dashboard or the module itself, narrowed to the caller's projects.
+  ANY("GET", "/api/test-design/metrics", ["dashboard.view", "testdesign.view"], "optional"),
+  R("POST", "/api/test-design/drafts", ["testdesign.generate"], "required"),
   R("GET", "/api/test-design/drafts/:draftId", ["testdesign.view"]),
   R("PUT", "/api/test-design/drafts/:draftId", ["testdesign.generate"]),
   R("DELETE", "/api/test-design/drafts/:draftId", ["testdesign.generate"]),

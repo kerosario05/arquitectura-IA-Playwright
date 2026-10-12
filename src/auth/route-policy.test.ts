@@ -264,6 +264,7 @@ async function main(): Promise<void> {
   await test("a test designer authors drafts and reads the Jira/TestRail catalogues", async () => {
     for (const [method, route] of [
       ["GET", "/api/test-design/drafts"],
+      ["GET", "/api/test-design/projects"],
       ["POST", "/api/test-design/drafts"],
       ["GET", "/api/test-design/drafts/d-1"],
       ["PUT", "/api/test-design/drafts/d-1/stories/s-1/scenarios"],
@@ -272,7 +273,7 @@ async function main(): Promise<void> {
       ["GET", "/api/jira/projects"],
       ["GET", "/api/testrail/projects"],
     ] as const) {
-      const res = await call(method, route, designerToken, {});
+      const res = await call(method, route, designerToken, { projectSlug: "kiosko" });
       assert.strictEqual(res.status, 200, `${method} ${route} -> ${JSON.stringify(res.body)}`);
     }
   });
@@ -289,6 +290,12 @@ async function main(): Promise<void> {
     // Still outside the modules its role does not hold.
     assert.strictEqual((await call("GET", "/api/executions", designerToken)).status, 403);
     assert.strictEqual((await call("POST", "/api/jira/issues/upload-defects", designerToken, {})).status, 403);
+  });
+
+  await test("a test designer can only design for the projects it was granted", async () => {
+    const res = await call("POST", "/api/test-design/drafts", designerToken, { projectSlug: "portal-comercial" });
+    assert.strictEqual(res.status, 403);
+    assert.strictEqual(res.body.error, "project_forbidden");
   });
 
   await test("an admin may publish test designs", async () => {

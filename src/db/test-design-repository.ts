@@ -46,6 +46,8 @@ export type UpdateDraftInput = {
 export type ListDraftsFilter = {
   createdBy?: string;
   jiraProjectKey?: string;
+  /** Automation project (Projects.slug). */
+  projectSlug?: string;
   includeArchived?: boolean;
 };
 
@@ -281,6 +283,10 @@ export async function listDrafts(filter: ListDraftsFilter = {}): Promise<TestDes
     if (filter.jiraProjectKey) {
       where.push("jiraProjectKey = ?");
       params.push(filter.jiraProjectKey.trim().toUpperCase());
+    }
+    if (filter.projectSlug) {
+      where.push("projectSlug = ?");
+      params.push(filter.projectSlug.trim());
     }
     if (!filter.includeArchived) where.push("status <> 'archived'");
 

@@ -127,16 +127,39 @@ test("draft status follows what each story still has to publish", () => {
   const draft = (stories: TestDesignDraftStory[], status: TestDesignDraftWithStories["status"] = "draft") =>
     ({ id: "d", status, stories }) as TestDesignDraftWithStories;
 
-  assert.equal(computeDraftStatus(draft([story({})])), "draft");
-  assert.equal(computeDraftStatus(draft([story({ testRailPublishedAt: "x" })])), "partially_published");
+  const withJira = { jira: true };
+  assert.equal(computeDraftStatus(draft([story({})]), withJira), "draft");
+  assert.equal(computeDraftStatus(draft([story({ testRailPublishedAt: "x" })]), withJira), "partially_published");
   const published = { testRailPublishedAt: "x", jiraPublishedAt: "y" };
   assert.equal(
-    computeDraftStatus(draft([story({ ...published, scenarios: [scenario({ testRailCaseId: 5 })] })])),
+    computeDraftStatus(draft([story({ ...published, scenarios: [scenario({ testRailCaseId: 5 })] })]), withJira),
     "published",
   );
   // A selected scenario whose case failed to upload keeps the draft partial.
-  assert.equal(computeDraftStatus(draft([story(published)])), "partially_published");
+  assert.equal(computeDraftStatus(draft([story(published)]), withJira), "partially_published");
   const jiraOnly = story({ scenarios: [scenario({ selectedForTestRail: false })], jiraPublishedAt: "y" });
-  assert.equal(computeDraftStatus(draft([jiraOnly])), "published");
-  assert.equal(computeDraftStatus(draft([jiraOnly], "archived")), "archived");
+  assert.equal(computeDraftStatus(draft([jiraOnly]), withJira), "published");
+  assert.equal(computeDraftStatus(draft([jiraOnly], "archived"), withJira), "archived");
+});
+
+test("with Jira publishing off, a draft whose cases are all in TestRail is published", () => {
+  // The case that showed "Publicado en parte": every case in TestRail, Jira still selected by default.
+  const story = {
+    id: "s",
+    draftId: "d",
+    issueKey: "AA-97",
+    issueSummary: "",
+    position: 0,
+    generationStatus: "ready",
+    generationError: null,
+    scenarios: [scenario({ testRailCaseId: 5, selectedForJira: true })],
+    jiraSubtaskKey: null,
+    jiraPublishedAt: null,
+    testRailPublishedAt: "x",
+    createdAt: "",
+    updatedAt: "",
+  } as TestDesignDraftStory;
+  const draft = { id: "d", status: "partially_published", stories: [story] } as TestDesignDraftWithStories;
+  assert.equal(computeDraftStatus(draft, { jira: false }), "published");
+  assert.equal(computeDraftStatus(draft, { jira: true }), "partially_published");
 });

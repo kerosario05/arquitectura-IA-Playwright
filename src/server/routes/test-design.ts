@@ -12,8 +12,15 @@ import {
 } from "../../test-design/test-design-publisher";
 import { resolveSubtaskType, SubtaskTypeNotFoundError } from "../../test-design/jira-subtask-type";
 import { canAccessProject, canWriteProject, type Principal } from "../../auth/principal";
-import { getProjectBySlug } from "../../db/project-repository";
+import { getProjectBySlug, listProjects } from "../../db/project-repository";
+import { getProjectConfigurationBySlug, type ProjectConfiguration } from "../../db/project-reader";
+import { filterByProjectAccess } from "../middleware/route-policy";
+import { loadProjectContext, projectContextFromConfiguration } from "../../test-design/project-knowledge-context";
 import * as repo from "../../db/test-design-repository";
+import { listEvents, recordEventSafely, type PublishedCase } from "../../db/test-design-event-repository";
+import { computeTestDesignMetrics, metricsRanges } from "../../test-design/test-design-metrics";
+import { ensureTestDesignBackfill } from "../../test-design/test-design-events-backfill";
+import { missingDataCount } from "../../test-design/test-data";
 import { loadJiraIssue } from "../../scenarios/jira-scenario-source";
 import {
   findPublishIssues,
@@ -50,6 +57,7 @@ const JIRA_ISSUE_KEY = /^[A-Z][A-Z0-9_]*-\d+$/;
 const defaultGenerationDeps: GenerationDeps = {
   createProvider: () => createTestDesignAiProvider(),
   loadIssue: (issueKey) => loadJiraIssue(requireJiraConfig(config), issueKey),
+  loadProjectContext: async (projectSlug, issueKey) => (await loadProjectContext(projectSlug, issueKey))?.text ?? null,
 };
 let generationDeps = defaultGenerationDeps;
 
@@ -105,6 +113,11 @@ function generating(res: Response, issueKeys: string[]): void {
     message: `Se están generando escenarios para ${issueKeys.join(", ")}; espera a que termine`,
     issueKeys,
   });
+}
+
+function actorOf(req: Request): { userId: string | null; userName: string | null } {
+  const principal = principalOf(req);
+  return { userId: principal.userId, userName: principal.username };
 }
 
 function isOwner(principal: Principal, draft: TestDesignDraft): boolean {
@@ -280,6 +293,61 @@ testDesignRouter.get(
 );
 
 // ---------------------------------------------------------------------------
+// Projects
+// ---------------------------------------------------------------------------
+
+function toPositiveIntOrNull(value: unknown): number | null {
+  const n = Number(value);
+  return Number.isInteger(n) && n > 0 ? n : null;
+}
+
+function projectTestRailTarget(project: ProjectConfiguration): TestDesignTestRailTarget {
+  return {
+    projectId: toPositiveIntOrNull(project.testrail?.projectIdTr),
+    suiteId: toPositiveIntOrNull(project.testrail?.suiteId),
+    sectionId: toPositiveIntOrNull(project.testrail?.sectionId),
+  };
+}
+
+/**
+ * Projects the caller may design tests for, with the defaults a new draft takes
+ * from them and how much knowledge each one has. Served here rather than through
+ * /api/projects so a role holding only this module does not need projects.view.
+ */
+testDesignRouter.get(
+  "/projects",
+  handle(async (req, res) => {
+    const principal = principalOf(req);
+    const visible = filterByProjectAccess(
+      principal,
+      (await listProjects()).filter((p) => p.enabled),
+      (p) => p.slug,
+    );
+    // Active drafts per project, for the list filter. Members of a project see all of its drafts.
+    const draftCounts = new Map<string, number>();
+    for (const draft of await repo.listDrafts()) {
+      const key = draft.projectSlug?.toLowerCase();
+      if (key) draftCounts.set(key, (draftCounts.get(key) ?? 0) + 1);
+    }
+    const projects = [];
+    for (const ref of visible) {
+      const project = await getProjectConfigurationBySlug(ref.slug);
+      if (!project) continue;
+      projects.push({
+        slug: project.slug,
+        name: project.name,
+        projectType: project.projectType,
+        jiraProjectKey: project.jira?.projectKey ?? null,
+        testRail: projectTestRailTarget(project),
+        knowledge: projectContextFromConfiguration(project).summary,
+        draftCount: draftCounts.get(project.slug.toLowerCase()) ?? 0,
+      });
+    }
+    res.json({ projects });
+  }),
+);
+
+// ---------------------------------------------------------------------------
 // Drafts
 // ---------------------------------------------------------------------------
 
@@ -291,9 +359,19 @@ testDesignRouter.get(
     const drafts = await repo.listDrafts({
       createdBy: mine ? principal.userId ?? "__none__" : undefined,
       jiraProjectKey: typeof req.query.jiraProjectKey === "string" ? req.query.jiraProjectKey : undefined,
+      // The route policy already refused a projectSlug the caller was not granted.
+      projectSlug: typeof req.query.projectSlug === "string" && req.query.projectSlug ? req.query.projectSlug : undefined,
       includeArchived: req.query.includeArchived === "true",
     });
-    res.json({ drafts: drafts.filter((draft) => canSeeDraft(principal, draft)) });
+    const visible = drafts.filter((draft) => canSeeDraft(principal, draft));
+    // A published or partly published status may be stale (rules change, e.g. Jira off):
+    // recompute it from the stories. Unpublished drafts cannot change status here.
+    for (const summary of visible) {
+      if (summary.status !== "partially_published" && summary.status !== "published") continue;
+      const full = await repo.getDraft(summary.id);
+      if (full) summary.status = (await reconcileStatus(full)).status;
+    }
+    res.json({ drafts: visible });
   }),
 );
 
@@ -302,9 +380,22 @@ testDesignRouter.post(
   handle(async (req, res) => {
     const principal = principalOf(req);
     const body = (req.body ?? {}) as Record<string, unknown>;
-    const jiraProjectKey = String(body.jiraProjectKey ?? "").trim().toUpperCase();
+    // The project is required: its knowledge feeds generation, and its Jira and
+    // TestRail settings are the defaults for the draft.
+    const projectSlug = optionalText(body.projectSlug, "projectSlug")?.trim() || "";
+    if (!projectSlug) {
+      badRequest(res, "Selecciona el proyecto");
+      return;
+    }
+    const project = await getProjectConfigurationBySlug(projectSlug);
+    if (!project) {
+      badRequest(res, `No existe el proyecto ${projectSlug}`);
+      return;
+    }
+
+    const jiraProjectKey = String(body.jiraProjectKey ?? project.jira?.projectKey ?? "").trim().toUpperCase();
     if (!JIRA_PROJECT_KEY.test(jiraProjectKey)) {
-      badRequest(res, "jiraProjectKey es obligatorio");
+      badRequest(res, "El proyecto no tiene Jira configurado; indica jiraProjectKey");
       return;
     }
     const issues = parseIssues(body.issues ?? [], jiraProjectKey);
@@ -318,21 +409,22 @@ testDesignRouter.post(
       return;
     }
 
-    const projectSlug = optionalText(body.projectSlug, "projectSlug")?.trim() || null;
-    if (projectSlug && !(await getProjectBySlug(projectSlug))) {
-      badRequest(res, `No existe el proyecto ${projectSlug}`);
-      return;
-    }
-
     const draft = await repo.createDraft({
       jiraProjectKey,
-      projectSlug,
+      projectSlug: project.slug,
       title: optionalText(body.title, "title"),
-      testRail: parseTestRail(body.testRail),
+      testRail: body.testRail === undefined ? projectTestRailTarget(project) : parseTestRail(body.testRail),
       instructions: optionalText(body.instructions, "instructions"),
       createdBy: principal.userId,
       createdByName: principal.username,
       issues,
+    });
+    await recordEventSafely({
+      eventType: "draft_created",
+      draftId: draft.id,
+      projectSlug: draft.projectSlug,
+      ...actorOf(req),
+      details: { stories: draft.stories.length },
     });
     res.status(201).json({ draft });
   }),
@@ -342,7 +434,7 @@ testDesignRouter.get(
   "/drafts/:draftId",
   handle(async (req, res) => {
     const draft = await loadDraftFor(req, res, "read");
-    if (draft) res.json({ draft: await settleInterruptedStories(draft) });
+    if (draft) res.json({ draft: await reconcileStatus(await settleInterruptedStories(draft)) });
   }),
 );
 
@@ -414,6 +506,19 @@ testDesignRouter.put(
     }
     const incoming = normalizeScenarios((req.body ?? {}).scenarios, { origin: "manual" });
     const scenarios = markEditedScenarios(story.scenarios, incoming);
+    const keptIds = new Set(scenarios.map((s) => s.id));
+    const removed = story.scenarios.filter((s) => !keptIds.has(s.id) && s.testRailCaseId === null);
+    if (removed.length > 0) {
+      await recordEventSafely({
+        eventType: "scenario_removed",
+        draftId: draft.id,
+        storyId: story.id,
+        projectSlug: draft.projectSlug,
+        issueKey: story.issueKey,
+        ...actorOf(req),
+        details: { removed: removed.map((s) => ({ origin: s.origin, edited: s.edited })) },
+      });
+    }
     const saved = await repo.saveStoryScenarios(draft.id, story.id, scenarios);
     res.json({ story: saved });
   }),
@@ -424,13 +529,18 @@ testDesignRouter.put(
 // ---------------------------------------------------------------------------
 
 async function launch(
+  req: Request,
   res: Response,
   draft: TestDesignDraftWithStories,
   stories: TestDesignDraftWithStories["stories"],
   instructions: string | null | undefined,
 ): Promise<void> {
   try {
-    await startGeneration(draft.id, stories, draft.instructions, generationDeps, { instructions });
+    await startGeneration(draft.id, stories, draft.instructions, generationDeps, {
+      instructions,
+      projectSlug: draft.projectSlug,
+      actor: actorOf(req),
+    });
   } catch (err) {
     if (err instanceof GenerationConflictError) {
       generating(res, err.issueKeys);
@@ -465,7 +575,7 @@ testDesignRouter.post(
       badRequest(res, "No hay historias pendientes de generar");
       return;
     }
-    await launch(res, draft, stories, optionalText(body.instructions, "instructions"));
+    await launch(req, res, draft, stories, optionalText(body.instructions, "instructions"));
   }),
 );
 
@@ -480,7 +590,7 @@ testDesignRouter.post(
       res.status(404).json({ ok: false, error: "story_not_found", message: "Historia no encontrada en el borrador" });
       return;
     }
-    await launch(res, draft, [story], optionalText((req.body ?? {}).instructions, "instructions"));
+    await launch(req, res, draft, [story], optionalText((req.body ?? {}).instructions, "instructions"));
   }),
 );
 
@@ -533,15 +643,17 @@ async function storiesToPublish(
   return stories;
 }
 
+/** Stores the status the draft's stories imply when it differs from the stored one. */
+async function reconcileStatus(draft: TestDesignDraftWithStories): Promise<TestDesignDraftWithStories> {
+  const status = computeDraftStatus(draft);
+  if (status === draft.status) return draft;
+  await repo.updateDraft(draft.id, { status });
+  return { ...draft, status };
+}
+
 async function finishPublish(draftId: string) {
   const fresh = await repo.getDraft(draftId);
-  if (!fresh) return null;
-  const status = computeDraftStatus(fresh);
-  if (status !== fresh.status) {
-    await repo.updateDraft(draftId, { status });
-    return { ...fresh, status };
-  }
-  return fresh;
+  return fresh ? reconcileStatus(fresh) : null;
 }
 
 testDesignRouter.post(
@@ -563,6 +675,34 @@ testDesignRouter.post(
       requiredCustomFields: testRailRequiredCaseCustomFields(),
       caseOracle: process.env.TESTRAIL_DEFAULT_CASE_ORACLE || "QA",
     });
+    for (const result of results) {
+      const story = stories.find((st) => st.id === result.storyId);
+      if (!story || result.status === "skipped") continue;
+      const byId = new Map(story.scenarios.map((sc) => [sc.id, sc]));
+      const cases: PublishedCase[] = [];
+      for (const outcome of result.scenarios) {
+        const scenario = byId.get(outcome.scenarioId);
+        if (!scenario || outcome.status === "failed" || !outcome.caseId) continue;
+        cases.push({
+          caseId: outcome.caseId,
+          title: scenario.title,
+          status: outcome.status,
+          origin: scenario.origin,
+          edited: scenario.edited,
+          type: scenario.type,
+          dataMissing: missingDataCount(scenario),
+        });
+      }
+      await recordEventSafely({
+        eventType: "published_testrail",
+        draftId: draft.id,
+        storyId: story.id,
+        projectSlug: draft.projectSlug,
+        issueKey: story.issueKey,
+        ...actorOf(req),
+        details: { cases, failed: result.scenarios.filter((o) => o.status === "failed").length },
+      });
+    }
     const updated = await finishPublish(draft.id);
     console.log(
       `[test-design:testrail] draft=${draft.id} historias=${results.length} ` +
@@ -597,5 +737,45 @@ testDesignRouter.post(
       `[test-design:jira] draft=${draft.id} ` + results.map((r) => `${r.issueKey}:${r.status}${r.subtaskKey ? `->${r.subtaskKey}` : ""}`).join(" "),
     );
     res.json({ draft: updated, results });
+  }),
+);
+
+// ---------------------------------------------------------------------------
+// Dashboard metrics
+// ---------------------------------------------------------------------------
+
+/**
+ * Usage summary for the dashboard: what reached TestRail and what the AI
+ * contributed, over the last `days` (default 30), limited to the caller's
+ * projects (or to `projectSlug`, which the route policy already checked).
+ */
+testDesignRouter.get(
+  "/metrics",
+  handle(async (req, res) => {
+    const principal = principalOf(req);
+    const requestedDays = Number(req.query.days);
+    const days = Number.isInteger(requestedDays) && requestedDays >= 1 && requestedDays <= 365 ? requestedDays : 30;
+    const projectSlug = typeof req.query.projectSlug === "string" ? req.query.projectSlug.trim() : "";
+
+    await ensureTestDesignBackfill();
+    const ranges = metricsRanges(days);
+    const history = await listEvents({ from: ranges.previous.from, to: ranges.current.to });
+
+    const scope: ReadonlySet<string> | null = projectSlug
+      ? new Set([projectSlug.toLowerCase()])
+      : principal.allProjects
+        ? null
+        : new Set([...principal.projectSlugs].map((s) => s.toLowerCase()));
+    const projectNames = new Map((await listProjects()).map((p) => [p.slug.toLowerCase(), p.name]));
+    let testRailBaseUrl: string | null = null;
+    try {
+      testRailBaseUrl = publishDeps.testRail().baseUrl;
+    } catch {
+      // TestRail not configured: the recent cases are listed without links.
+    }
+
+    res.json({
+      metrics: computeTestDesignMetrics(history, ranges, { projectSlugs: scope, projectNames, testRailBaseUrl }),
+    });
   }),
 );

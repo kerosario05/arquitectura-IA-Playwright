@@ -1,5 +1,15 @@
 import { randomUUID } from "node:crypto";
+import {
+  isSensitiveName,
+  keyFromLabel,
+  labelFromKey,
+  MAX_DATA_FIELDS,
+  MAX_DATA_VALUE_LENGTH,
+  reconcileDataFields,
+  scenarioTexts,
+} from "./test-data";
 import type {
+  TestDesignDataField,
   TestDesignPriority,
   TestDesignScenario,
   TestDesignScenarioType,
@@ -48,6 +58,35 @@ function normalizeStep(raw: unknown, path: string): TestDesignStep {
   };
 }
 
+function normalizeDataField(raw: unknown, path: string): TestDesignDataField | null {
+  if (!raw || typeof raw !== "object") throw new TestDesignValidationError(`${path} debe ser un objeto`);
+  const f = raw as Record<string, unknown>;
+  const label = text(f.label, `${path}.label`, 120);
+  const key = keyFromLabel(text(f.key, `${path}.key`, 60) || label);
+  if (!key) return null;
+  return {
+    key,
+    label: label || labelFromKey(key),
+    description: text(f.description, `${path}.description`, 500),
+    value: text(f.value, `${path}.value`, MAX_DATA_VALUE_LENGTH),
+    sensitive: typeof f.sensitive === "boolean" ? f.sensitive : isSensitiveName(`${key} ${label}`),
+  };
+}
+
+function normalizeData(raw: unknown, path: string): TestDesignDataField[] {
+  if (raw === undefined || raw === null) return [];
+  if (!Array.isArray(raw)) throw new TestDesignValidationError(`${path}.data debe ser una lista`);
+  if (raw.length > MAX_DATA_FIELDS) {
+    throw new TestDesignValidationError(`${path} supera el máximo de ${MAX_DATA_FIELDS} datos de prueba`);
+  }
+  const fields: TestDesignDataField[] = [];
+  raw.forEach((item, i) => {
+    const field = normalizeDataField(item, `${path}.data[${i}]`);
+    if (field && !fields.some((existing) => existing.key === field.key)) fields.push(field);
+  });
+  return fields;
+}
+
 function normalizeCaseId(value: unknown, path: string): number | null {
   if (value === undefined || value === null || value === "") return null;
   const id = typeof value === "string" ? Number(value.replace(/^C/i, "")) : value;
@@ -91,12 +130,17 @@ export function normalizeScenario(
   const origin = s.origin === "manual" || s.origin === "ai" ? s.origin : defaults.origin ?? "manual";
   const id = typeof s.id === "string" && s.id.trim() ? s.id.trim() : randomUUID();
 
+  const preconditions = text(s.preconditions, `${path}.preconditions`);
+  const expectedResult = text(s.expectedResult, `${path}.expectedResult`);
+  const data = reconcileDataFields(normalizeData(s.data, path), scenarioTexts({ preconditions, steps, expectedResult }));
+
   return {
     id,
     title: text(s.title, `${path}.title`, MAX_TITLE_LENGTH),
-    preconditions: text(s.preconditions, `${path}.preconditions`),
+    preconditions,
     steps,
-    expectedResult: text(s.expectedResult, `${path}.expectedResult`),
+    expectedResult,
+    data,
     priority,
     type,
     selectedForTestRail: s.selectedForTestRail === undefined ? true : s.selectedForTestRail === true,
@@ -129,7 +173,7 @@ export function normalizeScenarios(
 }
 
 function contentSignature(s: TestDesignScenario): string {
-  return JSON.stringify([s.title, s.preconditions, s.steps, s.expectedResult, s.priority, s.type]);
+  return JSON.stringify([s.title, s.preconditions, s.steps, s.expectedResult, s.priority, s.type, s.data]);
 }
 
 /**

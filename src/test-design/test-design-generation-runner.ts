@@ -1,8 +1,10 @@
 import type { AiProvider } from "../ai/ai-provider.types";
 import type { JiraIssueSource } from "../scenarios/scenario-types";
 import * as repo from "../db/test-design-repository";
+import { recordEventSafely } from "../db/test-design-event-repository";
 import {
   generateTestDesignScenarios,
+  isKeptOnRegeneration,
   keptScenarioTitles,
   mergeRegenerated,
 } from "./test-design-generator";
@@ -23,6 +25,8 @@ import type { TestDesignDraftStory } from "./test-design.types";
 export type GenerationDeps = {
   createProvider: () => Promise<AiProvider>;
   loadIssue: (issueKey: string) => Promise<JiraIssueSource>;
+  /** Prompt-ready knowledge of the draft project; null when there is none. */
+  loadProjectContext?: (projectSlug: string, issueKey: string) => Promise<string | null>;
 };
 
 export const INTERRUPTED_MESSAGE =
@@ -49,6 +53,16 @@ export class GenerationConflictError extends Error {
 export type StartGenerationOptions = {
   /** Extra guidance for this run only, on top of the draft's instructions. */
   instructions?: string | null;
+  /** The draft project, whose knowledge feeds the prompt. */
+  projectSlug?: string | null;
+  /** Who asked, for the usage history. */
+  actor?: { userId: string | null; userName: string | null };
+};
+
+type RunContext = {
+  instructions: string | null;
+  projectSlug: string | null;
+  actor: { userId: string | null; userName: string | null };
 };
 
 /**
@@ -77,14 +91,23 @@ export async function startGeneration(
   }
 
   const instructions = [draftInstructions, options.instructions].filter((t) => t?.trim()).join("\n\n");
-  const done = runAll(draftId, stories, instructions || null, deps);
+  const done = runAll(
+    draftId,
+    stories,
+    {
+      instructions: instructions || null,
+      projectSlug: options.projectSlug ?? null,
+      actor: options.actor ?? { userId: null, userName: null },
+    },
+    deps,
+  );
   return { done };
 }
 
 async function runAll(
   draftId: string,
   stories: TestDesignDraftStory[],
-  instructions: string | null,
+  ctx: RunContext,
   deps: GenerationDeps,
 ): Promise<void> {
   let provider: AiProvider;
@@ -92,14 +115,17 @@ async function runAll(
     provider = await deps.createProvider();
   } catch (err) {
     const message = `Proveedor de IA no disponible: ${err instanceof Error ? err.message : String(err)}`;
-    for (const story of stories) await finish(draftId, story, { status: "failed", error: message });
+    for (const story of stories) {
+      await finish(draftId, story, { status: "failed", error: message });
+      await recordFailure(draftId, story, ctx, message);
+    }
     return;
   }
 
   const queue = [...stories];
   const workers = Array.from({ length: Math.min(generationConcurrency(), queue.length) }, async () => {
     for (let story = queue.shift(); story; story = queue.shift()) {
-      await generateOne(draftId, story, instructions, provider, deps);
+      await generateOne(draftId, story, ctx, provider, deps);
     }
   });
   await Promise.all(workers);
@@ -108,22 +134,35 @@ async function runAll(
 async function generateOne(
   draftId: string,
   story: TestDesignDraftStory,
-  instructions: string | null,
+  ctx: RunContext,
   provider: AiProvider,
   deps: GenerationDeps,
 ): Promise<void> {
+  const { instructions, projectSlug } = ctx;
   const started = Date.now();
   try {
     const issue = await deps.loadIssue(story.issueKey);
+    const projectContext = await loadContext(deps, projectSlug, story.issueKey);
     const generated = await generateTestDesignScenarios(issue, {
       provider,
       instructions,
+      projectContext,
       existingTitles: keptScenarioTitles(story.scenarios),
     });
     // Re-read: the story may have been edited while the model was working.
     const current = (await repo.getStory(draftId, story.id))?.scenarios ?? story.scenarios;
     const scenarios = mergeRegenerated(current, generated);
     await finish(draftId, story, { status: "ready", scenarios, issueSummary: issue.summary });
+    const kept = current.filter(isKeptOnRegeneration).length;
+    await recordEventSafely({
+      eventType: "generation_completed",
+      draftId,
+      storyId: story.id,
+      projectSlug,
+      issueKey: story.issueKey,
+      ...ctx.actor,
+      details: { generated: generated.length, kept, replaced: current.length - kept },
+    });
     console.log(
       `[test-design:generation] ${story.issueKey} listo: ${generated.length} generados, ` +
         `${scenarios.length} en total (${Date.now() - started} ms)`,
@@ -132,6 +171,30 @@ async function generateOne(
     const message = err instanceof Error ? err.message : String(err);
     console.error(`[test-design:generation] ${story.issueKey} falló: ${message}`);
     await finish(draftId, story, { status: "failed", error: message.slice(0, 2000) });
+    await recordFailure(draftId, story, ctx, message);
+  }
+}
+
+async function recordFailure(draftId: string, story: TestDesignDraftStory, ctx: RunContext, message: string): Promise<void> {
+  await recordEventSafely({
+    eventType: "generation_failed",
+    draftId,
+    storyId: story.id,
+    projectSlug: ctx.projectSlug,
+    issueKey: story.issueKey,
+    ...ctx.actor,
+    details: { error: message.slice(0, 500) },
+  });
+}
+
+/** Knowledge improves the cases but is never required: a failure to read it is logged, not fatal. */
+async function loadContext(deps: GenerationDeps, projectSlug: string | null, issueKey: string): Promise<string | null> {
+  if (!projectSlug || !deps.loadProjectContext) return null;
+  try {
+    return await deps.loadProjectContext(projectSlug, issueKey);
+  } catch (err) {
+    console.warn(`[test-design:generation] sin conocimiento del proyecto ${projectSlug}: ${err instanceof Error ? err.message : String(err)}`);
+    return null;
   }
 }
 
