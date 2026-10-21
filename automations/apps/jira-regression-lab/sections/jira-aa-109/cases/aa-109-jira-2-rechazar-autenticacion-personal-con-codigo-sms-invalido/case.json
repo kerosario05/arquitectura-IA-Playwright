@@ -1,0 +1,9 @@
+{
+  "id": "aa-109-jira-2-rechazar-autenticacion-personal-con-codigo-sms-invalido",
+  "externalId": "AA-109:jira:2",
+  "title": "Rechazar autenticación personal con código SMS inválido",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-17T14:10:38.783Z"
+}

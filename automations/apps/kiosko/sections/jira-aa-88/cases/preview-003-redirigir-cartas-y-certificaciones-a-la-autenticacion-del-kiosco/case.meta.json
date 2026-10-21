@@ -1,0 +1,8 @@
+{
+  "appSlug": "kiosko",
+  "sectionSlug": "jira-aa-88",
+  "sourceScenarioId": "PREVIEW-003",
+  "title": "Redirigir Cartas y certificaciones a la autenticación del kiosco",
+  "generatedAt": "2026-10-09T19:48:04.882Z",
+  "executionEngine": "jira_semantic"
+}

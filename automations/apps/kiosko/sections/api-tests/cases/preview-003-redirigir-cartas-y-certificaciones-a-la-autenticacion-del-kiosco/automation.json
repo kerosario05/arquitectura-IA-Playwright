@@ -1,0 +1,134 @@
+{
+  "id": "preview-003-redirigir-cartas-y-certificaciones-a-la-autenticacion-del-kiosco",
+  "externalId": "PREVIEW-003",
+  "caseId": 0,
+  "title": "Redirigir Cartas y certificaciones a la autenticación del kiosco",
+  "planPath": "automations\\apps\\kiosko\\sections\\api-tests\\cases\\preview-003-redirigir-cartas-y-certificaciones-a-la-autenticacion-del-kiosco\\plan.json",
+  "specPath": "automations\\apps\\kiosko\\sections\\api-tests\\cases\\preview-003-redirigir-cartas-y-certificaciones-a-la-autenticacion-del-kiosco\\case.spec.ts",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "status": "spec_failed",
+  "source": "discovery",
+  "appProfile": "kiosko",
+  "createdAt": "2026-10-09T15:39:32.839Z",
+  "updatedAt": "2026-10-09T15:39:32.839Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-10-09T15-38-36-579Z\\discovered-plans.pending.json",
+  "pomStatus": "needs_manual_review",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "failed",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-10-09T15-38-36-579Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "specGeneration": {
+      "mode": "deterministic",
+      "provider": null,
+      "model": null,
+      "skill": {
+        "name": null,
+        "version": null,
+        "hash": null,
+        "loaded": false
+      },
+      "invocations": 0,
+      "invocationsConsumed": 0,
+      "durationMs": 45967,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "skipped",
+        "structure": "passed",
+        "traceFidelity": "skipped",
+        "typescript": "passed",
+        "playwrightDiscovery": "passed",
+        "semanticCoverage": "passed",
+        "functionalExecution": "failed"
+      },
+      "promotionAllowed": false,
+      "specsRequested": 1,
+      "specsValidated": 0,
+      "specsRejected": 1,
+      "specGenerationAttempts": 0,
+      "specRepairAttempts": 0,
+      "firstPassPromotion": false,
+      "failedGatesAttempt1": [
+        "functionalExecution"
+      ],
+      "regressedGates": [],
+      "missingRequirements": [],
+      "oracleTypes": [
+        "auth_gate"
+      ],
+      "errors": [
+        "functional_execution_failed:exitCode=1",
+        "functional_execution_error:Error: Promoted assertion failed at step 2 target=\"authentication gate\". diagnostics={\"currentUrl\":\"https://172.27.4.50/\",\"actionIntent\":\"assertVisible\",\"target\":\"authentication gate\",\"stepIndex\":2,\"timeoutMs\":15000,\"retryAttempted\":false,\"screenshotPath\":\"C:\\\\MisProyectos\\\\arquitectura-IA-Playwright-feature-auth-gate\\\\.artifacts\\\\promoted-runtime\\\\step-002.png\"} cause=\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m"
+      ],
+      "warnings": [
+        "step_index_not_explicit_in_spec:1",
+        "functional_execution_screenshots=1",
+        "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 2)."
+      ],
+      "finalSpec": {
+        "origin": "deterministic_compiler",
+        "generatedBy": "core",
+        "strategy": "deterministic_compiler",
+        "fallback": null
+      },
+      "runtimeGate": {
+        "decision": "block",
+        "promotionStatus": "blocked",
+        "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 2)."
+      },
+      "specWritten": false,
+      "previousSpec": {
+        "existed": false,
+        "hash": null,
+        "lastModifiedAt": null
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "spec_generation_validation_failed",
+      "blockers": [
+        "spec_generation_validation_failed"
+      ],
+      "availablePageObjects": [
+        "ProductListPage",
+        "OperationsMenuPage",
+        "CategoryPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false,
+      "specPath": "automations\\apps\\kiosko\\sections\\api-tests\\cases\\preview-003-redirigir-cartas-y-certificaciones-a-la-autenticacion-del-kiosco\\case.spec.ts",
+      "specHash": "c167d70ed842907159b856cac0bb077a6958c37d176701f4a3a13af542f69817",
+      "specSource": "ai_candidate"
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\kiosko\\sections\\api-tests\\cases\\preview-003-redirigir-cartas-y-certificaciones-a-la-autenticacion-del-kiosco\\plan.json",
+    "previousStatus": "spec_failed"
+  }
+}

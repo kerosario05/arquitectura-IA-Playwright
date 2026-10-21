@@ -1,0 +1,1891 @@
+[
+  {
+    "scenarioId": "REC-0525478A-01",
+    "title": "Crear cuenta",
+    "description": "Recorrido observado para completar \"Crear cuenta\". Se registraron 17 acciones funcionales.",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://solicitudedigitalesdev/",
+        "description": "Navegar a https://solicitudedigitalesdev/"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|CuentaAhorra y maneja tu dinero forma ágil y sencilla."
+        },
+        "description": "Presionar \"CuentaAhorra y maneja tu dinero forma ágil y sencilla.\"",
+        "interactionId": "interaction-6"
+      },
+      {
+        "action": "assert",
+        "target": {
+          "strategy": "text",
+          "value": "Selecciona la cuenta de tu preferencia"
+        },
+        "description": "Verificar que se muestra \"Selecciona la cuenta de tu preferencia\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Continuar"
+        },
+        "description": "Presionar \"Continuar\"",
+        "interactionId": "interaction-10"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "css",
+          "value": "#x_DocumentId"
+        },
+        "valueKey": "numero_de_identificacion",
+        "description": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "interactionId": "interaction-12"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "checkbox|Acepto los Términos y Condiciones de la Aplicación Móvil, Web, Portal(es) y/o Pl"
+        },
+        "description": "Marcar \"Acepto los Términos y Condiciones\"",
+        "interactionId": "interaction-13"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Continuar"
+        },
+        "description": "Presionar \"Continuar\"",
+        "interactionId": "interaction-16"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Continuar"
+        },
+        "description": "Presionar \"Continuar\"",
+        "interactionId": "interaction-21"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "div:has(input[id=\"react-select-6-input\"])"
+        },
+        "description": "Presionar \"Seleccione\"",
+        "interactionId": "interaction-23"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "#react-select-6-option-1"
+        },
+        "description": "Presionar el control grabado",
+        "interactionId": "interaction-24"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Enviar"
+        },
+        "description": "Presionar \"Enviar\"",
+        "interactionId": "interaction-27"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Please enter verification code. Digit 1"
+        },
+        "valueKey": "please_enter_verification_code_digit_1",
+        "description": "Ingresar [please_enter_verification_code_digit_1] en \"Please enter verification code. Digit 1\"",
+        "interactionId": "interaction-28"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|OTP digit 2"
+        },
+        "valueKey": "otp_digit_2",
+        "description": "Ingresar [otp_digit_2] en \"OTP digit 2\"",
+        "interactionId": "interaction-29"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|OTP digit 3"
+        },
+        "valueKey": "otp_digit_3",
+        "description": "Ingresar [otp_digit_3] en \"OTP digit 3\"",
+        "interactionId": "interaction-30"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|OTP digit 4"
+        },
+        "valueKey": "otp_digit_4",
+        "description": "Ingresar [otp_digit_4] en \"OTP digit 4\"",
+        "interactionId": "interaction-31"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|OTP digit 5"
+        },
+        "valueKey": "otp_digit_5",
+        "description": "Ingresar [otp_digit_5] en \"OTP digit 5\"",
+        "interactionId": "interaction-32"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|OTP digit 6"
+        },
+        "valueKey": "otp_digit_6",
+        "description": "Ingresar [otp_digit_6] en \"OTP digit 6\"",
+        "interactionId": "interaction-34"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Verificar"
+        },
+        "description": "Presionar \"Verificar\"",
+        "interactionId": "interaction-35"
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Presionar \"CuentaAhorra y maneja tu dinero forma ágil y sencilla.\"",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "renderedStep": "Presionar \"CuentaAhorra y maneja tu dinero forma ágil y sencilla.\"",
+        "interactionId": "interaction-6",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "0b23ab3287d9",
+        "screenAfterRef": "0b23ab3287d9",
+        "routeBefore": "https://solicitudedigitalesdev/",
+        "routeAfter": "https://solicitudedigitalesdev/cuentas",
+        "stateScope": "0b23ab3287d9",
+        "stepNumber": 2
+      },
+      {
+        "content": "El sistema muestra \"Selecciona la cuenta de tu preferencia\"",
+        "expected": "Se muestra \"Selecciona la cuenta de tu preferencia\"",
+        "classification": "FUNCTIONAL_ASSERTION",
+        "stepNumber": 3
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "renderedStep": "Presionar \"Continuar\"",
+        "interactionId": "interaction-10",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/cuentas",
+        "stateScope": "428533996fd7",
+        "stepNumber": 4
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "sourceEventRefs": [
+          "event-12"
+        ],
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"402-2467955-1\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "interactionId": "interaction-12",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/cuentas",
+        "stateScope": "428533996fd7",
+        "stepNumber": 5
+      },
+      {
+        "content": "Marcar \"Acepto los Términos y Condiciones\"",
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "renderedStep": "Marcar \"Acepto los Términos y Condiciones\"",
+        "interactionId": "interaction-13",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/cuentas",
+        "stateScope": "428533996fd7",
+        "stepNumber": 6
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "sourceEventRefs": [
+          "event-16"
+        ],
+        "renderedStep": "Presionar \"Continuar\"",
+        "interactionId": "interaction-16",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/cuentas",
+        "routeAfter": "https://solicitudedigitalesdev/cuentas?method=getClientInfo&productSlug=cuenta-de-ahorros-personal-en-pesos",
+        "stateScope": "428533996fd7",
+        "stepNumber": 7
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "sourceEventRefs": [
+          "event-21"
+        ],
+        "renderedStep": "Presionar \"Continuar\"",
+        "interactionId": "interaction-21",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/cuentas?method=getClientInfo&productSlug=cuenta-de-ahorros-personal-en-pesos",
+        "routeAfter": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+        "stateScope": "428533996fd7",
+        "stepNumber": 8
+      },
+      {
+        "content": "Presionar \"Seleccione\"",
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "renderedStep": "Presionar \"Seleccione\"",
+        "interactionId": "interaction-23",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+        "stateScope": "428533996fd7",
+        "stepNumber": 9
+      },
+      {
+        "content": "Presionar el control grabado",
+        "sourceEventRefs": [
+          "event-24"
+        ],
+        "renderedStep": "Presionar el control grabado",
+        "interactionId": "interaction-24",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+        "stateScope": "428533996fd7",
+        "stepNumber": 10
+      },
+      {
+        "content": "Presionar \"Enviar\"",
+        "sourceEventRefs": [
+          "event-27"
+        ],
+        "renderedStep": "Presionar \"Enviar\"",
+        "interactionId": "interaction-27",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+        "stateScope": "428533996fd7",
+        "stepNumber": 11
+      },
+      {
+        "content": "Ingresar [please_enter_verification_code_digit_1] en \"Please enter verification code. Digit 1\"",
+        "sourceEventRefs": [
+          "event-28"
+        ],
+        "stepTemplate": "Ingresar [please_enter_verification_code_digit_1] en \"Please enter verification code. Digit 1\"",
+        "renderedStep": "Ingresar \"1\" en \"Please enter verification code. Digit 1\"",
+        "valueKey": "please_enter_verification_code_digit_1",
+        "interactionId": "interaction-28",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+        "stateScope": "428533996fd7",
+        "stepNumber": 12
+      },
+      {
+        "content": "Ingresar [otp_digit_2] en \"OTP digit 2\"",
+        "sourceEventRefs": [
+          "event-29"
+        ],
+        "stepTemplate": "Ingresar [otp_digit_2] en \"OTP digit 2\"",
+        "renderedStep": "Ingresar \"••••••\" en \"OTP digit 2\"",
+        "valueKey": "otp_digit_2",
+        "interactionId": "interaction-29",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+        "stateScope": "428533996fd7",
+        "stepNumber": 13
+      },
+      {
+        "content": "Ingresar [otp_digit_3] en \"OTP digit 3\"",
+        "sourceEventRefs": [
+          "event-30"
+        ],
+        "stepTemplate": "Ingresar [otp_digit_3] en \"OTP digit 3\"",
+        "renderedStep": "Ingresar \"••••••\" en \"OTP digit 3\"",
+        "valueKey": "otp_digit_3",
+        "interactionId": "interaction-30",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+        "stateScope": "428533996fd7",
+        "stepNumber": 14
+      },
+      {
+        "content": "Ingresar [otp_digit_4] en \"OTP digit 4\"",
+        "sourceEventRefs": [
+          "event-31"
+        ],
+        "stepTemplate": "Ingresar [otp_digit_4] en \"OTP digit 4\"",
+        "renderedStep": "Ingresar \"••••••\" en \"OTP digit 4\"",
+        "valueKey": "otp_digit_4",
+        "interactionId": "interaction-31",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+        "stateScope": "428533996fd7",
+        "stepNumber": 15
+      },
+      {
+        "content": "Ingresar [otp_digit_5] en \"OTP digit 5\"",
+        "sourceEventRefs": [
+          "event-32"
+        ],
+        "stepTemplate": "Ingresar [otp_digit_5] en \"OTP digit 5\"",
+        "renderedStep": "Ingresar \"••••••\" en \"OTP digit 5\"",
+        "valueKey": "otp_digit_5",
+        "interactionId": "interaction-32",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+        "stateScope": "428533996fd7",
+        "stepNumber": 16
+      },
+      {
+        "content": "Ingresar [otp_digit_6] en \"OTP digit 6\"",
+        "sourceEventRefs": [
+          "event-34"
+        ],
+        "stepTemplate": "Ingresar [otp_digit_6] en \"OTP digit 6\"",
+        "renderedStep": "Ingresar \"••••••\" en \"OTP digit 6\"",
+        "valueKey": "otp_digit_6",
+        "interactionId": "interaction-34",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+        "stateScope": "428533996fd7",
+        "stepNumber": 17
+      },
+      {
+        "content": "Presionar \"Verificar\"",
+        "sourceEventRefs": [
+          "event-35"
+        ],
+        "renderedStep": "Presionar \"Verificar\"",
+        "interactionId": "interaction-35",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+        "stateScope": "428533996fd7",
+        "stepNumber": 18
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "numero_de_identificacion",
+        "label": "Número de identificación",
+        "stepIndex": 4,
+        "technicalTargetRefs": [
+          "css:#x_DocumentId",
+          "id:x_DocumentId"
+        ],
+        "sourceEventRefs": [
+          "event-12"
+        ],
+        "exampleValue": "402-2467955-1",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Número de identificación",
+        "needsReview": false,
+        "reviewReason": "explicit_associated_label"
+      },
+      {
+        "key": "please_enter_verification_code_digit_1",
+        "label": "Please enter verification code. Digit 1",
+        "stepIndex": 11,
+        "technicalTargetRefs": [
+          "role:textbox|Please enter verification code. Digit 1"
+        ],
+        "sourceEventRefs": [
+          "event-28"
+        ],
+        "exampleValue": "1",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Please enter verification code. Digit 1",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "otp_digit_2",
+        "label": "OTP digit 2",
+        "stepIndex": 12,
+        "technicalTargetRefs": [
+          "role:textbox|OTP digit 2"
+        ],
+        "sourceEventRefs": [
+          "event-29"
+        ],
+        "exampleValue": "2",
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "OTP digit 2",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "otp_digit_3",
+        "label": "OTP digit 3",
+        "stepIndex": 13,
+        "technicalTargetRefs": [
+          "role:textbox|OTP digit 3"
+        ],
+        "sourceEventRefs": [
+          "event-30"
+        ],
+        "exampleValue": "3",
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "OTP digit 3",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "otp_digit_4",
+        "label": "OTP digit 4",
+        "stepIndex": 14,
+        "technicalTargetRefs": [
+          "role:textbox|OTP digit 4"
+        ],
+        "sourceEventRefs": [
+          "event-31"
+        ],
+        "exampleValue": "4",
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "OTP digit 4",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "otp_digit_5",
+        "label": "OTP digit 5",
+        "stepIndex": 15,
+        "technicalTargetRefs": [
+          "role:textbox|OTP digit 5"
+        ],
+        "sourceEventRefs": [
+          "event-32"
+        ],
+        "exampleValue": "5",
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "OTP digit 5",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "otp_digit_6",
+        "label": "OTP digit 6",
+        "stepIndex": 16,
+        "technicalTargetRefs": [
+          "role:textbox|OTP digit 6"
+        ],
+        "sourceEventRefs": [
+          "event-34"
+        ],
+        "exampleValue": "6",
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "OTP digit 6",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"CuentaAhorra y maneja tu dinero forma ágil y sencilla.\"",
+        "strategy": "role",
+        "value": "button|CuentaAhorra y maneja tu dinero forma ágil y sencilla."
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "role",
+        "value": "button|Continuar"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "strategy": "css",
+        "value": "#x_DocumentId"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Marcar \"Acepto los Términos y Condiciones\"",
+        "strategy": "role",
+        "value": "checkbox|Acepto los Términos y Condiciones de la Aplicación Móvil, Web, Portal(es) y/o Pl"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "role",
+        "value": "button|Continuar"
+      },
+      {
+        "stepIndex": 7,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "role",
+        "value": "button|Continuar"
+      },
+      {
+        "stepIndex": 8,
+        "description": "Presionar \"Seleccione\"",
+        "strategy": "css",
+        "value": "div:has(input[id=\"react-select-6-input\"])"
+      },
+      {
+        "stepIndex": 9,
+        "description": "Presionar el control grabado",
+        "strategy": "css",
+        "value": "#react-select-6-option-1"
+      },
+      {
+        "stepIndex": 10,
+        "description": "Presionar \"Enviar\"",
+        "strategy": "role",
+        "value": "button|Enviar"
+      },
+      {
+        "stepIndex": 11,
+        "description": "Ingresar [please_enter_verification_code_digit_1] en \"Please enter verification code. Digit 1\"",
+        "strategy": "role",
+        "value": "textbox|Please enter verification code. Digit 1"
+      },
+      {
+        "stepIndex": 12,
+        "description": "Ingresar [otp_digit_2] en \"OTP digit 2\"",
+        "strategy": "role",
+        "value": "textbox|OTP digit 2"
+      },
+      {
+        "stepIndex": 13,
+        "description": "Ingresar [otp_digit_3] en \"OTP digit 3\"",
+        "strategy": "role",
+        "value": "textbox|OTP digit 3"
+      },
+      {
+        "stepIndex": 14,
+        "description": "Ingresar [otp_digit_4] en \"OTP digit 4\"",
+        "strategy": "role",
+        "value": "textbox|OTP digit 4"
+      },
+      {
+        "stepIndex": 15,
+        "description": "Ingresar [otp_digit_5] en \"OTP digit 5\"",
+        "strategy": "role",
+        "value": "textbox|OTP digit 5"
+      },
+      {
+        "stepIndex": 16,
+        "description": "Ingresar [otp_digit_6] en \"OTP digit 6\"",
+        "strategy": "role",
+        "value": "textbox|OTP digit 6"
+      },
+      {
+        "stepIndex": 17,
+        "description": "Presionar \"Verificar\"",
+        "strategy": "role",
+        "value": "button|Verificar"
+      }
+    ],
+    "sourceRecordingId": "0525478a-8560-4406-ae5e-e7a598366464",
+    "hasUncertainSteps": true,
+    "primary": true,
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7",
+      "event-8",
+      "event-9",
+      "event-10",
+      "event-11",
+      "event-12",
+      "event-13",
+      "event-14",
+      "event-15",
+      "event-16",
+      "event-17",
+      "event-18",
+      "event-19",
+      "event-20",
+      "event-21",
+      "event-22",
+      "event-23",
+      "event-24",
+      "event-25",
+      "event-26",
+      "event-27",
+      "event-28",
+      "event-29",
+      "event-30",
+      "event-31",
+      "event-32",
+      "event-33",
+      "event-34",
+      "event-35",
+      "event-36"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": false,
+    "functionalReadiness": true,
+    "technicalReadiness": false,
+    "expectedResultCandidate": "Se muestra \"Selecciona la cuenta de tu preferencia\"",
+    "oracleAuthority": "observed_only",
+    "confidence": 0.95,
+    "scenarioStepCount": 18,
+    "functionalActionCount": 16,
+    "nonUserSetupSteps": 1,
+    "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
+    "scenarioGoal": "Crear cuenta",
+    "stateSequenceValid": true,
+    "stateSequenceIssues": [],
+    "postGoalObservations": [],
+    "goalContract": {
+      "nonGeneric": true,
+      "goalCoherent": true,
+      "mutationIntentExpressed": true
+    },
+    "replayEligible": true,
+    "canonicalInteractions": [
+      {
+        "id": "interaction-1",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-1"
+        ],
+        "technicalTargetRefs": [],
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9,
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://solicitudedigitalesdev/"
+      },
+      {
+        "id": "interaction-3",
+        "controlIdentity": "0b23ab3287d9",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-3"
+        ],
+        "technicalTargetRefs": [],
+        "stateScope": "0b23ab3287d9",
+        "technicalOnly": true,
+        "confidence": 0.9,
+        "screenBeforeRef": "0b23ab3287d9",
+        "screenAfterRef": "0b23ab3287d9",
+        "routeBefore": "https://solicitudedigitalesdev/"
+      },
+      {
+        "id": "interaction-6",
+        "controlIdentity": "0b23ab3287d9|CuentaAhorra y maneja tu dinero forma ágil y sencilla.|role|button|CuentaAhorra y maneja tu dinero forma ágil y sencilla.",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "technicalTargetRefs": [
+          "role:button|CuentaAhorra y maneja tu dinero forma ágil y sencilla.",
+          "css:#nav-item-cuentas",
+          "id:nav-item-cuentas"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#nav-item-cuentas",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a",
+                "role": "button"
+              },
+              "stableDirectAttributes": {
+                "href": "#",
+                "id": "nav-item-cuentas",
+                "role": "button"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "clippath",
+                  "stableAttributes": {
+                    "id": "clip0_2384_5575"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",3]],\"descendantEntries\":[[\"circle\",1],[\"clippath\",1],[\"defs\",1],[\"g\",1],[\"path\",6],[\"rect\",1],[\"span\",5],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "nav-app-product-types"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\",\"role\":\"button\"},\"stableDirectAttributes\":{\"href\":\"#\",\"id\":\"nav-item-cuentas\",\"role\":\"button\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"clippath\",\"stableAttributes\":{\"id\":\"clip0_2384_5575\"}}],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",3]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"clippath\\\",1],[\\\"defs\\\",1],[\\\"g\\\",1],[\\\"path\\\",6],[\\\"rect\\\",1],[\\\"span\\\",5],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "stateScope": "0b23ab3287d9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "0b23ab3287d9",
+        "screenAfterRef": "0b23ab3287d9",
+        "routeBefore": "https://solicitudedigitalesdev/",
+        "routeAfter": "https://solicitudedigitalesdev/cuentas",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-10",
+        "controlIdentity": "428533996fd7|Continuar|role|button|Continuar",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Continuar",
+          "css:#btn-solicitar-cuenta-de-ahorros-personal-en-pesos",
+          "id:btn-solicitar-cuenta-de-ahorros-personal-en-pesos"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#btn-solicitar-cuenta-de-ahorros-personal-en-pesos",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "btn-solicitar-cuenta-de-ahorros-personal-en-pesos"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"circle\",1],[\"path\",1],[\"span\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "card-cuenta-de-ahorros-personal-en-pesos"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-solicitar-cuenta-de-ahorros-personal-en-pesos\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"path\\\",1],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "stateScope": "428533996fd7",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/cuentas"
+      },
+      {
+        "id": "interaction-12",
+        "controlIdentity": "428533996fd7|Número de identificación|css|#x_DocumentId",
+        "semanticField": "Número de identificación",
+        "action": "fill",
+        "valueKey": "numero_de_identificacion",
+        "recordedValue": "402-2467955-1",
+        "rawTypedValue": "40224679551",
+        "sourceEventRefs": [
+          "event-12"
+        ],
+        "technicalTargetRefs": [
+          "css:#x_DocumentId",
+          "id:x_DocumentId"
+        ],
+        "editingSessionRef": "edit-1",
+        "description": "Ingresar en \"Número de identificación\"",
+        "stateScope": "428533996fd7",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.8,
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/cuentas"
+      },
+      {
+        "id": "interaction-13",
+        "controlIdentity": "428533996fd7|control|role|checkbox|Acepto los Términos y Condiciones de la Aplicación Móvil, Web, Portal(es) y/o Pl",
+        "semanticField": "control",
+        "action": "check",
+        "valueKey": "control",
+        "sourceEventRefs": [
+          "event-13",
+          "event-14"
+        ],
+        "technicalTargetRefs": [
+          "role:checkbox|Acepto los Términos y Condiciones de la Aplicación Móvil, Web, Portal(es) y/o Pl",
+          "css:#base-ui-_r_1i_",
+          "id:base-ui-_r_1i_"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#base-ui-_r_1i_",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "span",
+                "role": "checkbox"
+              },
+              "stableDirectAttributes": {
+                "aria-labelledby": "el_AcceptTermsAndConditions",
+                "id": "base-ui-_r_1i_",
+                "role": "checkbox"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "el_AcceptTermsAndConditions"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"span\",\"role\":\"checkbox\"},\"stableDirectAttributes\":{\"id\":\"base-ui-_r_1i_\",\"role\":\"checkbox\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": false,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "checkbox",
+          "normalizedName": "Acepto los Términos y Condiciones de la Aplicación Móvil, Web, Portal(es) y/o Plataforma(s) Digitales y los Términos y Condiciones de Uso e Intercambio de Información Personal. Al continuar con este proceso, autorizo a EL BANCO a: a) recopilar, capturar y utilizar mis datos biométricos como mecanismos alternos de autenticación e identificación; b) a consultar mis datos en el Maestro de Cedulados de la Junta Central Electoral, el buró de crédito y en la Tesorería de Seguridad Social (TSS); c) Compartir, entregar y transmitir mi información de carácter personal: Nombre, Apellido, Cédula de Identidad, Correo Electrónico y Teléfonos con entidades y organismos públicos y gubernamentales a los fines de cumplir con la legislación y normativa aplicable.",
+          "targetTag": "span",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "el_AcceptTermsAndConditions"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"control\"",
+        "stateScope": "428533996fd7",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/cuentas"
+      },
+      {
+        "id": "interaction-16",
+        "controlIdentity": "428533996fd7|Continuar|role|button|Continuar",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-16"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Continuar",
+          "css:#btn-identity-validate",
+          "id:btn-identity-validate"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#btn-identity-validate",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "btn-identity-validate"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"circle\",1],[\"path\",1],[\"span\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "_r_1c_"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-identity-validate\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"path\\\",1],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "stateScope": "428533996fd7",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/cuentas",
+        "routeAfter": "https://solicitudedigitalesdev/cuentas?method=getClientInfo&productSlug=cuenta-de-ahorros-personal-en-pesos",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-21",
+        "controlIdentity": "428533996fd7|Continuar|role|button|Continuar",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-21"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Continuar",
+          "css:#btn-identity-confirm-and-continue",
+          "id:btn-identity-confirm-and-continue"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#btn-identity-confirm-and-continue",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "btn-identity-confirm-and-continue"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"circle\",1],[\"path\",1],[\"span\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "_r_2e_"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-identity-confirm-and-continue\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"path\\\",1],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "stateScope": "428533996fd7",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/cuentas?method=getClientInfo&productSlug=cuenta-de-ahorros-personal-en-pesos",
+        "routeAfter": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-23",
+        "controlIdentity": "428533996fd7|Seleccione|css|div:has(input[id=\"react-select-6-input\"])",
+        "semanticField": "Seleccione",
+        "action": "click",
+        "valueKey": "seleccione",
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "technicalTargetRefs": [
+          "css:div:has(input[id=\"react-select-6-input\"])"
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Seleccione",
+          "targetTag": "div",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(input[id=\"react-select-6-input\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Seleccione",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(input[id=\"react-select-6-input\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Seleccione\"",
+        "stateScope": "428533996fd7",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.55,
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos"
+      },
+      {
+        "id": "interaction-24",
+        "controlIdentity": "428533996fd7|829-***-0396|role|option|829-***-0396",
+        "action": "click",
+        "dynamicTargetLabel": true,
+        "sourceEventRefs": [
+          "event-24"
+        ],
+        "technicalTargetRefs": [
+          "role:option|829-***-0396",
+          "css:#react-select-6-option-1",
+          "id:react-select-6-option-1"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#react-select-6-option-1",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "div",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "id": "react-select-6-option-1",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "react-select-6-listbox"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"div\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"react-select-6-option-1\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "stateScope": "428533996fd7",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos"
+      },
+      {
+        "id": "interaction-27",
+        "controlIdentity": "428533996fd7|Enviar|role|button|Enviar",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-27"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Enviar",
+          "css:#btn-send-sms-otp",
+          "id:btn-send-sms-otp"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#btn-send-sms-otp",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "btn-send-sms-otp"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Enviar",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
+        "stateScope": "428533996fd7",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos"
+      },
+      {
+        "id": "interaction-28",
+        "controlIdentity": "428533996fd7|Please enter verification code. Digit 1|role|textbox|Please enter verification code. Digit 1",
+        "semanticField": "Please enter verification code. Digit 1",
+        "action": "fill",
+        "valueKey": "please_enter_verification_code_digit_1",
+        "recordedValue": "1",
+        "rawTypedValue": "1",
+        "sourceEventRefs": [
+          "event-28"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Please enter verification code. Digit 1"
+        ],
+        "editingSessionRef": "edit-3",
+        "description": "Ingresar en \"Please enter verification code. Digit 1\"",
+        "stateScope": "428533996fd7",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos"
+      },
+      {
+        "id": "interaction-29",
+        "controlIdentity": "428533996fd7|OTP digit 2|role|textbox|OTP digit 2",
+        "semanticField": "OTP digit 2",
+        "action": "fill",
+        "valueKey": "otp_digit_2",
+        "recordedValue": "2",
+        "rawTypedValue": "2",
+        "sourceEventRefs": [
+          "event-29"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|OTP digit 2"
+        ],
+        "editingSessionRef": "edit-4",
+        "description": "Ingresar en \"OTP digit 2\"",
+        "stateScope": "428533996fd7",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos"
+      },
+      {
+        "id": "interaction-30",
+        "controlIdentity": "428533996fd7|OTP digit 3|role|textbox|OTP digit 3",
+        "semanticField": "OTP digit 3",
+        "action": "fill",
+        "valueKey": "otp_digit_3",
+        "recordedValue": "3",
+        "rawTypedValue": "3",
+        "sourceEventRefs": [
+          "event-30"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|OTP digit 3"
+        ],
+        "editingSessionRef": "edit-5",
+        "description": "Ingresar en \"OTP digit 3\"",
+        "stateScope": "428533996fd7",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos"
+      },
+      {
+        "id": "interaction-31",
+        "controlIdentity": "428533996fd7|OTP digit 4|role|textbox|OTP digit 4",
+        "semanticField": "OTP digit 4",
+        "action": "fill",
+        "valueKey": "otp_digit_4",
+        "recordedValue": "4",
+        "rawTypedValue": "4",
+        "sourceEventRefs": [
+          "event-31"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|OTP digit 4"
+        ],
+        "editingSessionRef": "edit-6",
+        "description": "Ingresar en \"OTP digit 4\"",
+        "stateScope": "428533996fd7",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos"
+      },
+      {
+        "id": "interaction-32",
+        "controlIdentity": "428533996fd7|OTP digit 5|role|textbox|OTP digit 5",
+        "semanticField": "OTP digit 5",
+        "action": "fill",
+        "valueKey": "otp_digit_5",
+        "recordedValue": "5",
+        "rawTypedValue": "5",
+        "sourceEventRefs": [
+          "event-32"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|OTP digit 5"
+        ],
+        "editingSessionRef": "edit-7",
+        "description": "Ingresar en \"OTP digit 5\"",
+        "stateScope": "428533996fd7",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos"
+      },
+      {
+        "id": "interaction-34",
+        "controlIdentity": "428533996fd7|OTP digit 6|role|textbox|OTP digit 6",
+        "semanticField": "OTP digit 6",
+        "action": "fill",
+        "valueKey": "otp_digit_6",
+        "recordedValue": "6",
+        "rawTypedValue": "6",
+        "sourceEventRefs": [
+          "event-34"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|OTP digit 6"
+        ],
+        "editingSessionRef": "edit-8",
+        "description": "Ingresar en \"OTP digit 6\"",
+        "stateScope": "428533996fd7",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos"
+      },
+      {
+        "id": "interaction-35",
+        "controlIdentity": "428533996fd7|Verificar|role|button|Verificar",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-35"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Verificar",
+          "css:#btn-validate-sms-otp",
+          "id:btn-validate-sms-otp"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#btn-validate-sms-otp",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "btn-validate-sms-otp"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "stateScope": "428533996fd7",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "428533996fd7",
+        "screenAfterRef": "428533996fd7",
+        "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos"
+      }
+    ],
+    "entityActionBlocks": [],
+    "readiness": {
+      "functionalReadiness": true,
+      "dataReadiness": true,
+      "technicalReadiness": true,
+      "oracleReadiness": true,
+      "reviewReadiness": true,
+      "publicationContentReadiness": true,
+      "executionReadiness": true,
+      "publicationReadiness": true,
+      "missingInputs": [],
+      "datasetAuthorityMismatches": [],
+      "dataReadinessReasons": []
+    },
+    "technicalKnowledgeRefs": [],
+    "runtimeInputRequirements": [
+      {
+        "valueKey": "numero_de_identificacion",
+        "semanticField": "Número de identificación",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "402-2467955-1",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 4,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "402-2467955-1",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "please_enter_verification_code_digit_1",
+        "semanticField": "Please enter verification code. Digit 1",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "1",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 11,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "1",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "otp_digit_2",
+        "semanticField": "OTP digit 2",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": "2",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": true,
+        "stepIndex": 12,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "2",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "otp_digit_3",
+        "semanticField": "OTP digit 3",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": "3",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": true,
+        "stepIndex": 13,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "3",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "otp_digit_4",
+        "semanticField": "OTP digit 4",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": "4",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": true,
+        "stepIndex": 14,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "4",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "otp_digit_5",
+        "semanticField": "OTP digit 5",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": "5",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": true,
+        "stepIndex": 15,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "5",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "otp_digit_6",
+        "semanticField": "OTP digit 6",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": "6",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": true,
+        "stepIndex": 16,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "6",
+        "datasetAuthorityMismatch": false
+      }
+    ],
+    "runtimeDataset": {
+      "scenarioId": "REC-0525478A-01",
+      "requirements": [
+        {
+          "valueKey": "numero_de_identificacion",
+          "semanticField": "Número de identificación",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "402-2467955-1",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 4,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "402-2467955-1",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "please_enter_verification_code_digit_1",
+          "semanticField": "Please enter verification code. Digit 1",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "1",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 11,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "1",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "otp_digit_2",
+          "semanticField": "OTP digit 2",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": "2",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": true,
+          "stepIndex": 12,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "2",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "otp_digit_3",
+          "semanticField": "OTP digit 3",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": "3",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": true,
+          "stepIndex": 13,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "3",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "otp_digit_4",
+          "semanticField": "OTP digit 4",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": "4",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": true,
+          "stepIndex": 14,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "4",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "otp_digit_5",
+          "semanticField": "OTP digit 5",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": "5",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": true,
+          "stepIndex": 15,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "5",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "otp_digit_6",
+          "semanticField": "OTP digit 6",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": "6",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": true,
+          "stepIndex": 16,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "6",
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "resolvedValues": {
+        "numero_de_identificacion": "402-2467955-1",
+        "please_enter_verification_code_digit_1": "1",
+        "otp_digit_2": "2",
+        "otp_digit_3": "3",
+        "otp_digit_4": "4",
+        "otp_digit_5": "5",
+        "otp_digit_6": "6"
+      },
+      "missingValues": []
+    },
+    "mutationOpportunities": [
+      {
+        "opportunityId": "REC-0525478A-01:field_omission",
+        "title": "Crear cuenta: comprobar la omisión de un dato",
+        "mutationType": "FIELD_OMISSION",
+        "basePrimaryScenarioId": "REC-0525478A-01",
+        "operations": [
+          {
+            "type": "remove_action",
+            "interactionId": "interaction-12"
+          }
+        ],
+        "evidenceRefs": [
+          "event-1",
+          "event-2",
+          "event-3",
+          "event-4",
+          "event-5",
+          "event-6",
+          "event-7",
+          "event-8",
+          "event-9",
+          "event-10",
+          "event-11",
+          "event-12",
+          "event-13",
+          "event-14",
+          "event-15",
+          "event-16",
+          "event-17",
+          "event-18",
+          "event-19",
+          "event-20",
+          "event-21",
+          "event-22",
+          "event-23",
+          "event-24",
+          "event-25",
+          "event-26",
+          "event-27",
+          "event-28",
+          "event-29",
+          "event-30",
+          "event-31",
+          "event-32",
+          "event-33",
+          "event-34",
+          "event-35",
+          "event-36"
+        ],
+        "rationale": "Existen varios inputs observados; se propone una omisión agrupada sin inventar el resultado.",
+        "oracleAuthority": "MISSING",
+        "confidence": 0.5,
+        "needsReview": true
+      }
+    ],
+    "testRailCaseId": 54881,
+    "testRailDestination": {
+      "projectId": "56",
+      "suiteId": "1731",
+      "sectionId": "4903"
+    }
+  }
+]

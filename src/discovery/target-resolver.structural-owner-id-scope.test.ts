@@ -17,7 +17,7 @@ import type { RecordedTechnicalTarget } from "../recording/session-trace.types";
 class FakeLocator {
   constructor(
     private countValue: number,
-    private readonly opts: { attachesAfterMs?: number } = {},
+    private readonly opts: { attachesAfterMs?: number; visible?: boolean; enabled?: boolean } = {},
   ) {}
   locator(): FakeLocator {
     return new FakeLocator(0);
@@ -28,10 +28,16 @@ class FakeLocator {
   async count(): Promise<number> {
     return this.countValue;
   }
+  async isVisible(): Promise<boolean> {
+    return this.opts.visible ?? true;
+  }
+  async isEnabled(): Promise<boolean> {
+    return this.opts.enabled ?? true;
+  }
   async waitFor(options: { state?: string; timeout?: number }): Promise<void> {
     if (this.countValue >= 1) return;
     const delay = this.opts.attachesAfterMs;
-    if (delay === undefined || delay > (options.timeout ?? 0)) {
+    if (delay === undefined || delay > (options.timeout ?? 30_000)) {
       throw new Error("timeout");
     }
     this.countValue = 1;
@@ -59,6 +65,31 @@ function idScopedTarget(): RecordedTechnicalTarget {
       scopeIdentity: { strategy: "id", value: "root" },
       targetFingerprint: "fp",
       captureScopeUnique: true,
+      captureTargetMatchCount: 1,
+    },
+  };
+}
+
+function certifiedTargetWithIncompleteScope(): RecordedTechnicalTarget & { certificationTier: number } {
+  return {
+    targetType: "structural",
+    locatorCandidates: [{
+      strategy: "css",
+      value: '[aria-labelledby="accept-terms"][id="recorded-control"][role="checkbox"]',
+      confidence: 1,
+    }],
+    interactionEvidence: [],
+    confidence: 0.85,
+    validatedByInteraction: true,
+    certificationTier: 1,
+    structuralContext: {
+      owner: { tag: "span", role: "checkbox" },
+      deterministicStructuralIdentity: true,
+      structuralIdentityMatchCount: 1,
+      stableDirectAttributes: { "aria-labelledby": "accept-terms", id: "recorded-control", role: "checkbox" },
+      scopeIdentity: { strategy: "id", value: "form" },
+      targetFingerprint: "fp",
+      captureScopeUnique: false,
       captureTargetMatchCount: 1,
     },
   };
@@ -98,4 +129,38 @@ test("resolveRecordedStructuralOwner: an id-strategy scope that is genuinely abs
   });
   assert.equal(reason, "scoped_scope_not_unique");
   assert.equal(matchCount, 0);
+});
+
+test("resolveRecordedStructuralOwner: incomplete capture scope admits only the same certified direct target when it remains unique, visible, and enabled", async () => {
+  const selector = '[aria-labelledby="accept-terms"][id="recorded-control"][role="checkbox"]';
+  const page = new FakePage(new Map([[selector, new FakeLocator(1)]]));
+  let reason: string | undefined;
+  const result = await resolveRecordedStructuralOwner(page as any, certifiedTargetWithIncompleteScope(), (failure) => {
+    reason = failure;
+  });
+
+  assert.ok(result);
+  assert.equal(result.strategy, "recorded:css");
+  assert.equal(result.currentMatchCount, 1);
+  assert.equal(reason, undefined);
+});
+
+test("resolveRecordedStructuralOwner: incomplete capture scope still rejects ambiguous direct targets", async () => {
+  const selector = '[aria-labelledby="accept-terms"][id="recorded-control"][role="checkbox"]';
+  const page = new FakePage(new Map([[selector, new FakeLocator(2)]]));
+  let reason: string | undefined;
+  const result = await resolveRecordedStructuralOwner(page as any, certifiedTargetWithIncompleteScope(), (failure) => {
+    reason = failure;
+  });
+
+  assert.equal(result, undefined);
+  assert.equal(reason, "scope_evidence_incomplete_at_capture");
+});
+
+test("resolveRecordedStructuralOwner: incomplete capture scope rejects a hidden certified direct target", async () => {
+  const selector = '[aria-labelledby="accept-terms"][id="recorded-control"][role="checkbox"]';
+  const page = new FakePage(new Map([[selector, new FakeLocator(1, { visible: false })]]));
+  const result = await resolveRecordedStructuralOwner(page as any, certifiedTargetWithIncompleteScope());
+
+  assert.equal(result, undefined);
 });

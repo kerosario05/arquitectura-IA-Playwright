@@ -1,0 +1,9 @@
+{
+  "id": "aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-inicio-de-sesion-y-doble-verificacion",
+  "externalId": "AA-97:jira:1",
+  "title": "Transferencia exitosa entre cuentas propias con inicio de sesión y doble verificación",
+  "source": "discovery",
+  "appSlug": "fenix",
+  "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+  "createdAt": "2026-10-14T18:46:46.775Z"
+}

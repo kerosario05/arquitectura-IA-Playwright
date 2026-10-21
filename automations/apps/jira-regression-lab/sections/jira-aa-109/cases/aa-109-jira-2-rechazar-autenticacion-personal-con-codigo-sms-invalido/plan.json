@@ -1,0 +1,249 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-17T14:09:30.240Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "AA-109:jira:2",
+    "title": "Rechazar autenticación personal con código SMS inválido"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Presionar \"Personal\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Personal",
+        "exact": true
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [cedula]",
+      "valueKey": "cedula",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-identity\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "fill",
+      "description": "fill [usuario]",
+      "valueKey": "usuario",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-user\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "fill",
+      "description": "fill [contrasena]",
+      "valueKey": "contrasena",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-password\"]"
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"Iniciar sesión\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Iniciar sesión",
+        "exact": true
+      }
+    },
+    {
+      "index": 8,
+      "action": "click",
+      "description": "Solicitar el código por SMS.",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Solicitar código por SMS",
+        "exact": true
+      }
+    },
+    {
+      "index": 9,
+      "action": "fill",
+      "description": "fill [codigo_sms_invalido]",
+      "valueKey": "codigo_sms_invalido",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-otp\"]"
+      }
+    },
+    {
+      "index": 10,
+      "action": "click",
+      "description": "Presionar \"Continuar\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Continuar",
+        "exact": true
+      }
+    },
+    {
+      "index": 11,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"error de código\"",
+      "target": {
+        "strategy": "text",
+        "value": "error de código"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "cedula",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "usuario",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "codigo_sms_invalido",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Rechazar autenticación personal con código SMS inválido",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Personal"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "cedula",
+        "technicalTargetRefs": [
+          "css:[id=\"login-identity\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "fill",
+        "valueKey": "usuario",
+        "technicalTargetRefs": [
+          "css:[id=\"login-user\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "fill",
+        "valueKey": "contrasena",
+        "technicalTargetRefs": [
+          "css:[id=\"login-password\"]"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Solicitar código por SMS"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "fill",
+        "valueKey": "codigo_sms_invalido",
+        "technicalTargetRefs": [
+          "css:[id=\"login-otp\"]"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ]
+      },
+      {
+        "index": 11,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"error de código\"",
+        "technicalTargetRefs": [
+          "text:error de código"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-11",
+        "requirement": "Validar que se muestre \"error de código\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 11,
+        "target": "El código [dato] acceso no es válido.",
+        "evidence": [
+          "live-step-11"
+        ],
+        "details": {
+          "observedText": "El código [dato] acceso no es válido."
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "Se muestra \"error de código\" y no se autentica el cliente."
+  }
+}

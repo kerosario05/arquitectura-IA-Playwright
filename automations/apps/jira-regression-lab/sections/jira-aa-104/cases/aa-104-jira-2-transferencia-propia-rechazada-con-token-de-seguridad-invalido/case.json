@@ -1,0 +1,9 @@
+{
+  "id": "aa-104-jira-2-transferencia-propia-rechazada-con-token-de-seguridad-invalido",
+  "externalId": "AA-104:jira:2",
+  "title": "Transferencia propia rechazada con token de seguridad inválido",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-18T12:37:06.347Z"
+}

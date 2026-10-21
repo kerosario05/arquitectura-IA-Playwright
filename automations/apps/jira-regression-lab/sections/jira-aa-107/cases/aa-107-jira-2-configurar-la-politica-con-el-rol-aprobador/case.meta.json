@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-107",
+  "sourceScenarioId": "AA-107:jira:2",
+  "title": "Configurar la política con el rol Aprobador",
+  "generatedAt": "2026-10-19T01:29:30.537Z",
+  "executionEngine": "jira_semantic"
+}

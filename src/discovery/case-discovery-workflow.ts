@@ -394,8 +394,12 @@ function extractAuthoredFieldTarget(text: string | undefined): string | undefine
   return match?.[1]?.trim() || undefined;
 }
 
+function positiveRecordedVisibility(text: string | undefined): boolean {
+  return /^(?:se\s+muestra(?:n)?|el\s+sistema\s+muestra(?:n)?|the\s+system\s+(?:shows|displays))\s+["“]/i.test((text ?? "").trim());
+}
+
 function isAssertionAction(text: string | undefined): boolean {
-  return /^(validar|verificar|assert|comprobar|confirmar|mostrar|visualizar|se\s+muestr)/i.test((text ?? "").trim());
+  return positiveRecordedVisibility(text) || /^(validar|verificar|assert|comprobar|confirmar|mostrar|visualizar|se\s+muestr)/i.test((text ?? "").trim());
 }
 
 type TransitionClickLike = {
@@ -543,7 +547,27 @@ function buildExpectedObservableOracles(
     let polarity: AssertionPolarity | undefined;
     const expectedVisibleText = extractQuotedAssertionTarget(line);
 
-    if (authSignal && (authGateEvidence?.authGateDiagnostics?.detected || authMetadata?.authGateDetectedDuringDiscovery === true)) {
+    const passedVisibilityStep = positiveRecordedVisibility(line) && expectedVisibleText
+      ? caseResult.steps.find((step) => {
+        if (!isAssertionLikeStep(step) || (step.status !== "found" && step.assertionStatus !== "passed")) return false;
+        const sourceStep = scenarioSteps?.find((entry) => entry.index === step.index);
+        if (!sourceStep || sourceStep.polarity === "negative"
+          || resolveObservableOraclePolarity(sourceStep.requirementRefs, canonicalRequirements) === "negative"
+          || !positiveRecordedVisibility(sourceStep.action)) return false;
+        const sourceLiteral = extractQuotedAssertionTarget(sourceStep.action);
+        const observedLiteral = extractQuotedAssertionTarget(step.targetText);
+        return Boolean(sourceLiteral && observedLiteral
+          && normalizeOracleText(sourceLiteral) === normalizeOracleText(expectedVisibleText)
+          && normalizeOracleText(observedLiteral) === normalizeOracleText(expectedVisibleText));
+      }) : undefined;
+
+    if (passedVisibilityStep) {
+      type = "literal_visible_text";
+      backed = true;
+      target = expectedVisibleText;
+      stepIndex = passedVisibilityStep.index;
+      evidence.push("exact_literal_in_passed_recorded_visibility_assertion:true");
+    } else if (authSignal && (authGateEvidence?.authGateDiagnostics?.detected || authMetadata?.authGateDetectedDuringDiscovery === true)) {
       type = "auth_gate";
       backed = true;
       const authAssertion = authAssertionCandidates[0];
@@ -892,7 +916,18 @@ export function buildPromotionSourceScenario(
     const candidates = (recordingExecutionContract?.actions ?? []).map((action, actionIndex) => ({ action, actionIndex }))
       .filter(({ action, actionIndex }) => !claimedRecordingActions.has(actionIndex))
       .filter(({ action }) => {
+        // Recorded identity distinguishes semantic/field-only matches. Exact authored wording
+        // for repeated actions is paired by occurrence order below.
         const recordedHumanStep = normalizeOracleText(action.humanStep ?? "");
+        const exactHumanStepMatch = Boolean(recordedHumanStep && recordedHumanStep === normalizedAction);
+        // Scenario projections can carry an identity copied from a later repeated label.
+        // For an exact authored-step match, preserve occurrence order among the still-unclaimed
+        // recording actions; using that stale identity here swaps two identical actions (for
+        // example, consecutive "Continuar" buttons) and makes the promoted spec target the
+        // wrong screen. Identity still disambiguates semantic/field-only matches below.
+        if (scenarioStep.controlIdentity && action.controlIdentity
+          && scenarioStep.controlIdentity !== action.controlIdentity
+          && !exactHumanStepMatch) return false;
         const recordedSemanticField = normalizeOracleText(action.semanticField ?? "");
         const scenarioValueKey = (scenarioStep as typeof scenarioStep & { valueKey?: string }).valueKey?.trim();
         const recordedValueKey = (action as typeof action & { valueKey?: string }).valueKey?.trim();
@@ -914,7 +949,10 @@ export function buildPromotionSourceScenario(
       const actionType = action.actionType;
       // A recorded check/uncheck is a click on a toggle control: it was never linked to its scenario
       // step, so the step lost its recorded structural identity and compiled to its display text.
-      if (actionType === "click" || actionType === "check" || actionType === "uncheck") return isClickAction(scenarioStep.action);
+      if (actionType === "check" || actionType === "uncheck") {
+        return /^(marcar|desmarcar|check|uncheck)\b/i.test(scenarioStep.action.trim()) || isClickAction(scenarioStep.action);
+      }
+      if (actionType === "click") return isClickAction(scenarioStep.action);
       if (actionType === "fill") return /^(fill|completar|ingresar|escribir|seleccionar\s+todo)/i.test(scenarioStep.action.trim());
       if (actionType === "press") return /^(press|presionar\s+tecla|tecla)/i.test(scenarioStep.action.trim());
       if (actionType === "select") return /^(select|seleccionar)/i.test(scenarioStep.action.trim());
@@ -951,9 +989,10 @@ export function buildPromotionSourceScenario(
   }
   const recordingLineageForStep = (step: TestScenario["steps"][number]) => {
     const recordingAction = recordingActionByScenarioStepIndex.get(step.index);
-    const evidence = (step as typeof step & {
+    const stepEvidence = (step as typeof step & {
       playwrightRecorderEvidence?: NonNullable<NonNullable<typeof recordingExecutionContract>["actions"][number]["playwrightRecorderEvidence"]>;
-    }).playwrightRecorderEvidence ?? recordingAction?.playwrightRecorderEvidence;
+    }).playwrightRecorderEvidence;
+    const evidence = recordingAction?.playwrightRecorderEvidence ?? stepEvidence;
     const sourceTarget = normalizeOracleText(extractQuotedAssertionTarget(step.action) ?? "");
     const evidenceNamesSourceTarget = Boolean(
       evidence?.runtimeResolutionRequired === true
@@ -964,11 +1003,17 @@ export function buildPromotionSourceScenario(
     const scopeRef = evidence?.scopeIdentity
       ? `${evidence.scopeIdentity.strategy}:${evidence.scopeIdentity.value}`
       : undefined;
-    const sourceRefs = (step as typeof step & { technicalTargetRefs?: string[] }).technicalTargetRefs
-      ?? recordingAction?.technicalTargetRefs;
+    // The matched recording action is the step's occurrence-specific authority. A previously
+    // projected step can carry refs copied from another same-label control (for example two
+    // sequential "Continuar" buttons); preferring those refs would overwrite the correct
+    // one-to-one recording pairing below and make the promoted runtime click the wrong control.
+    const sourceRefs = recordingAction?.technicalTargetRefs
+      ?? (step as typeof step & { technicalTargetRefs?: string[] }).technicalTargetRefs;
     const filteredRefs = sourceRefs?.filter((ref) => !scopeRef || ref !== scopeRef);
-    const sourceRef = (step as typeof step & { technicalTargetRef?: string }).technicalTargetRef
-      ?? recordingAction?.technicalTargetRef;
+    const sourceRef = recordingAction?.technicalTargetRef
+      ?? (step as typeof step & { technicalTargetRef?: string }).technicalTargetRef;
+    const technicalTargetCandidates = recordingAction?.technicalTargetCandidates
+      ?? (step as typeof step & { technicalTargetCandidates?: Array<Record<string, unknown>> }).technicalTargetCandidates;
     const scopeWasMistakenForTarget = evidenceNamesSourceTarget
       && Boolean(scopeRef)
       && sourceRef === scopeRef
@@ -978,6 +1023,7 @@ export function buildPromotionSourceScenario(
       playwrightRecorderEvidence: evidence,
       technicalTargetRef: scopeWasMistakenForTarget ? undefined : (sourceRef === scopeRef ? filteredRefs?.[0] : sourceRef),
       technicalTargetRefs: scopeWasMistakenForTarget ? undefined : (sourceRef === scopeRef ? filteredRefs : sourceRefs),
+      technicalTargetCandidates,
     };
   };
   const stepExpected = scenario.steps
@@ -1145,8 +1191,7 @@ export function buildPromotionSourceScenario(
     // (case-discovery.ts's fill success path) is the same-shaped fallback -- mirrors the
     // existing discoveryStepByIndex.get(step.index)?.assertionImportance merge pattern just
     // below, never a new field/schema.
-    technicalTargetCandidates: (step as typeof step & { technicalTargetCandidates?: Array<Record<string, unknown>> }).technicalTargetCandidates
-      ?? recordingActionByScenarioStepIndex.get(step.index)?.technicalTargetCandidates
+    technicalTargetCandidates: recordingLineageForStep(step).technicalTargetCandidates
       ?? (discoveryStepByIndex.get(step.index) as { technicalTargetCandidates?: Array<Record<string, unknown>> } | undefined)?.technicalTargetCandidates,
     // Same fallback shape as technicalTargetCandidates above, for the plain field-relation hint
     // (associatedField) Discovery's own live click resolution already used -- never a
@@ -1257,8 +1302,7 @@ export function buildPromotionSourceScenario(
       // Same fallback merge as scenarioSteps above -- a field-scoped certified target Discovery's
       // own live fill execution already physically reconfirmed, when no Recording-sourced
       // authority already exists for this step.
-      technicalTargetCandidates: (step as typeof step & { technicalTargetCandidates?: Array<Record<string, unknown>> }).technicalTargetCandidates
-        ?? recordingActionByScenarioStepIndex.get(step.index)?.technicalTargetCandidates
+      technicalTargetCandidates: recordingLineageForStep(step).technicalTargetCandidates
         ?? (discoveryStepByIndex.get(step.index) as { technicalTargetCandidates?: Array<Record<string, unknown>> } | undefined)?.technicalTargetCandidates,
       associatedField: step.associatedField
         ?? recordingActionByScenarioStepIndex.get(step.index)?.associatedField

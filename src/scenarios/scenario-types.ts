@@ -380,6 +380,11 @@ export type ApprovedDiscoveryCandidateExecutionRequest = {
 };
 
 export type McpScenario = {
+  conditionRequirements?: import("../jira/jira-scenario-review").JiraConditionRequirement[];
+  reviewConfiguration?: import("../jira/jira-scenario-review").JiraReviewConfiguration;
+  unresolvedUiRequirements?: Array<{stepIndex:number;requirement:string}>;
+  acceptanceCriteriaRefs?: string[];
+  inputRequirements?: import("../jira/jira-input-requirements").JiraInputRequirement[];
   sourceIssueKey: string;
   title: string;
   steps: McpScenarioStep[];
@@ -1007,4 +1012,6 @@ export type AppKnowledge = {
   createdAt: string;
   updatedAt: string;
   items: AppKnowledgeItem[];
+  /** Jira-semantic routes are isolated from shared app-knowledge items. */
+  jiraRoutes?: Record<string, unknown>[];
 };

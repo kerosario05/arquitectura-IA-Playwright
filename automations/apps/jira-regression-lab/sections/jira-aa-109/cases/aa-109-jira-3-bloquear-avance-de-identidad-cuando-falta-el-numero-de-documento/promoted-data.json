@@ -1,0 +1,116 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-10-17T15:30:44.259Z",
+  "entries": [
+    {
+      "key": "cedula",
+      "source": "unknown",
+      "fieldName": "[id=\"login-identity\"]",
+      "stepIndex": 4,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "usuario",
+      "source": "app_test_data",
+      "fieldName": "[id=\"login-user\"]",
+      "stepIndex": 5,
+      "valueType": "string",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": "********sa"
+    },
+    {
+      "key": "contrasena",
+      "source": "app_test_data",
+      "fieldName": "[id=\"login-password\"]",
+      "stepIndex": 6,
+      "valueType": "string",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": "********26"
+    },
+    {
+      "key": "codigo_sms",
+      "source": "unknown",
+      "fieldName": "[id=\"login-otp\"]",
+      "stepIndex": 9,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "tipo_documento",
+      "source": "unknown",
+      "fieldName": "[id=\"loan-document-type\"]",
+      "stepIndex": 12,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "nombres",
+      "source": "unknown",
+      "fieldName": "[id=\"loan-first-name\"]",
+      "stepIndex": 13,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "apellidos",
+      "source": "unknown",
+      "fieldName": "[id=\"loan-last-name\"]",
+      "stepIndex": 14,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "fecha_nacimiento",
+      "source": "unknown",
+      "fieldName": "[id=\"loan-birth-date\"]",
+      "stepIndex": 15,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "estado_civil",
+      "source": "unknown",
+      "fieldName": "[id=\"loan-marital-status\"]",
+      "stepIndex": 16,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "dependientes",
+      "source": "unknown",
+      "fieldName": "[id=\"loan-dependents\"]",
+      "stepIndex": 17,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

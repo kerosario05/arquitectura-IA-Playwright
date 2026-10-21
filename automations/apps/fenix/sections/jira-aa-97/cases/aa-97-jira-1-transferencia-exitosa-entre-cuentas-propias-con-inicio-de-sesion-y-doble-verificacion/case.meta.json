@@ -1,0 +1,8 @@
+{
+  "appSlug": "fenix",
+  "sectionSlug": "jira-aa-97",
+  "sourceScenarioId": "AA-97:jira:1",
+  "title": "Transferencia exitosa entre cuentas propias con inicio de sesión y doble verificación",
+  "generatedAt": "2026-10-14T18:46:46.771Z",
+  "executionEngine": "jira_semantic"
+}

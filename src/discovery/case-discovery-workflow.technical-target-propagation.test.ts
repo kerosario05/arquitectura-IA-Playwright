@@ -163,6 +163,83 @@ test("recording action lineage is matched by semantic step identity when scenari
   assert.ok(contractStep?.certifiedTechnicalTarget, "recording candidate remains available to the shared target materializer");
 });
 
+test("repeated recording labels keep each occurrence's own technical target over stale projected refs", () => {
+  const makeButtonCandidate = (id: string) => [{
+    targetType: "structural",
+    locatorCandidates: [{ strategy: "css", value: `#${id}`, confidence: 0.9 }],
+    structuralContext: {
+      owner: { tag: "button" },
+      stableDirectAttributes: { id },
+      stableDescendants: [],
+      semanticShape: ["span"],
+      deterministicStructuralIdentity: true,
+      structuralIdentityMatchCount: 1,
+      captureTargetMatchCount: 1,
+    },
+    confidence: 0.9,
+    validatedByInteraction: true,
+  }];
+  const scenario = buildRecordingScenario();
+  scenario.steps = [
+    {
+      index: 6,
+      action: 'Presionar "Continuar"',
+      dataHints: [],
+      technicalTargetRefs: ["role:button|Continuar", "css:#continue-second", "id:continue-second"],
+      technicalTargetCandidates: makeButtonCandidate("continue-second"),
+    },
+    {
+      index: 7,
+      action: 'Presionar "Continuar"',
+      dataHints: [],
+      technicalTargetRefs: ["role:button|Continuar", "css:#continue-second", "id:continue-second"],
+      technicalTargetCandidates: makeButtonCandidate("continue-second"),
+    },
+  ];
+  scenario.recordingExecutionContract = {
+    actions: [
+      {
+        actionType: "click",
+        humanStep: 'Presionar "Continuar"',
+        stepIndex: 5,
+        technicalTargetRef: "role:button|Continuar",
+        technicalTargetRefs: ["role:button|Continuar", "css:#continue-first", "id:continue-first"],
+        technicalTargetCandidates: makeButtonCandidate("continue-first"),
+      },
+      {
+        actionType: "click",
+        humanStep: 'Presionar "Continuar"',
+        stepIndex: 6,
+        technicalTargetRef: "role:button|Continuar",
+        technicalTargetRefs: ["role:button|Continuar", "css:#continue-second", "id:continue-second"],
+        technicalTargetCandidates: makeButtonCandidate("continue-second"),
+      },
+    ],
+    runtimeInputRequirements: [],
+  };
+
+  const sourceScenario = buildPromotionSourceScenario(scenario, buildCaseResult());
+  const firstStep = sourceScenario.steps?.find((step) => step.index === 6)!;
+  const secondStep = sourceScenario.steps?.find((step) => step.index === 7)!;
+  assert.equal((firstStep.technicalTargetCandidates?.[0]?.structuralContext as any)?.stableDirectAttributes.id, "continue-first");
+  assert.equal((secondStep.technicalTargetCandidates?.[0]?.structuralContext as any)?.stableDirectAttributes.id, "continue-second");
+
+  const contract = buildSpecExecutionContract({
+    ...buildPlan({ strategy: "text", value: "Continuar" }),
+    steps: [6, 7].map((index) => ({
+      index,
+      action: "click",
+      target: { strategy: "text", value: "Continuar" },
+      description: 'Presionar "Continuar"',
+    })),
+  } as any, sourceScenario);
+  assert.deepEqual(
+    contract.steps.map((step) => step.certifiedTechnicalTarget?.structuralContext?.stableDirectAttributes?.id),
+    ["continue-first", "continue-second"],
+    "the persisted execution contract must retain each repeated label's own recorded target",
+  );
+});
+
 test("terminal feedback promotion does not require a trailing narrative success message", () => {
   const scenario = buildRecordingScenario();
   scenario.steps = [

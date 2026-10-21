@@ -1,0 +1,9 @@
+{
+  "id": "aa-109-jira-1-enviar-solicitud-personal-de-prestamo-con-verificacion-de-autorizacion-valida",
+  "externalId": "AA-109:jira:1",
+  "title": "Enviar solicitud personal de préstamo con verificación de autorización válida",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-17T15:20:13.264Z"
+}

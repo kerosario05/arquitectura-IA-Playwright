@@ -1,0 +1,313 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-16T18:30:49.908Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "AA-103:jira:3",
+    "title": "Rechazo de verificación MFA con código SMS inválido"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Presionar \"Empresarial\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Empresarial",
+        "exact": true
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [rnc]",
+      "valueKey": "rnc",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-rnc\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "fill",
+      "description": "fill [usuario]",
+      "valueKey": "usuario",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-user\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "fill",
+      "description": "fill [contrasena]",
+      "valueKey": "contrasena",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-password\"]"
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"Iniciar sesión\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Iniciar sesión",
+        "exact": true
+      }
+    },
+    {
+      "index": 8,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Verificación de acceso\"",
+      "target": {
+        "strategy": "text",
+        "value": "Verificación de acceso"
+      }
+    },
+    {
+      "index": 9,
+      "action": "click",
+      "description": "Solicitar el código por SMS.",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Solicitar código por SMS",
+        "exact": true
+      }
+    },
+    {
+      "index": 10,
+      "action": "fill",
+      "description": "fill [codigo_acceso_invalido]",
+      "valueKey": "codigo_acceso_invalido",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-otp\"]"
+      }
+    },
+    {
+      "index": 11,
+      "action": "click",
+      "description": "Presionar \"Continuar\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Continuar",
+        "exact": true
+      }
+    },
+    {
+      "index": 12,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"El código de acceso no es válido.\"",
+      "target": {
+        "strategy": "text",
+        "value": "El código de acceso no es válido."
+      }
+    },
+    {
+      "index": 13,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Verificación de acceso\"",
+      "target": {
+        "strategy": "text",
+        "value": "Verificación de acceso"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "rnc",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "usuario",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "codigo_acceso_invalido",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Rechazo de verificación MFA con código SMS inválido",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Empresarial"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "rnc",
+        "technicalTargetRefs": [
+          "css:[id=\"login-rnc\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "fill",
+        "valueKey": "usuario",
+        "technicalTargetRefs": [
+          "css:[id=\"login-user\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "fill",
+        "valueKey": "contrasena",
+        "technicalTargetRefs": [
+          "css:[id=\"login-password\"]"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Verificación de acceso\"",
+        "technicalTargetRefs": [
+          "text:Verificación de acceso"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Solicitar código por SMS"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "fill",
+        "valueKey": "codigo_acceso_invalido",
+        "technicalTargetRefs": [
+          "css:[id=\"login-otp\"]"
+        ]
+      },
+      {
+        "index": 11,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ]
+      },
+      {
+        "index": 12,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"El código de acceso no es válido.\"",
+        "technicalTargetRefs": [
+          "text:El código de acceso no es válido."
+        ]
+      },
+      {
+        "index": 13,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Verificación de acceso\"",
+        "technicalTargetRefs": [
+          "text:Verificación de acceso"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-8",
+        "requirement": "Validar que se muestre \"Verificación de acceso\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 8,
+        "target": "Verificación de acceso",
+        "evidence": [
+          "live-step-8"
+        ],
+        "details": {
+          "observedText": "Verificación de acceso"
+        }
+      },
+      {
+        "id": "jira-oracle-12",
+        "requirement": "Validar que se muestre \"El código de acceso no es válido.\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 12,
+        "target": "N\nNorthstar\nVerificación de acceso\n\nConfirma tu identidad para continuar al portal empresarial.\n\nEl código de acceso no es válido.\nCódigo de prueba enviado por SMS al teléfono registrado.\nSolicitar código por SMS\nCódigo de acceso\nContinuar\nEl código de acceso es independiente del token de transferencia.",
+        "evidence": [
+          "live-step-12"
+        ],
+        "details": {
+          "observedText": "N\nNorthstar\nVerificación de acceso\n\nConfirma tu identidad para continuar al portal empresarial.\n\nEl código de acceso no es válido.\nCódigo de prueba enviado por SMS al teléfono registrado.\nSolicitar código por SMS\nCódigo de acceso\nContinuar\nEl código de acceso es independiente del token de transferencia."
+        }
+      },
+      {
+        "id": "jira-oracle-13",
+        "requirement": "Validar que se muestre \"Verificación de acceso\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 13,
+        "target": "Verificación de acceso",
+        "evidence": [
+          "live-step-13"
+        ],
+        "details": {
+          "observedText": "Verificación de acceso"
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "Se muestra \"El código de acceso no es válido.\" y permanece \"Verificación de acceso\"."
+  }
+}

@@ -76,7 +76,7 @@
     {
       "index": 5,
       "action": "fill",
-      "description": "Ingresar \"qwerty123123\" en \"Contraseña:\"",
+      "description": "Ingresar \"••••••\" en \"Contraseña:\"",
       "target": {
         "strategy": "text",
         "value": "Contraseña",
@@ -185,7 +185,7 @@
   "notes": [
     "Discovery completed successfully. All targets and concrete assertions passed."
   ],
-  "createdAt": "2026-10-05T22:09:44.323Z",
+  "createdAt": "2026-10-09T23:14:20.916Z",
   "metadata": {
     "authFlowRequired": false,
     "authFlowAlias": "defaultClient",
@@ -295,8 +295,8 @@
       },
       {
         "index": 5,
-        "action": "Ingresar \"qwerty123123\" en \"Contraseña:\"",
-        "description": "Ingresar \"qwerty123123\" en \"Contraseña:\"",
+        "action": "Ingresar \"••••••\" en \"Contraseña:\"",
+        "description": "Ingresar \"••••••\" en \"Contraseña:\"",
         "valueKey": "contrasena",
         "technicalTargetRef": "role:textbox|Contraseña:",
         "technicalTargetRefs": [
@@ -342,8 +342,8 @@
       },
       {
         "index": 8,
-        "action": "Ingresar \"1\" en \"SMS\"",
-        "description": "Ingresar \"1\" en \"SMS\"",
+        "action": "Ingresar \"••••••\" en \"SMS\"",
+        "description": "Ingresar \"••••••\" en \"SMS\"",
         "valueKey": "sms",
         "playwrightRecorderEvidence": {
           "kind": "segmented_input",
@@ -362,88 +362,28 @@
       },
       {
         "index": 9,
-        "action": "Ingresar \"2\" en \"SMS\"",
-        "description": "Ingresar \"2\" en \"SMS\"",
-        "playwrightRecorderEvidence": {
-          "kind": "segmented_input",
-          "targetTag": "input",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "IdentifyUserForm"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true,
-          "segmentCount": 6
-        },
-        "associatedField": "SMS"
+        "action": "Ingresar \"••••••\" en \"SMS\"",
+        "description": "Ingresar \"••••••\" en \"SMS\""
       },
       {
         "index": 10,
-        "action": "Ingresar \"3\" en \"SMS\"",
-        "description": "Ingresar \"3\" en \"SMS\"",
-        "playwrightRecorderEvidence": {
-          "kind": "segmented_input",
-          "targetTag": "input",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "IdentifyUserForm"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true,
-          "segmentCount": 6
-        },
-        "associatedField": "SMS"
+        "action": "Ingresar \"••••••\" en \"SMS\"",
+        "description": "Ingresar \"••••••\" en \"SMS\""
       },
       {
         "index": 11,
-        "action": "Ingresar \"4\" en \"SMS\"",
-        "description": "Ingresar \"4\" en \"SMS\"",
-        "playwrightRecorderEvidence": {
-          "kind": "segmented_input",
-          "targetTag": "input",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "IdentifyUserForm"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true,
-          "segmentCount": 6
-        },
-        "associatedField": "SMS"
+        "action": "Ingresar \"••••••\" en \"SMS\"",
+        "description": "Ingresar \"••••••\" en \"SMS\""
       },
       {
         "index": 12,
-        "action": "Ingresar \"5\" en \"SMS\"",
-        "description": "Ingresar \"5\" en \"SMS\"",
-        "playwrightRecorderEvidence": {
-          "kind": "segmented_input",
-          "targetTag": "input",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "IdentifyUserForm"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true,
-          "segmentCount": 6
-        },
-        "associatedField": "SMS"
+        "action": "Ingresar \"••••••\" en \"SMS\"",
+        "description": "Ingresar \"••••••\" en \"SMS\""
       },
       {
         "index": 13,
-        "action": "Ingresar \"6\" en \"SMS\"",
-        "description": "Ingresar \"6\" en \"SMS\"",
-        "playwrightRecorderEvidence": {
-          "kind": "segmented_input",
-          "targetTag": "input",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "IdentifyUserForm"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true,
-          "segmentCount": 6
-        },
-        "associatedField": "SMS"
+        "action": "Ingresar \"••••••\" en \"SMS\"",
+        "description": "Ingresar \"••••••\" en \"SMS\""
       },
       {
         "index": 14,
@@ -921,7 +861,7 @@
       {
         "contractStepIndex": 4,
         "scenarioStepIndex": 5,
-        "originalText": "Ingresar \"qwerty123123\" en \"Contraseña:\"",
+        "originalText": "Ingresar \"••••••\" en \"Contraseña:\"",
         "operation": "fill",
         "target": {
           "strategy": "label",
@@ -1053,7 +993,7 @@
       {
         "contractStepIndex": 7,
         "scenarioStepIndex": 8,
-        "originalText": "Ingresar \"1\" en \"SMS\"",
+        "originalText": "Ingresar \"••••••\" en \"SMS\"",
         "operation": "fill",
         "target": {
           "strategy": "label",
@@ -1100,6 +1040,231 @@
       },
       {
         "contractStepIndex": 8,
+        "scenarioStepIndex": 9,
+        "originalText": "Ingresar \"••••••\" en \"SMS\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "SMS"
+        },
+        "valueKey": "sms",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "SMS",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 9,
+        "scenarioStepIndex": 10,
+        "originalText": "Ingresar \"••••••\" en \"SMS\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "SMS"
+        },
+        "valueKey": "sms",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "SMS",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 10,
+        "scenarioStepIndex": 11,
+        "originalText": "Ingresar \"••••••\" en \"SMS\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "SMS"
+        },
+        "valueKey": "sms",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "SMS",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 11,
+        "scenarioStepIndex": 12,
+        "originalText": "Ingresar \"••••••\" en \"SMS\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "SMS"
+        },
+        "valueKey": "sms",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "SMS",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 12,
+        "scenarioStepIndex": 13,
+        "originalText": "Ingresar \"••••••\" en \"SMS\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "SMS"
+        },
+        "valueKey": "sms",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "SMS",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 13,
         "scenarioStepIndex": 14,
         "originalText": "Presionar \"Continuar\"",
         "operation": "click",
@@ -1151,7 +1316,7 @@
         "evidenceRefs": []
       },
       {
-        "contractStepIndex": 9,
+        "contractStepIndex": 14,
         "scenarioStepIndex": 15,
         "originalText": "Presionar el control grabado",
         "operation": "click",
@@ -1189,7 +1354,7 @@
         "evidenceRefs": []
       },
       {
-        "contractStepIndex": 10,
+        "contractStepIndex": 15,
         "scenarioStepIndex": 16,
         "originalText": "Presionar \"Cerrar Sesión\"",
         "operation": "click",
@@ -1249,7 +1414,7 @@
         "evidenceRefs": []
       },
       {
-        "contractStepIndex": 11,
+        "contractStepIndex": 16,
         "scenarioStepIndex": 17,
         "originalText": "El sistema muestra \"Cerrar sesión\"",
         "operation": "assertVisible",
@@ -1271,7 +1436,7 @@
         ]
       },
       {
-        "contractStepIndex": 12,
+        "contractStepIndex": 17,
         "scenarioStepIndex": 18,
         "originalText": "Presionar \"Aceptar\"",
         "operation": "click",
@@ -1366,8 +1531,8 @@
     ],
     "unresolvedRequiredOracles": [],
     "diagnostics": {
-      "requiredScenarioSteps": 13,
-      "representedScenarioSteps": 13,
+      "requiredScenarioSteps": 18,
+      "representedScenarioSteps": 18,
       "missingScenarioSteps": []
     }
   }

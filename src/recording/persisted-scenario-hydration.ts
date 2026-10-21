@@ -62,7 +62,9 @@ export function hydratePersistedScenarios(
       ? { ...scenario, canonicalInteractions: freshCanonicalInteractions }
       : scenario;
     const repaired = applyRuntimeDatasetValues(
-      hydrateCanonicalInteractionsFromSemanticModel(withFreshCanonical, semanticModel),
+      hydrateCanonicalInteractionsFromSemanticModel(withFreshCanonical, withFreshCanonical !== scenario
+        ? { ...semanticModel, canonicalInteractions: freshCanonicalInteractions! }
+        : semanticModel),
       {},
     );
     const { stateSequenceValid, stateSequenceIssues } = validateInteractionStateSequence(repaired.canonicalInteractions ?? []);

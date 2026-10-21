@@ -463,11 +463,11 @@ test.describe("mobile async scenario generation endpoints", () => {
   });
 
   test("reuses same generation job for concurrent equivalent requests", async () => {
-    let release: (() => void) | null = null;
+    const releases: Array<() => void> = [];
     __setMobileScenarioGenerationRunnerForTesting(async (_input, handlers) => {
       handlers.onIssuesResolved(["AA-94", "AA-93"]);
       handlers.onIssueStart({ issueKey: "AA-94", index: 0, total: 2, startedAt: new Date().toISOString() });
-      await new Promise<void>((resolve) => { release = resolve; });
+      await new Promise<void>((resolve) => { releases.push(resolve); });
       handlers.onIssueCompleted({
         issueKey: "AA-94",
         index: 0,
@@ -478,6 +478,7 @@ test.describe("mobile async scenario generation endpoints", () => {
         durationMs: 5,
         scenarios: [{ scenarioId: "MOBILE-AA-94-001", sourceIssueKey: "AA-94", title: "S1", steps: [], expectedResult: "OK", preconditions: [], requiredData: [] }],
         rejected: [],
+        criterionCoverage: [],
         diagnostics: {
           providerExitCode: 0,
           rawOutputLength: 12,
@@ -503,6 +504,7 @@ test.describe("mobile async scenario generation endpoints", () => {
         durationMs: 5,
         scenarios: [{ scenarioId: "MOBILE-AA-93-001", sourceIssueKey: "AA-93", title: "S2", steps: [], expectedResult: "OK", preconditions: [], requiredData: [] }],
         rejected: [],
+        criterionCoverage: [],
         diagnostics: {
           providerExitCode: 0,
           rawOutputLength: 12,
@@ -524,6 +526,7 @@ test.describe("mobile async scenario generation endpoints", () => {
         ],
         rejected: [],
         issuesFound: 2,
+        criterionCoverage: [],
         diagnosticsByIssue: {
           "AA-94": {
             providerExitCode: 0,
@@ -595,7 +598,7 @@ test.describe("mobile async scenario generation endpoints", () => {
       expect(runningBody.status === "running" || runningBody.status === "pending").toBeTruthy();
       expect(Array.isArray(runningBody.issueProgress)).toBeTruthy();
 
-      release?.();
+      releases[0]?.();
       await __awaitMobileScenarioGenerationForTesting(firstBody.generationJobId);
       const doneRes = await fetch(`http://127.0.0.1:${port}/api/mobile/scenarios/generation/${firstBody.generationJobId}`);
       const doneBody = await doneRes.json() as { status: string; result?: { scenarios?: Array<{ sourceIssueKey: string }> } };

@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-106",
+  "sourceScenarioId": "AA-106:jira:2",
+  "title": "Verificar opciones de cuenta, estado y tipo de movimiento",
+  "generatedAt": "2026-10-18T21:54:37.263Z",
+  "executionEngine": "jira_semantic"
+}

@@ -148,6 +148,31 @@ async function main(): Promise<void> {
     "BetoSeguro12345",
   );
 
+  // A custom role for Test Design only: it must use isolated catalogs rather
+  // than gaining access to the existing Jira/TestRail API surface.
+  const roleRepo = await import("../db/role-repository");
+  const designerRole = await roleRepo.createRole(
+    { slug: "test-designer", name: "Diseñador de pruebas", description: "", isSystem: false },
+    conn,
+  );
+  await roleRepo.replaceRolePermissions(
+    designerRole.id,
+    ["testdesign.view", "testdesign.generate"],
+    conn,
+  );
+  const designerCreated = await call("POST", "/api/users", adminToken, {
+    username: "dora.design",
+    fullName: "Dora Diseño",
+    roles: ["test-designer"],
+    projects: [{ slug: "kiosko", accessLevel: 2 }],
+  });
+  assert.strictEqual(designerCreated.status, 201, JSON.stringify(designerCreated.body));
+  const designerToken = await activate(
+    "dora.design",
+    designerCreated.body.temporaryPassword,
+    "DoraSegura12345",
+  );
+
   // ------------------------------------------------------------------------
   console.log("\nmapeo de permisos por ruta");
 
@@ -164,6 +189,10 @@ async function main(): Promise<void> {
     );
     assert.strictEqual(findRoutePolicy("GET", "/api/runs/abc")?.path, "/api/runs/:jobId");
     assert.strictEqual(findRoutePolicy("GET", "/api/runs")?.path, "/api/runs");
+    assert.deepStrictEqual(findRoutePolicy("GET", "/api/test-design/jira/projects")?.permissions, ["testdesign.view"]);
+    assert.deepStrictEqual(findRoutePolicy("GET", "/api/test-design/testrail/projects")?.permissions, ["testdesign.view"]);
+    assert.deepStrictEqual(findRoutePolicy("GET", "/api/jira/projects")?.permissions, ["dashboard.view"]);
+    assert.deepStrictEqual(findRoutePolicy("GET", "/api/testrail/projects")?.permissions, ["dashboard.view"]);
   });
 
   await test("an admin reaches every module", async () => {
@@ -176,6 +205,8 @@ async function main(): Promise<void> {
       ["POST", "/api/recordings/start"],
       ["GET", "/api/jira/projects"],
       ["GET", "/api/testrail/status"],
+      ["GET", "/api/test-design/jira/projects"],
+      ["GET", "/api/test-design/testrail/projects"],
     ] as const) {
       const res = await call(method, route, adminToken, { appSlug: "kiosko", projectSlug: "kiosko" });
       assert.strictEqual(res.status, 200, `${method} ${route} -> ${JSON.stringify(res.body)}`);
@@ -235,6 +266,39 @@ async function main(): Promise<void> {
       const res = await call("GET", route, viewerToken);
       assert.strictEqual(res.status, 200, `${route} -> ${JSON.stringify(res.body)}`);
     }
+  });
+
+  await test("a test designer can use Test Design and its isolated catalogs", async () => {
+    for (const [method, route] of [
+      ["GET", "/api/test-design/drafts"],
+      ["POST", "/api/test-design/drafts"],
+      ["GET", "/api/test-design/drafts/d-1"],
+      ["PUT", "/api/test-design/drafts/d-1/stories/s-1/scenarios"],
+      ["POST", "/api/test-design/drafts/d-1/generate"],
+      ["GET", "/api/test-design/jira/projects"],
+      ["GET", "/api/test-design/jira/issues/search"],
+      ["GET", "/api/test-design/testrail/projects"],
+      ["GET", "/api/test-design/testrail/priorities"],
+    ] as const) {
+      const res = await call(method, route, designerToken, {});
+      assert.strictEqual(res.status, 200, `${method} ${route} -> ${JSON.stringify(res.body)}`);
+    }
+
+    for (const route of ["/api/jira/projects", "/api/testrail/projects"]) {
+      const res = await call("GET", route, designerToken);
+      assert.strictEqual(res.status, 403, `${route} should retain dashboard.view policy`);
+      assert.deepStrictEqual(res.body.missingPermissions, ["dashboard.view"]);
+    }
+  });
+
+  await test("test designers cannot publish without destination-specific permission", async () => {
+    const testrail = await call("POST", "/api/test-design/drafts/d-1/publish/testrail", designerToken, {});
+    assert.strictEqual(testrail.status, 403);
+    assert.deepStrictEqual(testrail.body.missingPermissions, ["testdesign.publish_testrail"]);
+
+    const jira = await call("POST", "/api/test-design/drafts/d-1/publish/jira", designerToken, {});
+    assert.strictEqual(jira.status, 403);
+    assert.deepStrictEqual(jira.body.missingPermissions, ["testdesign.publish_jira"]);
   });
 
   await test("nobody but an admin reaches the debug routes", async () => {

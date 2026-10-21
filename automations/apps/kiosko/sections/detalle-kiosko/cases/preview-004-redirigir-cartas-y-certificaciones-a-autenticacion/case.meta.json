@@ -1,0 +1,9 @@
+{
+  "appSlug": "kiosko",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "PREVIEW-004",
+  "testRailCaseId": 0,
+  "generatedAt": "2026-10-09T12:58:22.190Z",
+  "title": "Redirigir Cartas y certificaciones a autenticación"
+}

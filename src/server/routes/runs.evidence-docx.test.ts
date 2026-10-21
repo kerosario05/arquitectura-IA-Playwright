@@ -29,7 +29,7 @@ function removeIfExists(targetPath: string): void {
 }
 
 function writeEvidenceDocx(jobId: string, appSlug: string, sectionSlug: string, content: string): string {
-  const docPath = path.join(EVIDENCE_ROOT, appSlug, sectionSlug, "runs", jobId, "evidencia.docx");
+  const docPath = path.join(EVIDENCE_ROOT, appSlug, sectionSlug, "runs", jobId, "evidencia.pdf");
   fs.mkdirSync(path.dirname(docPath), { recursive: true });
   fs.writeFileSync(docPath, content, "utf-8");
   return docPath;
@@ -81,7 +81,7 @@ async function main(): Promise<void> {
     sectionSlug,
     status: "done",
   });
-  const readyDocPath = writeEvidenceDocx(readyJobId, appSlug, sectionSlug, "DOCX READY");
+  const readyDocPath = writeEvidenceDocx(readyJobId, appSlug, sectionSlug, "%PDF-READY");
 
   await test("resolver finds structured path from appSlug + sectionSlug + jobId", () => {
     const resolved = resolveEvidenceDocxForJob(readyJobId);
@@ -102,9 +102,27 @@ async function main(): Promise<void> {
 
       const downloadRes = await fetch(`${baseUrl}/api/runs/${readyJobId}/evidence-docx`);
       assert.strictEqual(downloadRes.status, 200);
+      assert.match(downloadRes.headers.get("content-type") ?? "", /application\/pdf/);
       const text = await downloadRes.text();
-      assert.strictEqual(text, "DOCX READY");
+      assert.strictEqual(text, "%PDF-READY");
     });
+  });
+
+  await test("Word is explicit and never silently replaces an unavailable PDF", async () => {
+    const wordPath = path.join(path.dirname(readyDocPath), "evidencia.docx");
+    fs.writeFileSync(wordPath, "WORD EXPLICIT");
+    fs.renameSync(readyDocPath, `${readyDocPath}.held`);
+    try {
+      assert.strictEqual(resolveEvidenceDocxForJob(readyJobId).documentReady, false);
+      assert.strictEqual(resolveEvidenceDocxForJob(readyJobId, ["docx"]).documentPath, wordPath);
+      await withServer(async baseUrl => {
+        const word = await fetch(`${baseUrl}/api/runs/${readyJobId}/evidence-docx?format=docx`);
+        assert.strictEqual(word.status, 200);
+        assert.strictEqual(await word.text(), "WORD EXPLICIT");
+      });
+    } finally {
+      fs.renameSync(`${readyDocPath}.held`, readyDocPath);
+    }
   });
 
   const runningJob = jobStore.create("scenario-preview", {
@@ -163,6 +181,49 @@ async function main(): Promise<void> {
       assert.strictEqual(body.status, "unavailable");
       assert.strictEqual(body.documentReady, false);
       assert.strictEqual(body.reasonCode, "cases_not_executable");
+    });
+  });
+
+  const failedWithEvidenceApp = `nonexec-evidence-app-${Date.now()}`;
+  const failedWithEvidenceSection = "failed-section";
+  // Keep a real job record for the reason-code branch and download route.
+  const diagnosticJob = jobStore.create("discovery-batch", {
+    appSlug: failedWithEvidenceApp,
+    sectionSlug: failedWithEvidenceSection,
+  });
+  const diagnosticJobId = diagnosticJob.id;
+  const diagnosticPreviewDir = writePreviewJobMetadata(diagnosticJobId, {
+    appSlug: failedWithEvidenceApp,
+    sectionSlug: failedWithEvidenceSection,
+    status: "done",
+  });
+  jobStore.update(diagnosticJobId, {
+    status: "done",
+    summary: {
+      passed: 0,
+      failed: 1,
+      reasonCode: "cases_not_executable",
+      documentAttempted: true,
+      documentGenerated: true,
+      documentPathPresent: true,
+    },
+  });
+  const failedWithEvidencePath = writeEvidenceDocx(
+    diagnosticJobId,
+    failedWithEvidenceApp,
+    failedWithEvidenceSection,
+    "%PDF-FAILED-RUN-EVIDENCE",
+  );
+  await test("failed non-executable job exposes a generated diagnostic PDF", async () => {
+    assert.equal(resolveEvidenceDocxForJob(diagnosticJobId).documentPath, failedWithEvidencePath);
+    await withServer(async baseUrl => {
+      const status = await fetch(`${baseUrl}/api/runs/${diagnosticJobId}/evidence-docx/status`);
+      assert.equal(status.status, 200);
+      assert.equal((await status.json() as any).status, "ready");
+
+      const download = await fetch(`${baseUrl}/api/runs/${diagnosticJobId}/evidence-docx`);
+      assert.equal(download.status, 200);
+      assert.equal(await download.text(), "%PDF-FAILED-RUN-EVIDENCE");
     });
   });
 
@@ -253,6 +314,9 @@ async function main(): Promise<void> {
 
   removeIfExists(previewDir);
   removeIfExists(path.join(EVIDENCE_ROOT, appSlug));
+  removeIfExists(diagnosticPreviewDir);
+  removeIfExists(path.join(ROOT, ".artifacts", "qa-lab-run-history", `${diagnosticJobId}.json`));
+  removeIfExists(path.join(EVIDENCE_ROOT, failedWithEvidenceApp));
 }
 
 void main();

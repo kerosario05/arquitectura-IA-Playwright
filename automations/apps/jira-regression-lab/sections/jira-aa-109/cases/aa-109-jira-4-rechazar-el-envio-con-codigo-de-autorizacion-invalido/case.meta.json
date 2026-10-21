@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-109",
+  "sourceScenarioId": "AA-109:jira:4",
+  "title": "Rechazar el envío con código de autorización inválido",
+  "generatedAt": "2026-10-17T16:43:35.181Z",
+  "executionEngine": "jira_semantic"
+}

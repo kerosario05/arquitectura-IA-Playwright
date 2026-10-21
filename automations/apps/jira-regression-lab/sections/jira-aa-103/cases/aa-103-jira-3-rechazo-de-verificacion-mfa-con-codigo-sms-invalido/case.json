@@ -1,0 +1,9 @@
+{
+  "id": "aa-103-jira-3-rechazo-de-verificacion-mfa-con-codigo-sms-invalido",
+  "externalId": "AA-103:jira:3",
+  "title": "Rechazo de verificación MFA con código SMS inválido",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-16T18:31:08.974Z"
+}

@@ -144,9 +144,9 @@ export type NormalizedParsedTarget<T extends Record<string, unknown> = Record<st
 
 const BOUNDARY_WORDS = [
   "click", "clic",
-  "presionar", "tocar",
+  "presionar", "tocar", "marcar", "desmarcar",
   "seleccionar", "escoger", "elegir",
-  "abrir", "ingresar", "acceder",
+  "abrir", "ingresar", "acceder", "solicitar", "request",
   "esperar",
   "validar", "verificar", "comprobar", "confirmar", "revisar",
   "Opcional:", "Optional:"
@@ -638,7 +638,12 @@ function tryParseSetupRoute(text: string, normalized: string): ParsedStepIntent 
   ];
 
   const targetKeywords =
-    /\b(url|portal|aplicaci[oó]n|sistema|sitio|web|p[aá]gina|home|inicio|iniciar\s+s[eé]sion|application|app|site|page|homepage|website)\b/i;
+    /\b(url|portal|aplicaci[oó]n|sistema|sitio|web|p[aá]gina|home|iniciar\s+s[eé]sion|application|app|site|page|homepage|website)\b/i;
+  // "inicio" also appears in ordinary field labels such as "fecha de inicio
+  // laboral". Treat it as a route only when the step explicitly means the
+  // home/start page, so a fill step cannot become APP_BASE_URL navigation.
+  const explicitHomeTarget =
+    /\b(?:ir|volver|regresar|navegar|acceder|go|return|navigate)\b.{0,24}\b(?:al\s+inicio|p[aá]gina\s+(?:de\s+)?inicio|p[aá]gina\s+principal|home(?:page)?)\b/i.test(text);
 
   const verbPattern = new RegExp(
     `^(?:${navVerbs.join("|")})(?:\\s+(?:a|al|the|el|la|los|las))?\\s+`,
@@ -646,7 +651,7 @@ function tryParseSetupRoute(text: string, normalized: string): ParsedStepIntent 
   );
 
   if (!verbPattern.test(text)) return null;
-  if (!targetKeywords.test(text)) return null;
+  if (!targetKeywords.test(text) && !explicitHomeTarget) return null;
 
   const urlMatch = text.match(/https?:\/\/[^\s,.]+/i);
 
@@ -712,7 +717,7 @@ function tryParseNavigationPath(text: string, normalized: string): ParsedStepInt
   // A slash is common inside recorded control labels (for example, a field label plus its
   // account context). An explicit action verb owns the step: keep `/` inside the target instead
   // of reclassifying the click as a navigation path and silently omitting it from execution.
-  if (/^(?:hacer\s+clic\s+en|clic\s+en|click\s+en|click|presionar|tocar|seleccionar|escoger|elegir)\b/i.test(text)) {
+  if (/^(?:hacer\s+clic\s+en|clic\s+en|click\s+en|click|presionar|tocar|marcar|desmarcar|seleccionar|escoger|elegir)\b/i.test(text)) {
     return null;
   }
 
@@ -855,7 +860,7 @@ function tryParseOptionalAction(text: string, normalized: string): ParsedStepInt
 function tryParseClickAction(text: string, normalized: string): ParsedStepIntent | null {
   const clickVerbs = [
     "clic en", "hacer clic en", "click en", "click on", "click",
-    "presionar", "tocar"
+    "presionar", "tocar", "marcar", "desmarcar", "solicitar", "request", "activar"
   ];
 
   const verbPattern = new RegExp(
@@ -1268,8 +1273,27 @@ function tryParseCompositeAction(text: string, normalized: string): ParsedStepIn
 }
 
 function tryParseFillAction(text: string, normalized: string): ParsedStepIntent | null {
+  const blankField = text.match(
+    /^(?:dejar\s+(?:el\s+)?(?:campo\s+)?|vaciar\s+(?:el\s+)?(?:campo\s+)?|clear\s+(?:the\s+)?(?:field\s+)?)["']?([^"']+?)["']?\s+(?:vac[ií]o|empty)$/i
+  ) ?? text.match(
+    /^(?:dejar\s+(?:el\s+)?(?:campo\s+)?vac[ií]o\s+|vaciar\s+(?:el\s+)?(?:campo\s+)?|clear\s+(?:the\s+)?(?:field\s+)?)["']([^"']+)["']\.?$/i
+  );
+  if (blankField) {
+    const field = cleanActionTarget(blankField[1]).replace(/^de\s+/i, "");
+    return {
+      type: "action_fill",
+      originalText: text,
+      normalizedText: normalized,
+      actionTarget: field,
+      actionVerb: "clear",
+      value: "",
+      valueSource: "literal",
+      priority: 5,
+    };
+  }
+
   const fillVerbs = [
-    "ingresar", "digitar", "escribir", "completar", "llenar",
+    "ingresar", "introducir", "digitar", "escribir", "completar", "llenar",
     "type", "enter", "fill"
   ];
 
@@ -1282,6 +1306,22 @@ function tryParseFillAction(text: string, normalized: string): ParsedStepIntent 
   if (!verbMatch) return null;
 
   const verb = verbMatch[0].trim().toLowerCase();
+
+  // A source-authored SMS-code instruction may name the value but omit a
+  // quoted control label. Keep it semantic so the selected app's live DOM can
+  // resolve the actual field instead of treating the whole sentence as a label.
+  const smsCode = text.match(/^introducir\s+(?:el\s+|un\s+)?c[oó]digo\s+(?:de\s+)?sms(?:\s+(?:v[aá]lido|correcto|del\s+proyecto))*[.]?$/i);
+  if (smsCode) {
+    return {
+      type: "action_fill",
+      originalText: text,
+      normalizedText: normalized,
+      actionTarget: "Código SMS",
+      actionVerb: verb,
+      valueSource: "unknown",
+      priority: 5,
+    };
+  }
 
   const standaloneRuntimeValue = text.slice(verbMatch[0].length).trim().match(
     /^(?:el|la|un|una)?\s*(?:valor)\s+\[([^\]\r\n]+)\]$/i

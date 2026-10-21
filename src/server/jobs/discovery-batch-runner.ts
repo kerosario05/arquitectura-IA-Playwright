@@ -1,9 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
+import { createHash } from "node:crypto";
 import { spawn } from "node:child_process";
 import { RunEvidenceRecorder } from "../../evidence/run-evidence-recorder";
-import { buildEvidenceRunPaths } from "../../evidence/evidence-paths";
-import { loadAutomationIndex } from "../../automations/automation-index";
+import { buildEvidencePaths, buildEvidenceRunPaths } from "../../evidence/evidence-paths";
+import { linkJiraAutomationToTestRailCase, loadAutomationIndex } from "../../automations/automation-index";
 import { validatePromotedArtifactForReuse } from "../../automations/automation-reuse";
 import {
   buildMcpScenarioContractFromTestRailCase,
@@ -16,13 +17,15 @@ import { loadAppConfig } from "../../automations/scenario-normalizer";
 import { config, requireTestRailConfig } from "../../config/env";
 import { TestRailClient } from "../../clients/testrail.client";
 import type { DataContextEntry } from "../../data/data-context";
-import { persistConfirmedRuntimeValues } from "../../db/project-case-runtime-value-service";
+import { getConfirmedRuntimeValues, persistConfirmedRuntimeValues } from "../../db/project-case-runtime-value-service";
+import { getProjectBySlug } from "../../db/project-repository";
 import { normalizeTestRailCase } from "../../testrail/testrail-normalizer";
 import type { PromotedAutomationIndexEntry, PromotedAutomationStatus } from "../../types/automation-promotion.types";
 import type { RawTestRailCase } from "../../types/testrail.types";
 import type { McpRouteProfile } from "../../scenarios/scenario-types";
 import type { PublishedCaseEntry } from "./launch-orchestrator";
 import { jobStore } from "./job-store";
+import { startJiraSemanticRun } from "./jira-semantic-runner";
 import {
   finalizeLaunchManifest,
   syncDiscoveryResultToTestRail,
@@ -72,7 +75,71 @@ type DiscoveryBatchParams = {
   publishedCases?: PublishedCaseEntry[];
   routeProfile?: McpRouteProfile;
   runtimeEntriesByCase?: Record<string, DataContextEntry[]>;
+  dataOverrides?: Record<string, Record<string, string>>;
+  // Jira-semantic launches: selected scenarios + provenance so jira_preview cases that need
+  // discovery run through the Jira engine (which owns auth/login setup) instead of the generic CLI.
+  executionEngine?: string;
+  scenarioOrigin?: unknown;
+  jiraSemanticScenarios?: Array<Record<string, unknown>>;
 };
+
+/** Selects the Jira scenario for a jira_preview published case; undefined keeps the generic discovery path. */
+export function selectJiraSemanticScenario(
+  params: Pick<DiscoveryBatchParams, "executionEngine" | "scenarioOrigin" | "jiraSemanticScenarios">,
+  entry: PublishedCaseEntry | undefined,
+): Record<string, unknown> | undefined {
+  if (!entry || entry.sourceType !== "jira_preview" || params.executionEngine !== "jira_semantic" || !params.scenarioOrigin) return undefined;
+  const ids = [entry.launchScenarioId, entry.executionScenarioId, entry.scenarioId].filter(Boolean);
+  return params.jiraSemanticScenarios?.find((scenario) => ids.includes(String(scenario.scenarioId)));
+}
+
+async function runJiraSemanticDiscoveryChild(
+  parentJobId: string,
+  params: DiscoveryBatchParams,
+  scenario: Record<string, unknown>,
+  entry: PublishedCaseEntry,
+  appSlug: string,
+): Promise<{ exitCode: number }> {
+  // No testRunId: the batch runner keeps ownership of TestRail result sync.
+  const child = jobStore.create("scenario-preview", {
+    executionEngine: "jira_semantic",
+    scenarioOrigin: params.scenarioOrigin,
+    jiraKey: params.jiraKey,
+    appSlug,
+    sectionSlug: params.sectionSlug,
+    sectionName: params.sectionName,
+    scenarios: [scenario],
+    publishedCases: [entry],
+    dataOverrides: params.dataOverrides,
+    options: { headed: params.headed === true, autoPromote: true, overwrite: params.overwrite === true },
+  }, { parentJobId });
+  await startJiraSemanticRun(child.id);
+  return { exitCode: jobStore.get(child.id)?.status === "done" ? 0 : 1 };
+}
+
+export async function persistRuntimeValuesForExecutedCase(input: {
+  projectSlug?: string;
+  caseId: number;
+  executionStatus: "passed" | "failed";
+  entries: readonly DataContextEntry[];
+  persist?: typeof persistConfirmedRuntimeValues;
+}): Promise<number> {
+  if (!input.projectSlug || input.entries.length === 0) return 0;
+  return (input.persist ?? persistConfirmedRuntimeValues)({
+    projectSlug: input.projectSlug,
+    caseId: input.caseId,
+    values: input.entries.map((entry) => ({
+      key: entry.key,
+      value: entry.value,
+      sensitive: entry.sensitive,
+      semanticType: entry.semanticType,
+      fieldKind: entry.fieldKind,
+      datasetIdentity: entry.datasetIdentity,
+      contractVersion: entry.contractVersion,
+      verified: true,
+    })),
+  });
+}
 
 export type RediscoveryIntentSource = "user_request" | "job_default" | "legacy_default" | "none";
 
@@ -440,8 +507,40 @@ export function validatePromotedEntryForExecution(input: {
     return { reusable: false, blocked: false, reason: "spec_outside_app_scope" };
   }
 
+  let jiraGenerated = false;
+  const jiraTagged = entry.tags?.includes("jira_generated") === true;
+  if (jiraTagged && entry.externalId && appRoot && isPathInside(appRoot, planPath)) {
+    try {
+      const plan = JSON.parse(fs.readFileSync(planPath, "utf8")) as {
+        scenario?: { source?: string; externalId?: string };
+      };
+      jiraGenerated = plan.scenario?.source === "jira" && plan.scenario.externalId === entry.externalId;
+    } catch {
+      jiraGenerated = false;
+    }
+  }
+  if (jiraTagged && !jiraGenerated) {
+    return { reusable: false, blocked: false, reason: "jira_plan_identity_mismatch" };
+  }
+  if (jiraGenerated) {
+    const promotion = entry as PromotedAutomationIndexEntry & {
+      promotionPersisted?: boolean;
+      promotedSpecPath?: string;
+      promotedSpecHash?: string;
+    };
+    if (promotion.promotionPersisted !== true
+      || path.resolve(promotion.promotedSpecPath ?? "") !== specPath
+      || !promotion.promotedSpecHash
+      ) {
+      return { reusable: false, blocked: false, reason: "promoted_artifact_integrity_invalid" };
+    }
+    if (createHash("sha256").update(fs.readFileSync(specPath)).digest("hex") !== promotion.promotedSpecHash) {
+      return { reusable: false, blocked: false, reason: "promoted_spec_hash_mismatch" };
+    }
+  }
+
   const expectedSection = nonEmptyString(input.sectionSlug) ? normalizeSectionSlug(input.sectionSlug) : undefined;
-  if (expectedSection) {
+  if (expectedSection && !jiraGenerated) {
     const discoveredSection = extractSectionSlugFromSpecPath(specPath);
     if (discoveredSection && discoveredSection !== expectedSection) {
       return { reusable: false, blocked: false, reason: "section_slug_mismatch" };
@@ -451,7 +550,7 @@ export function validatePromotedEntryForExecution(input: {
   const normalizedSpecPath = normalizePathForMatch(specPath);
   const caseMatch = normalizedSpecPath.match(/\/cases\/c(\d+)(?:[-/])[^/]*\/case\.spec\.ts$/)
     ?? normalizedSpecPath.match(/\/cases\/c(\d+)\/case\.spec\.ts$/);
-  if (!caseMatch || Number(caseMatch[1]) !== input.caseId) {
+  if (!jiraGenerated && (!caseMatch || Number(caseMatch[1]) !== input.caseId)) {
     return { reusable: false, blocked: false, reason: "spec_not_in_case_tree" };
   }
 
@@ -460,7 +559,9 @@ export function validatePromotedEntryForExecution(input: {
     return { reusable: false, blocked: false, reason: "missing_app_config" };
   }
 
-  const bootstrap = validatePromotedBootstrapContract({ caseId: input.caseId, specPath, planPath });
+  const bootstrap = jiraGenerated
+    ? validateJiraPromotedBootstrapContract({ specPath, planPath, externalId: entry.externalId })
+    : validatePromotedBootstrapContract({ caseId: input.caseId, specPath, planPath });
   console.log(`[promoted-bootstrap] caseId=${input.caseId} initialNavigationDeclared=${bootstrap.initialNavigationDeclared} currentUrl=not_started bootstrapContractValid=${bootstrap.valid}`);
   if (!bootstrap.valid) {
     return { reusable: false, blocked: false, reason: "stale_promoted_spec_bootstrap" };
@@ -484,6 +585,34 @@ export function validatePromotedBootstrapContract(input: {
       && /page\.goto\s*\(/.test(spec)
       && /createPromotedSpecRuntime[\s\S]*?try\s*\{/.test(spec);
     return { valid, initialNavigationDeclared: true };
+  } catch {
+    return { valid: false, initialNavigationDeclared: true };
+  }
+}
+
+function validateJiraPromotedBootstrapContract(input: {
+  specPath: string;
+  planPath: string;
+  externalId?: string;
+}): { valid: boolean; initialNavigationDeclared: boolean } {
+  try {
+    const plan = JSON.parse(fs.readFileSync(input.planPath, "utf8")) as {
+      scenario?: { source?: string; externalId?: string };
+      steps?: Array<{ action?: string }>;
+    };
+    const initialNavigationDeclared = (plan.steps ?? []).some((step) => step.action === "navigate");
+    const spec = fs.readFileSync(input.specPath, "utf8");
+    const jiraRuntimeDeclared = /from\s+["'][^"']*src\/jira\/jira-spec-runtime["']/.test(spec);
+    const baseUrlDeclared = /process\.env\.APP_BASE_URL/.test(spec);
+    const navigationUsesProfileBaseUrl = /page\.goto\s*\(\s*baseUrl\b/.test(spec);
+    const identityMatches = plan.scenario?.source === "jira"
+      && plan.scenario.externalId === input.externalId
+      && Boolean(input.externalId);
+    return {
+      valid: identityMatches && jiraRuntimeDeclared && baseUrlDeclared
+        && (!initialNavigationDeclared || navigationUsesProfileBaseUrl),
+      initialNavigationDeclared,
+    };
   } catch {
     return { valid: false, initialNavigationDeclared: true };
   }
@@ -608,6 +737,7 @@ export function resolveRouteFromValidation(input: {
   caseId: number;
   appSlug: string;
   forceRediscovery: boolean;
+  discoveryRequired?: boolean;
   rediscoveryIntent?: boolean;
   targetedDiscoverySupported?: boolean;
   contractEvaluation?: CaseContractSufficiencyResult;
@@ -625,6 +755,15 @@ export function resolveRouteFromValidation(input: {
       appSlug: input.appSlug,
       route: "full_discovery",
       reason: "explicit_rediscovery_requested",
+      specPath: input.validation.specPath,
+    };
+  }
+  if (input.discoveryRequired) {
+    return {
+      caseId: input.caseId,
+      appSlug: input.appSlug,
+      route: "full_discovery",
+      reason: "promoted_spec_missing_or_unusable",
       specPath: input.validation.specPath,
     };
   }
@@ -959,6 +1098,20 @@ export function buildTestPromotedArgs(params: DiscoveryBatchParams, caseId: numb
   return args;
 }
 
+export function resolveSectionSlugFromSpecPath(specPath: string | undefined, appSlug: string): string | undefined {
+  if (!specPath) return undefined;
+  const segments = path.resolve(specPath).split(path.sep).filter(Boolean);
+  for (let index = 0; index < segments.length - 4; index += 1) {
+    if (segments[index].toLowerCase() !== "automations"
+      || segments[index + 1]?.toLowerCase() !== "apps"
+      || segments[index + 2]?.toLowerCase() !== appSlug.toLowerCase()
+      || segments[index + 3]?.toLowerCase() !== "sections"
+      || segments[index + 5]?.toLowerCase() !== "cases") continue;
+    return segments[index + 4];
+  }
+  return undefined;
+}
+
 export function buildPromotedExecutionEnv(
   params: DiscoveryBatchParams,
   jobId: string,
@@ -1078,6 +1231,156 @@ export function writeRuntimeContextIfPresent(
     // the runner's finally block.
   }
   return targetPath;
+}
+
+/**
+ * Bridge Jira launch `dataOverrides[scenarioId][key]` into per-case runtime entries.
+ * Ownership comes only from the published-case mapping (scenarioId / launch /
+ * execution / testrail custom ids -> caseId). Precedence on the same normalized
+ * key: explicit `runtimeEntriesByCase` > `dataOverrides` (> confirmed values,
+ * applied later by hydration). Absent overrides return params unchanged.
+ *
+ * Verified promoted Jira cases rerun as `testrail_case`. Those are accepted only
+ * when the automation index proves a Jira-generated (jira_semantic) linkage for
+ * the app+case AND ownership is unambiguous; anything else stays untouched.
+ */
+export async function applyLaunchDataOverridesToRuntimeEntries(
+  params: DiscoveryBatchParams,
+  isJiraSemanticCase: (appSlug: string, caseId: number) => Promise<boolean> = resolveJiraSemanticCase,
+): Promise<DiscoveryBatchParams> {
+  const overrides = params.dataOverrides;
+  if (!overrides || typeof overrides !== "object" || Array.isArray(overrides) || !Array.isArray(params.publishedCases)) return params;
+  const byCase: Record<string, DataContextEntry[]> = { ...(params.runtimeEntriesByCase ?? {}) };
+  const appSlug = nonEmptyString(params.appSlug);
+  // Existing TestRail cases are also addressed by their case id: the launch preflight
+  // (runs.ts) accepts overrides keyed by `String(caseId)`, so the bridge must too.
+  const idsOf = (p: (typeof params.publishedCases)[number]) =>
+    [p.scenarioId, p.launchScenarioId, p.executionScenarioId, p.testrailCustomScenarioId, p.sourceType === "testrail_case" ? String(p.caseId) : undefined]
+      .filter((id): id is string => Boolean(id));
+  let changed = false;
+  for (const published of params.publishedCases) {
+    const isPreview = published.sourceType === "jira_preview";
+    // Fail closed: Recording / non-Jira TestRail / untyped entries are never touched.
+    if (!isPreview && published.sourceType !== "testrail_case") continue;
+    if (!Number.isSafeInteger(published.caseId) || published.caseId <= 0) continue;
+    const ids = idsOf(published);
+    const matches = [...new Set(ids)].map((id) => overrides[id]).filter((v) => v && typeof v === "object" && !Array.isArray(v));
+    if (matches.length === 0) continue;
+    // Several keys may address the same case (preflight merges them); equal values merge, differing values are ambiguous.
+    const scoped: Record<string, string> = {};
+    let conflict = false;
+    for (const match of matches) {
+      for (const [key, value] of Object.entries(match)) {
+        if (key in scoped && scoped[key] !== value) conflict = true;
+        scoped[key] = value;
+      }
+    }
+    if (conflict) continue;
+    if (!isPreview) {
+      if (!appSlug) continue;
+      // Ambiguous ownership: another entry shares the caseId, one of the ids, or ids resolve to different override objects.
+      const others = params.publishedCases.filter((o) => o !== published);
+      if (others.some((o) => o.caseId === published.caseId || idsOf(o).some((id) => ids.includes(id)))) continue;
+      let verified = false;
+      try {
+        verified = await isJiraSemanticCase(appSlug, published.caseId);
+      } catch {
+        verified = false;
+      }
+      if (!verified) continue;
+    }
+    const caseKey = String(published.caseId);
+    const existing = byCase[caseKey] ?? [];
+    const seen = new Set(existing.map((entry) => normalizeRuntimeKey(entry.key)));
+    const added: DataContextEntry[] = [];
+    for (const [key, value] of Object.entries(scoped)) {
+      const normalized = normalizeRuntimeKey(key);
+      if (!normalized || seen.has(normalized) || typeof value !== "string" || !value.trim()) continue;
+      seen.add(normalized);
+      added.push(normalizeRuntimeEntry({ key, value, source: "manual_runtime", sensitive: true }));
+    }
+    if (added.length === 0) continue;
+    byCase[caseKey] = [...existing, ...added];
+    changed = true;
+  }
+  return changed ? { ...params, runtimeEntriesByCase: byCase } : params;
+}
+
+/**
+ * Rehydrate confirmed inputs for promoted TestRail specs. Runtime values are
+ * scoped by both local project and TestRail case, and explicit launch values
+ * retain precedence over the last confirmed values.
+ */
+export async function hydrateConfirmedRuntimeEntriesByCase(
+  params: DiscoveryBatchParams,
+  dependencies: {
+    resolveProject?: typeof getProjectBySlug;
+    loadValues?: typeof getConfirmedRuntimeValues;
+    isJiraSemanticCase?: (appSlug: string, caseId: number) => Promise<boolean>;
+  } = {},
+): Promise<DiscoveryBatchParams> {
+  const projectSlug = nonEmptyString(params.appSlug);
+  if (!projectSlug || !Array.isArray(params.caseIds) || params.caseIds.length === 0) return params;
+  let project;
+  try {
+    project = await (dependencies.resolveProject ?? getProjectBySlug)(projectSlug);
+  } catch {
+    return params;
+  }
+  if (!project) return params;
+
+  const byCase: Record<string, DataContextEntry[]> = { ...(params.runtimeEntriesByCase ?? {}) };
+  for (const caseId of new Set(params.caseIds.filter((id) => Number.isSafeInteger(id) && id > 0))) {
+    try {
+      const isJiraSemanticCase = dependencies.isJiraSemanticCase
+        ? await dependencies.isJiraSemanticCase(projectSlug, caseId)
+        : await resolveJiraSemanticCase(projectSlug, caseId);
+      if (!isJiraSemanticCase) continue;
+      const confirmed = await (dependencies.loadValues ?? getConfirmedRuntimeValues)(project.id, caseId);
+      if (confirmed.length === 0) continue;
+      const existing = byCase[String(caseId)] ?? [];
+      const merged = new Map(existing.map((entry) => [normalizeRuntimeKey(entry.key), entry]));
+      for (const entry of confirmed) {
+        const key = normalizeRuntimeKey(entry.key);
+        if (!merged.has(key) && String(entry.value).trim()) {
+          merged.set(key, {
+            key: entry.key,
+            value: String(entry.value),
+            source: "runtime_context",
+            provenance: "confirmed_case_runtime",
+            sensitive: true,
+            ...(entry.semanticType ? { semanticType: entry.semanticType } : {}),
+            ...(entry.fieldKind ? { fieldKind: entry.fieldKind } : {}),
+            ...(entry.datasetIdentity ? { datasetIdentity: entry.datasetIdentity } : {}),
+            ...(entry.contractVersion ? { contractVersion: entry.contractVersion } : {}),
+            verified: entry.verified,
+          });
+        }
+      }
+      byCase[String(caseId)] = [...merged.values()];
+    } catch {
+      // A missing optional runtime-value store must not break cases whose
+      // inputs are supplied by the app profile or directly at launch.
+    }
+  }
+  return { ...params, runtimeEntriesByCase: byCase };
+}
+
+async function resolveJiraSemanticCase(appSlug: string, caseId: number): Promise<boolean> {
+  try {
+    const index = await loadAutomationIndex(path.resolve("automations", "apps", appSlug, "index.json"));
+    const candidates = index.automations.filter(entry => entry.caseId === caseId);
+    if (candidates.length !== 1) return false;
+    const entry = candidates[0];
+    if (entry.tags?.includes("jira_semantic")) return true;
+    const planPath = entry.planPath;
+    if (!planPath) return false;
+    const caseMetaPath = path.join(path.dirname(path.resolve(planPath)), "case.meta.json");
+    const metadata = JSON.parse(await fs.promises.readFile(caseMetaPath, "utf8")) as { executionEngine?: unknown };
+    return metadata.executionEngine === "jira_semantic";
+  } catch {
+    return false;
+  }
 }
 
 function logRuntimeInputAuthority(jobId: string, params: DiscoveryBatchParams): void {
@@ -1226,6 +1529,53 @@ function listEvidenceJsonFiles(dir: string): string[] {
   }
 
   return files;
+}
+
+export type LegacyScenarioEvidenceCandidate = {
+  appSlug: string;
+  sectionSlug: string;
+  scenarioIds: string[];
+};
+
+/**
+ * Discovery writes evidence to the legacy per-scenario directory before a promoted spec
+ * exists. Only admit evidence created during this job and whose embedded identity matches
+ * the requested project/scenario, so a rerun cannot silently attach stale screenshots.
+ */
+export function collectFreshLegacyScenarioEvidenceFiles(
+  candidates: LegacyScenarioEvidenceCandidate[],
+  notBeforeMs: number,
+): string[] {
+  const files = new Set<string>();
+  for (const candidate of candidates) {
+    const appSlug = candidate.appSlug.trim();
+    const sectionSlug = candidate.sectionSlug.trim();
+    if (!appSlug || !sectionSlug) continue;
+    const scenarioIds = new Set(candidate.scenarioIds.map(value => value.trim()).filter(Boolean));
+    for (const scenarioId of scenarioIds) {
+      let evidencePath: string;
+      try {
+        evidencePath = buildEvidencePaths({ appSlug, sectionSlug, scenarioId, scenarioTitle: scenarioId }).evidenceJsonPath;
+      } catch {
+        continue;
+      }
+      try {
+        const stat = fs.statSync(evidencePath);
+        if (!stat.isFile() || stat.mtimeMs < notBeforeMs) continue;
+        const record = JSON.parse(fs.readFileSync(evidencePath, "utf8")) as {
+          appSlug?: unknown;
+          scenarioId?: unknown;
+          steps?: unknown;
+        };
+        if (record.appSlug !== appSlug || !scenarioIds.has(String(record.scenarioId ?? ""))) continue;
+        if (!Array.isArray(record.steps) || record.steps.length === 0) continue;
+        files.add(evidencePath);
+      } catch {
+        // Incomplete/malformed evidence is not a valid report source.
+      }
+    }
+  }
+  return [...files];
 }
 
 function collectPromotedCaseIds(caseIds: number[], appSlug?: string): Set<number> {
@@ -1457,16 +1807,30 @@ export async function consolidateRunEvidenceForExecution(
   appSlug: string | undefined,
   sectionSlug: string | undefined,
   sectionName: string | undefined,
+  sourceSectionSlugs: string[] = [],
+  legacyScenarioEvidence: LegacyScenarioEvidenceCandidate[] = [],
+  notBeforeMs = 0,
 ): Promise<ConsolidationResult> {
   const safeAppSlug = (appSlug ?? "").trim() || "default";
-  const safeSectionSlug = normalizeSectionSlug(sectionSlug);
+  const sections = [...new Set([sectionSlug, ...sourceSectionSlugs]
+    .map(value => value?.trim())
+    .filter((value): value is string => Boolean(value))
+    .map(normalizeSectionSlug))];
+  const safeSectionSlug = sections[0] ?? normalizeSectionSlug(undefined);
   const paths = buildEvidenceRunPaths({
     appSlug: safeAppSlug,
     sectionSlug: safeSectionSlug,
     sectionName,
     runId,
   });
-  const evidenceFiles = listEvidenceJsonFiles(paths.scenariosDir);
+  const runEvidenceFiles = (sections.length > 0 ? sections : [safeSectionSlug])
+    .flatMap(sourceSection => listEvidenceJsonFiles(buildEvidenceRunPaths({
+      appSlug: safeAppSlug, sectionSlug: sourceSection, sectionName, runId,
+    }).scenariosDir));
+  const evidenceFiles = [...new Set([
+    ...runEvidenceFiles,
+    ...collectFreshLegacyScenarioEvidenceFiles(legacyScenarioEvidence, notBeforeMs),
+  ])];
   if (evidenceFiles.length === 0) {
     return {
       attempted: true,
@@ -1489,14 +1853,16 @@ export async function consolidateRunEvidenceForExecution(
       await recorder.addScenarioFromFile(evidenceJsonPath);
     }
     await recorder.finish();
-    const generated = fs.existsSync(paths.docxPath);
+    const documentPath = fs.existsSync(paths.pdfPath) ? paths.pdfPath
+      : fs.existsSync(paths.docxPath) ? paths.docxPath : undefined;
+    const generated = Boolean(documentPath);
     return {
       attempted: true,
       generated,
       documentPathPresent: generated,
-      ...(generated ? { documentPath: paths.docxPath } : {}),
+      ...(documentPath ? { documentPath } : {}),
       scenarioEvidenceCount: evidenceFiles.length,
-      ...(generated ? {} : { error: "consolidated_docx_missing" }),
+      ...(generated ? {} : { error: "consolidated_document_missing" }),
     };
   } catch (err: any) {
     return {
@@ -1693,9 +2059,10 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
   const checklistUrl = `/checklist/${checklistList.urlSlug}?jobId=${encodeURIComponent(jobId)}`;
   const initialDefectCount = countDefectsForJob(checklistList, jobId);
 
+  const runStartedAt = new Date();
   jobStore.update(jobId, {
     status: "running",
-    startedAt: new Date().toISOString(),
+    startedAt: runStartedAt.toISOString(),
     summary: baseSummary,
     checklistUrl,
     defectCount: initialDefectCount,
@@ -2019,6 +2386,7 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
       caseId,
       appSlug: effectiveAppSlug,
       forceRediscovery,
+      discoveryRequired: scenarioRef?.executionSource === "mcp_required",
       rediscoveryIntent: rediscoveryIntent.rediscoveryIntent,
       targetedDiscoverySupported,
       contractEvaluation,
@@ -2065,7 +2433,11 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
       let discoveryDurationMs = 0;
       log(jobId, `[run:discovery-batch] caseIds=${caseId} appSlug=${params.appSlug ?? "N/A"}`);
       log(jobId, `[run:discovery-batch] command=${cmd} ${fullDiscoveryArgs.join(" ")}`);
-      const discoveryResult = await runCommand(
+      const jiraScenario = params.contextOnly === true ? undefined : selectJiraSemanticScenario(params, scenarioRef);
+      if (jiraScenario && scenarioRef) log(jobId, `[run:jira-semantic] caseId=${caseId} scenarioId=${String(jiraScenario.scenarioId)} sourceType=jira_preview`);
+      const discoveryResult = jiraScenario && scenarioRef
+        ? await runJiraSemanticDiscoveryChild(jobId, params, jiraScenario, scenarioRef, effectiveAppSlug)
+        : await runCommand(
         jobId,
         cmd,
         fullDiscoveryArgs,
@@ -2085,6 +2457,10 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
         },
       );
       const structuredChildResult = await readStructuredChildResult(buildBatchResultPath(jobId), caseId);
+      if (jiraScenario && discoveryResult.exitCode === 0) {
+        discoveredState = "promoted";
+        promotionPersisted = true;
+      }
       runnerContextMaterialized = structuredChildResult?.contextMaterialized === true;
       if (structuredChildResult?.status) discoveredState = structuredChildResult.status;
       log(jobId, `[structured-child-result] caseId=${caseId} childStatus=${discoveredState ?? "unknown"} contextMaterialized=${runnerContextMaterialized}`);
@@ -2318,6 +2694,19 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
       promotionReason = route.reason;
     }
 
+    if (scenarioRef?.sourceType === "jira_preview" && scenarioRef.launchScenarioId && route.specPath) {
+      try {
+        const link = await linkJiraAutomationToTestRailCase({
+          appSlug: effectiveAppSlug,
+          externalId: scenarioRef.launchScenarioId,
+          caseId,
+        });
+        log(jobId, `[jira-testrail-link] appSlug=${effectiveAppSlug} externalId=${scenarioRef.launchScenarioId} caseId=${caseId} linked=${link.linked} reason=${link.reason}`);
+      } catch (error) {
+        log(jobId, `[jira-testrail-link] appSlug=${effectiveAppSlug} externalId=${scenarioRef.launchScenarioId} caseId=${caseId} linked=false reason=${error instanceof Error ? error.message : "link_failed"}`);
+      }
+    }
+
     routeDecisions.set(caseId, route);
     const prepareDurationMs = (prepareResult === "skipped" && promotionResult === "skipped")
       ? 0
@@ -2358,10 +2747,12 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
       continue;
     }
 
-    const testArgs = buildTestPromotedArgs(params, caseId);
+    const caseSectionSlug = resolveSectionSlugFromSpecPath(route.specPath, effectiveAppSlug) ?? params.sectionSlug;
+    const caseParams = { ...params, appSlug: effectiveAppSlug, ...(caseSectionSlug ? { sectionSlug: caseSectionSlug } : {}) };
+    const testArgs = buildTestPromotedArgs(caseParams, caseId);
     log(jobId, `[run:functional-execution] caseId=${caseId} command=${cmd} ${testArgs.join(" ")}`);
     const functionalStartedAt = Date.now();
-    const promotedExecutionEnv = buildPromotedExecutionEnv(params, jobId, process.env as NodeJS.ProcessEnv, runtimeContextPath);
+    const promotedExecutionEnv = buildPromotedExecutionEnv(caseParams, jobId, process.env as NodeJS.ProcessEnv, runtimeContextPath);
     const testResult = await runCommand(jobId, cmd, testArgs, promotedExecutionEnv);
     const caseCompletedAt = new Date().toISOString();
     const functionalDurationMs = Math.max(0, Date.now() - functionalStartedAt);
@@ -2423,24 +2814,17 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
     if (discoveryStatus === "passed") passed += 1;
     else failed += 1;
     executed += 1;
-    if (discoveryStatus === "passed" && params.appSlug) {
+    if (params.appSlug) {
       const runtimeEntries = params.runtimeEntriesByCase?.[String(caseId)] ?? [];
       if (runtimeEntries.length > 0) {
         try {
-          const confirmedPersisted = await persistConfirmedRuntimeValues({
+          const confirmedPersisted = await persistRuntimeValuesForExecutedCase({
             projectSlug: params.appSlug,
             caseId,
-            values: runtimeEntries.map((entry) => ({
-              key: entry.key,
-              value: entry.value,
-              semanticType: entry.semanticType,
-              fieldKind: entry.fieldKind,
-              datasetIdentity: entry.datasetIdentity,
-              contractVersion: entry.contractVersion,
-              verified: true,
-            })),
+            executionStatus: discoveryStatus,
+            entries: runtimeEntries,
           });
-          log(jobId, `[runtime-replay] caseId=${caseId} confirmedPersisted=${confirmedPersisted} secretsPersistedRaw=false`);
+          log(jobId, `[runtime-replay] caseId=${caseId} confirmedPersisted=${confirmedPersisted} executionStatus=${discoveryStatus}`);
         } catch (error) {
           log(jobId, `[runtime-replay] caseId=${caseId} confirmedPersisted=0 persistenceWarning=${error instanceof Error ? error.message : "unknown_error"}`);
         }
@@ -2596,12 +2980,23 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
   });
 
   const consolidationStartedAt = Date.now();
-  const documentResult = finalSnapshot.executed > 0
+  const evidenceSectionSlugs = [...new Set([...routeDecisions.values()]
+    .map(route => resolveSectionSlugFromSpecPath(route.specPath, route.appSlug))
+    .filter((value): value is string => Boolean(value)))];
+  const legacyScenarioEvidence: LegacyScenarioEvidenceCandidate[] = caseResults.map(result => ({
+    appSlug: result.appSlug ?? params.appSlug ?? "",
+    sectionSlug: result.sectionSlug ?? params.sectionSlug ?? "",
+    scenarioIds: [`C${result.caseId}`, String(result.caseId), result.scenarioId ?? ""],
+  }));
+  const documentResult = finalSnapshot.executed > 0 || caseResults.length > 0
     ? await consolidateRunEvidenceForExecution(
       jobId,
       params.appSlug,
       params.sectionSlug,
       params.sectionName,
+      evidenceSectionSlugs,
+      legacyScenarioEvidence,
+      runStartedAt.getTime(),
     )
     : {
       attempted: false,
@@ -2610,7 +3005,7 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
       scenarioEvidenceCount: 0,
     };
   const consolidationDurationMs = Math.max(0, Date.now() - consolidationStartedAt);
-  const consolidationResult = finalSnapshot.executed === 0
+  const consolidationResult = !documentResult.attempted
     ? "skipped"
     : (documentResult.generated ? "completed" : "failed");
   log(
@@ -2618,7 +3013,7 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
     `[evidence-consolidation] jobId=${jobId} trigger=job_completed scenarioCount=${documentResult.scenarioEvidenceCount} generationCount=1 result=${consolidationResult} durationMs=${consolidationDurationMs}`,
   );
 
-  const effectiveReasonCode = finalSnapshot.executed === 0
+  const effectiveReasonCode = finalSnapshot.executed === 0 && !documentResult.generated
     ? "cases_not_executable"
     : undefined;
   const reasonCode = effectiveReasonCode
@@ -2685,20 +3080,28 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
 export function startDiscoveryBatchRun(jobId: string): void {
   const job = jobStore.getInternal(jobId);
   if (!job) return;
-  const params = loadLaunchTestRailIdentity(job.params as DiscoveryBatchParams);
-  const runtimeContextPath = writeRuntimeContextIfPresent(jobId, params);
-  logRuntimeInputAuthority(jobId, params);
-  if (params.executePromotedSpecs === true) {
-    void startDiscoveryBatchExecutionFlow(jobId, params, runtimeContextPath)
-      .catch((err: any) => {
-        jobStore.update(jobId, { status: "failed", completedAt: new Date().toISOString() });
-        log(jobId, `[run:discovery-batch] Error al ejecutar flujo de ejecución: ${err?.message ?? String(err)}`);
-      })
-      .finally(async () => {
-        await deleteRuntimeContextIfExists(jobId);
-        jobStore.clearTransientParams(jobId);
-      });
-    return;
-  }
-  startLegacyDiscoveryBatchRun(jobId, params, runtimeContextPath);
+  void applyLaunchDataOverridesToRuntimeEntries(loadLaunchTestRailIdentity(job.params as DiscoveryBatchParams))
+    .then((initialParams) => hydrateConfirmedRuntimeEntriesByCase(initialParams))
+    .then((params) => {
+    const confirmedEntryCount = Object.values(params.runtimeEntriesByCase ?? {}).flat().filter((entry) => entry.provenance === "confirmed_case_runtime").length;
+    if (confirmedEntryCount > 0) log(jobId, `[runtime-input-hydration] projectScoped=true confirmedEntries=${confirmedEntryCount} valuesLogged=false`);
+    const runtimeContextPath = writeRuntimeContextIfPresent(jobId, params);
+    logRuntimeInputAuthority(jobId, params);
+    if (params.executePromotedSpecs === true) {
+      void startDiscoveryBatchExecutionFlow(jobId, params, runtimeContextPath)
+        .catch((err: any) => {
+          jobStore.update(jobId, { status: "failed", completedAt: new Date().toISOString() });
+          log(jobId, `[run:discovery-batch] Error al ejecutar flujo de ejecución: ${err?.message ?? String(err)}`);
+        })
+        .finally(async () => {
+          await deleteRuntimeContextIfExists(jobId);
+          jobStore.clearTransientParams(jobId);
+        });
+      return;
+    }
+    startLegacyDiscoveryBatchRun(jobId, params, runtimeContextPath);
+  }).catch((err: unknown) => {
+    jobStore.update(jobId, { status: "failed", completedAt: new Date().toISOString() });
+    log(jobId, `[run:discovery-batch] Runtime input preparation failed: ${err instanceof Error ? err.message : "unknown_error"}`);
+  });
 }

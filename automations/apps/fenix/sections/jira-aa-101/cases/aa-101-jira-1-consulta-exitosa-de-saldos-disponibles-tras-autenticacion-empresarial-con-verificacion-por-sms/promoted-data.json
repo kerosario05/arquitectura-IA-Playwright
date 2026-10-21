@@ -1,0 +1,50 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-10-14T15:01:55.086Z",
+  "entries": [
+    {
+      "key": "rnc",
+      "source": "unknown",
+      "fieldName": "[id=\"Enterprise\"]",
+      "stepIndex": 4,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "usuario",
+      "source": "unknown",
+      "fieldName": "[id=\"UserNameE\"]",
+      "stepIndex": 5,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "contrasena",
+      "source": "unknown",
+      "fieldName": "[id=\"PasswordE\"]",
+      "stepIndex": 6,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "codigo_acceso",
+      "source": "unknown",
+      "fieldName": "segmented_code",
+      "stepIndex": 9,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "name": "KIOSKO",
+  "baseUrl": "https://172.27.4.50/",
+  "loginMode": "no_login",
+  "testData": {},
+  "testDataAliases": {},
+  "missingInputBehavior": "fail",
+  "ignoreHTTPSErrors": false
+}

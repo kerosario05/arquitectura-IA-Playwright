@@ -16,6 +16,8 @@ function buildScenario(expected: string): TestScenario {
       { index: 2, action: "Click Iniciar", dataHints: [] },
     ],
     raw: {
+      id: 0,
+      title: "Escenario de prueba",
       custom_expected: expected,
     },
   };
@@ -718,7 +720,7 @@ test("structural post-action assertions inherit only current transition state", 
       { index: 8, action: "assert", targetText: "pantalla inicial autenticada del aplicativo", status: "satisfied_by_previous_assertion", assertionStatus: "satisfied_by_previous_assertion" },
     ] as any,
     runtimeEvidenceTrace: {
-      clickActions: [{ stepIndex: 6, target: "Continuar", actionType: "click", success: true, transitionDetected: true, afterUrl: "/dashboard" }],
+      clickActions: [{ stepIndex: 6, target: "Continuar", normalizedTarget: "continuar", actionType: "click", success: true, transitionDetected: true, afterContext: "url=/dashboard" }],
       fillActions: [], formEvidence: [], confirmationEvidence: [], structuralEvidence: [], feedbackEvidence: [],
     },
   });
@@ -734,7 +736,7 @@ test("structural post-action assertions inherit only current transition state", 
 
   const stale = buildCaseResult({
     ...result,
-    runtimeEvidenceTrace: { ...result.runtimeEvidenceTrace!, clickActions: [{ stepIndex: 6, target: "Continuar", actionType: "click", success: true, transitionDetected: false }] },
+    runtimeEvidenceTrace: { ...result.runtimeEvidenceTrace!, clickActions: [{ stepIndex: 6, target: "Continuar", normalizedTarget: "continuar", actionType: "click", success: true, transitionDetected: false }] },
   });
   const staleOracle = buildPromotionSourceScenario(scenario, stale).observableOracles?.find((oracle) => oracle.stepIndex === 8);
   assert.strictEqual(staleOracle?.backed, false);

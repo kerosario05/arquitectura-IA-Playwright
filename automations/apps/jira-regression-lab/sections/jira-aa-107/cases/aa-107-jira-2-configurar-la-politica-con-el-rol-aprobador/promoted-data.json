@@ -1,0 +1,83 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-10-19T01:29:30.545Z",
+  "entries": [
+    {
+      "key": "auth.company_identifier",
+      "source": "app_test_data",
+      "fieldName": "[id=\"login-rnc\"]",
+      "stepIndex": 2,
+      "valueType": "string",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": "*******01"
+    },
+    {
+      "key": "auth.username",
+      "source": "app_test_data",
+      "fieldName": "[id=\"login-user\"]",
+      "stepIndex": 3,
+      "valueType": "string",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": "********sa"
+    },
+    {
+      "key": "auth.password",
+      "source": "app_test_data",
+      "fieldName": "[id=\"login-password\"]",
+      "stepIndex": 4,
+      "valueType": "string",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": "********26"
+    },
+    {
+      "key": "jira_step_10",
+      "source": "unknown",
+      "fieldName": "[id=\"user-role\"]",
+      "stepIndex": 14,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "limite_aprobacion",
+      "source": "unknown",
+      "fieldName": "[id=\"approval-limit\"]",
+      "stepIndex": 16,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "permiso_aprobar_pagos",
+      "source": "unknown",
+      "fieldName": "Aprobar pagos",
+      "stepIndex": 20,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "permiso_administrar_usuarios",
+      "source": "unknown",
+      "fieldName": "Administrar usuarios",
+      "stepIndex": 21,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

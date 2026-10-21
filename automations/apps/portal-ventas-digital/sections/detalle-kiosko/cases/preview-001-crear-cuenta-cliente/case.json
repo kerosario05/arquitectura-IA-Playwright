@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-crear-cuenta-cliente",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Crear Cuenta Cliente",
+  "source": "discovery",
+  "appSlug": "portal-ventas-digital",
+  "appConfigPath": "automations\\apps\\portal-ventas-digital\\app.config.json",
+  "createdAt": "2026-10-20T16:10:52.778Z"
+}

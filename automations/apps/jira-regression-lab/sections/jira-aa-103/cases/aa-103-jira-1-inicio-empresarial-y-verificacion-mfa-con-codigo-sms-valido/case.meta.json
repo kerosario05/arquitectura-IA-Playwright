@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-103",
+  "sourceScenarioId": "AA-103:jira:1",
+  "title": "Inicio empresarial y verificación MFA con código SMS válido",
+  "generatedAt": "2026-10-16T18:30:01.122Z",
+  "executionEngine": "jira_semantic"
+}

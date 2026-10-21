@@ -1,0 +1,96 @@
+- generic [ref=e1]:
+  - generic [ref=e32]:
+    - complementary [ref=e33]:
+      - generic [ref=e34]:
+        - generic [ref=e35]: Q
+        - generic [ref=e38]:
+          - generic [ref=e39]: QA Lab
+          - generic [ref=e40]: Santa Cruz
+      - navigation [ref=e41]:
+        - button "Panorama" [ref=e42] [cursor=pointer]
+        - button "Lanzar pruebas" [ref=e49] [cursor=pointer]
+        - button "Grabación" [ref=e55] [cursor=pointer]
+        - button "Ejecuciones" [ref=e59] [cursor=pointer]
+        - button "Configuración" [ref=e64] [cursor=pointer]
+        - button "Usuarios" [ref=e68] [cursor=pointer]
+      - generic [ref=e76]:
+        - generic [ref=e80]: Pro tip
+        - generic [ref=e81]: Programa ejecuciones nocturnas para optimizar recursos.
+      - generic [ref=e82]:
+        - generic [ref=e83]: AD
+        - generic [ref=e84]:
+          - generic [ref=e85]: Administrador
+          - generic [ref=e86]: Administrador
+    - main [ref=e87]:
+      - generic [ref=e88]:
+        - generic [ref=e89]:
+          - generic [ref=e90]:
+            - generic [ref=e92]: En vivo · 16:27
+            - generic [ref=e93]: ·
+            - generic [ref=e94]: Configura una nueva ejecución en 4 pasos
+          - heading "Lanzar pruebas" [level=1] [ref=e133]
+        - generic [ref=e96]:
+          - generic [ref=e97]:
+            - combobox "Buscar" [ref=e98]
+            - generic: Ctrl K
+          - button "Notificaciones" [ref=e100] [cursor=pointer]
+          - button "Cerrar sesión de admin" [ref=e106] [cursor=pointer]
+      - generic [ref=e135]:
+        - generic [ref=e137]:
+          - button "Proyecto" [ref=e138] [cursor=pointer]
+          - button "Fuentes" [ref=e151] [cursor=pointer]
+          - button "Casos" [ref=e158] [cursor=pointer]
+          - button "Lanzar" [ref=e166] [cursor=pointer]
+        - generic [ref=e173]:
+          - generic [ref=e212]:
+            - generic [ref=e213]: Paso dos · Conecta las fuentes
+            - heading "¿De dónde vienen los casos?" [level=2] [ref=e214]
+            - paragraph [ref=e215]: Configura las herramientas que alimentarán la ejecución.
+            - generic [ref=e217]:
+              - button "Solo TestRail Suite completa" [ref=e218] [cursor=pointer]:
+                - generic [ref=e224]: Solo TestRail
+                - generic [ref=e225]: Suite completa
+              - button "Ambos combinados Máxima cobertura" [ref=e226] [cursor=pointer]:
+                - generic [ref=e233]: Ambos combinados
+                - generic [ref=e234]: Máxima cobertura
+            - generic [ref=e252]:
+              - generic [ref=e253]: TestRail
+              - generic [ref=e260]:
+                - generic [ref=e261]: Proyecto
+                - button "Arquitectura automatización" [ref=e1320] [cursor=pointer]
+              - generic [ref=e551]:
+                - generic [ref=e552]:
+                  - generic [ref=e553]: Suite ID
+                  - generic [ref=e554]: "1731"
+                - generic [ref=e555]:
+                  - generic [ref=e556]: Test Cases
+                  - generic [ref=e557]: "309"
+              - generic [ref=e558]:
+                - generic [ref=e559]: Sección
+                - button "Selecciona una sección..." [ref=e1321] [cursor=pointer]
+          - generic [ref=e199]:
+            - button "Atrás" [ref=e200] [cursor=pointer]
+            - button "Generar escenarios" [ref=e268] [cursor=pointer]
+  - generic [ref=e1325]:
+    - generic [ref=e1326]:
+      - textbox "Buscar sección..." [active] [ref=e1331]
+      - generic [ref=e1332]: 16 de 16 secciones
+    - generic [ref=e1333]:
+      - button "API Tests" [ref=e1334] [cursor=pointer]
+      - button "Kiosko" [ref=e1337] [cursor=pointer]
+      - button "REGRESION-KIOSKO niv. 1" [ref=e1340] [cursor=pointer]:
+        - generic [ref=e1342]: REGRESION-KIOSKO
+        - generic [ref=e1343]: niv. 1
+      - button "demoblaze" [ref=e1344] [cursor=pointer]
+      - button "Detalle_KIOSKO" [ref=e1347] [cursor=pointer]
+      - button "Alarm Controller — ApiDemos" [ref=e1350] [cursor=pointer]
+      - button "Proyecto Prueba BSC" [ref=e1353] [cursor=pointer]
+      - button "Enrrolamiento" [ref=e1356] [cursor=pointer]
+      - button "Enrrolamiento - App Conversacional" [ref=e1359] [cursor=pointer]
+      - button "Enrrol" [ref=e1362] [cursor=pointer]
+      - button "Enrrolamiento - AppConversacional" [ref=e1365] [cursor=pointer]
+      - button "userEnrroll" [ref=e1368] [cursor=pointer]
+      - button "userEnrrollTest1" [ref=e1371] [cursor=pointer]
+      - button "userEnrrollTest2" [ref=e1374] [cursor=pointer]
+      - button "Enrrolamiento Completo — App BSC Conversacional" [ref=e1377] [cursor=pointer]
+      - button "Portal Comercial" [ref=e1380] [cursor=pointer]

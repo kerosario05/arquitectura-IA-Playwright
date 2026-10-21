@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-109",
+  "sourceScenarioId": "AA-109:jira:6",
+  "title": "Bloquear avance de compromisos cuando una fila agregada está incompleta",
+  "generatedAt": "2026-10-17T18:49:02.712Z",
+  "executionEngine": "jira_semantic"
+}

@@ -89,6 +89,7 @@ test("observed gate with explicit recorded login does not require a second AuthF
     executableStepIndexes: [],
     planStepActions: new Map(),
     response: {
+      specContent: "",
       coveredStepIndexes: [],
       coveredAssertions: [],
       usedPageObjects: [],
@@ -1899,8 +1900,11 @@ test("hybrid spec generation", async (t) => {
         runPlaywrightDiscovery: async () => passList(1)
       });
       assert.strictEqual(result.promotionAllowed, true);
-      assert.ok(validationPath.startsWith(path.dirname(appPaths.specPath)));
-      assert.ok(path.basename(validationPath).startsWith("case.validation-"));
+      if (!validationPath) throw new Error("Expected the validation spec path to be captured");
+      if (!appPaths.specPath) throw new Error("Expected the promoted spec path to be available");
+      const validatedPath = validationPath;
+      assert.ok(validatedPath.startsWith(path.dirname(appPaths.specPath)));
+      assert.ok(path.basename(validatedPath).startsWith("case.validation-"));
     });
   });
 

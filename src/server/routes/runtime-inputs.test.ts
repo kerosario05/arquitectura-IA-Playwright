@@ -239,7 +239,6 @@ test("does not cross project bindings and keeps missing caseId safe", async () =
 });
 
 test("replays a compatible confirmed runtime value before deterministic generation", async () => {
-  let deterministicCalls = 0;
   const result = await resolveScenarioSyntheticBatch({
     projectId: "00000000-0000-0000-0000-000000000001",
     caseId: 90001,
@@ -255,10 +254,6 @@ test("replays a compatible confirmed runtime value before deterministic generati
       source: "confirmed_case_runtime",
       verified: true,
     }],
-    deterministicResolver: () => {
-      deterministicCalls += 1;
-      return { value: "wrong-fallback", source: "deterministic_synthetic" };
-    },
   });
   assert.equal(result.generated.length, 0);
   assert.equal(result.resolved[0]?.source, "confirmed_replay");
@@ -266,7 +261,6 @@ test("replays a compatible confirmed runtime value before deterministic generati
   assert.equal(result.resolved[0]?.generated, false);
   assert.equal(result.resolved[0]?.verified, true);
   assert.equal(result.compatibleValuesFound, 1);
-  assert.equal(deterministicCalls, 0);
 });
 
 test("rejects incompatible confirmed runtime metadata and uses the normal resolver", async () => {

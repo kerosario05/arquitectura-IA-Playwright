@@ -1,0 +1,127 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-10-18T21:54:37.273Z",
+  "entries": [
+    {
+      "key": "auth.company_identifier",
+      "source": "app_test_data",
+      "fieldName": "[id=\"login-rnc\"]",
+      "stepIndex": 2,
+      "valueType": "string",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": "*******01"
+    },
+    {
+      "key": "auth.username",
+      "source": "app_test_data",
+      "fieldName": "[id=\"login-user\"]",
+      "stepIndex": 3,
+      "valueType": "string",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": "********sa"
+    },
+    {
+      "key": "auth.password",
+      "source": "app_test_data",
+      "fieldName": "[id=\"login-password\"]",
+      "stepIndex": 4,
+      "valueType": "string",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": "********26"
+    },
+    {
+      "key": "account",
+      "source": "unknown",
+      "fieldName": "[id=\"statement-account\"]",
+      "stepIndex": 15,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "status_all",
+      "source": "unknown",
+      "fieldName": "[id=\"statement-status\"]",
+      "stepIndex": 17,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "status_completed",
+      "source": "unknown",
+      "fieldName": "[id=\"statement-status\"]",
+      "stepIndex": 19,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "status_pending",
+      "source": "unknown",
+      "fieldName": "[id=\"statement-status\"]",
+      "stepIndex": 21,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "movement_type_all",
+      "source": "unknown",
+      "fieldName": "[id=\"movement-type\"]",
+      "stepIndex": 23,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "movement_type_transfers",
+      "source": "unknown",
+      "fieldName": "[id=\"movement-type\"]",
+      "stepIndex": 25,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "movement_type_payments",
+      "source": "unknown",
+      "fieldName": "[id=\"movement-type\"]",
+      "stepIndex": 27,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "movement_type_deposits",
+      "source": "unknown",
+      "fieldName": "[id=\"movement-type\"]",
+      "stepIndex": 29,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

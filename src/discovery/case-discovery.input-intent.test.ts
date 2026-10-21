@@ -1,7 +1,18 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { isFillActionTarget, parseScenarioStepsForDiscovery, projectScenarioInputMetadata } from "./case-discovery";
+import { isFillActionTarget, isUnboundSemanticFillTarget, parseScenarioStepsForDiscovery, projectScenarioInputMetadata } from "./case-discovery";
 import type { TestScenario } from "../types/testrail.types";
+import { credentialRoleKeyForField, resolveDataKey } from "../data/data-key-resolver";
+
+test("natural TestRail OTP instruction reaches fill dispatch with the explicit case value", () => {
+  const input = scenario({ action: 'Ingresar el código de acceso en "Código".' });
+  const target = parseScenarioStepsForDiscovery(input).actionTargets[0];
+  assert.equal(isUnboundSemanticFillTarget(input, target), true);
+  const runtimeEntries = [{ key: "codigo_acceso", value: "654321" }, { key: "token_autorizacion", value: "later-token" }];
+  target.valueKey ??= credentialRoleKeyForField(target.target, runtimeEntries);
+  assert.equal(isFillActionTarget(target), true);
+  assert.equal(resolveDataKey(target.valueKey!, { runtimeEntries }).value, "654321");
+});
 
 function scenario(step: Partial<TestScenario["steps"][number]> = {}): TestScenario {
   return {
@@ -12,6 +23,26 @@ function scenario(step: Partial<TestScenario["steps"][number]> = {}): TestScenar
     steps: [{ index: 1, action: "fill the control", dataHints: [], ...step }],
   };
 }
+
+test("recorded checkbox prose retains check state and technical identity before the next click", () => {
+  for (const [verb, actionType] of [["Marcar", "check"], ["Desmarcar", "uncheck"]] as const) {
+    const humanStep = `${verb} "Preferencia A/B"`;
+    const parsed = parseScenarioStepsForDiscovery({
+      ...scenario(),
+      steps: [{index: 1, action: humanStep, dataHints: []}, {index: 2, action: 'Presionar "Avanzar"', dataHints: []}],
+      recordingExecutionContract: {
+        actions: [
+          {actionType, humanStep, targetRef: "preference", technicalTargetRef: "css:#preference", stepIndex: 0},
+          {actionType: "click", humanStep: 'Presionar "Avanzar"', targetRef: "advance", technicalTargetRef: "css:#advance", stepIndex: 1},
+        ], runtimeInputRequirements: [],
+      },
+    });
+    assert.equal(parsed.actionTargets.length, 2);
+    assert.equal(parsed.actionTargets[0].recordingActionType, actionType);
+    assert.equal(parsed.actionTargets[0].technicalTargetRef, "css:#preference");
+    assert.equal(parsed.actionTargets[1].recordingActionType, "click");
+  }
+});
 
 test("propagates action input metadata and requirement refs into ordered steps", () => {
   const parsed = parseScenarioStepsForDiscovery(scenario({
@@ -87,6 +118,15 @@ test("preserves namespaced placeholder fill metadata through discovery projectio
 test("selects fill dispatch for unknown placeholder source without forcing runtime override", () => {
   assert.equal(isFillActionTarget({ actionType: "action_fill", valueKey: "namespace.key", valueSource: "unknown" }), true);
   assert.equal(isFillActionTarget({ actionType: "action_click", valueKey: "namespace.key", valueSource: "unknown" }), false);
+});
+
+test("Jira and TestRail fill intent without inline data stays a fill while recording contracts retain their current dispatch", () => {
+  const unboundFill = { actionType: "action_fill" as const, valueSource: "unknown" as const };
+  assert.equal(isFillActionTarget(unboundFill), false);
+  assert.equal(isUnboundSemanticFillTarget({ source: "testrail" }, unboundFill), true);
+  assert.equal(isUnboundSemanticFillTarget({ source: "jira" }, unboundFill), true);
+  assert.equal(isUnboundSemanticFillTarget({ source: "testrail", recordingExecutionContract: { actions: [], runtimeInputRequirements: [] } }, unboundFill), false);
+  assert.equal(isUnboundSemanticFillTarget({ source: "testrail" }, { actionType: "action_click" }), false);
 });
 
 test("recording replay consumes structured action authority instead of rendered human text", () => {
@@ -233,6 +273,6 @@ test("recording replay preserves the semantic field as the selection authority",
     },
   });
 
-  assert.equal(parsed.actionTargets[0]?.selectionField, "Tipo de ID");
-  assert.equal(parsed.orderedSteps[0]?.selectionField, "Tipo de ID");
+  assert.equal((parsed.actionTargets[0] as { selectionField?: string } | undefined)?.selectionField, "Tipo de ID");
+  assert.equal((parsed.orderedSteps[0] as { selectionField?: string } | undefined)?.selectionField, "Tipo de ID");
 });

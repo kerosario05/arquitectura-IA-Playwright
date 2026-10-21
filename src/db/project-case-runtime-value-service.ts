@@ -4,6 +4,7 @@ import { withConnection, withTransaction } from "./sql-connection";
 export type ConfirmedRuntimeValue = {
   key: string;
   value: string | number | boolean;
+  sensitive?: boolean;
   semanticType?: string;
   fieldKind?: string;
   datasetIdentity?: string;
@@ -28,14 +29,6 @@ type RuntimeValueRow = {
   verified: boolean | number | string;
   confirmed: boolean | number | string;
 };
-
-function normalizeKey(value: string): string {
-  return value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-}
-
-function isSecretKey(key: string): boolean {
-  return /(^|[._-])(password|pass|token|otp|secret|pin)([._-]|$)/i.test(normalizeKey(key));
-}
 
 function toBoolean(value: boolean | number | string): boolean {
   if (typeof value === "boolean") return value;
@@ -76,12 +69,27 @@ export async function getConfirmedRuntimeValues(
 ): Promise<PersistedConfirmedRuntimeValue[]> {
   const read = async (connection: DbConnection): Promise<PersistedConfirmedRuntimeValue[]> => {
     // Probe metadata first so an un-migrated local database never prepares a
-    // SELECT against a table that does not exist (which can block ODBC's
-    // parameter analysis for a long time).
-    const table = await connection.query<{ tableId: number | null }>(
-      "SELECT OBJECT_ID(N'dbo.ProjectCaseRuntimeValue', N'U') AS tableId",
-    );
-    if (!table?.[0]?.tableId) return [];
+    // SELECT against a table that does not exist. SQLite has sqlite_master;
+    // SQL Server uses OBJECT_ID. Previously this always used OBJECT_ID, which
+    // silently treated saved SQLite runtime inputs as absent.
+    let sqliteMetadataAvailable = false;
+    try {
+      const table = await connection.query<{ name: string }>(
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?",
+        ["ProjectCaseRuntimeValue"],
+      );
+      sqliteMetadataAvailable = true;
+      if (table?.length) sqliteMetadataAvailable = true;
+      else return [];
+    } catch {
+      // `sqlite_master` is not a SQL Server catalog; fall through to OBJECT_ID.
+    }
+    if (!sqliteMetadataAvailable) {
+      const table = await connection.query<{ tableId: number | null }>(
+        "SELECT OBJECT_ID(N'dbo.ProjectCaseRuntimeValue', N'U') AS tableId",
+      );
+      if (!table?.[0]?.tableId) return [];
+    }
     const rows = await connection.query<RuntimeValueRow>(
       `SELECT [key], semanticType, fieldKind, datasetIdentity, contractVersion, valueType, [value], source, verified, confirmed
          FROM dbo.ProjectCaseRuntimeValue
@@ -118,8 +126,10 @@ export async function persistConfirmedRuntimeValues(input: {
     let persisted = 0;
     for (const entry of input.values) {
       if (!entry || typeof entry.key !== "string" || !entry.key.trim()) continue;
-      // Passwords, OTPs, tokens and secrets are never persisted as raw runtime values.
-      if (isSecretKey(entry.key)) continue;
+      // TestRail reruns must be able to restore the exact inputs used by the
+      // previous execution, including sensitive values in this controlled QA app.
+      // Values stay out of job records, logs and reports; this table is scoped by
+      // both local project and TestRail case.
       if (typeof entry.value !== "string" && typeof entry.value !== "number" && typeof entry.value !== "boolean") continue;
       const rawValue = String(entry.value).trim();
       if (!rawValue) continue;

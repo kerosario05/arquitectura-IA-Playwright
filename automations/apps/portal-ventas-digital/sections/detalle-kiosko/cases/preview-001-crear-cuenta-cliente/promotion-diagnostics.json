@@ -1,0 +1,20 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\portal-ventas-digital\\sections\\detalle-kiosko\\cases\\preview-001-crear-cuenta-cliente\\case.spec.ts",
+  "specHash": "a1c3d4e98112e34a3c949721e824ac542961228a696145ef84ffa881dcb4a65c",
+  "specSource": "generatedSpec"
+}

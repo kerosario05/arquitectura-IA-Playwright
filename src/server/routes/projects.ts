@@ -1,6 +1,7 @@
 import { Router } from "express";
 import crypto from "crypto";
-import { listProjects } from "../../db/project-repository";
+import { getProjectBySlug, listProjects } from "../../db/project-repository";
+import { getConfirmedRuntimeValues } from "../../db/project-case-runtime-value-service";
 import {
   createWebProject,
   createMobileProject,
@@ -130,8 +131,14 @@ export type InputRequirementService = {
   replaceForProjectAndCase: typeof replaceForProjectAndCase;
 };
 
-export function createInputRequirementsHandlers(service?: InputRequirementService) {
+type RuntimeInputValueReader = {
+  getProjectBySlug: typeof getProjectBySlug;
+  getConfirmedRuntimeValues: typeof getConfirmedRuntimeValues;
+};
+
+export function createInputRequirementsHandlers(service?: InputRequirementService, runtimeValueReader?: RuntimeInputValueReader) {
   const svc: InputRequirementService = service ?? { getByProjectAndCase, replaceForProjectAndCase };
+  const valueReader = runtimeValueReader ?? (service ? undefined : { getProjectBySlug, getConfirmedRuntimeValues });
 
   function validateParams(req: any): { projectSlug?: string; caseId?: number; error?: { status: number; code: string; message: string } } {
     const projectSlug = String(req?.params?.projectSlug ?? "").trim();
@@ -161,7 +168,15 @@ export function createInputRequirementsHandlers(service?: InputRequirementServic
         return;
       }
       const inputRequirements = await svc.getByProjectAndCase(parsed.projectSlug!, parsed.caseId!);
-      res.json({ projectSlug: parsed.projectSlug, caseId: parsed.caseId, inputRequirements });
+      let runtimeValues: Record<string, string | number | boolean> | undefined;
+      if (valueReader) {
+        const project = await valueReader.getProjectBySlug(parsed.projectSlug!);
+        const savedValues = project
+          ? await valueReader.getConfirmedRuntimeValues(project.id, parsed.caseId!)
+          : [];
+        runtimeValues = Object.fromEntries(savedValues.map((entry) => [entry.key, entry.value]));
+      }
+      res.json({ projectSlug: parsed.projectSlug, caseId: parsed.caseId, inputRequirements, inputRequirementsSyncVersion: 2, ...(runtimeValues ? { runtimeValues } : {}) });
     } catch (err) {
       if (isProjectNotFoundError(err)) {
         sendError(res, 404, "project_not_found", err instanceof Error ? err.message : String(err));

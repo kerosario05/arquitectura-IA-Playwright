@@ -1,0 +1,416 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-13T23:59:36.475Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "AA-100:jira:2",
+    "title": "Consultar el resumen de cuentas completando la verificación adicional"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Presionar \"perfil empresarial\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Empresarial",
+        "exact": true
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [rnc]",
+      "valueKey": "rnc",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"Enterprise\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "fill",
+      "description": "fill [usuario]",
+      "valueKey": "usuario",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"UserNameE\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "fill",
+      "description": "fill [contrasena]",
+      "valueKey": "contrasena",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"PasswordE\"]"
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"continuar inicio de sesión\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Iniciar sesión",
+        "exact": true
+      }
+    },
+    {
+      "index": 8,
+      "action": "click",
+      "description": "Solicitar el código por SMS",
+      "target": {
+        "strategy": "css",
+        "value": "div:visible:text-is(\"SMS\")"
+      }
+    },
+    {
+      "index": 9,
+      "action": "fill",
+      "description": "fill [codigo_acceso]",
+      "valueKey": "codigo_acceso",
+      "target": {
+        "strategy": "semantic",
+        "value": "segmented_code",
+        "metadata": {
+          "originalTarget": "Código de acceso",
+          "resolvedTargetName": "segmented code input group",
+          "resolvedCandidateId": "6",
+          "repairType": "jira_segmented_code",
+          "validationStatus": "runtime_resolution_required"
+        }
+      },
+      "resolutionState": "runtime_resolution_required"
+    },
+    {
+      "index": 10,
+      "action": "click",
+      "description": "Presionar \"continuar verificación de acceso\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Continuar",
+        "exact": true
+      }
+    },
+    {
+      "index": 11,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Resumen\"",
+      "target": {
+        "strategy": "text",
+        "value": "Resumen"
+      }
+    },
+    {
+      "index": 12,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Cuentas\"",
+      "target": {
+        "strategy": "text",
+        "value": "Cuentas"
+      }
+    },
+    {
+      "index": 13,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Cuenta Corriente\"",
+      "target": {
+        "strategy": "text",
+        "value": "Cuenta Corriente"
+      }
+    },
+    {
+      "index": 14,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Cuenta de Ahorro\"",
+      "target": {
+        "strategy": "text",
+        "value": "Cuenta de Ahorro"
+      }
+    },
+    {
+      "index": 15,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Balance Disponible\"",
+      "target": {
+        "strategy": "text",
+        "value": "Balance Disponible"
+      }
+    },
+    {
+      "index": 16,
+      "action": "assertVisible",
+      "description": "Validar que no se muestre \"Comprobante de transacción exitosa\"",
+      "target": {
+        "strategy": "text",
+        "value": "Comprobante de transacción exitosa"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "rnc",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "usuario",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "codigo_acceso",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Consultar el resumen de cuentas completando la verificación adicional",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Empresarial"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "rnc",
+        "technicalTargetRefs": [
+          "css:[id=\"Enterprise\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "fill",
+        "valueKey": "usuario",
+        "technicalTargetRefs": [
+          "css:[id=\"UserNameE\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "fill",
+        "valueKey": "contrasena",
+        "technicalTargetRefs": [
+          "css:[id=\"PasswordE\"]"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:div:visible:text-is(\"SMS\")"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "fill",
+        "valueKey": "codigo_acceso",
+        "technicalTargetRefs": [
+          "semantic:segmented_code"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ]
+      },
+      {
+        "index": 11,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Resumen\"",
+        "technicalTargetRefs": [
+          "text:Resumen"
+        ]
+      },
+      {
+        "index": 12,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Cuentas\"",
+        "technicalTargetRefs": [
+          "text:Cuentas"
+        ]
+      },
+      {
+        "index": 13,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Cuenta Corriente\"",
+        "technicalTargetRefs": [
+          "text:Cuenta Corriente"
+        ]
+      },
+      {
+        "index": 14,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Cuenta de Ahorro\"",
+        "technicalTargetRefs": [
+          "text:Cuenta de Ahorro"
+        ]
+      },
+      {
+        "index": 15,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Balance Disponible\"",
+        "technicalTargetRefs": [
+          "text:Balance Disponible"
+        ]
+      },
+      {
+        "index": 16,
+        "action": "assertVisible",
+        "description": "Validar que no se muestre \"Comprobante de transacción exitosa\"",
+        "technicalTargetRefs": [
+          "text:Comprobante de transacción exitosa"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-11",
+        "requirement": "Validar que se muestre \"Resumen\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 11,
+        "target": "Resumen",
+        "evidence": [
+          "live-step-11"
+        ],
+        "details": {
+          "observedText": "Resumen"
+        }
+      },
+      {
+        "id": "jira-oracle-12",
+        "requirement": "Validar que se muestre \"Cuentas\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 12,
+        "target": "Cuenta Mi Bolsillo",
+        "evidence": [
+          "live-step-12"
+        ],
+        "details": {
+          "observedText": "Cuenta Mi Bolsillo"
+        }
+      },
+      {
+        "id": "jira-oracle-13",
+        "requirement": "Validar que se muestre \"Cuenta Corriente\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 13,
+        "target": "Cuenta Corriente\n11311000003156\nCuenta Corrientes\n\nRD$133,575.44\nBalance Disponible",
+        "evidence": [
+          "live-step-13"
+        ],
+        "details": {
+          "observedText": "Cuenta Corriente\n11311000003156\nCuenta Corrientes\n\nRD$133,575.44\nBalance Disponible"
+        }
+      },
+      {
+        "id": "jira-oracle-14",
+        "requirement": "Validar que se muestre \"Cuenta de Ahorro\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 14,
+        "target": "Cuenta de Ahorro\n21312020003368\nCuenta de Ahorro\n\nUS$1,970.71\nBalance Disponible",
+        "evidence": [
+          "live-step-14"
+        ],
+        "details": {
+          "observedText": "Cuenta de Ahorro\n21312020003368\nCuenta de Ahorro\n\nUS$1,970.71\nBalance Disponible"
+        }
+      },
+      {
+        "id": "jira-oracle-15",
+        "requirement": "Validar que se muestre \"Balance Disponible\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 15,
+        "target": "Balance Disponible",
+        "evidence": [
+          "live-step-15"
+        ],
+        "details": {
+          "observedText": "Balance Disponible"
+        }
+      },
+      {
+        "id": "jira-oracle-16",
+        "requirement": "Validar que no se muestre \"Comprobante de transacción exitosa\"",
+        "type": "literal_visible_text",
+        "polarity": "negative",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 16,
+        "target": "Comprobante de transacción exitosa",
+        "evidence": [
+          "live-step-16"
+        ],
+        "details": {
+          "absent": true
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "No se muestra \"Comprobante de transacción exitosa\"."
+  }
+}

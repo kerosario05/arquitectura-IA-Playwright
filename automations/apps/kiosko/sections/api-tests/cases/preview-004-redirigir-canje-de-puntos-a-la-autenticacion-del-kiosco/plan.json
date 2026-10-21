@@ -1,0 +1,205 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-004",
+    "caseId": 0,
+    "title": "Redirigir Canje de Puntos a la autenticación del kiosco"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "description": "Clic en \"Canje de Puntos\".",
+      "target": {
+        "strategy": "semantic:css",
+        "value": "Canje de PuntosAplica tus Puntos Santa Cruz a tu tarjeta",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Canje de Puntos",
+          "resolvedTargetName": "Canje de PuntosAplica tus Puntos Santa Cruz a tu tarjeta",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "semantic:css",
+      "requirementRefs": []
+    }
+  ],
+  "notes": [
+    "Discovery partial: 1/2 navigations/assertions satisfied.",
+    "Review needed: 1 non-blocking assertion failure(s) were ignored for pass/fail reconciliation."
+  ],
+  "createdAt": "2026-10-09T15:39:43.062Z",
+  "metadata": {
+    "authFlowRequired": false,
+    "authFlowAlias": "defaultClient",
+    "authFlowLanding": "transactions_menu",
+    "authGateDetectedDuringDiscovery": true,
+    "authGateStage": "identification_input"
+  },
+  "sourceScenario": {
+    "title": "Redirigir Canje de Puntos a la autenticación del kiosco",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Clic en \"Canje de Puntos\".",
+        "description": "Clic en \"Canje de Puntos\"."
+      },
+      {
+        "index": 2,
+        "action": "Validar que se muestre \"pantalla de autenticación del kiosco\".",
+        "description": "Validar que se muestre \"pantalla de autenticación del kiosco\".",
+        "assertionImportance": "contextual"
+      }
+    ],
+    "expectedResult": "Canje de Puntos inicia el límite de autenticación del kiosco.",
+    "preconditions": [
+      "1. BASE_URL configurado.",
+      "2. App available.",
+      "3. APP_LOGIN_MODE=password.",
+      "4. AuthGate/AuthFlow enabled.",
+      "5. Test client meets dataRequirements.",
+      "6. App Slug: kiosko."
+    ],
+    "observedAssertions": [],
+    "observableOracles": [
+      {
+        "id": "expected-01",
+        "requirement": "pantalla de autenticación del kiosco",
+        "type": "auth_gate",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 2,
+        "target": "pantalla de autenticación del kiosco",
+        "evidence": [
+          "auth_gate_detected:true",
+          "auth_stage:unknown"
+        ],
+        "details": {
+          "gateDetected": true,
+          "stage": null,
+          "detectedBeforeStep": null,
+          "authFlowLanding": "transactions_menu"
+        }
+      },
+      {
+        "id": "reconciled-auth-2",
+        "requirement": "pantalla de autenticación del kiosco",
+        "type": "auth_gate",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 2,
+        "evidence": [
+          "auth_gate_detected:true",
+          "auth_stage:unknown",
+          "satisfied_by:auth_gate"
+        ],
+        "details": {
+          "gateDetected": true,
+          "stage": null,
+          "detectedBeforeStep": null,
+          "satisfiedBy": "auth_gate"
+        }
+      }
+    ],
+    "stepStatuses": [
+      {
+        "index": 1,
+        "status": "found"
+      },
+      {
+        "index": 2,
+        "status": "satisfied_by_previous_assertion"
+      }
+    ],
+    "auth": {
+      "gateDetected": true,
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    }
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "PREVIEW-004",
+    "title": "Redirigir Canje de Puntos a la autenticación del kiosco",
+    "appSlug": "kiosko",
+    "sectionSlug": "api-tests",
+    "auth": {
+      "gateDetected": true,
+      "required": false,
+      "stage": "identification_input",
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    },
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Clic en \"Canje de Puntos\".",
+        "operation": "navigate",
+        "target": {
+          "strategy": "url",
+          "value": "APP_BASE_URL"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Validar que se muestre \"pantalla de autenticación del kiosco\".",
+        "operation": "assertVisible",
+        "target": {
+          "strategy": "text",
+          "value": "pantalla de autenticación del kiosco"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "auth_gate",
+          "backed": true,
+          "implementationKind": "heading_or_control",
+          "mechanism": {
+            "source": "auth_gate_detector",
+            "method": "detectAuthGate",
+            "scanner": {
+              "source": "page_scanner",
+              "method": "scanCurrentPage"
+            },
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "auth_gate"
+            }
+          },
+          "requirement": "pantalla de autenticación del kiosco",
+          "target": "pantalla de autenticación del kiosco"
+        },
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 2,
+      "representedScenarioSteps": 2,
+      "missingScenarioSteps": []
+    }
+  }
+}

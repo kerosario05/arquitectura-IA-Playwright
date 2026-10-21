@@ -3,6 +3,7 @@ import type { LoginMode } from "../types/env.types";
 import { JiraClient } from "../clients/jira.client";
 import { loadJiraIssues } from "./jira-scenario-source";
 import { generateScenariosWithAi, evaluateProviderClaimCompliance } from "./codex-scenario-generator";
+import { generateJiraScenarios } from "../jira/jira-scenario-generator";
 import { validateScenario } from "./scenario-validator";
 import { buildCanonicalClaims, buildRequirementAccounting, evaluateFunctionalCoverageInvariant } from "./scenario-functional-quality";
 import { classifyScenarioPublicationEligibility } from "./scenario-publication-eligibility";
@@ -163,6 +164,8 @@ export function extractStructuredOptionFlows(huText: string): OptionFlow[] {
       .replace(/^\s*(?:[-*•]|\d+[.)])\s*/, "")
       .match(/^(.+?)\s*(?::|：|→)\s*(.+)$/);
     if (!item) continue;
+    // Document headings are metadata, even when another paragraph mentions selection.
+    if (/^(?:hu|historia(?: de usuario)?|user story|t[ií]tulo|title|descripci[oó]n(?: funcional)?|criterios? de aceptaci[oó]n|acceptance criteria|ac\d+|ca\d+)$/i.test(item[1].trim())) continue;
     const labels = item[1].split(/\s*,\s*|\s+\by\b\s+/i)
       .map((label) => label.trim().replace(/^"|"$/g, ""))
       .filter((label) => label.length > 1);
@@ -2452,6 +2455,22 @@ async function generateScenarioPreviewForIssue(
   }
 
   console.log(`[jira] selected issues count=${issues.length} keys=${JSON.stringify(issues.map((i) => i.key))}`);
+  if (req.generationMode === "jira_semantic") {
+    try {
+      const generated = await generateJiraScenarios(issues, effectiveAppSlug);
+      return {
+        ok: true,
+        source: { mode: "jira", projectKey: req.projectKey, sprintId, status: req.status ?? null, issuesFound: issues.length },
+        testrail: { projectId: req.testrailProjectId ?? null, suiteId: req.testrailSuiteId ?? null, sectionId: req.testrailSectionId ?? null, sectionName: req.testrailSectionName ?? null },
+        appSlug: effectiveAppSlug, targetAppSlug: appInference.appSlug, targetAppName: appInference.appName,
+        appInference, appProfilePath: appProfileResult.appConfigPath, scenarios: generated.scenarios,
+        routeProfile: null, rejected: generated.rejected, warnings: ["Jira scenarios require live Discovery before promotion; acceptance coverage must be reviewed."],
+        summary: { generated: generated.scenarios.length, visible: generated.scenarios.length, valid: generated.scenarios.filter(scenario => scenario.validation.valid).length, invalid: generated.scenarios.filter(scenario => !scenario.validation.valid).length, rejected: generated.rejected.length, adaptive: generated.scenarios.length, standard: 0 },
+      };
+    } catch (error) {
+      return { ok: false, error: "scenario_generation_failed", message: error instanceof Error ? error.message : "Jira scenario generation failed" };
+    }
+  }
   const canonicalIssues = issues.map((issue) => {
     const context = buildCanonicalHuContext(issue);
     return {
@@ -2645,7 +2664,7 @@ async function generateScenarioPreviewForIssue(
       huModel,
       scenarioPlan,
       functionalBranchesForAi,
-      { launchId: req.launchId },
+      { launchId: req.launchId, executionEngine: req.generationMode === "jira_semantic" ? "jira_semantic" : undefined },
     );
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -2704,7 +2723,7 @@ async function generateScenarioPreviewForIssue(
   // balance_inquiry / document_generation / payment_transfer / private scenarios
   // with steps like "Información de productos" from a catalog routeProfile.
   const isNonCatalogForInsertion = !canonicalIntentResolution.catalogRelevant && !canonicalIntentResolution.productDetailRelevant;
-  if ((newEntrySteps.length > 0 || oldEntrySteps.length > 0) && !isNonCatalogForInsertion) {
+  if (req.generationMode !== "jira_semantic" && (newEntrySteps.length > 0 || oldEntrySteps.length > 0) && !isNonCatalogForInsertion) {
     const entryFieldAuthority = resolvedRouteProfile?.fieldProvenance?.entry;
     const routeEntryAuthority = ["explicit_trusted_config", "validated_knowledge", "trusted_route"].includes(entryFieldAuthority ?? "unknown");
     rawScenarios = rawScenarios.map((sc) => {
@@ -2748,7 +2767,7 @@ async function generateScenarioPreviewForIssue(
   const routeResolutions = generationResult.routeResolutions;
 
   // Repair missing intermediate steps
-  if (resolvedRouteProfile) {
+  if (resolvedRouteProfile && req.generationMode !== "jira_semantic") {
     const derivedContext = buildDerivedExecutionContext(
       appInference.appSlug,
       resolvedRouteProfile,

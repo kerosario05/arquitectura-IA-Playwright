@@ -1,0 +1,9 @@
+{
+  "appSlug": "kiosko",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "PREVIEW-005",
+  "testRailCaseId": 0,
+  "generatedAt": "2026-10-09T12:58:42.930Z",
+  "title": "Redirigir Canje de Puntos a autenticación"
+}

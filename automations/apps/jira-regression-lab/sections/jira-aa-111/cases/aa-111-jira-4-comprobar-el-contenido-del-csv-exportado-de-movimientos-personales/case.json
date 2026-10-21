@@ -1,0 +1,9 @@
+{
+  "id": "aa-111-jira-4-comprobar-el-contenido-del-csv-exportado-de-movimientos-personales",
+  "externalId": "AA-111:jira:4",
+  "title": "Comprobar el contenido del CSV exportado de movimientos personales",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-19T03:51:59.925Z"
+}

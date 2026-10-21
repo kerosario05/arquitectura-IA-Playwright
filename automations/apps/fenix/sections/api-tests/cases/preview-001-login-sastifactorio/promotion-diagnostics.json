@@ -15,6 +15,6 @@
   "fallbackUsed": false,
   "requirePomRuntime": false,
   "specPath": "automations\\apps\\fenix\\sections\\api-tests\\cases\\preview-001-login-sastifactorio\\case.spec.ts",
-  "specHash": "dbb4e3558433250a20f0459dfa092a37bf87cb38288a5c126175f3035ef17605",
+  "specHash": "f454256b1c23c1f3e5c16d2f54e6f4f988c12c01e477ebfd3dd203dc44f20d9a",
   "specSource": "generatedSpec"
 }

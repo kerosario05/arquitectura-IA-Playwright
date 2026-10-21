@@ -1,0 +1,655 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-19T01:29:09.608Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "AA-107:jira:2",
+    "title": "Configurar la política con el rol Aprobador"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "fill",
+      "description": "fill [auth.company_identifier]",
+      "valueKey": "auth.company_identifier",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-rnc\"]"
+      }
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "fill [auth.username]",
+      "valueKey": "auth.username",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-user\"]"
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [auth.password]",
+      "valueKey": "auth.password",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-password\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "click Iniciar sesión",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Iniciar sesión",
+        "exact": true
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Presionar navegación a \"Administración\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "⚙ Administración",
+        "exact": true
+      }
+    },
+    {
+      "index": 7,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Política de aprobación\"",
+      "target": {
+        "strategy": "text",
+        "value": "Política de aprobación"
+      }
+    },
+    {
+      "index": 8,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Rol de Laura M.\"",
+      "target": {
+        "strategy": "text",
+        "value": "Rol de Laura M."
+      }
+    },
+    {
+      "index": 9,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Límite de aprobación\"",
+      "target": {
+        "strategy": "text",
+        "value": "Límite de aprobación"
+      }
+    },
+    {
+      "index": 10,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Consultar cuentas\"",
+      "target": {
+        "strategy": "text",
+        "value": "Consultar cuentas"
+      }
+    },
+    {
+      "index": 11,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Crear transferencias\"",
+      "target": {
+        "strategy": "text",
+        "value": "Crear transferencias"
+      }
+    },
+    {
+      "index": 12,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Aprobar pagos\"",
+      "target": {
+        "strategy": "text",
+        "value": "Aprobar pagos"
+      }
+    },
+    {
+      "index": 13,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Administrar usuarios\"",
+      "target": {
+        "strategy": "text",
+        "value": "Administrar usuarios"
+      }
+    },
+    {
+      "index": 14,
+      "action": "select",
+      "description": "select [jira_step_10]",
+      "valueKey": "jira_step_10",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"user-role\"]"
+      }
+    },
+    {
+      "index": 15,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Aprobador\"",
+      "target": {
+        "strategy": "text",
+        "value": "Aprobador"
+      }
+    },
+    {
+      "index": 16,
+      "action": "fill",
+      "description": "fill [limite_aprobacion]",
+      "valueKey": "limite_aprobacion",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"approval-limit\"]"
+      }
+    },
+    {
+      "index": 17,
+      "action": "assertVisible",
+      "description": "Validar que el control \"Ajuste visual\" se actualice con el monto ingresado.",
+      "target": {
+        "strategy": "text",
+        "value": "Ajuste visual"
+      }
+    },
+    {
+      "index": 18,
+      "action": "click",
+      "description": "Presionar \"Consultar cuentas\"",
+      "target": {
+        "strategy": "role",
+        "role": "checkbox",
+        "name": "Consultar cuentas",
+        "exact": true
+      }
+    },
+    {
+      "index": 19,
+      "action": "click",
+      "description": "Presionar \"Crear transferencias\"",
+      "target": {
+        "strategy": "role",
+        "role": "checkbox",
+        "name": "Crear transferencias",
+        "exact": true
+      }
+    },
+    {
+      "index": 20,
+      "action": "select",
+      "description": "select [permiso_aprobar_pagos]",
+      "valueKey": "permiso_aprobar_pagos",
+      "target": {
+        "strategy": "role",
+        "role": "checkbox",
+        "name": "Aprobar pagos",
+        "exact": true
+      }
+    },
+    {
+      "index": 21,
+      "action": "select",
+      "description": "select [permiso_administrar_usuarios]",
+      "valueKey": "permiso_administrar_usuarios",
+      "target": {
+        "strategy": "role",
+        "role": "checkbox",
+        "name": "Administrar usuarios",
+        "exact": true
+      }
+    },
+    {
+      "index": 22,
+      "action": "click",
+      "description": "Presionar \"Guardar política\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Guardar política",
+        "exact": true
+      }
+    },
+    {
+      "index": 23,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"La política de aprobación se guardó.\"",
+      "target": {
+        "strategy": "text",
+        "value": "La política de aprobación se guardó."
+      }
+    },
+    {
+      "index": 24,
+      "action": "assertVisible",
+      "description": "Validar que la fila de \"Laura M.\" refleje el rol elegido.",
+      "target": {
+        "strategy": "text",
+        "value": "Laura M."
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "auth.company_identifier",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "auth.username",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "auth.password",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "jira_step_10",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "limite_aprobacion",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "permiso_aprobar_pagos",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "permiso_administrar_usuarios",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Configurar la política con el rol Aprobador",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "fill",
+        "valueKey": "auth.company_identifier",
+        "technicalTargetRefs": [
+          "css:[id=\"login-rnc\"]"
+        ]
+      },
+      {
+        "index": 3,
+        "action": "fill",
+        "valueKey": "auth.username",
+        "technicalTargetRefs": [
+          "css:[id=\"login-user\"]"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "auth.password",
+        "technicalTargetRefs": [
+          "css:[id=\"login-password\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|⚙ Administración"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Política de aprobación\"",
+        "technicalTargetRefs": [
+          "text:Política de aprobación"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Rol de Laura M.\"",
+        "technicalTargetRefs": [
+          "text:Rol de Laura M."
+        ]
+      },
+      {
+        "index": 9,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Límite de aprobación\"",
+        "technicalTargetRefs": [
+          "text:Límite de aprobación"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Consultar cuentas\"",
+        "technicalTargetRefs": [
+          "text:Consultar cuentas"
+        ]
+      },
+      {
+        "index": 11,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Crear transferencias\"",
+        "technicalTargetRefs": [
+          "text:Crear transferencias"
+        ]
+      },
+      {
+        "index": 12,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Aprobar pagos\"",
+        "technicalTargetRefs": [
+          "text:Aprobar pagos"
+        ]
+      },
+      {
+        "index": 13,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Administrar usuarios\"",
+        "technicalTargetRefs": [
+          "text:Administrar usuarios"
+        ]
+      },
+      {
+        "index": 14,
+        "action": "select",
+        "valueKey": "jira_step_10",
+        "technicalTargetRefs": [
+          "css:[id=\"user-role\"]"
+        ]
+      },
+      {
+        "index": 15,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Aprobador\"",
+        "technicalTargetRefs": [
+          "text:Aprobador"
+        ]
+      },
+      {
+        "index": 16,
+        "action": "fill",
+        "valueKey": "limite_aprobacion",
+        "technicalTargetRefs": [
+          "css:[id=\"approval-limit\"]"
+        ]
+      },
+      {
+        "index": 17,
+        "action": "assertVisible",
+        "description": "Validar que el control \"Ajuste visual\" se actualice con el monto ingresado.",
+        "technicalTargetRefs": [
+          "text:Ajuste visual"
+        ]
+      },
+      {
+        "index": 18,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:checkbox|Consultar cuentas"
+        ]
+      },
+      {
+        "index": 19,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:checkbox|Crear transferencias"
+        ]
+      },
+      {
+        "index": 20,
+        "action": "select",
+        "valueKey": "permiso_aprobar_pagos",
+        "technicalTargetRefs": [
+          "role:checkbox|Aprobar pagos"
+        ]
+      },
+      {
+        "index": 21,
+        "action": "select",
+        "valueKey": "permiso_administrar_usuarios",
+        "technicalTargetRefs": [
+          "role:checkbox|Administrar usuarios"
+        ]
+      },
+      {
+        "index": 22,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Guardar política"
+        ]
+      },
+      {
+        "index": 23,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"La política de aprobación se guardó.\"",
+        "technicalTargetRefs": [
+          "text:La política de aprobación se guardó."
+        ]
+      },
+      {
+        "index": 24,
+        "action": "assertVisible",
+        "description": "Validar que la fila de \"Laura M.\" refleje el rol elegido.",
+        "technicalTargetRefs": [
+          "text:Laura M."
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-7",
+        "requirement": "Validar que se muestre \"Política de aprobación\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 7,
+        "target": "Política de aprobación",
+        "evidence": [
+          "live-step-7"
+        ],
+        "details": {
+          "observedText": "Política de aprobación"
+        }
+      },
+      {
+        "id": "jira-oracle-8",
+        "requirement": "Validar que se muestre \"Rol de Laura M.\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 8,
+        "target": "CONTROL DE ACCESO\nUsuarios y roles\n\nConfigura permisos, límites y aprobaciones del equipo.\n\nInvitar usuario\nUsuarios de la empresa\n4 activos\nUSUARIO\tROL\tESTADO\tÚLTIMO ACCESO\nQA Demo · qa_empresa\tAdministrador\tActivo\tHoy, 09:10\nLaura M. · laura.ops\tOperador\tActivo\tHoy, 08:42\nMateo R. · mateo.approver\tAprobador\tInvitación pendiente\t—\nPolítica de aprobación\nRol de Laura M.\nOperador\nAprobador\nAdministrador\nLímite de aprobación\nAjuste visual: RD$10,000\nPermisos del rol\nConsultar cuentas\nCrear transferencias\nAprobar pagos\nAdministrar usuarios\nGuardar política\nRegla de doble aprobación",
+        "evidence": [
+          "live-step-8"
+        ],
+        "details": {
+          "observedText": "CONTROL DE ACCESO\nUsuarios y roles\n\nConfigura permisos, límites y aprobaciones del equipo.\n\nInvitar usuario\nUsuarios de la empresa\n4 activos\nUSUARIO\tROL\tESTADO\tÚLTIMO ACCESO\nQA Demo · qa_empresa\tAdministrador\tActivo\tHoy, 09:10\nLaura M. · laura.ops\tOperador\tActivo\tHoy, 08:42\nMateo R. · mateo.approver\tAprobador\tInvitación pendiente\t—\nPolítica de aprobación\nRol de Laura M.\nOperador\nAprobador\nAdministrador\nLímite de aprobación\nAjuste visual: RD$10,000\nPermisos del rol\nConsultar cuentas\nCrear transferencias\nAprobar pagos\nAdministrar usuarios\nGuardar política\nRegla de doble aprobación"
+        }
+      },
+      {
+        "id": "jira-oracle-9",
+        "requirement": "Validar que se muestre \"Límite de aprobación\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 9,
+        "target": "CONTROL DE ACCESO\nUsuarios y roles\n\nConfigura permisos, límites y aprobaciones del equipo.\n\nInvitar usuario\nUsuarios de la empresa\n4 activos\nUSUARIO\tROL\tESTADO\tÚLTIMO ACCESO\nQA Demo · qa_empresa\tAdministrador\tActivo\tHoy, 09:10\nLaura M. · laura.ops\tOperador\tActivo\tHoy, 08:42\nMateo R. · mateo.approver\tAprobador\tInvitación pendiente\t—\nPolítica de aprobación\nRol de Laura M.\nOperador\nAprobador\nAdministrador\nLímite de aprobación\nAjuste visual: RD$10,000\nPermisos del rol\nConsultar cuentas\nCrear transferencias\nAprobar pagos\nAdministrar usuarios\nGuardar política\nRegla de doble aprobación",
+        "evidence": [
+          "live-step-9"
+        ],
+        "details": {
+          "observedText": "CONTROL DE ACCESO\nUsuarios y roles\n\nConfigura permisos, límites y aprobaciones del equipo.\n\nInvitar usuario\nUsuarios de la empresa\n4 activos\nUSUARIO\tROL\tESTADO\tÚLTIMO ACCESO\nQA Demo · qa_empresa\tAdministrador\tActivo\tHoy, 09:10\nLaura M. · laura.ops\tOperador\tActivo\tHoy, 08:42\nMateo R. · mateo.approver\tAprobador\tInvitación pendiente\t—\nPolítica de aprobación\nRol de Laura M.\nOperador\nAprobador\nAdministrador\nLímite de aprobación\nAjuste visual: RD$10,000\nPermisos del rol\nConsultar cuentas\nCrear transferencias\nAprobar pagos\nAdministrar usuarios\nGuardar política\nRegla de doble aprobación"
+        }
+      },
+      {
+        "id": "jira-oracle-10",
+        "requirement": "Validar que se muestre \"Consultar cuentas\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 10,
+        "target": "CONTROL DE ACCESO\nUsuarios y roles\n\nConfigura permisos, límites y aprobaciones del equipo.\n\nInvitar usuario\nUsuarios de la empresa\n4 activos\nUSUARIO\tROL\tESTADO\tÚLTIMO ACCESO\nQA Demo · qa_empresa\tAdministrador\tActivo\tHoy, 09:10\nLaura M. · laura.ops\tOperador\tActivo\tHoy, 08:42\nMateo R. · mateo.approver\tAprobador\tInvitación pendiente\t—\nPolítica de aprobación\nRol de Laura M.\nOperador\nAprobador\nAdministrador\nLímite de aprobación\nAjuste visual: RD$10,000\nPermisos del rol\nConsultar cuentas\nCrear transferencias\nAprobar pagos\nAdministrar usuarios\nGuardar política\nRegla de doble aprobación",
+        "evidence": [
+          "live-step-10"
+        ],
+        "details": {
+          "observedText": "CONTROL DE ACCESO\nUsuarios y roles\n\nConfigura permisos, límites y aprobaciones del equipo.\n\nInvitar usuario\nUsuarios de la empresa\n4 activos\nUSUARIO\tROL\tESTADO\tÚLTIMO ACCESO\nQA Demo · qa_empresa\tAdministrador\tActivo\tHoy, 09:10\nLaura M. · laura.ops\tOperador\tActivo\tHoy, 08:42\nMateo R. · mateo.approver\tAprobador\tInvitación pendiente\t—\nPolítica de aprobación\nRol de Laura M.\nOperador\nAprobador\nAdministrador\nLímite de aprobación\nAjuste visual: RD$10,000\nPermisos del rol\nConsultar cuentas\nCrear transferencias\nAprobar pagos\nAdministrar usuarios\nGuardar política\nRegla de doble aprobación"
+        }
+      },
+      {
+        "id": "jira-oracle-11",
+        "requirement": "Validar que se muestre \"Crear transferencias\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 11,
+        "target": "CONTROL DE ACCESO\nUsuarios y roles\n\nConfigura permisos, límites y aprobaciones del equipo.\n\nInvitar usuario\nUsuarios de la empresa\n4 activos\nUSUARIO\tROL\tESTADO\tÚLTIMO ACCESO\nQA Demo · qa_empresa\tAdministrador\tActivo\tHoy, 09:10\nLaura M. · laura.ops\tOperador\tActivo\tHoy, 08:42\nMateo R. · mateo.approver\tAprobador\tInvitación pendiente\t—\nPolítica de aprobación\nRol de Laura M.\nOperador\nAprobador\nAdministrador\nLímite de aprobación\nAjuste visual: RD$10,000\nPermisos del rol\nConsultar cuentas\nCrear transferencias\nAprobar pagos\nAdministrar usuarios\nGuardar política\nRegla de doble aprobación",
+        "evidence": [
+          "live-step-11"
+        ],
+        "details": {
+          "observedText": "CONTROL DE ACCESO\nUsuarios y roles\n\nConfigura permisos, límites y aprobaciones del equipo.\n\nInvitar usuario\nUsuarios de la empresa\n4 activos\nUSUARIO\tROL\tESTADO\tÚLTIMO ACCESO\nQA Demo · qa_empresa\tAdministrador\tActivo\tHoy, 09:10\nLaura M. · laura.ops\tOperador\tActivo\tHoy, 08:42\nMateo R. · mateo.approver\tAprobador\tInvitación pendiente\t—\nPolítica de aprobación\nRol de Laura M.\nOperador\nAprobador\nAdministrador\nLímite de aprobación\nAjuste visual: RD$10,000\nPermisos del rol\nConsultar cuentas\nCrear transferencias\nAprobar pagos\nAdministrar usuarios\nGuardar política\nRegla de doble aprobación"
+        }
+      },
+      {
+        "id": "jira-oracle-12",
+        "requirement": "Validar que se muestre \"Aprobar pagos\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 12,
+        "target": "CONTROL DE ACCESO\nUsuarios y roles\n\nConfigura permisos, límites y aprobaciones del equipo.\n\nInvitar usuario\nUsuarios de la empresa\n4 activos\nUSUARIO\tROL\tESTADO\tÚLTIMO ACCESO\nQA Demo · qa_empresa\tAdministrador\tActivo\tHoy, 09:10\nLaura M. · laura.ops\tOperador\tActivo\tHoy, 08:42\nMateo R. · mateo.approver\tAprobador\tInvitación pendiente\t—\nPolítica de aprobación\nRol de Laura M.\nOperador\nAprobador\nAdministrador\nLímite de aprobación\nAjuste visual: RD$10,000\nPermisos del rol\nConsultar cuentas\nCrear transferencias\nAprobar pagos\nAdministrar usuarios\nGuardar política\nRegla de doble aprobación",
+        "evidence": [
+          "live-step-12"
+        ],
+        "details": {
+          "observedText": "CONTROL DE ACCESO\nUsuarios y roles\n\nConfigura permisos, límites y aprobaciones del equipo.\n\nInvitar usuario\nUsuarios de la empresa\n4 activos\nUSUARIO\tROL\tESTADO\tÚLTIMO ACCESO\nQA Demo · qa_empresa\tAdministrador\tActivo\tHoy, 09:10\nLaura M. · laura.ops\tOperador\tActivo\tHoy, 08:42\nMateo R. · mateo.approver\tAprobador\tInvitación pendiente\t—\nPolítica de aprobación\nRol de Laura M.\nOperador\nAprobador\nAdministrador\nLímite de aprobación\nAjuste visual: RD$10,000\nPermisos del rol\nConsultar cuentas\nCrear transferencias\nAprobar pagos\nAdministrar usuarios\nGuardar política\nRegla de doble aprobación"
+        }
+      },
+      {
+        "id": "jira-oracle-13",
+        "requirement": "Validar que se muestre \"Administrar usuarios\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 13,
+        "target": "CONTROL DE ACCESO\nUsuarios y roles\n\nConfigura permisos, límites y aprobaciones del equipo.\n\nInvitar usuario\nUsuarios de la empresa\n4 activos\nUSUARIO\tROL\tESTADO\tÚLTIMO ACCESO\nQA Demo · qa_empresa\tAdministrador\tActivo\tHoy, 09:10\nLaura M. · laura.ops\tOperador\tActivo\tHoy, 08:42\nMateo R. · mateo.approver\tAprobador\tInvitación pendiente\t—\nPolítica de aprobación\nRol de Laura M.\nOperador\nAprobador\nAdministrador\nLímite de aprobación\nAjuste visual: RD$10,000\nPermisos del rol\nConsultar cuentas\nCrear transferencias\nAprobar pagos\nAdministrar usuarios\nGuardar política\nRegla de doble aprobación",
+        "evidence": [
+          "live-step-13"
+        ],
+        "details": {
+          "observedText": "CONTROL DE ACCESO\nUsuarios y roles\n\nConfigura permisos, límites y aprobaciones del equipo.\n\nInvitar usuario\nUsuarios de la empresa\n4 activos\nUSUARIO\tROL\tESTADO\tÚLTIMO ACCESO\nQA Demo · qa_empresa\tAdministrador\tActivo\tHoy, 09:10\nLaura M. · laura.ops\tOperador\tActivo\tHoy, 08:42\nMateo R. · mateo.approver\tAprobador\tInvitación pendiente\t—\nPolítica de aprobación\nRol de Laura M.\nOperador\nAprobador\nAdministrador\nLímite de aprobación\nAjuste visual: RD$10,000\nPermisos del rol\nConsultar cuentas\nCrear transferencias\nAprobar pagos\nAdministrar usuarios\nGuardar política\nRegla de doble aprobación"
+        }
+      },
+      {
+        "id": "jira-oracle-15",
+        "requirement": "Validar que se muestre \"Aprobador\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 15,
+        "target": "CONTROL DE ACCESO\nUsuarios y roles\n\nConfigura permisos, límites y aprobaciones del equipo.\n\nInvitar usuario\nUsuarios de la empresa\n4 activos\nUSUARIO\tROL\tESTADO\tÚLTIMO ACCESO\nQA Demo · qa_empresa\tAdministrador\tActivo\tHoy, 09:10\nLaura M. · laura.ops\tOperador\tActivo\tHoy, 08:42\nMateo R. · mateo.approver\tAprobador\tInvitación pendiente\t—\nPolítica de aprobación\nRol de Laura M.\nOperador\nAprobador\nAdministrador\nLímite de aprobación\nAjuste visual: RD$10,000\nPermisos del rol\nConsultar cuentas\nCrear transferencias\nAprobar pagos\nAdministrar usuarios\nGuardar política\nRegla de doble aprobación",
+        "evidence": [
+          "live-step-15"
+        ],
+        "details": {
+          "observedText": "CONTROL DE ACCESO\nUsuarios y roles\n\nConfigura permisos, límites y aprobaciones del equipo.\n\nInvitar usuario\nUsuarios de la empresa\n4 activos\nUSUARIO\tROL\tESTADO\tÚLTIMO ACCESO\nQA Demo · qa_empresa\tAdministrador\tActivo\tHoy, 09:10\nLaura M. · laura.ops\tOperador\tActivo\tHoy, 08:42\nMateo R. · mateo.approver\tAprobador\tInvitación pendiente\t—\nPolítica de aprobación\nRol de Laura M.\nOperador\nAprobador\nAdministrador\nLímite de aprobación\nAjuste visual: RD$10,000\nPermisos del rol\nConsultar cuentas\nCrear transferencias\nAprobar pagos\nAdministrar usuarios\nGuardar política\nRegla de doble aprobación"
+        }
+      },
+      {
+        "id": "jira-oracle-17",
+        "requirement": "Validar que el control \"Ajuste visual\" se actualice con el monto ingresado.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 17,
+        "target": "CONTROL DE ACCESO\nUsuarios y roles\n\nConfigura permisos, límites y aprobaciones del equipo.\n\nInvitar usuario\nUsuarios de la empresa\n4 activos\nUSUARIO\tROL\tESTADO\tÚLTIMO ACCESO\nQA Demo · qa_empresa\tAdministrador\tActivo\tHoy, 09:10\nLaura M. · laura.ops\tOperador\tActivo\tHoy, 08:42\nMateo R. · mateo.approver\tAprobador\tInvitación pendiente\t—\nPolítica de aprobación\nRol de Laura M.\nOperador\nAprobador\nAdministrador\nLímite de aprobación\nAjuste visual: RD$5,000\nPermisos del rol\nConsultar cuentas\nCrear transferencias\nAprobar pagos\nAdministrar usuarios\nGuardar política\nRegla de doble aprobación",
+        "evidence": [
+          "live-step-17"
+        ],
+        "details": {
+          "observedText": "CONTROL DE ACCESO\nUsuarios y roles\n\nConfigura permisos, límites y aprobaciones del equipo.\n\nInvitar usuario\nUsuarios de la empresa\n4 activos\nUSUARIO\tROL\tESTADO\tÚLTIMO ACCESO\nQA Demo · qa_empresa\tAdministrador\tActivo\tHoy, 09:10\nLaura M. · laura.ops\tOperador\tActivo\tHoy, 08:42\nMateo R. · mateo.approver\tAprobador\tInvitación pendiente\t—\nPolítica de aprobación\nRol de Laura M.\nOperador\nAprobador\nAdministrador\nLímite de aprobación\nAjuste visual: RD$5,000\nPermisos del rol\nConsultar cuentas\nCrear transferencias\nAprobar pagos\nAdministrar usuarios\nGuardar política\nRegla de doble aprobación"
+        }
+      },
+      {
+        "id": "jira-oracle-23",
+        "requirement": "Validar que se muestre \"La política de aprobación se guardó.\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 23,
+        "target": "La política de aprobación se guardó.",
+        "evidence": [
+          "live-step-23"
+        ],
+        "details": {
+          "observedText": "La política de aprobación se guardó."
+        }
+      },
+      {
+        "id": "jira-oracle-24",
+        "requirement": "Validar que la fila de \"Laura M.\" refleje el rol elegido.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 24,
+        "target": "CONTROL DE ACCESO\nUsuarios y roles\n\nConfigura permisos, límites y aprobaciones del equipo.\n\nInvitar usuario\nUsuarios de la empresa\n4 activos\nUSUARIO\tROL\tESTADO\tÚLTIMO ACCESO\nQA Demo · qa_empresa\tAdministrador\tActivo\tHoy, 09:10\nLaura M. · laura.ops\tAprobador\tActivo\tHoy, 08:42\nMateo R. · mateo.approver\tAprobador\tInvitación pendiente\t—\nPolítica de aprobación\nRol de Laura M.\nOperador\nAprobador\nAdministrador\nLímite de aprobación\nAjuste visual: RD$5,000\nPermisos del rol\nConsultar cuentas\nCrear transferencias\nAprobar pagos\nAdministrar usuarios\nGuardar política\nRegla de doble aprobación",
+        "evidence": [
+          "live-step-24"
+        ],
+        "details": {
+          "observedText": "CONTROL DE ACCESO\nUsuarios y roles\n\nConfigura permisos, límites y aprobaciones del equipo.\n\nInvitar usuario\nUsuarios de la empresa\n4 activos\nUSUARIO\tROL\tESTADO\tÚLTIMO ACCESO\nQA Demo · qa_empresa\tAdministrador\tActivo\tHoy, 09:10\nLaura M. · laura.ops\tAprobador\tActivo\tHoy, 08:42\nMateo R. · mateo.approver\tAprobador\tInvitación pendiente\t—\nPolítica de aprobación\nRol de Laura M.\nOperador\nAprobador\nAdministrador\nLímite de aprobación\nAjuste visual: RD$5,000\nPermisos del rol\nConsultar cuentas\nCrear transferencias\nAprobar pagos\nAdministrar usuarios\nGuardar política\nRegla de doble aprobación"
+        }
+      }
+    ],
+    "auth": {
+      "required": true,
+      "gateDetected": true,
+      "insertionAfterStepIndex": 5,
+      "flowAlias": "defaultClient"
+    },
+    "expectedResult": "La fila de Laura M. refleja el rol Aprobador."
+  }
+}

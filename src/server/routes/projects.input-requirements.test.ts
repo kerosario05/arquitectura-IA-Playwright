@@ -69,6 +69,31 @@ describe("projects input-requirements handlers", () => {
       projectSlug: "app-a",
       caseId: 4171,
        inputRequirements: [{ key: "auth.username", required: true, namedProfileRef: "profile_a" }],
+      inputRequirementsSyncVersion: 2,
+    });
+  });
+
+  test("GET returns the last executed values scoped to the same project and TestRail case", async () => {
+    const svc = makeService();
+    const { getInputRequirements } = createInputRequirementsHandlers(svc as any, {
+      getProjectBySlug: async (slug: string) => ({ id: `id-${slug}` } as any),
+      getConfirmedRuntimeValues: async (projectId: string, caseId: number) => {
+        assert.equal(projectId, "id-app-a");
+        assert.equal(caseId, 4171);
+        return [
+          { key: "auth.username", value: "qa-user", verified: true, source: "confirmed_case_runtime" },
+          { key: "auth.password", value: "qa-password", verified: true, source: "confirmed_case_runtime" },
+        ] as any;
+      },
+    });
+    const res = makeRes();
+    await getInputRequirements({ params: { projectSlug: "app-a", caseId: "4171" } }, res, () => {});
+    assert.deepStrictEqual(res.body, {
+      projectSlug: "app-a",
+      caseId: 4171,
+      inputRequirements: [{ key: "auth.username", required: true, namedProfileRef: "profile_a" }],
+      runtimeValues: { "auth.username": "qa-user", "auth.password": "qa-password" },
+      inputRequirementsSyncVersion: 2,
     });
   });
 

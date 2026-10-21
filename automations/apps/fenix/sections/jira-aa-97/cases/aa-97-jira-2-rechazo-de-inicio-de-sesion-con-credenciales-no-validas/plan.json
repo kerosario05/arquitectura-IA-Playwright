@@ -1,0 +1,222 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-16T12:32:51.880Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "AA-97:jira:2",
+    "title": "Rechazo de inicio de sesión con credenciales no válidas"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Presionar \"perfil empresarial\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Empresarial",
+        "exact": true
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [rnc]",
+      "valueKey": "rnc",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"Enterprise\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "fill",
+      "description": "fill [usuario]",
+      "valueKey": "usuario",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"UserNameE\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "fill",
+      "description": "fill [contrasena_invalida]",
+      "valueKey": "contrasena_invalida",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"PasswordE\"]"
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"continuar inicio de sesión\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Iniciar sesión",
+        "exact": true
+      }
+    },
+    {
+      "index": 8,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"mensaje de problema de credenciales\"",
+      "target": {
+        "strategy": "text",
+        "value": "mensaje de problema de credenciales"
+      }
+    },
+    {
+      "index": 9,
+      "action": "assertVisible",
+      "description": "Validar que no se muestre \"operación como exitosa\"",
+      "target": {
+        "strategy": "text",
+        "value": "operación como exitosa"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "rnc",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "usuario",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena_invalida",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Rechazo de inicio de sesión con credenciales no válidas",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Empresarial"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "rnc",
+        "technicalTargetRefs": [
+          "css:[id=\"Enterprise\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "fill",
+        "valueKey": "usuario",
+        "technicalTargetRefs": [
+          "css:[id=\"UserNameE\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "fill",
+        "valueKey": "contrasena_invalida",
+        "technicalTargetRefs": [
+          "css:[id=\"PasswordE\"]"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"mensaje de problema de credenciales\"",
+        "technicalTargetRefs": [
+          "text:mensaje de problema de credenciales"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "assertVisible",
+        "description": "Validar que no se muestre \"operación como exitosa\"",
+        "technicalTargetRefs": [
+          "text:operación como exitosa"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-8",
+        "requirement": "Validar que se muestre \"mensaje de problema de credenciales\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 8,
+        "target": "Usuario o Contraseña inválidos.",
+        "evidence": [
+          "live-step-8"
+        ],
+        "details": {
+          "observedText": "Usuario o Contraseña inválidos."
+        }
+      },
+      {
+        "id": "jira-oracle-9",
+        "requirement": "Validar que no se muestre \"operación como exitosa\"",
+        "type": "literal_visible_text",
+        "polarity": "negative",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 9,
+        "target": "operación como exitosa",
+        "evidence": [
+          "live-step-9"
+        ],
+        "details": {
+          "absent": true
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "No se presenta la \"operación como exitosa\" tras el rechazo de las credenciales."
+  }
+}

@@ -49,6 +49,8 @@ export interface EvidenceStepRecord {
   target?: string;
   status: EvidenceStepStatus;
   screenshotPath?: string;
+  /** False means a real observed frame was retained without certifying visual readiness. */
+  screenshotSettled?: boolean;
   snapshotPath?: string;
   timestamp: string;
   errorMessage?: string;
@@ -64,6 +66,8 @@ export interface InitialScreenEvidence {
   reason?: string;
   /** Settled form checkpoint on the same screen, e.g. credentials filled before submit. */
   completedFormCheckpointPath?: string;
+  /** False marks a diagnostic initial frame, not a stable screen checkpoint. */
+  settled?: boolean;
 }
 
 export interface DetailEvidenceMetadata {

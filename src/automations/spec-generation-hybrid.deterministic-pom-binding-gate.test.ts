@@ -92,6 +92,13 @@ function baseInput(specContent: string, executionContract?: any) {
   };
 }
 
+test("expect.poll is a used Playwright import; a genuinely unused expect remains rejected", () => {
+  const active = structuralValidation(baseInput("import { test, expect } from '@playwright/test';\ntest('fixture', async () => { await expect.poll(() => true).toBe(true); });"));
+  assert.ok(!active.structureErrors.includes("unused_import:expect"));
+  const inactive = structuralValidation(baseInput("import { test, expect } from '@playwright/test';\ntest('fixture', async () => {});"));
+  assert.ok(inactive.structureErrors.includes("unused_import:expect"));
+});
+
 function contractWithSteps(steps: Array<{ scenarioStepIndex: number; operation: string; required?: boolean }>): any {
   return {
     version: "1.0",

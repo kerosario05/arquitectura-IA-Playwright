@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-105",
+  "sourceScenarioId": "AA-105:jira:7",
+  "title": "Filtrar la lista de beneficiarios por alias",
+  "generatedAt": "2026-10-19T06:39:02.692Z",
+  "executionEngine": "jira_semantic"
+}

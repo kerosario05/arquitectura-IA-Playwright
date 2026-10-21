@@ -1,0 +1,9 @@
+{
+  "id": "aa-107-jira-1-configurar-la-politica-con-el-rol-operador",
+  "externalId": "AA-107:jira:1",
+  "title": "Configurar la política con el rol Operador",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-19T01:28:49.807Z"
+}

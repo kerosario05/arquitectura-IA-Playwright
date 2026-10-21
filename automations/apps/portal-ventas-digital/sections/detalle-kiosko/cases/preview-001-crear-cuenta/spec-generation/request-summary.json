@@ -1,0 +1,934 @@
+{
+  "appSlug": "portal-ventas-digital",
+  "sectionSlug": "detalle-kiosko",
+  "scenarioId": "PREVIEW-001",
+  "scenarioTitle": "Crear cuenta",
+  "stepCount": 18,
+  "sourceExpectedResultPresent": true,
+  "requiredAssertionCount": 2,
+  "observableOracles": [
+    {
+      "id": "observed-01",
+      "requirement": "El sistema muestra \"Selecciona la cuenta de tu preferencia\"",
+      "type": "literal_visible_text",
+      "backed": true,
+      "source": "discovery",
+      "target": "Selecciona la cuenta de tu preferencia",
+      "evidence": [
+        "assertion_resolved_during_discovery"
+      ]
+    },
+    {
+      "id": "expected-01",
+      "requirement": "Se muestra \"Selecciona la cuenta de tu preferencia\"",
+      "type": "literal_visible_text",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 3,
+      "target": "Selecciona la cuenta de tu preferencia",
+      "evidence": [
+        "exact_literal_in_passed_recorded_visibility_assertion:true"
+      ]
+    }
+  ],
+  "oracleTypes": [
+    "literal_visible_text"
+  ],
+  "availablePageObjectCount": 2,
+  "mode": "deterministic",
+  "functionalExecutionEnabled": true,
+  "provider": null,
+  "model": null,
+  "skill": {
+    "name": null,
+    "version": null,
+    "hash": null,
+    "loaded": false
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "PREVIEW-001",
+    "title": "Crear cuenta",
+    "appSlug": "portal-ventas-digital",
+    "sectionSlug": "detalle-kiosko",
+    "auth": {
+      "gateDetected": true,
+      "required": false,
+      "stage": "otp",
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    },
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Abrir la aplicación configurada del proyecto",
+        "operation": "navigate",
+        "target": {
+          "strategy": "url",
+          "value": "APP_BASE_URL"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Presionar \"CuentaAhorra y maneja tu dinero forma ágil y sencilla.\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "CuentaAhorra y maneja tu dinero forma ágil y sencilla."
+        },
+        "technicalTargetRef": "role:button|CuentaAhorra y maneja tu dinero forma ágil y sencilla.",
+        "technicalTargetRefs": [
+          "role:button|CuentaAhorra y maneja tu dinero forma ágil y sencilla.",
+          "css:#nav-item-cuentas",
+          "id:nav-item-cuentas"
+        ],
+        "controlIdentity": "0b23ab3287d9|CuentaAhorra y maneja tu dinero forma ágil y sencilla.|role|button|CuentaAhorra y maneja tu dinero forma ágil y sencilla.",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[href=\"#\"][id=\"nav-item-cuentas\"][role=\"button\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a",
+              "role": "button"
+            },
+            "stableDirectAttributes": {
+              "href": "#",
+              "id": "nav-item-cuentas",
+              "role": "button"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "clippath",
+                "stableAttributes": {
+                  "id": "clip0_2384_5575"
+                }
+              }
+            ],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "nav-app-product-types"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"a\",\"role\":\"button\"},\"stableDirectAttributes\":{\"href\":\"#\",\"id\":\"nav-item-cuentas\",\"role\":\"button\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"clippath\",\"stableAttributes\":{\"id\":\"clip0_2384_5575\"}}],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",3]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"clippath\\\",1],[\\\"defs\\\",1],[\\\"g\\\",1],[\\\"path\\\",6],[\\\"rect\\\",1],[\\\"span\\\",5],[\\\"svg\\\",2]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "El sistema muestra \"Selecciona la cuenta de tu preferencia\"",
+        "operation": "assertVisible",
+        "target": {
+          "strategy": "text",
+          "value": "Selecciona la cuenta de tu preferencia"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "literal_visible_text",
+          "backed": true,
+          "implementationKind": "heading_or_control",
+          "requirement": "Se muestra \"Selecciona la cuenta de tu preferencia\"",
+          "target": "Selecciona la cuenta de tu preferencia"
+        },
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Presionar \"Continuar\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Continuar"
+        },
+        "technicalTargetRef": "role:button|Continuar",
+        "technicalTargetRefs": [
+          "role:button|Continuar",
+          "css:#btn-solicitar-cuenta-de-ahorros-personal-en-pesos",
+          "id:btn-solicitar-cuenta-de-ahorros-personal-en-pesos"
+        ],
+        "controlIdentity": "428533996fd7|Continuar|role|button|Continuar",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[id=\"btn-solicitar-cuenta-de-ahorros-personal-en-pesos\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "id": "btn-solicitar-cuenta-de-ahorros-personal-en-pesos"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "card-cuenta-de-ahorros-personal-en-pesos"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-solicitar-cuenta-de-ahorros-personal-en-pesos\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"path\\\",1],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 4,
+        "scenarioStepIndex": 5,
+        "originalText": "Ingresar \"402-2467955-1\" en \"Número de identificación\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Número de identificación"
+        },
+        "valueKey": "numero_de_identificacion",
+        "associatedField": "Número de identificación",
+        "technicalTargetRef": "css:#x_DocumentId",
+        "technicalTargetRefs": [
+          "css:#x_DocumentId",
+          "id:x_DocumentId"
+        ],
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Número de identificación",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 5,
+        "scenarioStepIndex": 6,
+        "originalText": "Marcar \"Acepto los Términos y Condiciones\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Acepto los Términos y Condiciones"
+        },
+        "valueKey": "control",
+        "associatedField": "control",
+        "technicalTargetRef": "role:checkbox|Acepto los Términos y Condiciones de la Aplicación Móvil, Web, Portal(es) y/o Pl",
+        "technicalTargetRefs": [
+          "role:checkbox|Acepto los Términos y Condiciones de la Aplicación Móvil, Web, Portal(es) y/o Pl",
+          "css:#base-ui-_r_1i_",
+          "id:base-ui-_r_1i_"
+        ],
+        "controlIdentity": "428533996fd7|control|role|checkbox|Acepto los Términos y Condiciones de la Aplicación Móvil, Web, Portal(es) y/o Pl",
+        "recordingActionType": "check",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-labelledby=\"el_AcceptTermsAndConditions\"][id=\"base-ui-_r_1i_\"][role=\"checkbox\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "span",
+              "role": "checkbox"
+            },
+            "stableDirectAttributes": {
+              "aria-labelledby": "el_AcceptTermsAndConditions",
+              "id": "base-ui-_r_1i_",
+              "role": "checkbox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "el_AcceptTermsAndConditions"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"span\",\"role\":\"checkbox\"},\"stableDirectAttributes\":{\"id\":\"base-ui-_r_1i_\",\"role\":\"checkbox\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": false,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "checkbox",
+          "normalizedName": "Acepto los Términos y Condiciones de la Aplicación Móvil, Web, Portal(es) y/o Plataforma(s) Digitales y los Términos y Condiciones de Uso e Intercambio de Información Personal. Al continuar con este proceso, autorizo a EL BANCO a: a) recopilar, capturar y utilizar mis datos biométricos como mecanismos alternos de autenticación e identificación; b) a consultar mis datos en el Maestro de Cedulados de la Junta Central Electoral, el buró de crédito y en la Tesorería de Seguridad Social (TSS); c) Compartir, entregar y transmitir mi información de carácter personal: Nombre, Apellido, Cédula de Identidad, Correo Electrónico y Teléfonos con entidades y organismos públicos y gubernamentales a los fines de cumplir con la legislación y normativa aplicable.",
+          "targetTag": "span",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "el_AcceptTermsAndConditions"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 6,
+        "scenarioStepIndex": 7,
+        "originalText": "Presionar \"Continuar\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Continuar"
+        },
+        "technicalTargetRef": "role:button|Continuar",
+        "technicalTargetRefs": [
+          "role:button|Continuar",
+          "css:#btn-identity-validate",
+          "id:btn-identity-validate"
+        ],
+        "controlIdentity": "428533996fd7|Continuar|role|button|Continuar",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[id=\"btn-identity-validate\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "id": "btn-identity-validate"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "_r_1c_"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-identity-validate\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"path\\\",1],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 7,
+        "scenarioStepIndex": 8,
+        "originalText": "Presionar \"Continuar\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Continuar"
+        },
+        "technicalTargetRef": "role:button|Continuar",
+        "technicalTargetRefs": [
+          "role:button|Continuar",
+          "css:#btn-identity-confirm-and-continue",
+          "id:btn-identity-confirm-and-continue"
+        ],
+        "controlIdentity": "428533996fd7|Continuar|role|button|Continuar",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[id=\"btn-identity-confirm-and-continue\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "id": "btn-identity-confirm-and-continue"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "_r_2e_"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-identity-confirm-and-continue\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"path\\\",1],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 8,
+        "scenarioStepIndex": 9,
+        "originalText": "Presionar \"Seleccione\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Seleccione"
+        },
+        "valueKey": "seleccione",
+        "associatedField": "Seleccione",
+        "controlIdentity": "428533996fd7|Seleccione|css|div:has(input[id=\"react-select-6-input\"])",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Seleccione",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Seleccione",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(input[id=\"react-select-6-input\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 9,
+        "scenarioStepIndex": 10,
+        "originalText": "Presionar el control grabado",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Presionar el control grabado"
+        },
+        "selectionActivationField": "Seleccione",
+        "technicalTargetRef": "role:option|829-***-0396",
+        "technicalTargetRefs": [
+          "role:option|829-***-0396",
+          "css:#react-select-6-option-1",
+          "id:react-select-6-option-1"
+        ],
+        "controlIdentity": "428533996fd7|829-***-0396|role|option|829-***-0396",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[id=\"react-select-6-option-1\"][role=\"option\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "id": "react-select-6-option-1",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "react-select-6-listbox"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"div\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"react-select-6-option-1\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 10,
+        "scenarioStepIndex": 11,
+        "originalText": "Presionar \"Enviar\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Enviar"
+        },
+        "technicalTargetRef": "role:button|Enviar",
+        "technicalTargetRefs": [
+          "role:button|Enviar",
+          "css:#btn-send-sms-otp",
+          "id:btn-send-sms-otp"
+        ],
+        "controlIdentity": "428533996fd7|Enviar|role|button|Enviar",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[id=\"btn-send-sms-otp\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "id": "btn-send-sms-otp"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Enviar",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 11,
+        "scenarioStepIndex": 12,
+        "originalText": "Ingresar \"1\" en \"Please enter verification code. Digit 1\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Please enter verification code. Digit 1"
+        },
+        "valueKey": "please_enter_verification_code_digit_1",
+        "associatedField": "Please enter verification code. Digit 1",
+        "technicalTargetRef": "role:textbox|Please enter verification code. Digit 1",
+        "technicalTargetRefs": [
+          "role:textbox|Please enter verification code. Digit 1"
+        ],
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Please enter verification code. Digit 1",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 12,
+        "scenarioStepIndex": 13,
+        "originalText": "Ingresar \"••••••\" en \"OTP digit 2\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "OTP digit 2"
+        },
+        "valueKey": "otp_digit_2",
+        "associatedField": "OTP digit 2",
+        "technicalTargetRef": "role:textbox|OTP digit 2",
+        "technicalTargetRefs": [
+          "role:textbox|OTP digit 2"
+        ],
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "OTP digit 2",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 13,
+        "scenarioStepIndex": 14,
+        "originalText": "Ingresar \"••••••\" en \"OTP digit 3\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "OTP digit 3"
+        },
+        "valueKey": "otp_digit_3",
+        "associatedField": "OTP digit 3",
+        "technicalTargetRef": "role:textbox|OTP digit 3",
+        "technicalTargetRefs": [
+          "role:textbox|OTP digit 3"
+        ],
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "OTP digit 3",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 14,
+        "scenarioStepIndex": 15,
+        "originalText": "Ingresar \"••••••\" en \"OTP digit 4\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "OTP digit 4"
+        },
+        "valueKey": "otp_digit_4",
+        "associatedField": "OTP digit 4",
+        "technicalTargetRef": "role:textbox|OTP digit 4",
+        "technicalTargetRefs": [
+          "role:textbox|OTP digit 4"
+        ],
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "OTP digit 4",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 15,
+        "scenarioStepIndex": 16,
+        "originalText": "Ingresar \"••••••\" en \"OTP digit 5\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "OTP digit 5"
+        },
+        "valueKey": "otp_digit_5",
+        "associatedField": "OTP digit 5",
+        "technicalTargetRef": "role:textbox|OTP digit 5",
+        "technicalTargetRefs": [
+          "role:textbox|OTP digit 5"
+        ],
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "OTP digit 5",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 16,
+        "scenarioStepIndex": 17,
+        "originalText": "Ingresar \"••••••\" en \"OTP digit 6\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "OTP digit 6"
+        },
+        "valueKey": "otp_digit_6",
+        "associatedField": "OTP digit 6",
+        "technicalTargetRef": "role:textbox|OTP digit 6",
+        "technicalTargetRefs": [
+          "role:textbox|OTP digit 6"
+        ],
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "OTP digit 6",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 17,
+        "scenarioStepIndex": 18,
+        "originalText": "Presionar \"Verificar\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Verificar"
+        },
+        "technicalTargetRef": "role:button|Verificar",
+        "technicalTargetRefs": [
+          "role:button|Verificar",
+          "css:#btn-validate-sms-otp",
+          "id:btn-validate-sms-otp"
+        ],
+        "controlIdentity": "428533996fd7|Verificar|role|button|Verificar",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[id=\"btn-validate-sms-otp\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "id": "btn-validate-sms-otp"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 18,
+      "representedScenarioSteps": 18,
+      "missingScenarioSteps": []
+    }
+  },
+  "executionContractChars": 20605,
+  "promptChars": null,
+  "specGenerationAttempts": 0,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "promotionAllowed": false,
+  "failedGatesAttempt1": [
+    "functionalExecution"
+  ],
+  "finalSpec": {
+    "origin": "deterministic_compiler",
+    "generatedBy": "core",
+    "strategy": "deterministic_compiler",
+    "fallback": null
+  }
+}

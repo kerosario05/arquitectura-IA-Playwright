@@ -1,0 +1,39 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-10-16T18:30:30.730Z",
+  "entries": [
+    {
+      "key": "rnc",
+      "source": "app_test_data",
+      "fieldName": "[id=\"login-rnc\"]",
+      "stepIndex": 4,
+      "valueType": "string",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": "*******01"
+    },
+    {
+      "key": "usuario",
+      "source": "app_test_data",
+      "fieldName": "[id=\"login-user\"]",
+      "stepIndex": 5,
+      "valueType": "string",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": "********sa"
+    },
+    {
+      "key": "contrasena_invalida",
+      "source": "unknown",
+      "fieldName": "[id=\"login-password\"]",
+      "stepIndex": 6,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

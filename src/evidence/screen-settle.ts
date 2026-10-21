@@ -147,7 +147,9 @@ export async function waitForVisualSettle(page: Page, options: VisualSettleOptio
   try {
     await page.waitForFunction(probe, undefined, { timeout: options.timeoutMs, polling: 100 });
     return { settled: true, waitedMs: Date.now() - startedAt, loaderVisible: false };
-  } catch {
+  } catch (error) {
+    // Do not disguise probe/script failures as visual timeouts; retain the actual boundary.
+    console.log(`[evidence:settle] probe failed reason=${error instanceof Error ? error.message.split("\n")[0] : "unknown"}`);
     const loaderVisible = page.isClosed()
       ? false
       : await page.evaluate(() => {

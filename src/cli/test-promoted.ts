@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import {
@@ -18,6 +19,7 @@ import {
   resolvePromotedBrowserMode,
 } from "./test-promoted-browser-mode";
 import { MAX_SCENARIO_ATTEMPTS, shouldRetryScenario } from "../discovery/pre-business-retry-policy";
+import { instrumentPromotedJiraSpecForEvidence, jiraReuseEvidenceOptions } from "../jira/jira-reuse-evidence";
 
 function printUsage(): void {
   console.log(`
@@ -554,7 +556,43 @@ async function main(): Promise<void> {
   const projectScopedPlaywrightEnv = await resolvePromotedExecutionEnv(basePlaywrightEnv, resolvedAppSlug);
   let promotedRuntimeEnv = projectScopedPlaywrightEnv;
   if (options.caseId && testPath) {
-    const specSource = await fs.readFile(path.resolve(process.cwd(), testPath), "utf8");
+    let specSource = await fs.readFile(path.resolve(process.cwd(), testPath), "utf8");
+    const originalSpecPath = path.resolve(testPath);
+    const evidenceContext = resolvedAppSlug && resolvedSectionSlug && process.env.EVIDENCE_RUN_ID ? {
+      appSlug: resolvedAppSlug, sectionSlug: resolvedSectionSlug,
+      sectionName: process.env.SECTION_NAME, runId: process.env.EVIDENCE_RUN_ID,
+      caseId: Number(options.caseId), specPath: originalSpecPath,
+    } : undefined;
+    let jiraEvidence = jiraReuseEvidenceOptions(specSource, evidenceContext);
+    if (jiraEvidence) {
+      try {
+        const planPath = path.join(path.dirname(originalSpecPath), "plan.json");
+        const plan = JSON.parse(await fs.readFile(planPath, "utf8"));
+        const instrumentedSource = instrumentPromotedJiraSpecForEvidence(specSource, plan);
+        if (instrumentedSource && instrumentedSource !== specSource) {
+          const tempSpecPath = path.join(path.dirname(originalSpecPath),
+            `case.jira-reuse-${process.pid}-${Date.now()}.spec.ts`);
+          await fs.writeFile(tempSpecPath, instrumentedSource, "utf8");
+          process.once("exit", () => {
+            try { fsSync.rmSync(tempSpecPath, { force: true }); } catch { /* temporary telemetry copy */ }
+          });
+          specSource = instrumentedSource;
+          testPath = path.relative(process.cwd(), tempSpecPath).replace(/\\/g, "/");
+          playwrightArgs[1] = testPath;
+          jiraEvidence = jiraReuseEvidenceOptions(specSource, evidenceContext
+            ? { ...evidenceContext, specPath: tempSpecPath }
+            : undefined);
+          console.log("[test:promoted] Jira evidence hooks enabled using an ephemeral spec copy; promoted source is unchanged");
+        }
+      } catch (error) {
+        console.log(`[test:promoted] Jira evidence hooks unavailable; executing promoted source unchanged (${error instanceof Error ? error.message : "unknown"})`);
+      }
+    }
+    if (jiraEvidence) {
+      playwrightArgs[0] = `--config=${jiraEvidence.configPath}`;
+      playwrightArgs.push(`--output=${jiraEvidence.outputDir}`);
+      projectScopedPlaywrightEnv.JIRA_REUSE_EVIDENCE_CONTEXT = jiraEvidence.contextJson;
+    }
     const requiredKeys = resolvePromotedRuntimeInputKeys(specSource);
     const runtimeInputs = await preparePromotedRuntimeInputs({
       contextPath: process.env.DISCOVERY_RUNTIME_CONTEXT,

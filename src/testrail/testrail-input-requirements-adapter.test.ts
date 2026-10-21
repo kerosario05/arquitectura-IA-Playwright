@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { extractTestRailInputRequirements } from "./testrail-input-requirements-adapter";
+import { extractTestRailInputRequirements, extractTestRailInputRequirementsForSelection } from "./testrail-input-requirements-adapter";
 
 describe("TestRail input requirements adapter", () => {
   it("extracts requirements from approved markdown declarations", () => {
@@ -55,5 +55,25 @@ describe("TestRail input requirements adapter", () => {
 
     expect(result.requirements).toEqual([]);
     expect(result.conflicts).toEqual([]);
+  });
+
+  it("infers editable inputs only for explicit named fill steps during selection sync", () => {
+    const result = extractTestRailInputRequirementsForSelection({
+      id: 104,
+      title: "Rejected sign in",
+      custom_steps_separated: [
+        { content: 'Ingresar RNC en "RNC"' },
+        { content: 'Ingresar usuario en "Usuario"' },
+        { content: 'Ingresar una contraseña no válida en "Contraseña"' },
+        { content: 'Presionar "Iniciar sesión"' },
+        { content: 'Validar que se muestre "Problema de credenciales"' },
+      ],
+    });
+
+    expect(result.requirements.map(({ key, label, controlType, sensitive, source }) => ({ key, label, controlType, sensitive, source }))).toEqual([
+      { key: "input.rnc", label: "RNC", controlType: "text", sensitive: false, source: "runtime_inferred" },
+      { key: "input.usuario", label: "Usuario", controlType: "text", sensitive: false, source: "runtime_inferred" },
+      { key: "input.contrasena", label: "Contraseña", controlType: "password", sensitive: true, source: "runtime_inferred" },
+    ]);
   });
 });

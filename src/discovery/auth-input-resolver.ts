@@ -1,4 +1,5 @@
 import type { MissingInputBehavior } from "../types/env.types";
+import { VERIFICATION_CODE_KEYS } from "../data/verification-code-role";
 
 export type AuthInputData = {
   username?: string;
@@ -135,7 +136,10 @@ export function resolveAuthInputs(config: AuthInputResolverConfig): AuthInputRes
     "Identity_Provider",
   ]);
   const runtimeIdentificationType = resolveRuntimeEntry(runtimeEntries, ["auth.identification_type", "identificationType"]);
-  const runtimeOtp = resolveRuntimeEntry(runtimeEntries, ["auth.otp", "otp", "OTP_SECRET"]);
+  // Runtime data can use either the canonical auth key or a user-facing field label.
+  // Keep these aliases specific to one-time verification codes so a later business
+  // authorization token is never consumed as an OTP.
+  const runtimeOtp = resolveRuntimeEntry(runtimeEntries, VERIFICATION_CODE_KEYS);
   const runtimeUsername = resolveRuntimeEntry(runtimeEntries, ["auth.username", "username", "APP_USERNAME"]);
   const runtimePassword = resolveRuntimeEntry(runtimeEntries, ["auth.password", "password", "APP_PASSWORD"]);
 

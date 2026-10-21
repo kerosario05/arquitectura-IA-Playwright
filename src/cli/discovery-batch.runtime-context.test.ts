@@ -22,8 +22,8 @@ function describe(_name: string, fn: () => void): void {
 describe("discovery runtime context CLI", () => {
   test("resolveRuntimeEntriesForCase returns only the entries for the requested caseId", () => {
     const context = {
-      "100": [{ key: "auth.username", value: "runtime-user", source: "fixture", sensitive: false }],
-      "200": [{ key: "employee.document", value: "DOC-1", source: "fixture", sensitive: true }],
+      "100": [{ key: "auth.username", value: "runtime-user", source: "manual_runtime" as const, sensitive: false }],
+      "200": [{ key: "employee.document", value: "DOC-1", source: "manual_runtime" as const, sensitive: true }],
     };
     const for100 = resolveRuntimeEntriesForCase(context, 100)!;
     const for200 = resolveRuntimeEntriesForCase(context, 200)!;
@@ -44,7 +44,7 @@ describe("discovery runtime context CLI", () => {
   });
 
   test("loadRuntimeContextFromPath parses the file and tolerates missing env path", async () => {
-    const context = { "100": [{ key: "a", value: "b", source: "fixture", sensitive: false }] };
+    const context = { "100": [{ key: "a", value: "b", source: "manual_runtime" as const, sensitive: false }] };
     const dir = await fs.mkdtemp(path.join(os.tmpdir(), "rt-ctx-"));
     const file = path.join(dir, "ctx.json");
     await fs.writeFile(file, JSON.stringify(context), "utf-8");

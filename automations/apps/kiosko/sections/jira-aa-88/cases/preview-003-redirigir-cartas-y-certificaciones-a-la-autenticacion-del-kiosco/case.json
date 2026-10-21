@@ -1,0 +1,9 @@
+{
+  "id": "preview-003-redirigir-cartas-y-certificaciones-a-la-autenticacion-del-kiosco",
+  "externalId": "PREVIEW-003",
+  "title": "Redirigir Cartas y certificaciones a la autenticación del kiosco",
+  "source": "discovery",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "createdAt": "2026-10-09T19:48:04.885Z"
+}

@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-110",
+  "sourceScenarioId": "AA-110:jira:2",
+  "title": "Rechazar revisión de pago con monto cero",
+  "generatedAt": "2026-10-16T19:32:14.049Z",
+  "executionEngine": "jira_semantic"
+}

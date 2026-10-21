@@ -1,0 +1,10 @@
+{
+  "id": "preview-004-redirigir-canje-de-puntos-a-la-autenticacion-del-kiosco",
+  "externalId": "PREVIEW-004",
+  "caseId": 0,
+  "title": "Redirigir Canje de Puntos a la autenticación del kiosco",
+  "source": "discovery",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "createdAt": "2026-10-09T15:40:29.344Z"
+}

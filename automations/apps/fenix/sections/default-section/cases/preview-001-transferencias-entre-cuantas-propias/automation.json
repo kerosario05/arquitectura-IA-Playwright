@@ -7,17 +7,17 @@
   "specPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-transferencias-entre-cuantas-propias\\case.spec.ts",
   "appSlug": "fenix",
   "appConfigPath": "automations\\apps\\fenix\\app.config.json",
-  "status": "spec_failed",
+  "status": "active",
   "source": "discovery",
   "appProfile": "fenix",
-  "createdAt": "2026-10-07T21:56:32.076Z",
-  "updatedAt": "2026-10-07T21:56:32.076Z",
-  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T21-48-04-691Z\\discovered-plans.pending.json",
-  "pomStatus": "needs_manual_review",
+  "createdAt": "2026-10-19T14:58:25.475Z",
+  "updatedAt": "2026-10-19T14:58:25.475Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-19T14-51-45-409Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
   "inlineDebugMode": false,
-  "specVerificationStatus": "failed",
+  "specVerificationStatus": "passed",
   "metadata": {
-    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T21-48-04-691Z",
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-19T14-51-45-409Z",
     "pomDiagnostics": {
       "status": "promoted",
       "inlineFallbackUsed": false,
@@ -41,7 +41,7 @@
       },
       "invocations": 0,
       "invocationsConsumed": 0,
-      "durationMs": 339654,
+      "durationMs": 148393,
       "usage": {
         "inputTokens": null,
         "cachedInputTokens": null,
@@ -60,31 +60,24 @@
         "typescript": "passed",
         "playwrightDiscovery": "passed",
         "semanticCoverage": "passed",
-        "functionalExecution": "failed"
+        "functionalExecution": "passed"
       },
-      "promotionAllowed": false,
+      "promotionAllowed": true,
       "specsRequested": 1,
-      "specsValidated": 0,
-      "specsRejected": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
       "specGenerationAttempts": 0,
       "specRepairAttempts": 0,
-      "firstPassPromotion": false,
-      "failedGatesAttempt1": [
-        "functionalExecution"
-      ],
+      "firstPassPromotion": true,
+      "failedGatesAttempt1": [],
       "regressedGates": [],
       "missingRequirements": [],
       "oracleTypes": [
         "navigation_transition"
       ],
-      "errors": [
-        "functional_execution_failed:exitCode=1",
-        "functional_execution_error:\u001b[31mTest timeout of 300000ms exceeded.\u001b[39m"
-      ],
+      "errors": [],
       "warnings": [
-        "step_index_not_explicit_in_spec:18",
-        "functional_execution_screenshots=13",
-        "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 2)."
+        "step_index_not_explicit_in_spec:18"
       ],
       "finalSpec": {
         "origin": "deterministic_compiler",
@@ -93,25 +86,23 @@
         "fallback": null
       },
       "runtimeGate": {
-        "decision": "block",
-        "promotionStatus": "blocked",
-        "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 2)."
+        "decision": "promote",
+        "promotionStatus": "promoted",
+        "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
       },
-      "specWritten": false,
+      "specWritten": true,
       "previousSpec": {
-        "existed": false,
-        "hash": null,
-        "lastModifiedAt": null
+        "existed": true,
+        "hash": "47fc2637704bb4a864c2acca8cbd7835a6be0ff45bc0892d7f3b004aa9e2ab14",
+        "lastModifiedAt": "2026-10-15T12:12:29.196Z"
       }
     },
     "promotionStrategyDiagnostics": {
       "requestedStrategy": "auto",
       "autoPomEnabled": true,
       "selectedStrategy": "pom",
-      "reason": "spec_generation_validation_failed",
-      "blockers": [
-        "spec_generation_validation_failed"
-      ],
+      "reason": "promoted",
+      "blockers": [],
       "availablePageObjects": [
         "ProductListPage",
         "OperationsMenuPage"
@@ -124,10 +115,13 @@
       "requirePomRuntime": false,
       "specPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-transferencias-entre-cuantas-propias\\case.spec.ts",
       "specHash": "47fc2637704bb4a864c2acca8cbd7835a6be0ff45bc0892d7f3b004aa9e2ab14",
-      "specSource": "ai_candidate"
+      "specSource": "generatedSpec"
     },
     "overwritten": true,
     "previousAutomationPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-transferencias-entre-cuantas-propias\\plan.json",
     "previousStatus": "active"
-  }
+  },
+  "promotionPersisted": true,
+  "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-transferencias-entre-cuantas-propias\\case.spec.ts",
+  "promotedSpecHash": "47fc2637704bb4a864c2acca8cbd7835a6be0ff45bc0892d7f3b004aa9e2ab14"
 }

@@ -1,0 +1,9 @@
+{
+  "id": "aa-102-jira-1-consultar-el-resumen-consolidado-de-cuentas-empresariales-tras-autenticacion-con-sms",
+  "externalId": "AA-102:jira:1",
+  "title": "Consultar el resumen consolidado de cuentas empresariales tras autenticación con SMS",
+  "source": "discovery",
+  "appSlug": "fenix",
+  "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+  "createdAt": "2026-10-14T15:38:28.594Z"
+}

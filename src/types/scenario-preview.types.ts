@@ -108,6 +108,8 @@ export type CatalogDiagnostics = {
 };
 
 export type ScenarioPreviewRequest = {
+  executionEngine?: import("../jira/execution-origin").ExecutionEngine;
+  scenarioOrigin?: import("../jira/execution-origin").ExecutionOrigin;
   jiraKey?: string;
   jiraSummary?: string;
   appSlug: string;

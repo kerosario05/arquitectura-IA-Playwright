@@ -237,6 +237,55 @@ test("positive URL oracle accepts a verified adjacent in-place action and reject
   }), /PROMOTED_FAILURE_DIALOG_VISIBLE/);
 });
 
+test("positive URL assertion waits for the application's route transition signal", async () => {
+  const page = createMockPage() as any;
+  let currentUrl = "https://example.test/login";
+  let waitForUrlCalls = 0;
+  page.url = () => currentUrl;
+  page.evaluate = async () => ({ failureMessages: [], successMessages: [] });
+  page.waitForURL = async (predicate: (url: URL) => boolean, options: { timeout: number }) => {
+    waitForUrlCalls += 1;
+    assert.equal(options.timeout, 15000);
+    const nextUrl = new URL("https://example.test/dashboard");
+    assert.equal(predicate(nextUrl), true);
+    currentUrl = nextUrl.href;
+  };
+  const runtime = new PromotedSpecRuntime(page, { captureDiagnostics: false });
+  (runtime as any).ensureInitialEvidence = async () => undefined;
+  (runtime as any).captureEvidenceStep = async () => undefined;
+
+  await runtime.expectPromotedVisible({
+    stepIndex: 5,
+    target: "Continuar",
+    polarity: "positive",
+    expectedUrl: "/dashboard",
+    assertion: async () => undefined,
+  });
+
+  assert.equal(waitForUrlCalls, 1);
+  assert.equal(currentUrl, "https://example.test/dashboard");
+});
+
+test("negative URL assertion keeps immediate semantics and does not wait for navigation", async () => {
+  const page = createMockPage() as any;
+  let waitForUrlCalls = 0;
+  page.url = () => "https://example.test/login";
+  page.waitForURL = async () => { waitForUrlCalls += 1; };
+  const runtime = new PromotedSpecRuntime(page, { captureDiagnostics: false });
+  (runtime as any).ensureInitialEvidence = async () => undefined;
+  (runtime as any).captureEvidenceStep = async () => undefined;
+
+  await runtime.expectPromotedVisible({
+    stepIndex: 5,
+    target: "Continuar",
+    polarity: "negative",
+    expectedUrl: "/dashboard",
+    assertion: async () => undefined,
+  });
+
+  assert.equal(waitForUrlCalls, 0);
+});
+
 test("promoted successful fills feed the shared evidence checkpoint grouper", async () => {
   const runtime = new PromotedSpecRuntime(createMockPage() as any, { captureDiagnostics: false });
   const captured: Array<{ stepText: string; status: string; options: Record<string, unknown> }> = [];

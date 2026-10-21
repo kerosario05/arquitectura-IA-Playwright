@@ -395,6 +395,20 @@ function describeTap(event: RecordedEvent): string {
   return label && !isGenericUnresolvedLabel(label) ? `Presionar "${label}"` : "Presionar el control indicado";
 }
 
+function checkboxDisplayLabel(value: string): string {
+  const label = value.replace(/\s+/g, " ").trim();
+  const limit = 96;
+  if (label.length <= limit) return label;
+  // Keep a short observed leading clause; modifiers and the associated paragraph remain
+  // in the technical identity. This is display grammar, independent of business vocabulary.
+  const sentence = label.split(/\.\s+/)[0];
+  const leadingClause = sentence.split(/\s+(?:de|del|para|for|of)\s+/i)[0];
+  if (leadingClause.split(/\s+/).length >= 2 && leadingClause.length <= limit) return leadingClause;
+  const prefix = label.slice(0, limit - 1);
+  const wordBoundary = prefix.lastIndexOf(" ");
+  return `${(wordBoundary > limit / 2 ? prefix.slice(0, wordBoundary) : prefix).trimEnd()}…`;
+}
+
 function describeFillTemplate(label: string, valueKey: string): string {
   return `Ingresar [${valueKey}] en "${label}"`;
 }
@@ -971,6 +985,14 @@ export function buildHappyPathScenario(
   for (const [eventIndex, event] of eventsWithSelectionTargets.entries()) {
     if (event.kind === "note" || event.kind === "launch") continue;
     const canonical = canonicalByEvent.get(`event-${eventIndex + 1}`);
+    if (canonical
+      && (canonical.action === "check" || canonical.action === "uncheck")
+      && canonical.sourceEventRefs.length > 1
+      && canonical.sourceEventRefs[0] !== `event-${eventIndex + 1}`) {
+      // One custom checkbox can produce adjacent raw events for its visual owner and backing
+      // input. Keep one human step and one replay click for the merged physical action.
+      continue;
+    }
     // Recording Stop is the boundary. A state transition can end one screen and open the
     // next one; it is not a reason to discard later user actions. Only evidence explicitly
     // classified as technical-only is omitted from the executable projection.
@@ -1366,7 +1388,17 @@ export function buildHappyPathScenario(
     }
 
     if (event.kind === "tap") {
-      const label = target.label?.trim() || "el control";
+      const canonicalInteraction = canonicalByEvent.get(`event-${eventIndex + 1}`);
+      const checkbox = target.role?.toLowerCase() === "checkbox";
+      const observedCheckboxName = checkbox
+        && canonicalInteraction?.playwrightRecorderEvidence?.kind === "role"
+        && canonicalInteraction.playwrightRecorderEvidence.role?.toLowerCase() === "checkbox"
+        ? canonicalInteraction.playwrightRecorderEvidence.normalizedName?.trim()
+        : undefined;
+      // The accessible name can be an entire associated paragraph. Abbreviate
+      // human prose only; recorded locators and canonical evidence stay exact.
+      const observedLabel = observedCheckboxName || target.label?.trim() || "el control";
+      const label = checkbox ? checkboxDisplayLabel(observedLabel) : observedLabel;
       const recoveryLabel = target.associatedField?.trim() || target.label?.trim() || "";
       const listRecoveryAction: ConditionalAction | undefined = target.role?.toLowerCase() === "button"
         && isSelectionListRecoveryControlLabel(recoveryLabel)
@@ -1380,14 +1412,12 @@ export function buildHappyPathScenario(
         }
         : undefined;
       const selection = (target.interactionType === "select" && target.afterValue !== undefined) || target.afterValue !== undefined;
-      const checkbox = target.role?.toLowerCase() === "checkbox";
       const checkboxChecked = target.afterState?.selected !== false && target.afterState?.aria?.["aria-checked"] !== "false" && target.stateDelta?.checked !== false;
       const selectionResolution = selection ? fieldForEvent(event, eventIndex + 1) : undefined;
       const selectionLabel = selectionResolution?.semanticField
         ? selectionResolution.semanticField
         : selection ? `${label} · selección` : label;
       const selectionKey = selection ? selectionValueKey(event, selectionResolution?.semanticField ?? label) : undefined;
-      const canonicalInteraction = canonicalByEvent.get(`event-${eventIndex + 1}`);
       const description = listRecoveryAction
         ? `Si el botón "${recoveryLabel}" está visible, presionar el botón "${recoveryLabel}".`
         : canonicalInteraction?.dynamicTargetLabel

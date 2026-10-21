@@ -16,6 +16,7 @@ import {
   compareGridCollection,
   shouldInvokeAiAssistedDiscovery,
   resolveFillTarget,
+  verificationDigitPosition,
   classifyRecordedSurfaceCompatibility,
   releaseAcceptedScopeMarker,
   attemptSegmentedInputFill,
@@ -99,11 +100,12 @@ import { waitForStablePageState, type PageStabilityOptions } from "./page-stabil
 import { isGenericUnresolvedLabel } from "../recording/trace-normalizer";
 import { isRecordedDialogContainerTap } from "../recording/recorded-action-semantics";
 import { isCompatibleSegmentValue, isProjectableFirstSegment } from "./segmented-fill-projection";
+import { observeSegmentedCodeEvidence } from "./observed-segmented-code";
 import { parseProductConditionTarget, matchesProductCondition, type ProductCondition } from "./product-condition-parser";
 import { detectTransientScreen } from "./transient-screen-detector";
 import { evaluateEarlyCompletionPolicy, type EarlyCompletionPolicyResult } from "./early-completion-policy";
 import { detectSelectionSuccess, isSelectionLikeTarget, isSubmitLikeTarget, promoteToClickableAncestor, type SelectionDiagnostics } from "./selection-state-detector";
-import { resolveDataKey, formatDataKeyForLog, type DataKeyResolution } from "../data/data-key-resolver";
+import { resolveDataKey, formatDataKeyForLog, credentialRoleKeyForField, runtimeInputKeyForField, type DataKeyResolution } from "../data/data-key-resolver";
 import { type AutoGenerateConfig } from "../data/auto-test-data-generator";
 import {
   captureAssertionObservationSnapshot,
@@ -124,7 +126,7 @@ import { extractTestRailInputRequirements } from "../testrail/testrail-input-req
 import { isPendingOracleAuthority } from "./oracle-authority";
 import { resolvePostActionSynchronization } from "./post-action-synchronization";
 import { deduplicateActionTargetsBySource } from "./action-target-equivalence";
-import { verifySelectionState, hasCausalSelectionTransition, booleanState, type InteractiveState } from "./selection-state-verification";
+import { verifySelectionState, hasCausalSelectionTransition, booleanState, shouldPromoteStatefulControlToClickableAncestor, type InteractiveState } from "./selection-state-verification";
 import { resolveClickRetryPolicy } from "./click-retry-policy";
 import { shouldReapplyAuthFields } from "./auth-reapply-policy";
 import { createHash } from "node:crypto";
@@ -380,6 +382,7 @@ async function boundedLocatorEvaluate<T>(
 }
 
 export type SafeNetworkEvent = {
+  sameOrigin?: boolean;
   requestId?: string;
   method: string;
   resourceType: string;
@@ -396,6 +399,14 @@ export type SafeNetworkEvent = {
   redirectChain?: SafeRedirectHop[];
   chainCompleted?: boolean;
 };
+
+/** Only action-scoped application transports can veto a successful click.
+ * Paths are privacy-redacted and cannot establish that a later response retries this request. */
+export function findActionServerError(events: readonly SafeNetworkEvent[]): SafeNetworkEvent | undefined {
+  return events.find((event) => event.sameOrigin === true
+    && ["xhr", "fetch", "document"].includes(event.resourceType) && event.state !== "pending"
+    && event.status !== undefined && event.status >= 500 && event.status < 600);
+}
 
 export type SafeRedirectHop = {
   status: number;
@@ -500,6 +511,11 @@ export function detectAuthGateChange(
 export function crossActionOwnerReadinessRequired(
   nextActionTarget: Pick<ActionTargetItem, "target" | "associatedField" | "recordingActionType" | "technicalTargetRefs"> | undefined,
 ): boolean {
+  // A transient recorded option can intentionally withhold its dynamic display label.
+  // Its captured role/technical identity still lets the shared resolver prove that opening
+  // the owning control exposed the next action, even without an associatedField label.
+  if (nextActionTarget?.recordingActionType === "click"
+    && nextActionTarget.technicalTargetRefs?.some((ref) => /^role:option\|/i.test(ref.trim()))) return true;
   if (!nextActionTarget?.associatedField?.trim()) return false;
   const target = normalizeText(nextActionTarget.target);
   const associatedField = normalizeText(nextActionTarget.associatedField);
@@ -922,6 +938,9 @@ export function startNetworkObservation(page: Page, stepIndex: number, maxEvents
     const requestId = `${stepIndex}-${events.size + 1}`;
     requestIds.set(key, requestId);
     const event: SafeNetworkEvent = { requestId, method: String(request.method?.() ?? "GET"), resourceType: String(request.resourceType?.() ?? "other"), path: safePathname(String(request.url?.() ?? "")), state: "pending", startedAt: Date.now() };
+    try {
+      event.sameOrigin = new URL(String(request.url())).origin === new URL(page.url()).origin;
+    } catch { /* Unknown origin supplies no application-error authority. */ }
     events.set(key, event);
     noteProgress("request_started");
     const redirectedFrom = request.redirectedFrom?.() as object | undefined;
@@ -1112,7 +1131,23 @@ async function bestEffortRuntimeFillBlur(locator: Locator): Promise<void> {
 }
 
 async function commitAndVerifyRuntimeFill(locator: Locator, value: string, verificationLocator?: Locator): Promise<string> {
-  await locator.fill(value);
+  // Code digit widgets may commit their model on native keyboard events rather
+  // than input alone. Preserve that interaction only for an explicitly named
+  // verification digit; ordinary inputs retain atomic fill semantics.
+  const names = /^\d$/.test(value) ? await locator.evaluate((el) => [
+    el.getAttribute("aria-label"), el.getAttribute("placeholder"),
+    ...Array.from((el as HTMLInputElement).labels ?? []).map((label) => label.textContent),
+  ]).catch(() => []) : [];
+  const keyboardDigit = names.some((name) => typeof name === "string" && verificationDigitPosition(name));
+  const writeValue = async (editor: Locator) => {
+    if (keyboardDigit) {
+      await editor.selectText();
+      await editor.pressSequentially(value);
+    } else {
+      await editor.fill(value);
+    }
+  };
+  await writeValue(locator);
   // Blur is a best-effort commit signal. A grid editor may rematerialize
   // immediately after fill, so it has a short local budget and cannot extend
   // the scenario indefinitely if the editor detaches or ignores the timeout.
@@ -1130,7 +1165,7 @@ async function commitAndVerifyRuntimeFill(locator: Locator, value: string, verif
     const rematerializedCount = await rematerializedEditors?.count().catch(() => 0) ?? 0;
     const editor = rematerializedCount === 1 ? rematerializedEditors! : locator;
     if (verificationLocator) await verificationLocator.click().catch(() => undefined);
-    await editor.fill(value).catch(() => undefined);
+    await writeValue(editor).catch(() => undefined);
     await bestEffortRuntimeFillBlur(editor);
     await locator.page().waitForTimeout(100).catch(() => undefined);
     actual = await readCommittedEditableValue(locator, verificationLocator);
@@ -2066,13 +2101,43 @@ export function isFillActionTarget(target: Pick<ActionTargetItem, "actionType" |
     && Boolean(target.valueKey)
     && Number.isInteger(target.segmentPosition);
   if (target.actionType !== "action_fill" && !virtualKeyboardValue) return false;
-  // Authored literal fills (including each character in a captured code) have a value but no
-  // valueKey. Requiring a key sent those steps through the click path, which clicked the field
-  // label/container and then waited for a transition that a fill should never cause.
   if ((target.valueSource === "unknown" || target.valueSource === "literal")
     && typeof target.value === "string") return true;
+  // Virtual keyboard taps are projected as a fill only when they carry a resolved data binding
+  // and a segment position; ordinary clicks keep their existing action path.
   return Boolean(target.valueKey)
     && (target.valueSource === "unknown" || target.valueSource === "test_data");
+}
+
+/** Jira/TestRail semantic fill intent is authoritative; recorded action contracts keep their path. */
+export function isUnboundSemanticFillTarget(
+  scenario: Pick<TestScenario, "source" | "recordingId" | "recordedScenarioId" | "recordingExecutionContract">,
+  target: Pick<ActionTargetItem, "actionType">,
+): boolean {
+  return (scenario.source === "testrail" || scenario.source === "jira")
+    && !scenario.recordingId
+    && !scenario.recordedScenarioId
+    && !scenario.recordingExecutionContract
+    && target.actionType === "action_fill";
+}
+
+/** Keep authored field-to-data identity separate from live control resolution. */
+export function bindAuthoredRuntimeField(
+  scenario: Pick<TestScenario, "source" | "recordingId" | "recordedScenarioId" | "recordingExecutionContract">,
+  target: Pick<ActionTargetItem, "actionType" | "target" | "selectionField" | "associatedField" | "valueKey" | "valueSource" | "value" | "entityScope" | "rowScope">,
+  entries: ReadonlyArray<{ key: string }>,
+): boolean {
+  if (scenario.recordingId || scenario.recordedScenarioId || scenario.recordingExecutionContract
+    || (target.actionType !== "action_fill" && target.actionType !== "action_select")
+    || target.entityScope || target.rowScope !== undefined
+    || target.valueKey || target.valueSource === "literal"
+    || (typeof target.value === "string" && target.value.trim())) return false;
+  const field = target.selectionField ?? target.associatedField ?? target.target;
+  const key = runtimeInputKeyForField(field, entries);
+  if (!key) return false;
+  target.valueKey = key;
+  target.valueSource = "test_data";
+  return true;
 }
 
 /** Structural mirror of the fields both `resolveFillTarget`/`resolveActionTarget` results already carry. */
@@ -3182,6 +3247,13 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
         Object.assign(item, structuredMetadata);
         if (intent.valueSource !== undefined) item.valueSource = intent.valueSource as FillValueSource;
         if (intent.valueKey) item.valueKey = intent.valueKey;
+        if (!item.valueKey && sourceStep.valueKey?.trim()
+          && intents.filter(candidate => candidate.type === "action_fill" || candidate.type === "action_select").length === 1
+          && (intent.type === "action_fill" || intent.type === "action_select")
+          && intent.valueSource !== "literal") {
+          item.valueKey = sourceStep.valueKey.trim();
+          item.valueSource = "test_data";
+        }
         if (intent.value !== undefined) item.value = intent.value;
         actionTargets.push(item);
         orderedSteps.push({
@@ -3189,7 +3261,7 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
           originalText: step.action,
           type: intent.isOptional ? "optional_action" : (intent.type === "action_fill" ? "action_fill" : intent.type === "action_select" || intent.type === "select_first_visible_item" ? "action_select" : "action_click"),
           target: targetText,
-          valueKey: intent.valueKey,
+          valueKey: item.valueKey,
           value: intent.value,
           valueSource: item.valueSource,
           isOptional: intent.isOptional,
@@ -7807,6 +7879,24 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       continue;
     }
 
+    // Jira/TestRail-authored fill steps can name a credential field without embedding a
+    // literal value or canonical valueKey. Keep the authored fill intent and bind only generic
+    // credential roles to the project's existing secure runtime source; never synthesize data.
+    if (bindAuthoredRuntimeField(scenario, normalizedActionTarget,
+      options.runtimeEntries ?? Object.keys(options.scenarioDataOverrides ?? {}).map(key => ({ key })))) {
+      actionTarget.valueKey = normalizedActionTarget.valueKey;
+      actionTarget.valueSource = normalizedActionTarget.valueSource;
+      console.log(`[runtime-field-binding] stepIndex=${orderedItem.index} source=explicit_case_input`);
+    }
+    if (isUnboundSemanticFillTarget(scenario, normalizedActionTarget) && !normalizedActionTarget.valueKey) {
+      const credentialKey = credentialRoleKeyForField(normalizedActionTarget.target, options.runtimeEntries);
+      if (credentialKey) {
+        normalizedActionTarget.valueKey = credentialKey;
+        normalizedActionTarget.valueSource ??= "unknown";
+        console.log(`[credential-field-binding] stepIndex=${orderedItem.index} roleKey=${credentialKey} source=project_runtime_configuration`);
+      }
+    }
+
     // Conditional actions are evaluated at runtime. They must never be routed
     // through assertion/noop handling or through unconditional dialog recovery.
     const conditionalAction = normalizedActionTarget.conditionalAction;
@@ -7886,7 +7976,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       allDiscoveredObjects.push(...dialogRecoveryScan.objects);
     }
 
-    if (isFillActionTarget(normalizedActionTarget)) {
+    if (isFillActionTarget(normalizedActionTarget) || isUnboundSemanticFillTarget(scenario, normalizedActionTarget)) {
       console.log(`[discovery:case] Resolving fill target: ${normalizedActionTarget.target}`);
       
       // Build auto-generate config from env/config
@@ -7912,6 +8002,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           envVars[k] = v;
         }
       }
+      const credentialEnvAliases = (scenario.source === "testrail" || scenario.source === "jira")
+        && !scenario.recordingId
+        && !scenario.recordedScenarioId
+        && !scenario.recordingExecutionContract
+        ? { company_identifier: ["Identity_Provider"] }
+        : undefined;
       
       // Build per-scenario overrides and suggested data (generic, no hardcode)
       const overrides = (options as any).scenarioDataOverrides as Record<string, string> | undefined;
@@ -7951,6 +8047,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             overrides,
             suggestedData,
             runtimeEntries: options.runtimeEntries,
+            credentialEnvAliases,
           });
       
       console.log(formatDataKeyForLog(dataResolution));
@@ -8098,6 +8195,11 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       // unrelated non-editable element. Handled here directly via the same scope-then-segments
       // algorithm already proven for promoted-spec execution, bypassing the generic resolver
       // entirely for this evidence shape.
+      if (!normalizedActionTarget.playwrightRecorderEvidence
+        && isUnboundSemanticFillTarget(scenario, normalizedActionTarget)
+        && normalizedActionTarget.valueKey === "auth.otp") {
+        normalizedActionTarget.playwrightRecorderEvidence = await observeSegmentedCodeEvidence(page);
+      }
       if (normalizedActionTarget.playwrightRecorderEvidence?.kind === "segmented_input") {
         const segmentedResult = await attemptSegmentedInputFill(page, normalizedActionTarget.playwrightRecorderEvidence, fillValue);
         if (segmentedResult.ok) {
@@ -9711,7 +9813,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     // function), so applying it to every click, not only selection-like ones, never changes
     // behavior for an already-correct target and only helps a text/heading-anchored one.
     const isClickAction = actionTarget.action === "click" || actionTarget.actionType === "action_click";
+    const stateActionKindForOwner = recordingInteractionKind(actionTarget);
     if (resolution.locator && !resolution.selectionApplied
+      && shouldPromoteStatefulControlToClickableAncestor(stateActionKindForOwner)
       && (isClickAction || isSelectionLikeTarget(actionTarget.target, { action: actionTarget.action, actionType: actionTarget.actionType, snapshot: currentSnapshot }))) {
       console.log(`[discovery:case] Checking clickable ancestor: action=${actionTarget.action} target="${actionTarget.target}"`);
       const promotion = await promoteToClickableAncestor(resolution.locator);
@@ -12391,6 +12495,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     const actionNetworkEvents = await actionNetworkObservation.stop({
       passiveTail: !stability.stable && stability.reason === "loading_timeout"
     });
+    const actionServerError = findActionServerError(actionNetworkEvents);
     const relevantNetworkEvents = actionNetworkEvents.filter((event) =>
       event.resourceType === "fetch" ||
       event.resourceType === "xhr" ||
@@ -12561,6 +12666,25 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         pendingObjectsPath, pendingPlansPath, evidenceDir,
         failedAtStep, failedTarget, failedReason, allDiscoveredObjects,
         authFailure
+      );
+    }
+    if (actionServerError) {
+      failedAtStep = actionTarget.index;
+      failedTarget = actionTarget.target;
+      failedReason = "application_http_server_error";
+      const error = `Application HTTP ${actionServerError.status}: ${actionServerError.method} ${actionServerError.path}`;
+      console.log(`[application-http-error] actionIndex=${actionTarget.index} status=${actionServerError.status} method=${actionServerError.method} path=${actionServerError.path} dependentActionsBlocked=true`);
+      steps.push({
+        index: actionTarget.index, action: actionTarget.action, targetText: actionTarget.target,
+        status: "blocked", actionExecutionStatus: "executed", postActionOutcomeStatus: "application_error",
+        snapshotUrl: page.url(), error,
+        assertionDiagnostics: { failureReason: failedReason, networkEvent: actionServerError },
+      });
+      await captureEvStep(actionTarget.action, "failed", error);
+      return buildFailureResult(
+        scenario, steps, allDiscoveredObjects, planSteps,
+        pendingObjectsPath, pendingPlansPath, evidenceDir,
+        failedAtStep, failedTarget, failedReason, allDiscoveredObjects,
       );
     }
     if (postActionSyncSignal === "application_error") {

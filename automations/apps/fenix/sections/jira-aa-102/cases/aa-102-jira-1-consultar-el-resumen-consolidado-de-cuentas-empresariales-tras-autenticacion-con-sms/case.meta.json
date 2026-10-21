@@ -1,0 +1,8 @@
+{
+  "appSlug": "fenix",
+  "sectionSlug": "jira-aa-102",
+  "sourceScenarioId": "AA-102:jira:1",
+  "title": "Consultar el resumen consolidado de cuentas empresariales tras autenticación con SMS",
+  "generatedAt": "2026-10-14T15:38:28.590Z",
+  "executionEngine": "jira_semantic"
+}

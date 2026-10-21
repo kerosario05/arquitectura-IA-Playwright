@@ -1,0 +1,8 @@
+{
+  "appSlug": "fenix",
+  "sectionSlug": "jira-aa-101",
+  "sourceScenarioId": "AA-101:jira:1",
+  "title": "Consulta exitosa de saldos disponibles tras autenticación empresarial con verificación por SMS",
+  "generatedAt": "2026-10-14T15:01:55.073Z",
+  "executionEngine": "jira_semantic"
+}

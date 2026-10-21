@@ -2,6 +2,25 @@ import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import { classifyLaunchScenarioAuthority, classifyRouteDiscoveryEligibility, partitionLaunchScenarios } from "./launch-orchestrator";
 import { extractLaunchScenariosFromPayload } from "../routes/runs";
+import {resolveExecutionEngine} from '../../jira/execution-origin';
+
+test('explicit Jira provenance admits valid pending scenarios for publication without adaptive or runtime certification',()=>{
+ for(const appSlug of ['fixture-shop','fixture-service']) {
+  const scenarios=extractLaunchScenariosFromPayload({selectedScenarios:[{scenarioId:'HU-7:jira:1',sourceIssueKey:'HU-7',title:'Pending',steps:['Validar "Result"'],preconditions:[],expectedResult:'Result',validation:{valid:true},mcpExecutable:false,executionReadiness:'requires_discovery'}]});
+  const engine=resolveExecutionEngine({executionEngine:'jira_semantic',scenarioOrigin:{kind:'jira_generated',jiraKey:'HU-7'},jiraKey:'HU-7',scenarios});
+  const partition=partitionLaunchScenarios(scenarios,engine);
+  assert.equal(partition.standard.length,1,appSlug);
+  assert.equal(partition.adaptiveFunctional.length,0);
+  assert.equal(partition.routeDiscovery.length,0);
+  assert.equal(partition.standard[0].mcpExecutable,false);
+  assert.equal(partitionLaunchScenarios(scenarios).adaptiveFunctional.length,1);
+  assert.equal(partitionLaunchScenarios([{...scenarios[0],validation:{valid:false}}],engine).nonAutomatable.length,1);
+  assert.equal(partitionLaunchScenarios([{...scenarios[0],validation:undefined}],engine).nonAutomatable.length,1);
+  assert.throws(()=>resolveExecutionEngine({executionEngine:'jira_semantic',scenarioOrigin:{kind:'jira_generated',jiraKey:'OTHER-1'},scenarios}),/PROVENANCE_MISMATCH/);
+  const recorded=extractLaunchScenariosFromPayload({selectedScenarios:[{...scenarios[0],recordingId:'fixture-recording'}]});
+  assert.throws(()=>resolveExecutionEngine({executionEngine:'jira_semantic',scenarioOrigin:{kind:'jira_generated',jiraKey:'HU-7'},scenarios:recorded}),/RECORDING_CANNOT_USE_JIRA_ENGINE/);
+ }
+});
 
 describe("launch readiness authority", () => {
   test("keeps explicit false and route discovery adaptive", () => {

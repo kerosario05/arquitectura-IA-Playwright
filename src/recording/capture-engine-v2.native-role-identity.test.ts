@@ -147,7 +147,7 @@ test("unique structural heading stays display-only through canonical and scenari
   const event = { seq: 0, t: 1, kind: "tap", screenKey: "screen", url: "https://fixture.test", target: {
     label: raw.label, tag: raw.tagName, locators: [], technicalTargetCandidates: raw.technicalTargetCandidates,
   } } as RecordedEvent;
-  const trace = { recordingId: "recording", projectSlug: "project", appSlug: "app", platform: "web", baseUrl: "https://fixture.test", startedAt: new Date().toISOString(), status: "completed", events: [event], screens: [{ screenKey: "screen", url: "https://fixture.test" }] } as SessionTrace;
+  const trace = { recordingId: "recording", projectSlug: "project", appSlug: "app", platform: "web", baseUrl: "https://fixture.test", startedAt: new Date().toISOString(), status: "completed", events: [event], screens: [{ screenKey: "screen", url: "https://fixture.test", title: "Fixture", capturedAt: new Date().toISOString(), screenshotPath: "", snapshot: { elements: [] } }] } as unknown as SessionTrace;
 
   assert.equal(buildCanonicalInteractions([event])[0].semanticField, "Primary card");
   assert.ok(buildHappyPathScenario(trace, [event]).testRailSteps.some((step) => step.content === 'Presionar "Primary card"'));
@@ -175,7 +175,7 @@ test("compound Capture V2 action does not fabricate a role ref and retains struc
       structuralIdentityMatchCount: 1,
     },
   });
-  assert.ok(technicalEvidence?.candidates[0].structuralContext);
+  assert.ok(technicalEvidence?.candidates?.[0]?.structuralContext);
 
   const raw = adaptCaptureActionToRawInteraction({
     actionType: "click",

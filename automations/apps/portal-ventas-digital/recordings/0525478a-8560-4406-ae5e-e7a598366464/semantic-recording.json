@@ -1,0 +1,5023 @@
+{
+  "version": "1.0",
+  "recordingId": "0525478a-8560-4406-ae5e-e7a598366464",
+  "projectSlug": "portal-ventas-digital",
+  "appSlug": "portal-ventas-digital",
+  "platform": "web",
+  "recordingGoal": {
+    "declaredGoal": "Crear cuenta",
+    "normalizedGoal": "Crear cuenta",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "selectorOptionInventories": [],
+  "semanticScreens": [
+    {
+      "screenIdentity": "0b23ab3287d9",
+      "url": "https://solicitudedigitalesdev/",
+      "classification": "DYNAMIC_COMPONENT_STATE",
+      "sourceScreenKey": "0b23ab3287d9"
+    },
+    {
+      "screenIdentity": "1e31e8f1f5de",
+      "title": "Solicita un nuevo producto",
+      "url": "https://solicitudedigitalesdev/",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "1e31e8f1f5de"
+    },
+    {
+      "screenIdentity": "428533996fd7",
+      "title": "Selecciona la cuenta de tu preferencia",
+      "url": "https://solicitudedigitalesdev/cuentas",
+      "classification": "SAME_SCREEN_MUTATION",
+      "sourceScreenKey": "428533996fd7"
+    },
+    {
+      "screenIdentity": "e5ca713c947a",
+      "title": "Datos personales",
+      "url": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "e5ca713c947a"
+    },
+    {
+      "screenIdentity": "58501b3f747c",
+      "title": "Datos personales",
+      "url": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "58501b3f747c"
+    },
+    {
+      "screenIdentity": "394bb25d51e0",
+      "title": "Datos personales",
+      "url": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "394bb25d51e0"
+    }
+  ],
+  "semanticComponents": [
+    {
+      "componentId": "0b23ab3287d9:control:0b23ab3287d9|CuentaAhorra y maneja tu dinero forma ágil y sencilla.|button",
+      "componentType": "button",
+      "screenIdentity": "0b23ab3287d9",
+      "label": "CuentaAhorra y maneja tu dinero forma ágil y sencilla.",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-6"
+      ]
+    },
+    {
+      "componentId": "428533996fd7:control:428533996fd7|Continuar|button",
+      "componentType": "button",
+      "screenIdentity": "428533996fd7",
+      "label": "Continuar",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-10",
+        "obs-16",
+        "obs-21"
+      ]
+    },
+    {
+      "componentId": "428533996fd7:control:428533996fd7|Número de identificación|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "428533996fd7",
+      "label": "Número de identificación",
+      "associatedField": "Número de identificación",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label",
+      "observationRefs": [
+        "obs-12"
+      ]
+    },
+    {
+      "componentId": "428533996fd7:control:428533996fd7|control|checkbox",
+      "componentType": "checkbox",
+      "screenIdentity": "428533996fd7",
+      "label": "control",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-13"
+      ]
+    },
+    {
+      "componentId": "428533996fd7:control:428533996fd7|AtrásContinuar|amount_or_text",
+      "componentType": "checkbox",
+      "screenIdentity": "428533996fd7",
+      "label": "control",
+      "associatedField": "AtrásContinuar",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-14"
+      ]
+    },
+    {
+      "componentId": "428533996fd7:control:428533996fd7|Seleccione|control",
+      "componentType": "control",
+      "screenIdentity": "428533996fd7",
+      "label": "Seleccione",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-23"
+      ]
+    },
+    {
+      "componentId": "428533996fd7:control:428533996fd7|829-***-0396|option",
+      "componentType": "option",
+      "screenIdentity": "428533996fd7",
+      "label": "829-***-0396",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-24"
+      ]
+    },
+    {
+      "componentId": "428533996fd7:control:428533996fd7|Enviar|button",
+      "componentType": "button",
+      "screenIdentity": "428533996fd7",
+      "label": "Enviar",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-27"
+      ]
+    },
+    {
+      "componentId": "428533996fd7:control:428533996fd7|Please enter verification code. Digit 1|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "428533996fd7",
+      "label": "Please enter verification code. Digit 1",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-28"
+      ]
+    },
+    {
+      "componentId": "428533996fd7:control:428533996fd7|OTP digit 2|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "428533996fd7",
+      "label": "OTP digit 2",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-29"
+      ]
+    },
+    {
+      "componentId": "428533996fd7:control:428533996fd7|OTP digit 3|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "428533996fd7",
+      "label": "OTP digit 3",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-30"
+      ]
+    },
+    {
+      "componentId": "428533996fd7:control:428533996fd7|OTP digit 4|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "428533996fd7",
+      "label": "OTP digit 4",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-31"
+      ]
+    },
+    {
+      "componentId": "428533996fd7:control:428533996fd7|OTP digit 5|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "428533996fd7",
+      "label": "OTP digit 5",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-32"
+      ]
+    },
+    {
+      "componentId": "428533996fd7:control:428533996fd7|OTP digit 6|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "428533996fd7",
+      "label": "OTP digit 6",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-34"
+      ]
+    },
+    {
+      "componentId": "428533996fd7:control:428533996fd7|Verificar|button",
+      "componentType": "button",
+      "screenIdentity": "428533996fd7",
+      "label": "Verificar",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-35"
+      ]
+    }
+  ],
+  "semanticEvents": [
+    {
+      "eventRef": "event-1",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-2",
+      "action": "observe",
+      "screenIdentity": "0b23ab3287d9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-3",
+      "action": "navigate",
+      "screenIdentity": "0b23ab3287d9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-4",
+      "action": "observe",
+      "screenIdentity": "0b23ab3287d9",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "0b23ab3287d9:control:0b23ab3287d9|CuentaAhorra y maneja tu dinero forma ágil y sencilla.|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-5",
+      "action": "observe",
+      "screenIdentity": "0b23ab3287d9",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "0b23ab3287d9:control:0b23ab3287d9|CuentaAhorra y maneja tu dinero forma ágil y sencilla.|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-6",
+      "action": "click",
+      "screenIdentity": "0b23ab3287d9",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "0b23ab3287d9:control:role:button|CuentaAhorra y maneja tu dinero forma ágil y sencilla.",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-7",
+      "action": "navigate",
+      "screenIdentity": "0b23ab3287d9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-8",
+      "action": "observe",
+      "screenIdentity": "0b23ab3287d9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "SCREEN_TECHNICAL_TRANSITION"
+    },
+    {
+      "eventRef": "event-9",
+      "action": "observe",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "428533996fd7:control:428533996fd7|Continuar|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-10",
+      "action": "click",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "428533996fd7:control:role:button|Continuar",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-11",
+      "action": "observe",
+      "screenIdentity": "428533996fd7",
+      "componentType": "checkbox",
+      "controlAffordance": "observable_control",
+      "technicalTargetRef": "428533996fd7:control:428533996fd7|control|checkbox",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-12",
+      "action": "fill",
+      "screenIdentity": "428533996fd7",
+      "componentType": "textbox",
+      "field": "Número de identificación",
+      "associatedField": "Número de identificación",
+      "controlAffordance": "editable",
+      "valueKey": "numero_de_identificacion",
+      "valueRole": "action_input",
+      "technicalTargetRef": "428533996fd7:control:css:#x_DocumentId",
+      "afterState": "402-2467955-1",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-13",
+      "action": "activate",
+      "screenIdentity": "428533996fd7",
+      "componentType": "checkbox",
+      "controlAffordance": "observable_control",
+      "technicalTargetRef": "428533996fd7:control:role:checkbox|Acepto los Términos y Condiciones de la Aplicación Móvil, Web, Portal(es) y/o Pl",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-14",
+      "action": "activate",
+      "screenIdentity": "428533996fd7",
+      "componentType": "checkbox",
+      "associatedField": "AtrásContinuar",
+      "controlAffordance": "observable_control",
+      "technicalTargetRef": "428533996fd7:control:css:#x_AcceptTermsAndConditions",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-15",
+      "action": "observe",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "428533996fd7:control:428533996fd7|Continuar|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-16",
+      "action": "click",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "428533996fd7:control:role:button|Continuar",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-17",
+      "action": "navigate",
+      "screenIdentity": "428533996fd7",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-18",
+      "action": "navigate",
+      "screenIdentity": "428533996fd7",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-19",
+      "action": "navigate",
+      "screenIdentity": "428533996fd7",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-20",
+      "action": "observe",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "428533996fd7:control:428533996fd7|Continuar|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-21",
+      "action": "click",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "428533996fd7:control:role:button|Continuar",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-22",
+      "action": "navigate",
+      "screenIdentity": "428533996fd7",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-23",
+      "action": "activate",
+      "screenIdentity": "428533996fd7",
+      "componentType": "control",
+      "controlAffordance": "observable_control",
+      "technicalTargetRef": "428533996fd7:control:css:div:has(input[id=\"react-select-6-input\"])",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-24",
+      "action": "activate",
+      "screenIdentity": "428533996fd7",
+      "componentType": "option",
+      "controlAffordance": "selectable",
+      "technicalTargetRef": "428533996fd7:control:role:option|829-***-0396",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-25",
+      "action": "observe",
+      "screenIdentity": "428533996fd7",
+      "componentType": "option",
+      "controlAffordance": "selectable",
+      "technicalTargetRef": "428533996fd7:control:428533996fd7|829-***-0396|option",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-26",
+      "action": "observe",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "428533996fd7:control:428533996fd7|Enviar|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-27",
+      "action": "click",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "428533996fd7:control:role:button|Enviar",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-28",
+      "action": "fill",
+      "screenIdentity": "428533996fd7",
+      "componentType": "textbox",
+      "field": "Please enter verification code. Digit 1",
+      "controlAffordance": "editable",
+      "valueKey": "please_enter_verification_code_digit_1",
+      "valueRole": "action_input",
+      "technicalTargetRef": "428533996fd7:control:role:textbox|Please enter verification code. Digit 1",
+      "afterState": "1",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-29",
+      "action": "fill",
+      "screenIdentity": "428533996fd7",
+      "componentType": "textbox",
+      "field": "OTP digit 2",
+      "controlAffordance": "editable",
+      "valueKey": "otp_digit_2",
+      "valueRole": "secure_input",
+      "technicalTargetRef": "428533996fd7:control:role:textbox|OTP digit 2",
+      "afterState": "2",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-30",
+      "action": "fill",
+      "screenIdentity": "428533996fd7",
+      "componentType": "textbox",
+      "field": "OTP digit 3",
+      "controlAffordance": "editable",
+      "valueKey": "otp_digit_3",
+      "valueRole": "secure_input",
+      "technicalTargetRef": "428533996fd7:control:role:textbox|OTP digit 3",
+      "afterState": "3",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-31",
+      "action": "fill",
+      "screenIdentity": "428533996fd7",
+      "componentType": "textbox",
+      "field": "OTP digit 4",
+      "controlAffordance": "editable",
+      "valueKey": "otp_digit_4",
+      "valueRole": "secure_input",
+      "technicalTargetRef": "428533996fd7:control:role:textbox|OTP digit 4",
+      "afterState": "4",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-32",
+      "action": "fill",
+      "screenIdentity": "428533996fd7",
+      "componentType": "textbox",
+      "field": "OTP digit 5",
+      "controlAffordance": "editable",
+      "valueKey": "otp_digit_5",
+      "valueRole": "secure_input",
+      "technicalTargetRef": "428533996fd7:control:role:textbox|OTP digit 5",
+      "afterState": "5",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-33",
+      "action": "observe",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "428533996fd7:control:428533996fd7|Verificar|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-34",
+      "action": "fill",
+      "screenIdentity": "428533996fd7",
+      "componentType": "textbox",
+      "field": "OTP digit 6",
+      "controlAffordance": "editable",
+      "valueKey": "otp_digit_6",
+      "valueRole": "secure_input",
+      "technicalTargetRef": "428533996fd7:control:role:textbox|OTP digit 6",
+      "afterState": "6",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-35",
+      "action": "click",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "428533996fd7:control:role:button|Verificar",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-36",
+      "action": "navigate",
+      "screenIdentity": "428533996fd7",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    }
+  ],
+  "datasets": [
+    {
+      "valueKey": "numero_de_identificacion",
+      "semanticField": "Número de identificación",
+      "valueRole": "action_input",
+      "value": "402-2467955-1",
+      "rawTypedValue": "40224679551",
+      "committedValue": "402-2467955-1",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "428533996fd7:control:css:#x_DocumentId",
+      "recordingId": "0525478a-8560-4406-ae5e-e7a598366464",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label"
+    },
+    {
+      "valueKey": "please_enter_verification_code_digit_1",
+      "semanticField": "Please enter verification code. Digit 1",
+      "valueRole": "action_input",
+      "value": "1",
+      "rawTypedValue": "1",
+      "committedValue": "1",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "428533996fd7:control:role:textbox|Please enter verification code. Digit 1",
+      "recordingId": "0525478a-8560-4406-ae5e-e7a598366464",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "otp_digit_2",
+      "semanticField": "OTP digit 2",
+      "valueRole": "secure_input",
+      "value": "2",
+      "rawTypedValue": "2",
+      "committedValue": "2",
+      "source": "secure",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": true,
+      "generated": false,
+      "instanceIdentity": "428533996fd7:control:role:textbox|OTP digit 2",
+      "recordingId": "0525478a-8560-4406-ae5e-e7a598366464",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "otp_digit_3",
+      "semanticField": "OTP digit 3",
+      "valueRole": "secure_input",
+      "value": "3",
+      "rawTypedValue": "3",
+      "committedValue": "3",
+      "source": "secure",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": true,
+      "generated": false,
+      "instanceIdentity": "428533996fd7:control:role:textbox|OTP digit 3",
+      "recordingId": "0525478a-8560-4406-ae5e-e7a598366464",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "otp_digit_4",
+      "semanticField": "OTP digit 4",
+      "valueRole": "secure_input",
+      "value": "4",
+      "rawTypedValue": "4",
+      "committedValue": "4",
+      "source": "secure",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": true,
+      "generated": false,
+      "instanceIdentity": "428533996fd7:control:role:textbox|OTP digit 4",
+      "recordingId": "0525478a-8560-4406-ae5e-e7a598366464",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "otp_digit_5",
+      "semanticField": "OTP digit 5",
+      "valueRole": "secure_input",
+      "value": "5",
+      "rawTypedValue": "5",
+      "committedValue": "5",
+      "source": "secure",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": true,
+      "generated": false,
+      "instanceIdentity": "428533996fd7:control:role:textbox|OTP digit 5",
+      "recordingId": "0525478a-8560-4406-ae5e-e7a598366464",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "otp_digit_6",
+      "semanticField": "OTP digit 6",
+      "valueRole": "secure_input",
+      "value": "6",
+      "rawTypedValue": "6",
+      "committedValue": "6",
+      "source": "secure",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": true,
+      "generated": false,
+      "instanceIdentity": "428533996fd7:control:role:textbox|OTP digit 6",
+      "recordingId": "0525478a-8560-4406-ae5e-e7a598366464",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    }
+  ],
+  "technicalObservations": [
+    {
+      "observationId": "obs-4",
+      "status": "OBSERVED",
+      "screenIdentity": "0b23ab3287d9",
+      "componentType": "button",
+      "label": "CuentaAhorra y maneja tu dinero forma ágil y sencilla.",
+      "tag": "a",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "0b23ab3287d9:control:0b23ab3287d9|CuentaAhorra y maneja tu dinero forma ágil y sencilla.|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-5",
+      "status": "OBSERVED",
+      "screenIdentity": "0b23ab3287d9",
+      "componentType": "button",
+      "label": "CuentaAhorra y maneja tu dinero forma ágil y sencilla.",
+      "tag": "a",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "0b23ab3287d9:control:0b23ab3287d9|CuentaAhorra y maneja tu dinero forma ágil y sencilla.|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-6",
+      "status": "VALIDATED",
+      "screenIdentity": "0b23ab3287d9",
+      "componentType": "button",
+      "label": "CuentaAhorra y maneja tu dinero forma ágil y sencilla.",
+      "tag": "a",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|CuentaAhorra y maneja tu dinero forma ágil y sencilla.",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#nav-item-cuentas",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "nav-item-cuentas",
+          "confidence": 0.8
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#nav-item-cuentas",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a",
+              "role": "button"
+            },
+            "stableDirectAttributes": {
+              "href": "#",
+              "id": "nav-item-cuentas",
+              "role": "button"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "clippath",
+                "stableAttributes": {
+                  "id": "clip0_2384_5575"
+                }
+              }
+            ],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"span\",3]],\"descendantEntries\":[[\"circle\",1],[\"clippath\",1],[\"defs\",1],[\"g\",1],[\"path\",6],[\"rect\",1],[\"span\",5],[\"svg\",2]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "nav-app-product-types"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"a\",\"role\":\"button\"},\"stableDirectAttributes\":{\"href\":\"#\",\"id\":\"nav-item-cuentas\",\"role\":\"button\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"clippath\",\"stableAttributes\":{\"id\":\"clip0_2384_5575\"}}],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",3]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"clippath\\\",1],[\\\"defs\\\",1],[\\\"g\\\",1],[\\\"path\\\",6],[\\\"rect\\\",1],[\\\"span\\\",5],[\\\"svg\\\",2]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "0b23ab3287d9:control:role:button|CuentaAhorra y maneja tu dinero forma ágil y sencilla.",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-9",
+      "status": "OBSERVED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "label": "Continuar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "428533996fd7:control:428533996fd7|Continuar|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-10",
+      "status": "VALIDATED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "label": "Continuar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Continuar",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#btn-solicitar-cuenta-de-ahorros-personal-en-pesos",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "btn-solicitar-cuenta-de-ahorros-personal-en-pesos",
+          "confidence": 0.8
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#btn-solicitar-cuenta-de-ahorros-personal-en-pesos",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "id": "btn-solicitar-cuenta-de-ahorros-personal-en-pesos"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"circle\",1],[\"path\",1],[\"span\",1],[\"svg\",1]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "card-cuenta-de-ahorros-personal-en-pesos"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-solicitar-cuenta-de-ahorros-personal-en-pesos\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"path\\\",1],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "428533996fd7:control:role:button|Continuar",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-11",
+      "status": "OBSERVED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "checkbox",
+      "label": "control",
+      "tag": "span",
+      "role": "checkbox",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "428533996fd7:control:428533996fd7|control|checkbox",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-12",
+      "status": "VALIDATED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "textbox",
+      "label": "control",
+      "tag": "input",
+      "role": "input",
+      "associatedField": "Número de identificación",
+      "afterValue": "402-2467955-1",
+      "semanticField": "Número de identificación",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label",
+      "locatorCandidates": [
+        {
+          "strategy": "css",
+          "value": "#x_DocumentId",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "x_DocumentId",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.8,
+      "technicalTargetRef": "428533996fd7:control:css:#x_DocumentId",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-1",
+      "inputValue": "402-2467955-1",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-13",
+      "status": "VALIDATED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "checkbox",
+      "label": "control",
+      "tag": "span",
+      "role": "checkbox",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "checkbox|Acepto los Términos y Condiciones de la Aplicación Móvil, Web, Portal(es) y/o Pl",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#base-ui-_r_1i_",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "base-ui-_r_1i_",
+          "confidence": 0.8
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#base-ui-_r_1i_",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "span",
+              "role": "checkbox"
+            },
+            "stableDirectAttributes": {
+              "aria-labelledby": "el_AcceptTermsAndConditions",
+              "id": "base-ui-_r_1i_",
+              "role": "checkbox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "el_AcceptTermsAndConditions"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"span\",\"role\":\"checkbox\"},\"stableDirectAttributes\":{\"id\":\"base-ui-_r_1i_\",\"role\":\"checkbox\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": false,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "428533996fd7:control:role:checkbox|Acepto los Términos y Condiciones de la Aplicación Móvil, Web, Portal(es) y/o Pl",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-14",
+      "status": "VALIDATED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "checkbox",
+      "label": "control",
+      "tag": "input",
+      "role": "checkbox",
+      "associatedField": "AtrásContinuar",
+      "semanticField": "AtrásContinuar",
+      "locatorCandidates": [
+        {
+          "strategy": "css",
+          "value": "#x_AcceptTermsAndConditions",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "x_AcceptTermsAndConditions",
+          "confidence": 0.8
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#x_AcceptTermsAndConditions",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "input"
+            },
+            "stableDirectAttributes": {
+              "id": "x_AcceptTermsAndConditions"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "el_AcceptTermsAndConditions"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"input\"},\"stableDirectAttributes\":{\"id\":\"x_AcceptTermsAndConditions\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": false,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.8,
+      "technicalTargetRef": "428533996fd7:control:css:#x_AcceptTermsAndConditions",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-15",
+      "status": "OBSERVED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "label": "Continuar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "428533996fd7:control:428533996fd7|Continuar|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-16",
+      "status": "VALIDATED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "label": "Continuar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Continuar",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#btn-identity-validate",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "btn-identity-validate",
+          "confidence": 0.8
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#btn-identity-validate",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "id": "btn-identity-validate"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"circle\",1],[\"path\",1],[\"span\",1],[\"svg\",1]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "_r_1c_"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-identity-validate\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"path\\\",1],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "428533996fd7:control:role:button|Continuar",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-20",
+      "status": "OBSERVED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "label": "Continuar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "428533996fd7:control:428533996fd7|Continuar|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-21",
+      "status": "VALIDATED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "label": "Continuar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Continuar",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#btn-identity-confirm-and-continue",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "btn-identity-confirm-and-continue",
+          "confidence": 0.8
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#btn-identity-confirm-and-continue",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "id": "btn-identity-confirm-and-continue"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"circle\",1],[\"path\",1],[\"span\",1],[\"svg\",1]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "_r_2e_"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-identity-confirm-and-continue\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"path\\\",1],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "428533996fd7:control:role:button|Continuar",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-23",
+      "status": "VALIDATED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "control",
+      "label": "Seleccione",
+      "tag": "div",
+      "locatorCandidates": [
+        {
+          "strategy": "css",
+          "value": "div:has(input[id=\"react-select-6-input\"])",
+          "confidence": 0.55
+        }
+      ],
+      "confidence": 0.55,
+      "technicalTargetRef": "428533996fd7:control:css:div:has(input[id=\"react-select-6-input\"])",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-24",
+      "status": "VALIDATED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "option",
+      "label": "829-***-0396",
+      "tag": "div",
+      "role": "option",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "option|829-***-0396",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#react-select-6-option-1",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "react-select-6-option-1",
+          "confidence": 0.8
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#react-select-6-option-1",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "id": "react-select-6-option-1",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "react-select-6-listbox"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"div\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"react-select-6-option-1\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "428533996fd7:control:role:option|829-***-0396",
+      "validatedByInteraction": true,
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-25",
+      "status": "OBSERVED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "option",
+      "label": "829-***-0396",
+      "tag": "div",
+      "role": "option",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "428533996fd7:control:428533996fd7|829-***-0396|option",
+      "validatedByInteraction": false,
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-26",
+      "status": "OBSERVED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "label": "Enviar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "428533996fd7:control:428533996fd7|Enviar|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-27",
+      "status": "VALIDATED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "label": "Enviar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Enviar",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#btn-send-sms-otp",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "btn-send-sms-otp",
+          "confidence": 0.8
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#btn-send-sms-otp",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "id": "btn-send-sms-otp"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "428533996fd7:control:role:button|Enviar",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-28",
+      "status": "VALIDATED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "textbox",
+      "label": "Please enter verification code. Digit 1",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "1",
+      "semanticField": "Please enter verification code. Digit 1",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Please enter verification code. Digit 1",
+          "confidence": 0.85
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "428533996fd7:control:role:textbox|Please enter verification code. Digit 1",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-3",
+      "inputValue": "1",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-29",
+      "status": "VALIDATED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "textbox",
+      "label": "OTP digit 2",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "2",
+      "semanticField": "OTP digit 2",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|OTP digit 2",
+          "confidence": 0.85
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "428533996fd7:control:role:textbox|OTP digit 2",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-4",
+      "inputValue": "2",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-30",
+      "status": "VALIDATED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "textbox",
+      "label": "OTP digit 3",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "3",
+      "semanticField": "OTP digit 3",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|OTP digit 3",
+          "confidence": 0.85
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "428533996fd7:control:role:textbox|OTP digit 3",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-5",
+      "inputValue": "3",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-31",
+      "status": "VALIDATED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "textbox",
+      "label": "OTP digit 4",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "4",
+      "semanticField": "OTP digit 4",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|OTP digit 4",
+          "confidence": 0.85
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "428533996fd7:control:role:textbox|OTP digit 4",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-6",
+      "inputValue": "4",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-32",
+      "status": "VALIDATED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "textbox",
+      "label": "OTP digit 5",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "5",
+      "semanticField": "OTP digit 5",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|OTP digit 5",
+          "confidence": 0.85
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "428533996fd7:control:role:textbox|OTP digit 5",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-7",
+      "inputValue": "5",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-33",
+      "status": "OBSERVED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "label": "Verificar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "428533996fd7:control:428533996fd7|Verificar|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-34",
+      "status": "VALIDATED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "textbox",
+      "label": "OTP digit 6",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "6",
+      "semanticField": "OTP digit 6",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|OTP digit 6",
+          "confidence": 0.85
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "428533996fd7:control:role:textbox|OTP digit 6",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-8",
+      "inputValue": "6",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-35",
+      "status": "VALIDATED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "label": "Verificar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Verificar",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#btn-validate-sms-otp",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "btn-validate-sms-otp",
+          "confidence": 0.8
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#btn-validate-sms-otp",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "id": "btn-validate-sms-otp"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "428533996fd7:control:role:button|Verificar",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1e31e8f1f5de-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "1e31e8f1f5de",
+      "componentType": "a",
+      "label": "Obtener nuestra APP",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "Obtener nuestra APP"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Obtener nuestra APP",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1e31e8f1f5de:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1e31e8f1f5de-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "1e31e8f1f5de",
+      "componentType": "button",
+      "label": "Cuenta",
+      "tag": "a",
+      "role": "button",
+      "attributes": {
+        "id": "nav-item-cuentas",
+        "role": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "nav-item-cuentas",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "1e31e8f1f5de:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1e31e8f1f5de-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "1e31e8f1f5de",
+      "componentType": "button",
+      "label": "Tarjeta de Crédito",
+      "tag": "a",
+      "role": "button",
+      "attributes": {
+        "id": "nav-item-tarjetas-de-credito",
+        "role": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "nav-item-tarjetas-de-credito",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "1e31e8f1f5de:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1e31e8f1f5de-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "1e31e8f1f5de",
+      "componentType": "button",
+      "label": "Préstamo",
+      "tag": "a",
+      "role": "button",
+      "attributes": {
+        "id": "nav-item-prestamos",
+        "role": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "nav-item-prestamos",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "1e31e8f1f5de:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1e31e8f1f5de-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "1e31e8f1f5de",
+      "componentType": "button",
+      "label": "Depósito a plazo",
+      "tag": "a",
+      "role": "button",
+      "attributes": {
+        "id": "nav-item-depositos-a-plazos",
+        "role": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "nav-item-depositos-a-plazos",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "1e31e8f1f5de:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1e31e8f1f5de-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "1e31e8f1f5de",
+      "componentType": "button",
+      "label": "Slide 1",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button",
+        "aria-label": "Slide 1"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Slide 1",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1e31e8f1f5de:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1e31e8f1f5de-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "1e31e8f1f5de",
+      "componentType": "button",
+      "label": "Slide 2",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button",
+        "aria-label": "Slide 2"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Slide 2",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1e31e8f1f5de:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1e31e8f1f5de-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "1e31e8f1f5de",
+      "componentType": "button",
+      "label": "Slide 3",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button",
+        "aria-label": "Slide 3"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Slide 3",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1e31e8f1f5de:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1e31e8f1f5de-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "1e31e8f1f5de",
+      "componentType": "button",
+      "label": "Previous",
+      "tag": "a",
+      "role": "button",
+      "attributes": {
+        "role": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Previous",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1e31e8f1f5de:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1e31e8f1f5de-control-10",
+      "status": "OBSERVED",
+      "screenIdentity": "1e31e8f1f5de",
+      "componentType": "button",
+      "label": "Next",
+      "tag": "a",
+      "role": "button",
+      "attributes": {
+        "role": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Next",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1e31e8f1f5de:control:10",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1e31e8f1f5de-control-11",
+      "status": "OBSERVED",
+      "screenIdentity": "1e31e8f1f5de",
+      "componentType": "a",
+      "label": "Instagram",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "Instagram"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Instagram",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1e31e8f1f5de:control:11",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1e31e8f1f5de-control-12",
+      "status": "OBSERVED",
+      "screenIdentity": "1e31e8f1f5de",
+      "componentType": "a",
+      "label": "Facebook",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "Facebook"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Facebook",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1e31e8f1f5de:control:12",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1e31e8f1f5de-control-13",
+      "status": "OBSERVED",
+      "screenIdentity": "1e31e8f1f5de",
+      "componentType": "a",
+      "label": "LinkedIn",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "LinkedIn"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "LinkedIn",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1e31e8f1f5de:control:13",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1e31e8f1f5de-control-14",
+      "status": "OBSERVED",
+      "screenIdentity": "1e31e8f1f5de",
+      "componentType": "a",
+      "label": "Superintendencia de Bancos - Entidad autorizada",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "Superintendencia de Bancos - Entidad autorizada"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Superintendencia de Bancos - Entidad autorizada",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1e31e8f1f5de:control:14",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1e31e8f1f5de-control-15",
+      "status": "OBSERVED",
+      "screenIdentity": "1e31e8f1f5de",
+      "componentType": "a",
+      "label": "Quiénes Somos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Quiénes Somos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1e31e8f1f5de:control:15",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1e31e8f1f5de-control-16",
+      "status": "OBSERVED",
+      "screenIdentity": "1e31e8f1f5de",
+      "componentType": "a",
+      "label": "Productos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Productos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1e31e8f1f5de:control:16",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1e31e8f1f5de-control-17",
+      "status": "OBSERVED",
+      "screenIdentity": "1e31e8f1f5de",
+      "componentType": "a",
+      "label": "Contactos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Contactos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1e31e8f1f5de:control:17",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-1e31e8f1f5de-control-18",
+      "status": "OBSERVED",
+      "screenIdentity": "1e31e8f1f5de",
+      "componentType": "a",
+      "label": "Pasos Reclamación",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Pasos Reclamación",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "1e31e8f1f5de:control:18",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-428533996fd7-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "a",
+      "label": "Obtener nuestra APP",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "Obtener nuestra APP"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Obtener nuestra APP",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "428533996fd7:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-428533996fd7-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "label": "Comparar cuentas",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "btn-compare-products",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "btn-compare-products",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "428533996fd7:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-428533996fd7-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "label": "Visualización",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "btn-display",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "btn-display",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "428533996fd7:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-428533996fd7-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "label": "Más detalles",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "btn-ver-cuenta-de-ahorros-personal-en-pesos",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "btn-ver-cuenta-de-ahorros-personal-en-pesos",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "428533996fd7:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-428533996fd7-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "label": "Agregar para comparar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "btn-comparar-cuenta-de-ahorros-personal-en-pesos",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "btn-comparar-cuenta-de-ahorros-personal-en-pesos",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "428533996fd7:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-428533996fd7-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "label": "Continuar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "btn-solicitar-cuenta-de-ahorros-personal-en-pesos",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "btn-solicitar-cuenta-de-ahorros-personal-en-pesos",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "428533996fd7:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-428533996fd7-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "a",
+      "label": "Conoce más acerca de los costos asociados a nuestros productos y servicios",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Conoce más acerca de los costos asociados a nuestros productos y servicios  haciendo clic aquí.",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "428533996fd7:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-428533996fd7-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "button",
+      "label": "Cerrar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button",
+        "aria-label": "Cerrar"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Cerrar",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "428533996fd7:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-428533996fd7-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "a",
+      "label": "Instagram",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "Instagram"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Instagram",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "428533996fd7:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-428533996fd7-control-10",
+      "status": "OBSERVED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "a",
+      "label": "Facebook",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "Facebook"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Facebook",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "428533996fd7:control:10",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-428533996fd7-control-11",
+      "status": "OBSERVED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "a",
+      "label": "LinkedIn",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "LinkedIn"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "LinkedIn",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "428533996fd7:control:11",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-428533996fd7-control-12",
+      "status": "OBSERVED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "a",
+      "label": "Superintendencia de Bancos - Entidad autorizada",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "Superintendencia de Bancos - Entidad autorizada"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Superintendencia de Bancos - Entidad autorizada",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "428533996fd7:control:12",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-428533996fd7-control-13",
+      "status": "OBSERVED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "a",
+      "label": "Quiénes Somos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Quiénes Somos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "428533996fd7:control:13",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-428533996fd7-control-14",
+      "status": "OBSERVED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "a",
+      "label": "Productos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Productos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "428533996fd7:control:14",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-428533996fd7-control-15",
+      "status": "OBSERVED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "a",
+      "label": "Contactos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Contactos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "428533996fd7:control:15",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-428533996fd7-control-16",
+      "status": "OBSERVED",
+      "screenIdentity": "428533996fd7",
+      "componentType": "a",
+      "label": "Pasos Reclamación",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Pasos Reclamación",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "428533996fd7:control:16",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5ca713c947a-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "e5ca713c947a",
+      "componentType": "a",
+      "label": "Obtener nuestra APP",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "Obtener nuestra APP"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Obtener nuestra APP",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5ca713c947a:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5ca713c947a-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "e5ca713c947a",
+      "componentType": "textbox",
+      "label": "OTP digit 1",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "type": "text",
+        "aria-label": "OTP digit 1"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "OTP digit 1",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5ca713c947a:control:2",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-e5ca713c947a-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "e5ca713c947a",
+      "componentType": "textbox",
+      "label": "OTP digit 2",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "type": "text",
+        "aria-label": "OTP digit 2"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "OTP digit 2",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5ca713c947a:control:3",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-e5ca713c947a-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "e5ca713c947a",
+      "componentType": "textbox",
+      "label": "OTP digit 3",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "type": "text",
+        "aria-label": "OTP digit 3"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "OTP digit 3",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5ca713c947a:control:4",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-e5ca713c947a-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "e5ca713c947a",
+      "componentType": "textbox",
+      "label": "OTP digit 4",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "type": "text",
+        "aria-label": "OTP digit 4"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "OTP digit 4",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5ca713c947a:control:5",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-e5ca713c947a-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "e5ca713c947a",
+      "componentType": "textbox",
+      "label": "OTP digit 5",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "type": "text",
+        "aria-label": "OTP digit 5"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "OTP digit 5",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5ca713c947a:control:6",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-e5ca713c947a-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "e5ca713c947a",
+      "componentType": "textbox",
+      "label": "OTP digit 6",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "type": "text",
+        "aria-label": "OTP digit 6"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "OTP digit 6",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5ca713c947a:control:7",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-e5ca713c947a-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "e5ca713c947a",
+      "componentType": "button",
+      "label": "Enviar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "btn-send-sms-otp",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "btn-send-sms-otp",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e5ca713c947a:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5ca713c947a-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "e5ca713c947a",
+      "componentType": "button",
+      "label": "¿Tus datos se encuentran desactualizados?",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "btn-outdated-contact-data",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "btn-outdated-contact-data",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e5ca713c947a:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5ca713c947a-control-10",
+      "status": "OBSERVED",
+      "screenIdentity": "e5ca713c947a",
+      "componentType": "button",
+      "label": "Atrás",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "btn-go-back",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "btn-go-back",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e5ca713c947a:control:10",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5ca713c947a-control-11",
+      "status": "OBSERVED",
+      "screenIdentity": "e5ca713c947a",
+      "componentType": "button",
+      "label": "Continuar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "btn-continue",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "btn-continue",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e5ca713c947a:control:11",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5ca713c947a-control-12",
+      "status": "OBSERVED",
+      "screenIdentity": "e5ca713c947a",
+      "componentType": "a",
+      "label": "Instagram",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "Instagram"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Instagram",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5ca713c947a:control:12",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5ca713c947a-control-13",
+      "status": "OBSERVED",
+      "screenIdentity": "e5ca713c947a",
+      "componentType": "a",
+      "label": "Facebook",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "Facebook"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Facebook",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5ca713c947a:control:13",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5ca713c947a-control-14",
+      "status": "OBSERVED",
+      "screenIdentity": "e5ca713c947a",
+      "componentType": "a",
+      "label": "LinkedIn",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "LinkedIn"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "LinkedIn",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5ca713c947a:control:14",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5ca713c947a-control-15",
+      "status": "OBSERVED",
+      "screenIdentity": "e5ca713c947a",
+      "componentType": "a",
+      "label": "Superintendencia de Bancos - Entidad autorizada",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "Superintendencia de Bancos - Entidad autorizada"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Superintendencia de Bancos - Entidad autorizada",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5ca713c947a:control:15",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5ca713c947a-control-16",
+      "status": "OBSERVED",
+      "screenIdentity": "e5ca713c947a",
+      "componentType": "a",
+      "label": "Quiénes Somos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Quiénes Somos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5ca713c947a:control:16",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5ca713c947a-control-17",
+      "status": "OBSERVED",
+      "screenIdentity": "e5ca713c947a",
+      "componentType": "a",
+      "label": "Productos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Productos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5ca713c947a:control:17",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5ca713c947a-control-18",
+      "status": "OBSERVED",
+      "screenIdentity": "e5ca713c947a",
+      "componentType": "a",
+      "label": "Contactos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Contactos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5ca713c947a:control:18",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5ca713c947a-control-19",
+      "status": "OBSERVED",
+      "screenIdentity": "e5ca713c947a",
+      "componentType": "a",
+      "label": "Pasos Reclamación",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Pasos Reclamación",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5ca713c947a:control:19",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-58501b3f747c-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "58501b3f747c",
+      "componentType": "a",
+      "label": "Obtener nuestra APP",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "Obtener nuestra APP"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Obtener nuestra APP",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "58501b3f747c:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-58501b3f747c-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "58501b3f747c",
+      "componentType": "textbox",
+      "label": "OTP digit 1",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "type": "text",
+        "aria-label": "OTP digit 1"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "OTP digit 1",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "58501b3f747c:control:2",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-58501b3f747c-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "58501b3f747c",
+      "componentType": "textbox",
+      "label": "OTP digit 2",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "type": "text",
+        "aria-label": "OTP digit 2"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "OTP digit 2",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "58501b3f747c:control:3",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-58501b3f747c-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "58501b3f747c",
+      "componentType": "textbox",
+      "label": "OTP digit 3",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "type": "text",
+        "aria-label": "OTP digit 3"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "OTP digit 3",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "58501b3f747c:control:4",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-58501b3f747c-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "58501b3f747c",
+      "componentType": "textbox",
+      "label": "OTP digit 4",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "type": "text",
+        "aria-label": "OTP digit 4"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "OTP digit 4",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "58501b3f747c:control:5",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-58501b3f747c-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "58501b3f747c",
+      "componentType": "textbox",
+      "label": "OTP digit 5",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "type": "text",
+        "aria-label": "OTP digit 5"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "OTP digit 5",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "58501b3f747c:control:6",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-58501b3f747c-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "58501b3f747c",
+      "componentType": "textbox",
+      "label": "OTP digit 6",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "type": "text",
+        "aria-label": "OTP digit 6"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "OTP digit 6",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "58501b3f747c:control:7",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-58501b3f747c-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "58501b3f747c",
+      "componentType": "button",
+      "label": "Cargando...Enviar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "btn-send-sms-otp",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "btn-send-sms-otp",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "58501b3f747c:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-58501b3f747c-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "58501b3f747c",
+      "componentType": "button",
+      "label": "¿Tus datos se encuentran desactualizados?",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "btn-outdated-contact-data",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "btn-outdated-contact-data",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "58501b3f747c:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-58501b3f747c-control-10",
+      "status": "OBSERVED",
+      "screenIdentity": "58501b3f747c",
+      "componentType": "button",
+      "label": "Atrás",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "btn-go-back",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "btn-go-back",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "58501b3f747c:control:10",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-58501b3f747c-control-11",
+      "status": "OBSERVED",
+      "screenIdentity": "58501b3f747c",
+      "componentType": "button",
+      "label": "Continuar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "btn-continue",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "btn-continue",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "58501b3f747c:control:11",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-58501b3f747c-control-12",
+      "status": "OBSERVED",
+      "screenIdentity": "58501b3f747c",
+      "componentType": "a",
+      "label": "Instagram",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "Instagram"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Instagram",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "58501b3f747c:control:12",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-58501b3f747c-control-13",
+      "status": "OBSERVED",
+      "screenIdentity": "58501b3f747c",
+      "componentType": "a",
+      "label": "Facebook",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "Facebook"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Facebook",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "58501b3f747c:control:13",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-58501b3f747c-control-14",
+      "status": "OBSERVED",
+      "screenIdentity": "58501b3f747c",
+      "componentType": "a",
+      "label": "LinkedIn",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "LinkedIn"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "LinkedIn",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "58501b3f747c:control:14",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-58501b3f747c-control-15",
+      "status": "OBSERVED",
+      "screenIdentity": "58501b3f747c",
+      "componentType": "a",
+      "label": "Superintendencia de Bancos - Entidad autorizada",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "Superintendencia de Bancos - Entidad autorizada"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Superintendencia de Bancos - Entidad autorizada",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "58501b3f747c:control:15",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-58501b3f747c-control-16",
+      "status": "OBSERVED",
+      "screenIdentity": "58501b3f747c",
+      "componentType": "a",
+      "label": "Quiénes Somos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Quiénes Somos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "58501b3f747c:control:16",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-58501b3f747c-control-17",
+      "status": "OBSERVED",
+      "screenIdentity": "58501b3f747c",
+      "componentType": "a",
+      "label": "Productos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Productos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "58501b3f747c:control:17",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-58501b3f747c-control-18",
+      "status": "OBSERVED",
+      "screenIdentity": "58501b3f747c",
+      "componentType": "a",
+      "label": "Contactos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Contactos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "58501b3f747c:control:18",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-58501b3f747c-control-19",
+      "status": "OBSERVED",
+      "screenIdentity": "58501b3f747c",
+      "componentType": "a",
+      "label": "Pasos Reclamación",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Pasos Reclamación",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "58501b3f747c:control:19",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-394bb25d51e0-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "394bb25d51e0",
+      "componentType": "a",
+      "label": "Obtener nuestra APP",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "Obtener nuestra APP"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Obtener nuestra APP",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "394bb25d51e0:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-394bb25d51e0-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "394bb25d51e0",
+      "componentType": "textbox",
+      "label": "OTP digit 1",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "type": "text",
+        "aria-label": "OTP digit 1"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "OTP digit 1",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "394bb25d51e0:control:2",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-394bb25d51e0-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "394bb25d51e0",
+      "componentType": "textbox",
+      "label": "OTP digit 2",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "type": "text",
+        "aria-label": "OTP digit 2"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "OTP digit 2",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "394bb25d51e0:control:3",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-394bb25d51e0-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "394bb25d51e0",
+      "componentType": "textbox",
+      "label": "OTP digit 3",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "type": "text",
+        "aria-label": "OTP digit 3"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "OTP digit 3",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "394bb25d51e0:control:4",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-394bb25d51e0-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "394bb25d51e0",
+      "componentType": "textbox",
+      "label": "OTP digit 4",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "type": "text",
+        "aria-label": "OTP digit 4"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "OTP digit 4",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "394bb25d51e0:control:5",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-394bb25d51e0-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "394bb25d51e0",
+      "componentType": "textbox",
+      "label": "OTP digit 5",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "type": "text",
+        "aria-label": "OTP digit 5"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "OTP digit 5",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "394bb25d51e0:control:6",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-394bb25d51e0-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "394bb25d51e0",
+      "componentType": "textbox",
+      "label": "OTP digit 6",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "type": "text",
+        "aria-label": "OTP digit 6"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "OTP digit 6",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "394bb25d51e0:control:7",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-394bb25d51e0-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "394bb25d51e0",
+      "componentType": "button",
+      "label": "56",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "btn-resend-sms-otp",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "btn-resend-sms-otp",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "394bb25d51e0:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-394bb25d51e0-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "394bb25d51e0",
+      "componentType": "button",
+      "label": "Verificar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "btn-validate-sms-otp",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "btn-validate-sms-otp",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "394bb25d51e0:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-394bb25d51e0-control-10",
+      "status": "OBSERVED",
+      "screenIdentity": "394bb25d51e0",
+      "componentType": "button",
+      "label": "¿Tus datos se encuentran desactualizados?",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "btn-outdated-contact-data",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "btn-outdated-contact-data",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "394bb25d51e0:control:10",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-394bb25d51e0-control-11",
+      "status": "OBSERVED",
+      "screenIdentity": "394bb25d51e0",
+      "componentType": "button",
+      "label": "Atrás",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "btn-go-back",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "btn-go-back",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "394bb25d51e0:control:11",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-394bb25d51e0-control-12",
+      "status": "OBSERVED",
+      "screenIdentity": "394bb25d51e0",
+      "componentType": "button",
+      "label": "Continuar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "btn-continue",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "btn-continue",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "394bb25d51e0:control:12",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-394bb25d51e0-control-13",
+      "status": "OBSERVED",
+      "screenIdentity": "394bb25d51e0",
+      "componentType": "a",
+      "label": "Instagram",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "Instagram"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Instagram",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "394bb25d51e0:control:13",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-394bb25d51e0-control-14",
+      "status": "OBSERVED",
+      "screenIdentity": "394bb25d51e0",
+      "componentType": "a",
+      "label": "Facebook",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "Facebook"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Facebook",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "394bb25d51e0:control:14",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-394bb25d51e0-control-15",
+      "status": "OBSERVED",
+      "screenIdentity": "394bb25d51e0",
+      "componentType": "a",
+      "label": "LinkedIn",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "LinkedIn"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "LinkedIn",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "394bb25d51e0:control:15",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-394bb25d51e0-control-16",
+      "status": "OBSERVED",
+      "screenIdentity": "394bb25d51e0",
+      "componentType": "a",
+      "label": "Superintendencia de Bancos - Entidad autorizada",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "Superintendencia de Bancos - Entidad autorizada"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Superintendencia de Bancos - Entidad autorizada",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "394bb25d51e0:control:16",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-394bb25d51e0-control-17",
+      "status": "OBSERVED",
+      "screenIdentity": "394bb25d51e0",
+      "componentType": "a",
+      "label": "Quiénes Somos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Quiénes Somos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "394bb25d51e0:control:17",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-394bb25d51e0-control-18",
+      "status": "OBSERVED",
+      "screenIdentity": "394bb25d51e0",
+      "componentType": "a",
+      "label": "Productos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Productos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "394bb25d51e0:control:18",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-394bb25d51e0-control-19",
+      "status": "OBSERVED",
+      "screenIdentity": "394bb25d51e0",
+      "componentType": "a",
+      "label": "Contactos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Contactos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "394bb25d51e0:control:19",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-394bb25d51e0-control-20",
+      "status": "OBSERVED",
+      "screenIdentity": "394bb25d51e0",
+      "componentType": "a",
+      "label": "Pasos Reclamación",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Pasos Reclamación",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "394bb25d51e0:control:20",
+      "selectable": false,
+      "editable": false
+    }
+  ],
+  "editingSessions": [
+    {
+      "editingSessionId": "edit-1",
+      "controlIdentity": "428533996fd7|Número de identificación|amount_or_text",
+      "screenIdentity": "428533996fd7",
+      "startedAt": 17425,
+      "endedAt": 17425,
+      "rawEventRefs": [
+        "event-12"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "428533996fd7:css:#x_DocumentId"
+      ],
+      "inputValue": "402-2467955-1",
+      "rawTypedValue": "40224679551",
+      "semanticField": "Número de identificación",
+      "finalValue": "402-2467955-1"
+    },
+    {
+      "editingSessionId": "edit-2",
+      "controlIdentity": "428533996fd7|829-***-0396|option",
+      "screenIdentity": "428533996fd7",
+      "startedAt": 23428,
+      "endedAt": 23428,
+      "rawEventRefs": [
+        "event-25"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "428533996fd7:428533996fd7|829-***-0396|option"
+      ]
+    },
+    {
+      "editingSessionId": "edit-3",
+      "controlIdentity": "428533996fd7|Please enter verification code. Digit 1|amount_or_text",
+      "screenIdentity": "428533996fd7",
+      "startedAt": 28141,
+      "endedAt": 28141,
+      "rawEventRefs": [
+        "event-28"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "428533996fd7:role:textbox|Please enter verification code. Digit 1"
+      ],
+      "inputValue": "1",
+      "rawTypedValue": "1",
+      "finalValue": "1"
+    },
+    {
+      "editingSessionId": "edit-4",
+      "controlIdentity": "428533996fd7|OTP digit 2|amount_or_text",
+      "screenIdentity": "428533996fd7",
+      "startedAt": 28397,
+      "endedAt": 28397,
+      "rawEventRefs": [
+        "event-29"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "428533996fd7:role:textbox|OTP digit 2"
+      ],
+      "inputValue": "2",
+      "rawTypedValue": "2",
+      "finalValue": "2"
+    },
+    {
+      "editingSessionId": "edit-5",
+      "controlIdentity": "428533996fd7|OTP digit 3|amount_or_text",
+      "screenIdentity": "428533996fd7",
+      "startedAt": 28750,
+      "endedAt": 28750,
+      "rawEventRefs": [
+        "event-30"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "428533996fd7:role:textbox|OTP digit 3"
+      ],
+      "inputValue": "3",
+      "rawTypedValue": "3",
+      "finalValue": "3"
+    },
+    {
+      "editingSessionId": "edit-6",
+      "controlIdentity": "428533996fd7|OTP digit 4|amount_or_text",
+      "screenIdentity": "428533996fd7",
+      "startedAt": 29062,
+      "endedAt": 29062,
+      "rawEventRefs": [
+        "event-31"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "428533996fd7:role:textbox|OTP digit 4"
+      ],
+      "inputValue": "4",
+      "rawTypedValue": "4",
+      "finalValue": "4"
+    },
+    {
+      "editingSessionId": "edit-7",
+      "controlIdentity": "428533996fd7|OTP digit 5|amount_or_text",
+      "screenIdentity": "428533996fd7",
+      "startedAt": 29241,
+      "endedAt": 29241,
+      "rawEventRefs": [
+        "event-32"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "428533996fd7:role:textbox|OTP digit 5"
+      ],
+      "inputValue": "5",
+      "rawTypedValue": "5",
+      "finalValue": "5"
+    },
+    {
+      "editingSessionId": "edit-8",
+      "controlIdentity": "428533996fd7|OTP digit 6|amount_or_text",
+      "screenIdentity": "428533996fd7",
+      "startedAt": 31163,
+      "endedAt": 31163,
+      "rawEventRefs": [
+        "event-34"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "428533996fd7:role:textbox|OTP digit 6"
+      ],
+      "inputValue": "6",
+      "rawTypedValue": "6",
+      "finalValue": "6"
+    }
+  ],
+  "scenarioSuggestions": [],
+  "canonicalInteractions": [
+    {
+      "id": "interaction-1",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-1"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "https://solicitudedigitalesdev/",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-3",
+      "controlIdentity": "0b23ab3287d9",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-3"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "0b23ab3287d9",
+      "screenAfterRef": "0b23ab3287d9",
+      "routeBefore": "https://solicitudedigitalesdev/",
+      "stateScope": "0b23ab3287d9",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-6",
+      "controlIdentity": "0b23ab3287d9|CuentaAhorra y maneja tu dinero forma ágil y sencilla.|role|button|CuentaAhorra y maneja tu dinero forma ágil y sencilla.",
+      "action": "click",
+      "sourceEventRefs": [
+        "event-6"
+      ],
+      "technicalTargetRefs": [
+        "role:button|CuentaAhorra y maneja tu dinero forma ágil y sencilla.",
+        "css:#nav-item-cuentas",
+        "id:nav-item-cuentas"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#nav-item-cuentas",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a",
+              "role": "button"
+            },
+            "stableDirectAttributes": {
+              "href": "#",
+              "id": "nav-item-cuentas",
+              "role": "button"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "clippath",
+                "stableAttributes": {
+                  "id": "clip0_2384_5575"
+                }
+              }
+            ],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"span\",3]],\"descendantEntries\":[[\"circle\",1],[\"clippath\",1],[\"defs\",1],[\"g\",1],[\"path\",6],[\"rect\",1],[\"span\",5],[\"svg\",2]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "nav-app-product-types"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"a\",\"role\":\"button\"},\"stableDirectAttributes\":{\"href\":\"#\",\"id\":\"nav-item-cuentas\",\"role\":\"button\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"clippath\",\"stableAttributes\":{\"id\":\"clip0_2384_5575\"}}],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",3]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"clippath\\\",1],[\\\"defs\\\",1],[\\\"g\\\",1],[\\\"path\\\",6],[\\\"rect\\\",1],[\\\"span\\\",5],[\\\"svg\\\",2]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "screenBeforeRef": "0b23ab3287d9",
+      "screenAfterRef": "0b23ab3287d9",
+      "routeBefore": "https://solicitudedigitalesdev/",
+      "routeAfter": "https://solicitudedigitalesdev/cuentas",
+      "stateScope": "0b23ab3287d9",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-10",
+      "controlIdentity": "428533996fd7|Continuar|role|button|Continuar",
+      "action": "click",
+      "sourceEventRefs": [
+        "event-10"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Continuar",
+        "css:#btn-solicitar-cuenta-de-ahorros-personal-en-pesos",
+        "id:btn-solicitar-cuenta-de-ahorros-personal-en-pesos"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#btn-solicitar-cuenta-de-ahorros-personal-en-pesos",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "id": "btn-solicitar-cuenta-de-ahorros-personal-en-pesos"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"circle\",1],[\"path\",1],[\"span\",1],[\"svg\",1]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "card-cuenta-de-ahorros-personal-en-pesos"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-solicitar-cuenta-de-ahorros-personal-en-pesos\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"path\\\",1],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "screenBeforeRef": "428533996fd7",
+      "screenAfterRef": "428533996fd7",
+      "routeBefore": "https://solicitudedigitalesdev/cuentas",
+      "stateScope": "428533996fd7",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-12",
+      "controlIdentity": "428533996fd7|Número de identificación|css|#x_DocumentId",
+      "semanticField": "Número de identificación",
+      "action": "fill",
+      "valueKey": "numero_de_identificacion",
+      "recordedValue": "402-2467955-1",
+      "rawTypedValue": "40224679551",
+      "sourceEventRefs": [
+        "event-12"
+      ],
+      "technicalTargetRefs": [
+        "css:#x_DocumentId",
+        "id:x_DocumentId"
+      ],
+      "editingSessionRef": "edit-1",
+      "description": "Ingresar en \"Número de identificación\"",
+      "screenBeforeRef": "428533996fd7",
+      "screenAfterRef": "428533996fd7",
+      "routeBefore": "https://solicitudedigitalesdev/cuentas",
+      "stateScope": "428533996fd7",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.8
+    },
+    {
+      "id": "interaction-13",
+      "controlIdentity": "428533996fd7|control|role|checkbox|Acepto los Términos y Condiciones de la Aplicación Móvil, Web, Portal(es) y/o Pl",
+      "semanticField": "control",
+      "action": "check",
+      "valueKey": "control",
+      "sourceEventRefs": [
+        "event-13",
+        "event-14"
+      ],
+      "technicalTargetRefs": [
+        "role:checkbox|Acepto los Términos y Condiciones de la Aplicación Móvil, Web, Portal(es) y/o Pl",
+        "css:#base-ui-_r_1i_",
+        "id:base-ui-_r_1i_"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#base-ui-_r_1i_",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "span",
+              "role": "checkbox"
+            },
+            "stableDirectAttributes": {
+              "aria-labelledby": "el_AcceptTermsAndConditions",
+              "id": "base-ui-_r_1i_",
+              "role": "checkbox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "el_AcceptTermsAndConditions"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"span\",\"role\":\"checkbox\"},\"stableDirectAttributes\":{\"id\":\"base-ui-_r_1i_\",\"role\":\"checkbox\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": false,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "playwrightRecorderEvidence": {
+        "kind": "role",
+        "role": "checkbox",
+        "normalizedName": "Acepto los Términos y Condiciones de la Aplicación Móvil, Web, Portal(es) y/o Plataforma(s) Digitales y los Términos y Condiciones de Uso e Intercambio de Información Personal. Al continuar con este proceso, autorizo a EL BANCO a: a) recopilar, capturar y utilizar mis datos biométricos como mecanismos alternos de autenticación e identificación; b) a consultar mis datos en el Maestro de Cedulados de la Junta Central Electoral, el buró de crédito y en la Tesorería de Seguridad Social (TSS); c) Compartir, entregar y transmitir mi información de carácter personal: Nombre, Apellido, Cédula de Identidad, Correo Electrónico y Teléfonos con entidades y organismos públicos y gubernamentales a los fines de cumplir con la legislación y normativa aplicable.",
+        "targetTag": "span",
+        "scopeIdentity": {
+          "strategy": "id",
+          "value": "el_AcceptTermsAndConditions"
+        },
+        "runtimeResolutionRequired": true
+      },
+      "description": "Ingresar en \"control\"",
+      "screenBeforeRef": "428533996fd7",
+      "screenAfterRef": "428533996fd7",
+      "routeBefore": "https://solicitudedigitalesdev/cuentas",
+      "stateScope": "428533996fd7",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-16",
+      "controlIdentity": "428533996fd7|Continuar|role|button|Continuar",
+      "action": "click",
+      "sourceEventRefs": [
+        "event-16"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Continuar",
+        "css:#btn-identity-validate",
+        "id:btn-identity-validate"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#btn-identity-validate",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "id": "btn-identity-validate"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"circle\",1],[\"path\",1],[\"span\",1],[\"svg\",1]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "_r_1c_"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-identity-validate\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"path\\\",1],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "screenBeforeRef": "428533996fd7",
+      "screenAfterRef": "428533996fd7",
+      "routeBefore": "https://solicitudedigitalesdev/cuentas",
+      "routeAfter": "https://solicitudedigitalesdev/cuentas?method=getClientInfo&productSlug=cuenta-de-ahorros-personal-en-pesos",
+      "stateScope": "428533996fd7",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-21",
+      "controlIdentity": "428533996fd7|Continuar|role|button|Continuar",
+      "action": "click",
+      "sourceEventRefs": [
+        "event-21"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Continuar",
+        "css:#btn-identity-confirm-and-continue",
+        "id:btn-identity-confirm-and-continue"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#btn-identity-confirm-and-continue",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "id": "btn-identity-confirm-and-continue"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"circle\",1],[\"path\",1],[\"span\",1],[\"svg\",1]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "_r_2e_"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-identity-confirm-and-continue\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"path\\\",1],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "screenBeforeRef": "428533996fd7",
+      "screenAfterRef": "428533996fd7",
+      "routeBefore": "https://solicitudedigitalesdev/cuentas?method=getClientInfo&productSlug=cuenta-de-ahorros-personal-en-pesos",
+      "routeAfter": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "stateScope": "428533996fd7",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-23",
+      "controlIdentity": "428533996fd7|Seleccione|css|div:has(input[id=\"react-select-6-input\"])",
+      "semanticField": "Seleccione",
+      "action": "click",
+      "valueKey": "seleccione",
+      "sourceEventRefs": [
+        "event-23"
+      ],
+      "technicalTargetRefs": [
+        "css:div:has(input[id=\"react-select-6-input\"])"
+      ],
+      "semanticRuntimeEvidence": {
+        "source": "accessible_name",
+        "normalizedValue": "Seleccione",
+        "targetTag": "div",
+        "scopeAlternatives": [
+          {
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "div:has(input[id=\"react-select-6-input\"])"
+            },
+            "captureMatchCount": 1
+          }
+        ],
+        "captureUniqueTarget": true
+      },
+      "playwrightRecorderEvidence": {
+        "kind": "text",
+        "normalizedName": "Seleccione",
+        "targetTag": "div",
+        "scopeIdentity": {
+          "strategy": "css",
+          "value": "div:has(input[id=\"react-select-6-input\"])"
+        },
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true
+      },
+      "description": "Ingresar en \"Seleccione\"",
+      "screenBeforeRef": "428533996fd7",
+      "screenAfterRef": "428533996fd7",
+      "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "stateScope": "428533996fd7",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.55
+    },
+    {
+      "id": "interaction-24",
+      "controlIdentity": "428533996fd7|829-***-0396|role|option|829-***-0396",
+      "action": "click",
+      "dynamicTargetLabel": true,
+      "sourceEventRefs": [
+        "event-24"
+      ],
+      "technicalTargetRefs": [
+        "role:option|829-***-0396",
+        "css:#react-select-6-option-1",
+        "id:react-select-6-option-1"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#react-select-6-option-1",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "id": "react-select-6-option-1",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "react-select-6-listbox"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"div\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"react-select-6-option-1\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "screenBeforeRef": "428533996fd7",
+      "screenAfterRef": "428533996fd7",
+      "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "stateScope": "428533996fd7",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-27",
+      "controlIdentity": "428533996fd7|Enviar|role|button|Enviar",
+      "action": "click",
+      "sourceEventRefs": [
+        "event-27"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Enviar",
+        "css:#btn-send-sms-otp",
+        "id:btn-send-sms-otp"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#btn-send-sms-otp",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "id": "btn-send-sms-otp"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "playwrightRecorderEvidence": {
+        "kind": "role",
+        "role": "button",
+        "normalizedName": "Enviar",
+        "targetTag": "button",
+        "runtimeResolutionRequired": true
+      },
+      "screenBeforeRef": "428533996fd7",
+      "screenAfterRef": "428533996fd7",
+      "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "stateScope": "428533996fd7",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-28",
+      "controlIdentity": "428533996fd7|Please enter verification code. Digit 1|role|textbox|Please enter verification code. Digit 1",
+      "semanticField": "Please enter verification code. Digit 1",
+      "action": "fill",
+      "valueKey": "please_enter_verification_code_digit_1",
+      "recordedValue": "1",
+      "rawTypedValue": "1",
+      "sourceEventRefs": [
+        "event-28"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Please enter verification code. Digit 1"
+      ],
+      "editingSessionRef": "edit-3",
+      "description": "Ingresar en \"Please enter verification code. Digit 1\"",
+      "screenBeforeRef": "428533996fd7",
+      "screenAfterRef": "428533996fd7",
+      "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "stateScope": "428533996fd7",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-29",
+      "controlIdentity": "428533996fd7|OTP digit 2|role|textbox|OTP digit 2",
+      "semanticField": "OTP digit 2",
+      "action": "fill",
+      "valueKey": "otp_digit_2",
+      "recordedValue": "2",
+      "rawTypedValue": "2",
+      "sourceEventRefs": [
+        "event-29"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|OTP digit 2"
+      ],
+      "editingSessionRef": "edit-4",
+      "description": "Ingresar en \"OTP digit 2\"",
+      "screenBeforeRef": "428533996fd7",
+      "screenAfterRef": "428533996fd7",
+      "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "stateScope": "428533996fd7",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-30",
+      "controlIdentity": "428533996fd7|OTP digit 3|role|textbox|OTP digit 3",
+      "semanticField": "OTP digit 3",
+      "action": "fill",
+      "valueKey": "otp_digit_3",
+      "recordedValue": "3",
+      "rawTypedValue": "3",
+      "sourceEventRefs": [
+        "event-30"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|OTP digit 3"
+      ],
+      "editingSessionRef": "edit-5",
+      "description": "Ingresar en \"OTP digit 3\"",
+      "screenBeforeRef": "428533996fd7",
+      "screenAfterRef": "428533996fd7",
+      "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "stateScope": "428533996fd7",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-31",
+      "controlIdentity": "428533996fd7|OTP digit 4|role|textbox|OTP digit 4",
+      "semanticField": "OTP digit 4",
+      "action": "fill",
+      "valueKey": "otp_digit_4",
+      "recordedValue": "4",
+      "rawTypedValue": "4",
+      "sourceEventRefs": [
+        "event-31"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|OTP digit 4"
+      ],
+      "editingSessionRef": "edit-6",
+      "description": "Ingresar en \"OTP digit 4\"",
+      "screenBeforeRef": "428533996fd7",
+      "screenAfterRef": "428533996fd7",
+      "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "stateScope": "428533996fd7",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-32",
+      "controlIdentity": "428533996fd7|OTP digit 5|role|textbox|OTP digit 5",
+      "semanticField": "OTP digit 5",
+      "action": "fill",
+      "valueKey": "otp_digit_5",
+      "recordedValue": "5",
+      "rawTypedValue": "5",
+      "sourceEventRefs": [
+        "event-32"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|OTP digit 5"
+      ],
+      "editingSessionRef": "edit-7",
+      "description": "Ingresar en \"OTP digit 5\"",
+      "screenBeforeRef": "428533996fd7",
+      "screenAfterRef": "428533996fd7",
+      "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "stateScope": "428533996fd7",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-34",
+      "controlIdentity": "428533996fd7|OTP digit 6|role|textbox|OTP digit 6",
+      "semanticField": "OTP digit 6",
+      "action": "fill",
+      "valueKey": "otp_digit_6",
+      "recordedValue": "6",
+      "rawTypedValue": "6",
+      "sourceEventRefs": [
+        "event-34"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|OTP digit 6"
+      ],
+      "editingSessionRef": "edit-8",
+      "description": "Ingresar en \"OTP digit 6\"",
+      "screenBeforeRef": "428533996fd7",
+      "screenAfterRef": "428533996fd7",
+      "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "stateScope": "428533996fd7",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-35",
+      "controlIdentity": "428533996fd7|Verificar|role|button|Verificar",
+      "action": "click",
+      "sourceEventRefs": [
+        "event-35"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Verificar",
+        "css:#btn-validate-sms-otp",
+        "id:btn-validate-sms-otp"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#btn-validate-sms-otp",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "id": "btn-validate-sms-otp"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "screenBeforeRef": "428533996fd7",
+      "screenAfterRef": "428533996fd7",
+      "routeBefore": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "stateScope": "428533996fd7",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    }
+  ],
+  "gridMetadata": {
+    "detected": true,
+    "grids": 13,
+    "rows": 0,
+    "cells": 0,
+    "headers": [],
+    "headerRelationships": []
+  },
+  "source": "SessionTrace"
+}

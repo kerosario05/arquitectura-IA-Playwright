@@ -1,0 +1,85 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-09T19:48:10.746Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "PREVIEW-004",
+    "title": "Redirigir Canje de Puntos a la autenticación del kiosco"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "description": "Clic en \"Canje de Puntos\".",
+      "target": {
+        "strategy": "css",
+        "value": "[aria-label=\"Canje de Puntos\"]"
+      }
+    },
+    {
+      "index": 3,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"pantalla de autenticación del kiosco\".",
+      "target": {
+        "strategy": "text",
+        "value": "authentication gate"
+      }
+    }
+  ],
+  "requiredData": [],
+  "sourceScenario": {
+    "title": "Redirigir Canje de Puntos a la autenticación del kiosco",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:[aria-label=\"Canje de Puntos\"]"
+        ]
+      },
+      {
+        "index": 3,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"pantalla de autenticación del kiosco\".",
+        "technicalTargetRefs": [
+          "text:authentication gate"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-3",
+        "requirement": "Validar que se muestre \"pantalla de autenticación del kiosco\".",
+        "type": "auth_gate",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 3,
+        "target": "authentication gate",
+        "evidence": [
+          "live-step-3"
+        ],
+        "details": {
+          "stage": "identification_input"
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "Canje de Puntos inicia el límite de autenticación del kiosco."
+  }
+}

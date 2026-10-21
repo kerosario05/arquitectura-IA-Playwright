@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "appSlug": "app-one",
+  "createdAt": "2026-10-13T21:37:28.616Z",
+  "items": [],
+  "updatedAt": "2026-10-16T15:32:48.948Z",
+  "jiraRoutes": [
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "app-one",
+      "id": "route-1",
+      "profileRevision": "rev1",
+      "sourceIssueKey": "HU-1",
+      "scenarioId": "S1",
+      "jobId": "J1",
+      "validatedAt": "2026-10-16T15:32:48.863Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "click",
+          "field": "Transferencias"
+        }
+      ],
+      "evidenceRefs": [
+        "step-2.png"
+      ],
+      "invalidatedAt": "2026-10-16T15:32:48.941Z"
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "app-one",
+      "id": "route-2",
+      "profileRevision": "rev1",
+      "sourceIssueKey": "HU-1",
+      "scenarioId": "S2",
+      "jobId": "J1",
+      "validatedAt": "2026-10-16T15:32:48.863Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "click",
+          "field": "Transferencias"
+        }
+      ],
+      "evidenceRefs": [
+        "step-2.png"
+      ]
+    }
+  ]
+}

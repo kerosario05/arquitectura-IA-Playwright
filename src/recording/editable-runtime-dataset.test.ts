@@ -30,9 +30,10 @@ function makeScenario(fields: RecordedDataField[]): RecordedScenario {
     kind: "happy_path",
     provenance: "observed",
     mobileSteps: [],
-    webSteps: fields.map((field) => ({ action: field.key.endsWith("_seleccion") ? "click" : "fill", valueKey: field.key, entityScope: field.entityScope })),
+    webSteps: fields.map((field) => ({ action: (field.key.endsWith("_seleccion") ? "click" : "fill") as "click" | "fill", valueKey: field.key, entityScope: field.entityScope, description: `Observed ${field.key}` })),
     testRailSteps: fields.map((field) => ({ content: `Ingresar [${field.key}]`, stepTemplate: `Ingresar [${field.key}]`, valueKey: field.key, entityScope: field.entityScope, expected: "" })),
     requiredData: fields,
+    stepTargets: [],
     sourceRecordingId: "recording-editable",
     hasUncertainSteps: false,
     primary: true,
@@ -88,7 +89,7 @@ test("CASE 3: QA modifies value and records CURRENT_QA_EDIT", () => {
 test("CASE 4: CURRENT_QA_EDIT reaches the execution contract by valueKey", () => {
   const scenario = makeScenario([field("entity_1.name", "Alice")]);
   const contract = toSharedMcpScenario(scenario, "portal", { "entity_1.name": "Bob" });
-  assert.equal(contract.recordingExecutionContract?.datasetBindings["entity_1.name"], "Bob");
+  assert.equal(contract.recordingExecutionContract?.datasetBindings?.["entity_1.name"], "Bob");
   assert.equal(contract.recordingExecutionContract?.actions.find((action) => action.valueKey === "entity_1.name")?.value, "Bob");
 });
 

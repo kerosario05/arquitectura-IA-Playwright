@@ -1,5 +1,6 @@
 import type { RawTestRailCase } from "../types/testrail.types";
 import {
+  inferTestRailActionInputRequirements,
   parseTestRailInputRequirements,
   type ParsedTestRailInputRequirements,
 } from "./testrail-input-requirements-parser";
@@ -53,4 +54,16 @@ export function extractTestRailInputRequirements(
   rawCase: RawTestRailCase,
 ): ParsedTestRailInputRequirements {
   return parseTestRailInputRequirements(stripContractMarkup(contractText(rawCase)));
+}
+
+/** Selection-time sync may add fields inferred from explicit named fill actions. */
+export function extractTestRailInputRequirementsForSelection(
+  rawCase: RawTestRailCase,
+): ParsedTestRailInputRequirements {
+  const text = stripContractMarkup(contractText(rawCase));
+  const parsed = parseTestRailInputRequirements(text);
+  return {
+    ...parsed,
+    requirements: [...parsed.requirements, ...inferTestRailActionInputRequirements(text, parsed.requirements)],
+  };
 }

@@ -1,0 +1,9 @@
+{
+  "id": "aa-110-jira-3-rechazar-revision-de-pago-con-fecha-pasada",
+  "externalId": "AA-110:jira:3",
+  "title": "Rechazar revisión de pago con fecha pasada",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-16T19:33:07.387Z"
+}

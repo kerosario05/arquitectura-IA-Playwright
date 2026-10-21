@@ -45,7 +45,7 @@ function trace(events: RecordedEvent[]): SessionTrace {
     status: "completed",
     events,
     screens: [{ screenKey: "screen", url: "https://fixture.test" } as never],
-  } as SessionTrace;
+  } as unknown as SessionTrace;
 }
 
 test("framework owner uses its unique same-owner descendant semantic identity without changing structural execution evidence", () => {

@@ -117,4 +117,19 @@ describe("runtime auth input precedence", () => {
     assert.equal(resolution.sources.username, "user_provided_qa_credentials");
     assert.equal(resolution.sources.password, "user_provided_qa_credentials");
   });
+
+  test("generic Spanish and English verification-code keys resolve OTP without consuming a later authorization token", () => {
+    for (const key of ["codigo_acceso", "verification_code", "sms_code"]) {
+      const resolution = resolveAuthInputs({
+        env: {},
+        missingInputBehavior: "fail",
+        runtimeEntries: [
+          { key, value: "654321", source: "explicit_runtime_input" },
+          { key: "token_autorizacion", value: "business-token", source: "explicit_runtime_input" },
+        ],
+      });
+      assert.equal(resolution.data.otp, "654321", `OTP alias ${key} should resolve`);
+      assert.equal(resolution.data.token, undefined, "authorization token must remain separate from OTP");
+    }
+  });
 });

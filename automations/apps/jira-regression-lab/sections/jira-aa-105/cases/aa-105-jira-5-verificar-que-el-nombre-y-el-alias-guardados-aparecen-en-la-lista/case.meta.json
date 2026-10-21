@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-105",
+  "sourceScenarioId": "AA-105:jira:5",
+  "title": "Verificar que el nombre y el alias guardados aparecen en la lista",
+  "generatedAt": "2026-10-19T05:48:21.296Z",
+  "executionEngine": "jira_semantic"
+}

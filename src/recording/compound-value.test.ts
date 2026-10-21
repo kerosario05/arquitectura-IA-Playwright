@@ -26,6 +26,6 @@ test("compound selection lineage uses structural context instead of event positi
       screenKey: "screen",
       target: { compoundRole: "amount_or_text", associatedField: "Ingresos", cellRef: "cell:income", rowIdentity: "row:1" },
     },
-  ] as never;
+  ] as unknown as import("./session-trace.types").RecordedEvent[];
   assert.equal(confirmedCompoundSelectionBefore(events, 1, events[1].target), "DOP");
 });

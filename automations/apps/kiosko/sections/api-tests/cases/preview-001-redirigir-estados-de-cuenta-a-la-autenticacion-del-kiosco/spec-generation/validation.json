@@ -1,0 +1,69 @@
+{
+  "mode": "deterministic",
+  "provider": null,
+  "model": null,
+  "skill": {
+    "name": null,
+    "version": null,
+    "hash": null,
+    "loaded": false
+  },
+  "invocations": 0,
+  "invocationsConsumed": 0,
+  "durationMs": 54490,
+  "usage": {
+    "inputTokens": null,
+    "cachedInputTokens": null,
+    "cacheWriteInputTokens": null,
+    "nonCachedInputTokens": null,
+    "outputTokens": null,
+    "reasoningOutputTokens": null,
+    "totalPhysicalTokens": null,
+    "durationMs": null,
+    "credits": null
+  },
+  "validation": {
+    "schema": "skipped",
+    "structure": "passed",
+    "traceFidelity": "skipped",
+    "typescript": "passed",
+    "playwrightDiscovery": "passed",
+    "semanticCoverage": "passed",
+    "functionalExecution": "failed"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "specGenerationAttempts": 0,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [
+    "functionalExecution"
+  ],
+  "regressedGates": [],
+  "missingRequirements": [],
+  "oracleTypes": [
+    "auth_gate"
+  ],
+  "errors": [
+    "functional_execution_failed:exitCode=1",
+    "functional_execution_error:Error: Promoted assertion failed at step 2 target=\"authentication gate\". diagnostics={\"currentUrl\":\"https://172.27.4.50/\",\"actionIntent\":\"assertVisible\",\"target\":\"authentication gate\",\"stepIndex\":2,\"timeoutMs\":15000,\"retryAttempted\":false,\"screenshotPath\":\"[REDACTED]\"} cause=\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m"
+  ],
+  "warnings": [
+    "step_index_not_explicit_in_spec:1",
+    "functional_execution_screenshots=1",
+    "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 2)."
+  ],
+  "finalSpec": {
+    "origin": "deterministic_compiler",
+    "generatedBy": "core",
+    "strategy": "deterministic_compiler",
+    "fallback": null
+  },
+  "runtimeGate": {
+    "decision": "block",
+    "promotionStatus": "blocked",
+    "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 2)."
+  }
+}

@@ -156,7 +156,8 @@ debugRouter.post("/testrail/publish-scenario", async (req, res) => {
   } = validation;
 
   // ── Build a minimal McpScenario ─────────────────────────────────────────────
-  const scenario: McpScenario & { caseOracle?: string } = {
+  const scenario: McpScenario & { caseOracle?: string; scenarioId: string } = {
+    scenarioId,
     sourceIssueKey: storyKey,
     title,
     steps,

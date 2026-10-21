@@ -106,7 +106,7 @@ test("rediscovery provenance: preserves false, true, and undefined without coerc
 
 test("rediscovery provenance: marks an absent producer property without inventing a value", () => {
   const line = buildRediscoveryProvenanceLine({
-    boundary: "pre_job_store",
+    boundary: "job_store",
     sourceEndpoint: "/api/runs/launch-execution",
     jobType: "discovery-batch",
     correlationField: "launchId",

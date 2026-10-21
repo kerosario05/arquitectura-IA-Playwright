@@ -1,0 +1,9 @@
+{
+  "id": "aa-105-jira-6-filtrar-la-lista-de-beneficiarios-por-nombre",
+  "externalId": "AA-105:jira:6",
+  "title": "Filtrar la lista de beneficiarios por nombre",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-19T06:36:33.121Z"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "aa-105-jira-5-verificar-que-el-nombre-y-el-alias-guardados-aparecen-en-la-lista",
+  "externalId": "AA-105:jira:5",
+  "title": "Verificar que el nombre y el alias guardados aparecen en la lista",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-19T05:48:21.301Z"
+}

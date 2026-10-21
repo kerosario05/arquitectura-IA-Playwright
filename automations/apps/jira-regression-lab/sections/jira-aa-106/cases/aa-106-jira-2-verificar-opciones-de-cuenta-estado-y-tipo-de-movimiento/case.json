@@ -1,0 +1,9 @@
+{
+  "id": "aa-106-jira-2-verificar-opciones-de-cuenta-estado-y-tipo-de-movimiento",
+  "externalId": "AA-106:jira:2",
+  "title": "Verificar opciones de cuenta, estado y tipo de movimiento",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-18T21:54:37.267Z"
+}

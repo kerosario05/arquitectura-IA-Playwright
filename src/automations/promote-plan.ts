@@ -71,6 +71,9 @@ import { revalidateExistingSpecDeterministically } from "./existing-spec-revalid
 import { validatePromotedArtifactForReuse, type PromotedArtifactPhysicalContext } from "./automation-reuse";
 
 interface PromoteInput {
+  /** Optional caller cancellation; never publish a candidate after its job was cancelled. */
+  signal?: AbortSignal;
+  functionalExecutionEnabled?: boolean;
   plan: ExecutionPlan;
   sourcePlanPath?: string;
   lastExecutionResultPath?: string;
@@ -1867,6 +1870,7 @@ export async function promoteExecutionPlan(
   }
 
   const specGenerationResult = await runHybridSpecGeneration({
+    functionalExecutionEnabled: input.functionalExecutionEnabled,
     plan,
     deterministicDraft: generatedSpecContent,
     candidateAuthority,
@@ -1930,6 +1934,7 @@ export async function promoteExecutionPlan(
     specGenerationDiagnostics.errors.push(`promoted_spec_internal_imports_unresolved:${promotedImportValidation.unresolved.join(",")}`);
   }
   if (specPromotionAllowed) {
+    input.signal?.throwIfAborted();
     await writeFileAtomicWithRetry(appPaths.specPath, generatedSpecContent);
     specWritten = true;
   } else {

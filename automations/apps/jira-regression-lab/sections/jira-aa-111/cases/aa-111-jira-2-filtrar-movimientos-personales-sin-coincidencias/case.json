@@ -1,0 +1,9 @@
+{
+  "id": "aa-111-jira-2-filtrar-movimientos-personales-sin-coincidencias",
+  "externalId": "AA-111:jira:2",
+  "title": "Filtrar movimientos personales sin coincidencias",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-19T03:56:05.798Z"
+}

@@ -2,6 +2,200 @@
   "version": 1,
   "appSlug": "kiosko",
   "createdAt": "2026-09-14T21:56:29.312Z",
-  "updatedAt": "2026-09-14T21:56:29.312Z",
-  "items": []
+  "updatedAt": "2026-10-15T00:28:35.559Z",
+  "items": [
+    {
+      "id": "37eadc898e82",
+      "knowledgeKind": "route_transition",
+      "source": "mcp_runtime_observation",
+      "actionDescription": "Clic en \"Estados de cuenta\".",
+      "actionLocatorIdentity": "el-9",
+      "sourceTechnicalScreenKey": "de284f24d2e5479d",
+      "destinationTechnicalScreenKey": "907fd1093c0bf343",
+      "transitionValidated": true,
+      "validationStatus": "validated_technical",
+      "trustedForReuse": false,
+      "runCount": 3,
+      "createdAt": "2026-10-09T12:57:34.864Z",
+      "lastSeenAt": "2026-10-09T15:36:40.250Z",
+      "lastValidatedAt": "2026-10-09T15:36:40.250Z"
+    },
+    {
+      "id": "7958eb6ebf73",
+      "knowledgeKind": "route_transition",
+      "source": "mcp_runtime_observation",
+      "actionDescription": "Clic en \"Canje de Puntos\".",
+      "actionLocatorIdentity": "semantic:css",
+      "sourceTechnicalScreenKey": "de284f24d2e5479d",
+      "destinationTechnicalScreenKey": "907fd1093c0bf343",
+      "transitionValidated": true,
+      "validationStatus": "validated_technical",
+      "trustedForReuse": false,
+      "runCount": 9,
+      "createdAt": "2026-10-09T12:58:06.327Z",
+      "lastSeenAt": "2026-10-09T15:39:41.018Z",
+      "lastValidatedAt": "2026-10-09T15:39:41.018Z"
+    },
+    {
+      "id": "851c1216aa9a",
+      "knowledgeKind": "route_transition",
+      "source": "mcp_runtime_observation",
+      "actionDescription": "Clic en \"Explora nuestros productos\".",
+      "actionLocatorIdentity": "el-27",
+      "sourceTechnicalScreenKey": "38d02fb0ed5494e8",
+      "destinationTechnicalScreenKey": "fbb49d696e7128b2",
+      "transitionValidated": true,
+      "validationStatus": "validated_technical",
+      "trustedForReuse": false,
+      "runCount": 1,
+      "createdAt": "2026-10-09T12:58:55.214Z",
+      "lastSeenAt": "2026-10-09T12:58:55.214Z",
+      "lastValidatedAt": "2026-10-09T12:58:55.214Z"
+    },
+    {
+      "id": "d2a6984db019",
+      "knowledgeKind": "route_transition",
+      "source": "mcp_runtime_observation",
+      "actionDescription": "Seleccionar el primer elemento visible del listado.",
+      "actionLocatorIdentity": "el-11",
+      "sourceTechnicalScreenKey": "230b87b859d3a12f",
+      "destinationTechnicalScreenKey": "9bdbd2452e8c9d2f",
+      "transitionValidated": true,
+      "validationStatus": "validated_technical",
+      "trustedForReuse": false,
+      "runCount": 1,
+      "createdAt": "2026-10-09T12:58:58.956Z",
+      "lastSeenAt": "2026-10-09T12:58:58.956Z",
+      "lastValidatedAt": "2026-10-09T12:58:58.956Z"
+    },
+    {
+      "id": "bc8e0ada3510",
+      "knowledgeKind": "route_transition",
+      "source": "mcp_runtime_observation",
+      "actionDescription": "Clic en \"Explora nuestros productos\".",
+      "actionLocatorIdentity": "el-27",
+      "sourceTechnicalScreenKey": "f0d2d7a8ac5d7c2f",
+      "destinationTechnicalScreenKey": "e669463c64993a22",
+      "transitionValidated": true,
+      "validationStatus": "validated_technical",
+      "trustedForReuse": false,
+      "runCount": 2,
+      "createdAt": "2026-10-09T15:12:19.235Z",
+      "lastSeenAt": "2026-10-09T15:40:37.787Z",
+      "lastValidatedAt": "2026-10-09T15:40:37.787Z"
+    },
+    {
+      "id": "00de967d54ff",
+      "knowledgeKind": "route_transition",
+      "source": "mcp_runtime_observation",
+      "actionDescription": "Seleccionar el primer elemento visible del listado.",
+      "actionLocatorIdentity": "el-3",
+      "sourceTechnicalScreenKey": "fbb49d696e7128b2",
+      "destinationTechnicalScreenKey": "fbb49d696e7128b2",
+      "transitionValidated": true,
+      "validationStatus": "validated_technical",
+      "trustedForReuse": false,
+      "runCount": 2,
+      "createdAt": "2026-10-09T15:12:25.316Z",
+      "lastSeenAt": "2026-10-09T15:40:43.913Z",
+      "lastValidatedAt": "2026-10-09T15:40:43.913Z"
+    },
+    {
+      "id": "route_edge_kiosko_54f67g",
+      "source": "scenario_derived",
+      "coverageRefs": [
+        "learned_navigation_path",
+        "relation:child_route"
+      ],
+      "steps": [
+        "Clic en \"Explora nuestros productos\"."
+      ],
+      "clickTargets": [
+        "Explora nuestros productos"
+      ],
+      "assertionTargets": [],
+      "negativeAssertions": [],
+      "optionLabels": [],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-10-09T15:40:54.626Z",
+      "updatedAt": "2026-10-09T15:40:54.626Z",
+      "lastSeenAt": "2026-10-09T15:40:54.626Z",
+      "runCount": 1,
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "successCount": 1,
+      "confidenceScore": 0.9999999999999999,
+      "knowledgeKind": "route_functional_observed",
+      "destinationUrl": "https://172.27.4.50/product-catalog",
+      "routeFrom": "entry",
+      "actionTarget": "Explora nuestros productos",
+      "transitionValidated": true,
+      "sourceTechnicalScreenKey": "f0d2d7a8ac5d7c2f",
+      "destinationTechnicalScreenKey": "e669463c64993a22"
+    },
+    {
+      "id": "route_edge_kiosko_cva3k0",
+      "source": "scenario_derived",
+      "coverageRefs": [
+        "learned_navigation_path",
+        "relation:child_route"
+      ],
+      "steps": [
+        "Clic en \"el primer elemento visible del listado\"."
+      ],
+      "clickTargets": [
+        "el primer elemento visible del listado"
+      ],
+      "assertionTargets": [],
+      "negativeAssertions": [],
+      "optionLabels": [],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-10-09T15:40:54.630Z",
+      "updatedAt": "2026-10-09T15:40:54.630Z",
+      "lastSeenAt": "2026-10-09T15:40:54.630Z",
+      "runCount": 1,
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "successCount": 1,
+      "confidenceScore": 0.9999999999999999,
+      "knowledgeKind": "route_functional_observed",
+      "destinationUrl": "https://172.27.4.50/product-catalog",
+      "routeFrom": "Explora nuestros productos",
+      "actionTarget": "el primer elemento visible del listado",
+      "transitionValidated": true,
+      "sourceTechnicalScreenKey": "fbb49d696e7128b2",
+      "destinationTechnicalScreenKey": "fbb49d696e7128b2"
+    }
+  ],
+  "jiraRoutes": [
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "kiosko",
+      "id": "13d147712608302fd3d72dd57726a38769ec58dccfdbdc4973a7829ef0a3ee46",
+      "profileRevision": "25b615fa406bd0f32f2e772b8afa74a174e37c3adc9e67f5bd5d19421dbfd5e5",
+      "sourceIssueKey": "AA-88",
+      "scenarioId": "PREVIEW-001",
+      "jobId": "8168304b-5bae-41d0-9a75-820e6aec8691",
+      "validatedAt": "2026-10-15T00:28:35.552Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "Estados de cuenta"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png"
+      ]
+    }
+  ]
 }

@@ -5,7 +5,7 @@ import {
   type CanonicalScenario,
 } from "./canonical-scenario";
 
-const shared = {
+const shared: Omit<CanonicalScenario, "canonicalSchemaVersion" | "scenarioId" | "sourceRef" | "provenance"> = {
   title: "Complete account recovery",
   preconditions: ["The account exists"],
   steps: [{
@@ -21,7 +21,7 @@ const shared = {
     kind: "action",
     description: "The user can start account recovery",
     origin: { originRef: "requirement-1" },
-    coverability: "coverable" as const,
+    coverability: "covered",
   }],
   branches: [{
     branchId: "branch-main",

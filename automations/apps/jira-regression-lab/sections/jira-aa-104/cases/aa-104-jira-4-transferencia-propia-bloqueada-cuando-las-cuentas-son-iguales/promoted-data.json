@@ -1,0 +1,94 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-10-18T12:37:37.592Z",
+  "entries": [
+    {
+      "key": "auth.company_identifier",
+      "source": "app_test_data",
+      "fieldName": "[id=\"login-rnc\"]",
+      "stepIndex": 2,
+      "valueType": "string",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": "*******01"
+    },
+    {
+      "key": "auth.username",
+      "source": "app_test_data",
+      "fieldName": "[id=\"login-user\"]",
+      "stepIndex": 3,
+      "valueType": "string",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": "********sa"
+    },
+    {
+      "key": "auth.password",
+      "source": "app_test_data",
+      "fieldName": "[id=\"login-password\"]",
+      "stepIndex": 4,
+      "valueType": "string",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": "********26"
+    },
+    {
+      "key": "codigo_acceso",
+      "source": "unknown",
+      "fieldName": "[id=\"login-otp\"]",
+      "stepIndex": 8,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "cuenta_origen",
+      "source": "app_test_data",
+      "fieldName": "[id=\"source-account\"]",
+      "stepIndex": 12,
+      "valueType": "string",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": "********te"
+    },
+    {
+      "key": "cuenta_destino_igual",
+      "source": "unknown",
+      "fieldName": "[id=\"destination-account\"]",
+      "stepIndex": 13,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "monto_valido",
+      "source": "unknown",
+      "fieldName": "[id=\"transfer-amount\"]",
+      "stepIndex": 14,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "moneda_usd",
+      "source": "unknown",
+      "fieldName": "[id=\"transfer-currency\"]",
+      "stepIndex": 15,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

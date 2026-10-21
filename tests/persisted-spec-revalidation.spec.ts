@@ -57,8 +57,12 @@ test("promotes and round-trips the authoritative revalidation context", async ()
   }
   const automationId = buildAutomationId({ externalId: plan.scenario.externalId, caseId: plan.scenario.caseId, title: plan.scenario.title });
   const appPaths = buildAppAutomationPaths(appProfile, automationId, root, "section-a");
-  const persisted = JSON.parse(await fs.readFile(appPaths.planPath, "utf8"));
-  await fs.writeFile(appPaths.specPath, "export {};", "utf8");
+  expect(appPaths.planPath).toBeTruthy();
+  expect(appPaths.specPath).toBeTruthy();
+  const planPath = appPaths.planPath!;
+  const specPath = appPaths.specPath!;
+  const persisted = JSON.parse(await fs.readFile(planPath, "utf8"));
+  await fs.writeFile(specPath, "export {};", "utf8");
   expect(persisted.sourceScenario).toEqual(sourceScenario);
   expect(persisted.executionContract).toBeTruthy();
   expect(persisted.scenario).toEqual(plan.scenario);

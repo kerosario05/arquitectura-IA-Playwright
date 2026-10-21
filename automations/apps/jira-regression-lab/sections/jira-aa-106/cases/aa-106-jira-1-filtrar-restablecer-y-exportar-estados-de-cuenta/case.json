@@ -1,0 +1,9 @@
+{
+  "id": "aa-106-jira-1-filtrar-restablecer-y-exportar-estados-de-cuenta",
+  "externalId": "AA-106:jira:1",
+  "title": "Filtrar, restablecer y exportar estados de cuenta",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-19T05:31:43.896Z"
+}

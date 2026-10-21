@@ -8,8 +8,13 @@
  * Reuses the selector's output (buildDeclaredOrderedPathsFromKnowledge) and the
  * existing "Clic en \"<target>\"" step format. No new labels, no re-parsing.
  */
-type DeclaredOrderedPath = {
-  steps: Array<{ order: number; actionTarget: string }>;
+export type DeclaredOrderedPath = {
+  steps: Array<{
+    order: number;
+    actionTarget: string;
+    stepKind?: string;
+    actionIntent?: string;
+  }>;
   [key: string]: unknown;
 };
 

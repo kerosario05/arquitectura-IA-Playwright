@@ -2928,7 +2928,7 @@
       {
         "id": "interaction-58",
         "controlIdentity": "a6979159960e|entity_2|USD|role|option|USD",
-        "semanticField": "DOP",
+        "semanticField": "Moneda",
         "entityScope": "entity_2",
         "action": "click",
         "valueKey": "entity_2.usd",
@@ -3015,10 +3015,10 @@
       {
         "id": "interaction-59",
         "controlIdentity": "a6979159960e|entity_2|DOP|role|option|USD",
-        "semanticField": "DOP",
+        "semanticField": "Moneda",
         "entityScope": "entity_2",
         "action": "select",
-        "valueKey": "entity_2.dop_seleccion",
+        "valueKey": "entity_2.moneda_seleccion",
         "recordedValue": "USD",
         "sourceEventRefs": [
           "event-59"
@@ -5840,7 +5840,7 @@
       "specHash": "390b6eeb65e73b55b9178d5ce770364b00ab4e16d6db19423211ca36cd6717b2",
       "automationId": "preview-001-agregar-varios-empleados-manualmente-con-cedula",
       "sectionSlug": "default-section",
-      "generatedAt": "2026-10-07T20:19:13.594Z"
+      "generatedAt": "2026-10-15T13:48:37.045Z"
     }
   }
 ]

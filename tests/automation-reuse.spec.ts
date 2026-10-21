@@ -100,7 +100,7 @@ test.describe("findReusableAutomation", () => {
     delete legacyEntry.promotedSpecPath;
     delete legacyEntry.promotedSpecHash;
     expect(validatePromotedArtifactForReuse(legacyEntry, physical).reason).toBe("promotion_not_persisted");
-    expect(findReusableAutomation(99, "Modern", [entry], new Map([[entry.id, physical]])).entry.id).toBe(entry.id);
+    expect(findReusableAutomation(99, "Modern", [entry], new Map([[entry.id, physical]]))?.entry?.id).toBe(entry.id);
     expect(findReusableAutomation(99, "Modern", [{ ...entry, promotedSpecHash: "different" }], new Map([[entry.id, physical]]) )).toBeUndefined();
   });
   test("finds automation by same functionalCode", () => {

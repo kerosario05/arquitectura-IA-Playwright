@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  findBestActiveContainerForField,
   resolvePromotedFieldLocator,
 } from "./promoted-spec-runtime";
 import {
@@ -49,6 +50,55 @@ function fakeStructuredPage() {
     getByPlaceholder: () => candidate,
   } as any;
 }
+
+test("recorded field identity scopes a duplicate page locator to its matching active dialog", async () => {
+  const field = {
+    count: async () => 1,
+    isVisible: async () => true,
+    isDisabled: async () => false,
+    evaluate: async () => "input",
+  };
+  const duplicatesOutsideDialog = {
+    count: async () => 2,
+    isVisible: async () => false,
+    isDisabled: async () => false,
+    evaluate: async () => "input",
+  };
+  const dialog = { locator: () => field, getByTestId: () => field };
+  const page = {
+    locator: (selector: string) => selector === "dialog#active"
+      ? dialog
+      : duplicatesOutsideDialog,
+    getByTestId: () => duplicatesOutsideDialog,
+  } as any;
+  const resolved = await resolvePromotedFieldLocator(page, "css:#x_DocumentId", {
+    containerLocator: "dialog#active",
+    targetIdentity: { technicalTargetRefs: ["css:#x_DocumentId", "id:x_DocumentId"] },
+  });
+  assert.equal(resolved?.strategy, "recorded:css");
+  assert.equal(resolved?.scope, "container");
+});
+
+test("technical target identity can retain the active container when the runtime field label is a selector", async () => {
+  const page = {
+    evaluate: async () => [{
+      selector: "dialog#active",
+      descriptor: "dialog#active",
+      visible: true,
+      editableCount: 1,
+      matchingFieldFound: false,
+      rank: 11,
+      fieldSignals: ["x_DocumentId"],
+    }],
+  } as any;
+  const scan = await findBestActiveContainerForField(
+    page,
+    "css:#x_DocumentId",
+    ["css:#x_DocumentId", "id:x_DocumentId"],
+  );
+  assert.equal(scan.best?.descriptor, "dialog#active");
+  assert.equal(scan.best?.matchingFieldFound, true);
+});
 
 test("Colaborador keeps recording identity and resolves its structured grid input", async () => {
   await withEnv({

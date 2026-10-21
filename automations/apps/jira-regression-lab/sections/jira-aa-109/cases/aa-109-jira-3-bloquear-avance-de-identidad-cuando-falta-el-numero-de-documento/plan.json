@@ -1,0 +1,465 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-17T15:30:13.593Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "AA-109:jira:3",
+    "title": "Bloquear avance de identidad cuando falta el número de documento"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Presionar \"Personal\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Personal",
+        "exact": true
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [cedula]",
+      "valueKey": "cedula",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-identity\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "fill",
+      "description": "fill [usuario]",
+      "valueKey": "usuario",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-user\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "fill",
+      "description": "fill [contrasena]",
+      "valueKey": "contrasena",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-password\"]"
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"Iniciar sesión\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Iniciar sesión",
+        "exact": true
+      }
+    },
+    {
+      "index": 8,
+      "action": "click",
+      "description": "Solicitar el código por SMS.",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Solicitar código por SMS",
+        "exact": true
+      }
+    },
+    {
+      "index": 9,
+      "action": "fill",
+      "description": "fill [codigo_sms]",
+      "valueKey": "codigo_sms",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-otp\"]"
+      }
+    },
+    {
+      "index": 10,
+      "action": "click",
+      "description": "Presionar \"Continuar\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Continuar",
+        "exact": true
+      }
+    },
+    {
+      "index": 11,
+      "action": "click",
+      "description": "Presionar \"Solicitar préstamo\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Solicitar préstamo",
+        "exact": true
+      }
+    },
+    {
+      "index": 12,
+      "action": "select",
+      "description": "select [tipo_documento]",
+      "valueKey": "tipo_documento",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-document-type\"]"
+      }
+    },
+    {
+      "index": 13,
+      "action": "fill",
+      "description": "fill [nombres]",
+      "valueKey": "nombres",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-first-name\"]"
+      }
+    },
+    {
+      "index": 14,
+      "action": "fill",
+      "description": "fill [apellidos]",
+      "valueKey": "apellidos",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-last-name\"]"
+      }
+    },
+    {
+      "index": 15,
+      "action": "fill",
+      "description": "fill [fecha_nacimiento]",
+      "valueKey": "fecha_nacimiento",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-birth-date\"]"
+      }
+    },
+    {
+      "index": 16,
+      "action": "select",
+      "description": "select [estado_civil]",
+      "valueKey": "estado_civil",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-marital-status\"]"
+      }
+    },
+    {
+      "index": 17,
+      "action": "fill",
+      "description": "fill [dependientes]",
+      "valueKey": "dependientes",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-dependents\"]"
+      }
+    },
+    {
+      "index": 18,
+      "action": "click",
+      "description": "Presionar \"Continuar\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Avanzar a Contacto y domicilio",
+        "exact": true
+      }
+    },
+    {
+      "index": 19,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Identidad y perfil\"",
+      "target": {
+        "strategy": "text",
+        "value": "Identidad y perfil"
+      }
+    },
+    {
+      "index": 20,
+      "action": "assertVisible",
+      "description": "Validar que el campo \"Número de documento\" muestre un error de validación.",
+      "target": {
+        "strategy": "text",
+        "value": "Número de documento"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "cedula",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "usuario",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "codigo_sms",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "tipo_documento",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "nombres",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "apellidos",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "fecha_nacimiento",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "estado_civil",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "dependientes",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Bloquear avance de identidad cuando falta el número de documento",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Personal"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "cedula",
+        "technicalTargetRefs": [
+          "css:[id=\"login-identity\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "fill",
+        "valueKey": "usuario",
+        "technicalTargetRefs": [
+          "css:[id=\"login-user\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "fill",
+        "valueKey": "contrasena",
+        "technicalTargetRefs": [
+          "css:[id=\"login-password\"]"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Solicitar código por SMS"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "fill",
+        "valueKey": "codigo_sms",
+        "technicalTargetRefs": [
+          "css:[id=\"login-otp\"]"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ]
+      },
+      {
+        "index": 11,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Solicitar préstamo"
+        ]
+      },
+      {
+        "index": 12,
+        "action": "select",
+        "valueKey": "tipo_documento",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-document-type\"]"
+        ]
+      },
+      {
+        "index": 13,
+        "action": "fill",
+        "valueKey": "nombres",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-first-name\"]"
+        ]
+      },
+      {
+        "index": 14,
+        "action": "fill",
+        "valueKey": "apellidos",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-last-name\"]"
+        ]
+      },
+      {
+        "index": 15,
+        "action": "fill",
+        "valueKey": "fecha_nacimiento",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-birth-date\"]"
+        ]
+      },
+      {
+        "index": 16,
+        "action": "select",
+        "valueKey": "estado_civil",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-marital-status\"]"
+        ]
+      },
+      {
+        "index": 17,
+        "action": "fill",
+        "valueKey": "dependientes",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-dependents\"]"
+        ]
+      },
+      {
+        "index": 18,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Avanzar a Contacto y domicilio"
+        ]
+      },
+      {
+        "index": 19,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Identidad y perfil\"",
+        "technicalTargetRefs": [
+          "text:Identidad y perfil"
+        ]
+      },
+      {
+        "index": 20,
+        "action": "assertVisible",
+        "description": "Validar que el campo \"Número de documento\" muestre un error de validación.",
+        "technicalTargetRefs": [
+          "text:Número de documento"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-19",
+        "requirement": "Validar que se muestre \"Identidad y perfil\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 19,
+        "target": "Identidad y perfil",
+        "evidence": [
+          "live-step-19"
+        ],
+        "details": {
+          "observedText": "Identidad y perfil"
+        }
+      },
+      {
+        "id": "jira-oracle-20",
+        "requirement": "Validar que el campo \"Número de documento\" muestre un error de validación.",
+        "type": "field_validation",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 20,
+        "target": "Número de documento",
+        "evidence": [
+          "live-step-20"
+        ],
+        "details": {
+          "fieldLabel": "Número de documento",
+          "invalid": true,
+          "associatedError": true
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "La sección \"Identidad y perfil\" permanece activa y el campo \"Número de documento\" muestra un error de validación."
+  }
+}

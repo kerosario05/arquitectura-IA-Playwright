@@ -3,6 +3,8 @@ import { EventEmitter } from "events";
 import type { ChildProcess } from "child_process";
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { redactJiraScenarioInputs } from "../../jira/jira-rerun-manifest";
+import type { JiraScenarioInput } from "../../jira/jira-semantic-executor";
 
 export type JobStatus = "queued" | "running" | "done" | "failed" | "cancelled" | "completed_with_failures" | "completed_with_sync_errors";
 
@@ -93,6 +95,7 @@ const TERMINAL_STATUSES = new Set<JobStatus>([
   "done", "failed", "cancelled", "completed_with_failures", "completed_with_sync_errors",
 ]);
 const PERSISTED_PARAM_KEYS = [
+  "executionEngine",
   "appSlug", "projectSlug", "targetAppSlug", "launchId", "huKey", "huTitle", "jiraKey", "jiraTitle", "scenarioTitle", "title",
   "testrailProjectId", "testrailProjectName", "testrailSuiteId", "testrailSuiteName", "testrailSectionId", "sectionId", "sectionName", "sectionSlug", "testRunId",
 ] as const;
@@ -114,6 +117,10 @@ function persistedSnapshot(job: JobInternal): Job {
   }
 
   const summary: Record<string, unknown> = {};
+  if (job.params.executionEngine === "jira_semantic") {
+    const origin = job.params.scenarioOrigin as { kind?: string; jiraKey?: string } | undefined;
+    if (origin?.kind === "jira_generated" && typeof origin.jiraKey === "string") params.scenarioOrigin = { kind: origin.kind, jiraKey: origin.jiraKey };
+  }
   for (const key of PERSISTED_SUMMARY_KEYS) {
     const value = job.summary?.[key as keyof JobSummary];
     if (typeof value === "string" || typeof value === "number" || typeof value === "boolean" || value === null) summary[key] = value;
@@ -256,6 +263,10 @@ class JobStore {
     if (!job) return;
     delete job.params.runtimeEntriesByCase;
     delete job.params.dataOverrides;
+    delete job.params.jiraSemanticScenarios;
+    if (job.params.executionEngine === "jira_semantic" && Array.isArray(job.params.scenarios)) {
+      job.params.scenarios = (job.params.scenarios as JiraScenarioInput[]).map(redactJiraScenarioInputs);
+    }
   }
 
   appendLog(id: string, line: string): void {
@@ -282,6 +293,10 @@ class JobStore {
   private serialize(job: JobInternal): Job {
     const { process: _proc, emitter: _em, ...pub } = job;
     const params = { ...pub.params };
+    if (params.executionEngine === "jira_semantic") {
+      if (params.dataOverrides && typeof params.dataOverrides === "object") params.dataOverrides = Object.fromEntries(Object.keys(params.dataOverrides).map(key => [key, "[REDACTED]"]));
+      if (Array.isArray(params.scenarios)) params.scenarios = (params.scenarios as JiraScenarioInput[]).map(redactJiraScenarioInputs);
+    }
     const runtimeEntriesByCase = params.runtimeEntriesByCase;
     if (runtimeEntriesByCase && typeof runtimeEntriesByCase === "object" && !Array.isArray(runtimeEntriesByCase)) {
       params.runtimeEntriesByCase = Object.fromEntries(

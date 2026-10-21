@@ -1,0 +1,20 @@
+- generic [ref=e4]:
+  - generic [ref=e5]:
+    - generic [ref=e6]: Q
+    - generic [ref=e9]:
+      - generic [ref=e10]: QA Lab
+      - generic [ref=e11]: Santa Cruz
+  - generic [ref=e12]:
+    - heading "Iniciar sesión" [level=1] [ref=e13]
+    - paragraph [ref=e14]: Accede con tu usuario corporativo.
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - generic [ref=e17]: Usuario
+        - textbox "Usuario" [active] [ref=e22]:
+          - /placeholder: tu.usuario
+      - generic [ref=e23]:
+        - generic [ref=e24]: Contraseña
+        - textbox "Contraseña" [ref=e29]:
+          - /placeholder: ••••••••
+      - button "Entrar" [disabled] [ref=e30]
+  - paragraph [ref=e31]: ¿Olvidaste tu contraseña? Pídele a un administrador que la restablezca.

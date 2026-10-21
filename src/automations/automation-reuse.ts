@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import fsSync from "node:fs";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import type { ExecutionPlan, ExecutionPlanScenarioRef } from "../types/execution-plan.types";
@@ -7,6 +8,11 @@ import { loadAutomationIndex } from "./automation-index";
 import { validateExecutionPlan } from "../plans/execution-plan-validator";
 
 const FUNCTIONAL_CODE_RE = /\bC(\d{4,6})\b/;
+
+function isPathInside(rootPath: string, targetPath: string): boolean {
+  const relative = path.relative(rootPath, targetPath);
+  return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative));
+}
 
 export function extractFunctionalCode(title: string): string | undefined {
   const match = title.match(FUNCTIONAL_CODE_RE);
@@ -67,13 +73,31 @@ export function validatePromotedArtifactForReuse(
 
   const entrySpecPath = path.resolve(entry.specPath);
   const physicalSpecPath = path.resolve(physical.specPath);
+  const jiraPlanPath = path.resolve(entry.planPath);
+  const appRoot = path.resolve("automations", "apps", physical.appSlug);
+  const jiraTagged = entry.tags?.includes("jira_generated") === true;
+  let jiraGenerated = false;
+  if (jiraTagged && entry.externalId && isPathInside(appRoot, jiraPlanPath)) {
+    try {
+      const plan = JSON.parse(fsSync.readFileSync(jiraPlanPath, "utf8")) as {
+        scenario?: { source?: string; externalId?: string };
+      };
+      jiraGenerated = plan.scenario?.source === "jira" && plan.scenario.externalId === entry.externalId;
+    } catch {
+      jiraGenerated = false;
+    }
+  }
+  if (jiraTagged && !jiraGenerated) return { valid: false, reason: "identity_mismatch" };
   if (entry.appSlug !== physical.appSlug
     || entry.caseId !== physical.caseId
     || entrySpecPath !== physicalSpecPath
     || path.resolve(promotion.promotedSpecPath) !== physicalSpecPath
+    || !isPathInside(appRoot, physicalSpecPath)
     || !physical.sectionSlug
-    || !path.normalize(physicalSpecPath).toLowerCase().includes(`${path.sep}sections${path.sep}${physical.sectionSlug.toLowerCase()}${path.sep}`)
-    || !path.basename(path.dirname(physicalSpecPath)).toLowerCase().startsWith("c")) {
+    || (!jiraGenerated && (
+      !path.normalize(physicalSpecPath).toLowerCase().includes(`${path.sep}sections${path.sep}${physical.sectionSlug.toLowerCase()}${path.sep}`)
+      || !path.basename(path.dirname(physicalSpecPath)).toLowerCase().startsWith("c")
+    ))) {
     return { valid: false, reason: "identity_mismatch" };
   }
 

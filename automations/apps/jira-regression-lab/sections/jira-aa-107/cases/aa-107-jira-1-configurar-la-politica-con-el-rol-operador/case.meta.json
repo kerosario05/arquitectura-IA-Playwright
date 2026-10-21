@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-107",
+  "sourceScenarioId": "AA-107:jira:1",
+  "title": "Configurar la política con el rol Operador",
+  "generatedAt": "2026-10-19T01:28:49.803Z",
+  "executionEngine": "jira_semantic"
+}

@@ -1,0 +1,374 @@
+- generic [ref=e1]:
+  - generic [ref=e32]:
+    - complementary [ref=e33]:
+      - generic [ref=e34]:
+        - generic [ref=e35]: Q
+        - generic [ref=e38]:
+          - generic [ref=e39]: QA Lab
+          - generic [ref=e40]: Santa Cruz
+      - navigation [ref=e41]:
+        - button "Panorama" [ref=e42] [cursor=pointer]
+        - button "Lanzar pruebas" [ref=e49] [cursor=pointer]
+        - button "Grabación" [ref=e55] [cursor=pointer]
+        - button "Ejecuciones" [ref=e59] [cursor=pointer]
+        - button "Configuración" [ref=e64] [cursor=pointer]
+        - button "Usuarios" [ref=e68] [cursor=pointer]
+      - generic [ref=e76]:
+        - generic [ref=e80]: Pro tip
+        - generic [ref=e81]: Programa ejecuciones nocturnas para optimizar recursos.
+      - generic [ref=e82]:
+        - generic [ref=e83]: AD
+        - generic [ref=e84]:
+          - generic [ref=e85]: Administrador
+          - generic [ref=e86]: Administrador
+    - main [ref=e87]:
+      - generic [ref=e88]:
+        - generic [ref=e89]:
+          - generic [ref=e90]:
+            - generic [ref=e92]: En vivo · 16:26
+            - generic [ref=e93]: ·
+            - generic [ref=e94]: Configura una nueva ejecución en 4 pasos
+          - heading "Lanzar pruebas" [level=1] [ref=e133]
+        - generic [ref=e96]:
+          - generic [ref=e97]:
+            - combobox "Buscar" [ref=e98]
+            - generic: Ctrl K
+          - button "Notificaciones" [ref=e100] [cursor=pointer]
+          - button "Cerrar sesión de admin" [ref=e106] [cursor=pointer]
+      - generic [ref=e135]:
+        - generic [ref=e137]:
+          - button "Proyecto" [ref=e138] [cursor=pointer]
+          - button "Fuentes" [ref=e151] [cursor=pointer]
+          - button "Casos" [ref=e158] [cursor=pointer]
+          - button "Lanzar" [ref=e166] [cursor=pointer]
+        - generic [ref=e173]:
+          - generic [ref=e212]:
+            - generic [ref=e213]: Paso dos · Conecta las fuentes
+            - heading "¿De dónde vienen los casos?" [level=2] [ref=e214]
+            - paragraph [ref=e215]: Configura las herramientas que alimentarán la ejecución.
+            - generic [ref=e217]:
+              - button "Solo TestRail Suite completa" [ref=e218] [cursor=pointer]:
+                - generic [ref=e224]: Solo TestRail
+                - generic [ref=e225]: Suite completa
+              - button "Ambos combinados Máxima cobertura" [ref=e226] [cursor=pointer]:
+                - generic [ref=e233]: Ambos combinados
+                - generic [ref=e234]: Máxima cobertura
+            - generic [ref=e252]:
+              - generic [ref=e253]: TestRail
+              - generic [ref=e260]:
+                - generic [ref=e261]: Proyecto
+                - button "PROYECTO FENIX" [ref=e549] [cursor=pointer]
+              - generic [ref=e551]:
+                - generic [ref=e552]:
+                  - generic [ref=e553]: Suite ID
+                  - generic [ref=e554]: "16"
+                - generic [ref=e555]:
+                  - generic [ref=e556]: Test Cases
+                  - generic [ref=e557]: "1482"
+              - generic [ref=e558]:
+                - generic [ref=e559]: Sección
+                - button "Selecciona una sección..." [ref=e563] [cursor=pointer]
+          - generic [ref=e199]:
+            - button "Atrás" [ref=e200] [cursor=pointer]
+            - button "Generar escenarios" [ref=e268] [cursor=pointer]
+  - generic [ref=e567]:
+    - generic [ref=e568]:
+      - textbox "Buscar sección..." [active] [ref=e573]
+      - generic [ref=e574]: 126 de 126 secciones
+    - generic [ref=e575]:
+      - button "Flexilinea Personal - BSC en Línea" [ref=e576] [cursor=pointer]
+      - button "Flexilínea Personal - CoreB2000 niv. 1" [ref=e579] [cursor=pointer]:
+        - generic [ref=e581]: Flexilínea Personal - CoreB2000
+        - generic [ref=e582]: niv. 1
+      - button "Parámetro Crédito Diferido ACTIVO niv. 1" [ref=e583] [cursor=pointer]:
+        - generic [ref=e585]: Parámetro Crédito Diferido ACTIVO
+        - generic [ref=e586]: niv. 1
+      - button "Parámetro Crédito Diferido INACTIVO niv. 1" [ref=e587] [cursor=pointer]:
+        - generic [ref=e589]: Parámetro Crédito Diferido INACTIVO
+        - generic [ref=e590]: niv. 1
+      - button "Parámetro Crédito Diferido ACTIVO niv. 1" [ref=e591] [cursor=pointer]:
+        - generic [ref=e593]: Parámetro Crédito Diferido ACTIVO
+        - generic [ref=e594]: niv. 1
+      - button "Parámetro Crédito Diferido INACTIVO niv. 1" [ref=e595] [cursor=pointer]:
+        - generic [ref=e597]: Parámetro Crédito Diferido INACTIVO
+        - generic [ref=e598]: niv. 1
+      - button "Flexilinea Personal - BSC - TC niv. 1" [ref=e599] [cursor=pointer]:
+        - generic [ref=e601]: Flexilinea Personal - BSC - TC
+        - generic [ref=e602]: niv. 1
+      - button "Flexilínea Personal - BSC - TC" [ref=e603] [cursor=pointer]
+      - button "Flexilinea Empresarial" [ref=e606] [cursor=pointer]
+      - button "Ajustes Flexilínea Empresarial – Cambio de Usuario y Agregar Indicador \"Mi Negocio\" niv. 1" [ref=e609] [cursor=pointer]:
+        - generic [ref=e611]: Ajustes Flexilínea Empresarial – Cambio de Usuario y Agregar Indicador "Mi Negocio"
+        - generic [ref=e612]: niv. 1
+      - button "Transaferencia Enviadas" [ref=e613] [cursor=pointer]
+      - button "ELIMINAR BLOQUEO PAGO 214 PESOS, TC CON 999 B$C CUOTAS niv. 1" [ref=e616] [cursor=pointer]:
+        - generic [ref=e618]: ELIMINAR BLOQUEO PAGO 214 PESOS, TC CON 999 B$C CUOTAS
+        - generic [ref=e619]: niv. 1
+      - button "Grupo Empresarial" [ref=e620] [cursor=pointer]
+      - button "Reglas de Firma y Usuario niv. 1" [ref=e623] [cursor=pointer]:
+        - generic [ref=e625]: Reglas de Firma y Usuario
+        - generic [ref=e626]: niv. 1
+      - button "Pago Nomina y Suplidores" [ref=e627] [cursor=pointer]
+      - button "Pago Nomina niv. 1" [ref=e630] [cursor=pointer]:
+        - generic [ref=e632]: Pago Nomina
+        - generic [ref=e633]: niv. 1
+      - button "Pago Suplidores niv. 1" [ref=e634] [cursor=pointer]:
+        - generic [ref=e636]: Pago Suplidores
+        - generic [ref=e637]: niv. 1
+      - button "BSCDO-1864 | Pagos de nómina no completados status 50 niv. 1" [ref=e638] [cursor=pointer]:
+        - generic [ref=e640]: BSCDO-1864 | Pagos de nómina no completados status 50
+        - generic [ref=e641]: niv. 1
+      - button "Cuenta Bolsillo" [ref=e642] [cursor=pointer]
+      - button "Cuenta Bolsillo IB niv. 1" [ref=e645] [cursor=pointer]:
+        - generic [ref=e647]: Cuenta Bolsillo IB
+        - generic [ref=e648]: niv. 1
+      - button "Cuenta Bolsillo App iOS niv. 1" [ref=e649] [cursor=pointer]:
+        - generic [ref=e651]: Cuenta Bolsillo App iOS
+        - generic [ref=e652]: niv. 1
+      - button "Cuenta Bolsillo App Android niv. 1" [ref=e653] [cursor=pointer]:
+        - generic [ref=e655]: Cuenta Bolsillo App Android
+        - generic [ref=e656]: niv. 1
+      - button "Cobro de comison LBTR" [ref=e657] [cursor=pointer]
+      - button "Consultas niv. 1" [ref=e660] [cursor=pointer]:
+        - generic [ref=e662]: Consultas
+        - generic [ref=e663]: niv. 1
+      - button "Pagos niv. 1" [ref=e664] [cursor=pointer]:
+        - generic [ref=e666]: Pagos
+        - generic [ref=e667]: niv. 1
+      - button "Transferencias niv. 1" [ref=e668] [cursor=pointer]:
+        - generic [ref=e670]: Transferencias
+        - generic [ref=e671]: niv. 1
+      - button "Money Market" [ref=e672] [cursor=pointer]
+      - button "Visualización y Consulta de Cuenta Money Market niv. 1" [ref=e675] [cursor=pointer]:
+        - generic [ref=e677]: Visualización y Consulta de Cuenta Money Market
+        - generic [ref=e678]: niv. 1
+      - button "Consulta detallada de partidas niv. 2" [ref=e679] [cursor=pointer]:
+        - generic [ref=e681]: Consulta detallada de partidas
+        - generic [ref=e682]: niv. 2
+      - button "Creación de Partidas desde Cuenta Money Market niv. 3" [ref=e683] [cursor=pointer]:
+        - generic [ref=e685]: Creación de Partidas desde Cuenta Money Market
+        - generic [ref=e686]: niv. 3
+      - button "Cancelación de Partidas desde el Detalle niv. 4" [ref=e687] [cursor=pointer]:
+        - generic [ref=e689]: Cancelación de Partidas desde el Detalle
+        - generic [ref=e690]: niv. 4
+      - button "Servicios MDW niv. 5" [ref=e691] [cursor=pointer]:
+        - generic [ref=e693]: Servicios MDW
+        - generic [ref=e694]: niv. 5
+      - button "CORE niv. 6" [ref=e695] [cursor=pointer]:
+        - generic [ref=e697]: CORE
+        - generic [ref=e698]: niv. 6
+      - button "Money Market desde BSC En Linea niv. 1" [ref=e699] [cursor=pointer]:
+        - generic [ref=e701]: Money Market desde BSC En Linea
+        - generic [ref=e702]: niv. 1
+      - button "Test Cases" [ref=e703] [cursor=pointer]
+      - button "Tasa Pool en Compra y Venta Divisas" [ref=e706] [cursor=pointer]
+      - button "Cuentas Contables" [ref=e709] [cursor=pointer]
+      - button "IPF-4304 Avance de efectivo con Tarjeta de Crédito en línea" [ref=e712] [cursor=pointer]
+      - button "Casos Negativos niv. 1" [ref=e715] [cursor=pointer]:
+        - generic [ref=e717]: Casos Negativos
+        - generic [ref=e718]: niv. 1
+      - button "Casos Técnicos niv. 1" [ref=e719] [cursor=pointer]:
+        - generic [ref=e721]: Casos Técnicos
+        - generic [ref=e722]: niv. 1
+      - button "Casos Multimoneda niv. 1" [ref=e723] [cursor=pointer]:
+        - generic [ref=e725]: Casos Multimoneda
+        - generic [ref=e726]: niv. 1
+      - button "Casos por estado de tarjeta niv. 1" [ref=e727] [cursor=pointer]:
+        - generic [ref=e729]: Casos por estado de tarjeta
+        - generic [ref=e730]: niv. 1
+      - button "Histórico / Reportes / Notificaciones niv. 1" [ref=e731] [cursor=pointer]:
+        - generic [ref=e733]: Histórico / Reportes / Notificaciones
+        - generic [ref=e734]: niv. 1
+      - button "Parámetros para Avance de Efectivo niv. 1" [ref=e735] [cursor=pointer]:
+        - generic [ref=e737]: Parámetros para Avance de Efectivo
+        - generic [ref=e738]: niv. 1
+      - button "Corrección Reporte FD01" [ref=e739] [cursor=pointer]
+      - button "Transaciones por IB niv. 1" [ref=e742] [cursor=pointer]:
+        - generic [ref=e744]: Transaciones por IB
+        - generic [ref=e745]: niv. 1
+      - button "Transacciones por la App niv. 1" [ref=e746] [cursor=pointer]:
+        - generic [ref=e748]: Transacciones por la App
+        - generic [ref=e749]: niv. 1
+      - button "Transacciones por Caja niv. 1" [ref=e750] [cursor=pointer]:
+        - generic [ref=e752]: Transacciones por Caja
+        - generic [ref=e753]: niv. 1
+      - button "BSCDO-1815 | Mejora búsqueda de beneficiaros." [ref=e754] [cursor=pointer]
+      - button "Usuario Persona niv. 1" [ref=e757] [cursor=pointer]:
+        - generic [ref=e759]: Usuario Persona
+        - generic [ref=e760]: niv. 1
+      - button "Usuario Juridico niv. 1" [ref=e761] [cursor=pointer]:
+        - generic [ref=e763]: Usuario Juridico
+        - generic [ref=e764]: niv. 1
+      - button "BSCDO-1786 | Información sensible comprobante de adición de beneficiarios del Banco" [ref=e765] [cursor=pointer]
+      - button "Actualización de Datos" [ref=e768] [cursor=pointer]
+      - button "Ticket 1431017 / 1300504 - Corrección BSC En Línea niv. 1" [ref=e771] [cursor=pointer]:
+        - generic [ref=e773]: Ticket 1431017 / 1300504 - Corrección BSC En Línea
+        - generic [ref=e774]: niv. 1
+      - button "Mantenimiento BSC En Línea" [ref=e775] [cursor=pointer]
+      - 'button "MAT: BSCDO-1808 | Comprobante transacción con signo de moneda erróneo niv. 1" [ref=e778] [cursor=pointer]':
+        - generic [ref=e780]: "MAT: BSCDO-1808 | Comprobante transacción con signo de moneda erróneo"
+        - generic [ref=e781]: niv. 1
+      - 'button "MAT: BSCDO-1873 | Cliente no puede activar notificaciones de login ticket - 1426056 niv. 2" [ref=e782] [cursor=pointer]':
+        - generic [ref=e784]: "MAT: BSCDO-1873 | Cliente no puede activar notificaciones de login ticket - 1426056"
+        - generic [ref=e785]: niv. 2
+      - button "BSCDO-1827 | Alinear los textos Banco Swift en Comprobantes Web. niv. 1" [ref=e786] [cursor=pointer]:
+        - generic [ref=e788]: BSCDO-1827 | Alinear los textos Banco Swift en Comprobantes Web.
+        - generic [ref=e789]: niv. 1
+      - button "BSCDO-1828 | Reemplazar nombre de cuenta por Producto Opción mi Perfil niv. 1" [ref=e790] [cursor=pointer]:
+        - generic [ref=e792]: BSCDO-1828 | Reemplazar nombre de cuenta por Producto Opción mi Perfil
+        - generic [ref=e793]: niv. 1
+      - button "BSCDO-1830 | Ajustar Distinción cuadros Pantalla token niv. 1" [ref=e794] [cursor=pointer]:
+        - generic [ref=e796]: BSCDO-1830 | Ajustar Distinción cuadros Pantalla token
+        - generic [ref=e797]: niv. 1
+      - button "BSCDO-1831 | Botones Inhabilitados Histórico Reclamaciones Web. niv. 1" [ref=e798] [cursor=pointer]:
+        - generic [ref=e800]: BSCDO-1831 | Botones Inhabilitados Histórico Reclamaciones Web.
+        - generic [ref=e801]: niv. 1
+      - button "BSCDO-1798 | PAYSUPPLIERS_DEBIT_LBTR niv. 1" [ref=e802] [cursor=pointer]:
+        - generic [ref=e804]: BSCDO-1798 | PAYSUPPLIERS_DEBIT_LBTR
+        - generic [ref=e805]: niv. 1
+      - 'button "MAT: BSCDO-1873 | Cliente no puede activar notificaciones de login ticket - 1426056 niv. 1" [ref=e806] [cursor=pointer]':
+        - generic [ref=e808]: "MAT: BSCDO-1873 | Cliente no puede activar notificaciones de login ticket - 1426056"
+        - generic [ref=e809]: niv. 1
+      - 'button "MAT: PFS-1670 - Ticket 1440828- Orden de Cambios - 1314664 - Cliente cargo 2 pagos de Nomina por error y necesita que sean cancelado ya que por la web no le permite. niv. 1" [ref=e810] [cursor=pointer]':
+        - generic [ref=e812]: "MAT: PFS-1670 - Ticket 1440828- Orden de Cambios - 1314664 - Cliente cargo 2 pagos de Nomina por error y necesita que sean cancelado ya que por la web no le permite."
+        - generic [ref=e813]: niv. 1
+      - 'button "MAT: BSCDO-1842 | PARAMETROS PARA LISTADO DINAMICO EN SOLICITUDES DIGITALES niv. 1" [ref=e814] [cursor=pointer]':
+        - generic [ref=e816]: "MAT: BSCDO-1842 | PARAMETROS PARA LISTADO DINAMICO EN SOLICITUDES DIGITALES"
+        - generic [ref=e817]: niv. 1
+      - 'button "MAT: GDI-8266 Operación de Transferencia por Bancanet por Concepto de Pagos a Proveedores niv. 1" [ref=e818] [cursor=pointer]':
+        - generic [ref=e820]: "MAT: GDI-8266 Operación de Transferencia por Bancanet por Concepto de Pagos a Proveedores"
+        - generic [ref=e821]: niv. 1
+      - button "BSCDO-1879 | Impresion comprobante NCF por BSC en Linea de Empresa Asociada niv. 1" [ref=e822] [cursor=pointer]:
+        - generic [ref=e824]: BSCDO-1879 | Impresion comprobante NCF por BSC en Linea de Empresa Asociada
+        - generic [ref=e825]: niv. 1
+      - 'button "MAT: BSCDO-1842 | Parámetros Para Listado Dinámico En Solicitudes niv. 1" [ref=e826] [cursor=pointer]':
+        - generic [ref=e828]: "MAT: BSCDO-1842 | Parámetros Para Listado Dinámico En Solicitudes"
+        - generic [ref=e829]: niv. 1
+      - 'button "MAT: BSCDO-1903 | Error al momento del equipo de parametros tratar de registrar empleado niv. 1" [ref=e830] [cursor=pointer]':
+        - generic [ref=e832]: "MAT: BSCDO-1903 | Error al momento del equipo de parametros tratar de registrar empleado"
+        - generic [ref=e833]: niv. 1
+      - 'button "MAT: PFS-1632 ERROR CLIENTE NO VISUALIZA BENEFICIARIO INTERBANCARIO Ticket -1425577 niv. 1" [ref=e834] [cursor=pointer]':
+        - generic [ref=e836]: "MAT: PFS-1632 ERROR CLIENTE NO VISUALIZA BENEFICIARIO INTERBANCARIO Ticket -1425577"
+        - generic [ref=e837]: niv. 1
+      - 'button "MAT: GDI-8304 Se Solicita Realizar un Proceso de Housekeeping Sobre la Tabla CC.Movimto_Histori - Incidente 1450156 / 1319139 niv. 1" [ref=e838] [cursor=pointer]':
+        - generic [ref=e840]: "MAT: GDI-8304 Se Solicita Realizar un Proceso de Housekeeping Sobre la Tabla CC.Movimto_Histori - Incidente 1450156 / 1319139"
+        - generic [ref=e841]: niv. 1
+      - button "BSCDO-1964 | Sistema no permite eliminar reglas de firmas niv. 1" [ref=e842] [cursor=pointer]:
+        - generic [ref=e844]: BSCDO-1964 | Sistema no permite eliminar reglas de firmas
+        - generic [ref=e845]: niv. 1
+      - button "PFS-1745 - 1456078 - 1324461 Cambio su funcionalidades de administrador a basico niv. 1" [ref=e846] [cursor=pointer]:
+        - generic [ref=e848]: PFS-1745 - 1456078 - 1324461 Cambio su funcionalidades de administrador a basico
+        - generic [ref=e849]: niv. 1
+      - button "1458322 / 1326242 - Bloqueo masivo de usuarios comprometidos detectados por el SOC de BSC segun Listado anexo. niv. 1" [ref=e850] [cursor=pointer]:
+        - generic [ref=e852]: 1458322 / 1326242 - Bloqueo masivo de usuarios comprometidos detectados por el SOC de BSC segun Listado anexo.
+        - generic [ref=e853]: niv. 1
+      - 'button "MAT: GDI-8800 | Cambio en consulta JCE 1762 Fenix niv. 1" [ref=e854] [cursor=pointer]':
+        - generic [ref=e856]: "MAT: GDI-8800 | Cambio en consulta JCE 1762 Fenix"
+        - generic [ref=e857]: niv. 1
+      - 'button "MAT: PFS-1801 | Actualización Parámetro tiempo respuesta Timeout SII_PAYSVC niv. 1" [ref=e858] [cursor=pointer]':
+        - generic [ref=e860]: "MAT: PFS-1801 | Actualización Parámetro tiempo respuesta Timeout SII_PAYSVC"
+        - generic [ref=e861]: niv. 1
+      - 'button "MAT: BSCDO-2037 - Incluir Campo Id Transacción en Reporte de Transacciones ACH Salientes niv. 1" [ref=e862] [cursor=pointer]':
+        - generic [ref=e864]: "MAT: BSCDO-2037 - Incluir Campo Id Transacción en Reporte de Transacciones ACH Salientes"
+        - generic [ref=e865]: niv. 1
+      - 'button "MAT: PFS-1646 Eliminar empresa en referencia 133378531 FONDO DE INVERSION ABIERTO DINAMICO EXCEL-DOLARES00509447. niv. 1" [ref=e866] [cursor=pointer]':
+        - generic [ref=e868]: "MAT: PFS-1646 Eliminar empresa en referencia 133378531 FONDO DE INVERSION ABIERTO DINAMICO EXCEL-DOLARES00509447."
+        - generic [ref=e869]: niv. 1
+      - 'button "MAT: BSCDO-1873 | Cliente no puede activar notificaciones de login ticket - 1426056 niv. 1" [ref=e870] [cursor=pointer]':
+        - generic [ref=e872]: "MAT: BSCDO-1873 | Cliente no puede activar notificaciones de login ticket - 1426056"
+        - generic [ref=e873]: niv. 1
+      - 'button "MAT: FABB-143 Adecuación para la pantalla de rechazos para que tome 15 caracteres en el campo identificación niv. 1" [ref=e874] [cursor=pointer]':
+        - generic [ref=e876]: "MAT: FABB-143 Adecuación para la pantalla de rechazos para que tome 15 caracteres en el campo identificación"
+        - generic [ref=e877]: niv. 1
+      - 'button "MAT: PFS-1833 - BSCDO-2047 Usuario Leorosr al momento de ingresar para aprobar pagos no le arroja resultados niv. 1" [ref=e878] [cursor=pointer]':
+        - generic [ref=e880]: "MAT: PFS-1833 - BSCDO-2047 Usuario Leorosr al momento de ingresar para aprobar pagos no le arroja resultados"
+        - generic [ref=e881]: niv. 1
+      - 'button "MAT: PFS-1834 Ticket 1469756 / 1334484 - BSCDO-2037 - Incluir Campo Id Transacción en Reporte de Transacciones ACH Salientes niv. 1" [ref=e882] [cursor=pointer]':
+        - generic [ref=e884]: "MAT: PFS-1834 Ticket 1469756 / 1334484 - BSCDO-2037 - Incluir Campo Id Transacción en Reporte de Transacciones ACH Salientes"
+        - generic [ref=e885]: niv. 1
+      - 'button "MAT: FABB-143 Adecuacion para la pantalla de rechazos para que tome 15 caracteres en el campo identificacion niv. 1" [ref=e886] [cursor=pointer]':
+        - generic [ref=e888]: "MAT: FABB-143 Adecuacion para la pantalla de rechazos para que tome 15 caracteres en el campo identificacion"
+        - generic [ref=e889]: niv. 1
+      - 'button "MAT: BSCDO-2008 | Solicitud urgente de incorporación de campo pTerceroCuenta en servicio ACH (TrnCode 1747) niv. 1" [ref=e890] [cursor=pointer]':
+        - generic [ref=e892]: "MAT: BSCDO-2008 | Solicitud urgente de incorporación de campo pTerceroCuenta en servicio ACH (TrnCode 1747)"
+        - generic [ref=e893]: niv. 1
+      - button "PFS-1827 - BSCDO-2050 TRANSFERENCIAS ENVIADAS INTERNACIONALES - FENIX - CAMPO Swift BANCO INTERMEDIARIO niv. 1" [ref=e894] [cursor=pointer]:
+        - generic [ref=e896]: PFS-1827 - BSCDO-2050 TRANSFERENCIAS ENVIADAS INTERNACIONALES - FENIX - CAMPO Swift BANCO INTERMEDIARIO
+        - generic [ref=e897]: niv. 1
+      - button "PFS-1837 | BSCDO-2045 | Error 0 al realizar transferencia interbancaria expresa programada a futuro. niv. 1" [ref=e898] [cursor=pointer]:
+        - generic [ref=e900]: PFS-1837 | BSCDO-2045 | Error 0 al realizar transferencia interbancaria expresa programada a futuro.
+        - generic [ref=e901]: niv. 1
+      - button "PFS-1837 | BSCDO-2045 | Error 0 al realizar transferencia interbancaria expresa programada a futuro. niv. 1" [ref=e902] [cursor=pointer]:
+        - generic [ref=e904]: PFS-1837 | BSCDO-2045 | Error 0 al realizar transferencia interbancaria expresa programada a futuro.
+        - generic [ref=e905]: niv. 1
+      - 'button "MAT: PFS-1856 | Error 9200 al activar token digital – Corrección masiva de registros afectados niv. 1" [ref=e906] [cursor=pointer]':
+        - generic [ref=e908]: "MAT: PFS-1856 | Error 9200 al activar token digital – Corrección masiva de registros afectados"
+        - generic [ref=e909]: niv. 1
+      - button "PFS-1837 | BSCDO-2045 | Error 0 al realizar transferencia interbancaria expresa programada a futuro. niv. 1" [ref=e910] [cursor=pointer]:
+        - generic [ref=e912]: PFS-1837 | BSCDO-2045 | Error 0 al realizar transferencia interbancaria expresa programada a futuro.
+        - generic [ref=e913]: niv. 1
+      - button "PFS-1759 - Ticket 1458322 / 1326242 - Bloqueo masivo de usuarios comprometidos detectados por el SOC de BSC segun Listado anexo. niv. 1" [ref=e914] [cursor=pointer]:
+        - generic [ref=e916]: PFS-1759 - Ticket 1458322 / 1326242 - Bloqueo masivo de usuarios comprometidos detectados por el SOC de BSC segun Listado anexo.
+        - generic [ref=e917]: niv. 1
+      - 'button "MAT: PFS-1928 Eliminar la regla de firma regla de firma del cliente Cesar Gilberto Morales niv. 1" [ref=e918] [cursor=pointer]':
+        - generic [ref=e920]: "MAT: PFS-1928 Eliminar la regla de firma regla de firma del cliente Cesar Gilberto Morales"
+        - generic [ref=e921]: niv. 1
+      - button "FABB-163 | Script Aumento Tiempo Sesión niv. 1" [ref=e922] [cursor=pointer]:
+        - generic [ref=e924]: FABB-163 | Script Aumento Tiempo Sesión
+        - generic [ref=e925]: niv. 1
+      - button "FABB-164 | Mejora Pago Múltiples de Tarjetas – BSC En Línea niv. 1" [ref=e926] [cursor=pointer]:
+        - generic [ref=e928]: FABB-164 | Mejora Pago Múltiples de Tarjetas – BSC En Línea
+        - generic [ref=e929]: niv. 1
+      - button "Desbloqueo en línea de Tarjetas de Crédito BSC en linea y APP BSC" [ref=e930] [cursor=pointer]
+      - button "BSC en Linea (Web) niv. 1" [ref=e933] [cursor=pointer]:
+        - generic [ref=e935]: BSC en Linea (Web)
+        - generic [ref=e936]: niv. 1
+      - button "APP BSC (iOS y Android) niv. 1" [ref=e937] [cursor=pointer]:
+        - generic [ref=e939]: APP BSC (iOS y Android)
+        - generic [ref=e940]: niv. 1
+      - button "Validaciones de Mensajes y Estados de Producto" [ref=e941] [cursor=pointer]
+      - button "App BSC - Versión 2.0.9" [ref=e944] [cursor=pointer]
+      - button "App BSC - Versión 2.0.9 - Android niv. 1" [ref=e947] [cursor=pointer]:
+        - generic [ref=e949]: App BSC - Versión 2.0.9 - Android
+        - generic [ref=e950]: niv. 1
+      - button "App BSC - Versión 2.0.9 - iOS niv. 1" [ref=e951] [cursor=pointer]:
+        - generic [ref=e953]: App BSC - Versión 2.0.9 - iOS
+        - generic [ref=e954]: niv. 1
+      - button "BSCDO-1863 | Homologación de estatus de transferencias" [ref=e955] [cursor=pointer]
+      - button "BSCDO-1739 | Evaluación exclusión mail notificación transacciones a no participantes" [ref=e958] [cursor=pointer]
+      - button "Transferencia expresa interbancaria" [ref=e961] [cursor=pointer]
+      - button "BSCDO-1922 | Normalización ERROR 1003 al realizar cambio de identificación en BO" [ref=e964] [cursor=pointer]
+      - button "Error al consultar detalle transacción pendiente de aprobación (9930)" [ref=e967] [cursor=pointer]
+      - button "Actualización de Datos, Rectificar Cifras Correspondientes a los Montos Embargados" [ref=e970] [cursor=pointer]
+      - button "FABB-116 - Ajuste GetCreditCard para Mostrar Flotillas en BSCEL y APP BSC" [ref=e973] [cursor=pointer]
+      - 'button "IPF-6268: Flexilinea Empresarial - No permitir desembolsos clientes en Mora" [ref=e976] [cursor=pointer]'
+      - 'button "IPF-5848 Flexilínea Personal: Ajustes funcionales y controles operativos en procesos de reverso de movimientos y administración del límite de crédito" [ref=e979] [cursor=pointer]'
+      - button "BSCDO-1736 - FABB-156 - Ajuste administración de reglas de firmas desde el front" [ref=e982] [cursor=pointer]
+      - 'button "IPF-6329: Flexilinea Personal - Tasa por Empresa de Nomina" [ref=e985] [cursor=pointer]'
+      - button "Creación y validaciones de la parametrización de tasa x grupo niv. 1" [ref=e988] [cursor=pointer]:
+        - generic [ref=e990]: Creación y validaciones de la parametrización de tasa x grupo
+        - generic [ref=e991]: niv. 1
+      - button "Actualización de Parametrización Tasa x Grupo niv. 1" [ref=e992] [cursor=pointer]:
+        - generic [ref=e994]: Actualización de Parametrización Tasa x Grupo
+        - generic [ref=e995]: niv. 1
+      - button "Creación de crédito madre con la nueva parametrización de Tasa x Grupo niv. 1" [ref=e996] [cursor=pointer]:
+        - generic [ref=e998]: Creación de crédito madre con la nueva parametrización de Tasa x Grupo
+        - generic [ref=e999]: niv. 1
+      - button "Creación de crédito hija con la nueva parametrización de Tasa x Grupo niv. 1" [ref=e1000] [cursor=pointer]:
+        - generic [ref=e1002]: Creación de crédito hija con la nueva parametrización de Tasa x Grupo
+        - generic [ref=e1003]: niv. 1
+      - button "Desembolsar flexilíneas personales con la nueva parametrización de Tasa x Grupo niv. 1" [ref=e1004] [cursor=pointer]:
+        - generic [ref=e1006]: Desembolsar flexilíneas personales con la nueva parametrización de Tasa x Grupo
+        - generic [ref=e1007]: niv. 1
+      - 'button "PFS-1893: Transferencia internacional enviada como nacional" [ref=e1008] [cursor=pointer]'
+      - 'button "PFS-1904: Normalizacion Script para habilitar la opción de firmas autorizadas a los clientes jurídicos que se registren nuevos" [ref=e1011] [cursor=pointer]'
+      - button "FABB-140 - Nuevo Recaudador Argos Dominicana" [ref=e1014] [cursor=pointer]
+      - button "Tarjeta de Crédito" [ref=e1017] [cursor=pointer]
+      - button "Bloqueo y Desbloqueo de Tarjetas de Crédito con Múltiples Moneda niv. 1" [ref=e1020] [cursor=pointer]:
+        - generic [ref=e1022]: Bloqueo y Desbloqueo de Tarjetas de Crédito con Múltiples Moneda
+        - generic [ref=e1023]: niv. 1
+      - 'button "PFS-1915: Descarga y visualización de los NCF de la empresa en PDF hija" [ref=e1024] [cursor=pointer]'
+      - button "Reporte FD01 - Objetos de Base de Datos" [ref=e1027] [cursor=pointer]
+      - button "Desembolso de Flexilinea Empresarial de cliente con la misma garantía" [ref=e1030] [cursor=pointer]
+      - button "BSCDO-2020 | Cambiar contenido pop-up informativo de reclamaciones" [ref=e1033] [cursor=pointer]
+      - button "Validar Línea de Tránsito de Clientes en BSCEL" [ref=e1036] [cursor=pointer]

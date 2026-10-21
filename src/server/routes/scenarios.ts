@@ -1,9 +1,13 @@
 import { Router } from "express";
 import { config, requireJiraConfig } from "../../config/env";
 import { JiraClient } from "../../clients/jira.client";
+import {extractTextFromAdf} from '../../jira/adf-extractor';
+import {reviewEditedJiraScenarios} from '../../jira/jira-scenario-edit';
+import {loadAppConfig} from '../../automations/app-auto-resolver';
 import { normalizeJiraIssues } from "../../jira/jira-normalizer";
 import type { TestScenario } from "../../types/testrail.types";
 import { generateScenarioPreview } from "../../scenarios/scenario-preview.service";
+import { deriveJiraInputRequirements } from "../../jira/jira-input-requirements";
 import type { ScenarioPreviewRequest } from "../../scenarios/scenario-types";
 import { planRouteDiscovery } from "../../scenarios/route-discovery-planner";
 import { runGuidedRouteDiscovery } from "../../scenarios/guided-route-discovery";
@@ -12,6 +16,26 @@ import type { ApprovedDiscoveryCandidateExecutionRequest } from "../../scenarios
 import type { RouteDiscoveryPlanRequest, GuidedRouteDiscoveryRequest } from "../../scenarios/scenario-types";
 
 export const scenariosRouter = Router();
+
+// Read-only review: no generation, execution, publication or spec mutation.
+scenariosRouter.post('/jira/review-edit',async(req,res,next)=>{
+ try{
+  const {issueKey,appSlug,scenarios,scenarioId,patch}=req.body??{};
+  if(typeof issueKey!=='string'||!/^[A-Z][A-Z0-9_]*-\d+$/.test(issueKey)||typeof appSlug!=='string'||!/^[a-z0-9][a-z0-9-]*$/.test(appSlug)||!Array.isArray(scenarios)||!patch){
+   res.status(400).json({ok:false,error:'JIRA_EDIT_REQUEST_INVALID'});return;
+  }
+  const jiraConfig=requireJiraConfig(config);
+  const raw=await new JiraClient(jiraConfig).getIssue(issueKey);
+  const issue={key:raw.key,summary:raw.fields.summary??raw.key,description:extractTextFromAdf(raw.fields.description),
+   acceptanceCriteria:extractTextFromAdf(raw.fields[jiraConfig.acceptanceCriteriaField] as any)||null,labels:[],components:[],status:'',issueType:'Story'};
+  const app=await loadAppConfig(appSlug);
+  const reviewed=await reviewEditedJiraScenarios(issue,scenarios,scenarioId,patch,typeof app?.loginMode==='string'?app.loginMode:undefined);
+  res.json({ok:true,scenarios:reviewed});
+ }catch(error){
+  if(error instanceof Error&&error.message.startsWith('JIRA_EDIT_')){res.status(400).json({ok:false,error:error.message});return;}
+  next(error);
+ }
+});
 
 function buildJql(projectKey: string, sprintId: number, status?: string): string {
   const parts = [`project = "${projectKey}"`, `sprint = ${sprintId}`];
@@ -49,9 +73,12 @@ scenariosRouter.post("/preview", async (req, res, next) => {
       `status=${body.status ?? "any"}`
     );
     const result = await generateScenarioPreview(body);
+    if (result.ok && body.generationMode === "jira_semantic") {
+      result.scenarios = result.scenarios.map(scenario => ({ ...scenario, inputRequirements: deriveJiraInputRequirements(scenario.steps, scenario.inputRequirements) }));
+    }
 
     const _dbg = (result as any).scenarios ?? [];
-    for (const _sc of _dbg) { console.log('[scenario-id-trace] BACKEND_HTTP_OUT=' + JSON.stringify({ bucket: 'scenario', title: _sc?.title ?? '', scenarioId: _sc?.scenarioId ?? '', id: _sc?.id ?? '', sourceIssueKey: _sc?.sourceIssueKey ?? '' })); }
+    for (const _sc of _dbg) { console.log('[scenario-id-trace] BACKEND_HTTP_OUT=' + JSON.stringify({ bucket: 'scenario', title: _sc?.title ?? '', scenarioId: _sc?.scenarioId ?? '', id: _sc?.id ?? '', sourceIssueKey: _sc?.sourceIssueKey ?? '', unresolvedUiCount: Array.isArray(_sc?.unresolvedUiRequirements) ? _sc.unresolvedUiRequirements.length : null, conditionRequirementCount: Array.isArray(_sc?.conditionRequirements) ? _sc.conditionRequirements.length : null, jiraUiBlocked: Array.isArray(_sc?.validation?.errors) && _sc.validation.errors.includes('JIRA_UI_OBSERVATION_REQUIRED') })); }
 
     if (!result.ok) {
       const errorResult = result as Extract<typeof result, { ok: false }>;

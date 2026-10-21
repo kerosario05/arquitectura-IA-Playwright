@@ -1,7 +1,6 @@
 import { test, expect } from "@playwright/test";
-import { mergeDeclaredPathsIntoScenario, extractClickTarget } from "../src/scenarios/declared-path-merger";
+import { mergeDeclaredPathsIntoScenario, extractClickTarget, type DeclaredOrderedPath } from "../src/scenarios/declared-path-merger";
 import { repairUnbackedClicks } from "../src/scenarios/codex-scenario-generator";
-import type { DeclaredOrderedPath } from "../src/scenarios/knowledge-context-resolver";
 
 const pathAB: DeclaredOrderedPath = {
   steps: [
@@ -24,8 +23,6 @@ test("REPRODUCCIÓN: path completo en IA (unquoted) — merge inserted=0 y repai
 
   const repaired = repairUnbackedClicks(
     mergeResult.steps,
-    [],
-    [],
     [],
     [],
     mergeResult.matchedDeclaredPathTargets,
@@ -61,8 +58,6 @@ test("Si falta Entrada A → B inserta A y ambos quedan protegidos", () => {
     mergeResult.steps,
     [],
     [],
-    [],
-    [],
     mergeResult.matchedDeclaredPathTargets,
   );
   expect(repaired).toContain('Clic en "Entrada A"');
@@ -87,7 +82,7 @@ test("Path no aplica al escenario → Entrada A sin protección especial", () =>
   );
   expect(mergeResult.matchedDeclaredPathTargets).toEqual([]);
   // Repair normal convierte el click no respaldado
-  const repaired = repairUnbackedClicks(mergeResult.steps, [], [], [], [], []);
+  const repaired = repairUnbackedClicks(mergeResult.steps, [], [], []);
   expect(repaired).not.toContain('Clic en "Entrada A"');
   console.log("No-aplica OK");
 });
@@ -99,8 +94,6 @@ test("allowedExecutableClicks antes === después; readiness intacto", () => {
   const repaired = repairUnbackedClicks(
     mergeResult.steps,
     allowedBefore,
-    [],
-    [],
     [],
     mergeResult.matchedDeclaredPathTargets,
   );

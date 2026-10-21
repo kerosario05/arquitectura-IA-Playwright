@@ -61,8 +61,11 @@ test("implementation metadata requires exact target binding for click steps", ()
   assert.equal(foreign.implementation, undefined);
 
   const matching = contractFor("Salir", "Salir").steps[0];
-  assert.equal(matching.implementation?.owner, "ProductListPage");
-  assert.equal(matching.implementation?.method, "clickPrimaryAction");
+  assert.equal(matching.implementation?.kind, "page_object");
+  if (matching.implementation?.kind === "page_object") {
+    assert.equal(matching.implementation.owner, "ProductListPage");
+    assert.equal(matching.implementation.method, "clickPrimaryAction");
+  }
 
   const ambiguous = buildSpecExecutionContract(
     {

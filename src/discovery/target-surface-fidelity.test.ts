@@ -74,8 +74,8 @@ test("exact ref with two persisted technical targets remains ambiguous and is re
   const locator = uniqueVisibleControl();
   const page = { url: () => "https://app.test/current-surface", getByRole: () => locator } as any;
   const target = {
-    targetType: "display",
-    locatorCandidates: [{ strategy: "role", value: "button|Expected control", confidence: 0.85 }],
+    targetType: "display" as const,
+    locatorCandidates: [{ strategy: "role" as const, value: "button|Expected control", confidence: 0.85 }],
     structuralContext: { headerRef: "header:Expected control" },
     stableAttributes: {},
     interactionEvidence: ["click"],

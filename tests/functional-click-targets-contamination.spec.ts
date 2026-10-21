@@ -3,7 +3,7 @@ import { extractHuFunctionalClickTargets } from "../src/scenarios/effective-clic
 import type { FunctionalBranchRef } from "../src/scenarios/scenario-types";
 
 function branch(label: string, id = "b1"): FunctionalBranchRef {
-  return { branchId: id, sourceLabel: label, sourceIssueKey: "HU-1" };
+  return { branchId: id, sourceLabel: label, actionIntent: "click", accessIntent: "unknown", evidenceSource: "user_story" };
 }
 
 test("visibility verb not extracted as click target", () => {

@@ -1,0 +1,8 @@
+{
+  "appSlug": "fenix",
+  "sectionSlug": "jira-aa-100",
+  "sourceScenarioId": "AA-100:jira:2",
+  "title": "Consultar el resumen de cuentas completando la verificación adicional",
+  "generatedAt": "2026-10-14T00:01:03.670Z",
+  "executionEngine": "jira_semantic"
+}

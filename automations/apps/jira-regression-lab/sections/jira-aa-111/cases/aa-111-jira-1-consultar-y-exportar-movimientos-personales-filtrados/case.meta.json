@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-111",
+  "sourceScenarioId": "AA-111:jira:1",
+  "title": "Consultar y exportar movimientos personales filtrados",
+  "generatedAt": "2026-10-19T03:54:06.032Z",
+  "executionEngine": "jira_semantic"
+}

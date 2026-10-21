@@ -239,11 +239,11 @@ test("TEST 8 focal integration maps canonical evidence to oracle, contract, cove
   };
   const contract = buildSpecExecutionContract(plan, source, { appSlug: "synthetic-integration" });
   const contractValidation = validateSpecExecutionContract(contract);
-  const promoted = buildPromotedOracleImplementations(source.observableOracles, null);
+  const promoted = buildPromotedOracleImplementations(source.observableOracles ?? [], null);
   const coverage = buildSemanticCoverageDiagnostics({
     semanticErrors: [],
     requiredAssertions: [requirementOne, requirementTwo],
-    observableOracles: source.observableOracles,
+    observableOracles: source.observableOracles ?? [],
     scenarioSteps: source.steps ?? [],
   });
 
@@ -304,7 +304,7 @@ test("TEST 8 focal integration maps canonical evidence to oracle, contract, cove
         } as any,
         sectionSlug: "synthetic",
         scenarioId: "SYNTH-904",
-        sourceScenario: source,
+        sourceScenario: source as import("./spec-generation-hybrid").SpecGenerationSourceScenario,
         executionSource: "synthetic-boundary-test",
       }, {
         runTypeScriptValidation: async () => ({ ok: true, stdout: "", stderr: "", exitCode: 0 }),

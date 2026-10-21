@@ -12,7 +12,7 @@ const baseConfig = {
   testDataRefs: {},
   missingInputBehavior: "fail",
   updatedAt: "",
-};
+} as const;
 
 test("projects explicit project TLS true and false without changing base URL", () => {
   for (const value of [true, false]) {

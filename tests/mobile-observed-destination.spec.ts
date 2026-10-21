@@ -179,7 +179,7 @@ test.describe("mobile observed destination evidence", () => {
   test("T12: observed requirement + screen does NOT create requirement→screen binding", () => {
     // Having requirementIds=["CA01"] + observedDestinationEvidence with screenKey
     // should NOT create a DestinationClaimDefinition
-    const manifest = []; // No manifest should be created
+    const manifest: import("../src/mobile/mobile-destination-claim").DestinationClaimDefinition[] = []; // No manifest should be created
     const claimId = buildDestinationClaimId("CA01", "test_screen");
     const expectations = parseStepDestinationExpectations(
       [{ stepIndex: 1, destinationClaimId: claimId }],

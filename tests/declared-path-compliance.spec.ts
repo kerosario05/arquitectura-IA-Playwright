@@ -26,7 +26,6 @@ function makeScenario(overrides: Partial<McpScenario> & { steps: string[] }): Mc
   return {
     sourceIssueKey: "TEST-DP",
     title: "Declared path scenario",
-    steps: overrides.steps,
     preconditions: [],
     expectedResult: "Destination shown",
     type: "Functional",
@@ -53,7 +52,7 @@ test("declared_path step is compliant=true executionBacked=false — scenario NO
   }) as McpScenario & { matchedDeclaredPathTargets?: string[] };
   scenario.matchedDeclaredPathTargets = ["Entrada A", "Destino B"];
 
-  const result = validateScenarioCompliance(scenario, makeContext([]), undefined, undefined, scenario.matchedDeclaredPathTargets);
+  const result = validateScenarioCompliance(scenario, makeContext([]));
 
   expect(result.valid).toBe(true);
   expect(result.reasonCode).toBe("valid");
@@ -70,7 +69,7 @@ test("negative: matchedDeclaredPathTargets=[] → unbacked_click preserved", () 
     steps: ['1. Clic en "Entrada A".'],
   });
 
-  const result = validateScenarioCompliance(scenario, makeContext([]), undefined, undefined, []);
+  const result = validateScenarioCompliance(scenario, makeContext([]));
 
   expect(result.valid).toBe(false);
   expect(result.reasonCode).toBe("unbacked_click");
@@ -84,7 +83,7 @@ test("authority: declared path target does NOT enter allowedExecutableClicks nor
   scenario.matchedDeclaredPathTargets = ["Entrada A"];
 
   const allowedBefore: string[] = [];
-  const result = validateScenarioCompliance(scenario, makeContext(allowedBefore), undefined, undefined, scenario.matchedDeclaredPathTargets);
+  const result = validateScenarioCompliance(scenario, makeContext(allowedBefore));
 
   // compliant, but allowedExecutableClicks untouched and execution not backed
   expect(result.valid).toBe(true);
@@ -129,7 +128,7 @@ test("readiness: declared_path scenario with no evidence remains requiresRouteLe
   scenario.matchedDeclaredPathTargets = ["Entrada A"];
 
   const allowed = [] as string[];
-  const result = validateScenarioCompliance(scenario, makeContext(allowed), undefined, undefined, scenario.matchedDeclaredPathTargets);
+  const result = validateScenarioCompliance(scenario, makeContext(allowed));
 
   expect(result.valid).toBe(true);
   // No declared target leaked into the execution authority

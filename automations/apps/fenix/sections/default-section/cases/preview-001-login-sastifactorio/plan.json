@@ -52,7 +52,7 @@
     {
       "index": 3,
       "action": "fill",
-      "description": "Ingresar \"130047596\" en \"RNC:\"",
+      "description": "Ingresar \"130598983\" en \"RNC:\"",
       "target": {
         "strategy": "text",
         "value": "RNC",
@@ -64,7 +64,7 @@
     {
       "index": 4,
       "action": "fill",
-      "description": "Ingresar \"jpmota\" en \"Usuario:\"",
+      "description": "Ingresar \"olivam\" en \"Usuario:\"",
       "target": {
         "strategy": "text",
         "value": "Usuario",
@@ -185,7 +185,7 @@
   "notes": [
     "Discovery completed successfully. All targets and concrete assertions passed."
   ],
-  "createdAt": "2026-10-07T21:44:47.604Z",
+  "createdAt": "2026-10-19T14:47:16.736Z",
   "metadata": {
     "authFlowRequired": false,
     "authFlowAlias": "defaultClient",
@@ -265,8 +265,8 @@
       },
       {
         "index": 3,
-        "action": "Ingresar \"130047596\" en \"RNC:\"",
-        "description": "Ingresar \"130047596\" en \"RNC:\"",
+        "action": "Ingresar \"130598983\" en \"RNC:\"",
+        "description": "Ingresar \"130598983\" en \"RNC:\"",
         "valueKey": "rnc",
         "technicalTargetRef": "role:textbox|RNC:",
         "technicalTargetRefs": [
@@ -280,8 +280,8 @@
       },
       {
         "index": 4,
-        "action": "Ingresar \"jpmota\" en \"Usuario:\"",
-        "description": "Ingresar \"jpmota\" en \"Usuario:\"",
+        "action": "Ingresar \"olivam\" en \"Usuario:\"",
+        "description": "Ingresar \"olivam\" en \"Usuario:\"",
         "valueKey": "usuario",
         "technicalTargetRef": "role:textbox|Usuario:",
         "technicalTargetRefs": [
@@ -775,7 +775,7 @@
       {
         "contractStepIndex": 2,
         "scenarioStepIndex": 3,
-        "originalText": "Ingresar \"130047596\" en \"RNC:\"",
+        "originalText": "Ingresar \"130598983\" en \"RNC:\"",
         "operation": "fill",
         "target": {
           "strategy": "label",
@@ -818,7 +818,7 @@
       {
         "contractStepIndex": 3,
         "scenarioStepIndex": 4,
-        "originalText": "Ingresar \"jpmota\" en \"Usuario:\"",
+        "originalText": "Ingresar \"olivam\" en \"Usuario:\"",
         "operation": "fill",
         "target": {
           "strategy": "label",

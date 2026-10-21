@@ -20,6 +20,7 @@ export type EvidenceDocumentScenario = {
   scenarioId: string;
   title: string;
   status: string;
+  evidenceKind?: string;
   screens: EvidenceDocumentScreen[];
   images: EvidenceDocumentImage[];
   finalImagePath: string | null;
@@ -91,13 +92,15 @@ function buildEvidenceDocumentScenario(sc: EvidenceScenarioRecord): EvidenceDocu
     );
   }
 
-  // Get functional step screenshots (exclude validation steps, deduplicate by path)
+  // Jira's representative screenshot for a screen visit is often attached to its
+  // final assertion. Keep it so a screen group does not become a text-only page.
+  // Recording retains its existing behavior of excluding validation screenshots.
   const seenFuncPaths = new Set<string>();
   const functionalScreenshots: CandidateImage[] = sc.steps
     .filter(step => {
       if (!step.screenshotPath || !isImageFile(step.screenshotPath)) return false;
       if (!fs.existsSync(step.screenshotPath)) return false;
-      if (/^\s*validar\b/i.test(step.stepText)) return false;
+      if (sc.evidenceKind !== "jira_semantic" && /^\s*validar\b/i.test(step.stepText)) return false;
       const resolvedPath = path.resolve(step.screenshotPath);
       if (seenFuncPaths.has(resolvedPath)) {
         console.log(`[evidence-docx] skippedDuplicateImage scenario=${sc.scenarioId} step=${step.stepIndex ?? "?"} reason=same_step_screenshot`);
@@ -106,13 +109,16 @@ function buildEvidenceDocumentScenario(sc: EvidenceScenarioRecord): EvidenceDocu
       seenFuncPaths.add(resolvedPath);
       return true;
     })
-    .map(step => ({
-      path: path.resolve(step.screenshotPath!),
-      stepText: step.stepText,
-      stepIndex: step.stepIndex,
-      screenId: step.screenId,
-      screenTitle: step.screenTitle,
-    }));
+    .map(step => {
+      const observedOwner = step.screenId ? step : sc.steps.find(candidate => candidate.screenId && candidate.screenshotPath === step.screenshotPath) ?? step;
+      return {
+        path: path.resolve(step.screenshotPath!),
+        stepText: observedOwner.stepText,
+        stepIndex: observedOwner.stepIndex,
+        screenId: observedOwner.screenId,
+        screenTitle: observedOwner.screenTitle,
+      };
+    });
 
   // If no functional screenshots, use last screenshot as fallback
   let images: CandidateImage[] = functionalScreenshots;
@@ -267,6 +273,7 @@ function buildEvidenceDocumentScenario(sc: EvidenceScenarioRecord): EvidenceDocu
     scenarioId: sc.scenarioId,
     title: scenarioTitle,
     status: scenarioStatus,
+    evidenceKind: sc.evidenceKind,
     images: prepared.images,
     screens: buildEvidenceDocumentScreens(sc, prepared.images),
     finalImagePath: prepared.finalImagePath,
@@ -347,11 +354,10 @@ export function prependInitialScreenImage<T extends EvidenceDocumentImage>(
   const initialPath = initial?.path && isImageFile(initial.path) && fs.existsSync(initial.path)
     ? path.resolve(initial.path)
     : null;
-  // A useful completed-form checkpoint replaces the blank initial login frame at the
-  // beginning of the report. Keep the initial frame only when no completed checkpoint exists.
-  const preferredPath = completedFormPath ?? initialPath;
+  // Preserve the actual opening frame as well as a later filled-form checkpoint.
+  const preferredPath = initialPath ?? completedFormPath;
   if (!preferredPath) return images;
-  const preferredImage: EvidenceDocumentImage = completedFormPath
+  const preferredImage: EvidenceDocumentImage = !initialPath && completedFormPath
     ? { path: completedFormPath, stepText: "Formulario completado", screenId: initial?.screenId, screenTitle: initial?.screenTitle }
     : {
         path: initialPath!,
@@ -361,8 +367,11 @@ export function prependInitialScreenImage<T extends EvidenceDocumentImage>(
         screenId: initial?.screenId,
         screenTitle: initial?.screenTitle,
       };
-  const remaining = images.filter((image) => path.resolve(image.path) !== preferredPath);
-  return [preferredImage, ...remaining];
+  const remaining = images.filter((image) => path.resolve(image.path) !== preferredPath && path.resolve(image.path) !== completedFormPath);
+  const completed = initialPath && completedFormPath && initialPath !== completedFormPath
+    ? [{ path: completedFormPath, stepText: "Formulario completado", screenId: initial?.screenId, screenTitle: initial?.screenTitle }]
+    : [];
+  return [preferredImage, ...completed, ...remaining];
 }
 
 /** Groups the executed actions by their captured UI screen and attaches that screen's evidence. */
@@ -373,13 +382,28 @@ export function buildEvidenceDocumentScreens(
   const screens: EvidenceDocumentScreen[] = [];
   const stepScreenIndexes = new Map<EvidenceStepRecord, number>();
   const screenOccurrences = new Map<string, number>();
+  const isJiraSemantic = scenario.evidenceKind === "jira_semantic";
+  const hasObservedScreenIdentity = scenario.steps.some(step => Boolean(step.screenId));
+  const groupLegacyJiraSteps = isJiraSemantic && !hasObservedScreenIdentity;
 
   for (const step of scenario.steps) {
     if (!step.stepText.trim() || /^pantalla resultante tras el último paso$/i.test(step.stepText.trim())) continue;
     const screenshotPath = step.screenshotPath ? path.resolve(step.screenshotPath) : "";
-    const key = step.screenId || (screenshotPath ? `path:${screenshotPath}` : `step:${step.index}`);
+    // Older promoted Jira specs persisted only a final screenshot and no observed
+    // screen identity. Keep their ordered steps in one report section instead of
+    // manufacturing a blank page for every step. Recording's grouping is unchanged.
+    const key = step.screenId || (groupLegacyJiraSteps ? "jira-reuse-unobserved-screen" : "")
+      || (screenshotPath ? `path:${screenshotPath}` : `step:${step.index}`);
     let screen = screens.at(-1);
-    if (!screen || screen.id !== key) {
+    // Jira screen IDs identify the underlying screen, while the occurrence suffix
+    // distinguishes a later revisit. Consecutive steps in that same revisited
+    // screen must remain grouped under its suffixed occurrence (for example #2).
+    // The same occurrence rule applies to Recording visits as well.
+    const currentScreenMatches = screen && (
+      screen.id === key
+      || screen.id.startsWith(`${key}#`)
+    );
+    if (!screen || !currentScreenMatches) {
       const occurrence = (screenOccurrences.get(key) ?? 0) + 1;
       screenOccurrences.set(key, occurrence);
       screen = {
@@ -390,13 +414,19 @@ export function buildEvidenceDocumentScreens(
       };
       screens.push(screen);
     }
-    screen.steps.push({ number: screen.steps.length + 1, text: describeEvidenceStep(step).trim(), status: step.status });
+    const authoredNumber = step.stepIndex && step.stepIndex > 0 ? step.stepIndex : step.index > 0 ? step.index : screen.steps.length + 1;
+    screen.steps.push({ number: screen.steps.some(existing => existing.number === authoredNumber) ? 0 : authoredNumber, text: describeEvidenceStep(step).trim(), status: step.status });
     stepScreenIndexes.set(step, screens.length - 1);
   }
 
   for (const image of images) {
     const absolutePath = path.resolve(image.path);
-    const sourceStep = scenario.steps.find(step => step.screenshotPath && path.resolve(step.screenshotPath) === absolutePath);
+    const sourceStep = scenario.steps.find(step => step.screenshotPath && path.resolve(step.screenshotPath) === absolutePath && (!image.screenId || step.screenId === image.screenId));
+    const isJiraSemantic = scenario.evidenceKind === "jira_semantic";
+    const initialScreenPath = scenario.initialScreenEvidence?.path
+      ? path.resolve(scenario.initialScreenEvidence.path)
+      : undefined;
+    const isInitialScreen = initialScreenPath === absolutePath;
     const isFinalCheckpoint = /^pantalla final después del último paso$/i.test(image.stepText.trim());
     const lastScreen = screens.at(-1);
     const finalScreenTitle = image.screenTitle?.trim().toLocaleLowerCase("es");
@@ -410,8 +440,13 @@ export function buildEvidenceDocumentScreens(
     // final screen as the last step, attach its image there instead of creating a second
     // screenshot-only section with a repeated title. If the title differs, keep a separate
     // final section so a final screen that returns to an earlier route stays last.
-    let screenIndex = isFinalCheckpoint
-      ? finalCheckpointContinuesLastScreen ? screens.length - 1 : screens.length
+    const sourceScreenIndex = sourceStep ? stepScreenIndexes.get(sourceStep) : undefined;
+    let screenIndex = isInitialScreen && screens.length > 0
+      ? 0
+      : isFinalCheckpoint
+      ? isJiraSemantic
+        ? sourceScreenIndex ?? (finalCheckpointContinuesLastScreen ? screens.length - 1 : screens.length)
+        : finalCheckpointContinuesLastScreen ? screens.length - 1 : screens.length
       : sourceStep ? stepScreenIndexes.get(sourceStep) ?? -1 : -1;
     if (screenIndex < 0 && image.screenId) {
       const matchingScreens = screens

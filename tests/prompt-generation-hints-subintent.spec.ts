@@ -83,7 +83,7 @@ test("prompt generationHints respect subIntent contract and use functional targe
     { mainIntent: "B", subIntent: "B1", explicitRoutePath: [] },
     undefined,
     undefined,
-    ["Destino B"], // huFunctionalClickTargets
+    [{ sourceIssueKey: ISSUE.key, category: "action", sourceText: "Destino B", expectedBehavior: "Destino B" }],
   );
 
   const system = messages.find((m) => m.role === "system")?.content ?? "";
@@ -119,7 +119,7 @@ test("conflicting subIntent cleared — no subintent penalty rejects the branch"
     { mainIntent: "B", subIntent: "B1", explicitRoutePath: [] },
     undefined,
     undefined,
-    ["Destino B"],
+    [{ sourceIssueKey: ISSUE.key, category: "action", sourceText: "Destino B", expectedBehavior: "Destino B" }],
   );
   const system = messages.find((m) => m.role === "system")?.content ?? "";
   const hintsSection = system.split("## Declarative Generation Hints")[1] ?? "";
@@ -147,7 +147,7 @@ test("compatible subIntent preserved when huModel.mainIntent matches resolvedInt
     { mainIntent: "A", subIntent: "A1", explicitRoutePath: [] },
     undefined,
     undefined,
-    ["Destino B"],
+    [{ sourceIssueKey: ISSUE.key, category: "action", sourceText: "Destino B", expectedBehavior: "Destino B" }],
   );
   const system = messages.find((m) => m.role === "system")?.content ?? "";
   expect(system).toContain("Destino B");

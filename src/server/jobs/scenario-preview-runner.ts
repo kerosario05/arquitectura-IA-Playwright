@@ -4,6 +4,7 @@ import fs from "fs";
 import { randomUUID, createHash } from "crypto";
 import { loadScenarios, saveScenarios } from "../../recording/recording-store";
 import { verifyPromotedSpec } from "../../automations/promote-plan";
+import { startJiraSemanticRun } from "./jira-semantic-runner";
 import { jobStore, type JobSummary, type JobStatus } from "./job-store";
 import type { PublishedCaseEntry } from "./launch-orchestrator";
 import { type ScenarioPreviewRequest, type VirtualCase } from "../../types/scenario-preview.types";
@@ -55,6 +56,7 @@ import { buildStructuredDefectDescription, buildDefectTitle, inferDefectSeverity
 import { learnEntryStepsFromSnapshot } from "../services/entry-steps-learner";
 import { RunEvidenceRecorder } from "../../evidence/run-evidence-recorder";
 import { loadEvidenceConfig } from "../../evidence/evidence-types";
+import { persistReusedSpecDiagnostic, projectReusedSpecLiveOutput, summarizeReusedSpecError } from "./reuse-spec-live-log";
 import { buildVirtualCaseFromContract } from "../../automations/case-contract-evaluator";
 import { isEntryStepInsertionAuthorized } from "../../scenarios/scenario-preview.service";
 
@@ -461,6 +463,7 @@ export async function startReuseExistingPromotedSpecRun(
   let syncFailed = 0;
   for (let index = 0; index < scenarios.length; index++) {
     const scenario = scenarios[index];
+    let suppressedChildOutputLines = 0;
     jobStore.update(jobId, {
       currentCase: scenario.title,
       currentCaseId: scenario.scenarioId,
@@ -511,10 +514,9 @@ export async function startReuseExistingPromotedSpecRun(
       // SAME sink live, per line, as the child emits it -- never a second bus/pipeline. stderr
       // lines are tagged distinctly since this channel is flat text with no separate field.
       onOutput: (event) => {
-        jobStore.appendLog(
-          jobId,
-          event.stream === "stderr" ? `[promoted-child:stderr] ${event.line}` : `[promoted-child] ${event.line}`,
-        );
+        const projected = projectReusedSpecLiveOutput(event);
+        if (projected) jobStore.appendLog(jobId, projected);
+        else suppressedChildOutputLines += 1;
       },
     });
     const status: "passed" | "failed" = verification.status === "passed" ? "passed" : "failed";
@@ -540,14 +542,27 @@ export async function startReuseExistingPromotedSpecRun(
     // can only annotate/report this outcome, never alter it.
     caseOutcomeMap.set(scenario.scenarioId, { status });
     jobStore.appendLog(jobId, `[promoted-spec-reuse] phase=execution_complete scenarioId=${scenario.scenarioId} status=${status}`);
+    if (suppressedChildOutputLines > 0) {
+      jobStore.appendLog(jobId, `[promoted-spec-reuse] childOutputCompacted scenarioId=${scenario.scenarioId} suppressedLines=${suppressedChildOutputLines}`);
+    }
 
+    const errorSummary = status === "failed" ? summarizeReusedSpecError(verification.error) : undefined;
+    let diagnosticPath: string | undefined;
+    if (status === "failed" && verification.error && verification.error.length > 1200) {
+      try {
+        diagnosticPath = await persistReusedSpecDiagnostic(jobId, scenario.scenarioId, verification.error);
+      } catch {
+        jobStore.appendLog(jobId, `[promoted-spec-reuse] diagnosticArtifactWriteFailed scenarioId=${scenario.scenarioId}`);
+      }
+    }
     jobStore.appendLog(jobId, JSON.stringify({
       type: "case_finished",
       caseId: scenario.scenarioId,
       title: scenario.title,
       status,
       discoveryStatus: status,
-      error: verification.error,
+      ...(status === "failed" ? { error: errorSummary ?? "Promoted spec verification failed; see step failure markers." } : {}),
+      ...(diagnosticPath ? { diagnosticPath } : {}),
     }));
     jobStore.update(jobId, {
       summary: mergeScenarioPreviewSummary(jobStore.get(jobId)?.summary, {
@@ -1036,6 +1051,10 @@ function validatePreviewArtifacts(
 }
 
 export async function startScenarioPreviewRun(jobId: string): Promise<void> {
+  if (jobStore.getInternal(jobId)?.params.executionEngine === "jira_semantic") {
+    await startJiraSemanticRun(jobId);
+    return;
+  }
   const job = jobStore.getInternal(jobId);
   if (!job) return;
 
@@ -3144,7 +3163,7 @@ type ResolvedApp = {
   inference: ScenarioPreviewTargetInference;
 };
 
-function resolveEffectiveAppSlug(
+export function resolveEffectiveAppSlug(
   params: ScenarioPreviewParams,
   validScenarios: ScenarioPreviewParams["scenarios"],
 ): ResolvedApp {

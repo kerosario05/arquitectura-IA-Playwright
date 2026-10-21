@@ -1,0 +1,105 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-10-19T05:31:43.901Z",
+  "entries": [
+    {
+      "key": "auth.company_identifier",
+      "source": "app_test_data",
+      "fieldName": "[id=\"login-rnc\"]",
+      "stepIndex": 2,
+      "valueType": "string",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": "*******01"
+    },
+    {
+      "key": "auth.username",
+      "source": "app_test_data",
+      "fieldName": "[id=\"login-user\"]",
+      "stepIndex": 3,
+      "valueType": "string",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": "********sa"
+    },
+    {
+      "key": "auth.password",
+      "source": "app_test_data",
+      "fieldName": "[id=\"login-password\"]",
+      "stepIndex": 4,
+      "valueType": "string",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": "********26"
+    },
+    {
+      "key": "account",
+      "source": "unknown",
+      "fieldName": "[id=\"statement-account\"]",
+      "stepIndex": 15,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "start_date",
+      "source": "unknown",
+      "fieldName": "[id=\"date-from\"]",
+      "stepIndex": 16,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "end_date",
+      "source": "unknown",
+      "fieldName": "[id=\"date-to\"]",
+      "stepIndex": 17,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "status",
+      "source": "unknown",
+      "fieldName": "[id=\"statement-status\"]",
+      "stepIndex": 18,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "movement_type",
+      "source": "unknown",
+      "fieldName": "[id=\"movement-type\"]",
+      "stepIndex": 19,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "minimum_amount",
+      "source": "unknown",
+      "fieldName": "[id=\"min-amount\"]",
+      "stepIndex": 20,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

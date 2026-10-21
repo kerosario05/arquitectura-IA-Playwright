@@ -1,0 +1,9 @@
+{
+  "id": "aa-104-jira-4-transferencia-propia-bloqueada-cuando-las-cuentas-son-iguales",
+  "externalId": "AA-104:jira:4",
+  "title": "Transferencia propia bloqueada cuando las cuentas son iguales",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-18T12:37:37.589Z"
+}

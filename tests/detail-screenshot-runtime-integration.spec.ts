@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { runCaseDiscovery } from "../src/discovery/case-discovery";
-import type { TestRailCase } from "../src/testrail/testrail-types";
+import type { TestRailCaseFetchResult } from "../src/types/testrail.types";
 import * as fs from "node:fs";
 import * as path from "node:path";
 
@@ -78,9 +78,7 @@ test.describe("Detail Screenshot Runtime Integration", () => {
         pendingObjectsPath: path.join(artifactsDir, "pending-objects.json"),
         pendingPlansPath: path.join(artifactsDir, "pending-plans.json"),
         appBaseUrl: mockAppConfig.baseUrl,
-        headless: true,
         appSlug: mockAppConfig.appSlug,
-        config: mockAppConfig as any
       }).catch((err) => {
         // Expected to fail - we're just testing log output during initialization
         console.log(`Discovery failed (expected): ${err.message}`);

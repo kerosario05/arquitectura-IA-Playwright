@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-103",
+  "sourceScenarioId": "AA-103:jira:3",
+  "title": "Rechazo de verificación MFA con código SMS inválido",
+  "generatedAt": "2026-10-16T18:31:08.971Z",
+  "executionEngine": "jira_semantic"
+}

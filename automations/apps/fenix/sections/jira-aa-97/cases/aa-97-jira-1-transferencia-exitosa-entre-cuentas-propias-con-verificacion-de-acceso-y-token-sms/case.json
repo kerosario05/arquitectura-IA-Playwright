@@ -1,0 +1,9 @@
+{
+  "id": "aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-verificacion-de-acceso-y-token-sms",
+  "externalId": "AA-97:jira:1",
+  "title": "Transferencia exitosa entre cuentas propias con verificación de acceso y token SMS",
+  "source": "discovery",
+  "appSlug": "fenix",
+  "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+  "createdAt": "2026-10-16T13:04:30.353Z"
+}

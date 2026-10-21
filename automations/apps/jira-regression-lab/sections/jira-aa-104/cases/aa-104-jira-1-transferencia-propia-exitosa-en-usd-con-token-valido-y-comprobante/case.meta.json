@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-104",
+  "sourceScenarioId": "AA-104:jira:1",
+  "title": "Transferencia propia exitosa en USD con token válido y comprobante",
+  "generatedAt": "2026-10-18T12:36:20.073Z",
+  "executionEngine": "jira_semantic"
+}

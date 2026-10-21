@@ -38,6 +38,7 @@ function isRepairPurpose(purpose: string): boolean {
 
 function isSupportedCodexPurpose(purpose: string): boolean {
   return purpose === "scenario_generation"
+    || purpose === "test_design"
     || purpose === "spec_generation"
     || purpose === "scenario_data_semantic_enrichment"
     || purpose === "canonical_scenario_semantic_normalization"
@@ -73,7 +74,7 @@ export class CodexCliProvider {
     });
 
     let args = hasModelFlag ? [...this.extraArgs] : this.model ? ["--model", this.model, ...this.extraArgs] : [...this.extraArgs];
-    if (purpose !== "spec_generation" || !this.reasoningEffort) return args;
+    if (!(purpose === "spec_generation" || purpose === "jira_dom_target_repair") || !this.reasoningEffort) return args;
     const reasoningPrefix = "model_reasoning_effort=";
     const existing = args.find((arg) => arg.startsWith(reasoningPrefix));
     const expected = `${reasoningPrefix}${this.reasoningEffort}`;
@@ -375,6 +376,9 @@ export class CodexCliProvider {
     if (purpose === "spec_generation") {
       return "spec-generation-result.json";
     }
+    if (purpose === "test_design") {
+      return "test-design-result.json";
+    }
     if (purpose === "scenario_data_semantic_enrichment") {
       return "semantic-enrichment-result.json";
     }
@@ -457,7 +461,9 @@ export class CodexCliProvider {
     const timestamp = Date.now();
     const purposeDir = purpose === "scenario_generation"
       ? "scenario"
-      : (purpose === "spec_generation"
+      : (purpose === "test_design"
+        ? "test-design"
+        : purpose === "spec_generation"
         ? "spec"
         : (purpose === "canonical_scenario_semantic_normalization" ? "canonical-semantic" : "repair"));
     const tempDir = path.join(process.cwd(), ".artifacts", "ai-provider", "codex", purposeDir, `${timestamp}`);

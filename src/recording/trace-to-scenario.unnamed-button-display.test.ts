@@ -304,3 +304,112 @@ test("17/reusableStructuralClick. stable structural owners hide captured persona
   assert.equal(webStep.interactionId, "interaction-1");
   assert.ok(!step.content.includes(dynamicLabel));
 });
+
+test("checkbox owner and backing input from one captured gesture produce one named, idempotent scenario action", () => {
+  const checkboxScope = { strategy: "id", value: "consent-owner" };
+  const candidate = (tag: string, id: string) => ({
+    targetType: "structural",
+    locatorCandidates: [{ strategy: "css", value: `#${id}`, confidence: 0.8 }],
+    structuralContext: {
+      owner: { tag, ...(tag === "span" ? { role: "checkbox" } : {}) },
+      stableDirectAttributes: { id },
+      deterministicStructuralIdentity: true,
+      structuralIdentityMatchCount: 1,
+      scopeIdentity: checkboxScope,
+      captureTargetMatchCount: 1,
+    },
+    interactionEvidence: ["v2_click_owner"],
+    confidence: 0.85,
+    validatedByInteraction: true,
+  });
+  const events = [
+    {
+      seq: 10,
+      t: 100,
+      kind: "tap",
+      screenKey: "consent",
+      url: "/accounts",
+      target: {
+        label: "control",
+        role: "checkbox",
+        stateDelta: { checked: true },
+        afterState: { selected: true },
+        locators: [{ strategy: "role", value: "checkbox|Acepto los términos" }, { strategy: "css", value: "#base-ui-checkbox" }],
+        technicalTargetCandidates: [candidate("span", "base-ui-checkbox")],
+        playwrightRecorderEvidence: {
+          kind: "role",
+          role: "checkbox",
+          normalizedName: "Acepto los términos y condiciones de la aplicación",
+          targetTag: "span",
+          scopeIdentity: checkboxScope,
+          runtimeResolutionRequired: true,
+        },
+      },
+    },
+    {
+      seq: 11,
+      t: 110,
+      kind: "tap",
+      screenKey: "consent",
+      url: "/accounts",
+      target: {
+        label: "AtrásContinuar",
+        associatedField: "AtrásContinuar",
+        role: "checkbox",
+        stateDelta: { checked: true },
+        afterState: { selected: true },
+        locators: [{ strategy: "css", value: "#x_AcceptTermsAndConditions" }],
+        technicalTargetCandidates: [candidate("input", "x_AcceptTermsAndConditions")],
+      },
+    },
+  ] as SessionTrace["events"];
+  const recording = fixture({ events });
+  const scenario = buildHappyPathScenario(recording, events);
+  const checkboxSteps = scenario.testRailSteps.filter((step) => /^(?:Marcar|Desmarcar) /.test(step.content));
+  const replayActions = scenario.webSteps.filter((step) => step.interactionId);
+
+  assert.equal(checkboxSteps.length, 1, "the visual checkbox owner and hidden input must not create two human steps");
+  assert.match(checkboxSteps[0].content, /Acepto los términos y condiciones/);
+  assert.equal(replayActions.length, 1, "one recorded checkbox gesture must replay once, not toggle back off");
+  assert.deepEqual(scenario.canonicalInteractions?.find((item) => item.action === "check")?.sourceEventRefs, ["event-1", "event-2"]);
+
+  const differentScopeEvents = structuredClone(events);
+  differentScopeEvents[1].target!.technicalTargetCandidates![0].structuralContext!.scopeIdentity = {
+    strategy: "id",
+    value: "different-checkbox-owner",
+  };
+  const differentScopeScenario = buildHappyPathScenario(fixture({ events: differentScopeEvents }), differentScopeEvents);
+  assert.equal(differentScopeScenario.canonicalInteractions?.filter((item) => item.action === "check").length, 2,
+    "checkboxes in different captured scopes must stay separate");
+
+  const checkThenUncheckEvents = structuredClone(events);
+  checkThenUncheckEvents[1].target!.stateDelta = { checked: false };
+  checkThenUncheckEvents[1].target!.afterState = { selected: false };
+  const checkThenUncheckScenario = buildHappyPathScenario(fixture({ events: checkThenUncheckEvents }), checkThenUncheckEvents);
+  assert.deepEqual(checkThenUncheckScenario.canonicalInteractions?.map((item) => item.action), ["check", "uncheck"],
+    "a real resulting-state change must not be collapsed");
+});
+
+test("long checkbox names produce concise human steps while exact replay identity and source remain intact", () => {
+  for (const label of [
+    `Acepto los Términos y Condiciones de la Aplicación Móvil. ${"Texto legal asociado a esta casilla. ".repeat(25)}`,
+    `Enable notifications for this workspace. ${"Detailed notification policy for the selected control. ".repeat(20)}`,
+  ]) {
+    const event = {seq: 1, t: 100, kind: "tap", screenKey: "login", target: {
+      label: "control", role: "checkbox", stateDelta: {checked: true}, afterState: {selected: true},
+      locators: [{strategy: "role", value: `checkbox|${label}`, confidence: 0.95}],
+      playwrightRecorderEvidence: {kind: "role", role: "checkbox", normalizedName: label, targetTag: "input", runtimeResolutionRequired: true},
+    }} as SessionTrace["events"][number];
+    const trace = fixture({events: [event]});
+    const before = JSON.stringify(trace);
+    const scenario = buildHappyPathScenario(trace, trace.events);
+    const content = scenario.testRailSteps.at(-1)!.content;
+    assert.ok(content.length <= 106);
+    assert.equal(content, label.startsWith("Acepto") ? 'Marcar "Acepto los Términos y Condiciones"' : 'Marcar "Enable notifications"');
+    assert.equal(scenario.webSteps.at(-1)!.description, content);
+    assert.equal((scenario.webSteps.at(-1)!.target as {value: string}).value, `checkbox|${label}`);
+    assert.equal(scenario.stepTargets.at(-1)!.value, `checkbox|${label}`);
+    assert.equal(scenario.canonicalInteractions?.find(item => item.action === "check")?.playwrightRecorderEvidence?.normalizedName, label);
+    assert.equal(JSON.stringify(trace), before);
+  }
+});

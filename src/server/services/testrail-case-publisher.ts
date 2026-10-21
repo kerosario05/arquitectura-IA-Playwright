@@ -10,6 +10,7 @@ import {
 } from "./testrail-sync-types";
 import { describeTestRailRecordingPayload, validateTestRailRecordingPayload } from "../../recording/testrail-recording-payload";
 import { serializeTestRailSteps } from "../../testrail/testrail-step-serializer";
+import { scenarioCaseSteps } from "../../scenarios/scenario-case-transport";
 
 const ROOT = path.resolve(__dirname, "..", "..", "..");
 const STORE_PATH = path.join(ROOT, ".artifacts", "testrail", "scenario-case-mappings.json");
@@ -257,6 +258,17 @@ export function verifyExistingMappingIsExactMatch(
     return { valid: false, reason: "identity_not_exact" };
   }
   return { valid: true, case: remoteCase };
+}
+
+/** Reuse a TestRail result only when its live section and exact scenario ref match. */
+export function selectExactScenarioCase(
+  candidates: RawTestRailCase[],
+  ctx: { sectionId: number },
+  exactRefCandidates: string[],
+): RawTestRailCase | undefined {
+  const exact = candidates.filter(candidate => verifyExistingMappingIsExactMatch(candidate, ctx, exactRefCandidates).valid);
+  if (exact.length > 1) throw new Error(`testrail_scenario_mapping_ambiguous:${exact.map(candidate => candidate.id).join(",")}`);
+  return exact[0];
 }
 
 function isLegacyPreviewPattern(id: string): boolean {
@@ -549,9 +561,7 @@ function getConfiguredRequiredCaseFields(): Record<string, string> {
 function toStepsSeparated(scenario: ScenarioPreviewPublishContext["scenarios"][number]): Array<{ content: string; expected?: string }> {
   // Build clean steps: never mix global expectedResult into step-level expected.
   // Global expectedResult is sent separately via custom_expected.
-  const steps = scenario.steps
-    .map((step) => ({ content: step.replace(/^\d+[\.)]\s*/, "").trim() }))
-    .filter((s) => s.content.length > 0);
+  const steps = scenarioCaseSteps(scenario.steps);
   // TestRail requires custom_steps to be non-empty — never return an empty steps list.
   if (steps.length === 0) {
     return [{ content: sanitizeText(stripHtml(scenario.title)) || "Ejecutar el escenario de prueba automatizado." }];
@@ -575,6 +585,11 @@ function buildCustomFields(): Record<string, unknown> {
   }
 
   return customFields;
+}
+
+/** The configured required case fields (TESTRAIL_REQUIRED_CASE_FIELDS_JSON), for other publishers. */
+export function testRailRequiredCaseCustomFields(): Record<string, unknown> {
+  return buildCustomFields();
 }
 
 function sanitizeText(value: string | undefined): string | undefined {
@@ -1080,17 +1095,13 @@ export async function publishScenariosToTestRail(
         let found: RawTestRailCase[] = [];
         found = await client.getCasesByRefs(String(ctx.projectId), refs, ctx.suiteId ? String(ctx.suiteId) : undefined, String(ctx.sectionId));
 
-        if (found.length === 0 && typeof client.getCases === "function") {
+        if (typeof client.getCases === "function") {
           const sectionCases = await client.getCases(String(ctx.projectId), ctx.suiteId ? String(ctx.suiteId) : undefined, String(ctx.sectionId));
-          found = sectionCases.filter((c) => normalizeTitle(c.title) === normalizedScenarioTitle);
-          if (found.length === 0) {
-            found = sectionCases.filter((c) => normalizeTitle(c.title).includes(normalizedScenarioTitle) || normalizedScenarioTitle.includes(normalizeTitle(c.title)));
-          }
+          found = [...found, ...sectionCases.filter(candidate =>
+            verifyExistingMappingIsExactMatch(candidate, { sectionId: ctx.sectionId }, [refs]).valid)];
         }
 
-        const sectionCases = found.filter((c) => c.section_id === ctx.sectionId);
-        const exactTitleReuse = sectionCases.find((c) => normalizeTitle(c.title) === normalizedScenarioTitle);
-        const reusedCase = exactTitleReuse ?? (sectionCases.length === 1 ? sectionCases[0] : undefined);
+        const reusedCase = selectExactScenarioCase(found, { sectionId: ctx.sectionId }, [refs]);
         if (reusedCase) {
           testRailCase = await client.updateCase(reusedCase.id, {
             title: scenario.title,

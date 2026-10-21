@@ -1,0 +1,9 @@
+{
+  "id": "aa-104-jira-3-transferencia-propia-bloqueada-por-monto-cero",
+  "externalId": "AA-104:jira:3",
+  "title": "Transferencia propia bloqueada por monto cero",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-18T12:45:35.976Z"
+}

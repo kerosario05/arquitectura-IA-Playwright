@@ -18,22 +18,22 @@ function fakeDb() {
   return {
     rows,
     queries,
-    withConnection: async <T>(fn: (connection: { query: (sql: string, params?: unknown[]) => Promise<unknown[]> }) => Promise<T>) => fn({
+    withConnection: async <T>(fn: (connection: { query: <R = Record<string, unknown>>(sql: string, params?: unknown[]) => Promise<R[]> }) => Promise<T>) => fn({
       query: async (sql, params = []) => {
         queries.push(sql);
         const projectId = String(params[0] ?? "");
-        if (/SELECT projectId/i.test(sql)) return rows.get(projectId) ? [rows.get(projectId)] : [];
-        if (/DELETE FROM/i.test(sql)) { rows.delete(projectId); return []; }
+        if (/SELECT projectId/i.test(sql)) return (rows.get(projectId) ? [rows.get(projectId)] : []) as any;
+        if (/DELETE FROM/i.test(sql)) { rows.delete(projectId); return [] as any; }
         if (/\bUPDATE\b/i.test(sql)) {
           const current = rows.get(String(params[2]))!;
           current.version = String(params[0]); current.configJson = String(params[1]); current.updatedAt = new Date();
-          return [];
+          return [] as any;
         }
         if (/INSERT/i.test(sql)) {
           rows.set(projectId, { projectId, version: String(params[1]), configJson: String(params[2]), createdAt: new Date(), updatedAt: new Date() });
-          return [];
+          return [] as any;
         }
-        return [];
+        return [] as any;
       },
     }),
     logger: (message: string) => { if (message.includes("CONFIG_VALUE")) throw new Error("secret logged"); },

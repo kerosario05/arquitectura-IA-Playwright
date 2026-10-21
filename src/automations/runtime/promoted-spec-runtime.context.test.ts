@@ -315,7 +315,7 @@ test("field locator rejects a different label", async () => {
 });
 
 function fakeRawCandidatePage(labels: string[]): any {
-  const candidates = labels.map((label) => ({
+  const candidates: any[] = labels.map((label) => ({
     count: async () => 1,
     nth: () => undefined,
     isVisible: async () => true,

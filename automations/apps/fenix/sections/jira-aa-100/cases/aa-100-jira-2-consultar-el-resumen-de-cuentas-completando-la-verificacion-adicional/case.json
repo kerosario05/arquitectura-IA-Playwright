@@ -1,0 +1,9 @@
+{
+  "id": "aa-100-jira-2-consultar-el-resumen-de-cuentas-completando-la-verificacion-adicional",
+  "externalId": "AA-100:jira:2",
+  "title": "Consultar el resumen de cuentas completando la verificación adicional",
+  "source": "discovery",
+  "appSlug": "fenix",
+  "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+  "createdAt": "2026-10-14T00:01:03.674Z"
+}

@@ -5,7 +5,7 @@ import { createHash } from "node:crypto";
 import { promisify } from "node:util";
 import JSZip from "jszip";
 import type { EvidenceScenarioRecord } from "./evidence-types";
-import { buildEvidenceDocumentScreens, type EvidenceDocumentImage, type EvidenceDocumentScreen } from "./evidence-document-model";
+import { buildEvidenceDocumentScreens, prependInitialScreenImage as prependSharedInitialScreenImage, type EvidenceDocumentImage, type EvidenceDocumentScreen } from "./evidence-document-model";
 import { formatEvidenceCoverPeriod, replaceEvidenceCoverDash } from "./evidence-cover-period";
 
 const execFileAsync = promisify(execFile);
@@ -697,28 +697,7 @@ export function prependInitialScreenImage(
   scenario: EvidenceScenarioRecord,
   images: Array<{ path: string; stepText: string; screenId?: string; screenTitle?: string }>,
 ): Array<{ path: string; stepText: string; screenId?: string; screenTitle?: string }> {
-  const initial = scenario.initialScreenEvidence;
-  const checkpointPath = initial?.completedFormCheckpointPath;
-  const completedFormPath = checkpointPath && isImageFile(checkpointPath) && fs.existsSync(checkpointPath)
-    ? path.resolve(checkpointPath)
-    : null;
-  const initialPath = initial?.path && isImageFile(initial.path) && fs.existsSync(initial.path)
-    ? path.resolve(initial.path)
-    : null;
-  const preferredPath = completedFormPath ?? initialPath;
-  if (!preferredPath) return images;
-  const preferredImage = completedFormPath
-    ? { path: completedFormPath, stepText: "Formulario completado", screenId: initial?.screenId, screenTitle: initial?.screenTitle }
-    : {
-        path: initialPath!,
-        stepText: initial?.status === "load_failed"
-          ? `ESTADO INICIAL - FALLO DE CARGA: ${initial.reason ?? "initial_load_failure"}`
-          : "ESTADO INICIAL",
-        screenId: initial?.screenId,
-        screenTitle: initial?.screenTitle,
-      };
-  const remaining = images.filter(image => path.resolve(image.path) !== preferredPath);
-  return [preferredImage, ...remaining];
+  return prependSharedInitialScreenImage(scenario, images);
 }
 
 function validateFinalImageInsertionLogs(

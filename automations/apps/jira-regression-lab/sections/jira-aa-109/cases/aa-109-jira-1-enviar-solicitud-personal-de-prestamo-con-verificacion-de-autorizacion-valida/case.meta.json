@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-109",
+  "sourceScenarioId": "AA-109:jira:1",
+  "title": "Enviar solicitud personal de préstamo con verificación de autorización válida",
+  "generatedAt": "2026-10-17T15:20:13.260Z",
+  "executionEngine": "jira_semantic"
+}

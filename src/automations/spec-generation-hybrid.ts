@@ -52,6 +52,19 @@ export function rewritePromotedRuntimeImport(specContent: string, specFilePath: 
   );
 }
 
+/** Keep the validated candidate artifact without reopening an unchanged file after Playwright. */
+export async function persistCandidateSpecIfChanged(filePath: string, content: string): Promise<boolean> {
+  let existing: string | undefined;
+  try {
+    existing = await fs.readFile(filePath, "utf-8");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+  }
+  if (existing === content) return false;
+  await fs.writeFile(filePath, content, "utf-8");
+  return true;
+}
+
 export function rewritePromotedAuthFlowHelperImport(
   specContent: string,
   specFilePath: string,
@@ -273,6 +286,7 @@ export type SpecGenerationObservableOracleType =
   | "url_state"
   | "heading_or_control"
   | "auth_gate"
+  | "field_validation"
   | "runtime_state"
   | "page_object_state"
   | "unsupported_or_unresolved";
@@ -293,6 +307,7 @@ export type SpecGenerationObservableOracle = {
 
 export type PromotedOracleImplementationKind =
   | "auth_stage"
+  | "field_validation"
   | "url_state"
   | "heading_or_control"
   | "runtime_auth_state";
@@ -368,6 +383,8 @@ type SpecGenerationRepairContext = {
 };
 
 export type HybridSpecGenerationInput = {
+  /** Explicit verification policy for callers that require a functional candidate run. */
+  functionalExecutionEnabled?: boolean;
   plan: ExecutionPlan;
   deterministicDraft: string;
   // Structured generation-metadata signal (never scenario authority, never added to
@@ -1596,6 +1613,7 @@ function normalizeObservableOracleType(value: string | undefined): SpecGeneratio
     case "url_state":
     case "heading_or_control":
     case "auth_gate":
+    case "field_validation":
     case "runtime_state":
     case "page_object_state":
       return value as SpecGenerationObservableOracleType;
@@ -2191,6 +2209,19 @@ export function buildPromotedOracleImplementations(
         polarity: oracle.polarity,
         implementationKind: "url_state",
         expectedUrlPattern: urlPattern,
+        sourceEvidenceId: oracle.id,
+      });
+      continue;
+    }
+    if (oracle.type === "field_validation") {
+      if (!oracle.target) throw new Error("PROMOTED_FIELD_VALIDATION_TARGET_MISSING");
+      implementations.push({
+        oracleType: oracle.type,
+        scenarioStepIndex: oracle.stepIndex,
+        backed: true,
+        polarity: oracle.polarity,
+        implementationKind: "field_validation",
+        target: oracle.target,
         sourceEvidenceId: oracle.id,
       });
       continue;
@@ -3497,7 +3528,7 @@ export function structuralValidation(input: {
       errors.push("missing_expect_import_for_assertions");
     }
   }
-  const expectUsed = /\bexpect\s*\(/.test(contentWithoutImports);
+  const expectUsed = /\bexpect\s*(?:\(|\.\s*(?:poll|soft|configure|extend)\s*\()/.test(contentWithoutImports);
   const expectImported = /import\s*\{\s*[^}]*\bexpect\b[^}]*\}\s*from\s*['"]@playwright\/test['"]/m.test(content);
   if (expectImported && !expectUsed) {
     errors.push("unused_import:expect");
@@ -4625,9 +4656,11 @@ async function runHybridSpecGenerationInternal(
   const allowDeterministicFallback = bool(process.env.AI_SPEC_ALLOW_DETERMINISTIC_FALLBACK, false);
   const requireJson = bool(process.env.AI_SPEC_REQUIRE_JSON, true);
   const requireJsonSchema = bool(process.env.AI_SPEC_REQUIRE_JSON_SCHEMA, true);
-  const functionalExecutionEnabled = bool(process.env.AI_SPEC_FUNCTIONAL_EXECUTION_ENABLED, false);
+  const functionalExecutionEnabled = input.functionalExecutionEnabled ?? bool(process.env.AI_SPEC_FUNCTIONAL_EXECUTION_ENABLED, false);
   const functionalExecutionRawEnv = process.env.AI_SPEC_FUNCTIONAL_EXECUTION_ENABLED;
-  const functionalExecutionConfigReason = functionalExecutionRawEnv === undefined
+  const functionalExecutionConfigReason = input.functionalExecutionEnabled !== undefined
+    ? "caller_explicit_policy"
+    : functionalExecutionRawEnv === undefined
     ? "env_unset_defaults_to_disabled"
     : functionalExecutionEnabled
       ? "env_explicitly_enabled"
@@ -5553,7 +5586,10 @@ async function runHybridSpecGenerationInternal(
     }
   }
 
-  await fs.writeFile(candidateSpecPath, sanitizeText(rewritePromotedRuntimeImport(executableSpecContent, candidateSpecPath)), "utf-8");
+  await persistCandidateSpecIfChanged(
+    candidateSpecPath,
+    sanitizeText(rewritePromotedRuntimeImport(executableSpecContent, candidateSpecPath)),
+  );
 
   diagnostics.specsValidated = passed ? 1 : 0;
   diagnostics.specsRejected = passed ? 0 : 1;

@@ -47,6 +47,7 @@ import { buildTestRailRunName } from "../services/testrail-run-reporter";
 import { resolveReplayAdmission } from "../services/replay-admission";
 import { resolveScenarioAutomationPlans, partitionScenariosForExecution, computeTestRailPublishCandidates, type ScenarioAutomationPlan, type TestRailCaseLookup, type TestRailDestination } from "../../automations/recording-automation-resolution";
 import { startMixedRerun } from "../jobs/mixed-rerun-orchestrator";
+import type { SessionTrace } from "../../recording/session-trace.types";
 
 export const recordingsRouter = Router();
 
@@ -56,6 +57,19 @@ type RecordingBatchSelection = {
   datasetValues?: Record<string, string | undefined>;
   dataOverrides?: Record<number, string>;
 };
+
+export function recordingTraceReadinessError(
+  trace: Pick<SessionTrace, "status"> | null,
+  recordingId: string,
+): { status: 404 | 409; code: "RECORDING_NOT_FOUND" | "TRACE_NOT_READY"; message: string } | null {
+  if (!trace) {
+    return { status: 404, code: "RECORDING_NOT_FOUND", message: `No se encontró la grabación ${recordingId}` };
+  }
+  if (trace.status !== "stopped" && trace.status !== "derived") {
+    return { status: 409, code: "TRACE_NOT_READY", message: `La grabación ${recordingId} todavía no tiene un trace detenido` };
+  }
+  return null;
+}
 
 /** Execute selections from different recordings through one public job and one evidence run. */
 recordingsRouter.post("/execute-batch", async (req, res) => {
@@ -149,8 +163,13 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
       const groupAppSlug = loadTrace(appSlug, recordingId) ? appSlug : findOwningAppSlug(recordingId) ?? appSlug;
       recordingAppSlugs.set(recordingId, groupAppSlug);
       const trace = loadTrace(groupAppSlug, recordingId);
-      if (!trace || !["stopped", "derived"].includes(trace.status)) {
-        sendError(res, 409, "TRACE_NOT_READY", `La grabación ${recordingId} no tiene un trace detenido`);
+      if (!trace) {
+        sendError(res, 404, "RECORDING_NOT_FOUND", `No se encontró la grabación ${recordingId}`);
+        return;
+      }
+      const readinessError = recordingTraceReadinessError(trace, recordingId);
+      if (readinessError) {
+        sendError(res, readinessError.status, readinessError.code, readinessError.message);
         return;
       }
       if (!loadSemanticRecording(groupAppSlug, recordingId)) {
@@ -822,7 +841,7 @@ recordingsRouter.put("/:recordingId/scenario-value", async (req, res) => {
       sendError(res, 400, "UNKNOWN_SCENARIO_VALUE", "El valueKey no pertenece al escenario");
       return;
     }
-    const hydrated = hydrateCanonicalInteractionsFromSemanticModel(current, buildSemanticRecordingModel(trace));
+    const hydrated = hydratePersistedScenarios([current], buildSemanticRecordingModel(trace), trace)[0];
     const updated = applyRuntimeDatasetValues(hydrated, { [valueKey]: body.value });
     saveScenarios(appSlug, req.params.recordingId, scenarios.map((scenario) => scenario.scenarioId === scenarioId ? updated : scenario));
     res.json({ ok: true, scenario: updated });
@@ -927,18 +946,19 @@ recordingsRouter.post("/:recordingId/execute", async (req, res) => {
     const appSlug = await appSlugFor(projectSlug);
     const trace = loadTrace(appSlug, req.params.recordingId);
     if (!trace) {
-      sendError(res, 404, "RECORDING_NOT_FOUND", "La grabación indicada no existe");
+      sendError(res, 404, "RECORDING_NOT_FOUND", `No se encontró la grabación ${req.params.recordingId}`);
       return;
     }
-    if (!["stopped", "derived"].includes(trace.status)) {
-      sendError(res, 409, "TRACE_NOT_READY", "La grabación todavía no tiene un trace detenido");
+    const readinessError = recordingTraceReadinessError(trace, req.params.recordingId);
+    if (readinessError) {
+      sendError(res, readinessError.status, readinessError.code, readinessError.message);
       return;
     }
     if (!loadSemanticRecording(appSlug, req.params.recordingId)) {
       sendError(res, 409, "SEMANTIC_NOT_READY", "La grabación todavía no tiene base semántica materializada");
       return;
     }
-    const all = loadScenarios(appSlug, req.params.recordingId);
+    const all = readRecordingScenarios(appSlug, req.params.recordingId);
     if (all.length === 0) {
       sendError(res, 409, "SCENARIO_NOT_READY", "La grabación todavía no tiene escenarios materializados");
       return;
@@ -1383,7 +1403,7 @@ recordingsRouter.post("/:recordingId/testrail", async (req, res) => {
     }
 
     const appSlug = cfg.slug;
-    const all = loadScenarios(appSlug, req.params.recordingId);
+    const all = readRecordingScenarios(appSlug, req.params.recordingId);
     if (all.length === 0) {
       sendError(res, 404, "NO_SCENARIOS", "La grabación no tiene escenarios generados");
       return;

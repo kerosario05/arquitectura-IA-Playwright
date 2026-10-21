@@ -14,6 +14,7 @@ export type ParsedTestRailInputRequirements = {
 
 const DECLARATION_PATTERN = /^\s*(?:[-*]\s*)?(.+?)\s*\(\s*([^(),]+?)\s*,\s*([^()]+?)\s*\)\s*(?:\[[^\]]+\]\s*)*$/;
 const PLACEHOLDER_PATTERN = /\[([^\]]+)\]/g;
+const INPUT_ACTION_PATTERN = /^\s*(?:\d+\s*[.)]\s*)?(ingresar|introducir|escribir|completar|llenar|enter|type|fill|seleccionar|elegir|select|choose)\s+.+?\s+(?:en|in|into)\s+(?:(?:el|la|the)\s+)?(?:(?:campo|field|casilla|input)\s+)?(.+?)\s*[.!?]*\s*$/i;
 
 function isSensitiveControlType(controlType: string): boolean {
   return /^(?:secret|password|credential)$/i.test(controlType.trim());
@@ -25,6 +26,50 @@ function sameMetadata(left: InputRequirement, right: InputRequirement): boolean 
     && left.required === right.required
     && left.sensitive === right.sensitive
     && JSON.stringify(left.allowedValues) === JSON.stringify(right.allowedValues);
+}
+
+function normalizeInputLabel(value: string): string {
+  return value.replace(/["'“”‘’]/g, "").replace(/\s+/g, " ").trim().replace(/[.!?]+$/, "").trim();
+}
+
+function inputKeyForLabel(label: string): string {
+  const field = label.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+  return `input.${field}`;
+}
+
+/** Infer a runtime input only from an explicit fill/select action naming its field. */
+export function inferTestRailActionInputRequirements(
+  text: string,
+  existing: InputRequirement[] = [],
+): InputRequirement[] {
+  const inferred: InputRequirement[] = [];
+  const labels = new Set(existing.map((item) => normalizeInputLabel(item.label ?? "").toLowerCase()));
+  const keys = new Set(existing.map((item) => item.key.toLowerCase()));
+  for (const line of String(text ?? "").split(/\r?\n/)) {
+    PLACEHOLDER_PATTERN.lastIndex = 0;
+    if (PLACEHOLDER_PATTERN.test(line)) continue;
+    const match = line.match(INPUT_ACTION_PATTERN);
+    const label = match ? normalizeInputLabel(match[2] ?? "") : "";
+    if (!label) continue;
+    const key = inputKeyForLabel(label);
+    if (labels.has(label.toLowerCase()) || keys.has(key)) continue;
+    const sensitive = /(?:contrase(?:ñ|n)a|password|secret|clave)/i.test(label);
+    inferred.push({
+      key,
+      label,
+      controlType: sensitive ? "password" : /^(seleccionar|elegir|select|choose)$/i.test(match![1]) ? "select" : "text",
+      required: true,
+      sensitive,
+      allowedValues: [],
+      source: "runtime_inferred",
+      editable: true,
+      inputUsage: ["action"],
+    });
+    labels.add(label.toLowerCase());
+    keys.add(key);
+  }
+  return inferred;
 }
 
 export function parseTestRailInputRequirements(text: string): ParsedTestRailInputRequirements {

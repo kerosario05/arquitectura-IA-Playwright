@@ -80,6 +80,36 @@ test("materializes transformed requirements for the matching local TestRail proj
   ]);
 });
 
+test("adds fields from the exact promoted spec to the selected TestRail case in its app profile", async () => {
+  const persisted: any[] = [];
+  const response = await resolveSectionCases(
+    clientWith([rawCase(93011)]),
+    { sectionId: 7, projectId: 30 },
+    () => ({
+      normalizedScenario: { caseId: 93011, steps: [{ index: 1, action: "Ingresar usuario en Usuario", dataHints: [] }] },
+      inputRequirements: [],
+      unresolvedPlaceholders: [],
+      conflicts: [],
+    } as any),
+    {
+      resolveLocalProject: async () => ({ id: "local-project", slug: "portal-project" }),
+      derivePromotedRequirements: async ({ appSlug, caseId }) => {
+        assert.equal(appSlug, "portal-project");
+        assert.equal(caseId, 93011);
+        return [{ key: "auth.username", label: "Usuario", controlType: "text", required: true, sensitive: true }] as any;
+      },
+      materialize: async (input: any) => { persisted.push(input); },
+    },
+  );
+
+  const returned = casesOf(response)[0] as any;
+  assert.equal(returned.inputRequirements.length, 1);
+  assert.equal(returned.inputRequirements[0].key, "auth.username");
+  assert.equal(returned.inputRequirements[0].label, "Usuario");
+  assert.equal(returned.inputRequirements[0].sensitive, true);
+  assert.equal(persisted[0].requirements[0].key, "auth.username");
+});
+
 test("does not destructively materialize an empty derived requirement list", async () => {
   let materialized = 0;
   await resolveSectionCases(
@@ -98,6 +128,23 @@ test("does not destructively materialize an empty derived requirement list", asy
   );
 
   assert.equal(materialized, 0);
+});
+
+test("section listing persists promoted keys without prose-inferred aliases across projects", async () => {
+  for (const slug of ["fixture-accounts", "fixture-inventory"]) {
+    const persisted: any[] = [];
+    const response = await resolveSectionCases(clientWith([rawCase(93012)]), { sectionId: 7, projectId: 30 },
+      () => ({ normalizedScenario: { caseId: 93012 },
+        inputRequirements: [{ key: "input.source", label: "Source", source: "runtime_inferred" }],
+        unresolvedPlaceholders: [], conflicts: [],
+      } as any), {
+        resolveLocalProject: async () => ({ id: `id-${slug}`, slug }),
+        derivePromotedRequirements: async () => [{ key: "bound.source", label: "Source", source: "contract" }] as any,
+        materialize: async (input: any) => { persisted.push(input); },
+      });
+    assert.deepEqual((casesOf(response)[0] as any).inputRequirements.map((item: any) => item.key), ["bound.source"]);
+    assert.deepEqual(persisted[0].requirements.map((item: any) => item.key), ["bound.source"]);
+  }
 });
 
 test("marks a failed transformation without exposing error details", async () => {

@@ -1,5 +1,7 @@
 import fs from "node:fs/promises";
+import fsSync from "node:fs";
 import path from "node:path";
+import { createHash } from "node:crypto";
 import type {
   PromotedAutomationIndex,
   PromotedAutomationIndexEntry
@@ -154,6 +156,67 @@ export async function saveAutomationIndex(
   };
 
   await writeFileAtomic(resolved, JSON.stringify(updated, null, 2));
+}
+
+export async function linkJiraAutomationToTestRailCase(input: {
+  appSlug: string;
+  externalId: string;
+  caseId: number;
+  automationId?: string;
+}): Promise<{ linked: boolean; reason: string; automationId?: string }> {
+  const appSlug = input.appSlug.trim().toLowerCase();
+  const externalId = input.externalId.trim();
+  if (!/^[a-z0-9][a-z0-9-]*$/.test(appSlug) || !externalId || !Number.isSafeInteger(input.caseId) || input.caseId <= 0) {
+    return { linked: false, reason: "invalid_link_identity" };
+  }
+
+  const indexPath = path.join("automations", "apps", appSlug, "index.json");
+  const index = await loadAutomationIndex(indexPath);
+  const candidates = index.automations.filter((entry) =>
+    entry.externalId === externalId
+    && (entry.appSlug ?? entry.appProfile)?.trim().toLowerCase() === appSlug
+    && entry.tags?.includes("jira_generated")
+    && (!input.automationId || entry.id === input.automationId),
+  );
+  if (candidates.length === 0) return { linked: false, reason: "jira_promotion_not_found" };
+  if (candidates.length !== 1) return { linked: false, reason: "jira_promotion_ambiguous" };
+
+  const entry = candidates[0];
+  const generation = entry.metadata?.specGeneration;
+  if (entry.status !== "active"
+    || entry.specVerificationStatus !== "passed"
+    || generation?.promotionAllowed !== true
+    || generation.specWritten !== true
+    || generation.specsValidated < 1
+    || generation.specsRejected !== 0) {
+    return { linked: false, reason: "jira_promotion_not_verified", automationId: entry.id };
+  }
+  if (entry.caseId !== undefined && entry.caseId !== input.caseId) {
+    return { linked: false, reason: "jira_promotion_case_conflict", automationId: entry.id };
+  }
+
+  const appRoot = path.resolve("automations", "apps", appSlug);
+  const specPath = path.isAbsolute(entry.specPath)
+    ? path.resolve(entry.specPath)
+    : path.resolve(entry.specPath.replace(/[\\/]+/g, path.sep));
+  const relativeSpecPath = path.relative(appRoot, specPath);
+  if (relativeSpecPath.startsWith("..") || path.isAbsolute(relativeSpecPath) || !fsSync.existsSync(specPath)) {
+    return { linked: false, reason: "jira_spec_outside_app_or_missing", automationId: entry.id };
+  }
+
+  const specHash = createHash("sha256").update(fsSync.readFileSync(specPath)).digest("hex");
+  const updatedEntry: PromotedAutomationIndexEntry = {
+    ...entry,
+    caseId: input.caseId,
+    promotionPersisted: true,
+    promotedSpecPath: specPath,
+    promotedSpecHash: specHash,
+  };
+  await saveAutomationIndex({
+    ...index,
+    automations: index.automations.map((candidate) => candidate.id === entry.id ? updatedEntry : candidate),
+  }, indexPath);
+  return { linked: true, reason: entry.caseId === input.caseId ? "already_linked" : "linked", automationId: entry.id };
 }
 
 export function upsertAutomationIndexEntry(

@@ -129,16 +129,18 @@ function toIsoString(v: Date | string | null | undefined): string {
   return typeof v === "string" ? v : v.toISOString();
 }
 
-function buildKnowledgeFile(cfg: ProjectConfiguration): Record<string, unknown> {
+export function buildKnowledgeFile(cfg: ProjectConfiguration): Record<string, unknown> {
   let version = cfg.knowledge?.schemaVersion ?? 1;
   let createdAt = toIsoString(cfg.knowledge?.createdAt ?? cfg.createdAt);
   let updatedAt = toIsoString(cfg.knowledge?.updatedAt ?? cfg.updatedAt);
   let items: unknown[] = [];
+  let jiraRoutes: unknown[] | undefined;
   if (cfg.knowledge?.knowledgeJson) {
     try {
       const parsed = JSON.parse(cfg.knowledge.knowledgeJson);
       if (parsed && typeof parsed === "object") {
         if (Array.isArray(parsed.items)) items = parsed.items;
+        if (Array.isArray(parsed.jiraRoutes)) jiraRoutes = parsed.jiraRoutes;
         if (typeof parsed.version === "number") version = parsed.version;
         if (typeof parsed.createdAt === "string") createdAt = parsed.createdAt;
         if (typeof parsed.updatedAt === "string") updatedAt = parsed.updatedAt;
@@ -147,7 +149,8 @@ function buildKnowledgeFile(cfg: ProjectConfiguration): Record<string, unknown> 
       // keep empty defaults
     }
   }
-  return { version, appSlug: cfg.slug, createdAt, updatedAt, items };
+  return { version, appSlug: cfg.slug, createdAt, updatedAt, items,
+    ...(jiraRoutes ? { jiraRoutes } : {}) };
 }
 
 export async function materializeProjectRuntime(identifier: {

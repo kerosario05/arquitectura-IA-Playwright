@@ -1,15 +1,17 @@
 import { test, expect } from "@playwright/test";
 import { CopilotCliProvider, __setSpawnForTesting } from "../src/ai/providers/copilot-cli-provider";
-import type { ChildProcess } from "node:child_process";
+import type { spawn as Spawn } from "node:child_process";
 import { EventEmitter } from "node:events";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 
-class MockChildProcess extends EventEmitter implements Partial<ChildProcess> {
+class MockChildProcess extends EventEmitter {
   stdout = new EventEmitter();
   stderr = new EventEmitter();
-  kill() {}
+  kill() { return true; }
 }
+
+const setMockSpawn = (spawn: (...args: any[]) => any) => __setSpawnForTesting(spawn as unknown as typeof Spawn);
 
 test("copilot-cli with long prompt creates prompt.txt", async () => {
   let capturedCwd: string | undefined;
@@ -48,7 +50,7 @@ test("copilot-cli with long prompt creates prompt.txt", async () => {
     return child;
   };
 
-  __setSpawnForTesting(mockSpawn);
+  setMockSpawn(mockSpawn);
 
   const provider = new CopilotCliProvider({
     enabled: true,
@@ -113,7 +115,7 @@ test("copilot-cli uses cmd.exe on Windows .cmd files", async () => {
     return child;
   };
 
-  __setSpawnForTesting(mockSpawn);
+  setMockSpawn(mockSpawn);
 
   // Mock Windows platform
   const originalPlatform = process.platform;

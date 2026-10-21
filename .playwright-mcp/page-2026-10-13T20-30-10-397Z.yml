@@ -1,0 +1,184 @@
+- generic [ref=e32]:
+  - complementary [ref=e33]:
+    - generic [ref=e34]:
+      - generic [ref=e35]: Q
+      - generic [ref=e38]:
+        - generic [ref=e39]: QA Lab
+        - generic [ref=e40]: Santa Cruz
+    - navigation [ref=e41]:
+      - button "Panorama" [ref=e42] [cursor=pointer]
+      - button "Lanzar pruebas" [ref=e49] [cursor=pointer]
+      - button "Grabación" [ref=e55] [cursor=pointer]
+      - button "Ejecuciones" [ref=e59] [cursor=pointer]
+      - button "Configuración" [ref=e64] [cursor=pointer]
+      - button "Usuarios" [ref=e68] [cursor=pointer]
+    - generic [ref=e76]:
+      - generic [ref=e80]: Pro tip
+      - generic [ref=e81]: Programa ejecuciones nocturnas para optimizar recursos.
+    - generic [ref=e82]:
+      - generic [ref=e83]: AD
+      - generic [ref=e84]:
+        - generic [ref=e85]: Administrador
+        - generic [ref=e86]: Administrador
+  - main [ref=e87]:
+    - generic [ref=e88]:
+      - generic [ref=e89]:
+        - generic [ref=e90]:
+          - generic [ref=e92]: En vivo · 16:29
+          - generic [ref=e93]: ·
+          - generic [ref=e94]: Configura una nueva ejecución en 4 pasos
+        - heading "Lanzar pruebas" [level=1] [ref=e133]
+      - generic [ref=e96]:
+        - generic [ref=e97]:
+          - combobox "Buscar" [ref=e98]
+          - generic: Ctrl K
+        - button "Notificaciones" [ref=e100] [cursor=pointer]
+        - button "Cerrar sesión de admin" [ref=e106] [cursor=pointer]
+    - generic [ref=e135]:
+      - generic [ref=e137]:
+        - button "Proyecto" [ref=e138] [cursor=pointer]
+        - button "Fuentes" [ref=e151] [cursor=pointer]
+        - button "Casos" [ref=e158] [cursor=pointer]
+        - button "Lanzar" [ref=e166] [cursor=pointer]
+      - generic [ref=e173]:
+        - generic [ref=e1662]:
+          - generic [ref=e1663]:
+            - generic [ref=e1664]: Paso tres · Selecciona los casos
+            - generic [ref=e1665]:
+              - generic [ref=e1666]:
+                - heading "1 casos encontrados" [level=2] [ref=e1667]
+                - generic [ref=e1668]: Arquitectura automatización · REGRESION-KIOSKO
+              - generic [ref=e1670]:
+                - generic [ref=e1671]: 1 de 1 seleccionados
+                - button "Limpiar" [active] [ref=e1807] [cursor=pointer]
+                - button "Configurar datos requeridos" [ref=e1808] [cursor=pointer]
+          - generic [ref=e1674]:
+            - generic [ref=e1675]:
+              - button [ref=e1676] [cursor=pointer]
+              - generic [ref=e1677]: C53821
+              - button "Transferencia exitosa entre cuentas propias con verificación de acceso y token" [ref=e1678] [cursor=pointer]
+              - button [ref=e1681] [cursor=pointer]
+            - generic [ref=e1685]:
+              - generic [ref=e1686]:
+                - generic [ref=e1688]: C53821 · Transferencia exitosa entre cuentas propias con verificación de acceso y token
+                - generic [ref=e1689]: con precondiciones
+              - generic [ref=e1690]:
+                - generic [ref=e1691]: PRECONDICIONES
+                - list [ref=e1692]:
+                  - listitem [ref=e1693]: "Precondiciones:"
+                  - listitem [ref=e1694]: "- Aplicación disponible."
+                  - listitem [ref=e1695]: "- Usuario o datos de prueba configurados."
+              - generic [ref=e1696]:
+                - generic [ref=e1697]: DATOS DE EJECUCIÓN REQUERIDOS
+                - generic [ref=e1698]:
+                  - generic [ref=e1699]:
+                    - generic [ref=e1712]:
+                      - generic [ref=e1713]:
+                        - generic [ref=e1714]:
+                          - text: Contrasena
+                          - generic [ref=e1715]: "*"
+                        - textbox "Contrasena *" [ref=e1716]
+                      - generic "contrasena" [ref=e1717]
+                    - generic [ref=e1700]:
+                      - generic [ref=e1701]:
+                        - generic [ref=e1702]:
+                          - text: Rnc
+                          - generic [ref=e1703]: "*"
+                        - textbox "Rnc *" [ref=e1704]
+                      - generic "rnc" [ref=e1705]
+                    - generic [ref=e1718]:
+                      - generic [ref=e1719]:
+                        - generic [ref=e1720]:
+                          - text: Token transferencia
+                          - generic [ref=e1721]: "*"
+                        - textbox "Token transferencia *" [ref=e1722]
+                      - generic "token_transferencia" [ref=e1723]
+                    - generic [ref=e1706]:
+                      - generic [ref=e1707]:
+                        - generic [ref=e1708]:
+                          - text: Usuario
+                          - generic [ref=e1709]: "*"
+                        - textbox "Usuario *" [ref=e1710]
+                      - generic "usuario" [ref=e1711]
+                  - group [ref=e1733]:
+                    - generic "Dataset/Entidad 16" [ref=e1734] [cursor=pointer]
+                    - generic [ref=e1736]:
+                      - generic [ref=e1737]:
+                        - generic [ref=e1738]:
+                          - text: Seleccionar cuenta en "cuenta de destino".
+                          - generic [ref=e1739]: "*"
+                        - textbox "Seleccionar cuenta en \"cuenta de destino\". *" [ref=e1740]
+                      - generic "jira_step_16" [ref=e1741]
+                  - group [ref=e1742]:
+                    - generic "Dataset/Entidad 17" [ref=e1743] [cursor=pointer]
+                    - generic [ref=e1745]:
+                      - generic [ref=e1746]:
+                        - generic [ref=e1747]:
+                          - text: Ingresar monto en "monto".
+                          - generic [ref=e1748]: "*"
+                        - textbox "Ingresar monto en \"monto\". *" [ref=e1749]
+                      - generic "jira_step_17" [ref=e1750]
+                  - group [ref=e1751]:
+                    - generic "Dataset/Entidad 18" [ref=e1752] [cursor=pointer]
+                    - generic [ref=e1754]:
+                      - generic [ref=e1755]:
+                        - generic [ref=e1756]:
+                          - text: Validar que se muestre "cuenta que debitará"
+                          - generic [ref=e1757]: "*"
+                        - textbox "Validar que se muestre \"cuenta que debitará\" *" [ref=e1758]
+                      - generic "jira_step_18" [ref=e1759]
+                  - group [ref=e1724]:
+                    - generic "Dataset/Entidad 9" [ref=e1725] [cursor=pointer]
+                    - generic [ref=e1727]:
+                      - generic [ref=e1728]:
+                        - generic [ref=e1729]:
+                          - text: Ingresar código de acceso en "código de acceso".
+                          - generic [ref=e1730]: "*"
+                        - textbox "Ingresar código de acceso en \"código de acceso\". *" [ref=e1731]
+                      - generic "jira_step_9" [ref=e1732]
+              - generic [ref=e1760]:
+                - generic [ref=e1761]: PASOS
+                - list [ref=e1762]:
+                  - listitem [ref=e1763]: Abrir la aplicación configurada del proyecto.
+                  - listitem [ref=e1764]: Presionar "perfil empresarial".
+                  - listitem [ref=e1765]: Ingresar RNC en "RNC".
+                  - listitem [ref=e1766]: Ingresar usuario en "Usuario".
+                  - listitem [ref=e1767]: Ingresar contraseña en "Contraseña".
+                  - listitem [ref=e1768]: Presionar "continuar con el inicio de sesión".
+                  - listitem [ref=e1769]: Validar que se muestre "pantalla de verificación de usuario"
+                  - listitem [ref=e1770]: Presionar "solicitar el código por SMS".
+                  - listitem [ref=e1771]: Ingresar código de acceso en "código de acceso".
+                  - listitem [ref=e1772]: Presionar "continuar con la verificación de acceso".
+                  - listitem [ref=e1773]: Validar que se muestre "resumen de productos"
+                  - listitem [ref=e1774]: Presionar "Transferencias".
+                  - listitem [ref=e1775]: Presionar "Cuentas Propias".
+                  - listitem [ref=e1776]: Validar que se muestre "pantalla de transferencias"
+                  - listitem [ref=e1777]: Seleccionar cuenta en "cuenta de origen".
+                  - listitem [ref=e1778]: Seleccionar cuenta en "cuenta de destino".
+                  - listitem [ref=e1779]: Ingresar monto en "monto".
+                  - listitem [ref=e1780]: Validar que se muestre "cuenta que debitará"
+                  - listitem [ref=e1781]: Validar que se muestre "cuenta que recibirá los fondos"
+                  - listitem [ref=e1782]: Presionar "continuar con la transferencia".
+                  - listitem [ref=e1783]: Validar que se muestre "confirmación de transferencia"
+                  - listitem [ref=e1784]: Validar que se muestre "cuentas seleccionadas"
+                  - listitem [ref=e1785]: Validar que se muestre "monto"
+                  - listitem [ref=e1786]: Validar que se muestre "comisión"
+                  - listitem [ref=e1787]: Validar que se muestre "impuestos"
+                  - listitem [ref=e1788]: Validar que se muestre "tasa de cambio"
+                  - listitem [ref=e1789]: Validar que se muestre "total a debitar"
+                  - listitem [ref=e1790]: Presionar "continuar con la autorización".
+                  - listitem [ref=e1791]: Validar que se muestre "pantalla de validación de identidad"
+                  - listitem [ref=e1792]: Presionar "solicitar el token por el canal disponible".
+                  - listitem [ref=e1793]: Ingresar token de seguridad en "token de seguridad".
+                  - listitem [ref=e1794]: Presionar "autorizar la transferencia".
+                  - listitem [ref=e1795]: Validar que se muestre "comprobante de transacción exitosa"
+                  - listitem [ref=e1796]: Validar que se muestre "monto"
+                  - listitem [ref=e1797]: Validar que se muestre "cuentas involucradas"
+                  - listitem [ref=e1798]: Validar que se muestre "fecha y hora"
+                  - listitem [ref=e1799]: Validar que se muestre "referencia de la operación"
+              - generic [ref=e1800]:
+                - generic [ref=e1801]: RESULTADO ESPERADO
+                - paragraph [ref=e1803]: Se muestra el comprobante de transacción exitosa con la referencia de la operación.
+        - generic [ref=e199]:
+          - button "Atrás" [ref=e200] [cursor=pointer]
+          - button "Continuar" [ref=e1804] [cursor=pointer]

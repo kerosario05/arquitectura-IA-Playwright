@@ -666,7 +666,7 @@ function repairUnquotedValidationStep(normalized: string): string | null {
   return null;
 }
 
-function normalizeScenarioStep(step: string): { step: string; changed: boolean; rejectReason?: string } {
+export function normalizeScenarioStep(step: string): { step: string; changed: boolean; rejectReason?: string } {
   const stripped = step.replace(/^\d+[\.)]\s*/, "").trim();
   let normalized = stripped;
 
@@ -960,7 +960,7 @@ function dedupeConsecutiveSteps(steps: any[]): any[] {
  * Prevents scenarios from being rejected due to unbacked clicks like "Volver"
  * Preserves clicks for required navigation intermediates
  */
-function repairUnbackedClicks(
+export function repairUnbackedClicks(
   steps: any[],
   allowedTargets: string[],
   requiredIntermediates?: string[],
@@ -1200,7 +1200,7 @@ export async function generateScenariosWithAi(
   huScenarioModel?: any,
   routePendingScenarioPlan?: any,
   functionalBranches?: FunctionalBranchRef[],
-  telemetryContext?: { launchId?: string },
+  telemetryContext?: { launchId?: string; executionEngine?: "jira_semantic" },
 ): Promise<McpGenerationResponse> {
   const primaryIssue = issues[0];
   const requirementManifest = buildRequirementManifest(
@@ -1321,7 +1321,7 @@ export async function generateScenariosWithAi(
   // A missing route profile blocks execution authority, not functional scenario
   // generation. Keep the HU in the provider input so route readiness can be
   // resolved independently after scenarios exist.
-  if (!routeProfile && routeBackedIssues.length === 0) {
+  if (!routeProfile && routeBackedIssues.length === 0 && telemetryContext?.executionEngine !== "jira_semantic") {
     routeBackedIssues.push(...issues);
     console.log(`[scenario-route] functionalGenerationFallback routeProfile=missing issues=${routeBackedIssues.length}`);
   }
@@ -1395,7 +1395,7 @@ export async function generateScenariosWithAi(
   // If all issues are blocked, try route_pending mode
   if (routeBackedIssues.length === 0) {
     const hasIntentMismatch = blockedIssues.some(b => b.reason?.includes("route_profile_intent_mismatch"));
-    if (hasIntentMismatch && issues.length > 0) {
+    if ((hasIntentMismatch || telemetryContext?.executionEngine === "jira_semantic") && issues.length > 0) {
       console.log(`[scenario-preview] aiGeneration mode=route_pending reason=route_profile_intent_mismatch issues=${issues.length} planTarget=${routePendingScenarioPlan?.scenarioCountTarget ?? "?"}`);
       // Use the original issues for route_pending generation
       const routePendingIssues = issues;

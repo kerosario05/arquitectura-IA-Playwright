@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-10-08T12:29:02.155Z",
+  "updatedAt": "2026-10-20T19:21:23.159Z",
   "automations": [
     {
       "id": "c10002-test-automation-plan",
@@ -47485,13 +47485,13 @@
       "source": "discovery",
       "appProfile": "kiosko",
       "createdAt": "2026-10-02T19:15:25.723Z",
-      "updatedAt": "2026-10-08T12:29:02.155Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-08T12-25-29-406Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-08T15:40:00.780Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-08T15-37-23-359Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-08T12-25-29-406Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-08T15-37-23-359Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -47515,7 +47515,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 84563,
+          "durationMs": 68376,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -47566,7 +47566,7 @@
           "previousSpec": {
             "existed": true,
             "hash": "e2c8ad70f1c9494714d80e19a1c6cb6af2d85ef505d2122706bea56a6cf0a05c",
-            "lastModifiedAt": "2026-10-07T22:14:05.809Z"
+            "lastModifiedAt": "2026-10-08T12:29:02.082Z"
           }
         },
         "promotionStrategyDiagnostics": {
@@ -48016,13 +48016,13 @@
       "source": "discovery",
       "appProfile": "portal-empresarial",
       "createdAt": "2026-10-03T21:46:24.402Z",
-      "updatedAt": "2026-10-06T21:36:44.276Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-10-06T21-35-20-971Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-09T22:57:56.948Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-10-09T22-55-10-628Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-10-06T21-35-20-971Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-10-09T22-55-10-628Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -48046,7 +48046,134 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 40381,
+          "durationMs": 59382,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "navigation_transition"
+          ],
+          "errors": [],
+          "warnings": [
+            "step_index_not_explicit_in_spec:1"
+          ],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": true,
+            "hash": "1219bf22d61ad1ca23f3096ea0c83f47d65cc0f74e1ff891de57d9cb9ce9674d",
+            "lastModifiedAt": "2026-10-06T21:36:44.227Z"
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-002-login-satisfactorio\\case.spec.ts",
+          "specHash": "1219bf22d61ad1ca23f3096ea0c83f47d65cc0f74e1ff891de57d9cb9ce9674d",
+          "specSource": "generatedSpec"
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-002-login-satisfactorio\\plan.json",
+        "previousStatus": "active"
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-002-login-satisfactorio\\case.spec.ts",
+      "promotedSpecHash": "1219bf22d61ad1ca23f3096ea0c83f47d65cc0f74e1ff891de57d9cb9ce9674d"
+    },
+    {
+      "id": "preview-001-descargar-plantilla-para-carga-de-nomina",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "Descargar plantilla para carga de nómina",
+      "planPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-descargar-plantilla-para-carga-de-nomina\\plan.json",
+      "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-descargar-plantilla-para-carga-de-nomina\\case.spec.ts",
+      "appSlug": "portal-empresarial",
+      "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "portal-empresarial",
+      "createdAt": "2026-10-03T22:42:39.350Z",
+      "updatedAt": "2026-10-15T14:26:13.981Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-15T14-25-08-350Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-15T14-25-08-350Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 32195,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -48118,140 +48245,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false,
-          "specPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-002-login-satisfactorio\\case.spec.ts",
-          "specHash": "1219bf22d61ad1ca23f3096ea0c83f47d65cc0f74e1ff891de57d9cb9ce9674d",
-          "specSource": "generatedSpec"
-        },
-        "overwritten": true,
-        "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-002-login-satisfactorio\\plan.json",
-        "previousStatus": "active"
-      },
-      "promotionPersisted": true,
-      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-002-login-satisfactorio\\case.spec.ts",
-      "promotedSpecHash": "1219bf22d61ad1ca23f3096ea0c83f47d65cc0f74e1ff891de57d9cb9ce9674d"
-    },
-    {
-      "id": "preview-001-descargar-plantilla-para-carga-de-nomina",
-      "externalId": "PREVIEW-001",
-      "caseId": 0,
-      "title": "Descargar plantilla para carga de nómina",
-      "planPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-descargar-plantilla-para-carga-de-nomina\\plan.json",
-      "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-descargar-plantilla-para-carga-de-nomina\\case.spec.ts",
-      "appSlug": "portal-empresarial",
-      "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
-      "status": "active",
-      "source": "discovery",
-      "appProfile": "portal-empresarial",
-      "createdAt": "2026-10-03T22:42:39.350Z",
-      "updatedAt": "2026-10-07T20:44:35.403Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T20-43-11-471Z\\discovered-plans.pending.json",
-      "pomStatus": "promoted",
-      "inlineDebugMode": false,
-      "specVerificationStatus": "passed",
-      "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T20-43-11-471Z",
-        "pomDiagnostics": {
-          "status": "promoted",
-          "inlineFallbackUsed": false,
-          "reason": "promoted",
-          "requiredDataUsed": [],
-          "generatedPageObjects": [],
-          "generatedMethods": [],
-          "missingPageObjects": [],
-          "missingMethods": [],
-          "generatedCandidates": 0
-        },
-        "specGeneration": {
-          "mode": "deterministic",
-          "provider": null,
-          "model": null,
-          "skill": {
-            "name": null,
-            "version": null,
-            "hash": null,
-            "loaded": false
-          },
-          "invocations": 0,
-          "invocationsConsumed": 0,
-          "durationMs": 35674,
-          "usage": {
-            "inputTokens": null,
-            "cachedInputTokens": null,
-            "cacheWriteInputTokens": null,
-            "nonCachedInputTokens": null,
-            "outputTokens": null,
-            "reasoningOutputTokens": null,
-            "totalPhysicalTokens": null,
-            "durationMs": null,
-            "credits": null
-          },
-          "validation": {
-            "schema": "skipped",
-            "structure": "passed",
-            "traceFidelity": "skipped",
-            "typescript": "passed",
-            "playwrightDiscovery": "passed",
-            "semanticCoverage": "passed",
-            "functionalExecution": "passed"
-          },
-          "promotionAllowed": true,
-          "specsRequested": 1,
-          "specsValidated": 1,
-          "specsRejected": 0,
-          "specGenerationAttempts": 0,
-          "specRepairAttempts": 0,
-          "firstPassPromotion": true,
-          "failedGatesAttempt1": [],
-          "regressedGates": [],
-          "missingRequirements": [],
-          "oracleTypes": [
-            "navigation_transition"
-          ],
-          "errors": [],
-          "warnings": [
-            "step_index_not_explicit_in_spec:1"
-          ],
-          "finalSpec": {
-            "origin": "deterministic_compiler",
-            "generatedBy": "core",
-            "strategy": "deterministic_compiler",
-            "fallback": null
-          },
-          "runtimeGate": {
-            "decision": "promote",
-            "promotionStatus": "promoted",
-            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
-          },
-          "specWritten": true,
-          "previousSpec": {
-            "existed": true,
-            "hash": "da5aae187897b97ee62c1b07a65bc8db97fd6329a4b3e13024cae28fdca341a4",
-            "lastModifiedAt": "2026-10-07T04:16:49.920Z"
-          }
-        },
-        "promotionStrategyDiagnostics": {
-          "requestedStrategy": "auto",
-          "autoPomEnabled": true,
-          "selectedStrategy": "pom",
-          "reason": "promoted",
-          "blockers": [],
-          "availablePageObjects": [
-            "ProductListPage",
-            "OperationsMenuPage"
-          ],
-          "requiredPageMethods": [],
-          "missingPageMethods": [],
-          "autoPomAttempted": false,
-          "autoPomCreatedMethods": [],
-          "fallbackUsed": false,
-          "requirePomRuntime": false,
           "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-descargar-plantilla-para-carga-de-nomina\\case.spec.ts",
           "specHash": "da5aae187897b97ee62c1b07a65bc8db97fd6329a4b3e13024cae28fdca341a4",
           "specSource": "generatedSpec"
-        },
-        "overwritten": true,
-        "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-descargar-plantilla-para-carga-de-nomina\\plan.json",
-        "previousStatus": "active"
+        }
       },
       "promotionPersisted": true,
       "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-descargar-plantilla-para-carga-de-nomina\\case.spec.ts",
@@ -48515,17 +48512,17 @@
       "specPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-transferencias-entre-cuantas-propias\\case.spec.ts",
       "appSlug": "fenix",
       "appConfigPath": "automations\\apps\\fenix\\app.config.json",
-      "status": "spec_failed",
+      "status": "active",
       "source": "discovery",
       "appProfile": "fenix",
       "createdAt": "2026-10-05T12:08:45.731Z",
-      "updatedAt": "2026-10-07T21:56:32.104Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T21-48-04-691Z\\discovered-plans.pending.json",
-      "pomStatus": "needs_manual_review",
+      "updatedAt": "2026-10-19T14:58:25.530Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-19T14-51-45-409Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
       "inlineDebugMode": false,
-      "specVerificationStatus": "failed",
+      "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T21-48-04-691Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-19T14-51-45-409Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -48549,7 +48546,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 339654,
+          "durationMs": 148393,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -48568,31 +48565,24 @@
             "typescript": "passed",
             "playwrightDiscovery": "passed",
             "semanticCoverage": "passed",
-            "functionalExecution": "failed"
+            "functionalExecution": "passed"
           },
-          "promotionAllowed": false,
+          "promotionAllowed": true,
           "specsRequested": 1,
-          "specsValidated": 0,
-          "specsRejected": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
           "specGenerationAttempts": 0,
           "specRepairAttempts": 0,
-          "firstPassPromotion": false,
-          "failedGatesAttempt1": [
-            "functionalExecution"
-          ],
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
           "regressedGates": [],
           "missingRequirements": [],
           "oracleTypes": [
             "navigation_transition"
           ],
-          "errors": [
-            "functional_execution_failed:exitCode=1",
-            "functional_execution_error:\u001b[31mTest timeout of 300000ms exceeded.\u001b[39m"
-          ],
+          "errors": [],
           "warnings": [
-            "step_index_not_explicit_in_spec:18",
-            "functional_execution_screenshots=13",
-            "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 2)."
+            "step_index_not_explicit_in_spec:18"
           ],
           "finalSpec": {
             "origin": "deterministic_compiler",
@@ -48601,25 +48591,23 @@
             "fallback": null
           },
           "runtimeGate": {
-            "decision": "block",
-            "promotionStatus": "blocked",
-            "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 2)."
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
           },
-          "specWritten": false,
+          "specWritten": true,
           "previousSpec": {
-            "existed": false,
-            "hash": null,
-            "lastModifiedAt": null
+            "existed": true,
+            "hash": "47fc2637704bb4a864c2acca8cbd7835a6be0ff45bc0892d7f3b004aa9e2ab14",
+            "lastModifiedAt": "2026-10-15T12:12:29.196Z"
           }
         },
         "promotionStrategyDiagnostics": {
           "requestedStrategy": "auto",
           "autoPomEnabled": true,
           "selectedStrategy": "pom",
-          "reason": "spec_generation_validation_failed",
-          "blockers": [
-            "spec_generation_validation_failed"
-          ],
+          "reason": "promoted",
+          "blockers": [],
           "availablePageObjects": [
             "ProductListPage",
             "OperationsMenuPage"
@@ -48632,12 +48620,15 @@
           "requirePomRuntime": false,
           "specPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-transferencias-entre-cuantas-propias\\case.spec.ts",
           "specHash": "47fc2637704bb4a864c2acca8cbd7835a6be0ff45bc0892d7f3b004aa9e2ab14",
-          "specSource": "ai_candidate"
+          "specSource": "generatedSpec"
         },
         "overwritten": true,
         "previousAutomationPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-transferencias-entre-cuantas-propias\\plan.json",
         "previousStatus": "active"
-      }
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-transferencias-entre-cuantas-propias\\case.spec.ts",
+      "promotedSpecHash": "47fc2637704bb4a864c2acca8cbd7835a6be0ff45bc0892d7f3b004aa9e2ab14"
     },
     {
       "id": "preview-001-login-sastifactorio",
@@ -48652,13 +48643,13 @@
       "source": "discovery",
       "appProfile": "fenix",
       "createdAt": "2026-10-05T21:29:11.695Z",
-      "updatedAt": "2026-10-07T21:46:34.521Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T21-41-36-180Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-19T14:49:50.912Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-19T14-44-01-580Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T21-41-36-180Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-19T14-44-01-580Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -48682,7 +48673,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 80655,
+          "durationMs": 115476,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -48734,7 +48725,7 @@
           "previousSpec": {
             "existed": true,
             "hash": "be4cd8868a6db0d2664357c96c6907444d46cec281aed61586780701f6a27e71",
-            "lastModifiedAt": "2026-10-07T19:36:01.741Z"
+            "lastModifiedAt": "2026-10-15T12:04:26.379Z"
           }
         },
         "promotionStrategyDiagnostics": {
@@ -48778,13 +48769,13 @@
       "source": "discovery",
       "appProfile": "portal-empresarial",
       "createdAt": "2026-10-06T12:22:09.749Z",
-      "updatedAt": "2026-10-06T21:39:18.488Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-10-06T21-36-44-395Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-09T23:00:31.340Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-10-09T22-57-57-066Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-10-06T21-36-44-395Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-10-09T22-57-57-066Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -48808,7 +48799,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 74445,
+          "durationMs": 61684,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -48857,9 +48848,9 @@
           },
           "specWritten": true,
           "previousSpec": {
-            "existed": false,
-            "hash": null,
-            "lastModifiedAt": null
+            "existed": true,
+            "hash": "10ba64c63402cf12402eb7212f2f67e036beaeab90a623029bc5ae52b886510b",
+            "lastModifiedAt": "2026-10-06T21:39:18.427Z"
           }
         },
         "promotionStrategyDiagnostics": {
@@ -48903,13 +48894,13 @@
       "source": "discovery",
       "appProfile": "portal-empresarial",
       "createdAt": "2026-10-06T12:25:27.077Z",
-      "updatedAt": "2026-10-06T21:42:41.943Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-10-06T21-39-18-792Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-09T23:03:53.649Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-10-09T23-00-31-456Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-10-06T21-39-18-792Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-10-09T23-00-31-456Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -48933,7 +48924,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 92412,
+          "durationMs": 82475,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -48980,9 +48971,9 @@
           },
           "specWritten": true,
           "previousSpec": {
-            "existed": false,
-            "hash": null,
-            "lastModifiedAt": null
+            "existed": true,
+            "hash": "c8c147926d821c578d0f4757a8abfea04d0c11f963a46479452e7f37a2587d7e",
+            "lastModifiedAt": "2026-10-06T21:42:41.883Z"
           }
         },
         "promotionStrategyDiagnostics": {
@@ -49026,13 +49017,13 @@
       "source": "discovery",
       "appProfile": "portal-empresarial",
       "createdAt": "2026-10-06T15:40:22.930Z",
-      "updatedAt": "2026-10-06T21:44:03.076Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-10-06T21-42-42-051Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-09T22:09:16.346Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-10-09T22-05-36-716Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-10-06T21-42-42-051Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-10-09T22-05-36-716Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -49056,7 +49047,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 48859,
+          "durationMs": 116079,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -49107,9 +49098,9 @@
           },
           "specWritten": true,
           "previousSpec": {
-            "existed": false,
-            "hash": null,
-            "lastModifiedAt": null
+            "existed": true,
+            "hash": "1e245b73868f6cf25f10f26739b47f8888a08f771956c4a17fb5deaaaf6e90f3",
+            "lastModifiedAt": "2026-10-06T21:44:03.023Z"
           }
         },
         "promotionStrategyDiagnostics": {
@@ -49153,13 +49144,13 @@
       "source": "discovery",
       "appProfile": "portal-empresarial",
       "createdAt": "2026-10-06T16:03:06.707Z",
-      "updatedAt": "2026-10-07T20:18:48.416Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T20-13-38-911Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-15T13:48:01.265Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-15T13-42-10-049Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T20-13-38-911Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-15T13-42-10-049Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -49183,7 +49174,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 118462,
+          "durationMs": 144874,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -49232,7 +49223,7 @@
           "previousSpec": {
             "existed": true,
             "hash": "390b6eeb65e73b55b9178d5ce770364b00ab4e16d6db19423211ca36cd6717b2",
-            "lastModifiedAt": "2026-10-07T16:51:57.627Z"
+            "lastModifiedAt": "2026-10-15T12:33:05.222Z"
           }
         },
         "promotionStrategyDiagnostics": {
@@ -49276,13 +49267,13 @@
       "source": "discovery",
       "appProfile": "kiosko",
       "createdAt": "2026-10-06T20:12:02.278Z",
-      "updatedAt": "2026-10-08T12:19:26.627Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-08T12-16-05-342Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-08T15:31:21.742Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-08T15-28-32-767Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-08T12-16-05-342Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-08T15-28-32-767Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -49306,7 +49297,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 79447,
+          "durationMs": 66084,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -49357,7 +49348,7 @@
           "previousSpec": {
             "existed": true,
             "hash": "be823c5d787955aaaaac988d6314b3786956d597aceedee4961a94b034cda6e5",
-            "lastModifiedAt": "2026-10-07T22:02:37.267Z"
+            "lastModifiedAt": "2026-10-08T12:19:26.549Z"
           }
         },
         "promotionStrategyDiagnostics": {
@@ -49394,21 +49385,21 @@
       "externalId": "PREVIEW-002",
       "caseId": 0,
       "title": "Transferencias entre cuantas propias",
-      "planPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-002-transferencias-entre-cuantas-propias\\plan.json",
-      "specPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-002-transferencias-entre-cuantas-propias\\case.spec.ts",
+      "planPath": "automations\\apps\\fenix\\sections\\api-tests\\cases\\preview-002-transferencias-entre-cuantas-propias\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\api-tests\\cases\\preview-002-transferencias-entre-cuantas-propias\\case.spec.ts",
       "appSlug": "fenix",
       "appConfigPath": "automations\\apps\\fenix\\app.config.json",
-      "status": "spec_failed",
+      "status": "active",
       "source": "discovery",
       "appProfile": "fenix",
       "createdAt": "2026-10-07T00:31:15.728Z",
-      "updatedAt": "2026-10-07T02:51:40.053Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-10-07T02-39-51-927Z\\discovered-plans.pending.json",
-      "pomStatus": "needs_manual_review",
+      "updatedAt": "2026-10-09T22:25:22.017Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-10-09T22-19-33-292Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
       "inlineDebugMode": false,
-      "specVerificationStatus": "failed",
+      "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-10-07T02-39-51-927Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-10-09T22-19-33-292Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -49432,7 +49423,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 485357,
+          "durationMs": 132575,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -49451,31 +49442,24 @@
             "typescript": "passed",
             "playwrightDiscovery": "passed",
             "semanticCoverage": "passed",
-            "functionalExecution": "failed"
+            "functionalExecution": "passed"
           },
-          "promotionAllowed": false,
+          "promotionAllowed": true,
           "specsRequested": 1,
-          "specsValidated": 0,
-          "specsRejected": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
           "specGenerationAttempts": 0,
           "specRepairAttempts": 0,
-          "firstPassPromotion": false,
-          "failedGatesAttempt1": [
-            "functionalExecution"
-          ],
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
           "regressedGates": [],
           "missingRequirements": [],
           "oracleTypes": [
             "navigation_transition"
           ],
-          "errors": [
-            "functional_execution_failed:exitCode=1",
-            "functional_execution_error:\u001b[31mTest timeout of 300000ms exceeded.\u001b[39m"
-          ],
+          "errors": [],
           "warnings": [
-            "step_index_not_explicit_in_spec:18",
-            "functional_execution_screenshots=13",
-            "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 2)."
+            "step_index_not_explicit_in_spec:18"
           ],
           "finalSpec": {
             "origin": "deterministic_compiler",
@@ -49484,25 +49468,23 @@
             "fallback": null
           },
           "runtimeGate": {
-            "decision": "block",
-            "promotionStatus": "blocked",
-            "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 2)."
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
           },
-          "specWritten": false,
+          "specWritten": true,
           "previousSpec": {
-            "existed": true,
-            "hash": "4aa0b9aa757731e0194777284da1eda570ab16e87b592069e5757d1483af89df",
-            "lastModifiedAt": "2026-10-07T02:06:51.345Z"
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
           }
         },
         "promotionStrategyDiagnostics": {
           "requestedStrategy": "auto",
           "autoPomEnabled": true,
           "selectedStrategy": "pom",
-          "reason": "spec_generation_validation_failed",
-          "blockers": [
-            "spec_generation_validation_failed"
-          ],
+          "reason": "promoted",
+          "blockers": [],
           "availablePageObjects": [
             "ProductListPage",
             "OperationsMenuPage"
@@ -49513,14 +49495,14 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false,
-          "specPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-002-transferencias-entre-cuantas-propias\\case.spec.ts",
-          "specHash": "4aa0b9aa757731e0194777284da1eda570ab16e87b592069e5757d1483af89df",
-          "specSource": "ai_candidate"
-        },
-        "overwritten": true,
-        "previousAutomationPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-002-transferencias-entre-cuantas-propias\\plan.json",
-        "previousStatus": "active"
-      }
+          "specPath": "automations\\apps\\fenix\\sections\\api-tests\\cases\\preview-002-transferencias-entre-cuantas-propias\\case.spec.ts",
+          "specHash": "d70e8e79858421b6d1678187c9e946f5212a472ebbace967b242f89ac7c8187f",
+          "specSource": "generatedSpec"
+        }
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\api-tests\\cases\\preview-002-transferencias-entre-cuantas-propias\\case.spec.ts",
+      "promotedSpecHash": "d70e8e79858421b6d1678187c9e946f5212a472ebbace967b242f89ac7c8187f"
     },
     {
       "id": "preview-002-consultar-tarjeta-visa-clasica",
@@ -49780,13 +49762,13 @@
       "source": "discovery",
       "appProfile": "portal-empresarial",
       "createdAt": "2026-10-07T03:48:26.524Z",
-      "updatedAt": "2026-10-07T20:28:56.891Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T20-27-44-608Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-15T13:58:05.079Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-15T13-56-03-265Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T20-27-44-608Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-15T13-56-03-265Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -49810,7 +49792,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 34436,
+          "durationMs": 88650,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -49885,10 +49867,7 @@
           "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-login-satisfactorio\\case.spec.ts",
           "specHash": "4ee0ea7766f09da68977d7ffc5bf22cdca9bae990dbd898de4fa1cd23bb9db3c",
           "specSource": "generatedSpec"
-        },
-        "overwritten": true,
-        "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-login-satisfactorio\\plan.json",
-        "previousStatus": "active"
+        }
       },
       "promotionPersisted": true,
       "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-login-satisfactorio\\case.spec.ts",
@@ -49907,13 +49886,13 @@
       "source": "discovery",
       "appProfile": "portal-empresarial",
       "createdAt": "2026-10-07T03:53:47.186Z",
-      "updatedAt": "2026-10-07T20:33:22.573Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T20-30-43-820Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-15T14:03:48.886Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-15T14-01-11-355Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T20-30-43-820Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-15T14-01-11-355Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -49937,7 +49916,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 60040,
+          "durationMs": 78346,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -49986,9 +49965,9 @@
           },
           "specWritten": true,
           "previousSpec": {
-            "existed": true,
-            "hash": "ec6e2f7f49de1f01753548edb1af844a190b289f079bd839d43d173ce592960b",
-            "lastModifiedAt": "2026-10-07T03:53:47.157Z"
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
           }
         },
         "promotionStrategyDiagnostics": {
@@ -50010,10 +49989,7 @@
           "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente\\case.spec.ts",
           "specHash": "ec6e2f7f49de1f01753548edb1af844a190b289f079bd839d43d173ce592960b",
           "specSource": "generatedSpec"
-        },
-        "overwritten": true,
-        "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente\\plan.json",
-        "previousStatus": "active"
+        }
       },
       "promotionPersisted": true,
       "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente\\case.spec.ts",
@@ -50032,13 +50008,13 @@
       "source": "discovery",
       "appProfile": "portal-empresarial",
       "createdAt": "2026-10-07T04:05:34.322Z",
-      "updatedAt": "2026-10-07T04:05:34.363Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T04-02-04-753Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-15T14:15:55.590Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-15T14-12-31-754Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T04-02-04-753Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-15T14-12-31-754Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -50062,7 +50038,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 97254,
+          "durationMs": 97808,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -50138,6 +50114,3129 @@
       "promotionPersisted": true,
       "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-un-empleado-manualmente-con-cedula\\case.spec.ts",
       "promotedSpecHash": "4b4dd2b8fec2072fba46e920e497857633cb58ffc63f66fb961a0d4bb68f06b5"
+    },
+    {
+      "id": "jira-a-gate-a",
+      "externalId": "JIRA-a",
+      "title": "Gate a",
+      "planPath": "automations\\apps\\jira-fixture-nzncbv\\sections\\jira-aa-88\\cases\\jira-a-gate-a\\plan.json",
+      "specPath": "automations\\apps\\jira-fixture-nzncbv\\sections\\jira-aa-88\\cases\\jira-a-gate-a\\case.spec.ts",
+      "appSlug": "jira-fixture-nzncbv",
+      "appConfigPath": "automations\\apps\\jira-fixture-nzncbv\\app.config.json",
+      "status": "active",
+      "source": "manual",
+      "appProfile": "jira-fixture-nzncbv",
+      "baseUrlHash": "0fc6e0d49614",
+      "createdAt": "2026-10-09T13:58:01.610Z",
+      "updatedAt": "2026-10-09T14:16:39.547Z",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 26899,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "auth_gate"
+          ],
+          "errors": [],
+          "warnings": [
+            "step_index_not_explicit_in_spec:1"
+          ],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\jira-fixture-nzncbv\\sections\\jira-aa-88\\cases\\jira-a-gate-a\\case.spec.ts",
+          "specHash": "0952f73a2b8a12a1fbe0dc67e5fd9187965c8a9bb2467788dc832128356886b2",
+          "specSource": "generatedSpec"
+        }
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\jira-fixture-nzncbv\\sections\\jira-aa-88\\cases\\jira-a-gate-a\\case.spec.ts",
+      "promotedSpecHash": "0952f73a2b8a12a1fbe0dc67e5fd9187965c8a9bb2467788dc832128356886b2"
+    },
+    {
+      "id": "preview-001-redirigir-estados-de-cuenta-a-la-autenticacion-del-kiosco",
+      "externalId": "PREVIEW-001",
+      "title": "Redirigir Estados de cuenta a la autenticación del kiosco",
+      "planPath": "automations\\apps\\kiosko\\sections\\jira-aa-88\\cases\\preview-001-redirigir-estados-de-cuenta-a-la-autenticacion-del-kiosco\\plan.json",
+      "specPath": "automations\\apps\\kiosko\\sections\\jira-aa-88\\cases\\preview-001-redirigir-estados-de-cuenta-a-la-autenticacion-del-kiosco\\case.spec.ts",
+      "appSlug": "kiosko",
+      "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "kiosko",
+      "baseUrlHash": "74df3c0e992c",
+      "createdAt": "2026-10-09T15:09:03.506Z",
+      "updatedAt": "2026-10-09T19:46:43.669Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "preview-002-redirigir-consulta-de-balance-a-la-autenticacion-del-kiosco",
+      "externalId": "PREVIEW-002",
+      "title": "Redirigir Consulta de balance a la autenticación del kiosco",
+      "planPath": "automations\\apps\\kiosko\\sections\\jira-aa-88\\cases\\preview-002-redirigir-consulta-de-balance-a-la-autenticacion-del-kiosco\\plan.json",
+      "specPath": "automations\\apps\\kiosko\\sections\\jira-aa-88\\cases\\preview-002-redirigir-consulta-de-balance-a-la-autenticacion-del-kiosco\\case.spec.ts",
+      "appSlug": "kiosko",
+      "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "kiosko",
+      "baseUrlHash": "74df3c0e992c",
+      "createdAt": "2026-10-09T15:10:02.248Z",
+      "updatedAt": "2026-10-09T19:47:24.161Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "preview-003-redirigir-cartas-y-certificaciones-a-la-autenticacion-del-kiosco",
+      "externalId": "PREVIEW-003",
+      "title": "Redirigir Cartas y certificaciones a la autenticación del kiosco",
+      "planPath": "automations\\apps\\kiosko\\sections\\jira-aa-88\\cases\\preview-003-redirigir-cartas-y-certificaciones-a-la-autenticacion-del-kiosco\\plan.json",
+      "specPath": "automations\\apps\\kiosko\\sections\\jira-aa-88\\cases\\preview-003-redirigir-cartas-y-certificaciones-a-la-autenticacion-del-kiosco\\case.spec.ts",
+      "appSlug": "kiosko",
+      "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "kiosko",
+      "baseUrlHash": "74df3c0e992c",
+      "createdAt": "2026-10-09T15:11:10.986Z",
+      "updatedAt": "2026-10-09T19:48:04.919Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "preview-004-redirigir-canje-de-puntos-a-la-autenticacion-del-kiosco",
+      "externalId": "PREVIEW-004",
+      "title": "Redirigir Canje de Puntos a la autenticación del kiosco",
+      "planPath": "automations\\apps\\kiosko\\sections\\jira-aa-88\\cases\\preview-004-redirigir-canje-de-puntos-a-la-autenticacion-del-kiosco\\plan.json",
+      "specPath": "automations\\apps\\kiosko\\sections\\jira-aa-88\\cases\\preview-004-redirigir-canje-de-puntos-a-la-autenticacion-del-kiosco\\case.spec.ts",
+      "appSlug": "kiosko",
+      "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "kiosko",
+      "baseUrlHash": "74df3c0e992c",
+      "createdAt": "2026-10-09T15:12:10.095Z",
+      "updatedAt": "2026-10-09T19:48:43.630Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-verificacion-de-acceso-por-sms",
+      "externalId": "AA-97:jira:1",
+      "title": "Transferencia exitosa entre cuentas propias con verificación de acceso por SMS",
+      "planPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-verificacion-de-acceso-por-sms\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-verificacion-de-acceso-por-sms\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "2a7bf6928b41",
+      "createdAt": "2026-10-13T14:50:10.489Z",
+      "updatedAt": "2026-10-13T14:50:10.549Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-100-jira-2-consultar-el-resumen-de-cuentas-completando-la-verificacion-adicional",
+      "externalId": "AA-100:jira:2",
+      "title": "Consultar el resumen de cuentas completando la verificación adicional",
+      "planPath": "automations\\apps\\fenix\\sections\\jira-aa-100\\cases\\aa-100-jira-2-consultar-el-resumen-de-cuentas-completando-la-verificacion-adicional\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\jira-aa-100\\cases\\aa-100-jira-2-consultar-el-resumen-de-cuentas-completando-la-verificacion-adicional\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "2a7bf6928b41",
+      "createdAt": "2026-10-14T00:01:03.682Z",
+      "updatedAt": "2026-10-14T00:01:03.708Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-101-jira-1-consulta-exitosa-de-saldos-disponibles-tras-autenticacion-empresarial-con-verificacion-por-sms",
+      "externalId": "AA-101:jira:1",
+      "title": "Consulta exitosa de saldos disponibles tras autenticación empresarial con verificación por SMS",
+      "planPath": "automations\\apps\\fenix\\sections\\jira-aa-101\\cases\\aa-101-jira-1-consulta-exitosa-de-saldos-disponibles-tras-autenticacion-empresarial-con-verificacion-por-sms\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\jira-aa-101\\cases\\aa-101-jira-1-consulta-exitosa-de-saldos-disponibles-tras-autenticacion-empresarial-con-verificacion-por-sms\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "2a7bf6928b41",
+      "createdAt": "2026-10-14T15:01:55.090Z",
+      "updatedAt": "2026-10-14T15:01:55.171Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-102-jira-1-consultar-el-resumen-consolidado-de-cuentas-empresariales-tras-autenticacion-con-sms",
+      "externalId": "AA-102:jira:1",
+      "title": "Consultar el resumen consolidado de cuentas empresariales tras autenticación con SMS",
+      "planPath": "automations\\apps\\fenix\\sections\\jira-aa-102\\cases\\aa-102-jira-1-consultar-el-resumen-consolidado-de-cuentas-empresariales-tras-autenticacion-con-sms\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\jira-aa-102\\cases\\aa-102-jira-1-consultar-el-resumen-consolidado-de-cuentas-empresariales-tras-autenticacion-con-sms\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "2a7bf6928b41",
+      "createdAt": "2026-10-14T15:38:28.601Z",
+      "updatedAt": "2026-10-14T15:38:28.639Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-97-jira-2-rechazo-de-inicio-de-sesion-con-credenciales-no-validas",
+      "externalId": "AA-97:jira:2",
+      "title": "Rechazo de inicio de sesión con credenciales no válidas",
+      "planPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-2-rechazo-de-inicio-de-sesion-con-credenciales-no-validas\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-2-rechazo-de-inicio-de-sesion-con-credenciales-no-validas\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "2a7bf6928b41",
+      "createdAt": "2026-10-14T17:33:33.931Z",
+      "updatedAt": "2026-10-16T12:33:18.302Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-inicio-de-sesion-y-doble-verificacion",
+      "externalId": "AA-97:jira:1",
+      "title": "Transferencia exitosa entre cuentas propias con inicio de sesión y doble verificación",
+      "planPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-inicio-de-sesion-y-doble-verificacion\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-inicio-de-sesion-y-doble-verificacion\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "2a7bf6928b41",
+      "createdAt": "2026-10-14T18:46:46.782Z",
+      "updatedAt": "2026-10-14T18:46:46.814Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-97-jira-2-rechazo-de-inicio-de-sesion-con-contrasena-no-valida",
+      "externalId": "AA-97:jira:2",
+      "title": "Rechazo de inicio de sesión con contraseña no válida",
+      "planPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-2-rechazo-de-inicio-de-sesion-con-contrasena-no-valida\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-2-rechazo-de-inicio-de-sesion-con-contrasena-no-valida\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "2a7bf6928b41",
+      "createdAt": "2026-10-14T19:01:46.789Z",
+      "updatedAt": "2026-10-15T13:52:59.347Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-97-jira-2-rechazo-de-credenciales-empresariales-no-validas",
+      "externalId": "AA-97:jira:2",
+      "title": "Rechazo de credenciales empresariales no válidas",
+      "planPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-2-rechazo-de-credenciales-empresariales-no-validas\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-2-rechazo-de-credenciales-empresariales-no-validas\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "2a7bf6928b41",
+      "createdAt": "2026-10-14T19:34:17.756Z",
+      "updatedAt": "2026-10-16T15:41:35.897Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-verificacion-de-acceso-y-token-sms",
+      "externalId": "AA-97:jira:1",
+      "title": "Transferencia exitosa entre cuentas propias con verificación de acceso y token SMS",
+      "planPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-verificacion-de-acceso-y-token-sms\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-verificacion-de-acceso-y-token-sms\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "2a7bf6928b41",
+      "createdAt": "2026-10-14T20:19:55.302Z",
+      "updatedAt": "2026-10-16T13:04:30.414Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-97-jira-2-rechazo-de-inicio-de-sesion-por-credenciales-no-validas",
+      "externalId": "AA-97:jira:2",
+      "title": "Rechazo de inicio de sesión por credenciales no válidas",
+      "planPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-2-rechazo-de-inicio-de-sesion-por-credenciales-no-validas\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-2-rechazo-de-inicio-de-sesion-por-credenciales-no-validas\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "2a7bf6928b41",
+      "createdAt": "2026-10-14T20:56:35.662Z",
+      "updatedAt": "2026-10-14T20:56:35.703Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-97-jira-2-rechazo-de-inicio-de-sesion-por-contrasena-no-valida",
+      "externalId": "AA-97:jira:2",
+      "title": "Rechazo de inicio de sesión por contraseña no válida",
+      "planPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-2-rechazo-de-inicio-de-sesion-por-contrasena-no-valida\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-2-rechazo-de-inicio-de-sesion-por-contrasena-no-valida\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "2a7bf6928b41",
+      "createdAt": "2026-10-15T15:47:25.429Z",
+      "updatedAt": "2026-10-15T18:45:19.537Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-verificacion-de-acceso-y-token",
+      "externalId": "AA-97:jira:1",
+      "title": "Transferencia exitosa entre cuentas propias con verificación de acceso y token",
+      "planPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-verificacion-de-acceso-y-token\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-verificacion-de-acceso-y-token\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "2a7bf6928b41",
+      "createdAt": "2026-10-15T18:34:35.780Z",
+      "updatedAt": "2026-10-15T18:44:36.072Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-103-jira-1-inicio-empresarial-y-verificacion-mfa-con-codigo-sms-valido",
+      "externalId": "AA-103:jira:1",
+      "title": "Inicio empresarial y verificación MFA con código SMS válido",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-103\\cases\\aa-103-jira-1-inicio-empresarial-y-verificacion-mfa-con-codigo-sms-valido\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-103\\cases\\aa-103-jira-1-inicio-empresarial-y-verificacion-mfa-con-codigo-sms-valido\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-16T18:30:01.135Z",
+      "updatedAt": "2026-10-16T18:30:01.178Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-103-jira-2-rechazo-de-inicio-empresarial-con-contrasena-invalida",
+      "externalId": "AA-103:jira:2",
+      "title": "Rechazo de inicio empresarial con contraseña inválida",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-103\\cases\\aa-103-jira-2-rechazo-de-inicio-empresarial-con-contrasena-invalida\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-103\\cases\\aa-103-jira-2-rechazo-de-inicio-empresarial-con-contrasena-invalida\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-16T18:30:30.733Z",
+      "updatedAt": "2026-10-16T18:30:30.783Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-103-jira-3-rechazo-de-verificacion-mfa-con-codigo-sms-invalido",
+      "externalId": "AA-103:jira:3",
+      "title": "Rechazo de verificación MFA con código SMS inválido",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-103\\cases\\aa-103-jira-3-rechazo-de-verificacion-mfa-con-codigo-sms-invalido\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-103\\cases\\aa-103-jira-3-rechazo-de-verificacion-mfa-con-codigo-sms-invalido\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-16T18:31:08.980Z",
+      "updatedAt": "2026-10-16T18:31:09.011Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-110-jira-2-rechazar-revision-de-pago-con-monto-cero",
+      "externalId": "AA-110:jira:2",
+      "title": "Rechazar revisión de pago con monto cero",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-110\\cases\\aa-110-jira-2-rechazar-revision-de-pago-con-monto-cero\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-110\\cases\\aa-110-jira-2-rechazar-revision-de-pago-con-monto-cero\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-16T19:32:14.058Z",
+      "updatedAt": "2026-10-16T19:32:14.087Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-110-jira-3-rechazar-revision-de-pago-con-fecha-pasada",
+      "externalId": "AA-110:jira:3",
+      "title": "Rechazar revisión de pago con fecha pasada",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-110\\cases\\aa-110-jira-3-rechazar-revision-de-pago-con-fecha-pasada\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-110\\cases\\aa-110-jira-3-rechazar-revision-de-pago-con-fecha-pasada\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-16T19:33:07.391Z",
+      "updatedAt": "2026-10-16T19:33:07.415Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-110-jira-1-programar-revisar-editar-y-confirmar-un-pago-de-servicio",
+      "externalId": "AA-110:jira:1",
+      "title": "Programar, revisar, editar y confirmar un pago de servicio",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-110\\cases\\aa-110-jira-1-programar-revisar-editar-y-confirmar-un-pago-de-servicio\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-110\\cases\\aa-110-jira-1-programar-revisar-editar-y-confirmar-un-pago-de-servicio\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "78b686af8a22",
+      "createdAt": "2026-10-16T20:09:41.880Z",
+      "updatedAt": "2026-10-16T20:09:41.904Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-112-jira-1-actualizar-la-politica-de-aprobacion-de-laura-m-en-la-simulacion-administrativa",
+      "externalId": "AA-112:jira:1",
+      "title": "Actualizar la política de aprobación de Laura M. en la simulación administrativa",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-112\\cases\\aa-112-jira-1-actualizar-la-politica-de-aprobacion-de-laura-m-en-la-simulacion-administrativa\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-112\\cases\\aa-112-jira-1-actualizar-la-politica-de-aprobacion-de-laura-m-en-la-simulacion-administrativa\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-16T23:00:37.923Z",
+      "updatedAt": "2026-10-16T23:00:37.955Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-109-jira-2-rechazar-autenticacion-personal-con-codigo-sms-invalido",
+      "externalId": "AA-109:jira:2",
+      "title": "Rechazar autenticación personal con código SMS inválido",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-109\\cases\\aa-109-jira-2-rechazar-autenticacion-personal-con-codigo-sms-invalido\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-109\\cases\\aa-109-jira-2-rechazar-autenticacion-personal-con-codigo-sms-invalido\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-17T14:10:38.790Z",
+      "updatedAt": "2026-10-17T14:10:38.822Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-109-jira-1-enviar-solicitud-personal-de-prestamo-con-verificacion-de-autorizacion-valida",
+      "externalId": "AA-109:jira:1",
+      "title": "Enviar solicitud personal de préstamo con verificación de autorización válida",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-109\\cases\\aa-109-jira-1-enviar-solicitud-personal-de-prestamo-con-verificacion-de-autorizacion-valida\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-109\\cases\\aa-109-jira-1-enviar-solicitud-personal-de-prestamo-con-verificacion-de-autorizacion-valida\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-17T15:20:13.273Z",
+      "updatedAt": "2026-10-17T15:20:13.306Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-109-jira-3-bloquear-avance-de-identidad-cuando-falta-el-numero-de-documento",
+      "externalId": "AA-109:jira:3",
+      "title": "Bloquear avance de identidad cuando falta el número de documento",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-109\\cases\\aa-109-jira-3-bloquear-avance-de-identidad-cuando-falta-el-numero-de-documento\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-109\\cases\\aa-109-jira-3-bloquear-avance-de-identidad-cuando-falta-el-numero-de-documento\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-17T15:30:44.263Z",
+      "updatedAt": "2026-10-17T15:30:44.303Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-109-jira-4-rechazar-el-envio-con-codigo-de-autorizacion-invalido",
+      "externalId": "AA-109:jira:4",
+      "title": "Rechazar el envío con código de autorización inválido",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-109\\cases\\aa-109-jira-4-rechazar-el-envio-con-codigo-de-autorizacion-invalido\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-109\\cases\\aa-109-jira-4-rechazar-el-envio-con-codigo-de-autorizacion-invalido\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-17T16:43:35.193Z",
+      "updatedAt": "2026-10-17T16:43:35.225Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-109-jira-5-bloquear-un-ingreso-incompleto-y-aceptar-importe-mensual-cero",
+      "externalId": "AA-109:jira:5",
+      "title": "Bloquear un ingreso incompleto y aceptar importe mensual cero",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-109\\cases\\aa-109-jira-5-bloquear-un-ingreso-incompleto-y-aceptar-importe-mensual-cero\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-109\\cases\\aa-109-jira-5-bloquear-un-ingreso-incompleto-y-aceptar-importe-mensual-cero\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-17T18:42:36.290Z",
+      "updatedAt": "2026-10-17T18:42:36.335Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-109-jira-6-bloquear-avance-de-compromisos-cuando-una-fila-agregada-esta-incompleta",
+      "externalId": "AA-109:jira:6",
+      "title": "Bloquear avance de compromisos cuando una fila agregada está incompleta",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-109\\cases\\aa-109-jira-6-bloquear-avance-de-compromisos-cuando-una-fila-agregada-esta-incompleta\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-109\\cases\\aa-109-jira-6-bloquear-avance-de-compromisos-cuando-una-fila-agregada-esta-incompleta\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-17T18:49:02.726Z",
+      "updatedAt": "2026-10-17T18:49:02.764Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-104-jira-1-transferencia-propia-exitosa-en-usd-con-token-valido-y-comprobante",
+      "externalId": "AA-104:jira:1",
+      "title": "Transferencia propia exitosa en USD con token válido y comprobante",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-104\\cases\\aa-104-jira-1-transferencia-propia-exitosa-en-usd-con-token-valido-y-comprobante\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-104\\cases\\aa-104-jira-1-transferencia-propia-exitosa-en-usd-con-token-valido-y-comprobante\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-18T12:36:20.080Z",
+      "updatedAt": "2026-10-18T12:36:20.103Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-104-jira-2-transferencia-propia-rechazada-con-token-de-seguridad-invalido",
+      "externalId": "AA-104:jira:2",
+      "title": "Transferencia propia rechazada con token de seguridad inválido",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-104\\cases\\aa-104-jira-2-transferencia-propia-rechazada-con-token-de-seguridad-invalido\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-104\\cases\\aa-104-jira-2-transferencia-propia-rechazada-con-token-de-seguridad-invalido\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-18T12:37:06.352Z",
+      "updatedAt": "2026-10-18T12:37:06.371Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-104-jira-4-transferencia-propia-bloqueada-cuando-las-cuentas-son-iguales",
+      "externalId": "AA-104:jira:4",
+      "title": "Transferencia propia bloqueada cuando las cuentas son iguales",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-104\\cases\\aa-104-jira-4-transferencia-propia-bloqueada-cuando-las-cuentas-son-iguales\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-104\\cases\\aa-104-jira-4-transferencia-propia-bloqueada-cuando-las-cuentas-son-iguales\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-18T12:37:37.595Z",
+      "updatedAt": "2026-10-18T12:37:37.620Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-104-jira-3-transferencia-propia-bloqueada-por-monto-cero",
+      "externalId": "AA-104:jira:3",
+      "title": "Transferencia propia bloqueada por monto cero",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-104\\cases\\aa-104-jira-3-transferencia-propia-bloqueada-por-monto-cero\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-104\\cases\\aa-104-jira-3-transferencia-propia-bloqueada-por-monto-cero\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-18T12:45:35.981Z",
+      "updatedAt": "2026-10-18T12:45:36.006Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-108-jira-1-consultar-y-filtrar-el-registro-de-auditoria-empresarial",
+      "externalId": "AA-108:jira:1",
+      "title": "Consultar y filtrar el registro de auditoría empresarial",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-108\\cases\\aa-108-jira-1-consultar-y-filtrar-el-registro-de-auditoria-empresarial\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-108\\cases\\aa-108-jira-1-consultar-y-filtrar-el-registro-de-auditoria-empresarial\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-18T20:06:31.983Z",
+      "updatedAt": "2026-10-18T20:06:32.015Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-106-jira-2-verificar-opciones-de-cuenta-estado-y-tipo-de-movimiento",
+      "externalId": "AA-106:jira:2",
+      "title": "Verificar opciones de cuenta, estado y tipo de movimiento",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-106\\cases\\aa-106-jira-2-verificar-opciones-de-cuenta-estado-y-tipo-de-movimiento\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-106\\cases\\aa-106-jira-2-verificar-opciones-de-cuenta-estado-y-tipo-de-movimiento\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-18T21:54:37.277Z",
+      "updatedAt": "2026-10-18T21:54:37.303Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-107-jira-1-configurar-la-politica-con-el-rol-operador",
+      "externalId": "AA-107:jira:1",
+      "title": "Configurar la política con el rol Operador",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-107\\cases\\aa-107-jira-1-configurar-la-politica-con-el-rol-operador\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-107\\cases\\aa-107-jira-1-configurar-la-politica-con-el-rol-operador\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-19T01:28:49.815Z",
+      "updatedAt": "2026-10-19T01:28:49.843Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-107-jira-2-configurar-la-politica-con-el-rol-aprobador",
+      "externalId": "AA-107:jira:2",
+      "title": "Configurar la política con el rol Aprobador",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-107\\cases\\aa-107-jira-2-configurar-la-politica-con-el-rol-aprobador\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-107\\cases\\aa-107-jira-2-configurar-la-politica-con-el-rol-aprobador\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-19T01:29:30.548Z",
+      "updatedAt": "2026-10-19T01:29:30.573Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-107-jira-3-configurar-la-politica-con-el-rol-administrador",
+      "externalId": "AA-107:jira:3",
+      "title": "Configurar la política con el rol Administrador",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-107\\cases\\aa-107-jira-3-configurar-la-politica-con-el-rol-administrador\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-107\\cases\\aa-107-jira-3-configurar-la-politica-con-el-rol-administrador\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-19T01:30:10.353Z",
+      "updatedAt": "2026-10-19T01:30:10.380Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-111-jira-4-comprobar-el-contenido-del-csv-exportado-de-movimientos-personales",
+      "externalId": "AA-111:jira:4",
+      "title": "Comprobar el contenido del CSV exportado de movimientos personales",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-111\\cases\\aa-111-jira-4-comprobar-el-contenido-del-csv-exportado-de-movimientos-personales\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-111\\cases\\aa-111-jira-4-comprobar-el-contenido-del-csv-exportado-de-movimientos-personales\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-19T03:51:59.933Z",
+      "updatedAt": "2026-10-19T03:51:59.972Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-111-jira-1-consultar-y-exportar-movimientos-personales-filtrados",
+      "externalId": "AA-111:jira:1",
+      "title": "Consultar y exportar movimientos personales filtrados",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-111\\cases\\aa-111-jira-1-consultar-y-exportar-movimientos-personales-filtrados\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-111\\cases\\aa-111-jira-1-consultar-y-exportar-movimientos-personales-filtrados\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-19T03:54:06.051Z",
+      "updatedAt": "2026-10-19T03:54:06.093Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-111-jira-2-filtrar-movimientos-personales-sin-coincidencias",
+      "externalId": "AA-111:jira:2",
+      "title": "Filtrar movimientos personales sin coincidencias",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-111\\cases\\aa-111-jira-2-filtrar-movimientos-personales-sin-coincidencias\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-111\\cases\\aa-111-jira-2-filtrar-movimientos-personales-sin-coincidencias\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-19T03:56:05.840Z",
+      "updatedAt": "2026-10-19T03:56:05.886Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-111-jira-3-limpiar-filtros-y-comprobar-los-resultados-iniciales-del-perfil-personal",
+      "externalId": "AA-111:jira:3",
+      "title": "Limpiar filtros y comprobar los resultados iniciales del perfil Personal",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-111\\cases\\aa-111-jira-3-limpiar-filtros-y-comprobar-los-resultados-iniciales-del-perfil-personal\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-111\\cases\\aa-111-jira-3-limpiar-filtros-y-comprobar-los-resultados-iniciales-del-perfil-personal\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-19T03:57:43.308Z",
+      "updatedAt": "2026-10-19T03:57:43.346Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-106-jira-1-filtrar-restablecer-y-exportar-estados-de-cuenta",
+      "externalId": "AA-106:jira:1",
+      "title": "Filtrar, restablecer y exportar estados de cuenta",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-106\\cases\\aa-106-jira-1-filtrar-restablecer-y-exportar-estados-de-cuenta\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-106\\cases\\aa-106-jira-1-filtrar-restablecer-y-exportar-estados-de-cuenta\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-19T05:31:43.904Z",
+      "updatedAt": "2026-10-19T05:31:43.941Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-105-jira-3-rechazar-una-cuenta-ya-existente",
+      "externalId": "AA-105:jira:3",
+      "title": "Rechazar una cuenta ya existente",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-105\\cases\\aa-105-jira-3-rechazar-una-cuenta-ya-existente\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-105\\cases\\aa-105-jira-3-rechazar-una-cuenta-ya-existente\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-19T05:46:40.811Z",
+      "updatedAt": "2026-10-19T05:46:40.845Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-105-jira-5-verificar-que-el-nombre-y-el-alias-guardados-aparecen-en-la-lista",
+      "externalId": "AA-105:jira:5",
+      "title": "Verificar que el nombre y el alias guardados aparecen en la lista",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-105\\cases\\aa-105-jira-5-verificar-que-el-nombre-y-el-alias-guardados-aparecen-en-la-lista\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-105\\cases\\aa-105-jira-5-verificar-que-el-nombre-y-el-alias-guardados-aparecen-en-la-lista\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-19T05:48:21.310Z",
+      "updatedAt": "2026-10-19T05:48:21.349Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-105-jira-6-filtrar-la-lista-de-beneficiarios-por-nombre",
+      "externalId": "AA-105:jira:6",
+      "title": "Filtrar la lista de beneficiarios por nombre",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-105\\cases\\aa-105-jira-6-filtrar-la-lista-de-beneficiarios-por-nombre\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-105\\cases\\aa-105-jira-6-filtrar-la-lista-de-beneficiarios-por-nombre\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-19T06:36:33.155Z",
+      "updatedAt": "2026-10-19T06:36:33.212Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-105-jira-7-filtrar-la-lista-de-beneficiarios-por-alias",
+      "externalId": "AA-105:jira:7",
+      "title": "Filtrar la lista de beneficiarios por alias",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-105\\cases\\aa-105-jira-7-filtrar-la-lista-de-beneficiarios-por-alias\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-105\\cases\\aa-105-jira-7-filtrar-la-lista-de-beneficiarios-por-alias\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-19T06:39:02.705Z",
+      "updatedAt": "2026-10-19T06:39:02.752Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-105-jira-8-rechazar-un-beneficiario-con-el-alias-atlas",
+      "externalId": "AA-105:jira:8",
+      "title": "Rechazar un beneficiario con el alias Atlas",
+      "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-105\\cases\\aa-105-jira-8-rechazar-un-beneficiario-con-el-alias-atlas\\plan.json",
+      "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-105\\cases\\aa-105-jira-8-rechazar-un-beneficiario-con-el-alias-atlas\\case.spec.ts",
+      "appSlug": "jira-regression-lab",
+      "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "jira-regression-lab",
+      "baseUrlHash": "622cdbe9728c",
+      "createdAt": "2026-10-19T06:41:40.022Z",
+      "updatedAt": "2026-10-19T06:41:40.067Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-97-jira-1-edited-7b735ce96bfcab46-transferencia-exitosa-entre-cuentas-propias-con-verificacion-de-acceso",
+      "externalId": "AA-97:jira:1:edited-7b735ce96bfcab46",
+      "title": "Transferencia exitosa entre cuentas propias con verificación de acceso",
+      "planPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-edited-7b735ce96bfcab46-transferencia-exitosa-entre-cuentas-propias-con-verificacion-de-acceso\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-edited-7b735ce96bfcab46-transferencia-exitosa-entre-cuentas-propias-con-verificacion-de-acceso\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "2a7bf6928b41",
+      "createdAt": "2026-10-19T19:40:54.534Z",
+      "updatedAt": "2026-10-19T19:40:54.577Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "preview-001-crear-cuenta-cliente",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "Crear Cuenta Cliente",
+      "planPath": "automations\\apps\\portal-ventas-digital\\sections\\detalle-kiosko\\cases\\preview-001-crear-cuenta-cliente\\plan.json",
+      "specPath": "automations\\apps\\portal-ventas-digital\\sections\\detalle-kiosko\\cases\\preview-001-crear-cuenta-cliente\\case.spec.ts",
+      "appSlug": "portal-ventas-digital",
+      "appConfigPath": "automations\\apps\\portal-ventas-digital\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "portal-ventas-digital",
+      "createdAt": "2026-10-19T20:26:07.380Z",
+      "updatedAt": "2026-10-20T16:10:52.847Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-20T16-08-14-745Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-20T16-08-14-745Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 58063,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "literal_visible_text"
+          ],
+          "errors": [],
+          "warnings": [],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": true,
+            "hash": "ce0cd68bfd3d43eb9e80466a37903bafb283df6c9e072258fb48a3f14db654fd",
+            "lastModifiedAt": "2026-10-19T21:25:18.651Z"
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\portal-ventas-digital\\sections\\detalle-kiosko\\cases\\preview-001-crear-cuenta-cliente\\case.spec.ts",
+          "specHash": "a1c3d4e98112e34a3c949721e824ac542961228a696145ef84ffa881dcb4a65c",
+          "specSource": "generatedSpec"
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\portal-ventas-digital\\sections\\detalle-kiosko\\cases\\preview-001-crear-cuenta-cliente\\plan.json",
+        "previousStatus": "spec_failed"
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-ventas-digital\\sections\\detalle-kiosko\\cases\\preview-001-crear-cuenta-cliente\\case.spec.ts",
+      "promotedSpecHash": "a1c3d4e98112e34a3c949721e824ac542961228a696145ef84ffa881dcb4a65c"
+    },
+    {
+      "id": "preview-001-crear-cuenta",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "Crear cuenta",
+      "planPath": "automations\\apps\\portal-ventas-digital\\sections\\detalle-kiosko\\cases\\preview-001-crear-cuenta\\plan.json",
+      "specPath": "automations\\apps\\portal-ventas-digital\\sections\\detalle-kiosko\\cases\\preview-001-crear-cuenta\\case.spec.ts",
+      "appSlug": "portal-ventas-digital",
+      "appConfigPath": "automations\\apps\\portal-ventas-digital\\app.config.json",
+      "status": "spec_failed",
+      "source": "discovery",
+      "appProfile": "portal-ventas-digital",
+      "createdAt": "2026-10-20T16:16:58.251Z",
+      "updatedAt": "2026-10-20T19:21:23.159Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-20T19-18-41-440Z\\discovered-plans.pending.json",
+      "pomStatus": "needs_manual_review",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "failed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-20T19-18-41-440Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 84721,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "failed"
+          },
+          "promotionAllowed": false,
+          "specsRequested": 1,
+          "specsValidated": 0,
+          "specsRejected": 1,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": false,
+          "failedGatesAttempt1": [
+            "functionalExecution"
+          ],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "literal_visible_text"
+          ],
+          "errors": [
+            "functional_execution_failed:exitCode=1",
+            "functional_execution_error:[evidence:settle] probe failed reason=page.waitForFunction: EvalError: Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://*.qualtrics.com https://*.siteintercept.qualtrics.com https://cdn.evgnet.com https://*.evgnet.com https://connect.facebook.net\"."
+          ],
+          "warnings": [
+            "functional_execution_screenshots=19",
+            "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 2)."
+          ],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "block",
+            "promotionStatus": "blocked",
+            "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 2)."
+          },
+          "specWritten": false,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "spec_generation_validation_failed",
+          "blockers": [
+            "spec_generation_validation_failed"
+          ],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\portal-ventas-digital\\sections\\detalle-kiosko\\cases\\preview-001-crear-cuenta\\case.spec.ts",
+          "specHash": "0fd1cf7c3ac1d76dc072948a1d64e05123e19da3243fcd29d4c915298d4944e9",
+          "specSource": "ai_candidate"
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\portal-ventas-digital\\sections\\detalle-kiosko\\cases\\preview-001-crear-cuenta\\plan.json",
+        "previousStatus": "spec_failed"
+      }
     }
   ]
 }

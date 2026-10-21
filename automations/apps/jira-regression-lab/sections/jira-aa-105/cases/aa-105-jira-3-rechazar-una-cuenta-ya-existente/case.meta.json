@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-105",
+  "sourceScenarioId": "AA-105:jira:3",
+  "title": "Rechazar una cuenta ya existente",
+  "generatedAt": "2026-10-19T05:46:40.800Z",
+  "executionEngine": "jira_semantic"
+}

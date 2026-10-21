@@ -12,6 +12,7 @@ class FakeConnection {
   async close(): Promise<void> { /* no-op */ }
   async query<T = unknown>(sql: string, params: unknown[] = []): Promise<T[]> {
     this.queries.push({ sql, params });
+    if (sql.includes("FROM sqlite_master")) return [{ name: "ProjectCaseRuntimeValue" }] as T[];
     if (sql.includes("SELECT id FROM dbo.Projects")) {
       const id = this.slugToId.get(String(params[0]));
       return (id ? [{ id }] : []) as T[];
@@ -38,7 +39,7 @@ class FakeConnection {
   }
 }
 
-test("persists confirmed non-secret values with semantic metadata and replays by project/case", async () => {
+test("persists all confirmed test values with semantic metadata and replays by project/case", async () => {
   const conn = new FakeConnection();
   const count = await persistConfirmedRuntimeValues({
     projectSlug: "project-a",
@@ -47,24 +48,35 @@ test("persists confirmed non-secret values with semantic metadata and replays by
     values: [
       { key: "employee.document", value: "document-value", semanticType: "document_number", fieldKind: "text", datasetIdentity: "employee", contractVersion: "v1", verified: true },
       { key: "auth.password", value: "secret-value", verified: true },
+      { key: "contrasena", value: "localized-secret", verified: true },
+      { key: "jira_step_9", value: "one-time-code", sensitive: true, verified: true },
     ],
   });
-  assert.equal(count, 1);
-  assert.equal(conn.rows.size, 1);
+  assert.equal(count, 4);
+  assert.equal(conn.rows.size, 4);
   assert.equal([...conn.rows.values()][0].value, "document-value");
-  assert.ok(conn.queries.every(({ params }) => !params.includes("secret-value")));
+  assert.ok(["secret-value", "localized-secret", "one-time-code"].every((value) => conn.queries.some(({ params }) => params.includes(value))));
 
   const replay = await getConfirmedRuntimeValues("project-id-a", 90001, conn as any);
-  assert.deepEqual(replay, [{
-    key: "employee.document",
-    value: "document-value",
-    semanticType: "document_number",
-    fieldKind: "text",
-    datasetIdentity: "employee",
-    contractVersion: "v1",
-    source: "confirmed_case_runtime",
-    verified: true,
-  }]);
+  assert.deepEqual(replay.map(({ key }) => key).sort(), ["contrasena", "employee.document", "jira_step_9", "auth.password"].sort());
+  assert.equal(replay.find(({ key }) => key === "auth.password")?.value, "secret-value");
+  assert.equal(replay.find(({ key }) => key === "jira_step_9")?.value, "one-time-code");
+});
+
+test("missing SQLite runtime-value table returns no saved values without querying SQL Server metadata", async () => {
+  const conn = new FakeConnection();
+  conn.rows.clear();
+  const originalQuery = conn.query.bind(conn);
+  conn.query = async <T = unknown>(sql: string, params: unknown[] = []): Promise<T[]> => {
+    if (sql.includes("FROM sqlite_master")) {
+      conn.queries.push({ sql, params });
+      return [];
+    }
+    return originalQuery(sql, params);
+  };
+
+  assert.deepEqual(await getConfirmedRuntimeValues("project-id-a", 90001, conn as any), []);
+  assert.equal(conn.queries.some(({ sql }) => sql.includes("OBJECT_ID")), false);
 });
 
 test("confirmed runtime values are isolated by case and project", async () => {

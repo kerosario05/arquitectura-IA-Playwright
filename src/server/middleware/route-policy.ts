@@ -141,6 +141,23 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   R("GET", "/api/mobile/scenarios/generation/:generationJobId", ["executions.view"]),
   R("*", "/api/mobile/*", ["tests.launch"], "optional"),
 
+  // --- test design (draft authoring with isolated read-only catalogs) ------
+  // Catalog access is module-scoped. It deliberately does not grant access to
+  // the existing Jira or TestRail integration routes below.
+  R("GET", "/api/test-design/jira/*", ["testdesign.view"]),
+  R("GET", "/api/test-design/testrail/*", ["testdesign.view"]),
+  R("GET", "/api/test-design/drafts", ["testdesign.view"], "optional"),
+  R("POST", "/api/test-design/drafts", ["testdesign.generate"], "optional"),
+  R("GET", "/api/test-design/drafts/:draftId", ["testdesign.view"]),
+  R("PUT", "/api/test-design/drafts/:draftId", ["testdesign.generate"]),
+  R("DELETE", "/api/test-design/drafts/:draftId", ["testdesign.generate"]),
+  R("PUT", "/api/test-design/drafts/:draftId/stories/:storyId/scenarios", ["testdesign.generate"]),
+  R("POST", "/api/test-design/drafts/:draftId/stories/:storyId/regenerate", ["testdesign.generate"]),
+  R("POST", "/api/test-design/drafts/:draftId/generate", ["testdesign.generate"]),
+  R("POST", "/api/test-design/drafts/:draftId/publish/testrail", ["testdesign.publish_testrail"]),
+  R("POST", "/api/test-design/drafts/:draftId/testrail/reconcile", ["testdesign.publish_testrail"]),
+  R("POST", "/api/test-design/drafts/:draftId/publish/jira", ["testdesign.publish_jira"]),
+
   // --- external catalogues (read-only reference data) ---------------------
   R("GET", "/api/jira/*", ["dashboard.view"]),
   R("POST", "/api/jira/*", ["tests.launch"]),

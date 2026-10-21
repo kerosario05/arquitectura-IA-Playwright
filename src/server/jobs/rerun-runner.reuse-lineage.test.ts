@@ -4,6 +4,8 @@ import path from "node:path";
 import test from "node:test";
 import { prepareRerun, resolveRerunLineageRoot, type JobRecordLike } from "./rerun-runner";
 import type { VirtualCase } from "../../types/scenario-preview.types";
+import { recordingDir, saveScenarios } from "../../recording/recording-store";
+import type { RecordedScenario } from "../../recording/trace-to-scenario";
 
 /**
  * FIRST_LOSS fix: `POST /api/runs/:jobId/rerun` on a `reuse-existing` job 404'd with
@@ -78,6 +80,52 @@ test("1/DIRECT_SCENARIO_PREVIEW_RERUN_UNCHANGED: rerunning a scenario-preview jo
     }
   } finally {
     await cleanup([jobId]);
+  }
+});
+
+test("1A/SCENARIO_PREVIEW_SPEC_REUSE_CARRIES_CANONICAL_STEPS: preview-root reuse entries retain the selected case title and human-readable steps for LiveExecution", async () => {
+  const rootJobId = "hermetic-lineage-preview-reuse-steps";
+  const recordingId = "hermeticlineagestepsrecording";
+  const scenarioId = "REC-LINEAGE-STEPS-01";
+  const recordingPath = recordingDir(APP_SLUG, recordingId);
+  try {
+    saveScenarios(APP_SLUG, recordingId, [{
+      scenarioId,
+      title: "Login de prueba",
+      description: "",
+      preconditions: [],
+      kind: "happy_path",
+      provenance: "observed",
+      mobileSteps: [],
+      webSteps: [],
+      testRailSteps: [
+        { content: "Ingresar el usuario de prueba", stepTemplate: "Ingresar el usuario de prueba", renderedStep: "Ingresar el usuario de prueba" },
+        { content: "Presionar Continuar", stepTemplate: "Presionar Continuar", renderedStep: "Presionar Continuar" },
+      ],
+      requiredData: [],
+      stepTargets: [],
+      sourceRecordingId: recordingId,
+      hasUncertainSteps: false,
+    } as unknown as RecordedScenario]);
+    writePreviewJob(rootJobId, [baseVirtualCase({
+      appSlug: APP_SLUG,
+      recordingId,
+      recordedScenarioId: scenarioId,
+      title: "Login de prueba",
+    })]);
+
+    const result = await prepareRerun(rootJobId, "all", "scenario-preview", inMemoryJobRecordLookup({}));
+    assert.equal(result.ok, true, `expected a prepared rerun, got ${JSON.stringify(result)}`);
+    if (result.ok && result.jobType === "scenario-preview") {
+      assert.equal(result.promotedSpecReuse[0]?.scenarioId, scenarioId);
+      assert.equal(result.promotedSpecReuse[0]?.title, "Login de prueba");
+      assert.deepEqual(result.promotedSpecReuse[0]?.steps, ["Ingresar el usuario de prueba", "Presionar Continuar"]);
+    } else {
+      assert.fail("expected a scenario-preview rerun");
+    }
+  } finally {
+    await cleanup([rootJobId]);
+    fs.rmSync(recordingPath, { recursive: true, force: true });
   }
 });
 

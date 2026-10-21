@@ -1,0 +1,127 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-10-19T06:41:40.017Z",
+  "entries": [
+    {
+      "key": "auth.company_identifier",
+      "source": "app_test_data",
+      "fieldName": "[id=\"login-rnc\"]",
+      "stepIndex": 2,
+      "valueType": "string",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": "*******01"
+    },
+    {
+      "key": "auth.username",
+      "source": "app_test_data",
+      "fieldName": "[id=\"login-user\"]",
+      "stepIndex": 3,
+      "valueType": "string",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": "********sa"
+    },
+    {
+      "key": "auth.password",
+      "source": "app_test_data",
+      "fieldName": "[id=\"login-password\"]",
+      "stepIndex": 4,
+      "valueType": "string",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": "********26"
+    },
+    {
+      "key": "initial_beneficiary_name",
+      "source": "unknown",
+      "fieldName": "[id=\"beneficiary-name\"]",
+      "stepIndex": 17,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "initial_beneficiary_alias",
+      "source": "unknown",
+      "fieldName": "[id=\"beneficiary-alias\"]",
+      "stepIndex": 18,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "initial_beneficiary_account",
+      "source": "unknown",
+      "fieldName": "[id=\"beneficiary-account\"]",
+      "stepIndex": 19,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "initial_beneficiary_bank",
+      "source": "unknown",
+      "fieldName": "[id=\"beneficiary-bank\"]",
+      "stepIndex": 20,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "duplicate_beneficiary_name",
+      "source": "unknown",
+      "fieldName": "[id=\"beneficiary-name\"]",
+      "stepIndex": 25,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "duplicate_beneficiary_alias",
+      "source": "unknown",
+      "fieldName": "[id=\"beneficiary-alias\"]",
+      "stepIndex": 26,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "duplicate_beneficiary_account",
+      "source": "unknown",
+      "fieldName": "[id=\"beneficiary-account\"]",
+      "stepIndex": 27,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "duplicate_beneficiary_bank",
+      "source": "unknown",
+      "fieldName": "[id=\"beneficiary-bank\"]",
+      "stepIndex": 28,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

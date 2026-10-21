@@ -1,0 +1,116 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-10-19T03:51:59.930Z",
+  "entries": [
+    {
+      "key": "cedula",
+      "source": "unknown",
+      "fieldName": "[id=\"login-identity\"]",
+      "stepIndex": 5,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "usuario",
+      "source": "app_test_data",
+      "fieldName": "[id=\"login-user\"]",
+      "stepIndex": 6,
+      "valueType": "string",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": "********sa"
+    },
+    {
+      "key": "contrasena",
+      "source": "app_test_data",
+      "fieldName": "[id=\"login-password\"]",
+      "stepIndex": 7,
+      "valueType": "string",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": "********26"
+    },
+    {
+      "key": "codigo_acceso",
+      "source": "unknown",
+      "fieldName": "[id=\"login-otp\"]",
+      "stepIndex": 10,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "cuenta",
+      "source": "unknown",
+      "fieldName": "[id=\"statement-account\"]",
+      "stepIndex": 16,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "desde",
+      "source": "unknown",
+      "fieldName": "[id=\"date-from\"]",
+      "stepIndex": 17,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "hasta",
+      "source": "unknown",
+      "fieldName": "[id=\"date-to\"]",
+      "stepIndex": 18,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "estado",
+      "source": "unknown",
+      "fieldName": "[id=\"statement-status\"]",
+      "stepIndex": 19,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "tipo_movimiento",
+      "source": "unknown",
+      "fieldName": "[id=\"movement-type\"]",
+      "stepIndex": 20,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "monto_minimo",
+      "source": "unknown",
+      "fieldName": "[id=\"min-amount\"]",
+      "stepIndex": 21,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

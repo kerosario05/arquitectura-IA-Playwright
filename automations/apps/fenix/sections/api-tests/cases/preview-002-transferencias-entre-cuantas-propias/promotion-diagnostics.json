@@ -1,0 +1,20 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\fenix\\sections\\api-tests\\cases\\preview-002-transferencias-entre-cuantas-propias\\case.spec.ts",
+  "specHash": "d70e8e79858421b6d1678187c9e946f5212a472ebbace967b242f89ac7c8187f",
+  "specSource": "generatedSpec"
+}

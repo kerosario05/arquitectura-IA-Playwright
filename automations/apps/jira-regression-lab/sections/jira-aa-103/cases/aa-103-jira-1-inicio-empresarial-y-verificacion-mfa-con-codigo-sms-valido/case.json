@@ -1,0 +1,9 @@
+{
+  "id": "aa-103-jira-1-inicio-empresarial-y-verificacion-mfa-con-codigo-sms-valido",
+  "externalId": "AA-103:jira:1",
+  "title": "Inicio empresarial y verificación MFA con código SMS válido",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-16T18:30:01.125Z"
+}

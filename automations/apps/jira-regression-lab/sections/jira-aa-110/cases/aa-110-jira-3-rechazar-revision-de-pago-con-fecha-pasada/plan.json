@@ -1,0 +1,561 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-16T19:32:45.720Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "AA-110:jira:3",
+    "title": "Rechazar revisión de pago con fecha pasada"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Presionar \"Empresarial\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Empresarial",
+        "exact": true
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [rnc]",
+      "valueKey": "rnc",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-rnc\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "fill",
+      "description": "fill [usuario]",
+      "valueKey": "usuario",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-user\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "fill",
+      "description": "fill [contrasena]",
+      "valueKey": "contrasena",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-password\"]"
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"Iniciar sesión\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Iniciar sesión",
+        "exact": true
+      }
+    },
+    {
+      "index": 8,
+      "action": "click",
+      "description": "Solicitar el código por SMS.",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Solicitar código por SMS",
+        "exact": true
+      }
+    },
+    {
+      "index": 9,
+      "action": "fill",
+      "description": "fill [codigo_acceso_sms]",
+      "valueKey": "codigo_acceso_sms",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-otp\"]"
+      }
+    },
+    {
+      "index": 10,
+      "action": "click",
+      "description": "Presionar \"Continuar\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Continuar",
+        "exact": true
+      }
+    },
+    {
+      "index": 11,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Resumen de productos\"",
+      "target": {
+        "strategy": "text",
+        "value": "Resumen de productos"
+      }
+    },
+    {
+      "index": 12,
+      "action": "click",
+      "description": "Presionar \"Pagos\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "▣ Pagos",
+        "exact": true
+      }
+    },
+    {
+      "index": 13,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Cargando información segura\"",
+      "target": {
+        "strategy": "text",
+        "value": "Cargando información segura"
+      }
+    },
+    {
+      "index": 14,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Nuevo pago\"",
+      "target": {
+        "strategy": "text",
+        "value": "Nuevo pago"
+      }
+    },
+    {
+      "index": 15,
+      "action": "select",
+      "description": "select [proveedor]",
+      "valueKey": "proveedor",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"provider\"]"
+      }
+    },
+    {
+      "index": 16,
+      "action": "fill",
+      "description": "fill [numero_contrato]",
+      "valueKey": "numero_contrato",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"contract-number\"]"
+      }
+    },
+    {
+      "index": 17,
+      "action": "select",
+      "description": "select [cuenta_debitar]",
+      "valueKey": "cuenta_debitar",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"payment-account\"]"
+      }
+    },
+    {
+      "index": 18,
+      "action": "fill",
+      "description": "fill [monto]",
+      "valueKey": "monto",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"payment-amount\"]"
+      }
+    },
+    {
+      "index": 19,
+      "action": "fill",
+      "description": "fill [fecha_pago_pasada]",
+      "valueKey": "fecha_pago_pasada",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"payment-date\"]"
+      }
+    },
+    {
+      "index": 20,
+      "action": "select",
+      "description": "select [frecuencia]",
+      "valueKey": "frecuencia",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"payment-frequency\"]"
+      }
+    },
+    {
+      "index": 21,
+      "action": "click",
+      "description": "Presionar \"Revisar pago\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Revisar pago",
+        "exact": true
+      }
+    },
+    {
+      "index": 22,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"La fecha de pago no puede estar en el pasado\"",
+      "target": {
+        "strategy": "text",
+        "value": "La fecha de pago no puede estar en el pasado"
+      }
+    },
+    {
+      "index": 23,
+      "action": "assertVisible",
+      "description": "Validar que no se muestre \"Confirmación de pago\"",
+      "target": {
+        "strategy": "text",
+        "value": "Confirmación de pago"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "rnc",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "usuario",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "codigo_acceso_sms",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "proveedor",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "numero_contrato",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "cuenta_debitar",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "monto",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "fecha_pago_pasada",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "frecuencia",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Rechazar revisión de pago con fecha pasada",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Empresarial"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "rnc",
+        "technicalTargetRefs": [
+          "css:[id=\"login-rnc\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "fill",
+        "valueKey": "usuario",
+        "technicalTargetRefs": [
+          "css:[id=\"login-user\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "fill",
+        "valueKey": "contrasena",
+        "technicalTargetRefs": [
+          "css:[id=\"login-password\"]"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Solicitar código por SMS"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "fill",
+        "valueKey": "codigo_acceso_sms",
+        "technicalTargetRefs": [
+          "css:[id=\"login-otp\"]"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ]
+      },
+      {
+        "index": 11,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Resumen de productos\"",
+        "technicalTargetRefs": [
+          "text:Resumen de productos"
+        ]
+      },
+      {
+        "index": 12,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|▣ Pagos"
+        ]
+      },
+      {
+        "index": 13,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Cargando información segura\"",
+        "technicalTargetRefs": [
+          "text:Cargando información segura"
+        ]
+      },
+      {
+        "index": 14,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Nuevo pago\"",
+        "technicalTargetRefs": [
+          "text:Nuevo pago"
+        ]
+      },
+      {
+        "index": 15,
+        "action": "select",
+        "valueKey": "proveedor",
+        "technicalTargetRefs": [
+          "css:[id=\"provider\"]"
+        ]
+      },
+      {
+        "index": 16,
+        "action": "fill",
+        "valueKey": "numero_contrato",
+        "technicalTargetRefs": [
+          "css:[id=\"contract-number\"]"
+        ]
+      },
+      {
+        "index": 17,
+        "action": "select",
+        "valueKey": "cuenta_debitar",
+        "technicalTargetRefs": [
+          "css:[id=\"payment-account\"]"
+        ]
+      },
+      {
+        "index": 18,
+        "action": "fill",
+        "valueKey": "monto",
+        "technicalTargetRefs": [
+          "css:[id=\"payment-amount\"]"
+        ]
+      },
+      {
+        "index": 19,
+        "action": "fill",
+        "valueKey": "fecha_pago_pasada",
+        "technicalTargetRefs": [
+          "css:[id=\"payment-date\"]"
+        ]
+      },
+      {
+        "index": 20,
+        "action": "select",
+        "valueKey": "frecuencia",
+        "technicalTargetRefs": [
+          "css:[id=\"payment-frequency\"]"
+        ]
+      },
+      {
+        "index": 21,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Revisar pago"
+        ]
+      },
+      {
+        "index": 22,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"La fecha de pago no puede estar en el pasado\"",
+        "technicalTargetRefs": [
+          "text:La fecha de pago no puede estar en el pasado"
+        ]
+      },
+      {
+        "index": 23,
+        "action": "assertVisible",
+        "description": "Validar que no se muestre \"Confirmación de pago\"",
+        "technicalTargetRefs": [
+          "text:Confirmación de pago"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-11",
+        "requirement": "Validar que se muestre \"Resumen de productos\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 11,
+        "target": "Resumen de productos",
+        "evidence": [
+          "live-step-11"
+        ],
+        "details": {
+          "observedText": "Resumen de productos"
+        }
+      },
+      {
+        "id": "jira-oracle-13",
+        "requirement": "Validar que se muestre \"Cargando información segura\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 13,
+        "target": "Northstar / Resumen\n⌕\n♧\n3\nQD\nQA Demo\nCliente empresarial\n⌄\nCargando información segura…\nEspera mientras el portal actualiza los datos.",
+        "evidence": [
+          "live-step-13"
+        ],
+        "details": {
+          "observedText": "Northstar / Resumen\n⌕\n♧\n3\nQD\nQA Demo\nCliente empresarial\n⌄\nCargando información segura…\nEspera mientras el portal actualiza los datos."
+        }
+      },
+      {
+        "id": "jira-oracle-14",
+        "requirement": "Validar que se muestre \"Nuevo pago\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 14,
+        "target": "Nuevo pago",
+        "evidence": [
+          "live-step-14"
+        ],
+        "details": {
+          "observedText": "Nuevo pago"
+        }
+      },
+      {
+        "id": "jira-oracle-22",
+        "requirement": "Validar que se muestre \"La fecha de pago no puede estar en el pasado\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 22,
+        "target": "La fecha de pago no puede estar en el pasado.",
+        "evidence": [
+          "live-step-22"
+        ],
+        "details": {
+          "observedText": "La fecha de pago no puede estar en el pasado."
+        }
+      },
+      {
+        "id": "jira-oracle-23",
+        "requirement": "Validar que no se muestre \"Confirmación de pago\"",
+        "type": "literal_visible_text",
+        "polarity": "negative",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 23,
+        "target": "Confirmación de pago",
+        "evidence": [
+          "live-step-23"
+        ],
+        "details": {
+          "absent": true
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "Se muestra \"La fecha de pago no puede estar en el pasado\" y no se presenta \"Confirmación de pago\"."
+  }
+}

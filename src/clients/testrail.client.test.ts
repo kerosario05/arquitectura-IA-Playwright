@@ -45,3 +45,15 @@ describe("TestRail case field metadata", () => {
     await expect(createClient().getCaseFields()).rejects.toThrow("TestRail API error (HTTP 403) at get_case_fields: forbidden");
   });
 });
+
+describe("TestRail priorities", () => {
+  it("returns the configured instance priorities", async () => {
+    const priorities = [
+      { id: 3, name: "High", priority: 3 },
+      { id: 1, name: "Low", priority: 1 },
+    ];
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify({ priorities }), { status: 200 }));
+
+    await expect(createClient().getPriorities()).resolves.toEqual(priorities);
+  });
+});

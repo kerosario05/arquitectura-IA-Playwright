@@ -1,0 +1,8 @@
+{
+  "appSlug": "fenix",
+  "sectionSlug": "jira-aa-97",
+  "sourceScenarioId": "AA-97:jira:2",
+  "title": "Rechazo de inicio de sesión con credenciales no válidas",
+  "generatedAt": "2026-10-16T12:33:18.244Z",
+  "executionEngine": "jira_semantic"
+}

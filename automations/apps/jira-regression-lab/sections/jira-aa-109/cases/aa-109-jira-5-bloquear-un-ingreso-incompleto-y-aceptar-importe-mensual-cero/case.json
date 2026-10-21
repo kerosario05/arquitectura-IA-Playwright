@@ -1,0 +1,9 @@
+{
+  "id": "aa-109-jira-5-bloquear-un-ingreso-incompleto-y-aceptar-importe-mensual-cero",
+  "externalId": "AA-109:jira:5",
+  "title": "Bloquear un ingreso incompleto y aceptar importe mensual cero",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-17T18:42:36.278Z"
+}

@@ -136,7 +136,7 @@
       {
         "contractStepIndex": 2,
         "scenarioStepIndex": 3,
-        "originalText": "Ingresar \"130598983\" en \"RNC:\"",
+        "originalText": "Ingresar \"130872392\" en \"RNC:\"",
         "operation": "fill",
         "target": {
           "strategy": "label",
@@ -179,7 +179,7 @@
       {
         "contractStepIndex": 3,
         "scenarioStepIndex": 4,
-        "originalText": "Ingresar \"olivam\" en \"Usuario:\"",
+        "originalText": "Ingresar \"SAMOTA\" en \"Usuario:\"",
         "operation": "fill",
         "target": {
           "strategy": "label",
@@ -1644,11 +1644,9 @@
   "promptChars": null,
   "specGenerationAttempts": 0,
   "specRepairAttempts": 0,
-  "firstPassPromotion": false,
-  "promotionAllowed": false,
-  "failedGatesAttempt1": [
-    "functionalExecution"
-  ],
+  "firstPassPromotion": true,
+  "promotionAllowed": true,
+  "failedGatesAttempt1": [],
   "finalSpec": {
     "origin": "deterministic_compiler",
     "generatedBy": "core",

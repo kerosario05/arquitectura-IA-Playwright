@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-105",
+  "sourceScenarioId": "AA-105:jira:8",
+  "title": "Rechazar un beneficiario con el alias Atlas",
+  "generatedAt": "2026-10-19T06:41:40.008Z",
+  "executionEngine": "jira_semantic"
+}

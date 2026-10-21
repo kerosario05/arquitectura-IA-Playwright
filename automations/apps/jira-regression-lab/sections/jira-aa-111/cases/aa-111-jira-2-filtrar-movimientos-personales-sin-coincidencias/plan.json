@@ -1,0 +1,578 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-19T03:55:21.097Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "AA-111:jira:2",
+    "title": "Filtrar movimientos personales sin coincidencias"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Presionar \"Personal\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Personal",
+        "exact": true
+      }
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Presionar \"Iniciar sesión\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Iniciar sesión",
+        "exact": true
+      }
+    },
+    {
+      "index": 5,
+      "action": "fill",
+      "description": "fill [cedula]",
+      "valueKey": "cedula",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-identity\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "fill",
+      "description": "fill [usuario]",
+      "valueKey": "usuario",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-user\"]"
+      }
+    },
+    {
+      "index": 7,
+      "action": "fill",
+      "description": "fill [contrasena]",
+      "valueKey": "contrasena",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-password\"]"
+      }
+    },
+    {
+      "index": 8,
+      "action": "click",
+      "description": "Presionar \"Iniciar sesión\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Iniciar sesión",
+        "exact": true
+      }
+    },
+    {
+      "index": 9,
+      "action": "click",
+      "description": "Solicitar el código por SMS.",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Solicitar código por SMS",
+        "exact": true
+      }
+    },
+    {
+      "index": 10,
+      "action": "fill",
+      "description": "fill [codigo_acceso]",
+      "valueKey": "codigo_acceso",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-otp\"]"
+      }
+    },
+    {
+      "index": 11,
+      "action": "click",
+      "description": "Presionar \"Continuar\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Continuar",
+        "exact": true
+      }
+    },
+    {
+      "index": 12,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Resumen personal\"",
+      "target": {
+        "strategy": "text",
+        "value": "Resumen personal"
+      }
+    },
+    {
+      "index": 13,
+      "action": "click",
+      "description": "Presionar \"Movimientos\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "▤ Movimientos",
+        "exact": true
+      }
+    },
+    {
+      "index": 14,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Cargando información segura\"",
+      "target": {
+        "strategy": "text",
+        "value": "Cargando información segura"
+      }
+    },
+    {
+      "index": 15,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"tabla de movimientos personales\"",
+      "target": {
+        "strategy": "text",
+        "value": "tabla de movimientos personales"
+      }
+    },
+    {
+      "index": 16,
+      "action": "select",
+      "description": "select [cuenta]",
+      "valueKey": "cuenta",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"statement-account\"]"
+      }
+    },
+    {
+      "index": 17,
+      "action": "fill",
+      "description": "fill [desde]",
+      "valueKey": "desde",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"date-from\"]"
+      }
+    },
+    {
+      "index": 18,
+      "action": "fill",
+      "description": "fill [hasta]",
+      "valueKey": "hasta",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"date-to\"]"
+      }
+    },
+    {
+      "index": 19,
+      "action": "select",
+      "description": "select [estado]",
+      "valueKey": "estado",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"statement-status\"]"
+      }
+    },
+    {
+      "index": 20,
+      "action": "select",
+      "description": "select [tipo_movimiento]",
+      "valueKey": "tipo_movimiento",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"movement-type\"]"
+      }
+    },
+    {
+      "index": 21,
+      "action": "select",
+      "description": "fill [monto_minimo]",
+      "valueKey": "monto_minimo",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"min-amount\"]"
+      }
+    },
+    {
+      "index": 22,
+      "action": "click",
+      "description": "Presionar \"Aplicar filtros\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Aplicar filtros",
+        "exact": true
+      }
+    },
+    {
+      "index": 23,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"0 resultados\"",
+      "target": {
+        "strategy": "text",
+        "value": "0 resultados"
+      }
+    },
+    {
+      "index": 24,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"0 de 0 movimientos\"",
+      "target": {
+        "strategy": "text",
+        "value": "0 de 0 movimientos"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "cedula",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "usuario",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "codigo_acceso",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "cuenta",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "desde",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "hasta",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "estado",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "tipo_movimiento",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "monto_minimo",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Filtrar movimientos personales sin coincidencias",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Personal"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "fill",
+        "valueKey": "cedula",
+        "technicalTargetRefs": [
+          "css:[id=\"login-identity\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "fill",
+        "valueKey": "usuario",
+        "technicalTargetRefs": [
+          "css:[id=\"login-user\"]"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "fill",
+        "valueKey": "contrasena",
+        "technicalTargetRefs": [
+          "css:[id=\"login-password\"]"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Solicitar código por SMS"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "fill",
+        "valueKey": "codigo_acceso",
+        "technicalTargetRefs": [
+          "css:[id=\"login-otp\"]"
+        ]
+      },
+      {
+        "index": 11,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ]
+      },
+      {
+        "index": 12,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Resumen personal\"",
+        "technicalTargetRefs": [
+          "text:Resumen personal"
+        ]
+      },
+      {
+        "index": 13,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|▤ Movimientos"
+        ]
+      },
+      {
+        "index": 14,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Cargando información segura\"",
+        "technicalTargetRefs": [
+          "text:Cargando información segura"
+        ]
+      },
+      {
+        "index": 15,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"tabla de movimientos personales\"",
+        "technicalTargetRefs": [
+          "text:tabla de movimientos personales"
+        ]
+      },
+      {
+        "index": 16,
+        "action": "select",
+        "valueKey": "cuenta",
+        "technicalTargetRefs": [
+          "css:[id=\"statement-account\"]"
+        ]
+      },
+      {
+        "index": 17,
+        "action": "fill",
+        "valueKey": "desde",
+        "technicalTargetRefs": [
+          "css:[id=\"date-from\"]"
+        ]
+      },
+      {
+        "index": 18,
+        "action": "fill",
+        "valueKey": "hasta",
+        "technicalTargetRefs": [
+          "css:[id=\"date-to\"]"
+        ]
+      },
+      {
+        "index": 19,
+        "action": "select",
+        "valueKey": "estado",
+        "technicalTargetRefs": [
+          "css:[id=\"statement-status\"]"
+        ]
+      },
+      {
+        "index": 20,
+        "action": "select",
+        "valueKey": "tipo_movimiento",
+        "technicalTargetRefs": [
+          "css:[id=\"movement-type\"]"
+        ]
+      },
+      {
+        "index": 21,
+        "action": "select",
+        "valueKey": "monto_minimo",
+        "technicalTargetRefs": [
+          "css:[id=\"min-amount\"]"
+        ]
+      },
+      {
+        "index": 22,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Aplicar filtros"
+        ]
+      },
+      {
+        "index": 23,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"0 resultados\"",
+        "technicalTargetRefs": [
+          "text:0 resultados"
+        ]
+      },
+      {
+        "index": 24,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"0 de 0 movimientos\"",
+        "technicalTargetRefs": [
+          "text:0 de 0 movimientos"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-12",
+        "requirement": "Validar que se muestre \"Resumen personal\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 12,
+        "target": "Resumen personal",
+        "evidence": [
+          "live-step-12"
+        ],
+        "details": {
+          "observedText": "Resumen personal"
+        }
+      },
+      {
+        "id": "jira-oracle-14",
+        "requirement": "Validar que se muestre \"Cargando información segura\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 14,
+        "target": "N\nNorthstar\nPORTAL PERSONAL\nMIS PRODUCTOS\n▦\nResumen\n◫\nMis cuentas\n⇄\nTransferencias\n▣\nPagos\n▤\nMovimientos\n⌂\nSolicitar préstamo\n◷\nSeguridad\nEspacio de pruebas\nDatos ficticios · sin conexión bancaria\nEntorno: REGRESSION-LAB\nNorthstar / Resumen personal\n⌕\n♧\n3\nQD\nQA Demo\nCliente personal\n⌄\nEstado de carga\nCargando información segura…\nEspera mientras el portal actualiza los datos.",
+        "evidence": [
+          "live-step-14"
+        ],
+        "details": {
+          "observedText": "N\nNorthstar\nPORTAL PERSONAL\nMIS PRODUCTOS\n▦\nResumen\n◫\nMis cuentas\n⇄\nTransferencias\n▣\nPagos\n▤\nMovimientos\n⌂\nSolicitar préstamo\n◷\nSeguridad\nEspacio de pruebas\nDatos ficticios · sin conexión bancaria\nEntorno: REGRESSION-LAB\nNorthstar / Resumen personal\n⌕\n♧\n3\nQD\nQA Demo\nCliente personal\n⌄\nEstado de carga\nCargando información segura…\nEspera mientras el portal actualiza los datos."
+        }
+      },
+      {
+        "id": "jira-oracle-15",
+        "requirement": "Validar que se muestre \"tabla de movimientos personales\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 15,
+        "target": "Visible table caption \"Movimientos de la cuenta seleccionada\" with column headers: FECHA | DESCRIPCIÓN | REFERENCIA | MONTO | ESTADO nearby context: / | ⌕ | 3 | QD | QA Demo | Cliente personal | CONSULTAS | Estados de cuenta | Filtra movimientos por producto, rango de fechas y estado. | Exportar CSV | Cuenta | Desde | Hasta | Estado | Tipo de movimiento | Monto mínimo | RD$0 | Aplicar filtros | Limpiar filtros | 2 resultados | 1–2 de 2 movimientos | Actualizado hace unos segundos | Cuenta: Cuenta Corriente Personal | Desde: [numero]| Hasta:",
+        "evidence": [
+          "live-step-15"
+        ],
+        "details": {
+          "observedText": "Visible table caption \"Movimientos de la cuenta seleccionada\" with column headers: FECHA | DESCRIPCIÓN | REFERENCIA | MONTO | ESTADO nearby context: / | ⌕ | 3 | QD | QA Demo | Cliente personal | CONSULTAS | Estados de cuenta | Filtra movimientos por producto, rango de fechas y estado. | Exportar CSV | Cuenta | Desde | Hasta | Estado | Tipo de movimiento | Monto mínimo | RD$0 | Aplicar filtros | Limpiar filtros | 2 resultados | 1–2 de 2 movimientos | Actualizado hace unos segundos | Cuenta: Cuenta Corriente Personal | Desde: [numero]| Hasta:"
+        }
+      },
+      {
+        "id": "jira-oracle-23",
+        "requirement": "Validar que se muestre \"0 resultados\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 23,
+        "target": "CONSULTAS\nEstados de cuenta\n\nFiltra movimientos por producto, rango de fechas y estado.\n\nExportar CSV\nCuenta\nCuenta Corriente Personal\nCuenta de Ahorros Personal\nCuenta en dólares\nDesde\nHasta\nEstado\nTodos los estados\nCompletada\nPendiente\nTipo de movimiento\nTodos\nTransferencias\nPagos\nDepósitos\nMonto mínimo\nDeslizador de monto mínimo: RD$2,500\nAplicar filtros\nLimpiar filtros\n0 resultados\nMovimientos de la cuenta seleccionada\nFECHA\tDESCRIPCIÓN\tREFERENCIA\tMONTO\tESTADO\n0 de 0 movimientos\nActualizado hace unos segundos",
+        "evidence": [
+          "live-step-23"
+        ],
+        "details": {
+          "observedText": "CONSULTAS\nEstados de cuenta\n\nFiltra movimientos por producto, rango de fechas y estado.\n\nExportar CSV\nCuenta\nCuenta Corriente Personal\nCuenta de Ahorros Personal\nCuenta en dólares\nDesde\nHasta\nEstado\nTodos los estados\nCompletada\nPendiente\nTipo de movimiento\nTodos\nTransferencias\nPagos\nDepósitos\nMonto mínimo\nDeslizador de monto mínimo: RD$2,500\nAplicar filtros\nLimpiar filtros\n0 resultados\nMovimientos de la cuenta seleccionada\nFECHA\tDESCRIPCIÓN\tREFERENCIA\tMONTO\tESTADO\n0 de 0 movimientos\nActualizado hace unos segundos"
+        }
+      },
+      {
+        "id": "jira-oracle-24",
+        "requirement": "Validar que se muestre \"0 de 0 movimientos\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 24,
+        "target": "CONSULTAS\nEstados de cuenta\n\nFiltra movimientos por producto, rango de fechas y estado.\n\nExportar CSV\nCuenta\nCuenta Corriente Personal\nCuenta de Ahorros Personal\nCuenta en dólares\nDesde\nHasta\nEstado\nTodos los estados\nCompletada\nPendiente\nTipo de movimiento\nTodos\nTransferencias\nPagos\nDepósitos\nMonto mínimo\nDeslizador de monto mínimo: RD$2,500\nAplicar filtros\nLimpiar filtros\n0 resultados\nMovimientos de la cuenta seleccionada\nFECHA\tDESCRIPCIÓN\tREFERENCIA\tMONTO\tESTADO\n0 de 0 movimientos\nActualizado hace unos segundos",
+        "evidence": [
+          "live-step-24"
+        ],
+        "details": {
+          "observedText": "CONSULTAS\nEstados de cuenta\n\nFiltra movimientos por producto, rango de fechas y estado.\n\nExportar CSV\nCuenta\nCuenta Corriente Personal\nCuenta de Ahorros Personal\nCuenta en dólares\nDesde\nHasta\nEstado\nTodos los estados\nCompletada\nPendiente\nTipo de movimiento\nTodos\nTransferencias\nPagos\nDepósitos\nMonto mínimo\nDeslizador de monto mínimo: RD$2,500\nAplicar filtros\nLimpiar filtros\n0 resultados\nMovimientos de la cuenta seleccionada\nFECHA\tDESCRIPCIÓN\tREFERENCIA\tMONTO\tESTADO\n0 de 0 movimientos\nActualizado hace unos segundos"
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "Se muestra el conteo \"0 resultados\" y la paginación \"0 de 0 movimientos\"."
+  }
+}

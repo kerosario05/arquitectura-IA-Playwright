@@ -1,0 +1,69 @@
+- generic [ref=f1e9]:
+  - complementary [ref=f1e10]:
+    - generic [ref=f1e11]:
+      - generic [ref=f1e12]: Q
+      - generic [ref=f1e15]:
+        - generic [ref=f1e16]: QA Lab
+        - generic [ref=f1e17]: Santa Cruz
+    - navigation [ref=f1e18]:
+      - button "Panorama" [ref=f1e19] [cursor=pointer]
+      - button "Lanzar pruebas" [ref=f1e26] [cursor=pointer]
+      - button "Grabación" [ref=f1e32] [cursor=pointer]
+      - button "Ejecuciones" [ref=f1e36] [cursor=pointer]
+      - button "Configuración" [ref=f1e41] [cursor=pointer]
+      - button "Usuarios" [ref=f1e45] [cursor=pointer]
+    - generic [ref=f1e53]:
+      - generic [ref=f1e57]: Pro tip
+      - generic [ref=f1e58]: Programa ejecuciones nocturnas para optimizar recursos.
+    - generic [ref=f1e59]:
+      - generic [ref=f1e60]: AD
+      - generic [ref=f1e61]:
+        - generic [ref=f1e62]: Administrador
+        - generic [ref=f1e63]: Administrador
+  - main [ref=f1e64]:
+    - generic [ref=f1e65]:
+      - generic [ref=f1e66]:
+        - generic [ref=f1e67]:
+          - generic [ref=f1e69]: En vivo · 16:52
+          - generic [ref=f1e70]: ·
+          - generic [ref=f1e71]: Configura una nueva ejecución en 4 pasos
+        - heading "Lanzar pruebas" [level=1] [ref=f1e111]
+      - generic [ref=f1e73]:
+        - generic [ref=f1e74]:
+          - combobox "Buscar" [ref=f1e75]
+          - generic: Ctrl K
+        - button "Notificaciones (30 sin leer)" [ref=f1e77] [cursor=pointer]:
+          - generic [ref=f1e81]: 9+
+        - button "Cerrar sesión de admin" [ref=f1e84] [cursor=pointer]
+    - generic [ref=f1e113]:
+      - generic [ref=f1e115]:
+        - button "Proyecto" [ref=f1e116] [cursor=pointer]
+        - button "Fuentes" [ref=f1e129] [cursor=pointer]
+        - button "Casos" [ref=f1e136] [cursor=pointer]
+        - button "Lanzar" [ref=f1e144] [cursor=pointer]
+      - generic [ref=f1e151]:
+        - generic [ref=f1e190]:
+          - generic [ref=f1e191]: Paso dos · Conecta las fuentes
+          - heading "¿De dónde vienen los casos?" [level=2] [ref=f1e192]
+          - paragraph [ref=f1e193]: Configura las herramientas que alimentarán la ejecución.
+          - generic [ref=f1e195]:
+            - button "Solo TestRail Suite completa" [ref=f1e196] [cursor=pointer]:
+              - generic [ref=f1e202]: Solo TestRail
+              - generic [ref=f1e203]: Suite completa
+            - button "Ambos combinados Máxima cobertura" [ref=f1e204] [cursor=pointer]:
+              - generic [ref=f1e211]: Ambos combinados
+              - generic [ref=f1e212]: Máxima cobertura
+          - generic [ref=f1e213]:
+            - generic [ref=f1e214]:
+              - generic [ref=f1e215]: Jira
+              - generic [ref=f1e222]:
+                - generic [ref=f1e223]: Proyecto
+                - button "Selecciona un proyecto..." [ref=f1e225] [cursor=pointer]
+            - generic [ref=f1e230]:
+              - generic [ref=f1e231]: TestRail
+              - generic [ref=f1e238]:
+                - generic [ref=f1e239]: Proyecto
+                - button "Selecciona un proyecto..." [ref=f1e241] [cursor=pointer]
+        - generic [ref=f1e177]:
+          - button "Atrás" [ref=f1e178] [cursor=pointer]
+          - button "Generar escenarios" [disabled] [ref=f1e246]

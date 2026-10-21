@@ -23,7 +23,7 @@ test("one image per screen: fills share the pre-submit image, final screen is ap
     const page = await browser.newPage();
     await page.setContent(LOGIN_PAGE);
     const recorder = new EvidenceRecorder(
-      { appSlug: "app", sectionSlug: "sec", scenarioId: "S1", scenarioTitle: "t", runId: "run" },
+      { appSlug: "app", sectionSlug: "sec", scenarioId: "S1", scenarioTitle: "t", runId: "run", outputRoot },
       { outputRoot, docxEnabled: false, settleQuietMs: 150, settleTimeoutMs: 3000 },
     );
     await recorder.captureInitialScreen(page, "promoted_reuse");
@@ -44,6 +44,7 @@ test("one image per screen: fills share the pre-submit image, final screen is ap
     assert.ok(fs.existsSync(String(record.initialScreenEvidence?.completedFormCheckpointPath)));
     const reportImages = prependInitialScreenImage(record, []);
     assert.deepEqual(reportImages.map(image => path.resolve(image.path)), [
+      path.resolve(String(record.initialScreenEvidence?.path)),
       path.resolve(String(record.initialScreenEvidence?.completedFormCheckpointPath)),
     ]);
     assert.match(String(record.steps[4].screenshotPath), /final-state\.png$/);

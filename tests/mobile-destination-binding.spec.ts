@@ -248,7 +248,7 @@ test.describe("cache fallback authority leak prevention", () => {
 
   test("T4: SQL unavailable → fail-closed, no authority from stale cache", async () => {
     // Mock getProjectConfigurationBySlug to throw
-    const originalFn = await import("../src/db/project-reader.ts");
+    const originalFn = await import("../src/db/project-reader");
     const originalGetConfig = originalFn.getProjectConfigurationBySlug;
     let callCount = 0;
 

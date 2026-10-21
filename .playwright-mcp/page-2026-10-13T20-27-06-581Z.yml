@@ -1,0 +1,67 @@
+- generic [ref=e32]:
+  - complementary [ref=e33]:
+    - generic [ref=e34]:
+      - generic [ref=e35]: Q
+      - generic [ref=e38]:
+        - generic [ref=e39]: QA Lab
+        - generic [ref=e40]: Santa Cruz
+    - navigation [ref=e41]:
+      - button "Panorama" [ref=e42] [cursor=pointer]
+      - button "Lanzar pruebas" [ref=e49] [cursor=pointer]
+      - button "Grabación" [ref=e55] [cursor=pointer]
+      - button "Ejecuciones" [ref=e59] [cursor=pointer]
+      - button "Configuración" [ref=e64] [cursor=pointer]
+      - button "Usuarios" [ref=e68] [cursor=pointer]
+    - generic [ref=e76]:
+      - generic [ref=e80]: Pro tip
+      - generic [ref=e81]: Programa ejecuciones nocturnas para optimizar recursos.
+    - generic [ref=e82]:
+      - generic [ref=e83]: AD
+      - generic [ref=e84]:
+        - generic [ref=e85]: Administrador
+        - generic [ref=e86]: Administrador
+  - main [ref=e87]:
+    - generic [ref=e88]:
+      - generic [ref=e89]:
+        - generic [ref=e90]:
+          - generic [ref=e92]: En vivo · 16:26
+          - generic [ref=e93]: ·
+          - generic [ref=e94]: Configura una nueva ejecución en 4 pasos
+        - heading "Lanzar pruebas" [level=1] [ref=e133]
+      - generic [ref=e96]:
+        - generic [ref=e97]:
+          - combobox "Buscar" [ref=e98]
+          - generic: Ctrl K
+        - button "Notificaciones" [ref=e100] [cursor=pointer]
+        - button "Cerrar sesión de admin" [ref=e106] [cursor=pointer]
+    - generic [ref=e135]:
+      - generic [ref=e137]:
+        - button "Proyecto" [ref=e138] [cursor=pointer]
+        - button "Fuentes" [ref=e151] [cursor=pointer]
+        - button "Casos" [ref=e158] [cursor=pointer]
+        - button "Lanzar" [ref=e166] [cursor=pointer]
+      - generic [ref=e173]:
+        - generic [ref=e174]:
+          - generic [ref=e175]: Paso uno · Elige tu lanzadera
+          - heading "¿Qué proyecto vamos a correr?" [level=2] [ref=e176]
+          - paragraph [ref=e177]: Selecciona el framework de automatización.
+          - generic [ref=e178]:
+            - button "Web · Playwright Portal empresarial Web · Playwright" [ref=e179] [cursor=pointer]:
+              - generic [ref=e180]: Web · Playwright
+              - generic [ref=e182]: Portal empresarial
+              - generic [ref=e183]: Web · Playwright
+            - button "Web · Playwright KIOSKO Web · Playwright" [ref=e184] [cursor=pointer]:
+              - generic [ref=e185]: Web · Playwright
+              - generic [ref=e187]: KIOSKO
+              - generic [ref=e188]: Web · Playwright
+            - button "Web · Playwright Portal comercial Web · Playwright" [ref=e189] [cursor=pointer]:
+              - generic [ref=e190]: Web · Playwright
+              - generic [ref=e192]: Portal comercial
+              - generic [ref=e193]: Web · Playwright
+            - button "Web · Playwright Fenix Web · Playwright" [active] [ref=e194] [cursor=pointer]:
+              - generic [ref=e195]: Web · Playwright
+              - generic [ref=e197]: Fenix
+              - generic [ref=e198]: Web · Playwright
+        - generic [ref=e199]:
+          - button "Atrás" [disabled] [ref=e200]
+          - button "Continuar" [ref=e203] [cursor=pointer]

@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-106",
+  "sourceScenarioId": "AA-106:jira:1",
+  "title": "Filtrar, restablecer y exportar estados de cuenta",
+  "generatedAt": "2026-10-19T05:31:43.892Z",
+  "executionEngine": "jira_semantic"
+}

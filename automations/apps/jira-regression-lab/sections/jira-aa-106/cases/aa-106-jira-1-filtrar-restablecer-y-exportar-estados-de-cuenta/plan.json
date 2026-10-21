@@ -1,0 +1,895 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-19T05:30:23.128Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "AA-106:jira:1",
+    "title": "Filtrar, restablecer y exportar estados de cuenta"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "fill",
+      "description": "fill [auth.company_identifier]",
+      "valueKey": "auth.company_identifier",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-rnc\"]"
+      }
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "fill [auth.username]",
+      "valueKey": "auth.username",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-user\"]"
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [auth.password]",
+      "valueKey": "auth.password",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-password\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "click Iniciar sesión",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Iniciar sesión",
+        "exact": true
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Presionar \"Estados de cuenta\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "▤ Estados de cuenta",
+        "exact": true
+      }
+    },
+    {
+      "index": 7,
+      "action": "assertVisible",
+      "description": "Validar que \"Cuenta\" esté visible en la pantalla activa.",
+      "target": {
+        "strategy": "text",
+        "value": "Cuenta"
+      }
+    },
+    {
+      "index": 8,
+      "action": "assertVisible",
+      "description": "Validar que \"Desde\" esté visible en la pantalla activa.",
+      "target": {
+        "strategy": "text",
+        "value": "Desde"
+      }
+    },
+    {
+      "index": 9,
+      "action": "assertVisible",
+      "description": "Validar que \"Hasta\" esté visible en la pantalla activa.",
+      "target": {
+        "strategy": "text",
+        "value": "Hasta"
+      }
+    },
+    {
+      "index": 10,
+      "action": "assertVisible",
+      "description": "Validar que \"Estado\" esté visible en la pantalla activa.",
+      "target": {
+        "strategy": "text",
+        "value": "Estado"
+      }
+    },
+    {
+      "index": 11,
+      "action": "assertVisible",
+      "description": "Validar que \"Tipo de movimiento\" esté visible en la pantalla activa.",
+      "target": {
+        "strategy": "text",
+        "value": "Tipo de movimiento"
+      }
+    },
+    {
+      "index": 12,
+      "action": "assertVisible",
+      "description": "Validar que \"Monto mínimo\" esté visible en la pantalla activa.",
+      "target": {
+        "strategy": "text",
+        "value": "Monto mínimo"
+      }
+    },
+    {
+      "index": 13,
+      "action": "assertVisible",
+      "description": "Validar que \"Aplicar filtros\" esté visible en la pantalla activa.",
+      "target": {
+        "strategy": "text",
+        "value": "Aplicar filtros"
+      }
+    },
+    {
+      "index": 14,
+      "action": "assertVisible",
+      "description": "Validar que \"Limpiar filtros\" esté visible en la pantalla activa.",
+      "target": {
+        "strategy": "text",
+        "value": "Limpiar filtros"
+      }
+    },
+    {
+      "index": 15,
+      "action": "select",
+      "description": "select [account]",
+      "valueKey": "account",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"statement-account\"]"
+      }
+    },
+    {
+      "index": 16,
+      "action": "fill",
+      "description": "fill [start_date]",
+      "valueKey": "start_date",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"date-from\"]"
+      }
+    },
+    {
+      "index": 17,
+      "action": "fill",
+      "description": "fill [end_date]",
+      "valueKey": "end_date",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"date-to\"]"
+      }
+    },
+    {
+      "index": 18,
+      "action": "select",
+      "description": "select [status]",
+      "valueKey": "status",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"statement-status\"]"
+      }
+    },
+    {
+      "index": 19,
+      "action": "select",
+      "description": "select [movement_type]",
+      "valueKey": "movement_type",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"movement-type\"]"
+      }
+    },
+    {
+      "index": 20,
+      "action": "select",
+      "description": "fill [minimum_amount]",
+      "valueKey": "minimum_amount",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"min-amount\"]"
+      }
+    },
+    {
+      "index": 21,
+      "action": "click",
+      "description": "Presionar \"Aplicar filtros\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Aplicar filtros",
+        "exact": true
+      }
+    },
+    {
+      "index": 22,
+      "action": "assertVisible",
+      "description": "Validar que el indicador de cantidad de resultados esté visible en la pantalla activa.",
+      "target": {
+        "strategy": "text",
+        "value": "que el indicador de cantidad de resultados esté visible en la pantalla activa"
+      }
+    },
+    {
+      "index": 23,
+      "action": "assertVisible",
+      "description": "Validar que la tabla de movimientos esté visible en la pantalla activa.",
+      "target": {
+        "strategy": "text",
+        "value": "que la tabla de movimientos esté visible en la pantalla activa"
+      }
+    },
+    {
+      "index": 24,
+      "action": "click",
+      "description": "Presionar \"Limpiar filtros\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Limpiar filtros",
+        "exact": true
+      }
+    },
+    {
+      "index": 25,
+      "action": "assertVisible",
+      "description": "Validar que \"Cuenta\" muestre Cuenta Corriente.",
+      "target": {
+        "strategy": "text",
+        "value": "Cuenta"
+      }
+    },
+    {
+      "index": 26,
+      "action": "assertVisible",
+      "description": "Validar que \"Desde\" muestre 2026-10-01.",
+      "target": {
+        "strategy": "text",
+        "value": "Desde"
+      }
+    },
+    {
+      "index": 27,
+      "action": "assertVisible",
+      "description": "Validar que \"Hasta\" muestre 2026-10-16.",
+      "target": {
+        "strategy": "text",
+        "value": "Hasta"
+      }
+    },
+    {
+      "index": 28,
+      "action": "assertVisible",
+      "description": "Validar que \"Estado\" muestre Todos los estados.",
+      "target": {
+        "strategy": "text",
+        "value": "Estado"
+      }
+    },
+    {
+      "index": 29,
+      "action": "assertVisible",
+      "description": "Validar que \"Tipo de movimiento\" muestre Todos los tipos.",
+      "target": {
+        "strategy": "text",
+        "value": "Tipo de movimiento"
+      }
+    },
+    {
+      "index": 30,
+      "action": "assertVisible",
+      "description": "Validar que \"Monto mínimo\" muestre cero.",
+      "target": {
+        "strategy": "text",
+        "value": "Monto mínimo"
+      }
+    },
+    {
+      "index": 31,
+      "action": "click",
+      "description": "Presionar \"Exportar CSV\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Exportar CSV",
+        "exact": true
+      }
+    },
+    {
+      "index": 32,
+      "action": "assertVisible",
+      "description": "Validar que se descargue el archivo estado-de-cuenta-regression-lab.csv con los movimientos correspondientes a los filtros aplicados.",
+      "target": {
+        "strategy": "text",
+        "value": "estado-de-cuenta-regression-lab.csv"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "auth.company_identifier",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "auth.username",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "auth.password",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "account",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "start_date",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "end_date",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "status",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "movement_type",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "minimum_amount",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Filtrar, restablecer y exportar estados de cuenta",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "fill",
+        "valueKey": "auth.company_identifier",
+        "technicalTargetRefs": [
+          "css:[id=\"login-rnc\"]"
+        ]
+      },
+      {
+        "index": 3,
+        "action": "fill",
+        "valueKey": "auth.username",
+        "technicalTargetRefs": [
+          "css:[id=\"login-user\"]"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "auth.password",
+        "technicalTargetRefs": [
+          "css:[id=\"login-password\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|▤ Estados de cuenta"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "assertVisible",
+        "description": "Validar que \"Cuenta\" esté visible en la pantalla activa.",
+        "technicalTargetRefs": [
+          "text:Cuenta"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "assertVisible",
+        "description": "Validar que \"Desde\" esté visible en la pantalla activa.",
+        "technicalTargetRefs": [
+          "text:Desde"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "assertVisible",
+        "description": "Validar que \"Hasta\" esté visible en la pantalla activa.",
+        "technicalTargetRefs": [
+          "text:Hasta"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "assertVisible",
+        "description": "Validar que \"Estado\" esté visible en la pantalla activa.",
+        "technicalTargetRefs": [
+          "text:Estado"
+        ]
+      },
+      {
+        "index": 11,
+        "action": "assertVisible",
+        "description": "Validar que \"Tipo de movimiento\" esté visible en la pantalla activa.",
+        "technicalTargetRefs": [
+          "text:Tipo de movimiento"
+        ]
+      },
+      {
+        "index": 12,
+        "action": "assertVisible",
+        "description": "Validar que \"Monto mínimo\" esté visible en la pantalla activa.",
+        "technicalTargetRefs": [
+          "text:Monto mínimo"
+        ]
+      },
+      {
+        "index": 13,
+        "action": "assertVisible",
+        "description": "Validar que \"Aplicar filtros\" esté visible en la pantalla activa.",
+        "technicalTargetRefs": [
+          "text:Aplicar filtros"
+        ]
+      },
+      {
+        "index": 14,
+        "action": "assertVisible",
+        "description": "Validar que \"Limpiar filtros\" esté visible en la pantalla activa.",
+        "technicalTargetRefs": [
+          "text:Limpiar filtros"
+        ]
+      },
+      {
+        "index": 15,
+        "action": "select",
+        "valueKey": "account",
+        "technicalTargetRefs": [
+          "css:[id=\"statement-account\"]"
+        ]
+      },
+      {
+        "index": 16,
+        "action": "fill",
+        "valueKey": "start_date",
+        "technicalTargetRefs": [
+          "css:[id=\"date-from\"]"
+        ]
+      },
+      {
+        "index": 17,
+        "action": "fill",
+        "valueKey": "end_date",
+        "technicalTargetRefs": [
+          "css:[id=\"date-to\"]"
+        ]
+      },
+      {
+        "index": 18,
+        "action": "select",
+        "valueKey": "status",
+        "technicalTargetRefs": [
+          "css:[id=\"statement-status\"]"
+        ]
+      },
+      {
+        "index": 19,
+        "action": "select",
+        "valueKey": "movement_type",
+        "technicalTargetRefs": [
+          "css:[id=\"movement-type\"]"
+        ]
+      },
+      {
+        "index": 20,
+        "action": "select",
+        "valueKey": "minimum_amount",
+        "technicalTargetRefs": [
+          "css:[id=\"min-amount\"]"
+        ]
+      },
+      {
+        "index": 21,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Aplicar filtros"
+        ]
+      },
+      {
+        "index": 22,
+        "action": "assertVisible",
+        "description": "Validar que el indicador de cantidad de resultados esté visible en la pantalla activa.",
+        "technicalTargetRefs": [
+          "text:que el indicador de cantidad de resultados esté visible en la pantalla activa"
+        ]
+      },
+      {
+        "index": 23,
+        "action": "assertVisible",
+        "description": "Validar que la tabla de movimientos esté visible en la pantalla activa.",
+        "technicalTargetRefs": [
+          "text:que la tabla de movimientos esté visible en la pantalla activa"
+        ]
+      },
+      {
+        "index": 24,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Limpiar filtros"
+        ]
+      },
+      {
+        "index": 25,
+        "action": "assertVisible",
+        "description": "Validar que \"Cuenta\" muestre Cuenta Corriente.",
+        "technicalTargetRefs": [
+          "text:Cuenta"
+        ]
+      },
+      {
+        "index": 26,
+        "action": "assertVisible",
+        "description": "Validar que \"Desde\" muestre 2026-10-01.",
+        "technicalTargetRefs": [
+          "text:Desde"
+        ]
+      },
+      {
+        "index": 27,
+        "action": "assertVisible",
+        "description": "Validar que \"Hasta\" muestre 2026-10-16.",
+        "technicalTargetRefs": [
+          "text:Hasta"
+        ]
+      },
+      {
+        "index": 28,
+        "action": "assertVisible",
+        "description": "Validar que \"Estado\" muestre Todos los estados.",
+        "technicalTargetRefs": [
+          "text:Estado"
+        ]
+      },
+      {
+        "index": 29,
+        "action": "assertVisible",
+        "description": "Validar que \"Tipo de movimiento\" muestre Todos los tipos.",
+        "technicalTargetRefs": [
+          "text:Tipo de movimiento"
+        ]
+      },
+      {
+        "index": 30,
+        "action": "assertVisible",
+        "description": "Validar que \"Monto mínimo\" muestre cero.",
+        "technicalTargetRefs": [
+          "text:Monto mínimo"
+        ]
+      },
+      {
+        "index": 31,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Exportar CSV"
+        ]
+      },
+      {
+        "index": 32,
+        "action": "assertVisible",
+        "description": "Validar que se descargue el archivo estado-de-cuenta-regression-lab.csv con los movimientos correspondientes a los filtros aplicados.",
+        "technicalTargetRefs": [
+          "text:estado-de-cuenta-regression-lab.csv"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-7",
+        "requirement": "Validar que \"Cuenta\" esté visible en la pantalla activa.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 7,
+        "target": "Estados de cuenta",
+        "evidence": [
+          "live-step-7"
+        ],
+        "details": {
+          "observedText": "Estados de cuenta"
+        }
+      },
+      {
+        "id": "jira-oracle-8",
+        "requirement": "Validar que \"Desde\" esté visible en la pantalla activa.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 8,
+        "target": "Cuenta\nCuenta Corriente\nCuenta de Ahorros\nCuenta Empresarial USD\nDesde\nHasta\nEstado\nTodos los estados\nCompletada\nPendiente\nTipo de movimiento\nTodos\nTransferencias\nPagos\nDepósitos\nMonto mínimo\nDeslizador de monto mínimo: RD$0\nAplicar filtros\nLimpiar filtros\n2 resultados\nMovimientos de la cuenta seleccionada\nFECHA\tDESCRIPCIÓN\tREFERENCIA\tMONTO\tESTADO\n10 oct 2026\tTransferencia propia\tTRX-800124\t− RD$2,500.00\tCompletada\n9 oct 2026\tPago de servicio\tPAY-443102\t− RD$3,200.00\tCompletada\n1–2 de 2 movimientos\nActualizado hace unos segundos",
+        "evidence": [
+          "live-step-8"
+        ],
+        "details": {
+          "observedText": "Cuenta\nCuenta Corriente\nCuenta de Ahorros\nCuenta Empresarial USD\nDesde\nHasta\nEstado\nTodos los estados\nCompletada\nPendiente\nTipo de movimiento\nTodos\nTransferencias\nPagos\nDepósitos\nMonto mínimo\nDeslizador de monto mínimo: RD$0\nAplicar filtros\nLimpiar filtros\n2 resultados\nMovimientos de la cuenta seleccionada\nFECHA\tDESCRIPCIÓN\tREFERENCIA\tMONTO\tESTADO\n10 oct 2026\tTransferencia propia\tTRX-800124\t− RD$2,500.00\tCompletada\n9 oct 2026\tPago de servicio\tPAY-443102\t− RD$3,200.00\tCompletada\n1–2 de 2 movimientos\nActualizado hace unos segundos"
+        }
+      },
+      {
+        "id": "jira-oracle-9",
+        "requirement": "Validar que \"Hasta\" esté visible en la pantalla activa.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 9,
+        "target": "Cuenta\nCuenta Corriente\nCuenta de Ahorros\nCuenta Empresarial USD\nDesde\nHasta\nEstado\nTodos los estados\nCompletada\nPendiente\nTipo de movimiento\nTodos\nTransferencias\nPagos\nDepósitos\nMonto mínimo\nDeslizador de monto mínimo: RD$0\nAplicar filtros\nLimpiar filtros\n2 resultados\nMovimientos de la cuenta seleccionada\nFECHA\tDESCRIPCIÓN\tREFERENCIA\tMONTO\tESTADO\n10 oct 2026\tTransferencia propia\tTRX-800124\t− RD$2,500.00\tCompletada\n9 oct 2026\tPago de servicio\tPAY-443102\t− RD$3,200.00\tCompletada\n1–2 de 2 movimientos\nActualizado hace unos segundos",
+        "evidence": [
+          "live-step-9"
+        ],
+        "details": {
+          "observedText": "Cuenta\nCuenta Corriente\nCuenta de Ahorros\nCuenta Empresarial USD\nDesde\nHasta\nEstado\nTodos los estados\nCompletada\nPendiente\nTipo de movimiento\nTodos\nTransferencias\nPagos\nDepósitos\nMonto mínimo\nDeslizador de monto mínimo: RD$0\nAplicar filtros\nLimpiar filtros\n2 resultados\nMovimientos de la cuenta seleccionada\nFECHA\tDESCRIPCIÓN\tREFERENCIA\tMONTO\tESTADO\n10 oct 2026\tTransferencia propia\tTRX-800124\t− RD$2,500.00\tCompletada\n9 oct 2026\tPago de servicio\tPAY-443102\t− RD$3,200.00\tCompletada\n1–2 de 2 movimientos\nActualizado hace unos segundos"
+        }
+      },
+      {
+        "id": "jira-oracle-10",
+        "requirement": "Validar que \"Estado\" esté visible en la pantalla activa.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 10,
+        "target": "Estados de cuenta",
+        "evidence": [
+          "live-step-10"
+        ],
+        "details": {
+          "observedText": "Estados de cuenta"
+        }
+      },
+      {
+        "id": "jira-oracle-11",
+        "requirement": "Validar que \"Tipo de movimiento\" esté visible en la pantalla activa.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 11,
+        "target": "Cuenta\nCuenta Corriente\nCuenta de Ahorros\nCuenta Empresarial USD\nDesde\nHasta\nEstado\nTodos los estados\nCompletada\nPendiente\nTipo de movimiento\nTodos\nTransferencias\nPagos\nDepósitos\nMonto mínimo\nDeslizador de monto mínimo: RD$0\nAplicar filtros\nLimpiar filtros\n2 resultados\nMovimientos de la cuenta seleccionada\nFECHA\tDESCRIPCIÓN\tREFERENCIA\tMONTO\tESTADO\n10 oct 2026\tTransferencia propia\tTRX-800124\t− RD$2,500.00\tCompletada\n9 oct 2026\tPago de servicio\tPAY-443102\t− RD$3,200.00\tCompletada\n1–2 de 2 movimientos\nActualizado hace unos segundos",
+        "evidence": [
+          "live-step-11"
+        ],
+        "details": {
+          "observedText": "Cuenta\nCuenta Corriente\nCuenta de Ahorros\nCuenta Empresarial USD\nDesde\nHasta\nEstado\nTodos los estados\nCompletada\nPendiente\nTipo de movimiento\nTodos\nTransferencias\nPagos\nDepósitos\nMonto mínimo\nDeslizador de monto mínimo: RD$0\nAplicar filtros\nLimpiar filtros\n2 resultados\nMovimientos de la cuenta seleccionada\nFECHA\tDESCRIPCIÓN\tREFERENCIA\tMONTO\tESTADO\n10 oct 2026\tTransferencia propia\tTRX-800124\t− RD$2,500.00\tCompletada\n9 oct 2026\tPago de servicio\tPAY-443102\t− RD$3,200.00\tCompletada\n1–2 de 2 movimientos\nActualizado hace unos segundos"
+        }
+      },
+      {
+        "id": "jira-oracle-12",
+        "requirement": "Validar que \"Monto mínimo\" esté visible en la pantalla activa.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 12,
+        "target": "Cuenta\nCuenta Corriente\nCuenta de Ahorros\nCuenta Empresarial USD\nDesde\nHasta\nEstado\nTodos los estados\nCompletada\nPendiente\nTipo de movimiento\nTodos\nTransferencias\nPagos\nDepósitos\nMonto mínimo\nDeslizador de monto mínimo: RD$0\nAplicar filtros\nLimpiar filtros\n2 resultados\nMovimientos de la cuenta seleccionada\nFECHA\tDESCRIPCIÓN\tREFERENCIA\tMONTO\tESTADO\n10 oct 2026\tTransferencia propia\tTRX-800124\t− RD$2,500.00\tCompletada\n9 oct 2026\tPago de servicio\tPAY-443102\t− RD$3,200.00\tCompletada\n1–2 de 2 movimientos\nActualizado hace unos segundos",
+        "evidence": [
+          "live-step-12"
+        ],
+        "details": {
+          "observedText": "Cuenta\nCuenta Corriente\nCuenta de Ahorros\nCuenta Empresarial USD\nDesde\nHasta\nEstado\nTodos los estados\nCompletada\nPendiente\nTipo de movimiento\nTodos\nTransferencias\nPagos\nDepósitos\nMonto mínimo\nDeslizador de monto mínimo: RD$0\nAplicar filtros\nLimpiar filtros\n2 resultados\nMovimientos de la cuenta seleccionada\nFECHA\tDESCRIPCIÓN\tREFERENCIA\tMONTO\tESTADO\n10 oct 2026\tTransferencia propia\tTRX-800124\t− RD$2,500.00\tCompletada\n9 oct 2026\tPago de servicio\tPAY-443102\t− RD$3,200.00\tCompletada\n1–2 de 2 movimientos\nActualizado hace unos segundos"
+        }
+      },
+      {
+        "id": "jira-oracle-13",
+        "requirement": "Validar que \"Aplicar filtros\" esté visible en la pantalla activa.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 13,
+        "target": "Cuenta\nCuenta Corriente\nCuenta de Ahorros\nCuenta Empresarial USD\nDesde\nHasta\nEstado\nTodos los estados\nCompletada\nPendiente\nTipo de movimiento\nTodos\nTransferencias\nPagos\nDepósitos\nMonto mínimo\nDeslizador de monto mínimo: RD$0\nAplicar filtros\nLimpiar filtros\n2 resultados\nMovimientos de la cuenta seleccionada\nFECHA\tDESCRIPCIÓN\tREFERENCIA\tMONTO\tESTADO\n10 oct 2026\tTransferencia propia\tTRX-800124\t− RD$2,500.00\tCompletada\n9 oct 2026\tPago de servicio\tPAY-443102\t− RD$3,200.00\tCompletada\n1–2 de 2 movimientos\nActualizado hace unos segundos",
+        "evidence": [
+          "live-step-13"
+        ],
+        "details": {
+          "observedText": "Cuenta\nCuenta Corriente\nCuenta de Ahorros\nCuenta Empresarial USD\nDesde\nHasta\nEstado\nTodos los estados\nCompletada\nPendiente\nTipo de movimiento\nTodos\nTransferencias\nPagos\nDepósitos\nMonto mínimo\nDeslizador de monto mínimo: RD$0\nAplicar filtros\nLimpiar filtros\n2 resultados\nMovimientos de la cuenta seleccionada\nFECHA\tDESCRIPCIÓN\tREFERENCIA\tMONTO\tESTADO\n10 oct 2026\tTransferencia propia\tTRX-800124\t− RD$2,500.00\tCompletada\n9 oct 2026\tPago de servicio\tPAY-443102\t− RD$3,200.00\tCompletada\n1–2 de 2 movimientos\nActualizado hace unos segundos"
+        }
+      },
+      {
+        "id": "jira-oracle-14",
+        "requirement": "Validar que \"Limpiar filtros\" esté visible en la pantalla activa.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 14,
+        "target": "Cuenta\nCuenta Corriente\nCuenta de Ahorros\nCuenta Empresarial USD\nDesde\nHasta\nEstado\nTodos los estados\nCompletada\nPendiente\nTipo de movimiento\nTodos\nTransferencias\nPagos\nDepósitos\nMonto mínimo\nDeslizador de monto mínimo: RD$0\nAplicar filtros\nLimpiar filtros\n2 resultados\nMovimientos de la cuenta seleccionada\nFECHA\tDESCRIPCIÓN\tREFERENCIA\tMONTO\tESTADO\n10 oct 2026\tTransferencia propia\tTRX-800124\t− RD$2,500.00\tCompletada\n9 oct 2026\tPago de servicio\tPAY-443102\t− RD$3,200.00\tCompletada\n1–2 de 2 movimientos\nActualizado hace unos segundos",
+        "evidence": [
+          "live-step-14"
+        ],
+        "details": {
+          "observedText": "Cuenta\nCuenta Corriente\nCuenta de Ahorros\nCuenta Empresarial USD\nDesde\nHasta\nEstado\nTodos los estados\nCompletada\nPendiente\nTipo de movimiento\nTodos\nTransferencias\nPagos\nDepósitos\nMonto mínimo\nDeslizador de monto mínimo: RD$0\nAplicar filtros\nLimpiar filtros\n2 resultados\nMovimientos de la cuenta seleccionada\nFECHA\tDESCRIPCIÓN\tREFERENCIA\tMONTO\tESTADO\n10 oct 2026\tTransferencia propia\tTRX-800124\t− RD$2,500.00\tCompletada\n9 oct 2026\tPago de servicio\tPAY-443102\t− RD$3,200.00\tCompletada\n1–2 de 2 movimientos\nActualizado hace unos segundos"
+        }
+      },
+      {
+        "id": "jira-oracle-22",
+        "requirement": "Validar que el indicador de cantidad de resultados esté visible en la pantalla activa.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 22,
+        "target": "1 resultados",
+        "evidence": [
+          "live-step-22"
+        ],
+        "details": {
+          "observedText": "1 resultados"
+        }
+      },
+      {
+        "id": "jira-oracle-23",
+        "requirement": "Validar que la tabla de movimientos esté visible en la pantalla activa.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 23,
+        "target": "Visible table caption \"Movimientos de la cuenta seleccionada\" with column headers: FECHA | DESCRIPCIÓN | REFERENCIA | MONTO | ESTADO nearby context: / | ⌕ | 3 | QD | QA Demo | Cliente empresarial | CONSULTAS | Estados de cuenta | Filtra movimientos por producto, rango de fechas y estado. | Exportar CSV | Cuenta | Desde | Hasta | Estado | Tipo de movimiento | Monto mínimo | RD$500 | Aplicar filtros | Limpiar filtros | 1 resultados | 1–1 de 1 movimientos | Actualizado hace unos segundos | Cuenta: Cuenta Corriente | Desde: [numero]| Hasta: 202",
+        "evidence": [
+          "live-step-23"
+        ],
+        "details": {
+          "observedText": "Visible table caption \"Movimientos de la cuenta seleccionada\" with column headers: FECHA | DESCRIPCIÓN | REFERENCIA | MONTO | ESTADO nearby context: / | ⌕ | 3 | QD | QA Demo | Cliente empresarial | CONSULTAS | Estados de cuenta | Filtra movimientos por producto, rango de fechas y estado. | Exportar CSV | Cuenta | Desde | Hasta | Estado | Tipo de movimiento | Monto mínimo | RD$500 | Aplicar filtros | Limpiar filtros | 1 resultados | 1–1 de 1 movimientos | Actualizado hace unos segundos | Cuenta: Cuenta Corriente | Desde: [numero]| Hasta: 202"
+        }
+      },
+      {
+        "id": "jira-oracle-25",
+        "requirement": "Validar que \"Cuenta\" muestre Cuenta Corriente.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 25,
+        "target": "Estados de cuenta",
+        "evidence": [
+          "live-step-25"
+        ],
+        "details": {
+          "observedText": "Estados de cuenta"
+        }
+      },
+      {
+        "id": "jira-oracle-26",
+        "requirement": "Validar que \"Desde\" muestre 2026-10-01.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 26,
+        "target": "Cuenta\nCuenta Corriente\nCuenta de Ahorros\nCuenta Empresarial USD\nDesde\nHasta\nEstado\nTodos los estados\nCompletada\nPendiente\nTipo de movimiento\nTodos\nTransferencias\nPagos\nDepósitos\nMonto mínimo\nDeslizador de monto mínimo: RD$0\nAplicar filtros\nLimpiar filtros\n2 resultados\nMovimientos de la cuenta seleccionada\nFECHA\tDESCRIPCIÓN\tREFERENCIA\tMONTO\tESTADO\n10 oct 2026\tTransferencia propia\tTRX-800124\t− RD$2,500.00\tCompletada\n9 oct 2026\tPago de servicio\tPAY-443102\t− RD$3,200.00\tCompletada\n1–2 de 2 movimientos\nActualizado hace unos segundos",
+        "evidence": [
+          "live-step-26"
+        ],
+        "details": {
+          "observedText": "Cuenta\nCuenta Corriente\nCuenta de Ahorros\nCuenta Empresarial USD\nDesde\nHasta\nEstado\nTodos los estados\nCompletada\nPendiente\nTipo de movimiento\nTodos\nTransferencias\nPagos\nDepósitos\nMonto mínimo\nDeslizador de monto mínimo: RD$0\nAplicar filtros\nLimpiar filtros\n2 resultados\nMovimientos de la cuenta seleccionada\nFECHA\tDESCRIPCIÓN\tREFERENCIA\tMONTO\tESTADO\n10 oct 2026\tTransferencia propia\tTRX-800124\t− RD$2,500.00\tCompletada\n9 oct 2026\tPago de servicio\tPAY-443102\t− RD$3,200.00\tCompletada\n1–2 de 2 movimientos\nActualizado hace unos segundos"
+        }
+      },
+      {
+        "id": "jira-oracle-27",
+        "requirement": "Validar que \"Hasta\" muestre 2026-10-16.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 27,
+        "target": "Cuenta\nCuenta Corriente\nCuenta de Ahorros\nCuenta Empresarial USD\nDesde\nHasta\nEstado\nTodos los estados\nCompletada\nPendiente\nTipo de movimiento\nTodos\nTransferencias\nPagos\nDepósitos\nMonto mínimo\nDeslizador de monto mínimo: RD$0\nAplicar filtros\nLimpiar filtros\n2 resultados\nMovimientos de la cuenta seleccionada\nFECHA\tDESCRIPCIÓN\tREFERENCIA\tMONTO\tESTADO\n10 oct 2026\tTransferencia propia\tTRX-800124\t− RD$2,500.00\tCompletada\n9 oct 2026\tPago de servicio\tPAY-443102\t− RD$3,200.00\tCompletada\n1–2 de 2 movimientos\nActualizado hace unos segundos",
+        "evidence": [
+          "live-step-27"
+        ],
+        "details": {
+          "observedText": "Cuenta\nCuenta Corriente\nCuenta de Ahorros\nCuenta Empresarial USD\nDesde\nHasta\nEstado\nTodos los estados\nCompletada\nPendiente\nTipo de movimiento\nTodos\nTransferencias\nPagos\nDepósitos\nMonto mínimo\nDeslizador de monto mínimo: RD$0\nAplicar filtros\nLimpiar filtros\n2 resultados\nMovimientos de la cuenta seleccionada\nFECHA\tDESCRIPCIÓN\tREFERENCIA\tMONTO\tESTADO\n10 oct 2026\tTransferencia propia\tTRX-800124\t− RD$2,500.00\tCompletada\n9 oct 2026\tPago de servicio\tPAY-443102\t− RD$3,200.00\tCompletada\n1–2 de 2 movimientos\nActualizado hace unos segundos"
+        }
+      },
+      {
+        "id": "jira-oracle-28",
+        "requirement": "Validar que \"Estado\" muestre Todos los estados.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 28,
+        "target": "Estados de cuenta",
+        "evidence": [
+          "live-step-28"
+        ],
+        "details": {
+          "observedText": "Estados de cuenta"
+        }
+      },
+      {
+        "id": "jira-oracle-29",
+        "requirement": "Validar que \"Tipo de movimiento\" muestre Todos los tipos.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 29,
+        "target": "Cuenta\nCuenta Corriente\nCuenta de Ahorros\nCuenta Empresarial USD\nDesde\nHasta\nEstado\nTodos los estados\nCompletada\nPendiente\nTipo de movimiento\nTodos\nTransferencias\nPagos\nDepósitos\nMonto mínimo\nDeslizador de monto mínimo: RD$0\nAplicar filtros\nLimpiar filtros\n2 resultados\nMovimientos de la cuenta seleccionada\nFECHA\tDESCRIPCIÓN\tREFERENCIA\tMONTO\tESTADO\n10 oct 2026\tTransferencia propia\tTRX-800124\t− RD$2,500.00\tCompletada\n9 oct 2026\tPago de servicio\tPAY-443102\t− RD$3,200.00\tCompletada\n1–2 de 2 movimientos\nActualizado hace unos segundos",
+        "evidence": [
+          "live-step-29"
+        ],
+        "details": {
+          "observedText": "Cuenta\nCuenta Corriente\nCuenta de Ahorros\nCuenta Empresarial USD\nDesde\nHasta\nEstado\nTodos los estados\nCompletada\nPendiente\nTipo de movimiento\nTodos\nTransferencias\nPagos\nDepósitos\nMonto mínimo\nDeslizador de monto mínimo: RD$0\nAplicar filtros\nLimpiar filtros\n2 resultados\nMovimientos de la cuenta seleccionada\nFECHA\tDESCRIPCIÓN\tREFERENCIA\tMONTO\tESTADO\n10 oct 2026\tTransferencia propia\tTRX-800124\t− RD$2,500.00\tCompletada\n9 oct 2026\tPago de servicio\tPAY-443102\t− RD$3,200.00\tCompletada\n1–2 de 2 movimientos\nActualizado hace unos segundos"
+        }
+      },
+      {
+        "id": "jira-oracle-30",
+        "requirement": "Validar que \"Monto mínimo\" muestre cero.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 30,
+        "target": "Cuenta\nCuenta Corriente\nCuenta de Ahorros\nCuenta Empresarial USD\nDesde\nHasta\nEstado\nTodos los estados\nCompletada\nPendiente\nTipo de movimiento\nTodos\nTransferencias\nPagos\nDepósitos\nMonto mínimo\nDeslizador de monto mínimo: RD$0\nAplicar filtros\nLimpiar filtros\n2 resultados\nMovimientos de la cuenta seleccionada\nFECHA\tDESCRIPCIÓN\tREFERENCIA\tMONTO\tESTADO\n10 oct 2026\tTransferencia propia\tTRX-800124\t− RD$2,500.00\tCompletada\n9 oct 2026\tPago de servicio\tPAY-443102\t− RD$3,200.00\tCompletada\n1–2 de 2 movimientos\nActualizado hace unos segundos",
+        "evidence": [
+          "live-step-30"
+        ],
+        "details": {
+          "observedText": "Cuenta\nCuenta Corriente\nCuenta de Ahorros\nCuenta Empresarial USD\nDesde\nHasta\nEstado\nTodos los estados\nCompletada\nPendiente\nTipo de movimiento\nTodos\nTransferencias\nPagos\nDepósitos\nMonto mínimo\nDeslizador de monto mínimo: RD$0\nAplicar filtros\nLimpiar filtros\n2 resultados\nMovimientos de la cuenta seleccionada\nFECHA\tDESCRIPCIÓN\tREFERENCIA\tMONTO\tESTADO\n10 oct 2026\tTransferencia propia\tTRX-800124\t− RD$2,500.00\tCompletada\n9 oct 2026\tPago de servicio\tPAY-443102\t− RD$3,200.00\tCompletada\n1–2 de 2 movimientos\nActualizado hace unos segundos"
+        }
+      },
+      {
+        "id": "jira-oracle-32",
+        "requirement": "Validar que se descargue el archivo estado-de-cuenta-regression-lab.csv con los movimientos correspondientes a los filtros aplicados.",
+        "type": "runtime_state",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 32,
+        "target": "estado-de-cuenta-regression-lab.csv",
+        "evidence": [
+          "live-step-32"
+        ],
+        "details": {
+          "kind": "download_content",
+          "filename": "estado-de-cuenta-regression-lab.csv",
+          "bytes": 199
+        }
+      }
+    ],
+    "auth": {
+      "required": true,
+      "gateDetected": true,
+      "insertionAfterStepIndex": 5,
+      "flowAlias": "defaultClient"
+    },
+    "expectedResult": "Se descarga estado-de-cuenta-regression-lab.csv con los movimientos correspondientes a los filtros aplicados."
+  }
+}

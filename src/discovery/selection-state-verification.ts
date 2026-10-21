@@ -14,6 +14,12 @@ export type SelectionStateVerification = {
   reason: string;
 };
 
+/** A recorded check/uncheck must act on the resolved control itself, not an ancestor label. */
+export function shouldPromoteStatefulControlToClickableAncestor(actionKind: string | undefined): boolean {
+  const kind = String(actionKind ?? "").toLowerCase();
+  return kind !== "check" && kind !== "uncheck";
+}
+
 export function booleanState(state: InteractiveState): boolean | undefined {
   if (typeof state.checked === "boolean") return state.checked;
   if (typeof state.ariaChecked === "string" && /^(true|false)$/i.test(state.ariaChecked)) {

@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-109",
+  "sourceScenarioId": "AA-109:jira:5",
+  "title": "Bloquear un ingreso incompleto y aceptar importe mensual cero",
+  "generatedAt": "2026-10-17T18:42:36.272Z",
+  "executionEngine": "jira_semantic"
+}

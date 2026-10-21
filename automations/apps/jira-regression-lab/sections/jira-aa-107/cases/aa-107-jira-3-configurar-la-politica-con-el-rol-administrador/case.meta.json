@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-107",
+  "sourceScenarioId": "AA-107:jira:3",
+  "title": "Configurar la política con el rol Administrador",
+  "generatedAt": "2026-10-19T01:30:10.342Z",
+  "executionEngine": "jira_semantic"
+}

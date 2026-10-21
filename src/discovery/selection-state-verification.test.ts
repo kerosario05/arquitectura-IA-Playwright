@@ -1,6 +1,16 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { verifySelectionState, hasCausalSelectionTransition } from "./selection-state-verification";
+import { verifySelectionState, hasCausalSelectionTransition, shouldPromoteStatefulControlToClickableAncestor } from "./selection-state-verification";
+
+test("recorded check and uncheck keep the resolved control as the click target", () => {
+  assert.equal(shouldPromoteStatefulControlToClickableAncestor("check"), false);
+  assert.equal(shouldPromoteStatefulControlToClickableAncestor("uncheck"), false);
+});
+
+test("ordinary clicks retain clickable-ancestor promotion", () => {
+  assert.equal(shouldPromoteStatefulControlToClickableAncestor("click"), true);
+  assert.equal(shouldPromoteStatefulControlToClickableAncestor(undefined), true);
+});
 
 test("check succeeds from checked state", () => {
   assert.deepEqual(verifySelectionState("check", { checked: false }, { checked: true }).matches, true);

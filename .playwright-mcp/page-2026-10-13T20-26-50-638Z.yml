@@ -1,0 +1,49 @@
+- generic [ref=e32]:
+  - complementary [ref=e33]:
+    - generic [ref=e34]:
+      - generic [ref=e35]: Q
+      - generic [ref=e38]:
+        - generic [ref=e39]: QA Lab
+        - generic [ref=e40]: Santa Cruz
+    - navigation [ref=e41]:
+      - button "Panorama" [ref=e42] [cursor=pointer]
+      - button "Lanzar pruebas" [ref=e49] [cursor=pointer]
+      - button "Grabación" [ref=e55] [cursor=pointer]
+      - button "Ejecuciones" [ref=e59] [cursor=pointer]
+      - button "Configuración" [ref=e64] [cursor=pointer]
+      - button "Usuarios" [ref=e68] [cursor=pointer]
+    - generic [ref=e76]:
+      - generic [ref=e80]: Pro tip
+      - generic [ref=e81]: Programa ejecuciones nocturnas para optimizar recursos.
+    - generic [ref=e82]:
+      - generic [ref=e83]: AD
+      - generic [ref=e84]:
+        - generic [ref=e85]: Administrador
+        - generic [ref=e86]: Administrador
+  - main [ref=e87]:
+    - generic [ref=e88]:
+      - generic [ref=e89]:
+        - generic [ref=e90]:
+          - generic [ref=e92]: En vivo · 16:26
+          - generic [ref=e93]: ·
+          - generic [ref=e94]: Aquí está el pulso de tus pruebas automatizadas hoy
+        - heading "Buenos días, Carlos" [level=1] [ref=e95]
+      - generic [ref=e96]:
+        - generic [ref=e97]:
+          - combobox "Buscar" [ref=e98]
+          - generic: Ctrl K
+        - button "Notificaciones" [ref=e100] [cursor=pointer]
+        - button "Nueva ejecución" [ref=e104] [cursor=pointer]
+        - button "Cerrar sesión de admin" [ref=e106] [cursor=pointer]
+    - generic [ref=e111]:
+      - generic [ref=e112]:
+        - generic [ref=e113]:
+          - button "Todo" [ref=e114] [cursor=pointer]
+          - combobox "Filtrar Panorama por proyecto" [disabled] [ref=e115] [cursor=pointer]:
+            - option "Por proyecto..." [selected]
+        - generic [ref=e116]:
+          - generic [ref=e117]: Últimos 30 días
+          - button "Actualizar Panorama" [disabled] [ref=e120]
+      - generic [ref=e126]:
+        - heading "Cargando Panorama" [level=2] [ref=e130]
+        - paragraph [ref=e131]: Consultando los proyectos y ejecuciones del backend.

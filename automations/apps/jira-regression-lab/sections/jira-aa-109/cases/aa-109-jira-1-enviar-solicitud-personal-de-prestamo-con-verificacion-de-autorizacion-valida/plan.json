@@ -1,0 +1,2777 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-17T15:18:53.756Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "AA-109:jira:1",
+    "title": "Enviar solicitud personal de préstamo con verificación de autorización válida"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Presionar \"Personal\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Personal",
+        "exact": true
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [cedula]",
+      "valueKey": "cedula",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-identity\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "fill",
+      "description": "fill [usuario]",
+      "valueKey": "usuario",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-user\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "fill",
+      "description": "fill [contrasena]",
+      "valueKey": "contrasena",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-password\"]"
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"Iniciar sesión\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Iniciar sesión",
+        "exact": true
+      }
+    },
+    {
+      "index": 8,
+      "action": "click",
+      "description": "Solicitar el código por SMS.",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Solicitar código por SMS",
+        "exact": true
+      }
+    },
+    {
+      "index": 9,
+      "action": "fill",
+      "description": "fill [codigo_sms]",
+      "valueKey": "codigo_sms",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-otp\"]"
+      }
+    },
+    {
+      "index": 10,
+      "action": "click",
+      "description": "Presionar \"Continuar\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Continuar",
+        "exact": true
+      }
+    },
+    {
+      "index": 11,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"resumen personal\"",
+      "target": {
+        "strategy": "text",
+        "value": "resumen personal"
+      }
+    },
+    {
+      "index": 12,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"productos\"",
+      "target": {
+        "strategy": "text",
+        "value": "productos"
+      }
+    },
+    {
+      "index": 13,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"saldos\"",
+      "target": {
+        "strategy": "text",
+        "value": "saldos"
+      }
+    },
+    {
+      "index": 14,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"movimientos\"",
+      "target": {
+        "strategy": "text",
+        "value": "movimientos"
+      }
+    },
+    {
+      "index": 15,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"pagos\"",
+      "target": {
+        "strategy": "text",
+        "value": "pagos"
+      }
+    },
+    {
+      "index": 16,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"transferencias\"",
+      "target": {
+        "strategy": "text",
+        "value": "transferencias"
+      }
+    },
+    {
+      "index": 17,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"solicitudes\"",
+      "target": {
+        "strategy": "text",
+        "value": "solicitudes"
+      }
+    },
+    {
+      "index": 18,
+      "action": "click",
+      "description": "Presionar \"Solicitar préstamo\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Solicitar préstamo",
+        "exact": true
+      }
+    },
+    {
+      "index": 19,
+      "action": "select",
+      "description": "select [tipo_documento]",
+      "valueKey": "tipo_documento",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-document-type\"]"
+      }
+    },
+    {
+      "index": 20,
+      "action": "fill",
+      "description": "fill [numero_documento]",
+      "valueKey": "numero_documento",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-document-number\"]"
+      }
+    },
+    {
+      "index": 21,
+      "action": "fill",
+      "description": "fill [nombres]",
+      "valueKey": "nombres",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-first-name\"]"
+      }
+    },
+    {
+      "index": 22,
+      "action": "fill",
+      "description": "fill [apellidos]",
+      "valueKey": "apellidos",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-last-name\"]"
+      }
+    },
+    {
+      "index": 23,
+      "action": "fill",
+      "description": "fill [fecha_nacimiento]",
+      "valueKey": "fecha_nacimiento",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-birth-date\"]"
+      }
+    },
+    {
+      "index": 24,
+      "action": "select",
+      "description": "select [estado_civil]",
+      "valueKey": "estado_civil",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-marital-status\"]"
+      }
+    },
+    {
+      "index": 25,
+      "action": "fill",
+      "description": "fill [dependientes]",
+      "valueKey": "dependientes",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-dependents\"]"
+      }
+    },
+    {
+      "index": 26,
+      "action": "click",
+      "description": "Presionar \"Continuar\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Avanzar a Contacto y domicilio",
+        "exact": true
+      }
+    },
+    {
+      "index": 27,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"estado de carga\"",
+      "target": {
+        "strategy": "text",
+        "value": "estado de carga"
+      }
+    },
+    {
+      "index": 28,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Contacto y domicilio\"",
+      "target": {
+        "strategy": "text",
+        "value": "Contacto y domicilio"
+      }
+    },
+    {
+      "index": 29,
+      "action": "fill",
+      "description": "fill [correo]",
+      "valueKey": "correo",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-email\"]"
+      }
+    },
+    {
+      "index": 30,
+      "action": "fill",
+      "description": "fill [movil]",
+      "valueKey": "movil",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-mobile\"]"
+      }
+    },
+    {
+      "index": 31,
+      "action": "fill",
+      "description": "fill [alternativo]",
+      "valueKey": "alternativo",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-alt-phone\"]"
+      }
+    },
+    {
+      "index": 32,
+      "action": "select",
+      "description": "select [provincia]",
+      "valueKey": "provincia",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-province\"]"
+      }
+    },
+    {
+      "index": 33,
+      "action": "select",
+      "description": "select [municipio]",
+      "valueKey": "municipio",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-city\"]"
+      }
+    },
+    {
+      "index": 34,
+      "action": "fill",
+      "description": "select [sector]",
+      "valueKey": "sector",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-neighborhood\"]"
+      }
+    },
+    {
+      "index": 35,
+      "action": "fill",
+      "description": "fill [direccion]",
+      "valueKey": "direccion",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-address\"]"
+      }
+    },
+    {
+      "index": 36,
+      "action": "select",
+      "description": "fill [tiempo_direccion]",
+      "valueKey": "tiempo_direccion",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-address-years\"]"
+      }
+    },
+    {
+      "index": 37,
+      "action": "click",
+      "description": "Presionar \"Continuar\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Avanzar a Actividad laboral",
+        "exact": true
+      }
+    },
+    {
+      "index": 38,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"estado de carga\"",
+      "target": {
+        "strategy": "text",
+        "value": "estado de carga"
+      }
+    },
+    {
+      "index": 39,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Actividad laboral\"",
+      "target": {
+        "strategy": "text",
+        "value": "Actividad laboral"
+      }
+    },
+    {
+      "index": 40,
+      "action": "select",
+      "description": "select [situacion_laboral]",
+      "valueKey": "situacion_laboral",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-employment\"]"
+      }
+    },
+    {
+      "index": 41,
+      "action": "fill",
+      "description": "fill [empleador]",
+      "valueKey": "empleador",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-employer\"]"
+      }
+    },
+    {
+      "index": 42,
+      "action": "fill",
+      "description": "fill [cargo]",
+      "valueKey": "cargo",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-occupation\"]"
+      }
+    },
+    {
+      "index": 43,
+      "action": "select",
+      "description": "select [sector_economico]",
+      "valueKey": "sector_economico",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-industry\"]"
+      }
+    },
+    {
+      "index": 44,
+      "action": "fill",
+      "description": "fill [fecha_inicio]",
+      "valueKey": "fecha_inicio",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-start-date\"]"
+      }
+    },
+    {
+      "index": 45,
+      "action": "fill",
+      "description": "fill [telefono_laboral]",
+      "valueKey": "telefono_laboral",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-work-phone\"]"
+      }
+    },
+    {
+      "index": 46,
+      "action": "select",
+      "description": "select [tipo_contrato]",
+      "valueKey": "tipo_contrato",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-contract\"]"
+      }
+    },
+    {
+      "index": 47,
+      "action": "click",
+      "description": "Presionar \"Continuar\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Avanzar a Ingresos",
+        "exact": true
+      }
+    },
+    {
+      "index": 48,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"estado de carga\"",
+      "target": {
+        "strategy": "text",
+        "value": "estado de carga"
+      }
+    },
+    {
+      "index": 49,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Ingresos\"",
+      "target": {
+        "strategy": "text",
+        "value": "Ingresos"
+      }
+    },
+    {
+      "index": 50,
+      "action": "fill",
+      "description": "fill [ingreso_principal]",
+      "valueKey": "ingreso_principal",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-income\"]"
+      }
+    },
+    {
+      "index": 51,
+      "action": "fill",
+      "description": "fill [otros_ingresos]",
+      "valueKey": "otros_ingresos",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-other-income\"]"
+      }
+    },
+    {
+      "index": 52,
+      "action": "fill",
+      "description": "fill [origen_otros_ingresos]",
+      "valueKey": "origen_otros_ingresos",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-income-source\"]"
+      }
+    },
+    {
+      "index": 53,
+      "action": "select",
+      "description": "select [ingreso1_tipo]",
+      "valueKey": "ingreso1_tipo",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-income-1-type\"]"
+      }
+    },
+    {
+      "index": 54,
+      "action": "fill",
+      "description": "fill [ingreso1_importe]",
+      "valueKey": "ingreso1_importe",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-income-1-amount\"]"
+      }
+    },
+    {
+      "index": 55,
+      "action": "select",
+      "description": "select [ingreso1_frecuencia]",
+      "valueKey": "ingreso1_frecuencia",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-income-1-frequency\"]"
+      }
+    },
+    {
+      "index": 56,
+      "action": "click",
+      "description": "Presionar \"Agregar ingreso\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Agregar ingreso",
+        "exact": true
+      }
+    },
+    {
+      "index": 57,
+      "action": "select",
+      "description": "select [ingreso2_tipo]",
+      "valueKey": "ingreso2_tipo",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-income-2-type\"]"
+      }
+    },
+    {
+      "index": 58,
+      "action": "fill",
+      "description": "fill [ingreso2_importe]",
+      "valueKey": "ingreso2_importe",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-income-2-amount\"]"
+      }
+    },
+    {
+      "index": 59,
+      "action": "select",
+      "description": "select [ingreso2_frecuencia]",
+      "valueKey": "ingreso2_frecuencia",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-income-2-frequency\"]"
+      }
+    },
+    {
+      "index": 60,
+      "action": "click",
+      "description": "Presionar \"Continuar\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Avanzar a Compromisos",
+        "exact": true
+      }
+    },
+    {
+      "index": 61,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"estado de carga\"",
+      "target": {
+        "strategy": "text",
+        "value": "estado de carga"
+      }
+    },
+    {
+      "index": 62,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Compromisos\"",
+      "target": {
+        "strategy": "text",
+        "value": "Compromisos"
+      }
+    },
+    {
+      "index": 63,
+      "action": "fill",
+      "description": "fill [gastos_hogar]",
+      "valueKey": "gastos_hogar",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-household-costs\"]"
+      }
+    },
+    {
+      "index": 64,
+      "action": "fill",
+      "description": "fill [cuotas_prestamos]",
+      "valueKey": "cuotas_prestamos",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-existing-debt\"]"
+      }
+    },
+    {
+      "index": 65,
+      "action": "fill",
+      "description": "fill [gasto_vivienda]",
+      "valueKey": "gasto_vivienda",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-housing-costs\"]"
+      }
+    },
+    {
+      "index": 66,
+      "action": "select",
+      "description": "fill [dia_pago]",
+      "valueKey": "dia_pago",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-payment-day\"]"
+      }
+    },
+    {
+      "index": 67,
+      "action": "select",
+      "description": "select [compromiso1_tipo]",
+      "valueKey": "compromiso1_tipo",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-commitment-1-type\"]"
+      }
+    },
+    {
+      "index": 68,
+      "action": "fill",
+      "description": "fill [compromiso1_importe]",
+      "valueKey": "compromiso1_importe",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-commitment-1-amount\"]"
+      }
+    },
+    {
+      "index": 69,
+      "action": "select",
+      "description": "select [compromiso1_frecuencia]",
+      "valueKey": "compromiso1_frecuencia",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-commitment-1-frequency\"]"
+      }
+    },
+    {
+      "index": 70,
+      "action": "click",
+      "description": "Presionar \"Agregar compromiso\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Agregar compromiso",
+        "exact": true
+      }
+    },
+    {
+      "index": 71,
+      "action": "select",
+      "description": "select [compromiso2_tipo]",
+      "valueKey": "compromiso2_tipo",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-commitment-2-type\"]"
+      }
+    },
+    {
+      "index": 72,
+      "action": "fill",
+      "description": "fill [compromiso2_importe]",
+      "valueKey": "compromiso2_importe",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-commitment-2-amount\"]"
+      }
+    },
+    {
+      "index": 73,
+      "action": "select",
+      "description": "select [compromiso2_frecuencia]",
+      "valueKey": "compromiso2_frecuencia",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-commitment-2-frequency\"]"
+      }
+    },
+    {
+      "index": 74,
+      "action": "click",
+      "description": "Presionar \"Continuar\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Avanzar a Condiciones del préstamo",
+        "exact": true
+      }
+    },
+    {
+      "index": 75,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"estado de carga\"",
+      "target": {
+        "strategy": "text",
+        "value": "estado de carga"
+      }
+    },
+    {
+      "index": 76,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Condiciones\"",
+      "target": {
+        "strategy": "text",
+        "value": "Condiciones"
+      }
+    },
+    {
+      "index": 77,
+      "action": "fill",
+      "description": "fill [monto]",
+      "valueKey": "monto",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-amount\"]"
+      }
+    },
+    {
+      "index": 78,
+      "action": "select",
+      "description": "select [proposito]",
+      "valueKey": "proposito",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-purpose\"]"
+      }
+    },
+    {
+      "index": 79,
+      "action": "select",
+      "description": "select [plazo]",
+      "valueKey": "plazo",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-term\"]"
+      }
+    },
+    {
+      "index": 80,
+      "action": "select",
+      "description": "select [cuenta_desembolso]",
+      "valueKey": "cuenta_desembolso",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-disbursement-account\"]"
+      }
+    },
+    {
+      "index": 81,
+      "action": "select",
+      "description": "select [frecuencia_pago]",
+      "valueKey": "frecuencia_pago",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-frequency\"]"
+      }
+    },
+    {
+      "index": 82,
+      "action": "fill",
+      "description": "fill [fecha_desembolso]",
+      "valueKey": "fecha_desembolso",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-disbursement-date\"]"
+      }
+    },
+    {
+      "index": 83,
+      "action": "select",
+      "description": "select [seguro_vida]",
+      "valueKey": "seguro_vida",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-insurance\"]"
+      }
+    },
+    {
+      "index": 84,
+      "action": "click",
+      "description": "Presionar \"Continuar\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Avanzar a Referencias personales",
+        "exact": true
+      }
+    },
+    {
+      "index": 85,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"estado de carga\"",
+      "target": {
+        "strategy": "text",
+        "value": "estado de carga"
+      }
+    },
+    {
+      "index": 86,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Referencias\"",
+      "target": {
+        "strategy": "text",
+        "value": "Referencias"
+      }
+    },
+    {
+      "index": 87,
+      "action": "select",
+      "description": "fill [relacion1]",
+      "valueKey": "relacion1",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-ref1-relation\"]"
+      }
+    },
+    {
+      "index": 88,
+      "action": "fill",
+      "description": "fill [nombre_ref1]",
+      "valueKey": "nombre_ref1",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-ref1-name\"]"
+      }
+    },
+    {
+      "index": 89,
+      "action": "fill",
+      "description": "fill [telefono_ref1]",
+      "valueKey": "telefono_ref1",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-ref1-phone\"]"
+      }
+    },
+    {
+      "index": 90,
+      "action": "select",
+      "description": "fill [relacion2]",
+      "valueKey": "relacion2",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-ref2-relation\"]"
+      }
+    },
+    {
+      "index": 91,
+      "action": "fill",
+      "description": "fill [nombre_ref2]",
+      "valueKey": "nombre_ref2",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-ref2-name\"]"
+      }
+    },
+    {
+      "index": 92,
+      "action": "fill",
+      "description": "fill [telefono_ref2]",
+      "valueKey": "telefono_ref2",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-ref2-phone\"]"
+      }
+    },
+    {
+      "index": 93,
+      "action": "click",
+      "description": "Presionar \"Continuar\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Avanzar a Documentos y declaraciones",
+        "exact": true
+      }
+    },
+    {
+      "index": 94,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"estado de carga\"",
+      "target": {
+        "strategy": "text",
+        "value": "estado de carga"
+      }
+    },
+    {
+      "index": 95,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Documentos y declaraciones\"",
+      "target": {
+        "strategy": "text",
+        "value": "Documentos y declaraciones"
+      }
+    },
+    {
+      "index": 96,
+      "action": "select",
+      "description": "select [documento_identidad]",
+      "valueKey": "documento_identidad",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-id-document\"]"
+      }
+    },
+    {
+      "index": 97,
+      "action": "select",
+      "description": "select [comprobante_ingresos]",
+      "valueKey": "comprobante_ingresos",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-income-document\"]"
+      }
+    },
+    {
+      "index": 98,
+      "action": "select",
+      "description": "select [comprobante_domicilio]",
+      "valueKey": "comprobante_domicilio",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-address-document\"]"
+      }
+    },
+    {
+      "index": 99,
+      "action": "select",
+      "description": "select [autorizacion_crediticia]",
+      "valueKey": "autorizacion_crediticia",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-credit-consent\"]"
+      }
+    },
+    {
+      "index": 100,
+      "action": "select",
+      "description": "select [veracidad]",
+      "valueKey": "veracidad",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-accuracy\"]"
+      }
+    },
+    {
+      "index": 101,
+      "action": "select",
+      "description": "select [canal_notificacion]",
+      "valueKey": "canal_notificacion",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-notification-channel\"]"
+      }
+    },
+    {
+      "index": 102,
+      "action": "click",
+      "description": "Presionar \"Continuar\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Revisar solicitud",
+        "exact": true
+      }
+    },
+    {
+      "index": 103,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"datos capturados\"",
+      "target": {
+        "strategy": "text",
+        "value": "datos capturados"
+      }
+    },
+    {
+      "index": 104,
+      "action": "click",
+      "description": "Solicitar el código de autorización.",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Solicitar código de autorización",
+        "exact": true
+      }
+    },
+    {
+      "index": 105,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Código de autorización\"",
+      "target": {
+        "strategy": "text",
+        "value": "Código de autorización"
+      }
+    },
+    {
+      "index": 106,
+      "action": "fill",
+      "description": "fill [jira_step_105]",
+      "valueKey": "jira_step_105",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"loan-authorization-code\"]"
+      }
+    },
+    {
+      "index": 107,
+      "action": "click",
+      "description": "Presionar \"Enviar\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Enviar solicitud",
+        "exact": true
+      }
+    },
+    {
+      "index": 108,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Solicitud recibida\"",
+      "target": {
+        "strategy": "text",
+        "value": "Solicitud recibida"
+      }
+    },
+    {
+      "index": 109,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"referencia\"",
+      "target": {
+        "strategy": "text",
+        "value": "referencia"
+      }
+    },
+    {
+      "index": 110,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"estado en evaluación\"",
+      "target": {
+        "strategy": "text",
+        "value": "estado en evaluación"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "cedula",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "usuario",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "codigo_sms",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "tipo_documento",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "numero_documento",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "nombres",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "apellidos",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "fecha_nacimiento",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "estado_civil",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "dependientes",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "correo",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "movil",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "alternativo",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "provincia",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "municipio",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "sector",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "direccion",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "tiempo_direccion",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "situacion_laboral",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "empleador",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "cargo",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "sector_economico",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "fecha_inicio",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "telefono_laboral",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "tipo_contrato",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "ingreso_principal",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "otros_ingresos",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "origen_otros_ingresos",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "ingreso1_tipo",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "ingreso1_importe",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "ingreso1_frecuencia",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "ingreso2_tipo",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "ingreso2_importe",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "ingreso2_frecuencia",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "gastos_hogar",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "cuotas_prestamos",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "gasto_vivienda",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "dia_pago",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "compromiso1_tipo",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "compromiso1_importe",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "compromiso1_frecuencia",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "compromiso2_tipo",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "compromiso2_importe",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "compromiso2_frecuencia",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "monto",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "proposito",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "plazo",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "cuenta_desembolso",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "frecuencia_pago",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "fecha_desembolso",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "seguro_vida",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "relacion1",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "nombre_ref1",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "telefono_ref1",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "relacion2",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "nombre_ref2",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "telefono_ref2",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "documento_identidad",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "comprobante_ingresos",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "comprobante_domicilio",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "autorizacion_crediticia",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "veracidad",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "canal_notificacion",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "jira_step_105",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Enviar solicitud personal de préstamo con verificación de autorización válida",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Personal"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "cedula",
+        "technicalTargetRefs": [
+          "css:[id=\"login-identity\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "fill",
+        "valueKey": "usuario",
+        "technicalTargetRefs": [
+          "css:[id=\"login-user\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "fill",
+        "valueKey": "contrasena",
+        "technicalTargetRefs": [
+          "css:[id=\"login-password\"]"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Solicitar código por SMS"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "fill",
+        "valueKey": "codigo_sms",
+        "technicalTargetRefs": [
+          "css:[id=\"login-otp\"]"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ]
+      },
+      {
+        "index": 11,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"resumen personal\"",
+        "technicalTargetRefs": [
+          "text:resumen personal"
+        ]
+      },
+      {
+        "index": 12,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"productos\"",
+        "technicalTargetRefs": [
+          "text:productos"
+        ]
+      },
+      {
+        "index": 13,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"saldos\"",
+        "technicalTargetRefs": [
+          "text:saldos"
+        ]
+      },
+      {
+        "index": 14,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"movimientos\"",
+        "technicalTargetRefs": [
+          "text:movimientos"
+        ]
+      },
+      {
+        "index": 15,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"pagos\"",
+        "technicalTargetRefs": [
+          "text:pagos"
+        ]
+      },
+      {
+        "index": 16,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"transferencias\"",
+        "technicalTargetRefs": [
+          "text:transferencias"
+        ]
+      },
+      {
+        "index": 17,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"solicitudes\"",
+        "technicalTargetRefs": [
+          "text:solicitudes"
+        ]
+      },
+      {
+        "index": 18,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Solicitar préstamo"
+        ]
+      },
+      {
+        "index": 19,
+        "action": "select",
+        "valueKey": "tipo_documento",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-document-type\"]"
+        ]
+      },
+      {
+        "index": 20,
+        "action": "fill",
+        "valueKey": "numero_documento",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-document-number\"]"
+        ]
+      },
+      {
+        "index": 21,
+        "action": "fill",
+        "valueKey": "nombres",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-first-name\"]"
+        ]
+      },
+      {
+        "index": 22,
+        "action": "fill",
+        "valueKey": "apellidos",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-last-name\"]"
+        ]
+      },
+      {
+        "index": 23,
+        "action": "fill",
+        "valueKey": "fecha_nacimiento",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-birth-date\"]"
+        ]
+      },
+      {
+        "index": 24,
+        "action": "select",
+        "valueKey": "estado_civil",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-marital-status\"]"
+        ]
+      },
+      {
+        "index": 25,
+        "action": "fill",
+        "valueKey": "dependientes",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-dependents\"]"
+        ]
+      },
+      {
+        "index": 26,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Avanzar a Contacto y domicilio"
+        ]
+      },
+      {
+        "index": 27,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"estado de carga\"",
+        "technicalTargetRefs": [
+          "text:estado de carga"
+        ]
+      },
+      {
+        "index": 28,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Contacto y domicilio\"",
+        "technicalTargetRefs": [
+          "text:Contacto y domicilio"
+        ]
+      },
+      {
+        "index": 29,
+        "action": "fill",
+        "valueKey": "correo",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-email\"]"
+        ]
+      },
+      {
+        "index": 30,
+        "action": "fill",
+        "valueKey": "movil",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-mobile\"]"
+        ]
+      },
+      {
+        "index": 31,
+        "action": "fill",
+        "valueKey": "alternativo",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-alt-phone\"]"
+        ]
+      },
+      {
+        "index": 32,
+        "action": "select",
+        "valueKey": "provincia",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-province\"]"
+        ]
+      },
+      {
+        "index": 33,
+        "action": "select",
+        "valueKey": "municipio",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-city\"]"
+        ]
+      },
+      {
+        "index": 34,
+        "action": "fill",
+        "valueKey": "sector",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-neighborhood\"]"
+        ]
+      },
+      {
+        "index": 35,
+        "action": "fill",
+        "valueKey": "direccion",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-address\"]"
+        ]
+      },
+      {
+        "index": 36,
+        "action": "select",
+        "valueKey": "tiempo_direccion",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-address-years\"]"
+        ]
+      },
+      {
+        "index": 37,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Avanzar a Actividad laboral"
+        ]
+      },
+      {
+        "index": 38,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"estado de carga\"",
+        "technicalTargetRefs": [
+          "text:estado de carga"
+        ]
+      },
+      {
+        "index": 39,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Actividad laboral\"",
+        "technicalTargetRefs": [
+          "text:Actividad laboral"
+        ]
+      },
+      {
+        "index": 40,
+        "action": "select",
+        "valueKey": "situacion_laboral",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-employment\"]"
+        ]
+      },
+      {
+        "index": 41,
+        "action": "fill",
+        "valueKey": "empleador",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-employer\"]"
+        ]
+      },
+      {
+        "index": 42,
+        "action": "fill",
+        "valueKey": "cargo",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-occupation\"]"
+        ]
+      },
+      {
+        "index": 43,
+        "action": "select",
+        "valueKey": "sector_economico",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-industry\"]"
+        ]
+      },
+      {
+        "index": 44,
+        "action": "fill",
+        "valueKey": "fecha_inicio",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-start-date\"]"
+        ]
+      },
+      {
+        "index": 45,
+        "action": "fill",
+        "valueKey": "telefono_laboral",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-work-phone\"]"
+        ]
+      },
+      {
+        "index": 46,
+        "action": "select",
+        "valueKey": "tipo_contrato",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-contract\"]"
+        ]
+      },
+      {
+        "index": 47,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Avanzar a Ingresos"
+        ]
+      },
+      {
+        "index": 48,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"estado de carga\"",
+        "technicalTargetRefs": [
+          "text:estado de carga"
+        ]
+      },
+      {
+        "index": 49,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Ingresos\"",
+        "technicalTargetRefs": [
+          "text:Ingresos"
+        ]
+      },
+      {
+        "index": 50,
+        "action": "fill",
+        "valueKey": "ingreso_principal",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-income\"]"
+        ]
+      },
+      {
+        "index": 51,
+        "action": "fill",
+        "valueKey": "otros_ingresos",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-other-income\"]"
+        ]
+      },
+      {
+        "index": 52,
+        "action": "fill",
+        "valueKey": "origen_otros_ingresos",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-income-source\"]"
+        ]
+      },
+      {
+        "index": 53,
+        "action": "select",
+        "valueKey": "ingreso1_tipo",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-income-1-type\"]"
+        ]
+      },
+      {
+        "index": 54,
+        "action": "fill",
+        "valueKey": "ingreso1_importe",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-income-1-amount\"]"
+        ]
+      },
+      {
+        "index": 55,
+        "action": "select",
+        "valueKey": "ingreso1_frecuencia",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-income-1-frequency\"]"
+        ]
+      },
+      {
+        "index": 56,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Agregar ingreso"
+        ]
+      },
+      {
+        "index": 57,
+        "action": "select",
+        "valueKey": "ingreso2_tipo",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-income-2-type\"]"
+        ]
+      },
+      {
+        "index": 58,
+        "action": "fill",
+        "valueKey": "ingreso2_importe",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-income-2-amount\"]"
+        ]
+      },
+      {
+        "index": 59,
+        "action": "select",
+        "valueKey": "ingreso2_frecuencia",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-income-2-frequency\"]"
+        ]
+      },
+      {
+        "index": 60,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Avanzar a Compromisos"
+        ]
+      },
+      {
+        "index": 61,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"estado de carga\"",
+        "technicalTargetRefs": [
+          "text:estado de carga"
+        ]
+      },
+      {
+        "index": 62,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Compromisos\"",
+        "technicalTargetRefs": [
+          "text:Compromisos"
+        ]
+      },
+      {
+        "index": 63,
+        "action": "fill",
+        "valueKey": "gastos_hogar",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-household-costs\"]"
+        ]
+      },
+      {
+        "index": 64,
+        "action": "fill",
+        "valueKey": "cuotas_prestamos",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-existing-debt\"]"
+        ]
+      },
+      {
+        "index": 65,
+        "action": "fill",
+        "valueKey": "gasto_vivienda",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-housing-costs\"]"
+        ]
+      },
+      {
+        "index": 66,
+        "action": "select",
+        "valueKey": "dia_pago",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-payment-day\"]"
+        ]
+      },
+      {
+        "index": 67,
+        "action": "select",
+        "valueKey": "compromiso1_tipo",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-commitment-1-type\"]"
+        ]
+      },
+      {
+        "index": 68,
+        "action": "fill",
+        "valueKey": "compromiso1_importe",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-commitment-1-amount\"]"
+        ]
+      },
+      {
+        "index": 69,
+        "action": "select",
+        "valueKey": "compromiso1_frecuencia",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-commitment-1-frequency\"]"
+        ]
+      },
+      {
+        "index": 70,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Agregar compromiso"
+        ]
+      },
+      {
+        "index": 71,
+        "action": "select",
+        "valueKey": "compromiso2_tipo",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-commitment-2-type\"]"
+        ]
+      },
+      {
+        "index": 72,
+        "action": "fill",
+        "valueKey": "compromiso2_importe",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-commitment-2-amount\"]"
+        ]
+      },
+      {
+        "index": 73,
+        "action": "select",
+        "valueKey": "compromiso2_frecuencia",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-commitment-2-frequency\"]"
+        ]
+      },
+      {
+        "index": 74,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Avanzar a Condiciones del préstamo"
+        ]
+      },
+      {
+        "index": 75,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"estado de carga\"",
+        "technicalTargetRefs": [
+          "text:estado de carga"
+        ]
+      },
+      {
+        "index": 76,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Condiciones\"",
+        "technicalTargetRefs": [
+          "text:Condiciones"
+        ]
+      },
+      {
+        "index": 77,
+        "action": "fill",
+        "valueKey": "monto",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-amount\"]"
+        ]
+      },
+      {
+        "index": 78,
+        "action": "select",
+        "valueKey": "proposito",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-purpose\"]"
+        ]
+      },
+      {
+        "index": 79,
+        "action": "select",
+        "valueKey": "plazo",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-term\"]"
+        ]
+      },
+      {
+        "index": 80,
+        "action": "select",
+        "valueKey": "cuenta_desembolso",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-disbursement-account\"]"
+        ]
+      },
+      {
+        "index": 81,
+        "action": "select",
+        "valueKey": "frecuencia_pago",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-frequency\"]"
+        ]
+      },
+      {
+        "index": 82,
+        "action": "fill",
+        "valueKey": "fecha_desembolso",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-disbursement-date\"]"
+        ]
+      },
+      {
+        "index": 83,
+        "action": "select",
+        "valueKey": "seguro_vida",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-insurance\"]"
+        ]
+      },
+      {
+        "index": 84,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Avanzar a Referencias personales"
+        ]
+      },
+      {
+        "index": 85,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"estado de carga\"",
+        "technicalTargetRefs": [
+          "text:estado de carga"
+        ]
+      },
+      {
+        "index": 86,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Referencias\"",
+        "technicalTargetRefs": [
+          "text:Referencias"
+        ]
+      },
+      {
+        "index": 87,
+        "action": "select",
+        "valueKey": "relacion1",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-ref1-relation\"]"
+        ]
+      },
+      {
+        "index": 88,
+        "action": "fill",
+        "valueKey": "nombre_ref1",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-ref1-name\"]"
+        ]
+      },
+      {
+        "index": 89,
+        "action": "fill",
+        "valueKey": "telefono_ref1",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-ref1-phone\"]"
+        ]
+      },
+      {
+        "index": 90,
+        "action": "select",
+        "valueKey": "relacion2",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-ref2-relation\"]"
+        ]
+      },
+      {
+        "index": 91,
+        "action": "fill",
+        "valueKey": "nombre_ref2",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-ref2-name\"]"
+        ]
+      },
+      {
+        "index": 92,
+        "action": "fill",
+        "valueKey": "telefono_ref2",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-ref2-phone\"]"
+        ]
+      },
+      {
+        "index": 93,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Avanzar a Documentos y declaraciones"
+        ]
+      },
+      {
+        "index": 94,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"estado de carga\"",
+        "technicalTargetRefs": [
+          "text:estado de carga"
+        ]
+      },
+      {
+        "index": 95,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Documentos y declaraciones\"",
+        "technicalTargetRefs": [
+          "text:Documentos y declaraciones"
+        ]
+      },
+      {
+        "index": 96,
+        "action": "select",
+        "valueKey": "documento_identidad",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-id-document\"]"
+        ]
+      },
+      {
+        "index": 97,
+        "action": "select",
+        "valueKey": "comprobante_ingresos",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-income-document\"]"
+        ]
+      },
+      {
+        "index": 98,
+        "action": "select",
+        "valueKey": "comprobante_domicilio",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-address-document\"]"
+        ]
+      },
+      {
+        "index": 99,
+        "action": "select",
+        "valueKey": "autorizacion_crediticia",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-credit-consent\"]"
+        ]
+      },
+      {
+        "index": 100,
+        "action": "select",
+        "valueKey": "veracidad",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-accuracy\"]"
+        ]
+      },
+      {
+        "index": 101,
+        "action": "select",
+        "valueKey": "canal_notificacion",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-notification-channel\"]"
+        ]
+      },
+      {
+        "index": 102,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Revisar solicitud"
+        ]
+      },
+      {
+        "index": 103,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"datos capturados\"",
+        "technicalTargetRefs": [
+          "text:datos capturados"
+        ]
+      },
+      {
+        "index": 104,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Solicitar código de autorización"
+        ]
+      },
+      {
+        "index": 105,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Código de autorización\"",
+        "technicalTargetRefs": [
+          "text:Código de autorización"
+        ]
+      },
+      {
+        "index": 106,
+        "action": "fill",
+        "valueKey": "jira_step_105",
+        "technicalTargetRefs": [
+          "css:[id=\"loan-authorization-code\"]"
+        ]
+      },
+      {
+        "index": 107,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Enviar solicitud"
+        ]
+      },
+      {
+        "index": 108,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Solicitud recibida\"",
+        "technicalTargetRefs": [
+          "text:Solicitud recibida"
+        ]
+      },
+      {
+        "index": 109,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"referencia\"",
+        "technicalTargetRefs": [
+          "text:referencia"
+        ]
+      },
+      {
+        "index": 110,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"estado en evaluación\"",
+        "technicalTargetRefs": [
+          "text:estado en evaluación"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-11",
+        "requirement": "Validar que se muestre \"resumen personal\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 11,
+        "target": "Resumen personal",
+        "evidence": [
+          "live-step-11"
+        ],
+        "details": {
+          "observedText": "Resumen personal"
+        }
+      },
+      {
+        "id": "jira-oracle-12",
+        "requirement": "Validar que se muestre \"productos\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 12,
+        "target": "Mis productos",
+        "evidence": [
+          "live-step-12"
+        ],
+        "details": {
+          "observedText": "Mis productos"
+        }
+      },
+      {
+        "id": "jira-oracle-13",
+        "requirement": "Validar que se muestre \"saldos\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 13,
+        "target": "Cuenta de Ahorros •••• [numero] · DOP RD$64,250.00 Balance disponible Activa · RD$64,250.00 Balance disponible · Cuenta Corriente •••• [numero] · DOP RD$20,000.00 Balance disponible Activa · RD$20,000.00 Balance disponible · Tarjeta de Crédito •••• [numero] · Límite RD$75,000 RD$12,450.00 Balance utilizado Al día",
+        "evidence": [
+          "live-step-13"
+        ],
+        "details": {
+          "observedText": "Cuenta de Ahorros •••• [numero] · DOP RD$64,250.00 Balance disponible Activa · RD$64,250.00 Balance disponible · Cuenta Corriente •••• [numero] · DOP RD$20,000.00 Balance disponible Activa · RD$20,000.00 Balance disponible · Tarjeta de Crédito •••• [numero] · Límite RD$75,000 RD$12,450.00 Balance utilizado Al día"
+        }
+      },
+      {
+        "id": "jira-oracle-14",
+        "requirement": "Validar que se muestre \"movimientos\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 14,
+        "target": "▤\nMovimientos",
+        "evidence": [
+          "live-step-14"
+        ],
+        "details": {
+          "observedText": "▤\nMovimientos"
+        }
+      },
+      {
+        "id": "jira-oracle-15",
+        "requirement": "Validar que se muestre \"pagos\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 15,
+        "target": "▣\nPagos",
+        "evidence": [
+          "live-step-15"
+        ],
+        "details": {
+          "observedText": "▣\nPagos"
+        }
+      },
+      {
+        "id": "jira-oracle-16",
+        "requirement": "Validar que se muestre \"transferencias\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 16,
+        "target": "⇄\nTransferencias",
+        "evidence": [
+          "live-step-16"
+        ],
+        "details": {
+          "observedText": "⇄\nTransferencias"
+        }
+      },
+      {
+        "id": "jira-oracle-17",
+        "requirement": "Validar que se muestre \"solicitudes\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 17,
+        "target": "MI ESPACIO PERSONAL\nResumen personal\n\nConsulta tus cuentas, organiza tus pagos y continúa tus solicitudes.\n\nVer movimientos\nSolicitar préstamo",
+        "evidence": [
+          "live-step-17"
+        ],
+        "details": {
+          "observedText": "MI ESPACIO PERSONAL\nResumen personal\n\nConsulta tus cuentas, organiza tus pagos y continúa tus solicitudes.\n\nVer movimientos\nSolicitar préstamo"
+        }
+      },
+      {
+        "id": "jira-oracle-27",
+        "requirement": "Validar que se muestre \"estado de carga\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 27,
+        "target": "N\nNorthstar\nPORTAL PERSONAL\nMIS PRODUCTOS\n▦\nResumen\n◫\nMis cuentas\n⇄\nTransferencias\n▣\nPagos\n▤\nMovimientos\n⌂\nSolicitar préstamo\n◷\nSeguridad\nEspacio de pruebas\nDatos ficticios · sin conexión bancaria\nEntorno: REGRESSION-LAB\nNorthstar / Préstamo personal\n⌕\n♧\n3\nQD\nQA Demo\nCliente personal\n⌄\nEstado de carga\nCargando información segura…\nEspera mientras el portal actualiza los datos.",
+        "evidence": [
+          "live-step-27"
+        ],
+        "details": {
+          "observedText": "N\nNorthstar\nPORTAL PERSONAL\nMIS PRODUCTOS\n▦\nResumen\n◫\nMis cuentas\n⇄\nTransferencias\n▣\nPagos\n▤\nMovimientos\n⌂\nSolicitar préstamo\n◷\nSeguridad\nEspacio de pruebas\nDatos ficticios · sin conexión bancaria\nEntorno: REGRESSION-LAB\nNorthstar / Préstamo personal\n⌕\n♧\n3\nQD\nQA Demo\nCliente personal\n⌄\nEstado de carga\nCargando información segura…\nEspera mientras el portal actualiza los datos."
+        }
+      },
+      {
+        "id": "jira-oracle-28",
+        "requirement": "Validar que se muestre \"Contacto y domicilio\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 28,
+        "target": "Contacto y domicilio",
+        "evidence": [
+          "live-step-28"
+        ],
+        "details": {
+          "observedText": "Contacto y domicilio"
+        }
+      },
+      {
+        "id": "jira-oracle-38",
+        "requirement": "Validar que se muestre \"estado de carga\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 38,
+        "target": "N\nNorthstar\nPORTAL PERSONAL\nMIS PRODUCTOS\n▦\nResumen\n◫\nMis cuentas\n⇄\nTransferencias\n▣\nPagos\n▤\nMovimientos\n⌂\nSolicitar préstamo\n◷\nSeguridad\nEspacio de pruebas\nDatos ficticios · sin conexión bancaria\nEntorno: REGRESSION-LAB\nNorthstar / Préstamo personal\n⌕\n♧\n3\nQD\nQA Demo\nCliente personal\n⌄\nEstado de carga\nCargando información segura…\nEspera mientras el portal actualiza los datos.",
+        "evidence": [
+          "live-step-38"
+        ],
+        "details": {
+          "observedText": "N\nNorthstar\nPORTAL PERSONAL\nMIS PRODUCTOS\n▦\nResumen\n◫\nMis cuentas\n⇄\nTransferencias\n▣\nPagos\n▤\nMovimientos\n⌂\nSolicitar préstamo\n◷\nSeguridad\nEspacio de pruebas\nDatos ficticios · sin conexión bancaria\nEntorno: REGRESSION-LAB\nNorthstar / Préstamo personal\n⌕\n♧\n3\nQD\nQA Demo\nCliente personal\n⌄\nEstado de carga\nCargando información segura…\nEspera mientras el portal actualiza los datos."
+        }
+      },
+      {
+        "id": "jira-oracle-39",
+        "requirement": "Validar que se muestre \"Actividad laboral\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 39,
+        "target": "Actividad laboral",
+        "evidence": [
+          "live-step-39"
+        ],
+        "details": {
+          "observedText": "Actividad laboral"
+        }
+      },
+      {
+        "id": "jira-oracle-48",
+        "requirement": "Validar que se muestre \"estado de carga\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 48,
+        "target": "N\nNorthstar\nPORTAL PERSONAL\nMIS PRODUCTOS\n▦\nResumen\n◫\nMis cuentas\n⇄\nTransferencias\n▣\nPagos\n▤\nMovimientos\n⌂\nSolicitar préstamo\n◷\nSeguridad\nEspacio de pruebas\nDatos ficticios · sin conexión bancaria\nEntorno: REGRESSION-LAB\nNorthstar / Préstamo personal\n⌕\n♧\n3\nQD\nQA Demo\nCliente personal\n⌄\nEstado de carga\nCargando información segura…\nEspera mientras el portal actualiza los datos.",
+        "evidence": [
+          "live-step-48"
+        ],
+        "details": {
+          "observedText": "N\nNorthstar\nPORTAL PERSONAL\nMIS PRODUCTOS\n▦\nResumen\n◫\nMis cuentas\n⇄\nTransferencias\n▣\nPagos\n▤\nMovimientos\n⌂\nSolicitar préstamo\n◷\nSeguridad\nEspacio de pruebas\nDatos ficticios · sin conexión bancaria\nEntorno: REGRESSION-LAB\nNorthstar / Préstamo personal\n⌕\n♧\n3\nQD\nQA Demo\nCliente personal\n⌄\nEstado de carga\nCargando información segura…\nEspera mientras el portal actualiza los datos."
+        }
+      },
+      {
+        "id": "jira-oracle-49",
+        "requirement": "Validar que se muestre \"Ingresos\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 49,
+        "target": "Ingresos\nSección 4 / 8\nIngreso mensual principal\nOtros ingresos mensuales\nOrigen de otros ingresos\nDetalle de ingresos en tabla\n1 filas\nDesglosa ingresos mensuales para la evaluación\nCONCEPTO\tIMPORTE MENSUAL (RD$)\tFRECUENCIA\tACCIÓN\n\nTipo de ingreso fila 1\nSelecciona un tipo\nSalario\nBonificación\nOtro ingreso\n\t\nImporte de ingreso fila 1\n\t\nFrecuencia de ingreso fila 1\nSelecciona una frecuencia\nMensual\nQuincenal\n\tQuitar\nTOTAL DESGLOSADO\tRD$0.00\nAgregar ingreso\nVolver\nAvanzar a Compromisos",
+        "evidence": [
+          "live-step-49"
+        ],
+        "details": {
+          "observedText": "Ingresos\nSección 4 / 8\nIngreso mensual principal\nOtros ingresos mensuales\nOrigen de otros ingresos\nDetalle de ingresos en tabla\n1 filas\nDesglosa ingresos mensuales para la evaluación\nCONCEPTO\tIMPORTE MENSUAL (RD$)\tFRECUENCIA\tACCIÓN\n\nTipo de ingreso fila 1\nSelecciona un tipo\nSalario\nBonificación\nOtro ingreso\n\t\nImporte de ingreso fila 1\n\t\nFrecuencia de ingreso fila 1\nSelecciona una frecuencia\nMensual\nQuincenal\n\tQuitar\nTOTAL DESGLOSADO\tRD$0.00\nAgregar ingreso\nVolver\nAvanzar a Compromisos"
+        }
+      },
+      {
+        "id": "jira-oracle-61",
+        "requirement": "Validar que se muestre \"estado de carga\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 61,
+        "target": "N\nNorthstar\nPORTAL PERSONAL\nMIS PRODUCTOS\n▦\nResumen\n◫\nMis cuentas\n⇄\nTransferencias\n▣\nPagos\n▤\nMovimientos\n⌂\nSolicitar préstamo\n◷\nSeguridad\nEspacio de pruebas\nDatos ficticios · sin conexión bancaria\nEntorno: REGRESSION-LAB\nNorthstar / Préstamo personal\n⌕\n♧\n3\nQD\nQA Demo\nCliente personal\n⌄\nEstado de carga\nCargando información segura…\nEspera mientras el portal actualiza los datos.\nSe agregó una fila de ingreso.",
+        "evidence": [
+          "live-step-61"
+        ],
+        "details": {
+          "observedText": "N\nNorthstar\nPORTAL PERSONAL\nMIS PRODUCTOS\n▦\nResumen\n◫\nMis cuentas\n⇄\nTransferencias\n▣\nPagos\n▤\nMovimientos\n⌂\nSolicitar préstamo\n◷\nSeguridad\nEspacio de pruebas\nDatos ficticios · sin conexión bancaria\nEntorno: REGRESSION-LAB\nNorthstar / Préstamo personal\n⌕\n♧\n3\nQD\nQA Demo\nCliente personal\n⌄\nEstado de carga\nCargando información segura…\nEspera mientras el portal actualiza los datos.\nSe agregó una fila de ingreso."
+        }
+      },
+      {
+        "id": "jira-oracle-62",
+        "requirement": "Validar que se muestre \"Compromisos\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 62,
+        "target": "Compromisos\nSección 5 / 8\nGastos mensuales del hogar\nCuotas de préstamos vigentes\nGasto mensual de vivienda\nDía preferido de pago\nDía 5\nDía 15\nDía 25\nDetalle de compromisos en tabla\n1 filas\nDesglosa compromisos mensuales para la evaluación\nCONCEPTO\tIMPORTE MENSUAL (RD$)\tFRECUENCIA\tACCIÓN\n\nTipo de compromiso fila 1\nSelecciona un tipo\nVivienda\nPréstamo\nTarjeta\n\t\nImporte de compromiso fila 1\n\t\nFrecuencia de compromiso fila 1\nSelecciona una frecuencia\nMensual\nQuincenal\n\tQuitar\nTOTAL DESGLOSADO\tRD$0.00\nAgregar compromiso\nVolver\nAvanzar a Condiciones del préstamo",
+        "evidence": [
+          "live-step-62"
+        ],
+        "details": {
+          "observedText": "Compromisos\nSección 5 / 8\nGastos mensuales del hogar\nCuotas de préstamos vigentes\nGasto mensual de vivienda\nDía preferido de pago\nDía 5\nDía 15\nDía 25\nDetalle de compromisos en tabla\n1 filas\nDesglosa compromisos mensuales para la evaluación\nCONCEPTO\tIMPORTE MENSUAL (RD$)\tFRECUENCIA\tACCIÓN\n\nTipo de compromiso fila 1\nSelecciona un tipo\nVivienda\nPréstamo\nTarjeta\n\t\nImporte de compromiso fila 1\n\t\nFrecuencia de compromiso fila 1\nSelecciona una frecuencia\nMensual\nQuincenal\n\tQuitar\nTOTAL DESGLOSADO\tRD$0.00\nAgregar compromiso\nVolver\nAvanzar a Condiciones del préstamo"
+        }
+      },
+      {
+        "id": "jira-oracle-75",
+        "requirement": "Validar que se muestre \"estado de carga\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 75,
+        "target": "N\nNorthstar\nPORTAL PERSONAL\nMIS PRODUCTOS\n▦\nResumen\n◫\nMis cuentas\n⇄\nTransferencias\n▣\nPagos\n▤\nMovimientos\n⌂\nSolicitar préstamo\n◷\nSeguridad\nEspacio de pruebas\nDatos ficticios · sin conexión bancaria\nEntorno: REGRESSION-LAB\nNorthstar / Préstamo personal\n⌕\n♧\n3\nQD\nQA Demo\nCliente personal\n⌄\nEstado de carga\nCargando información segura…\nEspera mientras el portal actualiza los datos.\nSe agregó una fila de compromiso.",
+        "evidence": [
+          "live-step-75"
+        ],
+        "details": {
+          "observedText": "N\nNorthstar\nPORTAL PERSONAL\nMIS PRODUCTOS\n▦\nResumen\n◫\nMis cuentas\n⇄\nTransferencias\n▣\nPagos\n▤\nMovimientos\n⌂\nSolicitar préstamo\n◷\nSeguridad\nEspacio de pruebas\nDatos ficticios · sin conexión bancaria\nEntorno: REGRESSION-LAB\nNorthstar / Préstamo personal\n⌕\n♧\n3\nQD\nQA Demo\nCliente personal\n⌄\nEstado de carga\nCargando información segura…\nEspera mientras el portal actualiza los datos.\nSe agregó una fila de compromiso."
+        }
+      },
+      {
+        "id": "jira-oracle-76",
+        "requirement": "Validar que se muestre \"Condiciones\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 76,
+        "target": "Condiciones del préstamo",
+        "evidence": [
+          "live-step-76"
+        ],
+        "details": {
+          "observedText": "Condiciones del préstamo"
+        }
+      },
+      {
+        "id": "jira-oracle-85",
+        "requirement": "Validar que se muestre \"estado de carga\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 85,
+        "target": "N\nNorthstar\nPORTAL PERSONAL\nMIS PRODUCTOS\n▦\nResumen\n◫\nMis cuentas\n⇄\nTransferencias\n▣\nPagos\n▤\nMovimientos\n⌂\nSolicitar préstamo\n◷\nSeguridad\nEspacio de pruebas\nDatos ficticios · sin conexión bancaria\nEntorno: REGRESSION-LAB\nNorthstar / Préstamo personal\n⌕\n♧\n3\nQD\nQA Demo\nCliente personal\n⌄\nEstado de carga\nCargando información segura…\nEspera mientras el portal actualiza los datos.",
+        "evidence": [
+          "live-step-85"
+        ],
+        "details": {
+          "observedText": "N\nNorthstar\nPORTAL PERSONAL\nMIS PRODUCTOS\n▦\nResumen\n◫\nMis cuentas\n⇄\nTransferencias\n▣\nPagos\n▤\nMovimientos\n⌂\nSolicitar préstamo\n◷\nSeguridad\nEspacio de pruebas\nDatos ficticios · sin conexión bancaria\nEntorno: REGRESSION-LAB\nNorthstar / Préstamo personal\n⌕\n♧\n3\nQD\nQA Demo\nCliente personal\n⌄\nEstado de carga\nCargando información segura…\nEspera mientras el portal actualiza los datos."
+        }
+      },
+      {
+        "id": "jira-oracle-86",
+        "requirement": "Validar que se muestre \"Referencias\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 86,
+        "target": "Referencias personales",
+        "evidence": [
+          "live-step-86"
+        ],
+        "details": {
+          "observedText": "Referencias personales"
+        }
+      },
+      {
+        "id": "jira-oracle-94",
+        "requirement": "Validar que se muestre \"estado de carga\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 94,
+        "target": "N\nNorthstar\nPORTAL PERSONAL\nMIS PRODUCTOS\n▦\nResumen\n◫\nMis cuentas\n⇄\nTransferencias\n▣\nPagos\n▤\nMovimientos\n⌂\nSolicitar préstamo\n◷\nSeguridad\nEspacio de pruebas\nDatos ficticios · sin conexión bancaria\nEntorno: REGRESSION-LAB\nNorthstar / Préstamo personal\n⌕\n♧\n3\nQD\nQA Demo\nCliente personal\n⌄\nEstado de carga\nCargando información segura…\nEspera mientras el portal actualiza los datos.",
+        "evidence": [
+          "live-step-94"
+        ],
+        "details": {
+          "observedText": "N\nNorthstar\nPORTAL PERSONAL\nMIS PRODUCTOS\n▦\nResumen\n◫\nMis cuentas\n⇄\nTransferencias\n▣\nPagos\n▤\nMovimientos\n⌂\nSolicitar préstamo\n◷\nSeguridad\nEspacio de pruebas\nDatos ficticios · sin conexión bancaria\nEntorno: REGRESSION-LAB\nNorthstar / Préstamo personal\n⌕\n♧\n3\nQD\nQA Demo\nCliente personal\n⌄\nEstado de carga\nCargando información segura…\nEspera mientras el portal actualiza los datos."
+        }
+      },
+      {
+        "id": "jira-oracle-95",
+        "requirement": "Validar que se muestre \"Documentos y declaraciones\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 95,
+        "target": "Documentos y declaraciones",
+        "evidence": [
+          "live-step-95"
+        ],
+        "details": {
+          "observedText": "Documentos y declaraciones"
+        }
+      },
+      {
+        "id": "jira-oracle-103",
+        "requirement": "Validar que se muestre \"datos capturados\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 103,
+        "target": "Datos capturados",
+        "evidence": [
+          "live-step-103"
+        ],
+        "details": {
+          "observedText": "Datos capturados"
+        }
+      },
+      {
+        "id": "jira-oracle-105",
+        "requirement": "Validar que se muestre \"Código de autorización\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 105,
+        "target": "Editar última sección\nSolicitar código de autorización",
+        "evidence": [
+          "live-step-105"
+        ],
+        "details": {
+          "observedText": "Editar última sección\nSolicitar código de autorización"
+        }
+      },
+      {
+        "id": "jira-oracle-108",
+        "requirement": "Validar que se muestre \"Solicitud recibida\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 108,
+        "target": "Solicitud recibida",
+        "evidence": [
+          "live-step-108"
+        ],
+        "details": {
+          "observedText": "Solicitud recibida"
+        }
+      },
+      {
+        "id": "jira-oracle-109",
+        "requirement": "Validar que se muestre \"referencia\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 109,
+        "target": "Referencia de prueba: LOAN-50333193",
+        "evidence": [
+          "live-step-109"
+        ],
+        "details": {
+          "observedText": "Referencia de prueba: LOAN-50333193"
+        }
+      },
+      {
+        "id": "jira-oracle-110",
+        "requirement": "Validar que se muestre \"estado en evaluación\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 110,
+        "target": "SOLICITUD ENVIADA\nSolicitud en evaluación\n\nRecibirás una actualización por el canal que seleccionaste.\n\n✓\nSolicitud recibida\n\nEstado: En evaluación\n\nReferencia de prueba: LOAN-50333193\n\nVolver al resumen\nIniciar otra solicitud",
+        "evidence": [
+          "live-step-110"
+        ],
+        "details": {
+          "observedText": "SOLICITUD ENVIADA\nSolicitud en evaluación\n\nRecibirás una actualización por el canal que seleccionaste.\n\n✓\nSolicitud recibida\n\nEstado: En evaluación\n\nReferencia de prueba: LOAN-50333193\n\nVolver al resumen\nIniciar otra solicitud"
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "Se muestra \"estado en evaluación\" para la solicitud recibida."
+  }
+}

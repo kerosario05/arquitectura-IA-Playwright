@@ -1,0 +1,131 @@
+{
+  "appSlug": "kiosko",
+  "sectionSlug": "api-tests",
+  "scenarioId": "PREVIEW-004",
+  "scenarioTitle": "Redirigir Canje de Puntos a la autenticación del kiosco",
+  "stepCount": 2,
+  "sourceExpectedResultPresent": true,
+  "requiredAssertionCount": 2,
+  "observableOracles": [
+    {
+      "id": "expected-01",
+      "requirement": "pantalla de autenticación del kiosco",
+      "type": "auth_gate",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 2,
+      "target": "pantalla de autenticación del kiosco",
+      "evidence": [
+        "auth_gate_detected:true",
+        "auth_stage:unknown"
+      ],
+      "details": {
+        "gateDetected": true,
+        "stage": null,
+        "detectedBeforeStep": null,
+        "authFlowLanding": "transactions_menu"
+      }
+    }
+  ],
+  "oracleTypes": [
+    "auth_gate"
+  ],
+  "availablePageObjectCount": 3,
+  "mode": "deterministic",
+  "functionalExecutionEnabled": true,
+  "provider": null,
+  "model": null,
+  "skill": {
+    "name": null,
+    "version": null,
+    "hash": null,
+    "loaded": false
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "PREVIEW-004",
+    "title": "Redirigir Canje de Puntos a la autenticación del kiosco",
+    "appSlug": "kiosko",
+    "sectionSlug": "api-tests",
+    "auth": {
+      "gateDetected": true,
+      "required": false,
+      "stage": "identification_input",
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    },
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Clic en \"Canje de Puntos\".",
+        "operation": "navigate",
+        "target": {
+          "strategy": "url",
+          "value": "APP_BASE_URL"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Validar que se muestre \"pantalla de autenticación del kiosco\".",
+        "operation": "assertVisible",
+        "target": {
+          "strategy": "text",
+          "value": "pantalla de autenticación del kiosco"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "auth_gate",
+          "backed": true,
+          "implementationKind": "heading_or_control",
+          "mechanism": {
+            "source": "auth_gate_detector",
+            "method": "detectAuthGate",
+            "scanner": {
+              "source": "page_scanner",
+              "method": "scanCurrentPage"
+            },
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "auth_gate"
+            }
+          },
+          "requirement": "pantalla de autenticación del kiosco",
+          "target": "pantalla de autenticación del kiosco"
+        },
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 2,
+      "representedScenarioSteps": 2,
+      "missingScenarioSteps": []
+    }
+  },
+  "executionContractChars": 1415,
+  "promptChars": null,
+  "specGenerationAttempts": 0,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "promotionAllowed": false,
+  "failedGatesAttempt1": [
+    "functionalExecution"
+  ],
+  "finalSpec": {
+    "origin": "deterministic_compiler",
+    "generatedBy": "core",
+    "strategy": "deterministic_compiler",
+    "fallback": null
+  }
+}

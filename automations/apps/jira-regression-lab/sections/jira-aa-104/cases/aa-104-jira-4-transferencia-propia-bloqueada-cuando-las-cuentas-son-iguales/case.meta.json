@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-104",
+  "sourceScenarioId": "AA-104:jira:4",
+  "title": "Transferencia propia bloqueada cuando las cuentas son iguales",
+  "generatedAt": "2026-10-18T12:37:37.586Z",
+  "executionEngine": "jira_semantic"
+}

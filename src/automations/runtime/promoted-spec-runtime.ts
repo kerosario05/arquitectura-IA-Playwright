@@ -11,8 +11,9 @@ import { waitForPageReady } from "../../browser/page-readiness";
 import { EvidenceRecorder } from "../../evidence/evidence-recorder";
 import { loadEvidenceConfig } from "../../evidence/evidence-types";
 import { normalizeSemanticText } from "../semantic-text-normalization";
+import { evaluatePromotedScenarioOutcome, type ScenarioOutcomeCheck } from "./promoted-scenario-outcome";
 import { findSemanticTargetMatch, type SemanticMatchOptions } from "./semantic-target-matcher";
-import { attemptVirtualKeyboardPress, resolveActionTarget, resolveFillTarget, recordedLocatorFactory, resolveRecordedStructuralOwner } from "../../discovery/target-resolver";
+import { attemptVirtualKeyboardPress, resolveActionTarget, resolveFillTarget, recordedLocatorFactory, resolveRecordedStructuralOwner, verificationDigitPosition } from "../../discovery/target-resolver";
 import { hasCausalSelectionTransition, type InteractiveState } from "../../discovery/selection-state-verification";
 import type { RecordedLocator, RecordedTechnicalTarget } from "../../recording/session-trace.types";
 import type { PlaywrightRecorderEvidence, SemanticRuntimeEvidence } from "../../recording/structural-owner-identity";
@@ -42,7 +43,7 @@ import {
  * process is provably running a cached/stale copy of this module and must be restarted -- no
  * further code change in this file can fix that from the inside.
  */
-export const PROMOTED_SPEC_RUNTIME_MODULE_VERSION = "2026-10-07T01-selection-list-recovery-v1";
+export const PROMOTED_SPEC_RUNTIME_MODULE_VERSION = "2026-10-20T07-structural-click-evidence-v1";
 console.log(
   `[runtime:module-loaded] file=src/automations/runtime/promoted-spec-runtime.ts ` +
   `version=${PROMOTED_SPEC_RUNTIME_MODULE_VERSION} loadedAt=${new Date().toISOString()} pid=${process.pid}`,
@@ -78,7 +79,7 @@ export type PromotedExpectedEffect =
  *  the single shared CORE both Discovery and promoted runtime compare against. */
 async function readPromotedInteractiveState(
   locator: any,
-  options: { includeRenderedText?: boolean } = {},
+  options: { includeRenderedText?: boolean; timeoutMs?: number } = {},
 ): Promise<InteractiveState | undefined> {
   if (!locator) return undefined;
   return locator.evaluate((element: any, includeRenderedText: boolean) => {
@@ -100,7 +101,7 @@ async function readPromotedInteractiveState(
       ariaPressed: element.getAttribute("aria-pressed"),
       ...(typeof selectionValue === "string" ? { value: selectionValue } : {}),
     };
-  }, options.includeRenderedText === true).catch(() => undefined);
+  }, options.includeRenderedText === true, options.timeoutMs === undefined ? {} : { timeout: options.timeoutMs }).catch(() => undefined);
 }
 
 type PromotedSelectionStateProbe = {
@@ -152,6 +153,7 @@ async function capturePromotedSelectionStateProbe(
   targetIdentity: PromotedFieldTargetIdentity | undefined,
   selectionActivationField?: string,
   exactOptionLocator?: any,
+  resolvedActionLocator?: Locator,
 ): Promise<PromotedSelectionStateProbe | undefined> {
   const optionRef = targetIdentity?.technicalTargetRefs.find((ref) => /^role:option\|/i.test(ref.trim()));
   if (optionRef && selectionActivationField?.trim()) {
@@ -195,6 +197,27 @@ async function capturePromotedSelectionStateProbe(
         exactTargetLocator: optionResolution.locator,
       };
     }
+  }
+  // Prefer the exact locator that will be dispatched. Several certified refs can all identify
+  // the same recorded control; counting refs as separate candidates falsely makes state opaque.
+  if (resolvedActionLocator) {
+    const before = await readPromotedInteractiveState(resolvedActionLocator);
+    const recordedOption = Boolean(optionRef && selectionActivationField?.trim());
+    console.log(
+      `[selection-runtime] phase=before_dispatch probeAvailable=${Boolean(before)} ` +
+      `strategy=${recordedOption ? "recorded-selection-option" : "resolved-action-target"} ` +
+      `snapshot="${selectionRuntimeSnapshot(before)}"`,
+    );
+    return before ? {
+      locator: resolvedActionLocator,
+      before,
+      strategy: recordedOption ? "recorded-selection-option" : "resolved-action-target",
+      ...(recordedOption ? {
+        expectedValue: semanticNameFromRef(optionRef!),
+        optionAlreadySelected: before.selected === true,
+        exactTargetLocator: resolvedActionLocator,
+      } : {}),
+    } : undefined;
   }
   const technicalProbeCandidates = await Promise.all(
     (targetIdentity?.technicalTargetRefs ?? [])
@@ -773,7 +796,7 @@ export function evaluatePromotedCompletionSignal(input: {
   );
 }
 
-async function readPromotedOutcomeSignals(page: Page): Promise<PromotedOutcomeSignals> {
+async function readPromotedOutcomeSignals(page: Page, strict = false): Promise<PromotedOutcomeSignals> {
   return page.evaluate(() => {
     const visible = (element: Element) => {
       const node = element as HTMLElement;
@@ -782,19 +805,28 @@ async function readPromotedOutcomeSignals(page: Page): Promise<PromotedOutcomeSi
       return style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity) !== 0 && rect.width > 0 && rect.height > 0;
     };
     const text = (element: Element) => (element.textContent || "").replace(/\s+/g, " ").trim();
-    const failurePattern = /\b(error|failure|failed|fall[oó]|fall[a-záéíóú]*|no podemos procesar|no se pudo|unable to|could not|denied|rechazad[oa])\b|c[oó]digo\s*[:#-]?\s*\d{3,}/i;
+    const failurePattern = /\b(error|failure|failed|invalid|incorrect|incorrect[oa]|inv[aá]lid[oa]|unsuccessful|fall[oó]|fall[a-záéíóú]*|no podemos procesar|no se pudo|unable to|could not|denied|rechazad[oa])\b|c[oó]digo\s*[:#-]?\s*\d{3,}/i;
     const successPattern = /\b(transferencia|operaci[oó]n|transacci[oó]n)\b.{0,70}\b(completad[ao]|realizad[ao]|exitosa?|confirmad[ao])\b|\b(completad[ao]|realizad[ao]|exitosa?|confirmad[ao])\b.{0,70}\b(transferencia|operaci[oó]n|transacci[oó]n)\b/i;
     const failureNodes = Array.from(document.querySelectorAll('[role="dialog"], [role="alertdialog"], [aria-modal="true"], dialog, [class*="modal" i], [class*="dialog" i], [class*="overlay" i], [role="alert"]')).filter(visible);
+    const explicitErrors = Array.from(document.querySelectorAll('[data-severity="error"], [data-state="error"], [class~="error"], [class~="text-danger"], [class~="invalid-feedback"]')).filter(visible).map(text).filter(Boolean);
+    for (const invalid of Array.from(document.querySelectorAll('[aria-invalid="true"]')).filter(visible)) {
+      const ids = `${invalid.getAttribute("aria-errormessage") ?? ""} ${invalid.getAttribute("aria-describedby") ?? ""}`.trim().split(/\s+/).filter(Boolean);
+      const messages = ids.flatMap(id => { const node = document.getElementById(id); return node && visible(node) && text(node) ? [text(node)] : []; });
+      explicitErrors.push(...(messages.length ? messages : ["invalid_control_without_verified_error_message"]));
+    }
     const successNodes = Array.from(document.querySelectorAll('[role="dialog"], [role="alertdialog"], [role="status"], [role="alert"], [aria-live], dialog, h1, h2, h3, [class*="success" i], [data-testid*="success" i]')).filter(visible);
     const outcomeRegion = document.querySelector('main, [role="main"]') as HTMLElement | null;
     const outcomeLines = (outcomeRegion ?? document.body).innerText.split(/\r?\n+/).map((value) => value.replace(/\s+/g, " ").trim());
     const successMessages = [...successNodes.map(text), ...outcomeLines]
       .filter((value) => value && successPattern.test(value));
     return {
-      failureMessages: failureNodes.map(text).filter((value) => value && failurePattern.test(value)),
+      failureMessages: Array.from(new Set([...failureNodes.map(text).filter((value) => value && failurePattern.test(value)), ...explicitErrors])),
       successMessages: Array.from(new Set(successMessages)),
     };
-  }).catch(() => ({ failureMessages: [], successMessages: [] }));
+  }).catch((cause: unknown) => {
+    if (strict) throw new Error("PROMOTED_FINAL_OUTCOME_UNVERIFIED", { cause });
+    return { failureMessages: [], successMessages: [] };
+  });
 }
 
 export function evaluatePromotedAssertionState(
@@ -924,7 +956,11 @@ function normalizeText(text: string): string {
   return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim();
 }
 
-export async function findBestActiveContainerForField(page: Page, fieldName?: string): Promise<{
+export async function findBestActiveContainerForField(
+  page: Page,
+  fieldName?: string,
+  technicalTargetRefs: string[] = [],
+): Promise<{
   best?: ContainerCandidate;
   candidates: ContainerCandidate[];
 }> {
@@ -1009,11 +1045,25 @@ export async function findBestActiveContainerForField(page: Page, fieldName?: st
     return list;
   }, normalizedField);
 
+  const recordedIdentitySignals = technicalTargetRefs.flatMap((ref) => {
+    const separator = ref.indexOf(":");
+    if (separator < 0) return [];
+    const strategy = ref.slice(0, separator).trim().toLowerCase();
+    const value = ref.slice(separator + 1).trim();
+    if (strategy === "id" && value) return [normalizeText(normalizeSemanticText(value))];
+    if (strategy === "css" && /^#[A-Za-z_][\\w:-]*$/.test(value)) {
+      return [normalizeText(normalizeSemanticText(value.slice(1)))];
+    }
+    if (strategy === "data-testid" && value) return [normalizeText(normalizeSemanticText(value))];
+    return [];
+  });
   const candidates = rawCandidates.map(({ fieldSignals, ...candidate }) => ({
     ...candidate,
-    matchingFieldFound: fieldName
-      ? fieldSignals.some((signal) => normalizeText(normalizeSemanticText(signal)).includes(normalizedField))
-      : false,
+    matchingFieldFound: Boolean(fieldName
+      && fieldSignals.some((signal) => normalizeText(normalizeSemanticText(signal)).includes(normalizedField)))
+      || recordedIdentitySignals.some((identitySignal) =>
+        fieldSignals.some((signal) => normalizeText(normalizeSemanticText(signal)) === identitySignal),
+      ),
   })).map((candidate) => ({
     ...candidate,
     rank: candidate.rank + (candidate.matchingFieldFound ? 100 : 0),
@@ -1231,12 +1281,25 @@ export async function resolvePromotedFieldLocator(
     const refValue = ref.slice(separator + 1).trim();
     if (!refValue) continue;
     let directLocator: any;
-    if (refStrategy === "css") directLocator = page.locator(refValue);
-    else if (refStrategy === "id") directLocator = page.locator(`[id="${refValue.replace(/"/g, '\\"')}"]`);
-    else if (refStrategy === "data-testid") directLocator = page.getByTestId(refValue);
+    const refScope = container ?? page;
+    if (refStrategy === "css") directLocator = refScope.locator(refValue);
+    else if (refStrategy === "id") directLocator = refScope.locator(`[id="${refValue.replace(/"/g, '\\"')}"]`);
+    else if (refStrategy === "data-testid") directLocator = refScope.getByTestId(refValue);
     else continue;
-    const directResolved = await validateEditableCandidate(directLocator, "page", `recorded:${refStrategy}`);
+    const directResolved = await validateEditableCandidate(directLocator, container ? "container" : "page", `recorded:${refStrategy}`);
     if (directResolved) return directResolved;
+  }
+
+  // Recorded and current accessible names can describe the same explicit verification digit
+  // differently. Use Discovery's shared resolver and digit identity, never DOM position.
+  // Stable recorded attributes above retain priority; ambiguity must not reach fuzzy matching.
+  const verificationField = semanticNameFromRef(field) ?? field;
+  if (verificationDigitPosition(verificationField)) {
+    const resolved = await resolveFillTarget(page, await scanCurrentPage(page), verificationField,
+      container ? { type: "form", reason: "form_opened", containerLocator: container } : undefined,
+      { associatedField: verificationField, recordedTechnicalTargetRefs: identity?.technicalTargetRefs });
+    if (resolved.status !== "resolved" || !resolved.locator) return undefined;
+    return validateEditableCandidate(resolved.locator, container ? "container" : "page", `shared:${resolved.locatorStrategy ?? "verification-digit"}`);
   }
 
   // Dynamic grids may be re-mounted immediately after a preceding selection.
@@ -1526,6 +1589,32 @@ export async function resolvePromotedClickableLocator(
           clickable: true,
         };
       }
+    }
+    return undefined;
+  }
+
+  // A recorded text identity is an exact name, not a substring search. Dynamic
+  // dropdown containers can change between sessions, while the observed text
+  // remains valid. Re-prove exact uniqueness and actionability on the live page;
+  // never pick the first partial match or fall back after an ambiguous identity.
+  const recordedRefs = options?.targetIdentity?.technicalTargetRefs ?? [];
+  const parsedTextTarget = parseSerializedTechnicalTargetString(effectiveTarget);
+  const recordedTextRef = parsedTextTarget?.strategy === "text"
+    && recordedRefs.length > 0
+    && recordedRefs.every((ref) => parseSerializedTechnicalTargetString(ref)?.strategy === "text")
+    ? recordedRefs.map(parseSerializedTechnicalTargetString)
+      .find((candidate) => candidate?.strategy === "text" && candidate.value === parsedTextTarget.value)
+    : undefined;
+  if (recordedTextRef) {
+    const locator = recordedLocatorFactory(container ?? page, recordedTextRef, true);
+    const count = locator ? await locator.count().catch(() => 0) : 0;
+    if (locator && count === 1) {
+      const visible = await locator.isVisible({ timeout: timeoutMs }).catch(() => false);
+      const enabled = visible && await locator.isEnabled({ timeout: timeoutMs }).catch(() => false);
+      if (visible && enabled) return {
+        locator, strategy: "recorded:text-exact", scope: container ? "container" : "page",
+        visible: true, enabled: true, clickable: true,
+      };
     }
     return undefined;
   }
@@ -2642,6 +2731,7 @@ export class PromotedSpecRuntime {
   private initialNavigationEnsured = false;
   private initialScreenCapturePromise?: Promise<void>;
   private readonly loginRequests = new Set<Request>();
+  private readonly pendingScenarioRequests = new Set<Request>();
   private observedDownloadSequence = 0;
   private readonly authBoundary = {
     loginRequestObserved: false,
@@ -2688,6 +2778,7 @@ export class PromotedSpecRuntime {
 
   private attachAuthBoundaryObserver(): void {
     this.page.on("request", (request) => {
+      if (["fetch", "xhr", "document"].includes(request.resourceType?.())) this.pendingScenarioRequests.add(request);
       if (request.method().toUpperCase() !== "POST" || !this.isLoginRequestUrl(request.url())) return;
       this.loginRequests.add(request);
       if (!this.authBoundary.loginRequestObserved) {
@@ -2704,11 +2795,13 @@ export class PromotedSpecRuntime {
       this.authBoundary.loginStatus ??= response.status();
     });
     this.page.on("requestfinished", (request) => {
+      this.pendingScenarioRequests.delete(request);
       if (!this.loginRequests.has(request)) return;
       this.authBoundary.loginRequestFinished = true;
       this.authBoundary.loginRequestFinishedAt = Date.now();
     });
     this.page.on("requestfailed", (request) => {
+      this.pendingScenarioRequests.delete(request);
       if (!this.loginRequests.has(request)) return;
       this.authBoundary.loginRequestFailed = true;
       this.authBoundary.loginRequestFinished = true;
@@ -3231,6 +3324,25 @@ export class PromotedSpecRuntime {
    * cannot be emitted from here: those happen inside the generated candidate file and Playwright
    * itself, outside this class.
    */
+  async verifyScenarioOutcome(check: Omit<ScenarioOutcomeCheck, "failureMessages">, stepIndex: number): Promise<void> {
+    try {
+      const settled = await waitForStableInteractiveScreen(this.page, {
+        waitForPendingTransport: true,
+        absoluteDeadlineMs: this.config.actionTimeoutMs,
+        progressProbe: () => ({ active: this.pendingScenarioRequests.size > 0, pendingCount: this.pendingScenarioRequests.size }),
+      });
+      if (!settled.stable) throw new Error("PROMOTED_FINAL_OUTCOME_UNVERIFIED");
+      const signals = await readPromotedOutcomeSignals(this.page, true);
+      const result = evaluatePromotedScenarioOutcome({ ...check, failureMessages: signals.failureMessages });
+      if (result !== "verified") throw new Error(result);
+      await this.captureEvidenceStep("Validar resultado final del escenario", "passed", undefined, { sourceStepIndex: stepIndex });
+    } catch (error) {
+      const code = error instanceof Error ? error.message : "PROMOTED_FINAL_OUTCOME_UNVERIFIED";
+      await this.captureEvidenceStep("Validar resultado final del escenario", "failed", code, { sourceStepIndex: stepIndex }).catch(() => undefined);
+      throw error;
+    }
+  }
+
   async finishEvidence(): Promise<void> {
     console.log(`[promoted-runtime-lifecycle] phase=test_business_complete currentUrl=${this.page.url()}`);
     await this.emitAuthBoundaryAttempt();
@@ -3477,7 +3589,7 @@ export class PromotedSpecRuntime {
     const resolution = await resolveRecordedStructuralOwner(this.page, options.structuralTarget, (reason, details) => {
       structuralFailureReason = reason;
       structuralFailureMatchCount = details?.matchCount;
-    });
+    }, this.config.actionTimeoutMs);
     // A captured option can carry an ephemeral scope ID even though its exact role/name ref and
     // recorded trigger field remain valid. Resolve the recorded owner→option lineage through the
     // shared resolver even when the structural certificate also resolves: the structural locator
@@ -3555,6 +3667,7 @@ export class PromotedSpecRuntime {
         targetIdentity,
         options.selectionActivationField,
         causalOptionResolution?.status === "resolved" ? resolvedLocator : undefined,
+        resolvedLocator,
       )
       : undefined;
     if (options.checkState) {
@@ -3566,6 +3679,7 @@ export class PromotedSpecRuntime {
       }).catch(() => undefined);
       if (checked !== undefined && checked === (options.checkState === "checked")) {
         console.log(`[promoted-click-structural] stepIndex=${options.stepIndex} checkState=${options.checkState} alreadySatisfied=true click=skipped`);
+        await this.captureClickStep(options.target, "passed", undefined, options.stepIndex);
         return;
       }
     }
@@ -3588,6 +3702,7 @@ export class PromotedSpecRuntime {
       currentUrl: this.page.url(),
       actionOutcomeObserved: this.config.enabled && resolvedExpectedEffect !== "none",
     };
+    await this.captureClickStep(options.target, "passed", undefined, options.stepIndex);
     console.log(`[promoted-click-structural] stepIndex=${options.stepIndex} phase=complete currentUrl=${this.page.url()}`);
   }
 
@@ -3658,6 +3773,12 @@ export class PromotedSpecRuntime {
       valueKey: options.valueKey,
       technicalTargetRefs: options.technicalTargetRefs,
     });
+    const explicitTarget = parseSerializedTechnicalTargetString(options.target);
+    const explicitTextIdentity = explicitTarget?.strategy === "text"
+      && options.technicalTargetRefs?.length
+      && options.technicalTargetRefs.every((ref) => parseSerializedTechnicalTargetString(ref)?.strategy === "text")
+      && options.technicalTargetRefs.some((ref) => ref === options.target)
+      ? { ...targetIdentity, technicalTargetRefs: options.technicalTargetRefs } : undefined;
     const resolvedExpectedEffect = effectiveExpectedEffect(expectedEffect, targetIdentity);
 
     const replaySteps = options.previousStepReplays || options.previousSteps;
@@ -4051,7 +4172,12 @@ export class PromotedSpecRuntime {
       // (resolveActionTarget -> tryFieldScopedStructuralFallback) Discovery's own live walk
       // already used to pass this step, only attempted when the stronger authorities above
       // didn't resolve. Never certifies/upgrades resolutionState -- a plain retry hint.
-      const associatedFieldResolution = !recordedStructuralResolution?.locator
+      const exactTextResolution = explicitTextIdentity
+        ? await resolvePromotedClickableLocator(this.page, options.target, {
+          containerLocator: containerSelector, targetIdentity: explicitTextIdentity,
+          timeoutMs: this.config.actionTimeoutMs,
+        }) : undefined;
+      const associatedFieldResolution = !explicitTextIdentity && !recordedStructuralResolution?.locator
         && !structuredCheckboxResolution?.locator
         && (options.associatedField || options.selectionActivationField)
         ? await resolveActionTarget(
@@ -4084,7 +4210,7 @@ export class PromotedSpecRuntime {
       // runtime evidence, then the generic text/role fallback below. Reuses the SAME shared
       // resolveActionTarget -> resolveSemanticRuntimeTarget chain, never a second implementation.
       // Never certifies/upgrades resolutionState/technicalReady/promotionReady.
-      const semanticRuntimeResolution = !recordedStructuralResolution?.locator
+      const semanticRuntimeResolution = !explicitTextIdentity && !recordedStructuralResolution?.locator
         && !structuredCheckboxResolution?.locator
         && !associatedFieldResolution?.locator
         && options.semanticRuntimeEvidence
@@ -4099,7 +4225,7 @@ export class PromotedSpecRuntime {
           },
         ).catch(() => undefined)
         : undefined;
-      const recorderRuntimeResolution = !recordedStructuralResolution?.locator
+      const recorderRuntimeResolution = !explicitTextIdentity && !recordedStructuralResolution?.locator
         && !structuredCheckboxResolution?.locator
         && !associatedFieldResolution?.locator
         && !semanticRuntimeResolution?.locator
@@ -4133,6 +4259,8 @@ export class PromotedSpecRuntime {
           enabled: true,
           clickable: true,
         }
+        : exactTextResolution
+        ? exactTextResolution
         : associatedFieldResolution?.status === "resolved" && associatedFieldResolution.locator
         ? {
           locator: associatedFieldResolution.locator,
@@ -4162,7 +4290,7 @@ export class PromotedSpecRuntime {
         }
         : await resolvePromotedClickableLocator(this.page, options.target, {
           containerLocator: containerSelector,
-          targetIdentity,
+          targetIdentity: explicitTextIdentity ?? targetIdentity,
           timeoutMs: this.config.actionTimeoutMs,
           actionKind: options.actionIntent as "submit" | "link" | "button" | "action",
           actionIntent: options.actionIntent
@@ -4180,7 +4308,7 @@ export class PromotedSpecRuntime {
           resolved,
           async () => resolvePromotedClickableLocator(this.page, options.target, {
             containerLocator: containerSelector,
-            targetIdentity,
+            targetIdentity: explicitTextIdentity ?? targetIdentity,
             timeoutMs: this.config.actionTimeoutMs,
             actionKind: options.actionIntent as "submit" | "link" | "button" | "action",
             actionIntent: options.actionIntent,
@@ -4275,6 +4403,10 @@ export class PromotedSpecRuntime {
           }
         }
       }
+    }
+
+    if (explicitTextIdentity && !nativeClickSucceeded) {
+      throw new Error(`promoted_recorded_text_click_failed: step=${options.stepIndex} reason=${nativeClickError ?? "exact_target_not_unique_or_actionable"}`);
     }
 
     // Step 2: If native click didn't succeed, try callback POM fallback
@@ -4494,7 +4626,7 @@ export class PromotedSpecRuntime {
       );
     }
     const previousActiveContainer = this.activeContainer?.descriptor;
-    const refresh = await this.refreshActiveContainerForField(resolvedField);
+    const refresh = await this.refreshActiveContainerForField(resolvedField, targetIdentity.technicalTargetRefs);
     const refreshedActiveContainer = this.activeContainer?.descriptor;
     const searchedContainers = refresh.candidates.length;
     
@@ -5315,7 +5447,17 @@ export class PromotedSpecRuntime {
         throw new Error("PROMOTED_ASSERTION_DESCRIPTOR_UNRESOLVED");
       }
       if (options.expectedUrl) {
-        const stateMatches = evaluatePromotedAssertionState(this.page.url(), options);
+        const expectedUrl = options.expectedUrl;
+        let stateMatches = evaluatePromotedAssertionState(this.page.url(), options);
+        // A successful submit can return before the server finishes redirecting. Wait on
+        // Playwright's URL signal for positive route assertions instead of sampling once;
+        // negative assertions and already-satisfied routes retain their immediate behavior.
+        if (!stateMatches && options.polarity === "positive") {
+          await this.page.waitForURL((url) => url.href.includes(expectedUrl), {
+            timeout: this.config.actionTimeoutMs,
+          }).catch(() => undefined);
+          stateMatches = evaluatePromotedAssertionState(this.page.url(), options);
+        }
         if (!stateMatches) throw new Error("PROMOTED_ASSERTION_STATE_MISMATCH");
         if (options.polarity === "positive") {
           const signals = await readPromotedOutcomeSignals(this.page);
@@ -5510,21 +5652,24 @@ export class PromotedSpecRuntime {
         return;
       }
       if (expectedEffect === "selection_state_change") {
-        const selectionAfter = selectionProbe
-          ? await readPromotedInteractiveState(selectionProbe.locator, {
-              includeRenderedText: selectionProbe.strategy.startsWith("recorded-selection-owner:"),
-            })
-          : undefined;
         const expectedSelectionValue = normalizeSemanticText(selectionProbe?.expectedValue ?? "");
-        const observedSelectionValue = normalizeSemanticText(selectionAfter?.value ?? "");
         const exactOptionNoLongerVisible = expectedSelectionValue
           && selectionProbe?.exactTargetLocator
+          && !this.page.isClosed()
           && this.page.url() === previousUrl
-          && !await selectionProbe.exactTargetLocator.isVisible().catch(() => false);
+          && await selectionProbe.exactTargetLocator.isVisible().catch(() => undefined) === false
+          && !this.page.isClosed();
         if (exactOptionNoLongerVisible) {
           console.log("[runtime:post-action] expectedEffect=selection_state_change signal=recorded_option_surface_closed");
           return;
         }
+        const selectionAfter = selectionProbe
+          ? await readPromotedInteractiveState(selectionProbe.locator, {
+              includeRenderedText: selectionProbe.strategy.startsWith("recorded-selection-owner:"),
+              timeoutMs: Math.max(1, Math.min(this.config.actionTimeoutMs, this.config.stabilityTimeoutMs - (Date.now() - startedAt))),
+            })
+          : undefined;
+        const observedSelectionValue = normalizeSemanticText(selectionAfter?.value ?? "");
         if (expectedSelectionValue && selectionProbe?.optionAlreadySelected === true) {
           console.log("[runtime:post-action] expectedEffect=selection_state_change signal=recorded_option_already_selected");
           return;
@@ -5670,9 +5815,9 @@ export class PromotedSpecRuntime {
     return best.descriptor;
   }
 
-  private async refreshActiveContainerForField(fieldName: string): Promise<{ best?: ContainerCandidate; candidates: ContainerCandidate[] }> {
+  private async refreshActiveContainerForField(fieldName: string, technicalTargetRefs: string[] = []): Promise<{ best?: ContainerCandidate; candidates: ContainerCandidate[] }> {
     const existing = this.activeContainer;
-    const scan = await findBestActiveContainerForField(this.page, fieldName);
+    const scan = await findBestActiveContainerForField(this.page, fieldName, technicalTargetRefs);
     const containsExisting = existing
       ? scan.candidates.find((c) => c.descriptor === existing.descriptor && c.visible && c.editableCount > 0 && c.matchingFieldFound)
       : undefined;
@@ -5714,5 +5859,51 @@ export type PromotedSpecRuntimePublicMethod = typeof PROMOTED_SPEC_RUNTIME_PUBLI
 export type PromotedSpecRuntimeApi = Pick<PromotedSpecRuntime, PromotedSpecRuntimePublicMethod>;
 
 export function createPromotedSpecRuntime(page: Page, config?: Partial<PromotedRuntimeConfig>): PromotedSpecRuntimeApi {
-  return new PromotedSpecRuntime(page, config);
+  const runtime = new PromotedSpecRuntime(page, config);
+  // Track public scenario calls, not internal recovery/setup calls. Existing promoted specs
+  // already finalize evidence through this API, so their lineage need not be rewritten.
+  const actions = new Set(["clickPromotedTarget", "fillPromotedField", "pressPromotedTarget", "selectPromotedItem"]);
+  let sequence = 0;
+  let lastAction = 0;
+  let lastAssertion = 0;
+  let lastStepIndex = 0;
+  let executionFailed = false;
+  let expectedVisibleTargets: string[] = [];
+  return new Proxy(runtime, {
+    get(target, property, receiver) {
+      const member = Reflect.get(target, property, receiver);
+      if (typeof member !== "function") return member;
+      const name = String(property);
+      if (name === "finishEvidence") return async () => {
+        let outcomeError: unknown;
+        if (!executionFailed && sequence > 0) {
+          try {
+            await target.verifyScenarioOutcome({ hasFinalAssertion: lastAssertion > lastAction, expectedVisibleTargets }, lastStepIndex);
+          } catch (error) { outcomeError = error; }
+        }
+        try { await target.finishEvidence(); }
+        finally { if (outcomeError) throw outcomeError; }
+      };
+      if (!actions.has(name) && name !== "expectPromotedVisible") return member.bind(target);
+      return async (...args: any[]) => {
+        const callSequence = ++sequence;
+        lastStepIndex = args[0]?.stepIndex ?? lastStepIndex;
+        if (actions.has(name)) {
+          lastAction = callSequence;
+          expectedVisibleTargets = [];
+        }
+        try {
+          const result = await member.apply(target, args);
+          if (name === "expectPromotedVisible") {
+            lastAssertion = callSequence;
+            const assertion = args[0] as PromotedAssertOptions;
+            if (assertion.polarity === "positive" && !assertion.expectedUrl) {
+              expectedVisibleTargets.push(semanticNameFromRef(assertion.target) ?? assertion.target);
+            }
+          }
+          return result;
+        } catch (error) { executionFailed = true; throw error; }
+      };
+    },
+  });
 }

@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-108",
+  "sourceScenarioId": "AA-108:jira:1",
+  "title": "Consultar y filtrar el registro de auditoría empresarial",
+  "generatedAt": "2026-10-18T20:06:31.973Z",
+  "executionEngine": "jira_semantic"
+}

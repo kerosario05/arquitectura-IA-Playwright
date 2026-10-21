@@ -37,7 +37,11 @@ function openDatabase(): DatabaseSync {
 }
 
 /** Applies additive changes to databases created by an older SQLite schema. */
-function ensureSchemaCompatibility(handle: DatabaseSync): void {
+export function ensureSchemaCompatibility(handle: DatabaseSync): void {
+  const requirementColumns = handle.prepare("PRAGMA table_info(ProjectCaseInputRequirement)").all() as Array<{name?:string}>;
+  if (requirementColumns.length && !requirementColumns.some(column=>column.name === "namedProfileRef")) {
+    handle.exec("ALTER TABLE ProjectCaseInputRequirement ADD COLUMN namedProfileRef TEXT");
+  }
   const columns = handle
     .prepare("PRAGMA table_info(WebProjectConfiguration)")
     .all() as Array<{ name?: string }>;

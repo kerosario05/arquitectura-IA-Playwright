@@ -1,0 +1,9 @@
+{
+  "id": "aa-103-jira-2-rechazo-de-inicio-empresarial-con-contrasena-invalida",
+  "externalId": "AA-103:jira:2",
+  "title": "Rechazo de inicio empresarial con contraseña inválida",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-16T18:30:30.725Z"
+}

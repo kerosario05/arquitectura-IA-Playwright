@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { fillAndObserveRuntimeInput, startNetworkObservation } from "./case-discovery";
+import { fillAndObserveRuntimeInput, startNetworkObservation, findActionServerError } from "./case-discovery";
 import { waitForStableInteractiveScreen } from "../runner/execution-plan-executor";
 
 class FakePage {
@@ -668,4 +668,31 @@ test("getProgressState: one non-terminal subrequest failure never masks another 
   assert.equal(state.requestFailed, false);
   assert.equal(state.active, true);
   assert.equal(state.pendingCount, 1);
+});
+
+test("action application 5xx survives observation and rejects success across app origins", async () => {
+  for (const origin of ["https://bank.test", "https://inventory.test"]) {
+    class ApplicationPage extends FakePage { url(): string { return `${origin}/home`; } }
+    const page = new ApplicationPage();
+    const observation = startNetworkObservation(page as any, 12, 100, { diagnosticMs: 0 });
+    const business = request(`${origin}/api/open-form?secret=hidden`, "GET", "xhr");
+    const telemetry = request("https://telemetry.test/collect", "POST", "fetch");
+    const asset = request(`${origin}/logo.png`, "GET", "image");
+    for (const req of [telemetry, asset, business]) {
+      page.emit("request", req);
+      page.emit("response", response(req, 500));
+    }
+    const events = await observation.stop({ passiveTail: false });
+    const failed = findActionServerError(events);
+    assert.equal(failed?.status, 500);
+    assert.equal(failed?.path, "/api/open-form");
+    assert.equal(failed?.sameOrigin, true);
+    assert.equal(JSON.stringify(events).includes("secret"), false);
+    assert.equal(findActionServerError(events.filter(event => event.path !== "/api/open-form")), undefined);
+    assert.equal(findActionServerError([...events, { ...failed!, status: 200, state: "completed" }])?.status, 500,
+      "another successful response cannot hide the error using only a redacted path");
+    assert.equal(findActionServerError([{ ...failed!, sameOrigin: undefined }]), undefined);
+    assert.equal(findActionServerError([{ ...failed!, status: 401 }]), undefined,
+      "authentication 4xx retains its existing classifier");
+  }
 });

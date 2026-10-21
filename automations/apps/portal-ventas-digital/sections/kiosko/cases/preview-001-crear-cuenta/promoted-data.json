@@ -1,0 +1,83 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-10-20T17:32:29.343Z",
+  "entries": [
+    {
+      "key": "numero_de_identificacion",
+      "source": "unknown",
+      "fieldName": "Número de identificación",
+      "stepIndex": 4,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "please_enter_verification_code_digit_1",
+      "source": "unknown",
+      "fieldName": "Please enter verification code. Digit 1",
+      "stepIndex": 11,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "otp_digit_2",
+      "source": "unknown",
+      "fieldName": "OTP digit 2",
+      "stepIndex": 12,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "otp_digit_3",
+      "source": "unknown",
+      "fieldName": "OTP digit 3",
+      "stepIndex": 13,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "otp_digit_4",
+      "source": "unknown",
+      "fieldName": "OTP digit 4",
+      "stepIndex": 14,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "otp_digit_5",
+      "source": "unknown",
+      "fieldName": "OTP digit 5",
+      "stepIndex": 15,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "otp_digit_6",
+      "source": "unknown",
+      "fieldName": "OTP digit 6",
+      "stepIndex": 16,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

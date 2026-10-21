@@ -337,11 +337,23 @@ function buildScenarioSummaries(manifest: ManifestShape): ExecutionScenarioSumma
  * the HU's defects. Includes not-yet-uploaded defects so the summary is useful before the Jira
  * upload step runs — the `registeredInJira` flag distinguishes them.
  */
-function buildDefectSummaries(huKey: string | undefined, jobId: string | undefined): ExecutionDefectSummary[] {
-  if (!huKey) return [];
-  const list = defectChecklistStore.get(huKey);
-  if (!list) return [];
-  return list.defects
+function buildDefectSummaries(
+  huKey: string | undefined,
+  jobId: string | undefined,
+  launchId?: string,
+): ExecutionDefectSummary[] {
+  // A run launched without a Jira HU (recordings, ad-hoc launches) keeps its defects in the
+  // launch/job-scoped checklist the batch runner creates, never under a HU key -- look there too.
+  const identities = [huKey, launchId ? `launch:${launchId}` : undefined, jobId ? `job:${jobId}` : undefined]
+    .filter((identity): identity is string => Boolean(identity));
+  const seen = new Set<string>();
+  const defects = identities.flatMap((identity) => defectChecklistStore.get(identity)?.defects ?? [])
+    .filter((d) => {
+      if (seen.has(d.id)) return false;
+      seen.add(d.id);
+      return true;
+    });
+  return defects
     .filter((d) => (jobId ? d.jobId === jobId : true))
     .map((d) => ({
       id: d.id,
@@ -424,7 +436,7 @@ export function buildExecutionSummary(launchId: string): ExecutionSummary | null
           synced: typeof persistedSummary.synced === "number" ? persistedSummary.synced : undefined,
           syncFailed: typeof persistedSummary.syncFailed === "number" ? persistedSummary.syncFailed : undefined,
         },
-        defects: [],
+        defects: buildDefectSummaries(undefined, persistedJob.id, launchId),
         evidenceAvailable: hasEvidenceDocx(launchId),
       };
     }
@@ -480,7 +492,11 @@ export function buildExecutionSummary(launchId: string): ExecutionSummary | null
         synced: typeof persistedSummary.synced === "number" ? persistedSummary.synced : undefined,
         syncFailed: typeof persistedSummary.syncFailed === "number" ? persistedSummary.syncFailed : undefined,
       },
-      defects: [],
+      defects: buildDefectSummaries(
+        typeof params.jiraKey === "string" ? params.jiraKey : typeof params.huKey === "string" ? params.huKey : undefined,
+        persistedJob?.id,
+        launchId,
+      ),
       evidenceAvailable: hasEvidenceDocx(launchId),
     };
   }
@@ -517,7 +533,7 @@ export function buildExecutionSummary(launchId: string): ExecutionSummary | null
       synced: manifest.summary?.synced,
       syncFailed: manifest.summary?.syncFailed,
     },
-    defects: buildDefectSummaries(huKey, manifest.jobId),
+    defects: buildDefectSummaries(huKey, manifest.jobId, launchId),
     evidenceAvailable: hasEvidenceDocx(manifest.jobId),
   };
 }

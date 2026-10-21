@@ -1,0 +1,9 @@
+{
+  "id": "aa-101-jira-1-consulta-exitosa-de-saldos-disponibles-tras-autenticacion-empresarial-con-verificacion-por-sms",
+  "externalId": "AA-101:jira:1",
+  "title": "Consulta exitosa de saldos disponibles tras autenticación empresarial con verificación por SMS",
+  "source": "discovery",
+  "appSlug": "fenix",
+  "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+  "createdAt": "2026-10-14T15:01:55.078Z"
+}

@@ -1,0 +1,609 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-18T12:36:48.699Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "AA-104:jira:2",
+    "title": "Transferencia propia rechazada con token de seguridad inválido"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "fill",
+      "description": "fill [auth.company_identifier]",
+      "valueKey": "auth.company_identifier",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-rnc\"]"
+      }
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "fill [auth.username]",
+      "valueKey": "auth.username",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-user\"]"
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [auth.password]",
+      "valueKey": "auth.password",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-password\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "click Iniciar sesión",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Iniciar sesión",
+        "exact": true
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Presionar \"Empresarial\"",
+      "target": {
+        "strategy": "css",
+        "value": "p:visible:text-is(\"Confirma tu identidad para continuar al portal empresarial.\")"
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Solicitar el código por SMS",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Solicitar código por SMS",
+        "exact": true
+      }
+    },
+    {
+      "index": 8,
+      "action": "fill",
+      "description": "fill [codigo_acceso]",
+      "valueKey": "codigo_acceso",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-otp\"]"
+      }
+    },
+    {
+      "index": 9,
+      "action": "click",
+      "description": "Presionar \"Continuar\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Continuar",
+        "exact": true
+      }
+    },
+    {
+      "index": 10,
+      "action": "click",
+      "description": "Presionar \"transferencia propia\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Nueva transferencia",
+        "exact": true
+      }
+    },
+    {
+      "index": 11,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Datos de la transferencia\"",
+      "target": {
+        "strategy": "text",
+        "value": "Datos de la transferencia"
+      }
+    },
+    {
+      "index": 12,
+      "action": "select",
+      "description": "select [cuenta_origen]",
+      "valueKey": "cuenta_origen",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"source-account\"]"
+      }
+    },
+    {
+      "index": 13,
+      "action": "select",
+      "description": "select [cuenta_destino_distinta]",
+      "valueKey": "cuenta_destino_distinta",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"destination-account\"]"
+      }
+    },
+    {
+      "index": 14,
+      "action": "fill",
+      "description": "fill [monto_valido]",
+      "valueKey": "monto_valido",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"transfer-amount\"]"
+      }
+    },
+    {
+      "index": 15,
+      "action": "select",
+      "description": "select [moneda_usd]",
+      "valueKey": "moneda_usd",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"transfer-currency\"]"
+      }
+    },
+    {
+      "index": 16,
+      "action": "click",
+      "description": "Presionar \"Continuar\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Continuar a la confirmación",
+        "exact": true
+      }
+    },
+    {
+      "index": 17,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Confirma los datos\"",
+      "target": {
+        "strategy": "text",
+        "value": "Confirma los datos"
+      }
+    },
+    {
+      "index": 18,
+      "action": "click",
+      "description": "Presionar \"Continuar\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Continuar a autorización",
+        "exact": true
+      }
+    },
+    {
+      "index": 19,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Validación de identidad\"",
+      "target": {
+        "strategy": "text",
+        "value": "Validación de identidad"
+      }
+    },
+    {
+      "index": 20,
+      "action": "click",
+      "description": "Solicitar el token por SMS",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Solicitar token por SMS",
+        "exact": true
+      }
+    },
+    {
+      "index": 21,
+      "action": "fill",
+      "description": "fill [token_seguridad_invalido]",
+      "valueKey": "token_seguridad_invalido",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"transfer-token\"]"
+      }
+    },
+    {
+      "index": 22,
+      "action": "click",
+      "description": "Presionar \"Autorizar transferencia\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Autorizar transferencia",
+        "exact": true
+      }
+    },
+    {
+      "index": 23,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"El token de seguridad no es válido\"",
+      "target": {
+        "strategy": "text",
+        "value": "El token de seguridad no es válido"
+      }
+    },
+    {
+      "index": 24,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"La transferencia no se ejecutó\"",
+      "target": {
+        "strategy": "text",
+        "value": "La transferencia no se ejecutó"
+      }
+    },
+    {
+      "index": 25,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Validación de identidad\"",
+      "target": {
+        "strategy": "text",
+        "value": "Validación de identidad"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "auth.company_identifier",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "auth.username",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "auth.password",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "codigo_acceso",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "cuenta_origen",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "cuenta_destino_distinta",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "monto_valido",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "moneda_usd",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "token_seguridad_invalido",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Transferencia propia rechazada con token de seguridad inválido",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "fill",
+        "valueKey": "auth.company_identifier",
+        "technicalTargetRefs": [
+          "css:[id=\"login-rnc\"]"
+        ]
+      },
+      {
+        "index": 3,
+        "action": "fill",
+        "valueKey": "auth.username",
+        "technicalTargetRefs": [
+          "css:[id=\"login-user\"]"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "auth.password",
+        "technicalTargetRefs": [
+          "css:[id=\"login-password\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:p:visible:text-is(\"Confirma tu identidad para continuar al portal empresarial.\")"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Solicitar código por SMS"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "fill",
+        "valueKey": "codigo_acceso",
+        "technicalTargetRefs": [
+          "css:[id=\"login-otp\"]"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Nueva transferencia"
+        ]
+      },
+      {
+        "index": 11,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Datos de la transferencia\"",
+        "technicalTargetRefs": [
+          "text:Datos de la transferencia"
+        ]
+      },
+      {
+        "index": 12,
+        "action": "select",
+        "valueKey": "cuenta_origen",
+        "technicalTargetRefs": [
+          "css:[id=\"source-account\"]"
+        ]
+      },
+      {
+        "index": 13,
+        "action": "select",
+        "valueKey": "cuenta_destino_distinta",
+        "technicalTargetRefs": [
+          "css:[id=\"destination-account\"]"
+        ]
+      },
+      {
+        "index": 14,
+        "action": "fill",
+        "valueKey": "monto_valido",
+        "technicalTargetRefs": [
+          "css:[id=\"transfer-amount\"]"
+        ]
+      },
+      {
+        "index": 15,
+        "action": "select",
+        "valueKey": "moneda_usd",
+        "technicalTargetRefs": [
+          "css:[id=\"transfer-currency\"]"
+        ]
+      },
+      {
+        "index": 16,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Continuar a la confirmación"
+        ]
+      },
+      {
+        "index": 17,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Confirma los datos\"",
+        "technicalTargetRefs": [
+          "text:Confirma los datos"
+        ]
+      },
+      {
+        "index": 18,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Continuar a autorización"
+        ]
+      },
+      {
+        "index": 19,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Validación de identidad\"",
+        "technicalTargetRefs": [
+          "text:Validación de identidad"
+        ]
+      },
+      {
+        "index": 20,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Solicitar token por SMS"
+        ]
+      },
+      {
+        "index": 21,
+        "action": "fill",
+        "valueKey": "token_seguridad_invalido",
+        "technicalTargetRefs": [
+          "css:[id=\"transfer-token\"]"
+        ]
+      },
+      {
+        "index": 22,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Autorizar transferencia"
+        ]
+      },
+      {
+        "index": 23,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"El token de seguridad no es válido\"",
+        "technicalTargetRefs": [
+          "text:El token de seguridad no es válido"
+        ]
+      },
+      {
+        "index": 24,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"La transferencia no se ejecutó\"",
+        "technicalTargetRefs": [
+          "text:La transferencia no se ejecutó"
+        ]
+      },
+      {
+        "index": 25,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Validación de identidad\"",
+        "technicalTargetRefs": [
+          "text:Validación de identidad"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-11",
+        "requirement": "Validar que se muestre \"Datos de la transferencia\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 11,
+        "target": "Datos de la transferencia",
+        "evidence": [
+          "live-step-11"
+        ],
+        "details": {
+          "observedText": "Datos de la transferencia"
+        }
+      },
+      {
+        "id": "jira-oracle-17",
+        "requirement": "Validar que se muestre \"Confirma los datos\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 17,
+        "target": "Confirma los datos",
+        "evidence": [
+          "live-step-17"
+        ],
+        "details": {
+          "observedText": "Confirma los datos"
+        }
+      },
+      {
+        "id": "jira-oracle-19",
+        "requirement": "Validar que se muestre \"Validación de identidad\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 19,
+        "target": "Validación de identidad",
+        "evidence": [
+          "live-step-19"
+        ],
+        "details": {
+          "observedText": "Validación de identidad"
+        }
+      },
+      {
+        "id": "jira-oracle-23",
+        "requirement": "Validar que se muestre \"El token de seguridad no es válido\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 23,
+        "target": "PAGOS Y TRANSFERENCIAS\nTransferencia entre cuentas propias\n\nEnvía fondos entre tus productos con confirmación y autorización de seguridad.\n\n✓\nDatos\n✓\nConfirmación\n3\nAutorización\n4\nComprobante\nValidación de identidad\nToken de transferencia\n\nIngresa el token de seguridad independiente del código usado para iniciar sesión.\n\nEl token de seguridad no es válido. La transferencia no se ejecutó.\nSolicitar token por SMS\nToken de seguridad\nEl token tiene seis dígitos.\nVolver\nAutorizar transferencia",
+        "evidence": [
+          "live-step-23"
+        ],
+        "details": {
+          "observedText": "PAGOS Y TRANSFERENCIAS\nTransferencia entre cuentas propias\n\nEnvía fondos entre tus productos con confirmación y autorización de seguridad.\n\n✓\nDatos\n✓\nConfirmación\n3\nAutorización\n4\nComprobante\nValidación de identidad\nToken de transferencia\n\nIngresa el token de seguridad independiente del código usado para iniciar sesión.\n\nEl token de seguridad no es válido. La transferencia no se ejecutó.\nSolicitar token por SMS\nToken de seguridad\nEl token tiene seis dígitos.\nVolver\nAutorizar transferencia"
+        }
+      },
+      {
+        "id": "jira-oracle-24",
+        "requirement": "Validar que se muestre \"La transferencia no se ejecutó\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 24,
+        "target": "PAGOS Y TRANSFERENCIAS\nTransferencia entre cuentas propias\n\nEnvía fondos entre tus productos con confirmación y autorización de seguridad.\n\n✓\nDatos\n✓\nConfirmación\n3\nAutorización\n4\nComprobante\nValidación de identidad\nToken de transferencia\n\nIngresa el token de seguridad independiente del código usado para iniciar sesión.\n\nEl token de seguridad no es válido. La transferencia no se ejecutó.\nSolicitar token por SMS\nToken de seguridad\nEl token tiene seis dígitos.\nVolver\nAutorizar transferencia",
+        "evidence": [
+          "live-step-24"
+        ],
+        "details": {
+          "observedText": "PAGOS Y TRANSFERENCIAS\nTransferencia entre cuentas propias\n\nEnvía fondos entre tus productos con confirmación y autorización de seguridad.\n\n✓\nDatos\n✓\nConfirmación\n3\nAutorización\n4\nComprobante\nValidación de identidad\nToken de transferencia\n\nIngresa el token de seguridad independiente del código usado para iniciar sesión.\n\nEl token de seguridad no es válido. La transferencia no se ejecutó.\nSolicitar token por SMS\nToken de seguridad\nEl token tiene seis dígitos.\nVolver\nAutorizar transferencia"
+        }
+      },
+      {
+        "id": "jira-oracle-25",
+        "requirement": "Validar que se muestre \"Validación de identidad\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 25,
+        "target": "Validación de identidad",
+        "evidence": [
+          "live-step-25"
+        ],
+        "details": {
+          "observedText": "Validación de identidad"
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "Permanece \"Validación de identidad\" y se informa que la transferencia no se ejecutó."
+  }
+}

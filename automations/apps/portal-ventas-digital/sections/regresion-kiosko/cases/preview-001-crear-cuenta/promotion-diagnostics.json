@@ -1,0 +1,20 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\portal-ventas-digital\\sections\\regresion-kiosko\\cases\\preview-001-crear-cuenta\\case.spec.ts",
+  "specHash": "b44ba3848626e893eec0fecb29056bcdb6ac7e3321374e7d10bfc0745ba9550d",
+  "specSource": "generatedSpec"
+}

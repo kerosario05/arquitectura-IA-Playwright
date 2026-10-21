@@ -252,7 +252,8 @@ function displayTargetRef(target: SpecStepTarget): string {
  * business-text locators like getByText('Depurar').
  */
 function buildTechnicalTargetRefLocatorExpression(technicalTargetRef: string): string {
-  return `recordedLocatorFactory(page, parseSerializedTechnicalTargetString('${escapeString(technicalTargetRef)}')!)!`;
+  const exactText = technicalTargetRef.startsWith("text:") ? ", true" : "";
+  return `recordedLocatorFactory(page, parseSerializedTechnicalTargetString('${escapeString(technicalTargetRef)}')!${exactText})!`;
 }
 
 function hasTechnicalTargetRef(step: SpecExecutionContractStep): step is SpecExecutionContractStep & { technicalTargetRef: string } {
@@ -894,6 +895,8 @@ function compileSelectStep(
         ? `'${escapeString(step.value)}'`
         : undefined;
   const nativeSelection = step.playwrightRecorderEvidence?.nativeSelection;
+  const discoveredNativeSelection = step.selectionControlKind === "native_select" && target?.strategy === "css" && Boolean(target.value);
+  if (discoveredNativeSelection) targetRef = `css:${target!.value}`;
   const selectableRecordedOptions = nativeSelection?.options
     .filter((option) => option.value.trim().length > 0 && option.disabled !== true) ?? [];
   const recordedSelectionIndex = nativeSelection?.selectionMode === "index"
@@ -944,13 +947,15 @@ function compileSelectStep(
   const associatedField = inferredSelectionField ? nextFillField : step.associatedField;
   if (selectionField) lines.push(`      selectionField: '${escapeString(selectionField)}',`);
   if (associatedField) lines.push(`      associatedField: '${escapeString(associatedField)}',`);
-  if (usesRefLocator) lines.push(`      technicalTargetRefs: ['${escapeString(targetRef)}'],`);
+  if (usesRefLocator || discoveredNativeSelection) lines.push(`      technicalTargetRefs: ['${escapeString(targetRef)}'],`);
   if ((isRuntimeDeferred || nativeSelection) && step.playwrightRecorderEvidence) {
     lines.push(`      playwrightRecorderEvidence: ${JSON.stringify(step.playwrightRecorderEvidence)},`);
   }
   lines.push(`      actionIntent: 'select',`);
   lines.push(`      expectedEffect: 'selection_state_change',`);
-  lines.push(selectionValueExpr && nativeSelection?.selectionMode !== "index"
+  lines.push(discoveredNativeSelection && selectionValueExpr
+    ? `      action: async () => { await page.locator('${escapeString(target!.value!)}').selectOption({ label: ${selectionValueExpr} }); }`
+    : selectionValueExpr && nativeSelection?.selectionMode !== "index"
     ? `      action: async () => { await page.getByRole('option', { name: ${selectionValueExpr}, exact: true }).click(); }`
     : `      action: async () => { throw new Error('Recorded indexed selection requires runtime resolution'); }`);
   lines.push(`    });`);
@@ -1087,7 +1092,12 @@ export function compileDeterministicSpec(contract: SpecExecutionContract, compil
     )
   );
 
-  lines.push(usesExpectOracle ? `import { test, expect } from '@playwright/test';` : `import { test } from '@playwright/test';`);
+  const usesAuthGateOracle = contract.steps.some(s => s.required !== false && s.oracle?.type === "auth_gate");
+  lines.push(usesExpectOracle || usesAuthGateOracle ? `import { test, expect } from '@playwright/test';` : `import { test } from '@playwright/test';`);
+  if (usesAuthGateOracle) {
+    lines.push(`import { scanCurrentPage } from '${portableImportPath(compileContext.targetSpecPath, path.resolve(process.cwd(), "src/explorer/page-scanner.ts"))}';`);
+    lines.push(`import { detectAuthGate } from '${portableImportPath(compileContext.targetSpecPath, path.resolve(process.cwd(), "src/discovery/auth-gate-detector.ts"))}';`);
+  }
   lines.push(
     usesTechnicalTargetRef
       ? `import { createPromotedSpecRuntime, parseSerializedTechnicalTargetString } from '${promotedRuntimeImportPath}';`
@@ -1171,6 +1181,7 @@ export function compileDeterministicSpec(contract: SpecExecutionContract, compil
     const isSupportedAction = SUPPORTED_OPERATIONS.has(step.operation);
     const hasNavigationOracle = step.oracle?.type === "navigation_transition";
     const hasVisibleTextOracle = ["literal_visible_text", "heading_or_control"].includes(step.oracle?.type ?? "");
+    const hasAuthGateOracle = step.oracle?.type === "auth_gate";
 
     if (isSupportedAction) {
       switch (step.operation as SpecCompilerSupportedOperation) {
@@ -1196,7 +1207,7 @@ export function compileDeterministicSpec(contract: SpecExecutionContract, compil
           );
           break;
       }
-    } else if (!hasNavigationOracle && !hasVisibleTextOracle) {
+    } else if (!hasNavigationOracle && !hasVisibleTextOracle && !hasAuthGateOracle) {
       unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:operation_unsupported:${step.operation}`);
     }
 
@@ -1205,6 +1216,18 @@ export function compileDeterministicSpec(contract: SpecExecutionContract, compil
     }
     if (hasVisibleTextOracle) {
       compileVisibleTextOracle(step, lines, bindings, unsupportedCapabilities);
+    }
+    if (hasAuthGateOracle) {
+      if (!step.oracle?.backed || step.oracle.mechanism?.source !== "auth_gate_detector") {
+        unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:auth_gate_unbacked`);
+      } else {
+        const stage = step.oracle.mechanism.expected?.stage;
+        const polarity = step.oracle.polarity ?? "positive";
+        lines.push(`    await promotedRuntime.expectPromotedVisible({ stepIndex: ${step.scenarioStepIndex}, target: 'authentication gate', polarity: '${polarity}', assertion: async () => {`);
+        lines.push(`      await expect.poll(async () => { const gate = detectAuthGate(await scanCurrentPage(page)); return gate.detected && gate.stage !== 'unknown' && gate.stage !== 'authenticated_landing'${stage ? ` && gate.stage === ${jsonLiteral(stage)}` : ""}; }).toBe(${polarity !== "negative"});`);
+        lines.push(`    } });`);
+        bindings.push({ scenarioStepIndex: step.scenarioStepIndex, operation: step.operation, runtimeMethod: "expectPromotedVisible", targetRef: "authentication gate" });
+      }
     }
 
     if (authFlowRequired && contract.auth?.insertionAfterStepIndex === step.scenarioStepIndex) emitAuthFlowCall();

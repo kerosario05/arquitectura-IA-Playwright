@@ -219,6 +219,27 @@ describe("runCodexCli usage instrumentation", () => {
     });
   });
 
+  test("CODEX_HOME is inherited by child env when set and absent otherwise", async () => {
+    await withTempCwd(async (cwd) => {
+      const original = process.env.CODEX_HOME;
+      const input = { command: "codex", extraArgs: [], prompt: "p", cwd, timeoutMs: 5000 };
+      try {
+        process.env.CODEX_HOME = path.join(cwd, "dedicated-codex-home");
+        installSpawnPlan({ stdoutLines: [] });
+        await runCodexCli(input);
+        assert.strictEqual((lastSpawn?.options as { env: NodeJS.ProcessEnv }).env.CODEX_HOME, process.env.CODEX_HOME);
+
+        delete process.env.CODEX_HOME;
+        installSpawnPlan({ stdoutLines: [] });
+        await runCodexCli(input);
+        assert.ok(!("CODEX_HOME" in (lastSpawn?.options as { env: NodeJS.ProcessEnv }).env));
+      } finally {
+        if (original === undefined) delete process.env.CODEX_HOME;
+        else process.env.CODEX_HOME = original;
+      }
+    });
+  });
+
   test("agent run without timeout waits for natural process completion", async () => {
     await withTempCwd(async (cwd) => {
       installSpawnPlan({ stdoutLines: [JSON.stringify({ type: "item.completed", item: { type: "agent_message", content: [{ text: "completed" }] } })] });

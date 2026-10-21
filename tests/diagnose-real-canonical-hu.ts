@@ -25,10 +25,12 @@ async function main(): Promise<void> {
   const key = process.argv[2];
   if (!key) throw new Error("Usage: npx tsx tests/diagnose-real-canonical-hu.ts <issue-key>");
   const jiraConfig = requireJiraConfig(config);
+  const projectKey = jiraConfig.projectKey;
+  if (!projectKey) throw new Error("Jira project key is not configured");
   const jira = new JiraClient(jiraConfig);
-  const sprint = await jira.getActiveSprint(jiraConfig.projectKey);
+  const sprint = await jira.getActiveSprint(projectKey);
   if (!sprint) throw new Error("No active sprint");
-  const issues = await loadJiraIssues(jiraConfig, jiraConfig.projectKey, sprint.id, undefined, 200);
+  const issues = await loadJiraIssues(jiraConfig, projectKey, sprint.id, undefined, 200);
   const issue = issues.find((candidate) => candidate.key === key);
   if (!issue) throw new Error(`Issue not found in active sprint: ${key}`);
 
@@ -36,7 +38,7 @@ async function main(): Promise<void> {
   const detectedFlows = detectOptionFlows(issue).flows;
   const structuredFlows = extractStructuredOptionFlows(context.text);
   const visibleOptions = structuredFlows.map((flow) => flow.optionLabel);
-  const branches = extractFunctionalBranchesFromHu(context.text, visibleOptions, detectedFlows, structuredFlows);
+  const branches = extractFunctionalBranchesFromHu(context.text, visibleOptions, [], structuredFlows);
   const requirements = buildRequirementManifest(context.text, branches);
   const lines = context.text.split("\n");
   const candidateSections = context.text.split(/\n\s*\n/).filter(Boolean);

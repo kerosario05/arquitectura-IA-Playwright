@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-103",
+  "sourceScenarioId": "AA-103:jira:2",
+  "title": "Rechazo de inicio empresarial con contraseña inválida",
+  "generatedAt": "2026-10-16T18:30:30.721Z",
+  "executionEngine": "jira_semantic"
+}

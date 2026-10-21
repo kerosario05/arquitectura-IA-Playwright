@@ -1,0 +1,9 @@
+{
+  "id": "preview-001-redirigir-estados-de-cuenta-a-la-autenticacion-del-kiosco",
+  "externalId": "PREVIEW-001",
+  "title": "Redirigir Estados de cuenta a la autenticación del kiosco",
+  "source": "discovery",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "createdAt": "2026-10-09T19:46:43.632Z"
+}

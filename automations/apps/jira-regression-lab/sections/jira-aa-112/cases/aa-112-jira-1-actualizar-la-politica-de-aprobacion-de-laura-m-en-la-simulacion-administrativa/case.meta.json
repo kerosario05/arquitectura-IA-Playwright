@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-112",
+  "sourceScenarioId": "AA-112:jira:1",
+  "title": "Actualizar la política de aprobación de Laura M. en la simulación administrativa",
+  "generatedAt": "2026-10-16T23:00:37.910Z",
+  "executionEngine": "jira_semantic"
+}

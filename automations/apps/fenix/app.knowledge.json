@@ -2,6 +2,683 @@
   "version": 1,
   "appSlug": "fenix",
   "createdAt": "2026-09-23T13:48:01.218Z",
-  "updatedAt": "2026-09-23T13:48:01.218Z",
-  "items": []
+  "updatedAt": "2026-10-19T19:38:22.369Z",
+  "items": [],
+  "jiraRoutes": [
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "fenix",
+      "id": "14394cfbf083c2380cc5bbc6a35166f109a1609495b3d6bb35809b2b2ae5c2de",
+      "profileRevision": "854d1a28d006225af70656f58f8801b66c7a12dbb7f540424b4ef83491a12a0f",
+      "sourceIssueKey": "AA-100",
+      "scenarioId": "AA-100:jira:2",
+      "jobId": "76634652-2679-4cc7-9ac4-0f3cb7ae6783",
+      "validatedAt": "2026-10-14T00:18:25.108Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "perfil empresarial"
+        },
+        {
+          "action": "fill",
+          "field": "RNC",
+          "dataRef": "rnc"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "continuar inicio de sesión"
+        },
+        {
+          "action": "click",
+          "field": "código por SMS"
+        },
+        {
+          "action": "fill",
+          "field": "Código de acceso",
+          "dataRef": "codigo_acceso"
+        },
+        {
+          "action": "click",
+          "field": "continuar verificación de acceso"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png",
+        "scenario-1-step-13.png",
+        "scenario-1-step-14.png"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "fenix",
+      "id": "af509c1fffcd7694453b314a7bb80766cda0ab875dc239f73fa55227ec7137a4",
+      "profileRevision": "854d1a28d006225af70656f58f8801b66c7a12dbb7f540424b4ef83491a12a0f",
+      "sourceIssueKey": "AA-101",
+      "scenarioId": "AA-101:jira:1",
+      "jobId": "8adfbf48-efed-4e8e-b342-947aadb84ef2",
+      "validatedAt": "2026-10-14T14:57:15.253Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "perfil empresarial"
+        },
+        {
+          "action": "fill",
+          "field": "RNC",
+          "dataRef": "rnc"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "continuar inicio de sesión"
+        },
+        {
+          "action": "click",
+          "field": "código por SMS"
+        },
+        {
+          "action": "fill",
+          "field": "Código de acceso",
+          "dataRef": "codigo_acceso"
+        },
+        {
+          "action": "click",
+          "field": "continuar verificación de acceso"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png",
+        "scenario-1-step-13.png"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "fenix",
+      "id": "5ce691bc84aaa59e4629a297f95d0b75a206b908f52ed4566bc256b08ba4bc59",
+      "profileRevision": "854d1a28d006225af70656f58f8801b66c7a12dbb7f540424b4ef83491a12a0f",
+      "sourceIssueKey": "AA-102",
+      "scenarioId": "AA-102:jira:1",
+      "jobId": "9ae14d16-12f4-4b8c-b314-8e5df63b65f2",
+      "validatedAt": "2026-10-14T15:36:41.052Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "perfil empresarial"
+        },
+        {
+          "action": "fill",
+          "field": "RNC",
+          "dataRef": "rnc"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "continuar inicio de sesión"
+        },
+        {
+          "action": "click",
+          "field": "código por SMS"
+        },
+        {
+          "action": "fill",
+          "field": "Código de acceso",
+          "dataRef": "codigo_acceso"
+        },
+        {
+          "action": "click",
+          "field": "continuar verificación de acceso"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png",
+        "scenario-1-step-13.png"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "fenix",
+      "id": "9366c2269a2eded3fc9935a4a8a37d645d72f25b2b979dd1af3f5501a026c582",
+      "profileRevision": "854d1a28d006225af70656f58f8801b66c7a12dbb7f540424b4ef83491a12a0f",
+      "sourceIssueKey": "AA-97",
+      "scenarioId": "AA-97:jira:1",
+      "jobId": "5592c5ec-ab26-4592-8132-7621d17dc915",
+      "validatedAt": "2026-10-16T13:02:22.765Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "perfil empresarial"
+        },
+        {
+          "action": "fill",
+          "field": "RNC",
+          "dataRef": "rnc_valido"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario_valido"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena_valida"
+        },
+        {
+          "action": "click",
+          "field": "continuar inicio de sesión"
+        },
+        {
+          "action": "click",
+          "field": "código por SMS"
+        },
+        {
+          "action": "fill",
+          "field": "Código",
+          "dataRef": "codigo_acceso_valido"
+        },
+        {
+          "action": "click",
+          "field": "continuar inicio de sesión"
+        },
+        {
+          "action": "click",
+          "field": "Transferencias"
+        },
+        {
+          "action": "click",
+          "field": "Cuentas Propias"
+        },
+        {
+          "action": "select",
+          "field": "Cuenta de origen",
+          "dataRef": "cuenta_origen"
+        },
+        {
+          "action": "select",
+          "field": "Cuenta de destino",
+          "dataRef": "cuenta_destino"
+        },
+        {
+          "action": "fill",
+          "field": "Monto",
+          "dataRef": "monto_transferencia"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "click",
+          "field": "token por SMS"
+        },
+        {
+          "action": "fill",
+          "field": "Token",
+          "dataRef": "token_transferencia_valido"
+        },
+        {
+          "action": "click",
+          "field": "Autorizar transferencia"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png",
+        "scenario-1-step-13.png",
+        "scenario-1-step-14.png",
+        "scenario-1-step-15.png",
+        "scenario-1-step-16.png",
+        "scenario-1-step-17.png",
+        "scenario-1-step-18.png",
+        "scenario-1-step-19.png",
+        "scenario-1-step-20.png",
+        "scenario-1-step-21.png",
+        "scenario-1-step-22.png",
+        "scenario-1-step-23.png",
+        "scenario-1-step-24.png",
+        "scenario-1-step-25.png",
+        "scenario-1-step-26.png",
+        "scenario-1-step-27.png",
+        "scenario-1-step-28.png",
+        "scenario-1-step-29.png",
+        "scenario-1-step-30.png",
+        "scenario-1-step-31.png",
+        "scenario-1-step-32.png",
+        "scenario-1-step-33.png",
+        "scenario-1-step-34.png",
+        "scenario-1-step-35.png"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "fenix",
+      "id": "3f6340554f5950df8652f91acb370bfc6cbbc4603ad28d9f6597861986322a77",
+      "profileRevision": "854d1a28d006225af70656f58f8801b66c7a12dbb7f540424b4ef83491a12a0f",
+      "sourceIssueKey": "AA-97",
+      "scenarioId": "AA-97:jira:2",
+      "jobId": "6cb29f08-795f-42b7-9e9a-4ecce80ac928",
+      "validatedAt": "2026-10-16T15:40:41.491Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "perfil empresarial"
+        },
+        {
+          "action": "fill",
+          "field": "RNC",
+          "dataRef": "rnc"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena_invalida"
+        },
+        {
+          "action": "click",
+          "field": "continuar inicio de sesión"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-2-step-1.png",
+        "scenario-2-step-2.png",
+        "scenario-2-step-3.png",
+        "scenario-2-step-4.png",
+        "scenario-2-step-5.png",
+        "scenario-2-step-6.png",
+        "scenario-2-step-7.png",
+        "scenario-2-step-8.png"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "fenix",
+      "id": "da765ebbec3b53092dd3aa6131c59fdbd28c71094e8095b854341adcbbe11f68",
+      "profileRevision": "854d1a28d006225af70656f58f8801b66c7a12dbb7f540424b4ef83491a12a0f",
+      "sourceIssueKey": "AA-97",
+      "scenarioId": "AA-97:jira:1:edited-6ea987cfdf973725",
+      "jobId": "ed05cf1a-bb8e-4a3b-b7d2-7678c5317cc4",
+      "validatedAt": "2026-10-19T18:26:47.418Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "perfil empresarial"
+        },
+        {
+          "action": "fill",
+          "field": "RNC",
+          "dataRef": "rnc"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesión"
+        },
+        {
+          "action": "click",
+          "field": "sms"
+        },
+        {
+          "action": "fill",
+          "field": "Código",
+          "dataRef": "codigo_acceso"
+        },
+        {
+          "action": "click",
+          "field": "continuar"
+        },
+        {
+          "action": "click",
+          "field": "Transferencias"
+        },
+        {
+          "action": "click",
+          "field": "Cuentas Propias"
+        },
+        {
+          "action": "select",
+          "field": "Cuenta de origen",
+          "dataRef": "cuenta_origen"
+        },
+        {
+          "action": "select",
+          "field": "Cuenta de destino",
+          "dataRef": "cuenta_destino"
+        },
+        {
+          "action": "fill",
+          "field": "Monto",
+          "dataRef": "monto"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "click",
+          "field": "el token por SMS"
+        },
+        {
+          "action": "fill",
+          "field": "Token",
+          "dataRef": "token_transferencia"
+        },
+        {
+          "action": "click",
+          "field": "Autorizar transferencia"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png",
+        "scenario-1-step-13.png",
+        "scenario-1-step-14.png",
+        "scenario-1-step-15.png",
+        "scenario-1-step-16.png",
+        "scenario-1-step-17.png",
+        "scenario-1-step-18.png",
+        "scenario-1-step-19.png",
+        "scenario-1-step-20.png",
+        "scenario-1-step-21.png",
+        "scenario-1-step-22.png",
+        "scenario-1-step-23.png",
+        "scenario-1-step-24.png",
+        "scenario-1-step-25.png",
+        "scenario-1-step-26.png",
+        "scenario-1-step-27.png",
+        "scenario-1-step-28.png",
+        "scenario-1-step-29.png",
+        "scenario-1-step-30.png",
+        "scenario-1-step-31.png",
+        "scenario-1-step-32.png",
+        "scenario-1-step-33.png",
+        "scenario-1-step-34.png"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "fenix",
+      "id": "3fe62098d580df19761ce1598d342a382af12bd4f33f50dc850dc14e91c636ef",
+      "profileRevision": "854d1a28d006225af70656f58f8801b66c7a12dbb7f540424b4ef83491a12a0f",
+      "sourceIssueKey": "AA-97",
+      "scenarioId": "AA-97:jira:1:edited-7b735ce96bfcab46",
+      "jobId": "8da9de51-6fe4-4012-8207-0f6415a68e3e",
+      "validatedAt": "2026-10-19T19:38:22.357Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "perfil empresarial"
+        },
+        {
+          "action": "fill",
+          "field": "RNC",
+          "dataRef": "rnc"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesión"
+        },
+        {
+          "action": "click",
+          "field": "SMS"
+        },
+        {
+          "action": "fill",
+          "field": "Código",
+          "dataRef": "codigo_acceso"
+        },
+        {
+          "action": "click",
+          "field": "continuar"
+        },
+        {
+          "action": "click",
+          "field": "Transferencias"
+        },
+        {
+          "action": "click",
+          "field": "Cuentas Propias"
+        },
+        {
+          "action": "select",
+          "field": "Cuenta de origen",
+          "dataRef": "cuenta_origen"
+        },
+        {
+          "action": "select",
+          "field": "Cuenta de destino",
+          "dataRef": "cuenta_destino"
+        },
+        {
+          "action": "fill",
+          "field": "Monto",
+          "dataRef": "monto"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "click",
+          "field": "SMS"
+        },
+        {
+          "action": "fill",
+          "field": "Token",
+          "dataRef": "token_autorizacion"
+        },
+        {
+          "action": "click",
+          "field": "Autorizar transferencia"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png",
+        "scenario-1-step-13.png",
+        "scenario-1-step-14.png",
+        "scenario-1-step-15.png",
+        "scenario-1-step-16.png",
+        "scenario-1-step-17.png",
+        "scenario-1-step-18.png",
+        "scenario-1-step-19.png",
+        "scenario-1-step-20.png",
+        "scenario-1-step-21.png",
+        "scenario-1-step-22.png",
+        "scenario-1-step-23.png",
+        "scenario-1-step-24.png",
+        "scenario-1-step-25.png",
+        "scenario-1-step-26.png",
+        "scenario-1-step-27.png",
+        "scenario-1-step-28.png",
+        "scenario-1-step-29.png",
+        "scenario-1-step-30.png",
+        "scenario-1-step-31.png",
+        "scenario-1-step-32.png",
+        "scenario-1-step-33.png"
+      ]
+    }
+  ]
 }

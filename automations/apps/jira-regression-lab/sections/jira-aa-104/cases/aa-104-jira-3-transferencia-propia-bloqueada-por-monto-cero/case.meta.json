@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-104",
+  "sourceScenarioId": "AA-104:jira:3",
+  "title": "Transferencia propia bloqueada por monto cero",
+  "generatedAt": "2026-10-18T12:45:35.973Z",
+  "executionEngine": "jira_semantic"
+}

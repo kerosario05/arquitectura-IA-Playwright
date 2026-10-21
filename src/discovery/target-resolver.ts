@@ -8,6 +8,7 @@ import type { PlaywrightRecorderEvidence, SemanticRuntimeEvidence } from "../rec
 import { isGenericUnresolvedLabel } from "../recording/trace-normalizer";
 import type { AppRouteProfile } from "../types/env.types";
 import { parseProductConditionTarget, resolveProductConditionAgainstSnapshot, type ProductCondition } from "./product-condition-parser";
+import { cleanupSelectionOptionMarker } from "./selection-option-marker-cleanup";
 import { detectOrdinalSelectionPattern, resolveOrdinalSelection, type OrdinalSelectionResult } from "./ordinal-selection-resolver";
 import { resolveAmbiguousIntermediateTarget, type ContextualResolverInput } from "./contextual-intermediate-resolver";
 import { resolveTargetWithAliases } from "./target-alias-resolver";
@@ -555,6 +556,9 @@ const CLICKABLE_ROLES = new Set(["button", "link", "menuitem", "tab", "treeitem"
 const CLICKABLE_TAGS = new Set(["button", "a", "input", "select", "textarea"]);
 
 export function isElementClickable(el: SnapshotElement): boolean {
+  // The scanner can observe an actual framework click owner on a non-native tag.
+  // Preserve that authority when ranking candidates instead of preferring any native link.
+  if (el.actionability === "FRAMEWORK_ACTIONABLE" && el.actionOwner === true) return true;
   if (CLICKABLE_ROLES.has(el.role ?? "")) return true;
   if (CLICKABLE_TAGS.has(el.tagName?.toLowerCase() ?? "")) return true;
   if (el.type === "button" || el.type === "link") return true;
@@ -3938,6 +3942,7 @@ async function resolveActionTargetCore(
             let visibleOptionText = visibleOptionCount === 1 ? await visibleOption!.innerText().catch(() => "") : "";
             let visibleOptionMatches = visibleOptionCount === 1 && await visibleOption!.isVisible().catch(() => false)
               && selectionOptionMatches(desiredSelection, visibleOptionText);
+            let selectionOptionMarkerApplied = false;
             if (capturedSelection && !visibleOptionMatches) {
               // The recorded scope owns the backing select, but is not necessarily its
               // visible trigger. Activate only a unique actionable descendant of that scope.
@@ -4041,7 +4046,10 @@ async function resolveActionTargetCore(
                 leaves[0].setAttribute("data-codex-selection-option", value.marker);
                 return true;
               }, { identity: capturedSelection ? desiredSelection : optionIdentity, marker }).catch(() => false);
-              if (uniqueLeaf) optionToClick = page.locator(`[data-codex-selection-option="${marker}"]`);
+              if (uniqueLeaf) {
+                optionToClick = page.locator(`[data-codex-selection-option="${marker}"]`);
+                selectionOptionMarkerApplied = true;
+              }
               visibleOptionText = optionToClick ? await optionToClick.innerText().catch(() => "") : "";
               visibleOptionMatches = Boolean(optionToClick && await optionToClick.count().catch(() => 0) === 1 && await optionToClick.isVisible().catch(() => false) && selectionOptionMatches(desiredSelection, visibleOptionText));
               console.log(`[recorded-selection-option] textMatches=${visibleOptionCount} uniqueLeaf=${uniqueLeaf} markedLocatorCount=${optionToClick ? await optionToClick.count().catch(() => 0) : 0} visibleAndIdentityVerified=${visibleOptionMatches}`);
@@ -4051,7 +4059,9 @@ async function resolveActionTargetCore(
               const selected = await nativeSelect.locator("option:checked").evaluate((element) => ({ label: (element as HTMLOptionElement).label || (element as HTMLOptionElement).textContent || "", value: (element as HTMLOptionElement).value })).catch(() => ({ label: "", value: "" }));
               if ((!capturedOptionValue || selected.value === capturedOptionValue) && selectionOptionMatches(desiredSelection, `${selected.label} ${selected.value}`)) {
                 console.log("[recorded-selection] visibleOptionApplied=true uniqueIdentityMatch=true stateVerified=true");
-                await optionToClick.evaluate((element) => element.removeAttribute("data-codex-selection-option")).catch(() => undefined);
+                if (selectionOptionMarkerApplied) {
+                  await cleanupSelectionOptionMarker(optionToClick, "data-codex-selection-option");
+                }
                 return {
                   status: "resolved", target, locator: optionToClick,
                   locatorStrategy: "recorded_visible_option_identity", confidence: 0.98,
@@ -5083,7 +5093,9 @@ async function resolveActionTargetCore(
     } as TargetResolutionResult & { _diagnosis?: unknown[] };
   }
 
-  const topCandidates = clickableCandidates.length > 0 ? clickableCandidates : nonClickableCandidates;
+  const actionableCandidates = clickableCandidates.length > 0 ? clickableCandidates : nonClickableCandidates;
+  const exactCandidates = actionableCandidates.filter((candidate) => candidate.normalizedText === normalizeText(target));
+  const topCandidates = exactCandidates.length > 0 ? exactCandidates : actionableCandidates;
   const sorted = topCandidates.sort((a, b) => b.matchScore - a.matchScore);
 
   const best = sorted[0];
@@ -6033,6 +6045,27 @@ export async function resolveSnapshotElementLocator(
   const candidateTextRegex = buildFlexibleTextRegex(candidateText);
   const targetRegex = buildFlexibleTokenRegex(target);
 
+  // Preserve the identity of the observed snapshot candidate before trying a
+  // different control role with a partial name (e.g. a menu versus an authorization link).
+  for (const identity of sortedLocators.filter(item => item.strategy === "css" || item.strategy === "testId")) {
+    if (!identity.value) continue;
+    const locator = (identity.strategy === "testId" ? page.getByTestId(identity.value) : page.locator(identity.value))
+      .and(page.locator(":visible"));
+    attemptedLocators.push(`snapshot-identity:${identity.strategy}`);
+    if (await countLocator(locator) === 1) return { locator, locatorStrategy: identity.strategy, attemptedLocators };
+  }
+  if (element.text?.trim()) {
+    let exactObserved = page.getByText(element.text, { exact: true }).and(page.locator(":visible"));
+    const observedTag = element.tagName ?? tagName;
+    if (observedTag && /^[a-z][a-z0-9-]*$/i.test(observedTag)) {
+      exactObserved = exactObserved.and(page.locator(observedTag));
+    }
+    attemptedLocators.push("snapshot-identity:exact-text-and-tag");
+    const exactCount = await countLocator(exactObserved);
+    if (exactCount === 1) return { locator: exactObserved, locatorStrategy: "snapshot:exact_text", attemptedLocators };
+    if (exactCount > 1) return { attemptedLocators };
+  }
+
   const tryLocator = async (
     label: string,
     factory: () => Locator | undefined,
@@ -6040,9 +6073,9 @@ export async function resolveSnapshotElementLocator(
   ): Promise<{ locator?: Locator; locatorStrategy?: string }> => {
     attemptedLocators.push(label);
     const locator = factory();
-    if (locator && await countLocator(locator) > 0) {
+    if (locator && await countLocator(locator) === 1) {
       return {
-        locator: locator.first(),
+        locator,
         locatorStrategy: strategy
       };
     }
@@ -6112,9 +6145,9 @@ export async function resolveSnapshotElementLocator(
       locator = page.locator(candidateLocator.value);
     }
 
-    if (locator && await countLocator(locator) > 0) {
+    if (locator && await countLocator(locator) === 1) {
       return {
-        locator: locator.first(),
+        locator,
         locatorStrategy: candidateLocator.strategy,
         attemptedLocators
       };
@@ -6125,9 +6158,9 @@ export async function resolveSnapshotElementLocator(
   for (const text of fallbackTexts) {
     attemptedLocators.push(`elementText:${text}`);
     const locator = page.getByText(buildFlexibleTextRegex(text), { exact: false });
-    if (await countLocator(locator) > 0) {
+    if (await countLocator(locator) === 1) {
       return {
-        locator: locator.first(),
+        locator,
         locatorStrategy: "text",
         attemptedLocators
       };
@@ -6347,7 +6380,7 @@ async function resolveRecordedNavigationLinkByHref(
   }
 
   const exactRenderedText = new RegExp(`^\\s*${exactTargetName.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}\\s*$`);
-  const candidateScope = authority.landmarkTag ? page.locator(authority.landmarkTag) : page;
+  const candidateScope: Locator = authority.landmarkTag ? page.locator(authority.landmarkTag) : page.locator("html");
   const scopeCount = authority.landmarkTag ? await candidateScope.count().catch(() => 0) : 1;
   if (scopeCount !== 1) {
     console.log(`[recording-replay] recordedNavigationLinkFallback=landmark_scope_not_unique landmark=${authority.landmarkTag} count=${scopeCount}`);
@@ -6659,7 +6692,13 @@ export async function resolveRecordedStructuralOwner(
    * Purely additive/optional: existing callers that omit this param see zero behavior change.
    */
   onFailureReason?: (reason: string, details?: { matchCount?: number }) => void,
+  timeoutMs?: number,
 ): Promise<RecordedLocatorResolution | undefined> {
+  const readinessDeadline = timeoutMs && Number.isFinite(timeoutMs) && timeoutMs > 0
+    ? Date.now() + timeoutMs : undefined;
+  const remainingReadinessTimeout = () => readinessDeadline === undefined
+    ? timeoutMs : Math.max(1, readinessDeadline - Date.now());
+
   const context = technicalTarget?.structuralContext;
   const owner = context?.owner;
   const stableDirectAttributes = context?.stableDirectAttributes ?? {};
@@ -6742,6 +6781,40 @@ export async function resolveRecordedStructuralOwner(
     && context.captureTargetMatchCount === 1,
   );
   if (scopeIdentity && !scopedEvidence) {
+    // A recording can have a uniquely certified target while its optional enclosing scope
+    // was not unique at capture time. In that case the scope cannot authorize a lookup, but
+    // it also must not hide an exact Tier-1 locator that independently passed capture-time
+    // uniqueness. Revalidate that same recorded CSS locator against the live page and admit
+    // it only when it still identifies one visible, enabled element. This keeps the fallback
+    // fail-closed and avoids relying on a guessed label or positional match.
+    const certificationTier = (technicalTarget as { certificationTier?: number } | undefined)?.certificationTier;
+    const certifiedDirectLocator = certificationTier === 1
+      && context.deterministicStructuralIdentity === true
+      && context.captureTargetMatchCount === 1
+      && context.structuralIdentityMatchCount === 1
+      && technicalTarget?.locatorCandidates?.[0]?.strategy === "css"
+      ? recordedLocatorFactory(page, technicalTarget.locatorCandidates[0], true)
+      : undefined;
+    const certifiedDirectCount = certifiedDirectLocator
+      ? await certifiedDirectLocator.count().catch(() => 0)
+      : 0;
+    if (certifiedDirectLocator && certifiedDirectCount === 1) {
+      const visible = await certifiedDirectLocator.isVisible().catch(() => false);
+      const enabled = visible && await certifiedDirectLocator.isEnabled().catch(() => true);
+      if (visible && enabled) {
+        console.log(
+          `[recording-replay][structural-match] reason=scope_evidence_incomplete_using_certified_direct_target ` +
+          `scopeStrategy=${scopeIdentity.strategy} final=1`,
+        );
+        return {
+          locator: certifiedDirectLocator,
+          strategy: "recorded:css",
+          confidence: technicalTarget?.confidence ?? 0.95,
+          currentMatchCount: 1,
+          structuralCompatibility: true,
+        };
+      }
+    }
     console.log(`[recording-replay][structural-match] reason=scope_evidence_incomplete_at_capture ownerTag=${owner.tag} scopeStrategy=${scopeIdentity.strategy ?? "none"} captureScopeUnique=${context.captureScopeUnique} captureTargetMatchCount=${context.captureTargetMatchCount}`);
     onFailureReason?.("scope_evidence_incomplete_at_capture");
     return undefined;
@@ -6798,7 +6871,7 @@ export async function resolveRecordedStructuralOwner(
       // never attaches. `waitFor` alone (no positional narrowing call) already waits for a
       // match to reach the state -- the strict count===1 check right after this is what
       // actually enforces uniqueness, not this attachment wait.
-      await scopeLocator.waitFor({ state: "attached", timeout: 5000 }).catch(() => undefined);
+      await scopeLocator.waitFor({ state: "attached", timeout: remainingReadinessTimeout() }).catch(() => undefined);
     }
     const scopeMatchCount = scopeLocator ? await scopeLocator.count().catch(() => 0) : 0;
     if (!scopeLocator || scopeMatchCount !== 1) {
@@ -6867,6 +6940,21 @@ export async function resolveRecordedStructuralOwner(
     `landmarkAncestor=${landmarkAncestor?.tag ?? "none"} candidateVisibility=runtime_locator`
   );
 
+  const hasStableOwnerAnchor = Boolean(
+    (stableDirectAttributes.id || stableDirectAttributes["data-testid"])
+    && context.deterministicStructuralIdentity === true
+    && context.structuralIdentityMatchCount === 1
+    && context.captureTargetMatchCount === 1,
+  );
+  // An attached SPA surface does not imply that its certified action has mounted.
+  // Await only the SAME capture-unique owner anchor; then re-run every normal
+  // count, visibility and enabled check below. Ambiguity is never narrowed.
+  if (hasStableOwnerAnchor) {
+    const readinessSelector = `${landmarkPrefix}${owner.tag}${structuralAttributeSelector(stableDirectAttributes)}`
+      + (owner.role && !stableDirectAttributes.role ? `[role="${cssAttributeValue(owner.role)}"]` : "");
+    await scopeRoot.locator(readinessSelector).waitFor({ state: "visible", timeout: remainingReadinessTimeout() }).catch(() => undefined);
+  }
+
   const structuralCandidateCountBeforeFilter = await scopeRoot.locator("*").count().catch(() => 0);
   const structuralCandidateCountAfterOwnerTag = await scopeRoot.locator(`${landmarkPrefix}${owner.tag}`).count().catch(() => 0);
   if (structuralCandidateCountAfterOwnerTag === 0) {
@@ -6887,12 +6975,6 @@ export async function resolveRecordedStructuralOwner(
   // unique owner itself remains the same. In that case the capture-time structural identity
   // plus the live unique id/test id is sufficient; keep visibility/actionability checks and do
   // not relax owners identified only by text, class, or position.
-  const hasStableOwnerAnchor = Boolean(
-    (stableDirectAttributes.id || stableDirectAttributes["data-testid"])
-    && context.deterministicStructuralIdentity === true
-    && context.structuralIdentityMatchCount === 1
-    && context.captureTargetMatchCount === 1,
-  );
   if (hasStableOwnerAnchor && structuralCandidateCountAfterStableAttributes === 1) {
     const anchoredOwner = scopeRoot.locator(baseSelector);
     const anchoredVisible = await anchoredOwner.isVisible().catch(() => false);
@@ -7894,8 +7976,20 @@ const FILL_LOCATOR_STRATEGIES = [
   { label: "input[fuzzy]", factory: (page: Page, target: string, regex: RegExp) => page.locator(`input[name^="${target.substring(0, 3)}"], input[placeholder^="${target.substring(0, 3)}"], input[aria-label^="${target.substring(0, 3)}"]`) },
 ];
 
+export function verificationDigitPosition(target: string): string | undefined {
+  const normalized = normalizeText(target).replace(/[.:,]/g, ' ').replace(/\s+/g, ' ').trim();
+  return /^(?:(?:please )?(?:enter|ingrese|ingresar) )?(?:otp|verification code|one time (?:password|code)|codigo de verificacion) (?:digit|digito) ([1-9]\d*)$/.exec(normalized)?.[1];
+}
+
+function buildFillFieldRegex(target: string): RegExp {
+  const position = verificationDigitPosition(target);
+  if (!position) return buildFlexibleTokenRegex(target);
+  // Match explicit digit semantics, never DOM order or a project-specific field alias.
+  return new RegExp(`^(?:(?:please\\s+)?(?:enter|ingrese|ingresar)\\s+)?(?:otp|verification\\s+code|one[ -]time\\s+(?:password|code)|c[oó]digo\\s+de\\s+verificaci[oó]n)[\\s.:,]+(?:digit|d[ií]gito)\\s+${position}$`, 'i');
+}
+
 function createScopedFillStrategies(containerLocator: Locator, target: string): Array<{ label: string; factory: () => Locator }> {
-  const regex = buildFlexibleTokenRegex(target);
+  const regex = buildFillFieldRegex(target);
   return [
     { label: "activeContainer:getByLabel", factory: () => containerLocator.getByLabel(target, { exact: false }) },
     { label: "activeContainer:getByPlaceholder", factory: () => containerLocator.getByPlaceholder(target, { exact: false }) },
@@ -7970,7 +8064,7 @@ async function tryConstructLocatorFromSnapshotElement(
     // Strategy 5: Try role-based locator
     if (element.role && ["textbox", "combobox", "searchbox", "spinbutton"].includes(element.role)) {
       attemptedStrategies.push(`role:${element.role}`);
-      const regex = buildFlexibleTokenRegex(target);
+      const regex = buildFillFieldRegex(target);
       const locator = container.getByRole(element.role as any, { name: regex });
       if (await locator.count() > 0) {
         return { locator, strategy: `role:${element.role}` };
@@ -8250,9 +8344,20 @@ async function tryFillLocator(
   const locator = strategy.factory(page, target, regex);
   try {
     const count = await locator.count();
+    if (verificationDigitPosition(target) && count !== 1) return {};
     if (count > 0) {
       for (let i = 0; i < count; i++) {
-        const element = locator.nth(i);
+        const element = count === 1 ? locator : locator.nth(i);
+        const expectedDigit = verificationDigitPosition(target);
+        if (expectedDigit) {
+          const fieldNames = await element.evaluate((el) => [
+            el.getAttribute('aria-label'), el.getAttribute('placeholder'),
+            ...Array.from((el as HTMLInputElement).labels ?? []).map((label) => label.textContent),
+            (el.getAttribute('aria-labelledby') ?? '').split(/\s+/).filter(Boolean)
+              .map((id) => el.ownerDocument.getElementById(id)?.textContent ?? '').join(' '),
+          ]).catch(() => []);
+          if (!fieldNames.some((name) => typeof name === 'string' && verificationDigitPosition(name) === expectedDigit)) continue;
+        }
         let isVisible = true;
         let isEnabled = true;
         let tagName = "unknown";
@@ -8406,7 +8511,7 @@ async function resolveFillTargetCore(
     score?: number;
   }> = [];
   const localResolversTried: string[] = ["fill_resolver"];
-  const regex = buildFlexibleTokenRegex(target);
+  const regex = buildFillFieldRegex(target);
 
   console.log(`[fill-resolver] Resolving field="${target}"${activeContainer ? ` within active container="${activeContainer.type}"` : ""}`);
 

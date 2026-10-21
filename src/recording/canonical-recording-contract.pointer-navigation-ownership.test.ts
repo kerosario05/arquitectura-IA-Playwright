@@ -23,6 +23,33 @@ function ev(overrides: Record<string, unknown>) {
   } as never;
 }
 
+test("screen observation before same-surface query navigation retains the settled route", () => {
+  const events = [
+    ev({ seq: 0, t: 1, kind: "note", observationType: "pointer", interactionId: "a", url: "/flow" }),
+    ev({ seq: 1, t: 2, kind: "tap", interactionId: "a", url: "/flow", target: { role: "button", locators: [{ strategy: "css", value: "#submit" }] } }),
+    ev({ seq: 2, t: 3, kind: "screen_change", url: "/flow", toScreenKey: "settled" }),
+    ev({ seq: 3, t: 4, kind: "navigate", screenKey: "settled", url: "/verify?return=/flow" }),
+    ev({ seq: 4, t: 5, kind: "navigate", screenKey: "settled", url: "/flow?phase=review" }),
+    ev({ seq: 5, t: 6, kind: "note", observationType: "pointer", interactionId: "b", screenKey: "settled", url: "/flow?phase=review" }),
+    ev({ seq: 6, t: 7, kind: "tap", interactionId: "b", screenKey: "settled", url: "/flow?phase=review", target: { role: "button", locators: [{ strategy: "css", value: "#confirm" }] } }),
+  ];
+  const interactions = buildCanonicalInteractions(events);
+  assert.equal(interactions[0].routeAfter, "/flow?phase=review");
+  assert.equal(validateInteractionStateSequence(interactions).stateSequenceValid, true);
+});
+
+test("a later unmatched route still cannot replace an observed overlay-dismissal surface", () => {
+  const events = [
+    ev({ seq: 0, t: 1, kind: "note", observationType: "pointer", interactionId: "a", url: "/workspace" }),
+    ev({ seq: 1, t: 2, kind: "tap", interactionId: "a", url: "/workspace", target: { role: "button", locators: [{ strategy: "css", value: "#dismiss" }] } }),
+    ev({ seq: 2, t: 3, kind: "screen_change", url: "/workspace", toScreenKey: "underlying" }),
+    ev({ seq: 3, t: 4, kind: "navigate", screenKey: "underlying", url: "/timeout" }),
+  ];
+  const interactions = buildCanonicalInteractions(events);
+  assert.equal(interactions[0].routeAfter, "/workspace");
+  assert.equal(interactions[0].screenAfterRef, "underlying");
+});
+
 // ─── Test 1: fill → pointer → navigate → tap ──────────────────────────────
 
 test("1/fillThenPointerNavigation. fill does not steal navigation from subsequent pointer tap", () => {

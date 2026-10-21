@@ -16,11 +16,11 @@ function diagnostics() {
     rawScenarioCount: 1,
     rawRejectedCount: 0,
     normalizationDroppedCount: 0,
-    dropReasons: [],
+    dropReasons: [] as string[],
     finalScenarioCount: 1,
     finalRejectedCount: 0,
     classifiedReason: undefined,
-  } as const;
+  };
 }
 
 test.describe("mobile scenario generation manager", () => {
@@ -30,14 +30,14 @@ test.describe("mobile scenario generation manager", () => {
   });
 
   test("shares one running job for equivalent concurrent requests", async () => {
-    let releaseFirstIssue: (() => void) | null = null;
+    const releaseFirstIssue: Array<() => void> = [];
     let runnerCalls = 0;
     __setMobileScenarioGenerationRunnerForTesting(async (_input, handlers) => {
       runnerCalls += 1;
       handlers.onIssuesResolved(["AA-94", "AA-93"]);
       handlers.onIssueStart({ issueKey: "AA-94", index: 0, total: 2, startedAt: new Date().toISOString() });
       await new Promise<void>((resolve) => {
-        releaseFirstIssue = resolve;
+        releaseFirstIssue.push(resolve);
       });
       handlers.onIssueCompleted({
         issueKey: "AA-94",
@@ -49,6 +49,7 @@ test.describe("mobile scenario generation manager", () => {
         durationMs: 10,
         scenarios: [{ scenarioId: "MOBILE-AA-94-001", sourceIssueKey: "AA-94", title: "S1", steps: [], expectedResult: "OK", preconditions: [], requiredData: [] }],
         rejected: [],
+        criterionCoverage: [],
         diagnostics: diagnostics(),
       });
       handlers.onIssueStart({ issueKey: "AA-93", index: 1, total: 2, startedAt: new Date().toISOString() });
@@ -62,6 +63,7 @@ test.describe("mobile scenario generation manager", () => {
         durationMs: 10,
         scenarios: [{ scenarioId: "MOBILE-AA-93-001", sourceIssueKey: "AA-93", title: "S2", steps: [], expectedResult: "OK", preconditions: [], requiredData: [] }],
         rejected: [],
+        criterionCoverage: [],
         diagnostics: diagnostics(),
       });
       return {
@@ -71,6 +73,7 @@ test.describe("mobile scenario generation manager", () => {
         ],
         rejected: [],
         issuesFound: 2,
+        criterionCoverage: [],
         diagnosticsByIssue: { "AA-94": diagnostics(), "AA-93": diagnostics() },
       };
     });
@@ -89,7 +92,7 @@ test.describe("mobile scenario generation manager", () => {
     expect(running?.status).toBe("running");
     expect(running?.issueProgress.some((issue) => issue.issueKey === "AA-94" && issue.status === "running")).toBe(true);
 
-    releaseFirstIssue?.();
+    releaseFirstIssue[0]?.();
     await __awaitMobileScenarioGenerationForTesting(first.job.generationJobId);
     const completed = getMobileScenarioGenerationJob(first.job.generationJobId);
     expect(completed?.status).toBe("completed");
@@ -127,12 +130,14 @@ test.describe("mobile scenario generation manager", () => {
         durationMs: 5,
         scenarios: [{ scenarioId: "MOBILE-AA-94-001", sourceIssueKey: "AA-94", title: "S1", steps: [], expectedResult: "OK", preconditions: [], requiredData: [] }],
         rejected: [],
+        criterionCoverage: [],
         diagnostics: diagnostics(),
       });
       return {
         scenarios: [{ scenarioId: "MOBILE-AA-94-001", sourceIssueKey: "AA-94", title: "S1", steps: [], expectedResult: "OK", preconditions: [], requiredData: [] }],
         rejected: [],
         issuesFound: 1,
+        criterionCoverage: [],
         diagnosticsByIssue: { "AA-94": diagnostics() },
       };
     });

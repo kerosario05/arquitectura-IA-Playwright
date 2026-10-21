@@ -34,6 +34,41 @@ CREATE TABLE IF NOT EXISTS Projects (
   updatedAt    TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR})
 );
 
+CREATE TABLE IF NOT EXISTS ProjectCaseInputRequirement (
+  projectId TEXT NOT NULL COLLATE NOCASE,
+  caseId INTEGER NOT NULL,
+  [key] TEXT NOT NULL,
+  label TEXT,
+  controlType TEXT,
+  required INTEGER NOT NULL,
+  sensitive INTEGER NOT NULL,
+  allowedValues TEXT,
+  namedProfileRef TEXT,
+  createdAt TEXT NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  updatedAt TEXT NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  PRIMARY KEY (projectId, caseId, [key]),
+  FOREIGN KEY (projectId) REFERENCES Projects(id)
+);
+
+CREATE TABLE IF NOT EXISTS ProjectCaseRuntimeValue (
+  projectId TEXT NOT NULL COLLATE NOCASE,
+  caseId INTEGER NOT NULL,
+  [key] TEXT NOT NULL,
+  semanticType TEXT,
+  fieldKind TEXT,
+  datasetIdentity TEXT,
+  contractVersion TEXT,
+  valueType TEXT NOT NULL,
+  [value] TEXT NOT NULL,
+  source TEXT NOT NULL,
+  verified INTEGER NOT NULL DEFAULT 0,
+  confirmed INTEGER NOT NULL DEFAULT 1,
+  createdAt TEXT NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  updatedAt TEXT NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  PRIMARY KEY (projectId, caseId, [key]),
+  FOREIGN KEY (projectId) REFERENCES Projects(id)
+);
+
 CREATE TABLE IF NOT EXISTS SharedConnection (
   id                  TEXT    PRIMARY KEY COLLATE NOCASE DEFAULT (${UUID_DEFAULT_EXPR}),
   connectionType      INTEGER NOT NULL,           -- 1 = Jira, 2 = TestRail
@@ -240,4 +275,45 @@ CREATE TABLE IF NOT EXISTS UserAuditLog (
 );
 
 CREATE INDEX IF NOT EXISTS IX_UserAuditLog_target ON UserAuditLog (targetUserId, createdAt);
+
+-- ---------------------------------------------------------------------------
+-- Test design: scenario drafts authored from Jira stories (src/test-design).
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS TestDesignDraft (
+  id                TEXT    PRIMARY KEY COLLATE NOCASE DEFAULT (${UUID_DEFAULT_EXPR}),
+  title             TEXT,
+  projectSlug       TEXT    COLLATE NOCASE,
+  jiraProjectKey    TEXT    NOT NULL COLLATE NOCASE,
+  testRailProjectId INTEGER,
+  testRailSuiteId   INTEGER,
+  testRailSectionId INTEGER,
+  instructions      TEXT,
+  status            TEXT    NOT NULL DEFAULT 'draft',
+  createdBy         TEXT    COLLATE NOCASE,
+  createdByName     TEXT,
+  createdAt         TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  updatedAt         TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR})
+);
+
+CREATE INDEX IF NOT EXISTS IX_TestDesignDraft_createdBy ON TestDesignDraft (createdBy, updatedAt);
+CREATE INDEX IF NOT EXISTS IX_TestDesignDraft_jiraProject ON TestDesignDraft (jiraProjectKey, updatedAt);
+
+CREATE TABLE IF NOT EXISTS TestDesignDraftStory (
+  id                  TEXT    PRIMARY KEY COLLATE NOCASE DEFAULT (${UUID_DEFAULT_EXPR}),
+  draftId             TEXT    NOT NULL COLLATE NOCASE
+                              REFERENCES TestDesignDraft(id) ON DELETE CASCADE,
+  issueKey            TEXT    NOT NULL COLLATE NOCASE,
+  issueSummary        TEXT    NOT NULL DEFAULT '',
+  position            INTEGER NOT NULL DEFAULT 0,
+  generationStatus    TEXT    NOT NULL DEFAULT 'pending',
+  generationError     TEXT,
+  scenariosJson       TEXT    NOT NULL DEFAULT '[]',
+  jiraSubtaskKey      TEXT,
+  jiraPublishedAt     TEXT,
+  testRailPublishedAt TEXT,
+  createdAt           TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  updatedAt           TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  UNIQUE (draftId, issueKey)
+);
 `;

@@ -93,7 +93,7 @@ test("observed unresolved tap persists for review while remaining non-executable
   assert.equal(primary.testRailSteps.some((step) => step.content.includes("SMS")), true);
   const audit = evaluateRecordedScenarioExecutionReadiness(primary);
   assert.equal(audit.technicalReady, false);
-  assert.equal(audit.actions.some((action) => action.interactionId === sms!.id), false);
+  assert.equal(audit.actions.some((action) => action.actionId === sms!.id), false);
 });
 
 test("READINESS: persistence never depends on readiness -- the persisted primary's promotionReady stays false while readiness keeps governing execution/promotion independently", () => {

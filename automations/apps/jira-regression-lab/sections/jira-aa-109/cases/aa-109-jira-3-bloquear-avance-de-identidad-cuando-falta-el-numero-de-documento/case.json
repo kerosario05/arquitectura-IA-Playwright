@@ -1,0 +1,9 @@
+{
+  "id": "aa-109-jira-3-bloquear-avance-de-identidad-cuando-falta-el-numero-de-documento",
+  "externalId": "AA-109:jira:3",
+  "title": "Bloquear avance de identidad cuando falta el número de documento",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-17T15:30:44.255Z"
+}

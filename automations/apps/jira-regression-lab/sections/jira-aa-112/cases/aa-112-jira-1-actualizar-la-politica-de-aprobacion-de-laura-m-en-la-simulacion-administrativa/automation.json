@@ -1,0 +1,56 @@
+{
+  "id": "aa-112-jira-1-actualizar-la-politica-de-aprobacion-de-laura-m-en-la-simulacion-administrativa",
+  "externalId": "AA-112:jira:1",
+  "title": "Actualizar la política de aprobación de Laura M. en la simulación administrativa",
+  "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-112\\cases\\aa-112-jira-1-actualizar-la-politica-de-aprobacion-de-laura-m-en-la-simulacion-administrativa\\plan.json",
+  "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-112\\cases\\aa-112-jira-1-actualizar-la-politica-de-aprobacion-de-laura-m-en-la-simulacion-administrativa\\case.spec.ts",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "jira-regression-lab",
+  "baseUrlHash": "622cdbe9728c",
+  "createdAt": "2026-10-16T23:00:37.923Z",
+  "updatedAt": "2026-10-16T23:00:37.923Z",
+  "specVerificationStatus": "passed",
+  "tags": [
+    "jira_semantic",
+    "jira_generated"
+  ],
+  "metadata": {
+    "specGeneration": {
+      "mode": "deterministic",
+      "provider": null,
+      "model": null,
+      "invocations": 0,
+      "invocationsConsumed": 0,
+      "durationMs": 0,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "passed",
+        "typescript": "skipped",
+        "playwrightDiscovery": "skipped",
+        "semanticCoverage": "passed",
+        "functionalExecution": "passed"
+      },
+      "promotionAllowed": true,
+      "specsRequested": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
+      "specWritten": true,
+      "errors": [],
+      "warnings": []
+    }
+  }
+}

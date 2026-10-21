@@ -251,7 +251,7 @@ test("lifecycle/cleanupAfterTotalFailure. both attempts failing still releases t
   const { releaseAcceptedScopeMarker } = await import("./target-resolver");
   const state = { markerPresent: true };
   const page = { evaluate: async () => { state.markerPresent = false; return undefined; } } as any;
-  const locator = { click: async () => { throw new Error("always fails"); } };
+  const locator = { click: async (_options?: { force?: boolean }) => { throw new Error("always fails"); } };
   try {
     try { await locator.click(); } catch { try { await locator.click({ force: true }); } catch { /* caller returns a failure result */ } }
   } finally {

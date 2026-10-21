@@ -1,0 +1,56 @@
+{
+  "id": "aa-104-jira-1-transferencia-propia-exitosa-en-usd-con-token-valido-y-comprobante",
+  "externalId": "AA-104:jira:1",
+  "title": "Transferencia propia exitosa en USD con token válido y comprobante",
+  "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-104\\cases\\aa-104-jira-1-transferencia-propia-exitosa-en-usd-con-token-valido-y-comprobante\\plan.json",
+  "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-104\\cases\\aa-104-jira-1-transferencia-propia-exitosa-en-usd-con-token-valido-y-comprobante\\case.spec.ts",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "jira-regression-lab",
+  "baseUrlHash": "622cdbe9728c",
+  "createdAt": "2026-10-18T12:36:20.080Z",
+  "updatedAt": "2026-10-18T12:36:20.080Z",
+  "specVerificationStatus": "passed",
+  "tags": [
+    "jira_semantic",
+    "jira_generated"
+  ],
+  "metadata": {
+    "specGeneration": {
+      "mode": "deterministic",
+      "provider": null,
+      "model": null,
+      "invocations": 0,
+      "invocationsConsumed": 0,
+      "durationMs": 0,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "passed",
+        "typescript": "skipped",
+        "playwrightDiscovery": "skipped",
+        "semanticCoverage": "passed",
+        "functionalExecution": "passed"
+      },
+      "promotionAllowed": true,
+      "specsRequested": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
+      "specWritten": true,
+      "errors": [],
+      "warnings": []
+    }
+  }
+}

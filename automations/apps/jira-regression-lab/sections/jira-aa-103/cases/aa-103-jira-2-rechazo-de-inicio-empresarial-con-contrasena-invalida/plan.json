@@ -1,0 +1,221 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-16T18:30:09.941Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "AA-103:jira:2",
+    "title": "Rechazo de inicio empresarial con contraseña inválida"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Presionar \"Empresarial\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Empresarial",
+        "exact": true
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [rnc]",
+      "valueKey": "rnc",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-rnc\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "fill",
+      "description": "fill [usuario]",
+      "valueKey": "usuario",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-user\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "fill",
+      "description": "fill [contrasena_invalida]",
+      "valueKey": "contrasena_invalida",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-password\"]"
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"Iniciar sesión\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Iniciar sesión",
+        "exact": true
+      }
+    },
+    {
+      "index": 8,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"RNC, usuario o contraseña no válidos.\"",
+      "target": {
+        "strategy": "text",
+        "value": "RNC, usuario o contraseña no válidos."
+      }
+    },
+    {
+      "index": 9,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Iniciar sesión\"",
+      "target": {
+        "strategy": "text",
+        "value": "Iniciar sesión"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "rnc",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "usuario",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena_invalida",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Rechazo de inicio empresarial con contraseña inválida",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Empresarial"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "rnc",
+        "technicalTargetRefs": [
+          "css:[id=\"login-rnc\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "fill",
+        "valueKey": "usuario",
+        "technicalTargetRefs": [
+          "css:[id=\"login-user\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "fill",
+        "valueKey": "contrasena_invalida",
+        "technicalTargetRefs": [
+          "css:[id=\"login-password\"]"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"RNC, usuario o contraseña no válidos.\"",
+        "technicalTargetRefs": [
+          "text:RNC, usuario o contraseña no válidos."
+        ]
+      },
+      {
+        "index": 9,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Iniciar sesión\"",
+        "technicalTargetRefs": [
+          "text:Iniciar sesión"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-8",
+        "requirement": "Validar que se muestre \"RNC, usuario o contraseña no válidos.\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 8,
+        "target": "RNC, usuario o contraseña no válidos.",
+        "evidence": [
+          "live-step-8"
+        ],
+        "details": {
+          "observedText": "RNC, usuario o contraseña no válidos."
+        }
+      },
+      {
+        "id": "jira-oracle-9",
+        "requirement": "Validar que se muestre \"Iniciar sesión\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 9,
+        "target": "Iniciar sesión",
+        "evidence": [
+          "live-step-9"
+        ],
+        "details": {
+          "observedText": "Iniciar sesión"
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "Se muestra \"RNC, usuario o contraseña no válidos.\" y permanece \"Iniciar sesión\"."
+  }
+}

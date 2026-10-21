@@ -1,0 +1,351 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-14T15:36:41.048Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "AA-102:jira:1",
+    "title": "Consultar el resumen consolidado de cuentas empresariales tras autenticación con SMS"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Presionar \"perfil empresarial\".",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Empresarial",
+        "exact": true
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [rnc]",
+      "valueKey": "rnc",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"Enterprise\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "fill",
+      "description": "fill [usuario]",
+      "valueKey": "usuario",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"UserNameE\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "fill",
+      "description": "fill [contrasena]",
+      "valueKey": "contrasena",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"PasswordE\"]"
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"continuar inicio de sesión\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Iniciar sesión",
+        "exact": true
+      }
+    },
+    {
+      "index": 8,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Verificación de Usuario\"",
+      "target": {
+        "strategy": "text",
+        "value": "Verificación de Usuario"
+      }
+    },
+    {
+      "index": 9,
+      "action": "click",
+      "description": "Solicitar el código por SMS.",
+      "target": {
+        "strategy": "css",
+        "value": "div:visible:text-is(\"SMS\")"
+      }
+    },
+    {
+      "index": 10,
+      "action": "fill",
+      "description": "fill [codigo_acceso]",
+      "valueKey": "codigo_acceso",
+      "target": {
+        "strategy": "semantic",
+        "value": "segmented_code",
+        "metadata": {
+          "originalTarget": "Código de acceso",
+          "resolvedTargetName": "segmented code input group",
+          "resolvedCandidateId": "6",
+          "repairType": "jira_segmented_code",
+          "validationStatus": "runtime_resolution_required"
+        }
+      },
+      "resolutionState": "runtime_resolution_required"
+    },
+    {
+      "index": 11,
+      "action": "click",
+      "description": "Presionar \"continuar verificación de acceso\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Continuar",
+        "exact": true
+      }
+    },
+    {
+      "index": 12,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"resumen de cuentas\"",
+      "target": {
+        "strategy": "text",
+        "value": "resumen de cuentas"
+      }
+    },
+    {
+      "index": 13,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"US$\"",
+      "target": {
+        "strategy": "text",
+        "value": "US$"
+      }
+    },
+    {
+      "index": 14,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"RD$\"",
+      "target": {
+        "strategy": "text",
+        "value": "RD$"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "rnc",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "usuario",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "codigo_acceso",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Consultar el resumen consolidado de cuentas empresariales tras autenticación con SMS",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Empresarial"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "rnc",
+        "technicalTargetRefs": [
+          "css:[id=\"Enterprise\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "fill",
+        "valueKey": "usuario",
+        "technicalTargetRefs": [
+          "css:[id=\"UserNameE\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "fill",
+        "valueKey": "contrasena",
+        "technicalTargetRefs": [
+          "css:[id=\"PasswordE\"]"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Verificación de Usuario\"",
+        "technicalTargetRefs": [
+          "text:Verificación de Usuario"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:div:visible:text-is(\"SMS\")"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "fill",
+        "valueKey": "codigo_acceso",
+        "technicalTargetRefs": [
+          "semantic:segmented_code"
+        ]
+      },
+      {
+        "index": 11,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ]
+      },
+      {
+        "index": 12,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"resumen de cuentas\"",
+        "technicalTargetRefs": [
+          "text:resumen de cuentas"
+        ]
+      },
+      {
+        "index": 13,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"US$\"",
+        "technicalTargetRefs": [
+          "text:US$"
+        ]
+      },
+      {
+        "index": 14,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"RD$\"",
+        "technicalTargetRefs": [
+          "text:RD$"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-8",
+        "requirement": "Validar que se muestre \"Verificación de Usuario\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 8,
+        "target": "Verificación de Usuario\n\nEstimada Sra. Oliva Medina Bello, hemos notado que está intentando acceder desde un nuevo dispositivo.\n\nPara poder continuar con el acceso a su banca en línea, por favor seleccione un medio por el cual recibir su código de seguridad, luego digite su código de seguridad y haga clic en el botón de Continuar.\n\nSMS\nSi\nNo\n¿Desea registrar este equipo como seguro de manera que no se vuelvan a hacer las preguntas de seguridad?\n\n* No es recomendable que se marque esta opción si está utilizando un equipo público.\n\n** Por tu seguridad, estamos almacenando un componente en tu navegador que garantizará mayor protección en tus accesos. Esto no afectará tu experiencia en el canal.\n\nCancelar\nInicio - Quiénes Somos - Productos - Contactos -Tarifas de Servicio - Pasos Reclamación\n© 2026 Banco Santa Cruz, República Dominicana\nPowered by Sistemas Integrados de Informática\nVersion: 2026.3.1.0 Built: 29/09/2026 03:53:58 PM",
+        "evidence": [
+          "live-step-8"
+        ],
+        "details": {
+          "observedText": "Verificación de Usuario\n\nEstimada Sra. Oliva Medina Bello, hemos notado que está intentando acceder desde un nuevo dispositivo.\n\nPara poder continuar con el acceso a su banca en línea, por favor seleccione un medio por el cual recibir su código de seguridad, luego digite su código de seguridad y haga clic en el botón de Continuar.\n\nSMS\nSi\nNo\n¿Desea registrar este equipo como seguro de manera que no se vuelvan a hacer las preguntas de seguridad?\n\n* No es recomendable que se marque esta opción si está utilizando un equipo público.\n\n** Por tu seguridad, estamos almacenando un componente en tu navegador que garantizará mayor protección en tus accesos. Esto no afectará tu experiencia en el canal.\n\nCancelar\nInicio - Quiénes Somos - Productos - Contactos -Tarifas de Servicio - Pasos Reclamación\n© 2026 Banco Santa Cruz, República Dominicana\nPowered by Sistemas Integrados de Informática\nVersion: 2026.3.1.0 Built: 29/09/2026 03:53:58 PM"
+        }
+      },
+      {
+        "id": "jira-oracle-12",
+        "requirement": "Validar que se muestre \"resumen de cuentas\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 12,
+        "target": "Visible heading and nearby content: Resumen Todos Cuentas Tarjetas Préstamos Certificados de Depósito Cuentas Cuenta de Ahorro [numero]Cuenta de Ahorro US$1,970.71 Balance Disponible Cuenta Corriente [numero]Cuenta Corrientes RD$133,575.44 Balance Disponible",
+        "evidence": [
+          "live-step-12"
+        ],
+        "details": {
+          "observedText": "Visible heading and nearby content: Resumen Todos Cuentas Tarjetas Préstamos Certificados de Depósito Cuentas Cuenta de Ahorro [numero]Cuenta de Ahorro US$1,970.71 Balance Disponible Cuenta Corriente [numero]Cuenta Corrientes RD$133,575.44 Balance Disponible"
+        }
+      },
+      {
+        "id": "jira-oracle-13",
+        "requirement": "Validar que se muestre \"US$\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 13,
+        "target": "US$1,970.71\nBalance Disponible",
+        "evidence": [
+          "live-step-13"
+        ],
+        "details": {
+          "observedText": "US$1,970.71\nBalance Disponible"
+        }
+      },
+      {
+        "id": "jira-oracle-14",
+        "requirement": "Validar que se muestre \"RD$\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 14,
+        "target": "RD$133,575.44\nBalance Disponible",
+        "evidence": [
+          "live-step-14"
+        ],
+        "details": {
+          "observedText": "RD$133,575.44\nBalance Disponible"
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "Se validan los saldos de cuentas con los símbolos \"US$\" y \"RD$\"."
+  }
+}

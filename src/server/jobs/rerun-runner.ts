@@ -74,6 +74,15 @@ export type RerunPrepareResult = {
   };
 } | {
   ok: true;
+  jobType: "discovery-batch";
+  discoveryParams: Record<string, unknown>;
+  selectedCount: number;
+  totalCount: number;
+  sourceJobId: string;
+  rerunMode: "failed_only" | "all";
+  appSlug: string;
+} | {
+  ok: true;
   jobType: "mobile-launch-execution";
   mobileParams: MobileLaunchExecutionParams;
   selectedCount: number;
@@ -415,6 +424,10 @@ async function resolvePromotedSpecReuse(cases: VirtualCase[]): Promise<PromotedS
       reuse: spec.status === "fresh" && Boolean(spec.path),
       caseId: match.testRailCaseId,
       title: vc.title,
+      // runs.ts transports this entry into the reused job's scenario list. Keep the
+      // canonical human-readable steps with it so case_started can seed the LiveExecution
+      // panel even when the source is a scenario-preview root (not a recording-batch job).
+      steps: match.testRailSteps?.map((step) => step.content) ?? [],
       runtimeValues: match.runtimeDataset?.resolvedValues,
     });
   }
@@ -465,7 +478,138 @@ const MAX_RERUN_LINEAGE_DEPTH = 8;
 
 async function defaultGetJobRecord(jobId: string): Promise<JobRecordLike | undefined> {
   const { jobStore } = await import("./job-store");
-  return jobStore.get(jobId);
+  return jobStore.get(jobId) ?? jobStore.getPersisted(jobId);
+}
+
+const DISCOVERY_BATCH_RESULTS_DIR = path.join(ROOT, ".artifacts", "tmp", "discovery-batch-results");
+const SCENARIO_LAUNCH_RUNS_DIR = path.join(ROOT, ".artifacts", "scenario-launch-runs");
+const DISCOVERY_BATCH_FAILURE_STATES = new Set([
+  "discovered_partial",
+  "exploration_failed",
+  "failed",
+  "promotion_failed",
+  "not_promoted",
+]);
+
+type DiscoveryBatchResultArtifact = {
+  args?: { app?: string; caseIds?: unknown[]; headed?: boolean; autoPromote?: boolean; autoPom?: boolean };
+  cases?: Array<{ caseId?: unknown; selected?: boolean; status?: string }>;
+};
+
+function positiveCaseId(value: unknown): number | undefined {
+  if (typeof value === "number" && Number.isInteger(value) && value > 0) return value;
+  if (typeof value === "string" && /^\d+$/.test(value.trim())) {
+    const parsed = Number(value.trim());
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
+  }
+  return undefined;
+}
+
+function readLaunchPublishedCases(launchId: string | undefined): Array<Record<string, unknown>> | undefined {
+  if (!launchId) return undefined;
+  const manifestPath = path.join(SCENARIO_LAUNCH_RUNS_DIR, launchId, "launch-manifest.json");
+  try {
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8")) as { launchId?: unknown; publishedCases?: unknown };
+    if (manifest.launchId !== launchId || !Array.isArray(manifest.publishedCases)) return undefined;
+    return manifest.publishedCases.filter((entry): entry is Record<string, unknown> => Boolean(entry && typeof entry === "object" && !Array.isArray(entry)));
+  } catch {
+    return undefined;
+  }
+}
+
+/** Reconstructs a discovery-batch rerun from its own batch result and launch selection.
+ * This job type never writes preview-scenarios.json; its selected TestRail case IDs are
+ * persisted by discovery:batch and its launch manifest. */
+async function prepareRerunFromDiscoveryBatchJob(
+  sourceJobId: string,
+  mode: "failed_only" | "all",
+  record: JobRecordLike | undefined,
+): Promise<RerunPrepareResult> {
+  const resultPath = path.join(DISCOVERY_BATCH_RESULTS_DIR, `${sourceJobId}.json`);
+  let result: DiscoveryBatchResultArtifact;
+  try {
+    result = JSON.parse(fs.readFileSync(resultPath, "utf-8")) as DiscoveryBatchResultArtifact;
+  } catch (error) {
+    return {
+      ok: false,
+      error: "missing_discovery_batch_results",
+      message: `Discovery-batch job ${sourceJobId} has no readable batch result at ${resultPath}: ${error instanceof Error ? error.message : String(error)}`,
+    };
+  }
+
+  const requestedIds = Array.isArray(result.args?.caseIds)
+    ? result.args.caseIds.map(positiveCaseId).filter((id): id is number => id !== undefined)
+    : [];
+  const selectedEntries = (result.cases ?? []).filter((entry) => entry.selected === true && positiveCaseId(entry.caseId) !== undefined);
+  const allIds = requestedIds.length > 0
+    ? [...new Set(requestedIds)]
+    : [...new Set(selectedEntries.map((entry) => positiveCaseId(entry.caseId)!))];
+  if (allIds.length === 0) {
+    return { ok: false, error: "empty_discovery_batch", message: `Discovery-batch job ${sourceJobId} has no canonical selected TestRail case IDs.` };
+  }
+
+  let selectedIds = allIds;
+  if (mode === "failed_only") {
+    const failedIds = new Set(selectedEntries
+      .filter((entry) => typeof entry.status === "string" && DISCOVERY_BATCH_FAILURE_STATES.has(entry.status))
+      .map((entry) => positiveCaseId(entry.caseId)!)
+      .filter((id) => allIds.includes(id)));
+    selectedIds = allIds.filter((id) => failedIds.has(id));
+    if (selectedIds.length === 0) {
+      return { ok: false, error: "no_failures", message: `No failed discovery cases found in source job ${sourceJobId}.` };
+    }
+  }
+
+  const sourceParams = record?.params ?? {};
+  const launchId = typeof sourceParams.launchId === "string" ? sourceParams.launchId : undefined;
+  const storedPublishedCases = Array.isArray(sourceParams.publishedCases)
+    ? sourceParams.publishedCases.filter((entry): entry is Record<string, unknown> => Boolean(entry && typeof entry === "object" && !Array.isArray(entry)))
+    : undefined;
+  const publishedCases = storedPublishedCases ?? readLaunchPublishedCases(launchId);
+  const scopedPublishedCases = publishedCases?.filter((entry) => {
+    const id = positiveCaseId(entry.caseId ?? entry.testRailCaseId ?? entry.testrailCaseId);
+    return id !== undefined && selectedIds.includes(id);
+  });
+  const appSlug = typeof sourceParams.appSlug === "string" && sourceParams.appSlug.trim()
+    ? sourceParams.appSlug
+    : typeof result.args?.app === "string" && result.args.app.trim()
+      ? result.args.app
+      : "default";
+  const discoveryParams: Record<string, unknown> = {
+    caseIds: selectedIds,
+    appSlug,
+    ...(positiveCaseId(sourceParams.testRailProjectId) ? { testRailProjectId: positiveCaseId(sourceParams.testRailProjectId) } : {}),
+    ...(positiveCaseId(sourceParams.testRailSuiteId) ? { testRailSuiteId: positiveCaseId(sourceParams.testRailSuiteId) } : {}),
+    ...(positiveCaseId(sourceParams.testRailSectionId ?? sourceParams.sectionId) ? { testRailSectionId: positiveCaseId(sourceParams.testRailSectionId ?? sourceParams.sectionId) } : {}),
+    ...(typeof sourceParams.sectionName === "string" ? { sectionName: sourceParams.sectionName } : {}),
+    ...(typeof sourceParams.sectionSlug === "string" ? { sectionSlug: sourceParams.sectionSlug } : {}),
+    ...(typeof sourceParams.testRunId === "number" ? { testRunId: sourceParams.testRunId } : {}),
+    ...(typeof sourceParams.jiraKey === "string" ? { jiraKey: sourceParams.jiraKey } : {}),
+    // Do not reuse launchId: the discovery runner treats it as the active launch and would
+    // overwrite the original launch manifest with this rerun's job/result pointers.
+    ...(scopedPublishedCases?.length ? { publishedCases: scopedPublishedCases } : {}),
+    overwrite: true,
+    autoPromote: sourceParams.autoPromote === false || result.args?.autoPromote === false ? false : true,
+    autoPom: sourceParams.autoPom === false || result.args?.autoPom === false ? false : true,
+    rerunActive: true,
+    forceRediscovery: true,
+    executePromotedSpecs: false,
+    headed: sourceParams.headed === true || result.args?.headed === true,
+    sourceJobId,
+    rerunMode: mode,
+    rerun: true,
+  };
+
+  return {
+    ok: true,
+    jobType: "discovery-batch",
+    discoveryParams,
+    selectedCount: selectedIds.length,
+    totalCount: allIds.length,
+    sourceJobId,
+    rerunMode: mode,
+    appSlug,
+  };
 }
 
 /**
@@ -525,6 +669,9 @@ export async function prepareRerun(
 
   if (!fs.existsSync(previewPath) && sourceJobTypeHint !== "mobile-launch-execution") {
     const currentJob = await getJobRecord(sourceJobId);
+    if (sourceJobTypeHint === "discovery-batch" || currentJob?.type === "discovery-batch") {
+      return prepareRerunFromDiscoveryBatchJob(sourceJobId, mode, currentJob);
+    }
     const recordingBatch = await prepareRerunFromRecordingBatchJob(sourceJobId, mode, currentJob);
     if (recordingBatch) return recordingBatch;
     const directReuse = await prepareRerunFromReuseExistingJob(sourceJobId, mode, currentJob);

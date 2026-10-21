@@ -1,0 +1,9 @@
+{
+  "appSlug": "kiosko",
+  "sectionSlug": "api-tests",
+  "sectionName": "API Tests",
+  "sourceScenarioId": "PREVIEW-001",
+  "testRailCaseId": 0,
+  "generatedAt": "2026-10-09T15:36:42.622Z",
+  "title": "Redirigir Estados de cuenta a la autenticación del kiosco"
+}

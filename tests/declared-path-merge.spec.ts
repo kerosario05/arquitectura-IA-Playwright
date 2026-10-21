@@ -1,7 +1,6 @@
 import { test, expect } from "@playwright/test";
-import { mergeDeclaredPathsIntoScenario } from "../src/scenarios/declared-path-merger";
+import { mergeDeclaredPathsIntoScenario, type DeclaredOrderedPath } from "../src/scenarios/declared-path-merger";
 import { repairUnbackedClicks } from "../src/scenarios/codex-scenario-generator";
-import type { DeclaredOrderedPath } from "../src/scenarios/knowledge-context-resolver";
 
 const pathAB: DeclaredOrderedPath = {
   steps: [
@@ -101,8 +100,6 @@ test("Caso 6: repair preserva steps declarados — executionBacked=false, sin al
   // allowedExecutableClicks vacío — el paso declarado NO se agrega a authority
   const repaired = repairUnbackedClicks(
     merged.steps,
-    [],
-    [],
     [],
     [],
     ["Entrada A"],

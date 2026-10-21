@@ -194,7 +194,7 @@
           "event-7"
         ],
         "stepTemplate": "Ingresar [rnc] en \"RNC:\"",
-        "renderedStep": "Ingresar \"130598983\" en \"RNC:\"",
+        "renderedStep": "Ingresar \"130872392\" en \"RNC:\"",
         "valueKey": "rnc",
         "interactionId": "interaction-7",
         "sensitive": false,
@@ -212,7 +212,7 @@
           "event-9"
         ],
         "stepTemplate": "Ingresar [usuario] en \"Usuario:\"",
-        "renderedStep": "Ingresar \"olivam\" en \"Usuario:\"",
+        "renderedStep": "Ingresar \"SAMOTA\" en \"Usuario:\"",
         "valueKey": "usuario",
         "interactionId": "interaction-9",
         "sensitive": false,
@@ -2158,8 +2158,8 @@
         "semanticField": "RNC:",
         "valueRole": "action_input",
         "required": true,
-        "value": "130598983",
-        "source": "RECORDED_CONFIRMED",
+        "value": "130872392",
+        "source": "CURRENT_QA_EDIT",
         "resolved": true,
         "sensitive": false,
         "stepIndex": 2,
@@ -2168,8 +2168,8 @@
         "systemGenerated": false,
         "masked": false,
         "editable": true,
-        "authority": "canonical_logical",
-        "authorityValue": "130598983",
+        "authority": "explicit_qa_edit",
+        "authorityValue": "130872392",
         "datasetAuthorityMismatch": false
       },
       {
@@ -2177,8 +2177,8 @@
         "semanticField": "Usuario:",
         "valueRole": "action_input",
         "required": true,
-        "value": "olivam",
-        "source": "RECORDED_CONFIRMED",
+        "value": "SAMOTA",
+        "source": "CURRENT_QA_EDIT",
         "resolved": true,
         "sensitive": false,
         "stepIndex": 3,
@@ -2187,8 +2187,8 @@
         "systemGenerated": false,
         "masked": false,
         "editable": true,
-        "authority": "canonical_logical",
-        "authorityValue": "olivam",
+        "authority": "explicit_qa_edit",
+        "authorityValue": "SAMOTA",
         "datasetAuthorityMismatch": false
       },
       {
@@ -2323,8 +2323,8 @@
           "semanticField": "RNC:",
           "valueRole": "action_input",
           "required": true,
-          "value": "130598983",
-          "source": "RECORDED_CONFIRMED",
+          "value": "130872392",
+          "source": "CURRENT_QA_EDIT",
           "resolved": true,
           "sensitive": false,
           "stepIndex": 2,
@@ -2333,8 +2333,8 @@
           "systemGenerated": false,
           "masked": false,
           "editable": true,
-          "authority": "canonical_logical",
-          "authorityValue": "130598983",
+          "authority": "explicit_qa_edit",
+          "authorityValue": "130872392",
           "datasetAuthorityMismatch": false
         },
         {
@@ -2342,8 +2342,8 @@
           "semanticField": "Usuario:",
           "valueRole": "action_input",
           "required": true,
-          "value": "olivam",
-          "source": "RECORDED_CONFIRMED",
+          "value": "SAMOTA",
+          "source": "CURRENT_QA_EDIT",
           "resolved": true,
           "sensitive": false,
           "stepIndex": 3,
@@ -2352,8 +2352,8 @@
           "systemGenerated": false,
           "masked": false,
           "editable": true,
-          "authority": "canonical_logical",
-          "authorityValue": "olivam",
+          "authority": "explicit_qa_edit",
+          "authorityValue": "SAMOTA",
           "datasetAuthorityMismatch": false
         },
         {
@@ -2481,8 +2481,8 @@
         }
       ],
       "resolvedValues": {
-        "rnc": "130598983",
-        "usuario": "olivam",
+        "rnc": "130872392",
+        "usuario": "SAMOTA",
         "contrasena": "qwerty123123",
         "sms": "123456",
         "account_from_select_input_seleccion": "@selection-rule/v1:{\"terms\":[\"Cuenta Corrientes\"],\"matchIndex\":0}",
@@ -2567,11 +2567,11 @@
     },
     "promotedSpec": {
       "appSlug": "fenix",
-      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\api-tests\\cases\\preview-001-transferencias-entre-cuantas-propias\\case.spec.ts",
-      "specHash": "796ba2eeaadf123f7e99b54c17b9f3c7f84704f0744bc6230222f206fa86e8d8",
+      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-transferencias-entre-cuantas-propias\\case.spec.ts",
+      "specHash": "47fc2637704bb4a864c2acca8cbd7835a6be0ff45bc0892d7f3b004aa9e2ab14",
       "automationId": "preview-001-transferencias-entre-cuantas-propias",
-      "sectionSlug": "api-tests",
-      "generatedAt": "2026-10-07T21:35:04.270Z"
+      "sectionSlug": "default-section",
+      "generatedAt": "2026-10-19T14:59:05.885Z"
     },
     "selectorOptionInventories": [
       {

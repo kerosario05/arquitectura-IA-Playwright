@@ -1,0 +1,9 @@
+{
+  "id": "aa-111-jira-3-limpiar-filtros-y-comprobar-los-resultados-iniciales-del-perfil-personal",
+  "externalId": "AA-111:jira:3",
+  "title": "Limpiar filtros y comprobar los resultados iniciales del perfil Personal",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-19T03:57:43.300Z"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "aa-104-jira-1-transferencia-propia-exitosa-en-usd-con-token-valido-y-comprobante",
+  "externalId": "AA-104:jira:1",
+  "title": "Transferencia propia exitosa en USD con token válido y comprobante",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-18T12:36:20.075Z"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "aa-105-jira-3-rechazar-una-cuenta-ya-existente",
+  "externalId": "AA-105:jira:3",
+  "title": "Rechazar una cuenta ya existente",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-19T05:46:40.804Z"
+}

@@ -66,7 +66,7 @@ async function buildPrompt(items: unknown[], functionalTargets: string[]) {
     undefined, "catalog_listing_flow", undefined, undefined, undefined,
     { mainIntent: "catalog_listing_flow", subIntent: "standard", explicitRoutePath: [] },
     undefined, undefined,
-    functionalTargets,
+    functionalTargets.map((target) => ({ sourceIssueKey: CURRENT_ISSUE.key, category: "action" as const, sourceText: target, expectedBehavior: target })),
   );
   return messages.find((m) => m.role === "system")?.content ?? "";
 }

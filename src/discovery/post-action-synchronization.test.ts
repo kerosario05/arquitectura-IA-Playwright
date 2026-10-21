@@ -2,6 +2,29 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { resolvePostActionSynchronization } from "./post-action-synchronization";
 
+test("an unchanged auth surface permits a technically resolved recorded next action without display text", () => {
+  assert.deepEqual(resolvePostActionSynchronization({
+    authenticationBoundaryStillActive: true,
+    nextTargetKnown: true,
+    nextTargetAvailable: false,
+    nextTargetBecameVisible: false,
+    nextTargetRequiresRuntimeResolution: true,
+    nextTargetReady: true,
+    loadingSettled: true,
+  }), { completed: true, signal: "next_target_resolver_ready" });
+});
+
+test("auth surface still blocks missing next targets, unscoped readiness and unmet recorded routes", () => {
+  for (const variation of [
+    { nextTargetRequiresRuntimeResolution: true, nextTargetReady: false },
+    { nextTargetRequiresRuntimeResolution: false, nextTargetReady: true },
+    { nextTargetRequiresRuntimeResolution: true, nextTargetReady: true, recordedPostActionSurfaceRequired: true, recordedPostActionSurfaceReached: false },
+  ]) {
+    assert.deepEqual(resolvePostActionSynchronization({ authenticationBoundaryStillActive: true,
+      nextTargetKnown: true, nextTargetAvailable: false, loadingSettled: true, ...variation }), { completed: false });
+  }
+});
+
 test("immediate action response is accepted when the watcher was armed before click", () => {
   assert.deepEqual(resolvePostActionSynchronization({ actionNetworkObserved: true, actionNetworkResponse: true }), {
     completed: true,

@@ -20,8 +20,8 @@ export type PageStabilityResult = {
   transientDetections: TransientScreenDetection[];
 };
 
-const DEFAULT_TIMEOUT_MS = 15000;
-const DEFAULT_POLL_MS = 300;
+export const DEFAULT_TIMEOUT_MS = 15000;
+export const DEFAULT_POLL_MS = 300;
 const DEFAULT_STABLE_FOR_MS = 800;
 
 function normalizeText(text: string): string {

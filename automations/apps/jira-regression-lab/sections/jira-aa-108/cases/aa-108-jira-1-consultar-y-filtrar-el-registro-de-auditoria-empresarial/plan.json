@@ -1,0 +1,457 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-18T20:06:13.351Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "AA-108:jira:1",
+    "title": "Consultar y filtrar el registro de auditoría empresarial"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "description": "Presionar \"Empresarial\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Empresarial",
+        "exact": true
+      }
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "fill [auth.company_identifier]",
+      "valueKey": "auth.company_identifier",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-rnc\"]"
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [auth.username]",
+      "valueKey": "auth.username",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-user\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "fill",
+      "description": "fill [auth.password]",
+      "valueKey": "auth.password",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-password\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "click Iniciar sesión",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Iniciar sesión",
+        "exact": true
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"Auditoría\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "◷ Auditoría",
+        "exact": true
+      }
+    },
+    {
+      "index": 8,
+      "action": "assertVisible",
+      "description": "Validar que \"Registro de auditoría\" muestre las columnas Usuario, Fecha y hora, Evento, Resultado y Referencia.",
+      "target": {
+        "strategy": "text",
+        "value": "Registro de auditoría"
+      }
+    },
+    {
+      "index": 9,
+      "action": "fill",
+      "description": "fill [audit_search]",
+      "valueKey": "audit_search",
+      "target": {
+        "strategy": "css",
+        "value": "[aria-label=\"Buscar en auditoría\"]"
+      }
+    },
+    {
+      "index": 10,
+      "action": "assertVisible",
+      "description": "Validar que la cantidad de eventos auditados refleje la búsqueda en \"Registro de auditoría\".",
+      "target": {
+        "strategy": "text",
+        "value": "Registro de auditoría"
+      }
+    },
+    {
+      "index": 11,
+      "action": "assertVisible",
+      "description": "Validar que los eventos de prueba de QA Demo estén visibles en \"Registro de auditoría\".",
+      "target": {
+        "strategy": "text",
+        "value": "Registro de auditoría"
+      }
+    },
+    {
+      "index": 12,
+      "action": "select",
+      "description": "select [audit_period_7_days]",
+      "valueKey": "audit_period_7_days",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"audit-period\"]"
+      }
+    },
+    {
+      "index": 13,
+      "action": "assertVisible",
+      "description": "Validar que los eventos auditados visibles estén actualizados para Últimos 7 días en \"Registro de auditoría\".",
+      "target": {
+        "strategy": "text",
+        "value": "Registro de auditoría"
+      }
+    },
+    {
+      "index": 14,
+      "action": "select",
+      "description": "select [audit_period_30_days]",
+      "valueKey": "audit_period_30_days",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"audit-period\"]"
+      }
+    },
+    {
+      "index": 15,
+      "action": "assertVisible",
+      "description": "Validar que los eventos auditados visibles estén actualizados para Últimos 30 días en \"Registro de auditoría\".",
+      "target": {
+        "strategy": "text",
+        "value": "Registro de auditoría"
+      }
+    },
+    {
+      "index": 16,
+      "action": "select",
+      "description": "select [audit_period_90_days]",
+      "valueKey": "audit_period_90_days",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"audit-period\"]"
+      }
+    },
+    {
+      "index": 17,
+      "action": "assertVisible",
+      "description": "Validar que los eventos auditados visibles estén actualizados para Últimos 90 días en \"Registro de auditoría\".",
+      "target": {
+        "strategy": "text",
+        "value": "Registro de auditoría"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "auth.company_identifier",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "auth.username",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "auth.password",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "audit_search",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "audit_period_7_days",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "audit_period_30_days",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "audit_period_90_days",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Consultar y filtrar el registro de auditoría empresarial",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Empresarial"
+        ]
+      },
+      {
+        "index": 3,
+        "action": "fill",
+        "valueKey": "auth.company_identifier",
+        "technicalTargetRefs": [
+          "css:[id=\"login-rnc\"]"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "auth.username",
+        "technicalTargetRefs": [
+          "css:[id=\"login-user\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "fill",
+        "valueKey": "auth.password",
+        "technicalTargetRefs": [
+          "css:[id=\"login-password\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|◷ Auditoría"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "assertVisible",
+        "description": "Validar que \"Registro de auditoría\" muestre las columnas Usuario, Fecha y hora, Evento, Resultado y Referencia.",
+        "technicalTargetRefs": [
+          "text:Registro de auditoría"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "fill",
+        "valueKey": "audit_search",
+        "technicalTargetRefs": [
+          "css:[aria-label=\"Buscar en auditoría\"]"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "assertVisible",
+        "description": "Validar que la cantidad de eventos auditados refleje la búsqueda en \"Registro de auditoría\".",
+        "technicalTargetRefs": [
+          "text:Registro de auditoría"
+        ]
+      },
+      {
+        "index": 11,
+        "action": "assertVisible",
+        "description": "Validar que los eventos de prueba de QA Demo estén visibles en \"Registro de auditoría\".",
+        "technicalTargetRefs": [
+          "text:Registro de auditoría"
+        ]
+      },
+      {
+        "index": 12,
+        "action": "select",
+        "valueKey": "audit_period_7_days",
+        "technicalTargetRefs": [
+          "css:[id=\"audit-period\"]"
+        ]
+      },
+      {
+        "index": 13,
+        "action": "assertVisible",
+        "description": "Validar que los eventos auditados visibles estén actualizados para Últimos 7 días en \"Registro de auditoría\".",
+        "technicalTargetRefs": [
+          "text:Registro de auditoría"
+        ]
+      },
+      {
+        "index": 14,
+        "action": "select",
+        "valueKey": "audit_period_30_days",
+        "technicalTargetRefs": [
+          "css:[id=\"audit-period\"]"
+        ]
+      },
+      {
+        "index": 15,
+        "action": "assertVisible",
+        "description": "Validar que los eventos auditados visibles estén actualizados para Últimos 30 días en \"Registro de auditoría\".",
+        "technicalTargetRefs": [
+          "text:Registro de auditoría"
+        ]
+      },
+      {
+        "index": 16,
+        "action": "select",
+        "valueKey": "audit_period_90_days",
+        "technicalTargetRefs": [
+          "css:[id=\"audit-period\"]"
+        ]
+      },
+      {
+        "index": 17,
+        "action": "assertVisible",
+        "description": "Validar que los eventos auditados visibles estén actualizados para Últimos 90 días en \"Registro de auditoría\".",
+        "technicalTargetRefs": [
+          "text:Registro de auditoría"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-8",
+        "requirement": "Validar que \"Registro de auditoría\" muestre las columnas Usuario, Fecha y hora, Evento, Resultado y Referencia.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 8,
+        "target": "Registro de auditoría",
+        "evidence": [
+          "live-step-8"
+        ],
+        "details": {
+          "observedText": "Registro de auditoría"
+        }
+      },
+      {
+        "id": "jira-oracle-10",
+        "requirement": "Validar que la cantidad de eventos auditados refleje la búsqueda en \"Registro de auditoría\".",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 10,
+        "target": "Registro de auditoría",
+        "evidence": [
+          "live-step-10"
+        ],
+        "details": {
+          "observedText": "Registro de auditoría"
+        }
+      },
+      {
+        "id": "jira-oracle-11",
+        "requirement": "Validar que los eventos de prueba de QA Demo estén visibles en \"Registro de auditoría\".",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 11,
+        "target": "Registro de auditoría",
+        "evidence": [
+          "live-step-11"
+        ],
+        "details": {
+          "observedText": "Registro de auditoría"
+        }
+      },
+      {
+        "id": "jira-oracle-13",
+        "requirement": "Validar que los eventos auditados visibles estén actualizados para Últimos 7 días en \"Registro de auditoría\".",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 13,
+        "target": "Registro de auditoría",
+        "evidence": [
+          "live-step-13"
+        ],
+        "details": {
+          "observedText": "Registro de auditoría"
+        }
+      },
+      {
+        "id": "jira-oracle-15",
+        "requirement": "Validar que los eventos auditados visibles estén actualizados para Últimos 30 días en \"Registro de auditoría\".",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 15,
+        "target": "Registro de auditoría",
+        "evidence": [
+          "live-step-15"
+        ],
+        "details": {
+          "observedText": "Registro de auditoría"
+        }
+      },
+      {
+        "id": "jira-oracle-17",
+        "requirement": "Validar que los eventos auditados visibles estén actualizados para Últimos 90 días en \"Registro de auditoría\".",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 17,
+        "target": "Registro de auditoría",
+        "evidence": [
+          "live-step-17"
+        ],
+        "details": {
+          "observedText": "Registro de auditoría"
+        }
+      }
+    ],
+    "auth": {
+      "required": true,
+      "gateDetected": true,
+      "insertionAfterStepIndex": 6,
+      "flowAlias": "defaultClient"
+    },
+    "expectedResult": "Los eventos auditados visibles en \"Registro de auditoría\" están actualizados para Últimos 90 días."
+  }
+}

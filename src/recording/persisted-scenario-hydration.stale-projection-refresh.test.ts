@@ -187,10 +187,36 @@ test("9/promotionUnchanged. publicationReadiness/promotion is never elevated by 
   assert.equal(projected[0].readiness?.publicationReadiness, stale.readiness?.publicationReadiness, "publicationReadiness must be left exactly as persisted by this fix");
 });
 
-test("10/legacy. a scenario with no semanticModel at all is returned completely untouched (pre-existing early-return preserved)", () => {
+test("10/legacy. missing semantic authority preserves state lineage while safe presentation is refreshed", () => {
   const stale = stalePersistedScenario(staleCanonicalInteractionsShape());
+  const original = JSON.stringify(stale);
   const projected = hydratePersistedScenarios([stale], null, traceOf(pointerFillTapEvents));
-  assert.equal(projected[0], stale, "identity-preserved passthrough, exactly as before this ticket");
+  assert.deepEqual(projected[0].canonicalInteractions, stale.canonicalInteractions);
+  assert.equal(projected[0].stateSequenceValid, false);
+  assert.equal(JSON.stringify(stale), original, "persisted input remains immutable");
+});
+
+test("query redirect after a screen observation refreshes stale state at the persisted consumer boundary", () => {
+  const events = [
+    ev({ seq: 0, t: 1, kind: "note", observationType: "pointer", interactionId: "a", url: "/flow" }),
+    ev({ seq: 1, t: 2, kind: "tap", interactionId: "a", url: "/flow", target: { role: "button", locators: [{ strategy: "css", value: "#submit" }] } }),
+    ev({ seq: 2, t: 3, kind: "screen_change", url: "/flow", toScreenKey: "settled" }),
+    ev({ seq: 3, t: 4, kind: "navigate", screenKey: "settled", url: "/verify" }),
+    ev({ seq: 4, t: 5, kind: "navigate", screenKey: "settled", url: "/flow?phase=review" }),
+    ev({ seq: 5, t: 6, kind: "note", observationType: "pointer", interactionId: "b", screenKey: "settled", url: "/flow?phase=review" }),
+    ev({ seq: 6, t: 7, kind: "tap", interactionId: "b", screenKey: "settled", url: "/flow?phase=review", target: { role: "button", locators: [{ strategy: "css", value: "#confirm" }] } }),
+  ];
+  const stale = stalePersistedScenario(buildCanonicalInteractions(events));
+  stale.stateSequenceValid = false;
+  stale.stateSequenceIssues = ["old_projection"];
+  const original = JSON.stringify(stale);
+  const staleModel = { ...emptySemanticModel, canonicalInteractions: stale.canonicalInteractions!.map((interaction, index) => index === 0
+    ? { ...interaction, routeAfter: "/flow" }
+    : interaction) };
+  const [projected] = hydratePersistedScenarios([stale], staleModel, traceOf(events));
+  assert.equal(projected.stateSequenceValid, true);
+  assert.deepEqual(projected.stateSequenceIssues, []);
+  assert.equal(JSON.stringify(stale), original);
 });
 
 test("11/frontendContract. every key already present on the persisted scenario is still present on the projection -- this fix only refreshes field VALUES, never removes a field the DTO relies on", () => {

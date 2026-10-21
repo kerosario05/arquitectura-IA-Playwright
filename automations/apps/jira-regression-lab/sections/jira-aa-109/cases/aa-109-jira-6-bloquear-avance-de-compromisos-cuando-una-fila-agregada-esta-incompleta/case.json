@@ -1,0 +1,9 @@
+{
+  "id": "aa-109-jira-6-bloquear-avance-de-compromisos-cuando-una-fila-agregada-esta-incompleta",
+  "externalId": "AA-109:jira:6",
+  "title": "Bloquear avance de compromisos cuando una fila agregada está incompleta",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-17T18:49:02.716Z"
+}

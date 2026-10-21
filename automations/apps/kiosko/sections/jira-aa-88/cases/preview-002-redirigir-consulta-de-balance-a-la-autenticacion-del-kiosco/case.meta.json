@@ -1,0 +1,8 @@
+{
+  "appSlug": "kiosko",
+  "sectionSlug": "jira-aa-88",
+  "sourceScenarioId": "PREVIEW-002",
+  "title": "Redirigir Consulta de balance a la autenticación del kiosco",
+  "generatedAt": "2026-10-09T19:47:24.122Z",
+  "executionEngine": "jira_semantic"
+}

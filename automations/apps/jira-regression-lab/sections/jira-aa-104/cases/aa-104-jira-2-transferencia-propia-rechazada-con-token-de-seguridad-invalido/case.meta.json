@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-104",
+  "sourceScenarioId": "AA-104:jira:2",
+  "title": "Transferencia propia rechazada con token de seguridad inválido",
+  "generatedAt": "2026-10-18T12:37:06.344Z",
+  "executionEngine": "jira_semantic"
+}

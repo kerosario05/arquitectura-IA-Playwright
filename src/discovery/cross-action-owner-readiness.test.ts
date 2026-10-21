@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { crossActionOwnerReadinessRequired } from "./case-discovery";
+import { resolvePostActionSynchronization } from "./post-action-synchronization";
 
 const action = (associatedField: string | undefined, recordingActionType: "fill" | "click" | "select") => ({
   target: "text:target",
@@ -50,4 +51,23 @@ test("6/multiproject. no target text/app hardcode governs the decision -- driven
   const anyClickField = crossActionOwnerReadinessRequired(action("Whatever Field Name", "click"));
   assert.equal(anyFillField, false);
   assert.equal(anyClickField, true);
+});
+
+test("recorded options with withheld display labels use technical readiness without an associated field", () => {
+  for (const optionRefs of [
+    ["role:option|masked", "css:#contact-option", "id:contact-option"],
+    ["role:option|", "css:[data-testid=account-option]"],
+  ]) {
+    const next = JSON.parse(JSON.stringify({ ...action(undefined, "click"), target: "Presionar el control grabado", technicalTargetRefs: optionRefs }));
+    const required = crossActionOwnerReadinessRequired(next);
+    assert.equal(required, true, "the recorded option identity must activate the existing resolver peek");
+    const unavailable = resolvePostActionSynchronization({ nextTargetKnown: true, nextTargetRequiresRuntimeResolution: required,
+      nextTargetReady: false, loadingSettled: true, screenFingerprintChanged: true });
+    assert.equal(unavailable.completed, false);
+    const available = resolvePostActionSynchronization({ nextTargetKnown: true, nextTargetRequiresRuntimeResolution: required,
+      nextTargetReady: true, loadingSettled: true, authenticationBoundaryStillActive: true });
+    assert.equal(available.completed, true);
+  }
+  assert.equal(crossActionOwnerReadinessRequired({ ...action(undefined, "click"), technicalTargetRefs: ["role:button|Open"] }), false);
+  assert.equal(crossActionOwnerReadinessRequired({ ...action(undefined, "fill"), technicalTargetRefs: ["role:option|masked"] }), false);
 });

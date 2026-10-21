@@ -10,14 +10,14 @@
   "status": "active",
   "source": "discovery",
   "appProfile": "portal-empresarial",
-  "createdAt": "2026-10-06T21:44:03.046Z",
-  "updatedAt": "2026-10-06T21:44:03.046Z",
-  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-10-06T21-42-42-051Z\\discovered-plans.pending.json",
+  "createdAt": "2026-10-09T22:09:16.273Z",
+  "updatedAt": "2026-10-09T22:09:16.273Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-10-09T22-05-36-716Z\\discovered-plans.pending.json",
   "pomStatus": "promoted",
   "inlineDebugMode": false,
   "specVerificationStatus": "passed",
   "metadata": {
-    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-10-06T21-42-42-051Z",
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-10-09T22-05-36-716Z",
     "pomDiagnostics": {
       "status": "promoted",
       "inlineFallbackUsed": false,
@@ -41,7 +41,7 @@
       },
       "invocations": 0,
       "invocationsConsumed": 0,
-      "durationMs": 48859,
+      "durationMs": 116079,
       "usage": {
         "inputTokens": null,
         "cachedInputTokens": null,
@@ -92,9 +92,9 @@
       },
       "specWritten": true,
       "previousSpec": {
-        "existed": false,
-        "hash": null,
-        "lastModifiedAt": null
+        "existed": true,
+        "hash": "1e245b73868f6cf25f10f26739b47f8888a08f771956c4a17fb5deaaaf6e90f3",
+        "lastModifiedAt": "2026-10-06T21:44:03.023Z"
       }
     },
     "promotionStrategyDiagnostics": {

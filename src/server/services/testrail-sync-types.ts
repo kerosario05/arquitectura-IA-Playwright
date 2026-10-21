@@ -47,14 +47,20 @@ export function buildScenarioPreviewScenarioId(
   index: number,
   context?: { launchId?: string; cacheKey?: string; sourceScenarioId?: string }
 ): string {
-  void scenario;
-
   // Priority 1: For launch execution, generate a stable unique mapping identity from launchId + index.
   // A TestRail custom field is optional; the server-side mapping is authoritative.
   if (context?.launchId) {
     const shortLaunchId = context.launchId.slice(0, 8); // First 8 chars of UUID
     return `L-${shortLaunchId}-${String(index + 1).padStart(3, "0")}`;
   }
+
+  // Standalone Jira previews and debug publication calls may publish one
+  // scenario at a time. Preserve its canonical identity instead of assigning
+  // PREVIEW-001 to every independent request in the same section.
+  const sourceScenarioId = context?.sourceScenarioId?.trim();
+  if (sourceScenarioId) return sourceScenarioId;
+  const canonicalScenarioId = (scenario as McpScenario & { scenarioId?: unknown }).scenarioId;
+  if (typeof canonicalScenarioId === "string" && canonicalScenarioId.trim()) return canonicalScenarioId.trim();
 
   // Priority 2: For preview runs with launch- cacheKey, use cacheKey + index to avoid collisions
   if (context?.cacheKey && context.cacheKey.startsWith("launch-")) {

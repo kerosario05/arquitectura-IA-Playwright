@@ -58,7 +58,7 @@ describe("generateScenariosWithAi route_pending purpose", () => {
   async function runRoutePendingCase(
     scenario: Record<string, unknown>,
     usage?: AiUsageMetrics,
-    options?: { launchId?: string; issueKey?: string; appSlug?: string },
+    options?: { launchId?: string; issueKey?: string; appSlug?: string; jiraSemantic?: boolean },
   ): Promise<{ calls: AiCompletionRequest[]; response: Awaited<ReturnType<typeof generateScenariosWithAi>> }> {
     const calls: AiCompletionRequest[] = [];
     const issueKey = options?.issueKey ?? issues[0].key;
@@ -86,7 +86,7 @@ describe("generateScenariosWithAi route_pending purpose", () => {
       undefined,
       undefined,
       undefined,
-      routeProfile,
+      options?.jiraSemantic ? undefined : routeProfile,
       undefined,
       undefined,
       mockProvider
@@ -98,7 +98,7 @@ describe("generateScenariosWithAi route_pending purpose", () => {
       undefined,
       undefined,
       undefined,
-      { launchId: options?.launchId },
+      { launchId: options?.launchId, executionEngine: options?.jiraSemantic ? "jira_semantic" : undefined },
     );
 
     return { calls, response };
@@ -119,6 +119,14 @@ describe("generateScenariosWithAi route_pending purpose", () => {
     assert.strictEqual(response.scenarios.length, 1, "valid scenario must not be dropped");
     assert.strictEqual(response.scenarios[0].title, "Escenario ejecutable");
     assert.strictEqual(response.scenarios[0].mcpExecutable, true);
+  });
+
+  test("explicit Jira semantic discovery can generate without a route profile", async () => {
+    const { calls, response } = await runRoutePendingCase({ title: "Observe authentication gate", steps: ['Presionar "Solicitar"', 'Validar pantalla de autenticación'], mcpExecutable: true }, undefined, { jiraSemantic: true });
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].purpose, "scenario_generation");
+    assert.equal(response.scenarios.length, 1);
+    assert.deepEqual(response.scenarios[0].steps, ['Presionar "Solicitar"', 'Validar pantalla de autenticación']);
   });
 
   test("preserves mcpExecutable=false without promoting to true", async () => {

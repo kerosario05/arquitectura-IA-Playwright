@@ -1,0 +1,56 @@
+{
+  "id": "aa-106-jira-1-filtrar-restablecer-y-exportar-estados-de-cuenta",
+  "externalId": "AA-106:jira:1",
+  "title": "Filtrar, restablecer y exportar estados de cuenta",
+  "planPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-106\\cases\\aa-106-jira-1-filtrar-restablecer-y-exportar-estados-de-cuenta\\plan.json",
+  "specPath": "automations\\apps\\jira-regression-lab\\sections\\jira-aa-106\\cases\\aa-106-jira-1-filtrar-restablecer-y-exportar-estados-de-cuenta\\case.spec.ts",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "jira-regression-lab",
+  "baseUrlHash": "622cdbe9728c",
+  "createdAt": "2026-10-19T05:31:43.904Z",
+  "updatedAt": "2026-10-19T05:31:43.904Z",
+  "specVerificationStatus": "passed",
+  "tags": [
+    "jira_semantic",
+    "jira_generated"
+  ],
+  "metadata": {
+    "specGeneration": {
+      "mode": "deterministic",
+      "provider": null,
+      "model": null,
+      "invocations": 0,
+      "invocationsConsumed": 0,
+      "durationMs": 0,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "passed",
+        "typescript": "skipped",
+        "playwrightDiscovery": "skipped",
+        "semanticCoverage": "passed",
+        "functionalExecution": "passed"
+      },
+      "promotionAllowed": true,
+      "specsRequested": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
+      "specWritten": true,
+      "errors": [],
+      "warnings": []
+    }
+  }
+}

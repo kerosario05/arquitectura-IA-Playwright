@@ -20,22 +20,26 @@ function deferred<T>() {
 test("returns immediately with status deriving, then reports each stage with counts", async () => {
   resetDerivationProgressForTests();
   const gate = deferred<{ scenarioCount: number }>();
-  let report: ((update: DerivationStageUpdate) => void) | undefined;
-  const started = startBackgroundDerivation("rec-1", (onProgress) => { report = onProgress; return gate.promise; });
+  const progress: { report?: (update: DerivationStageUpdate) => void } = {};
+  const started = startBackgroundDerivation("rec-1", (onProgress) => { progress.report = onProgress; return gate.promise; });
 
   assert.equal(started.status, "deriving");
   assert.equal(started.stageIndex, 0);
   assert.equal(started.stageCount, 4);
-  assert.equal(report, undefined, "the work must not start before the caller answers its HTTP request");
+  assert.equal(progress.report, undefined, "the work must not start before the caller answers its HTTP request");
   await tick();
-  assert.ok(report);
+  assert.ok(progress.report);
 
-  report!({ stage: "building_steps", actionCount: 34 });
+  const emitProgress = (update: DerivationStageUpdate) => {
+    if (!progress.report) throw new Error("progress callback was not registered");
+    progress.report(update);
+  };
+  emitProgress({ stage: "building_steps", actionCount: 34 });
   assert.equal(getDerivationProgress("rec-1")?.stage, "building_steps");
   assert.equal(getDerivationProgress("rec-1")?.stageIndex, 2);
   assert.equal(getDerivationProgress("rec-1")?.actionCount, 34);
 
-  report!({ stage: "ai_enrichment", stepCount: 21 });
+  emitProgress({ stage: "ai_enrichment", stepCount: 21 });
   assert.equal(getDerivationProgress("rec-1")?.stageIndex, 3);
   assert.equal(getDerivationProgress("rec-1")?.actionCount, 34, "counts reported earlier are kept");
   assert.equal(getDerivationProgress("rec-1")?.stepCount, 21);

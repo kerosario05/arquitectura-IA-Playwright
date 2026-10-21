@@ -1,0 +1,9 @@
+{
+  "id": "aa-112-jira-1-actualizar-la-politica-de-aprobacion-de-laura-m-en-la-simulacion-administrativa",
+  "externalId": "AA-112:jira:1",
+  "title": "Actualizar la política de aprobación de Laura M. en la simulación administrativa",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-16T23:00:37.914Z"
+}

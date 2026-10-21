@@ -1,0 +1,2748 @@
+{
+  "version": 1,
+  "appSlug": "jira-regression-lab",
+  "createdAt": "2026-10-16T17:17:22.0097010Z",
+  "updatedAt": "2026-10-19T03:57:03.719Z",
+  "items": [],
+  "jiraRoutes": [
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "jira-regression-lab",
+      "id": "f8cf749d10d1fa9908f21ec72d22dfabdb1a2665e99487d5f72961ba1055ce54",
+      "profileRevision": "6c444add2a9f7dbff7cdf9ede9d6dc59183738465ff71c09e9e8ca92f5b43a2d",
+      "sourceIssueKey": "AA-103",
+      "scenarioId": "AA-103:jira:1",
+      "jobId": "1d89f8b8-5dfa-4a40-8f21-cc3a60749fcb",
+      "validatedAt": "2026-10-16T18:29:31.666Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "Empresarial"
+        },
+        {
+          "action": "fill",
+          "field": "RNC",
+          "dataRef": "rnc"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesión"
+        },
+        {
+          "action": "click",
+          "field": "código por SMS"
+        },
+        {
+          "action": "fill",
+          "field": "Código de acceso",
+          "dataRef": "codigo_acceso"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "jira-regression-lab",
+      "id": "533fd6894157020458d3870ca8527fff28209609e17126275d0deddbbcd45fd2",
+      "profileRevision": "6c444add2a9f7dbff7cdf9ede9d6dc59183738465ff71c09e9e8ca92f5b43a2d",
+      "sourceIssueKey": "AA-103",
+      "scenarioId": "AA-103:jira:2",
+      "jobId": "1d89f8b8-5dfa-4a40-8f21-cc3a60749fcb",
+      "validatedAt": "2026-10-16T18:30:09.942Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "Empresarial"
+        },
+        {
+          "action": "fill",
+          "field": "RNC",
+          "dataRef": "rnc"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena_invalida"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesión"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-2-step-1.png",
+        "scenario-2-step-2.png",
+        "scenario-2-step-3.png",
+        "scenario-2-step-4.png",
+        "scenario-2-step-5.png",
+        "scenario-2-step-6.png",
+        "scenario-2-step-7.png",
+        "scenario-2-step-8.png"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "jira-regression-lab",
+      "id": "e4048ef359cf4446219dbe6d0a83dabe8e9cf8ea625cb27ca9d0835e62748d0a",
+      "profileRevision": "6c444add2a9f7dbff7cdf9ede9d6dc59183738465ff71c09e9e8ca92f5b43a2d",
+      "sourceIssueKey": "AA-103",
+      "scenarioId": "AA-103:jira:3",
+      "jobId": "1d89f8b8-5dfa-4a40-8f21-cc3a60749fcb",
+      "validatedAt": "2026-10-16T18:30:49.909Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "Empresarial"
+        },
+        {
+          "action": "fill",
+          "field": "RNC",
+          "dataRef": "rnc"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesión"
+        },
+        {
+          "action": "click",
+          "field": "código por SMS"
+        },
+        {
+          "action": "fill",
+          "field": "Código de acceso",
+          "dataRef": "codigo_acceso_invalido"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-3-step-1.png",
+        "scenario-3-step-2.png",
+        "scenario-3-step-3.png",
+        "scenario-3-step-4.png",
+        "scenario-3-step-5.png",
+        "scenario-3-step-6.png",
+        "scenario-3-step-7.png",
+        "scenario-3-step-8.png",
+        "scenario-3-step-9.png",
+        "scenario-3-step-10.png",
+        "scenario-3-step-11.png",
+        "scenario-3-step-12.png"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "jira-regression-lab",
+      "id": "d926d217fa94e272c790d8016f084ba53b8cf924429a69b2e12cc2c0935a35d8",
+      "profileRevision": "6c444add2a9f7dbff7cdf9ede9d6dc59183738465ff71c09e9e8ca92f5b43a2d",
+      "sourceIssueKey": "AA-110",
+      "scenarioId": "AA-110:jira:2",
+      "jobId": "a622fc51-514f-4ff7-8337-f3fc62facac1",
+      "validatedAt": "2026-10-16T19:31:42.244Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "Empresarial"
+        },
+        {
+          "action": "fill",
+          "field": "RNC",
+          "dataRef": "rnc"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesión"
+        },
+        {
+          "action": "click",
+          "field": "el código por SMS"
+        },
+        {
+          "action": "fill",
+          "field": "Código de acceso",
+          "dataRef": "codigo_acceso_sms"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "click",
+          "field": "Pagos"
+        },
+        {
+          "action": "select",
+          "field": "Proveedor",
+          "dataRef": "proveedor"
+        },
+        {
+          "action": "fill",
+          "field": "Número de contrato",
+          "dataRef": "numero_contrato"
+        },
+        {
+          "action": "select",
+          "field": "Cuenta a debitar",
+          "dataRef": "cuenta_debitar"
+        },
+        {
+          "action": "fill",
+          "field": "Monto",
+          "dataRef": "monto_cero"
+        },
+        {
+          "action": "fill",
+          "field": "Fecha de pago",
+          "dataRef": "fecha_pago"
+        },
+        {
+          "action": "select",
+          "field": "Frecuencia",
+          "dataRef": "frecuencia"
+        },
+        {
+          "action": "click",
+          "field": "Revisar pago"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-2-step-1.png",
+        "scenario-2-step-2.png",
+        "scenario-2-step-3.png",
+        "scenario-2-step-4.png",
+        "scenario-2-step-5.png",
+        "scenario-2-step-6.png",
+        "scenario-2-step-7.png",
+        "scenario-2-step-8.png",
+        "scenario-2-step-9.png",
+        "scenario-2-step-10.png",
+        "scenario-2-step-11.png",
+        "scenario-2-step-12.png",
+        "scenario-2-step-13.png",
+        "scenario-2-step-14.png",
+        "scenario-2-step-15.png",
+        "scenario-2-step-16.png",
+        "scenario-2-step-17.png",
+        "scenario-2-step-18.png",
+        "scenario-2-step-19.png",
+        "scenario-2-step-20.png",
+        "scenario-2-step-21.png"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "jira-regression-lab",
+      "id": "595f032e0f59c2326ef7d7c3bac077ccd82c29acffa4659792e78e4b4c157faf",
+      "profileRevision": "6c444add2a9f7dbff7cdf9ede9d6dc59183738465ff71c09e9e8ca92f5b43a2d",
+      "sourceIssueKey": "AA-110",
+      "scenarioId": "AA-110:jira:3",
+      "jobId": "a622fc51-514f-4ff7-8337-f3fc62facac1",
+      "validatedAt": "2026-10-16T19:32:45.721Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "Empresarial"
+        },
+        {
+          "action": "fill",
+          "field": "RNC",
+          "dataRef": "rnc"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesión"
+        },
+        {
+          "action": "click",
+          "field": "el código por SMS"
+        },
+        {
+          "action": "fill",
+          "field": "Código de acceso",
+          "dataRef": "codigo_acceso_sms"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "click",
+          "field": "Pagos"
+        },
+        {
+          "action": "select",
+          "field": "Proveedor",
+          "dataRef": "proveedor"
+        },
+        {
+          "action": "fill",
+          "field": "Número de contrato",
+          "dataRef": "numero_contrato"
+        },
+        {
+          "action": "select",
+          "field": "Cuenta a debitar",
+          "dataRef": "cuenta_debitar"
+        },
+        {
+          "action": "fill",
+          "field": "Monto",
+          "dataRef": "monto"
+        },
+        {
+          "action": "fill",
+          "field": "Fecha de pago",
+          "dataRef": "fecha_pago_pasada"
+        },
+        {
+          "action": "select",
+          "field": "Frecuencia",
+          "dataRef": "frecuencia"
+        },
+        {
+          "action": "click",
+          "field": "Revisar pago"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-3-step-1.png",
+        "scenario-3-step-2.png",
+        "scenario-3-step-3.png",
+        "scenario-3-step-4.png",
+        "scenario-3-step-5.png",
+        "scenario-3-step-6.png",
+        "scenario-3-step-7.png",
+        "scenario-3-step-8.png",
+        "scenario-3-step-9.png",
+        "scenario-3-step-10.png",
+        "scenario-3-step-11.png",
+        "scenario-3-step-12.png",
+        "scenario-3-step-13.png",
+        "scenario-3-step-14.png",
+        "scenario-3-step-15.png",
+        "scenario-3-step-16.png",
+        "scenario-3-step-17.png",
+        "scenario-3-step-18.png",
+        "scenario-3-step-19.png",
+        "scenario-3-step-20.png",
+        "scenario-3-step-21.png"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "jira-regression-lab",
+      "id": "103aec34f4e00a8cab09bc3093e5e5230285862f703ed9cb9fd39bc376a49238",
+      "profileRevision": "6c444add2a9f7dbff7cdf9ede9d6dc59183738465ff71c09e9e8ca92f5b43a2d",
+      "sourceIssueKey": "AA-109",
+      "scenarioId": "AA-109:jira:2",
+      "jobId": "ae3c6879-fdf5-498e-bb83-d15a3141646d",
+      "validatedAt": "2026-10-17T14:09:30.243Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "Personal"
+        },
+        {
+          "action": "fill",
+          "field": "Cédula",
+          "dataRef": "cedula"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesión"
+        },
+        {
+          "action": "click",
+          "field": "el código por SMS"
+        },
+        {
+          "action": "fill",
+          "field": "Código",
+          "dataRef": "codigo_sms_invalido"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "jira-regression-lab",
+      "id": "a324c0910cb4ee7c84423138d6cad8ff8a056b879d99697f7797afd3f8c23a8c",
+      "profileRevision": "6c444add2a9f7dbff7cdf9ede9d6dc59183738465ff71c09e9e8ca92f5b43a2d",
+      "sourceIssueKey": "AA-109",
+      "scenarioId": "AA-109:jira:1",
+      "jobId": "bc5499d6-fd4a-4898-a58e-072b3525f7f0",
+      "validatedAt": "2026-10-17T15:18:53.760Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "Personal"
+        },
+        {
+          "action": "fill",
+          "field": "Cédula",
+          "dataRef": "cedula"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesión"
+        },
+        {
+          "action": "click",
+          "field": "el código por SMS"
+        },
+        {
+          "action": "fill",
+          "field": "Código",
+          "dataRef": "codigo_sms"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "click",
+          "field": "Solicitar préstamo"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de documento",
+          "dataRef": "tipo_documento"
+        },
+        {
+          "action": "fill",
+          "field": "Número de documento",
+          "dataRef": "numero_documento"
+        },
+        {
+          "action": "fill",
+          "field": "Nombres",
+          "dataRef": "nombres"
+        },
+        {
+          "action": "fill",
+          "field": "Apellidos",
+          "dataRef": "apellidos"
+        },
+        {
+          "action": "fill",
+          "field": "Fecha de nacimiento",
+          "dataRef": "fecha_nacimiento"
+        },
+        {
+          "action": "select",
+          "field": "Estado civil",
+          "dataRef": "estado_civil"
+        },
+        {
+          "action": "fill",
+          "field": "Personas dependientes",
+          "dataRef": "dependientes"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "fill",
+          "field": "Correo electrónico",
+          "dataRef": "correo"
+        },
+        {
+          "action": "fill",
+          "field": "Teléfono móvil",
+          "dataRef": "movil"
+        },
+        {
+          "action": "fill",
+          "field": "Teléfono alternativo",
+          "dataRef": "alternativo"
+        },
+        {
+          "action": "select",
+          "field": "Provincia",
+          "dataRef": "provincia"
+        },
+        {
+          "action": "select",
+          "field": "Municipio",
+          "dataRef": "municipio"
+        },
+        {
+          "action": "fill",
+          "field": "Sector o barrio",
+          "dataRef": "sector"
+        },
+        {
+          "action": "fill",
+          "field": "Dirección residencial",
+          "dataRef": "direccion"
+        },
+        {
+          "action": "select",
+          "field": "Tiempo en la dirección",
+          "dataRef": "tiempo_direccion"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "select",
+          "field": "Situación laboral",
+          "dataRef": "situacion_laboral"
+        },
+        {
+          "action": "fill",
+          "field": "Nombre de empleador o negocio",
+          "dataRef": "empleador"
+        },
+        {
+          "action": "fill",
+          "field": "Cargo u ocupación",
+          "dataRef": "cargo"
+        },
+        {
+          "action": "select",
+          "field": "Sector económico",
+          "dataRef": "sector_economico"
+        },
+        {
+          "action": "fill",
+          "field": "Fecha de inicio laboral",
+          "dataRef": "fecha_inicio"
+        },
+        {
+          "action": "fill",
+          "field": "Teléfono laboral",
+          "dataRef": "telefono_laboral"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de contrato",
+          "dataRef": "tipo_contrato"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "fill",
+          "field": "Ingreso mensual principal",
+          "dataRef": "ingreso_principal"
+        },
+        {
+          "action": "fill",
+          "field": "Otros ingresos mensuales",
+          "dataRef": "otros_ingresos"
+        },
+        {
+          "action": "fill",
+          "field": "Origen de otros ingresos",
+          "dataRef": "origen_otros_ingresos"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de ingreso de la fila 1",
+          "dataRef": "ingreso1_tipo"
+        },
+        {
+          "action": "fill",
+          "field": "Importe mensual de la fila 1",
+          "dataRef": "ingreso1_importe"
+        },
+        {
+          "action": "select",
+          "field": "Frecuencia de la fila 1",
+          "dataRef": "ingreso1_frecuencia"
+        },
+        {
+          "action": "click",
+          "field": "Agregar ingreso"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de ingreso de la fila 2",
+          "dataRef": "ingreso2_tipo"
+        },
+        {
+          "action": "fill",
+          "field": "Importe mensual de la fila 2",
+          "dataRef": "ingreso2_importe"
+        },
+        {
+          "action": "select",
+          "field": "Frecuencia de la fila 2",
+          "dataRef": "ingreso2_frecuencia"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "fill",
+          "field": "Gastos mensuales del hogar",
+          "dataRef": "gastos_hogar"
+        },
+        {
+          "action": "fill",
+          "field": "Cuotas de préstamos vigentes",
+          "dataRef": "cuotas_prestamos"
+        },
+        {
+          "action": "fill",
+          "field": "Gasto mensual de vivienda",
+          "dataRef": "gasto_vivienda"
+        },
+        {
+          "action": "select",
+          "field": "Día preferido de pago",
+          "dataRef": "dia_pago"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de compromiso de la fila 1",
+          "dataRef": "compromiso1_tipo"
+        },
+        {
+          "action": "fill",
+          "field": "Importe de compromiso de la fila 1",
+          "dataRef": "compromiso1_importe"
+        },
+        {
+          "action": "select",
+          "field": "Frecuencia de compromiso de la fila 1",
+          "dataRef": "compromiso1_frecuencia"
+        },
+        {
+          "action": "click",
+          "field": "Agregar compromiso"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de compromiso de la fila 2",
+          "dataRef": "compromiso2_tipo"
+        },
+        {
+          "action": "fill",
+          "field": "Importe de compromiso de la fila 2",
+          "dataRef": "compromiso2_importe"
+        },
+        {
+          "action": "select",
+          "field": "Frecuencia de compromiso de la fila 2",
+          "dataRef": "compromiso2_frecuencia"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "fill",
+          "field": "Monto solicitado",
+          "dataRef": "monto"
+        },
+        {
+          "action": "select",
+          "field": "Propósito del préstamo",
+          "dataRef": "proposito"
+        },
+        {
+          "action": "select",
+          "field": "Plazo deseado",
+          "dataRef": "plazo"
+        },
+        {
+          "action": "select",
+          "field": "Cuenta de desembolso",
+          "dataRef": "cuenta_desembolso"
+        },
+        {
+          "action": "select",
+          "field": "Frecuencia de pago",
+          "dataRef": "frecuencia_pago"
+        },
+        {
+          "action": "fill",
+          "field": "Fecha ideal de desembolso",
+          "dataRef": "fecha_desembolso"
+        },
+        {
+          "action": "select",
+          "field": "Seguro de vida",
+          "dataRef": "seguro_vida"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "select",
+          "field": "Relación de referencia 1",
+          "dataRef": "relacion1"
+        },
+        {
+          "action": "fill",
+          "field": "Nombre de referencia 1",
+          "dataRef": "nombre_ref1"
+        },
+        {
+          "action": "fill",
+          "field": "Teléfono de referencia 1",
+          "dataRef": "telefono_ref1"
+        },
+        {
+          "action": "select",
+          "field": "Relación de referencia 2",
+          "dataRef": "relacion2"
+        },
+        {
+          "action": "fill",
+          "field": "Nombre de referencia 2",
+          "dataRef": "nombre_ref2"
+        },
+        {
+          "action": "fill",
+          "field": "Teléfono de referencia 2",
+          "dataRef": "telefono_ref2"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "select",
+          "field": "Disponibilidad del documento de identidad",
+          "dataRef": "documento_identidad"
+        },
+        {
+          "action": "select",
+          "field": "Comprobante de ingresos",
+          "dataRef": "comprobante_ingresos"
+        },
+        {
+          "action": "select",
+          "field": "Comprobante de domicilio",
+          "dataRef": "comprobante_domicilio"
+        },
+        {
+          "action": "select",
+          "field": "Autorización de consulta crediticia",
+          "dataRef": "autorizacion_crediticia"
+        },
+        {
+          "action": "select",
+          "field": "Confirmación de veracidad",
+          "dataRef": "veracidad"
+        },
+        {
+          "action": "select",
+          "field": "Canal de notificación",
+          "dataRef": "canal_notificacion"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "click",
+          "field": "el código de autorización"
+        },
+        {
+          "action": "fill",
+          "field": "Código de autorización",
+          "dataRef": "jira_step_105"
+        },
+        {
+          "action": "click",
+          "field": "Enviar"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png",
+        "scenario-1-step-13.png",
+        "scenario-1-step-14.png",
+        "scenario-1-step-15.png",
+        "scenario-1-step-16.png",
+        "scenario-1-step-17.png",
+        "scenario-1-step-18.png",
+        "scenario-1-step-19.png",
+        "scenario-1-step-20.png",
+        "scenario-1-step-21.png",
+        "scenario-1-step-22.png",
+        "scenario-1-step-23.png",
+        "scenario-1-step-24.png",
+        "scenario-1-step-25.png",
+        "scenario-1-step-26.png",
+        "scenario-1-step-27.png",
+        "scenario-1-step-28.png",
+        "scenario-1-step-29.png",
+        "scenario-1-step-30.png",
+        "scenario-1-step-31.png",
+        "scenario-1-step-32.png",
+        "scenario-1-step-33.png",
+        "scenario-1-step-34.png",
+        "scenario-1-step-35.png",
+        "scenario-1-step-36.png",
+        "scenario-1-step-37.png",
+        "scenario-1-step-38.png",
+        "scenario-1-step-39.png",
+        "scenario-1-step-40.png",
+        "scenario-1-step-41.png",
+        "scenario-1-step-42.png",
+        "scenario-1-step-43.png",
+        "scenario-1-step-44.png",
+        "scenario-1-step-45.png",
+        "scenario-1-step-46.png",
+        "scenario-1-step-47.png",
+        "scenario-1-step-48.png",
+        "scenario-1-step-49.png",
+        "scenario-1-step-50.png",
+        "scenario-1-step-51.png",
+        "scenario-1-step-52.png",
+        "scenario-1-step-53.png",
+        "scenario-1-step-54.png",
+        "scenario-1-step-55.png",
+        "scenario-1-step-56.png",
+        "scenario-1-step-57.png",
+        "scenario-1-step-58.png",
+        "scenario-1-step-59.png",
+        "scenario-1-step-60.png",
+        "scenario-1-step-61.png",
+        "scenario-1-step-62.png",
+        "scenario-1-step-63.png",
+        "scenario-1-step-64.png",
+        "scenario-1-step-65.png",
+        "scenario-1-step-66.png",
+        "scenario-1-step-67.png",
+        "scenario-1-step-68.png",
+        "scenario-1-step-69.png",
+        "scenario-1-step-70.png",
+        "scenario-1-step-71.png",
+        "scenario-1-step-72.png",
+        "scenario-1-step-73.png",
+        "scenario-1-step-74.png",
+        "scenario-1-step-75.png",
+        "scenario-1-step-76.png",
+        "scenario-1-step-77.png",
+        "scenario-1-step-78.png",
+        "scenario-1-step-79.png",
+        "scenario-1-step-80.png",
+        "scenario-1-step-81.png",
+        "scenario-1-step-82.png",
+        "scenario-1-step-83.png",
+        "scenario-1-step-84.png",
+        "scenario-1-step-85.png",
+        "scenario-1-step-86.png",
+        "scenario-1-step-87.png",
+        "scenario-1-step-88.png",
+        "scenario-1-step-89.png",
+        "scenario-1-step-90.png",
+        "scenario-1-step-91.png",
+        "scenario-1-step-92.png",
+        "scenario-1-step-93.png",
+        "scenario-1-step-94.png",
+        "scenario-1-step-95.png",
+        "scenario-1-step-96.png",
+        "scenario-1-step-97.png",
+        "scenario-1-step-98.png",
+        "scenario-1-step-99.png",
+        "scenario-1-step-100.png",
+        "scenario-1-step-101.png",
+        "scenario-1-step-102.png",
+        "scenario-1-step-103.png",
+        "scenario-1-step-104.png",
+        "scenario-1-step-105.png",
+        "scenario-1-step-106.png",
+        "scenario-1-step-107.png",
+        "scenario-1-step-108.png",
+        "scenario-1-step-109.png"
+      ],
+      "invalidatedAt": "2026-10-18T14:30:03.908Z"
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "jira-regression-lab",
+      "id": "a341c190673cb58ae96638bb5d414a7047d8240f2de623e5e029855191938b36",
+      "profileRevision": "6c444add2a9f7dbff7cdf9ede9d6dc59183738465ff71c09e9e8ca92f5b43a2d",
+      "sourceIssueKey": "AA-109",
+      "scenarioId": "AA-109:jira:4",
+      "jobId": "c21db7bf-34eb-4e58-b62a-86b6c51073a6",
+      "validatedAt": "2026-10-17T16:42:54.712Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "Personal"
+        },
+        {
+          "action": "fill",
+          "field": "Cédula",
+          "dataRef": "cedula"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesión"
+        },
+        {
+          "action": "click",
+          "field": "el código por SMS"
+        },
+        {
+          "action": "fill",
+          "field": "Código",
+          "dataRef": "codigo_sms"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "click",
+          "field": "Solicitar préstamo"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de documento",
+          "dataRef": "tipo_documento"
+        },
+        {
+          "action": "fill",
+          "field": "Número de documento",
+          "dataRef": "numero_documento"
+        },
+        {
+          "action": "fill",
+          "field": "Nombres",
+          "dataRef": "nombres"
+        },
+        {
+          "action": "fill",
+          "field": "Apellidos",
+          "dataRef": "apellidos"
+        },
+        {
+          "action": "fill",
+          "field": "Fecha de nacimiento",
+          "dataRef": "fecha_nacimiento"
+        },
+        {
+          "action": "select",
+          "field": "Estado civil",
+          "dataRef": "estado_civil"
+        },
+        {
+          "action": "fill",
+          "field": "Personas dependientes",
+          "dataRef": "personas_dependientes"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "fill",
+          "field": "Correo electrónico",
+          "dataRef": "correo_electronico"
+        },
+        {
+          "action": "fill",
+          "field": "Teléfono móvil",
+          "dataRef": "telefono_movil"
+        },
+        {
+          "action": "fill",
+          "field": "Teléfono alternativo",
+          "dataRef": "telefono_alternativo"
+        },
+        {
+          "action": "select",
+          "field": "Provincia",
+          "dataRef": "provincia"
+        },
+        {
+          "action": "select",
+          "field": "Municipio",
+          "dataRef": "municipio"
+        },
+        {
+          "action": "fill",
+          "field": "Sector o barrio",
+          "dataRef": "sector_barrio"
+        },
+        {
+          "action": "fill",
+          "field": "Dirección residencial",
+          "dataRef": "direccion_residencial"
+        },
+        {
+          "action": "select",
+          "field": "Tiempo en la dirección",
+          "dataRef": "tiempo_direccion"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "select",
+          "field": "Situación laboral",
+          "dataRef": "situacion_laboral"
+        },
+        {
+          "action": "fill",
+          "field": "Nombre de empleador o negocio",
+          "dataRef": "empleador_negocio"
+        },
+        {
+          "action": "fill",
+          "field": "Cargo u ocupación",
+          "dataRef": "cargo_ocupacion"
+        },
+        {
+          "action": "select",
+          "field": "Sector económico",
+          "dataRef": "sector_economico"
+        },
+        {
+          "action": "fill",
+          "field": "Fecha de inicio laboral",
+          "dataRef": "fecha_inicio_laboral"
+        },
+        {
+          "action": "fill",
+          "field": "Teléfono laboral",
+          "dataRef": "telefono_laboral"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de contrato",
+          "dataRef": "tipo_contrato"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "fill",
+          "field": "Ingreso mensual principal",
+          "dataRef": "ingreso_mensual_principal"
+        },
+        {
+          "action": "fill",
+          "field": "Otros ingresos mensuales",
+          "dataRef": "otros_ingresos_mensuales"
+        },
+        {
+          "action": "fill",
+          "field": "Origen de otros ingresos",
+          "dataRef": "origen_otros_ingresos"
+        },
+        {
+          "action": "select",
+          "field": "Tipo",
+          "dataRef": "tipo_ingreso_1"
+        },
+        {
+          "action": "fill",
+          "field": "Importe mensual",
+          "dataRef": "importe_mensual_ingreso_1"
+        },
+        {
+          "action": "select",
+          "field": "Frecuencia",
+          "dataRef": "frecuencia_ingreso_1"
+        },
+        {
+          "action": "click",
+          "field": "Agregar ingreso"
+        },
+        {
+          "action": "select",
+          "field": "Tipo",
+          "dataRef": "tipo_ingreso_2"
+        },
+        {
+          "action": "fill",
+          "field": "Importe mensual",
+          "dataRef": "importe_mensual_ingreso_2"
+        },
+        {
+          "action": "select",
+          "field": "Frecuencia",
+          "dataRef": "frecuencia_ingreso_2"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "fill",
+          "field": "Gastos mensuales del hogar",
+          "dataRef": "gastos_mensuales_hogar"
+        },
+        {
+          "action": "fill",
+          "field": "Cuotas de préstamos vigentes",
+          "dataRef": "cuotas_prestamos_vigentes"
+        },
+        {
+          "action": "fill",
+          "field": "Gasto mensual de vivienda",
+          "dataRef": "gasto_mensual_vivienda"
+        },
+        {
+          "action": "select",
+          "field": "Día preferido de pago",
+          "dataRef": "dia_preferido_pago"
+        },
+        {
+          "action": "select",
+          "field": "Tipo",
+          "dataRef": "tipo_compromiso_1"
+        },
+        {
+          "action": "fill",
+          "field": "Importe",
+          "dataRef": "importe_compromiso_1"
+        },
+        {
+          "action": "select",
+          "field": "Frecuencia",
+          "dataRef": "frecuencia_compromiso_1"
+        },
+        {
+          "action": "click",
+          "field": "Agregar compromiso"
+        },
+        {
+          "action": "select",
+          "field": "Tipo",
+          "dataRef": "tipo_compromiso_2"
+        },
+        {
+          "action": "fill",
+          "field": "Importe",
+          "dataRef": "importe_compromiso_2"
+        },
+        {
+          "action": "select",
+          "field": "Frecuencia",
+          "dataRef": "frecuencia_compromiso_2"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "fill",
+          "field": "Monto solicitado",
+          "dataRef": "monto_solicitado"
+        },
+        {
+          "action": "select",
+          "field": "Propósito del préstamo",
+          "dataRef": "proposito_prestamo"
+        },
+        {
+          "action": "select",
+          "field": "Plazo deseado",
+          "dataRef": "plazo_deseado"
+        },
+        {
+          "action": "select",
+          "field": "Cuenta de desembolso",
+          "dataRef": "cuenta_desembolso"
+        },
+        {
+          "action": "select",
+          "field": "Frecuencia de pago",
+          "dataRef": "frecuencia_pago"
+        },
+        {
+          "action": "fill",
+          "field": "Fecha ideal de desembolso",
+          "dataRef": "fecha_ideal_desembolso"
+        },
+        {
+          "action": "select",
+          "field": "Seguro de vida",
+          "dataRef": "seguro_vida"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "select",
+          "field": "Relación",
+          "dataRef": "relacion_referencia_1"
+        },
+        {
+          "action": "fill",
+          "field": "Nombre",
+          "dataRef": "nombre_referencia_1"
+        },
+        {
+          "action": "fill",
+          "field": "Teléfono",
+          "dataRef": "telefono_referencia_1"
+        },
+        {
+          "action": "select",
+          "field": "Relación",
+          "dataRef": "relacion_referencia_2"
+        },
+        {
+          "action": "fill",
+          "field": "Nombre",
+          "dataRef": "nombre_referencia_2"
+        },
+        {
+          "action": "fill",
+          "field": "Teléfono",
+          "dataRef": "telefono_referencia_2"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "select",
+          "field": "Documento de identidad",
+          "dataRef": "documento_identidad"
+        },
+        {
+          "action": "select",
+          "field": "Comprobante de ingresos",
+          "dataRef": "comprobante_ingresos"
+        },
+        {
+          "action": "select",
+          "field": "Comprobante de domicilio",
+          "dataRef": "comprobante_domicilio"
+        },
+        {
+          "action": "select",
+          "field": "Autorización de consulta crediticia",
+          "dataRef": "autorizacion_consulta_crediticia"
+        },
+        {
+          "action": "select",
+          "field": "Confirmación de veracidad",
+          "dataRef": "confirmacion_veracidad"
+        },
+        {
+          "action": "select",
+          "field": "Canal de notificación",
+          "dataRef": "canal_notificacion"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "click",
+          "field": "el código de autorización"
+        },
+        {
+          "action": "fill",
+          "field": "Código de autorización",
+          "dataRef": "codigo_autorizacion_invalido"
+        },
+        {
+          "action": "click",
+          "field": "Enviar"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png",
+        "scenario-1-step-13.png",
+        "scenario-1-step-14.png",
+        "scenario-1-step-15.png",
+        "scenario-1-step-16.png",
+        "scenario-1-step-17.png",
+        "scenario-1-step-18.png",
+        "scenario-1-step-19.png",
+        "scenario-1-step-20.png",
+        "scenario-1-step-21.png",
+        "scenario-1-step-22.png",
+        "scenario-1-step-23.png",
+        "scenario-1-step-24.png",
+        "scenario-1-step-25.png",
+        "scenario-1-step-26.png",
+        "scenario-1-step-27.png",
+        "scenario-1-step-28.png",
+        "scenario-1-step-29.png",
+        "scenario-1-step-30.png",
+        "scenario-1-step-31.png",
+        "scenario-1-step-32.png",
+        "scenario-1-step-33.png",
+        "scenario-1-step-34.png",
+        "scenario-1-step-35.png",
+        "scenario-1-step-36.png",
+        "scenario-1-step-37.png",
+        "scenario-1-step-38.png",
+        "scenario-1-step-39.png",
+        "scenario-1-step-40.png",
+        "scenario-1-step-41.png",
+        "scenario-1-step-42.png",
+        "scenario-1-step-43.png",
+        "scenario-1-step-44.png",
+        "scenario-1-step-45.png",
+        "scenario-1-step-46.png",
+        "scenario-1-step-47.png",
+        "scenario-1-step-48.png",
+        "scenario-1-step-49.png",
+        "scenario-1-step-50.png",
+        "scenario-1-step-51.png",
+        "scenario-1-step-52.png",
+        "scenario-1-step-53.png",
+        "scenario-1-step-54.png",
+        "scenario-1-step-55.png",
+        "scenario-1-step-56.png",
+        "scenario-1-step-57.png",
+        "scenario-1-step-58.png",
+        "scenario-1-step-59.png",
+        "scenario-1-step-60.png",
+        "scenario-1-step-61.png",
+        "scenario-1-step-62.png",
+        "scenario-1-step-63.png",
+        "scenario-1-step-64.png",
+        "scenario-1-step-65.png",
+        "scenario-1-step-66.png",
+        "scenario-1-step-67.png",
+        "scenario-1-step-68.png",
+        "scenario-1-step-69.png",
+        "scenario-1-step-70.png",
+        "scenario-1-step-71.png",
+        "scenario-1-step-72.png",
+        "scenario-1-step-73.png",
+        "scenario-1-step-74.png",
+        "scenario-1-step-75.png",
+        "scenario-1-step-76.png",
+        "scenario-1-step-77.png",
+        "scenario-1-step-78.png",
+        "scenario-1-step-79.png",
+        "scenario-1-step-80.png",
+        "scenario-1-step-81.png",
+        "scenario-1-step-82.png",
+        "scenario-1-step-83.png",
+        "scenario-1-step-84.png",
+        "scenario-1-step-85.png",
+        "scenario-1-step-86.png"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "jira-regression-lab",
+      "id": "3c05fe67bde7a65accbca63e6364efaa05c5c47643260d04846369e53ad84ac7",
+      "profileRevision": "6c444add2a9f7dbff7cdf9ede9d6dc59183738465ff71c09e9e8ca92f5b43a2d",
+      "sourceIssueKey": "AA-109",
+      "scenarioId": "AA-109:jira:3",
+      "jobId": "0cae7a28-25ab-4c0b-9bff-01cd8013546a",
+      "validatedAt": "2026-10-17T16:53:32.651Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "Personal"
+        },
+        {
+          "action": "fill",
+          "field": "Cédula",
+          "dataRef": "cedula"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesión"
+        },
+        {
+          "action": "click",
+          "field": "el código por SMS"
+        },
+        {
+          "action": "fill",
+          "field": "Código",
+          "dataRef": "codigo_sms"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "click",
+          "field": "Solicitar préstamo"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de documento",
+          "dataRef": "tipo_documento"
+        },
+        {
+          "action": "fill",
+          "field": "Nombres",
+          "dataRef": "nombres"
+        },
+        {
+          "action": "fill",
+          "field": "Apellidos",
+          "dataRef": "apellidos"
+        },
+        {
+          "action": "fill",
+          "field": "Fecha de nacimiento",
+          "dataRef": "fecha_nacimiento"
+        },
+        {
+          "action": "select",
+          "field": "Estado civil",
+          "dataRef": "estado_civil"
+        },
+        {
+          "action": "fill",
+          "field": "Personas dependientes",
+          "dataRef": "dependientes"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png",
+        "scenario-1-step-13.png",
+        "scenario-1-step-14.png",
+        "scenario-1-step-15.png",
+        "scenario-1-step-16.png",
+        "scenario-1-step-17.png",
+        "scenario-1-step-18.png"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "jira-regression-lab",
+      "id": "079b04dc0e207a4dbd04b5e3f77a83d1dd72cf16b9540f598a22b214b92a4452",
+      "profileRevision": "6c444add2a9f7dbff7cdf9ede9d6dc59183738465ff71c09e9e8ca92f5b43a2d",
+      "sourceIssueKey": "AA-109",
+      "scenarioId": "AA-109:jira:5",
+      "jobId": "29c438a1-2449-44a4-97b9-99ed3b760e08",
+      "validatedAt": "2026-10-17T18:41:44.729Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "Personal"
+        },
+        {
+          "action": "fill",
+          "field": "Cédula",
+          "dataRef": "cedula"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesión"
+        },
+        {
+          "action": "click",
+          "field": "el código por SMS"
+        },
+        {
+          "action": "fill",
+          "field": "Código SMS",
+          "dataRef": "codigo_sms"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "click",
+          "field": "Solicitar préstamo"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de documento",
+          "dataRef": "tipo_documento"
+        },
+        {
+          "action": "fill",
+          "field": "Número de documento",
+          "dataRef": "numero_documento"
+        },
+        {
+          "action": "fill",
+          "field": "Nombres",
+          "dataRef": "nombres"
+        },
+        {
+          "action": "fill",
+          "field": "Apellidos",
+          "dataRef": "apellidos"
+        },
+        {
+          "action": "fill",
+          "field": "Fecha de nacimiento",
+          "dataRef": "fecha_nacimiento"
+        },
+        {
+          "action": "select",
+          "field": "Estado civil",
+          "dataRef": "estado_civil"
+        },
+        {
+          "action": "fill",
+          "field": "Personas dependientes",
+          "dataRef": "personas_dependientes"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "fill",
+          "field": "Correo electrónico",
+          "dataRef": "correo_electronico"
+        },
+        {
+          "action": "fill",
+          "field": "Teléfono móvil",
+          "dataRef": "telefono_movil"
+        },
+        {
+          "action": "fill",
+          "field": "Teléfono alternativo",
+          "dataRef": "telefono_alternativo"
+        },
+        {
+          "action": "select",
+          "field": "Provincia",
+          "dataRef": "provincia"
+        },
+        {
+          "action": "select",
+          "field": "Municipio",
+          "dataRef": "municipio"
+        },
+        {
+          "action": "fill",
+          "field": "Sector o barrio",
+          "dataRef": "sector_barrio"
+        },
+        {
+          "action": "fill",
+          "field": "Dirección residencial",
+          "dataRef": "direccion_residencial"
+        },
+        {
+          "action": "select",
+          "field": "Tiempo en la dirección",
+          "dataRef": "tiempo_direccion"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "select",
+          "field": "Situación laboral",
+          "dataRef": "situacion_laboral"
+        },
+        {
+          "action": "fill",
+          "field": "Nombre de empleador o negocio",
+          "dataRef": "empleador"
+        },
+        {
+          "action": "fill",
+          "field": "Cargo u ocupación",
+          "dataRef": "cargo"
+        },
+        {
+          "action": "select",
+          "field": "Sector económico",
+          "dataRef": "sector_economico"
+        },
+        {
+          "action": "fill",
+          "field": "Fecha de inicio laboral",
+          "dataRef": "fecha_inicio_laboral"
+        },
+        {
+          "action": "fill",
+          "field": "Teléfono laboral",
+          "dataRef": "telefono_laboral"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de contrato",
+          "dataRef": "tipo_contrato"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "fill",
+          "field": "Ingreso mensual principal",
+          "dataRef": "ingreso_principal"
+        },
+        {
+          "action": "fill",
+          "field": "Otros ingresos mensuales",
+          "dataRef": "otros_ingresos"
+        },
+        {
+          "action": "fill",
+          "field": "Origen de otros ingresos",
+          "dataRef": "origen_otros_ingresos"
+        },
+        {
+          "action": "select",
+          "field": "Tipo",
+          "dataRef": "tipo_ingreso_primero"
+        },
+        {
+          "action": "fill",
+          "field": "Importe mensual",
+          "dataRef": "importe_ingreso_primero"
+        },
+        {
+          "action": "select",
+          "field": "Frecuencia",
+          "dataRef": "frecuencia_ingreso_primero"
+        },
+        {
+          "action": "click",
+          "field": "Agregar ingreso"
+        },
+        {
+          "action": "select",
+          "field": "Tipo",
+          "dataRef": "tipo_ingreso_agregado"
+        },
+        {
+          "action": "select",
+          "field": "Frecuencia",
+          "dataRef": "frecuencia_ingreso_agregado"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "fill",
+          "field": "Importe mensual",
+          "dataRef": "importe_ingreso_agregado_cero"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png",
+        "scenario-1-step-13.png",
+        "scenario-1-step-14.png",
+        "scenario-1-step-15.png",
+        "scenario-1-step-16.png",
+        "scenario-1-step-17.png",
+        "scenario-1-step-18.png",
+        "scenario-1-step-19.png",
+        "scenario-1-step-20.png",
+        "scenario-1-step-21.png",
+        "scenario-1-step-22.png",
+        "scenario-1-step-23.png",
+        "scenario-1-step-24.png",
+        "scenario-1-step-25.png",
+        "scenario-1-step-26.png",
+        "scenario-1-step-27.png",
+        "scenario-1-step-28.png",
+        "scenario-1-step-29.png",
+        "scenario-1-step-30.png",
+        "scenario-1-step-31.png",
+        "scenario-1-step-32.png",
+        "scenario-1-step-33.png",
+        "scenario-1-step-34.png",
+        "scenario-1-step-35.png",
+        "scenario-1-step-36.png",
+        "scenario-1-step-37.png",
+        "scenario-1-step-38.png",
+        "scenario-1-step-39.png",
+        "scenario-1-step-40.png",
+        "scenario-1-step-41.png",
+        "scenario-1-step-42.png",
+        "scenario-1-step-43.png",
+        "scenario-1-step-44.png",
+        "scenario-1-step-45.png",
+        "scenario-1-step-46.png",
+        "scenario-1-step-47.png",
+        "scenario-1-step-49.png",
+        "scenario-1-step-50.png",
+        "scenario-1-step-51.png"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "jira-regression-lab",
+      "id": "08468aa90f1be6c616ba2d8211ffbdb9c46087f592a500c3b4f8a2effab4879a",
+      "profileRevision": "6c444add2a9f7dbff7cdf9ede9d6dc59183738465ff71c09e9e8ca92f5b43a2d",
+      "sourceIssueKey": "AA-109",
+      "scenarioId": "AA-109:jira:6",
+      "jobId": "44c50608-d92d-4ff6-949b-a41ee5737f0d",
+      "validatedAt": "2026-10-17T18:48:27.964Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "Personal"
+        },
+        {
+          "action": "fill",
+          "field": "Cédula",
+          "dataRef": "cedula"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesión"
+        },
+        {
+          "action": "click",
+          "field": "el código por SMS"
+        },
+        {
+          "action": "fill",
+          "field": "Código SMS",
+          "dataRef": "codigo_sms"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "click",
+          "field": "Solicitar préstamo"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de documento",
+          "dataRef": "tipo_documento"
+        },
+        {
+          "action": "fill",
+          "field": "Número de documento",
+          "dataRef": "numero_documento"
+        },
+        {
+          "action": "fill",
+          "field": "Nombres",
+          "dataRef": "nombres"
+        },
+        {
+          "action": "fill",
+          "field": "Apellidos",
+          "dataRef": "apellidos"
+        },
+        {
+          "action": "fill",
+          "field": "Fecha de nacimiento",
+          "dataRef": "fecha_nacimiento"
+        },
+        {
+          "action": "select",
+          "field": "Estado civil",
+          "dataRef": "estado_civil"
+        },
+        {
+          "action": "fill",
+          "field": "Personas dependientes",
+          "dataRef": "personas_dependientes"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "fill",
+          "field": "Correo electrónico",
+          "dataRef": "correo_electronico"
+        },
+        {
+          "action": "fill",
+          "field": "Teléfono móvil",
+          "dataRef": "telefono_movil"
+        },
+        {
+          "action": "fill",
+          "field": "Teléfono alternativo",
+          "dataRef": "telefono_alternativo"
+        },
+        {
+          "action": "select",
+          "field": "Provincia",
+          "dataRef": "provincia"
+        },
+        {
+          "action": "select",
+          "field": "Municipio",
+          "dataRef": "municipio"
+        },
+        {
+          "action": "fill",
+          "field": "Sector o barrio",
+          "dataRef": "sector_barrio"
+        },
+        {
+          "action": "fill",
+          "field": "Dirección residencial",
+          "dataRef": "direccion_residencial"
+        },
+        {
+          "action": "select",
+          "field": "Tiempo en la dirección",
+          "dataRef": "tiempo_direccion"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "select",
+          "field": "Situación laboral",
+          "dataRef": "situacion_laboral"
+        },
+        {
+          "action": "fill",
+          "field": "Nombre de empleador o negocio",
+          "dataRef": "empleador"
+        },
+        {
+          "action": "fill",
+          "field": "Cargo u ocupación",
+          "dataRef": "cargo"
+        },
+        {
+          "action": "select",
+          "field": "Sector económico",
+          "dataRef": "sector_economico"
+        },
+        {
+          "action": "fill",
+          "field": "Fecha de inicio laboral",
+          "dataRef": "fecha_inicio_laboral"
+        },
+        {
+          "action": "fill",
+          "field": "Teléfono laboral",
+          "dataRef": "telefono_laboral"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de contrato",
+          "dataRef": "tipo_contrato"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "fill",
+          "field": "Ingreso mensual principal",
+          "dataRef": "ingreso_principal"
+        },
+        {
+          "action": "fill",
+          "field": "Otros ingresos mensuales",
+          "dataRef": "otros_ingresos"
+        },
+        {
+          "action": "fill",
+          "field": "Origen de otros ingresos",
+          "dataRef": "origen_otros_ingresos"
+        },
+        {
+          "action": "select",
+          "field": "Tipo",
+          "dataRef": "tipo_ingreso"
+        },
+        {
+          "action": "fill",
+          "field": "Importe mensual",
+          "dataRef": "importe_ingreso"
+        },
+        {
+          "action": "select",
+          "field": "Frecuencia",
+          "dataRef": "frecuencia_ingreso"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "fill",
+          "field": "Gastos mensuales del hogar",
+          "dataRef": "gastos_hogar"
+        },
+        {
+          "action": "fill",
+          "field": "Cuotas de préstamos vigentes",
+          "dataRef": "cuotas_prestamos"
+        },
+        {
+          "action": "fill",
+          "field": "Gasto mensual de vivienda",
+          "dataRef": "gasto_vivienda"
+        },
+        {
+          "action": "select",
+          "field": "Día preferido de pago",
+          "dataRef": "dia_pago"
+        },
+        {
+          "action": "select",
+          "field": "Tipo",
+          "dataRef": "tipo_compromiso_primero"
+        },
+        {
+          "action": "fill",
+          "field": "Importe",
+          "dataRef": "importe_compromiso_primero"
+        },
+        {
+          "action": "select",
+          "field": "Frecuencia",
+          "dataRef": "frecuencia_compromiso_primero"
+        },
+        {
+          "action": "click",
+          "field": "Agregar compromiso"
+        },
+        {
+          "action": "select",
+          "field": "Tipo",
+          "dataRef": "tipo_compromiso_agregado"
+        },
+        {
+          "action": "select",
+          "field": "Frecuencia",
+          "dataRef": "frecuencia_compromiso_agregado"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png",
+        "scenario-1-step-13.png",
+        "scenario-1-step-14.png",
+        "scenario-1-step-15.png",
+        "scenario-1-step-16.png",
+        "scenario-1-step-17.png",
+        "scenario-1-step-18.png",
+        "scenario-1-step-19.png",
+        "scenario-1-step-20.png",
+        "scenario-1-step-21.png",
+        "scenario-1-step-22.png",
+        "scenario-1-step-23.png",
+        "scenario-1-step-24.png",
+        "scenario-1-step-25.png",
+        "scenario-1-step-26.png",
+        "scenario-1-step-27.png",
+        "scenario-1-step-28.png",
+        "scenario-1-step-29.png",
+        "scenario-1-step-30.png",
+        "scenario-1-step-31.png",
+        "scenario-1-step-32.png",
+        "scenario-1-step-33.png",
+        "scenario-1-step-34.png",
+        "scenario-1-step-35.png",
+        "scenario-1-step-36.png",
+        "scenario-1-step-37.png",
+        "scenario-1-step-38.png",
+        "scenario-1-step-39.png",
+        "scenario-1-step-40.png",
+        "scenario-1-step-41.png",
+        "scenario-1-step-42.png",
+        "scenario-1-step-43.png",
+        "scenario-1-step-44.png",
+        "scenario-1-step-45.png",
+        "scenario-1-step-46.png",
+        "scenario-1-step-47.png",
+        "scenario-1-step-48.png",
+        "scenario-1-step-49.png",
+        "scenario-1-step-50.png",
+        "scenario-1-step-51.png",
+        "scenario-1-step-52.png",
+        "scenario-1-step-53.png",
+        "scenario-1-step-54.png"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "jira-regression-lab",
+      "id": "0a07f0d0af5255d2857e68fffd6a60cdd23ecad2babbc8e6b5f7e06aff20d0b4",
+      "profileRevision": "6c444add2a9f7dbff7cdf9ede9d6dc59183738465ff71c09e9e8ca92f5b43a2d",
+      "sourceIssueKey": "AA-111",
+      "scenarioId": "AA-111:jira:4",
+      "jobId": "1a07af27-7d28-490f-9b3e-e34fc5af3b4c",
+      "validatedAt": "2026-10-19T03:51:09.793Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "Personal"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesión"
+        },
+        {
+          "action": "fill",
+          "field": "Cédula",
+          "dataRef": "cedula"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesión"
+        },
+        {
+          "action": "click",
+          "field": "el código por SMS"
+        },
+        {
+          "action": "fill",
+          "field": "Código de acceso",
+          "dataRef": "codigo_acceso"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "click",
+          "field": "Movimientos"
+        },
+        {
+          "action": "select",
+          "field": "Cuenta",
+          "dataRef": "cuenta"
+        },
+        {
+          "action": "fill",
+          "field": "Desde",
+          "dataRef": "desde"
+        },
+        {
+          "action": "fill",
+          "field": "Hasta",
+          "dataRef": "hasta"
+        },
+        {
+          "action": "select",
+          "field": "Estado",
+          "dataRef": "estado"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de movimiento",
+          "dataRef": "tipo_movimiento"
+        },
+        {
+          "action": "select",
+          "field": "Monto mínimo",
+          "dataRef": "monto_minimo"
+        },
+        {
+          "action": "click",
+          "field": "Aplicar filtros"
+        },
+        {
+          "action": "click",
+          "field": "Exportar CSV"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png",
+        "scenario-1-step-13.png",
+        "scenario-1-step-14.png",
+        "scenario-1-step-15.png",
+        "scenario-1-step-16.png",
+        "scenario-1-step-17.png",
+        "scenario-1-step-18.png",
+        "scenario-1-step-19.png",
+        "scenario-1-step-20.png",
+        "scenario-1-step-21.png",
+        "scenario-1-step-22.png",
+        "scenario-1-step-23.png",
+        "scenario-1-step-24.png",
+        "scenario-1-step-25.png",
+        "scenario-1-step-26.png",
+        "scenario-1-step-27.png",
+        "scenario-1-step-28.png",
+        "scenario-1-step-29.png",
+        "scenario-1-step-30.png",
+        "scenario-1-step-31.png",
+        "scenario-1-step-32.png",
+        "scenario-1-step-33.png"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "jira-regression-lab",
+      "id": "c9ffcff5398f49c19877af62322fa0981ba88b2591f1edf4f47d8851afdeafdc",
+      "profileRevision": "6c444add2a9f7dbff7cdf9ede9d6dc59183738465ff71c09e9e8ca92f5b43a2d",
+      "sourceIssueKey": "AA-111",
+      "scenarioId": "AA-111:jira:1",
+      "jobId": "9125e853-7443-4700-b9d1-92bcb3740545",
+      "validatedAt": "2026-10-19T03:53:18.819Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "Personal"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesión"
+        },
+        {
+          "action": "fill",
+          "field": "Cédula",
+          "dataRef": "cedula"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesión"
+        },
+        {
+          "action": "click",
+          "field": "el código por SMS"
+        },
+        {
+          "action": "fill",
+          "field": "Código de acceso",
+          "dataRef": "codigo_acceso"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "click",
+          "field": "Movimientos"
+        },
+        {
+          "action": "select",
+          "field": "Cuenta",
+          "dataRef": "cuenta"
+        },
+        {
+          "action": "fill",
+          "field": "Desde",
+          "dataRef": "desde"
+        },
+        {
+          "action": "fill",
+          "field": "Hasta",
+          "dataRef": "hasta"
+        },
+        {
+          "action": "select",
+          "field": "Estado",
+          "dataRef": "estado"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de movimiento",
+          "dataRef": "tipo_movimiento"
+        },
+        {
+          "action": "select",
+          "field": "Monto mínimo",
+          "dataRef": "monto_minimo"
+        },
+        {
+          "action": "click",
+          "field": "Aplicar filtros"
+        },
+        {
+          "action": "click",
+          "field": "Exportar CSV"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png",
+        "scenario-1-step-13.png",
+        "scenario-1-step-14.png",
+        "scenario-1-step-15.png",
+        "scenario-1-step-16.png",
+        "scenario-1-step-17.png",
+        "scenario-1-step-18.png",
+        "scenario-1-step-19.png",
+        "scenario-1-step-20.png",
+        "scenario-1-step-21.png",
+        "scenario-1-step-22.png",
+        "scenario-1-step-23.png",
+        "scenario-1-step-24.png",
+        "scenario-1-step-25.png",
+        "scenario-1-step-26.png",
+        "scenario-1-step-27.png",
+        "scenario-1-step-28.png",
+        "scenario-1-step-29.png",
+        "scenario-1-step-30.png",
+        "scenario-1-step-31.png",
+        "scenario-1-step-32.png"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "jira-regression-lab",
+      "id": "413a401a94f02c49315f39e7c657b73d1d62c9769cc9e270e2c8c4b2efd8b1b8",
+      "profileRevision": "6c444add2a9f7dbff7cdf9ede9d6dc59183738465ff71c09e9e8ca92f5b43a2d",
+      "sourceIssueKey": "AA-111",
+      "scenarioId": "AA-111:jira:2",
+      "jobId": "3c7eca4f-289f-49e0-9ece-9a2fd5541fc8",
+      "validatedAt": "2026-10-19T03:55:21.098Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "Personal"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesión"
+        },
+        {
+          "action": "fill",
+          "field": "Cédula",
+          "dataRef": "cedula"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesión"
+        },
+        {
+          "action": "click",
+          "field": "el código por SMS"
+        },
+        {
+          "action": "fill",
+          "field": "Código de acceso",
+          "dataRef": "codigo_acceso"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "click",
+          "field": "Movimientos"
+        },
+        {
+          "action": "select",
+          "field": "Cuenta",
+          "dataRef": "cuenta"
+        },
+        {
+          "action": "fill",
+          "field": "Desde",
+          "dataRef": "desde"
+        },
+        {
+          "action": "fill",
+          "field": "Hasta",
+          "dataRef": "hasta"
+        },
+        {
+          "action": "select",
+          "field": "Estado",
+          "dataRef": "estado"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de movimiento",
+          "dataRef": "tipo_movimiento"
+        },
+        {
+          "action": "select",
+          "field": "Monto mínimo",
+          "dataRef": "monto_minimo"
+        },
+        {
+          "action": "click",
+          "field": "Aplicar filtros"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png",
+        "scenario-1-step-13.png",
+        "scenario-1-step-14.png",
+        "scenario-1-step-15.png",
+        "scenario-1-step-16.png",
+        "scenario-1-step-17.png",
+        "scenario-1-step-18.png",
+        "scenario-1-step-19.png",
+        "scenario-1-step-20.png",
+        "scenario-1-step-21.png",
+        "scenario-1-step-22.png",
+        "scenario-1-step-23.png"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "jira-regression-lab",
+      "id": "43de273894936f222d4fb8562a13d85466209a7c87b741d1da7829d59097dfbe",
+      "profileRevision": "6c444add2a9f7dbff7cdf9ede9d6dc59183738465ff71c09e9e8ca92f5b43a2d",
+      "sourceIssueKey": "AA-111",
+      "scenarioId": "AA-111:jira:3",
+      "jobId": "210f5477-b0d5-4f69-9e71-c1df1e603600",
+      "validatedAt": "2026-10-19T03:57:03.714Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "Personal"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesión"
+        },
+        {
+          "action": "fill",
+          "field": "Cédula",
+          "dataRef": "cedula"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesión"
+        },
+        {
+          "action": "click",
+          "field": "el código por SMS"
+        },
+        {
+          "action": "fill",
+          "field": "Código de acceso",
+          "dataRef": "codigo_acceso"
+        },
+        {
+          "action": "click",
+          "field": "Continuar"
+        },
+        {
+          "action": "click",
+          "field": "Movimientos"
+        },
+        {
+          "action": "select",
+          "field": "Cuenta",
+          "dataRef": "cuenta"
+        },
+        {
+          "action": "click",
+          "field": "Limpiar filtros"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png",
+        "scenario-1-step-13.png",
+        "scenario-1-step-14.png",
+        "scenario-1-step-15.png",
+        "scenario-1-step-16.png",
+        "scenario-1-step-17.png",
+        "scenario-1-step-18.png"
+      ]
+    }
+  ]
+}

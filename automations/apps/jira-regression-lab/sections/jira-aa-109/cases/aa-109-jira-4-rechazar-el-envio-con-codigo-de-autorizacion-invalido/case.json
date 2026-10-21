@@ -1,0 +1,9 @@
+{
+  "id": "aa-109-jira-4-rechazar-el-envio-con-codigo-de-autorizacion-invalido",
+  "externalId": "AA-109:jira:4",
+  "title": "Rechazar el envío con código de autorización inválido",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-17T16:43:35.185Z"
+}

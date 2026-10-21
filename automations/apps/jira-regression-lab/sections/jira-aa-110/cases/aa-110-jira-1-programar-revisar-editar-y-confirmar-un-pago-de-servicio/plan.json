@@ -1,0 +1,1334 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-16T20:09:23.756Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "AA-110:jira:1",
+    "title": "Programar, revisar, editar y confirmar un pago de servicio"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Presionar \"Empresarial\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Empresarial",
+        "exact": true
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [rnc]",
+      "valueKey": "rnc",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-rnc\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "fill",
+      "description": "fill [usuario]",
+      "valueKey": "usuario",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-user\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "fill",
+      "description": "fill [contrasena]",
+      "valueKey": "contrasena",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-password\"]"
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"Iniciar sesión\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Iniciar sesión",
+        "exact": true
+      }
+    },
+    {
+      "index": 8,
+      "action": "click",
+      "description": "Solicitar el código por SMS.",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Solicitar código por SMS",
+        "exact": true
+      }
+    },
+    {
+      "index": 9,
+      "action": "fill",
+      "description": "fill [codigo_acceso_sms]",
+      "valueKey": "codigo_acceso_sms",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-otp\"]"
+      }
+    },
+    {
+      "index": 10,
+      "action": "click",
+      "description": "Presionar \"Continuar\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Continuar",
+        "exact": true
+      }
+    },
+    {
+      "index": 11,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Resumen de productos\"",
+      "target": {
+        "strategy": "text",
+        "value": "Resumen de productos"
+      }
+    },
+    {
+      "index": 12,
+      "action": "click",
+      "description": "Presionar \"Pagos\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "▣ Pagos",
+        "exact": true
+      }
+    },
+    {
+      "index": 13,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Cargando información segura\"",
+      "target": {
+        "strategy": "text",
+        "value": "Cargando información segura"
+      }
+    },
+    {
+      "index": 14,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Nuevo pago\"",
+      "target": {
+        "strategy": "text",
+        "value": "Nuevo pago"
+      }
+    },
+    {
+      "index": 15,
+      "action": "select",
+      "description": "select [proveedor]",
+      "valueKey": "proveedor",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"provider\"]"
+      }
+    },
+    {
+      "index": 16,
+      "action": "fill",
+      "description": "fill [numero_contrato]",
+      "valueKey": "numero_contrato",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"contract-number\"]"
+      }
+    },
+    {
+      "index": 17,
+      "action": "select",
+      "description": "select [cuenta_debitar]",
+      "valueKey": "cuenta_debitar",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"payment-account\"]"
+      }
+    },
+    {
+      "index": 18,
+      "action": "fill",
+      "description": "fill [monto]",
+      "valueKey": "monto",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"payment-amount\"]"
+      }
+    },
+    {
+      "index": 19,
+      "action": "fill",
+      "description": "fill [fecha_pago]",
+      "valueKey": "fecha_pago",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"payment-date\"]"
+      }
+    },
+    {
+      "index": 20,
+      "action": "select",
+      "description": "select [frecuencia]",
+      "valueKey": "frecuencia",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"payment-frequency\"]"
+      }
+    },
+    {
+      "index": 21,
+      "action": "click",
+      "description": "Presionar \"Correo electrónico\".",
+      "target": {
+        "strategy": "css",
+        "value": "label:visible:text-is(\"Correo electrónico\")"
+      }
+    },
+    {
+      "index": 22,
+      "action": "click",
+      "description": "Presionar \"SMS\".",
+      "target": {
+        "strategy": "css",
+        "value": "label:visible:text-is(\"SMS\")"
+      }
+    },
+    {
+      "index": 23,
+      "action": "click",
+      "description": "Presionar \"Push\".",
+      "target": {
+        "strategy": "css",
+        "value": "label:visible:text-is(\"Push\")"
+      }
+    },
+    {
+      "index": 24,
+      "action": "click",
+      "description": "Presionar \"Revisar pago\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Revisar pago",
+        "exact": true
+      }
+    },
+    {
+      "index": 25,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Confirmación de pago\"",
+      "target": {
+        "strategy": "text",
+        "value": "Confirmación de pago"
+      }
+    },
+    {
+      "index": 26,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Proveedor\"",
+      "target": {
+        "strategy": "text",
+        "value": "Proveedor"
+      }
+    },
+    {
+      "index": 27,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Contrato\"",
+      "target": {
+        "strategy": "text",
+        "value": "Contrato"
+      }
+    },
+    {
+      "index": 28,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Cuenta a debitar\"",
+      "target": {
+        "strategy": "text",
+        "value": "Cuenta a debitar"
+      }
+    },
+    {
+      "index": 29,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Monto\"",
+      "target": {
+        "strategy": "text",
+        "value": "Monto"
+      }
+    },
+    {
+      "index": 30,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Fecha\"",
+      "target": {
+        "strategy": "text",
+        "value": "Fecha"
+      }
+    },
+    {
+      "index": 31,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Frecuencia\"",
+      "target": {
+        "strategy": "text",
+        "value": "Frecuencia"
+      }
+    },
+    {
+      "index": 32,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Avisar al completar\"",
+      "target": {
+        "strategy": "text",
+        "value": "Avisar al completar"
+      }
+    },
+    {
+      "index": 33,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Correo electrónico\"",
+      "target": {
+        "strategy": "text",
+        "value": "Correo electrónico"
+      }
+    },
+    {
+      "index": 34,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"SMS\"",
+      "target": {
+        "strategy": "text",
+        "value": "SMS"
+      }
+    },
+    {
+      "index": 35,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Push\"",
+      "target": {
+        "strategy": "text",
+        "value": "Push"
+      }
+    },
+    {
+      "index": 36,
+      "action": "click",
+      "description": "Presionar \"Editar\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Editar",
+        "exact": true
+      }
+    },
+    {
+      "index": 37,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Nuevo pago\"",
+      "target": {
+        "strategy": "text",
+        "value": "Nuevo pago"
+      }
+    },
+    {
+      "index": 38,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Proveedor\"",
+      "target": {
+        "strategy": "text",
+        "value": "Proveedor"
+      }
+    },
+    {
+      "index": 39,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Número de contrato\"",
+      "target": {
+        "strategy": "text",
+        "value": "Número de contrato"
+      }
+    },
+    {
+      "index": 40,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Cuenta a debitar\"",
+      "target": {
+        "strategy": "text",
+        "value": "Cuenta a debitar"
+      }
+    },
+    {
+      "index": 41,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Monto\"",
+      "target": {
+        "strategy": "text",
+        "value": "Monto"
+      }
+    },
+    {
+      "index": 42,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Fecha de pago\"",
+      "target": {
+        "strategy": "text",
+        "value": "Fecha de pago"
+      }
+    },
+    {
+      "index": 43,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Frecuencia\"",
+      "target": {
+        "strategy": "text",
+        "value": "Frecuencia"
+      }
+    },
+    {
+      "index": 44,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Correo electrónico\"",
+      "target": {
+        "strategy": "text",
+        "value": "Correo electrónico"
+      }
+    },
+    {
+      "index": 45,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"SMS\"",
+      "target": {
+        "strategy": "text",
+        "value": "SMS"
+      }
+    },
+    {
+      "index": 46,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Push\"",
+      "target": {
+        "strategy": "text",
+        "value": "Push"
+      }
+    },
+    {
+      "index": 47,
+      "action": "click",
+      "description": "Presionar \"Revisar pago\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Revisar pago",
+        "exact": true
+      }
+    },
+    {
+      "index": 48,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Confirmación de pago\"",
+      "target": {
+        "strategy": "text",
+        "value": "Confirmación de pago"
+      }
+    },
+    {
+      "index": 49,
+      "action": "click",
+      "description": "Presionar \"Confirmar pago\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Confirmar pago",
+        "exact": true
+      }
+    },
+    {
+      "index": 50,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Pago de prueba completado correctamente\"",
+      "target": {
+        "strategy": "text",
+        "value": "Pago de prueba completado correctamente"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "rnc",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "usuario",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "codigo_acceso_sms",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "proveedor",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "numero_contrato",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "cuenta_debitar",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "monto",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "fecha_pago",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "frecuencia",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Programar, revisar, editar y confirmar un pago de servicio",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Empresarial"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "rnc",
+        "technicalTargetRefs": [
+          "css:[id=\"login-rnc\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "fill",
+        "valueKey": "usuario",
+        "technicalTargetRefs": [
+          "css:[id=\"login-user\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "fill",
+        "valueKey": "contrasena",
+        "technicalTargetRefs": [
+          "css:[id=\"login-password\"]"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Solicitar código por SMS"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "fill",
+        "valueKey": "codigo_acceso_sms",
+        "technicalTargetRefs": [
+          "css:[id=\"login-otp\"]"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ]
+      },
+      {
+        "index": 11,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Resumen de productos\"",
+        "technicalTargetRefs": [
+          "text:Resumen de productos"
+        ]
+      },
+      {
+        "index": 12,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|▣ Pagos"
+        ]
+      },
+      {
+        "index": 13,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Cargando información segura\"",
+        "technicalTargetRefs": [
+          "text:Cargando información segura"
+        ]
+      },
+      {
+        "index": 14,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Nuevo pago\"",
+        "technicalTargetRefs": [
+          "text:Nuevo pago"
+        ]
+      },
+      {
+        "index": 15,
+        "action": "select",
+        "valueKey": "proveedor",
+        "technicalTargetRefs": [
+          "css:[id=\"provider\"]"
+        ]
+      },
+      {
+        "index": 16,
+        "action": "fill",
+        "valueKey": "numero_contrato",
+        "technicalTargetRefs": [
+          "css:[id=\"contract-number\"]"
+        ]
+      },
+      {
+        "index": 17,
+        "action": "select",
+        "valueKey": "cuenta_debitar",
+        "technicalTargetRefs": [
+          "css:[id=\"payment-account\"]"
+        ]
+      },
+      {
+        "index": 18,
+        "action": "fill",
+        "valueKey": "monto",
+        "technicalTargetRefs": [
+          "css:[id=\"payment-amount\"]"
+        ]
+      },
+      {
+        "index": 19,
+        "action": "fill",
+        "valueKey": "fecha_pago",
+        "technicalTargetRefs": [
+          "css:[id=\"payment-date\"]"
+        ]
+      },
+      {
+        "index": 20,
+        "action": "select",
+        "valueKey": "frecuencia",
+        "technicalTargetRefs": [
+          "css:[id=\"payment-frequency\"]"
+        ]
+      },
+      {
+        "index": 21,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:label:visible:text-is(\"Correo electrónico\")"
+        ]
+      },
+      {
+        "index": 22,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:label:visible:text-is(\"SMS\")"
+        ]
+      },
+      {
+        "index": 23,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:label:visible:text-is(\"Push\")"
+        ]
+      },
+      {
+        "index": 24,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Revisar pago"
+        ]
+      },
+      {
+        "index": 25,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Confirmación de pago\"",
+        "technicalTargetRefs": [
+          "text:Confirmación de pago"
+        ]
+      },
+      {
+        "index": 26,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Proveedor\"",
+        "technicalTargetRefs": [
+          "text:Proveedor"
+        ]
+      },
+      {
+        "index": 27,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Contrato\"",
+        "technicalTargetRefs": [
+          "text:Contrato"
+        ]
+      },
+      {
+        "index": 28,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Cuenta a debitar\"",
+        "technicalTargetRefs": [
+          "text:Cuenta a debitar"
+        ]
+      },
+      {
+        "index": 29,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Monto\"",
+        "technicalTargetRefs": [
+          "text:Monto"
+        ]
+      },
+      {
+        "index": 30,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Fecha\"",
+        "technicalTargetRefs": [
+          "text:Fecha"
+        ]
+      },
+      {
+        "index": 31,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Frecuencia\"",
+        "technicalTargetRefs": [
+          "text:Frecuencia"
+        ]
+      },
+      {
+        "index": 32,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Avisar al completar\"",
+        "technicalTargetRefs": [
+          "text:Avisar al completar"
+        ]
+      },
+      {
+        "index": 33,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Correo electrónico\"",
+        "technicalTargetRefs": [
+          "text:Correo electrónico"
+        ]
+      },
+      {
+        "index": 34,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"SMS\"",
+        "technicalTargetRefs": [
+          "text:SMS"
+        ]
+      },
+      {
+        "index": 35,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Push\"",
+        "technicalTargetRefs": [
+          "text:Push"
+        ]
+      },
+      {
+        "index": 36,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Editar"
+        ]
+      },
+      {
+        "index": 37,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Nuevo pago\"",
+        "technicalTargetRefs": [
+          "text:Nuevo pago"
+        ]
+      },
+      {
+        "index": 38,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Proveedor\"",
+        "technicalTargetRefs": [
+          "text:Proveedor"
+        ]
+      },
+      {
+        "index": 39,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Número de contrato\"",
+        "technicalTargetRefs": [
+          "text:Número de contrato"
+        ]
+      },
+      {
+        "index": 40,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Cuenta a debitar\"",
+        "technicalTargetRefs": [
+          "text:Cuenta a debitar"
+        ]
+      },
+      {
+        "index": 41,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Monto\"",
+        "technicalTargetRefs": [
+          "text:Monto"
+        ]
+      },
+      {
+        "index": 42,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Fecha de pago\"",
+        "technicalTargetRefs": [
+          "text:Fecha de pago"
+        ]
+      },
+      {
+        "index": 43,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Frecuencia\"",
+        "technicalTargetRefs": [
+          "text:Frecuencia"
+        ]
+      },
+      {
+        "index": 44,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Correo electrónico\"",
+        "technicalTargetRefs": [
+          "text:Correo electrónico"
+        ]
+      },
+      {
+        "index": 45,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"SMS\"",
+        "technicalTargetRefs": [
+          "text:SMS"
+        ]
+      },
+      {
+        "index": 46,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Push\"",
+        "technicalTargetRefs": [
+          "text:Push"
+        ]
+      },
+      {
+        "index": 47,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Revisar pago"
+        ]
+      },
+      {
+        "index": 48,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Confirmación de pago\"",
+        "technicalTargetRefs": [
+          "text:Confirmación de pago"
+        ]
+      },
+      {
+        "index": 49,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Confirmar pago"
+        ]
+      },
+      {
+        "index": 50,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Pago de prueba completado correctamente\"",
+        "technicalTargetRefs": [
+          "text:Pago de prueba completado correctamente"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-11",
+        "requirement": "Validar que se muestre \"Resumen de productos\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 11,
+        "target": "Resumen de productos",
+        "evidence": [
+          "live-step-11"
+        ],
+        "details": {
+          "observedText": "Resumen de productos"
+        }
+      },
+      {
+        "id": "jira-oracle-13",
+        "requirement": "Validar que se muestre \"Cargando información segura\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 13,
+        "target": "Cargando información segura…\nEspera mientras el portal actualiza los datos.",
+        "evidence": [
+          "live-step-13"
+        ],
+        "details": {
+          "observedText": "Cargando información segura…\nEspera mientras el portal actualiza los datos."
+        }
+      },
+      {
+        "id": "jira-oracle-14",
+        "requirement": "Validar que se muestre \"Nuevo pago\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 14,
+        "target": "Nuevo pago",
+        "evidence": [
+          "live-step-14"
+        ],
+        "details": {
+          "observedText": "Nuevo pago"
+        }
+      },
+      {
+        "id": "jira-oracle-25",
+        "requirement": "Validar que se muestre \"Confirmación de pago\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 25,
+        "target": "Confirmación de pago",
+        "evidence": [
+          "live-step-25"
+        ],
+        "details": {
+          "observedText": "Confirmación de pago"
+        }
+      },
+      {
+        "id": "jira-oracle-26",
+        "requirement": "Validar que se muestre \"Proveedor\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 26,
+        "target": "PAGOS\nConfirmación de pago\n\nRevisa el proveedor, cuenta y calendario antes de confirmar.\n\nProveedor\nInternet · FibraNet\nContrato\n12345\nCuenta a debitar\nCuenta Corriente\nMonto\nRD$10.00\nFecha\n2026-10-23\nFrecuencia\nPago único\nAvisar al completar\nCorreo electrónico, SMS, Push\nEditar\nConfirmar pago",
+        "evidence": [
+          "live-step-26"
+        ],
+        "details": {
+          "observedText": "PAGOS\nConfirmación de pago\n\nRevisa el proveedor, cuenta y calendario antes de confirmar.\n\nProveedor\nInternet · FibraNet\nContrato\n12345\nCuenta a debitar\nCuenta Corriente\nMonto\nRD$10.00\nFecha\n2026-10-23\nFrecuencia\nPago único\nAvisar al completar\nCorreo electrónico, SMS, Push\nEditar\nConfirmar pago"
+        }
+      },
+      {
+        "id": "jira-oracle-27",
+        "requirement": "Validar que se muestre \"Contrato\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 27,
+        "target": "PAGOS\nConfirmación de pago\n\nRevisa el proveedor, cuenta y calendario antes de confirmar.\n\nProveedor\nInternet · FibraNet\nContrato\n12345\nCuenta a debitar\nCuenta Corriente\nMonto\nRD$10.00\nFecha\n2026-10-23\nFrecuencia\nPago único\nAvisar al completar\nCorreo electrónico, SMS, Push\nEditar\nConfirmar pago",
+        "evidence": [
+          "live-step-27"
+        ],
+        "details": {
+          "observedText": "PAGOS\nConfirmación de pago\n\nRevisa el proveedor, cuenta y calendario antes de confirmar.\n\nProveedor\nInternet · FibraNet\nContrato\n12345\nCuenta a debitar\nCuenta Corriente\nMonto\nRD$10.00\nFecha\n2026-10-23\nFrecuencia\nPago único\nAvisar al completar\nCorreo electrónico, SMS, Push\nEditar\nConfirmar pago"
+        }
+      },
+      {
+        "id": "jira-oracle-28",
+        "requirement": "Validar que se muestre \"Cuenta a debitar\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 28,
+        "target": "PAGOS\nConfirmación de pago\n\nRevisa el proveedor, cuenta y calendario antes de confirmar.\n\nProveedor\nInternet · FibraNet\nContrato\n12345\nCuenta a debitar\nCuenta Corriente\nMonto\nRD$10.00\nFecha\n2026-10-23\nFrecuencia\nPago único\nAvisar al completar\nCorreo electrónico, SMS, Push\nEditar\nConfirmar pago",
+        "evidence": [
+          "live-step-28"
+        ],
+        "details": {
+          "observedText": "PAGOS\nConfirmación de pago\n\nRevisa el proveedor, cuenta y calendario antes de confirmar.\n\nProveedor\nInternet · FibraNet\nContrato\n12345\nCuenta a debitar\nCuenta Corriente\nMonto\nRD$10.00\nFecha\n2026-10-23\nFrecuencia\nPago único\nAvisar al completar\nCorreo electrónico, SMS, Push\nEditar\nConfirmar pago"
+        }
+      },
+      {
+        "id": "jira-oracle-29",
+        "requirement": "Validar que se muestre \"Monto\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 29,
+        "target": "PAGOS\nConfirmación de pago\n\nRevisa el proveedor, cuenta y calendario antes de confirmar.\n\nProveedor\nInternet · FibraNet\nContrato\n12345\nCuenta a debitar\nCuenta Corriente\nMonto\nRD$10.00\nFecha\n2026-10-23\nFrecuencia\nPago único\nAvisar al completar\nCorreo electrónico, SMS, Push\nEditar\nConfirmar pago",
+        "evidence": [
+          "live-step-29"
+        ],
+        "details": {
+          "observedText": "PAGOS\nConfirmación de pago\n\nRevisa el proveedor, cuenta y calendario antes de confirmar.\n\nProveedor\nInternet · FibraNet\nContrato\n12345\nCuenta a debitar\nCuenta Corriente\nMonto\nRD$10.00\nFecha\n2026-10-23\nFrecuencia\nPago único\nAvisar al completar\nCorreo electrónico, SMS, Push\nEditar\nConfirmar pago"
+        }
+      },
+      {
+        "id": "jira-oracle-30",
+        "requirement": "Validar que se muestre \"Fecha\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 30,
+        "target": "PAGOS\nConfirmación de pago\n\nRevisa el proveedor, cuenta y calendario antes de confirmar.\n\nProveedor\nInternet · FibraNet\nContrato\n12345\nCuenta a debitar\nCuenta Corriente\nMonto\nRD$10.00\nFecha\n2026-10-23\nFrecuencia\nPago único\nAvisar al completar\nCorreo electrónico, SMS, Push\nEditar\nConfirmar pago",
+        "evidence": [
+          "live-step-30"
+        ],
+        "details": {
+          "observedText": "PAGOS\nConfirmación de pago\n\nRevisa el proveedor, cuenta y calendario antes de confirmar.\n\nProveedor\nInternet · FibraNet\nContrato\n12345\nCuenta a debitar\nCuenta Corriente\nMonto\nRD$10.00\nFecha\n2026-10-23\nFrecuencia\nPago único\nAvisar al completar\nCorreo electrónico, SMS, Push\nEditar\nConfirmar pago"
+        }
+      },
+      {
+        "id": "jira-oracle-31",
+        "requirement": "Validar que se muestre \"Frecuencia\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 31,
+        "target": "PAGOS\nConfirmación de pago\n\nRevisa el proveedor, cuenta y calendario antes de confirmar.\n\nProveedor\nInternet · FibraNet\nContrato\n12345\nCuenta a debitar\nCuenta Corriente\nMonto\nRD$10.00\nFecha\n2026-10-23\nFrecuencia\nPago único\nAvisar al completar\nCorreo electrónico, SMS, Push\nEditar\nConfirmar pago",
+        "evidence": [
+          "live-step-31"
+        ],
+        "details": {
+          "observedText": "PAGOS\nConfirmación de pago\n\nRevisa el proveedor, cuenta y calendario antes de confirmar.\n\nProveedor\nInternet · FibraNet\nContrato\n12345\nCuenta a debitar\nCuenta Corriente\nMonto\nRD$10.00\nFecha\n2026-10-23\nFrecuencia\nPago único\nAvisar al completar\nCorreo electrónico, SMS, Push\nEditar\nConfirmar pago"
+        }
+      },
+      {
+        "id": "jira-oracle-32",
+        "requirement": "Validar que se muestre \"Avisar al completar\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 32,
+        "target": "PAGOS\nConfirmación de pago\n\nRevisa el proveedor, cuenta y calendario antes de confirmar.\n\nProveedor\nInternet · FibraNet\nContrato\n12345\nCuenta a debitar\nCuenta Corriente\nMonto\nRD$10.00\nFecha\n2026-10-23\nFrecuencia\nPago único\nAvisar al completar\nCorreo electrónico, SMS, Push\nEditar\nConfirmar pago",
+        "evidence": [
+          "live-step-32"
+        ],
+        "details": {
+          "observedText": "PAGOS\nConfirmación de pago\n\nRevisa el proveedor, cuenta y calendario antes de confirmar.\n\nProveedor\nInternet · FibraNet\nContrato\n12345\nCuenta a debitar\nCuenta Corriente\nMonto\nRD$10.00\nFecha\n2026-10-23\nFrecuencia\nPago único\nAvisar al completar\nCorreo electrónico, SMS, Push\nEditar\nConfirmar pago"
+        }
+      },
+      {
+        "id": "jira-oracle-33",
+        "requirement": "Validar que se muestre \"Correo electrónico\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 33,
+        "target": "PAGOS\nConfirmación de pago\n\nRevisa el proveedor, cuenta y calendario antes de confirmar.\n\nProveedor\nInternet · FibraNet\nContrato\n12345\nCuenta a debitar\nCuenta Corriente\nMonto\nRD$10.00\nFecha\n2026-10-23\nFrecuencia\nPago único\nAvisar al completar\nCorreo electrónico, SMS, Push\nEditar\nConfirmar pago",
+        "evidence": [
+          "live-step-33"
+        ],
+        "details": {
+          "observedText": "PAGOS\nConfirmación de pago\n\nRevisa el proveedor, cuenta y calendario antes de confirmar.\n\nProveedor\nInternet · FibraNet\nContrato\n12345\nCuenta a debitar\nCuenta Corriente\nMonto\nRD$10.00\nFecha\n2026-10-23\nFrecuencia\nPago único\nAvisar al completar\nCorreo electrónico, SMS, Push\nEditar\nConfirmar pago"
+        }
+      },
+      {
+        "id": "jira-oracle-34",
+        "requirement": "Validar que se muestre \"SMS\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 34,
+        "target": "PAGOS\nConfirmación de pago\n\nRevisa el proveedor, cuenta y calendario antes de confirmar.\n\nProveedor\nInternet · FibraNet\nContrato\n12345\nCuenta a debitar\nCuenta Corriente\nMonto\nRD$10.00\nFecha\n2026-10-23\nFrecuencia\nPago único\nAvisar al completar\nCorreo electrónico, SMS, Push\nEditar\nConfirmar pago",
+        "evidence": [
+          "live-step-34"
+        ],
+        "details": {
+          "observedText": "PAGOS\nConfirmación de pago\n\nRevisa el proveedor, cuenta y calendario antes de confirmar.\n\nProveedor\nInternet · FibraNet\nContrato\n12345\nCuenta a debitar\nCuenta Corriente\nMonto\nRD$10.00\nFecha\n2026-10-23\nFrecuencia\nPago único\nAvisar al completar\nCorreo electrónico, SMS, Push\nEditar\nConfirmar pago"
+        }
+      },
+      {
+        "id": "jira-oracle-35",
+        "requirement": "Validar que se muestre \"Push\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 35,
+        "target": "PAGOS\nConfirmación de pago\n\nRevisa el proveedor, cuenta y calendario antes de confirmar.\n\nProveedor\nInternet · FibraNet\nContrato\n12345\nCuenta a debitar\nCuenta Corriente\nMonto\nRD$10.00\nFecha\n2026-10-23\nFrecuencia\nPago único\nAvisar al completar\nCorreo electrónico, SMS, Push\nEditar\nConfirmar pago",
+        "evidence": [
+          "live-step-35"
+        ],
+        "details": {
+          "observedText": "PAGOS\nConfirmación de pago\n\nRevisa el proveedor, cuenta y calendario antes de confirmar.\n\nProveedor\nInternet · FibraNet\nContrato\n12345\nCuenta a debitar\nCuenta Corriente\nMonto\nRD$10.00\nFecha\n2026-10-23\nFrecuencia\nPago único\nAvisar al completar\nCorreo electrónico, SMS, Push\nEditar\nConfirmar pago"
+        }
+      },
+      {
+        "id": "jira-oracle-37",
+        "requirement": "Validar que se muestre \"Nuevo pago\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 37,
+        "target": "Nuevo pago",
+        "evidence": [
+          "live-step-37"
+        ],
+        "details": {
+          "observedText": "Nuevo pago"
+        }
+      },
+      {
+        "id": "jira-oracle-38",
+        "requirement": "Validar que se muestre \"Proveedor\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 38,
+        "target": "PAGOS\nPago de servicios\n\nPaga facturas de forma programada o inmediata.\n\nVer historial\nNuevo pago\nPago de servicios\nProveedor\nInternet · FibraNet\nElectricidad · EDE Norte\nTelefonía · Móvil Plus\nNúmero de contrato\nCuenta a debitar\nCuenta Corriente (DOP)\nCuenta de Ahorros (DOP)\nCuenta Empresarial USD (USD)\nMonto\nFecha de pago\nFrecuencia\nPago único\nSemanal\nMensual\nAvisar al completar\nCorreo electrónico\nSMS\nPush\nRevisar pago\nPagos recientes\nFibraNet · junio\nPago completado\nRD$3,200.00\nEDE Norte · junio\nPago programado\nRD$4,850.00\nReglas de programación",
+        "evidence": [
+          "live-step-38"
+        ],
+        "details": {
+          "observedText": "PAGOS\nPago de servicios\n\nPaga facturas de forma programada o inmediata.\n\nVer historial\nNuevo pago\nPago de servicios\nProveedor\nInternet · FibraNet\nElectricidad · EDE Norte\nTelefonía · Móvil Plus\nNúmero de contrato\nCuenta a debitar\nCuenta Corriente (DOP)\nCuenta de Ahorros (DOP)\nCuenta Empresarial USD (USD)\nMonto\nFecha de pago\nFrecuencia\nPago único\nSemanal\nMensual\nAvisar al completar\nCorreo electrónico\nSMS\nPush\nRevisar pago\nPagos recientes\nFibraNet · junio\nPago completado\nRD$3,200.00\nEDE Norte · junio\nPago programado\nRD$4,850.00\nReglas de programación"
+        }
+      },
+      {
+        "id": "jira-oracle-39",
+        "requirement": "Validar que se muestre \"Número de contrato\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 39,
+        "target": "PAGOS\nPago de servicios\n\nPaga facturas de forma programada o inmediata.\n\nVer historial\nNuevo pago\nPago de servicios\nProveedor\nInternet · FibraNet\nElectricidad · EDE Norte\nTelefonía · Móvil Plus\nNúmero de contrato\nCuenta a debitar\nCuenta Corriente (DOP)\nCuenta de Ahorros (DOP)\nCuenta Empresarial USD (USD)\nMonto\nFecha de pago\nFrecuencia\nPago único\nSemanal\nMensual\nAvisar al completar\nCorreo electrónico\nSMS\nPush\nRevisar pago\nPagos recientes\nFibraNet · junio\nPago completado\nRD$3,200.00\nEDE Norte · junio\nPago programado\nRD$4,850.00\nReglas de programación",
+        "evidence": [
+          "live-step-39"
+        ],
+        "details": {
+          "observedText": "PAGOS\nPago de servicios\n\nPaga facturas de forma programada o inmediata.\n\nVer historial\nNuevo pago\nPago de servicios\nProveedor\nInternet · FibraNet\nElectricidad · EDE Norte\nTelefonía · Móvil Plus\nNúmero de contrato\nCuenta a debitar\nCuenta Corriente (DOP)\nCuenta de Ahorros (DOP)\nCuenta Empresarial USD (USD)\nMonto\nFecha de pago\nFrecuencia\nPago único\nSemanal\nMensual\nAvisar al completar\nCorreo electrónico\nSMS\nPush\nRevisar pago\nPagos recientes\nFibraNet · junio\nPago completado\nRD$3,200.00\nEDE Norte · junio\nPago programado\nRD$4,850.00\nReglas de programación"
+        }
+      },
+      {
+        "id": "jira-oracle-40",
+        "requirement": "Validar que se muestre \"Cuenta a debitar\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 40,
+        "target": "PAGOS\nPago de servicios\n\nPaga facturas de forma programada o inmediata.\n\nVer historial\nNuevo pago\nPago de servicios\nProveedor\nInternet · FibraNet\nElectricidad · EDE Norte\nTelefonía · Móvil Plus\nNúmero de contrato\nCuenta a debitar\nCuenta Corriente (DOP)\nCuenta de Ahorros (DOP)\nCuenta Empresarial USD (USD)\nMonto\nFecha de pago\nFrecuencia\nPago único\nSemanal\nMensual\nAvisar al completar\nCorreo electrónico\nSMS\nPush\nRevisar pago\nPagos recientes\nFibraNet · junio\nPago completado\nRD$3,200.00\nEDE Norte · junio\nPago programado\nRD$4,850.00\nReglas de programación",
+        "evidence": [
+          "live-step-40"
+        ],
+        "details": {
+          "observedText": "PAGOS\nPago de servicios\n\nPaga facturas de forma programada o inmediata.\n\nVer historial\nNuevo pago\nPago de servicios\nProveedor\nInternet · FibraNet\nElectricidad · EDE Norte\nTelefonía · Móvil Plus\nNúmero de contrato\nCuenta a debitar\nCuenta Corriente (DOP)\nCuenta de Ahorros (DOP)\nCuenta Empresarial USD (USD)\nMonto\nFecha de pago\nFrecuencia\nPago único\nSemanal\nMensual\nAvisar al completar\nCorreo electrónico\nSMS\nPush\nRevisar pago\nPagos recientes\nFibraNet · junio\nPago completado\nRD$3,200.00\nEDE Norte · junio\nPago programado\nRD$4,850.00\nReglas de programación"
+        }
+      },
+      {
+        "id": "jira-oracle-41",
+        "requirement": "Validar que se muestre \"Monto\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 41,
+        "target": "PAGOS\nPago de servicios\n\nPaga facturas de forma programada o inmediata.\n\nVer historial\nNuevo pago\nPago de servicios\nProveedor\nInternet · FibraNet\nElectricidad · EDE Norte\nTelefonía · Móvil Plus\nNúmero de contrato\nCuenta a debitar\nCuenta Corriente (DOP)\nCuenta de Ahorros (DOP)\nCuenta Empresarial USD (USD)\nMonto\nFecha de pago\nFrecuencia\nPago único\nSemanal\nMensual\nAvisar al completar\nCorreo electrónico\nSMS\nPush\nRevisar pago\nPagos recientes\nFibraNet · junio\nPago completado\nRD$3,200.00\nEDE Norte · junio\nPago programado\nRD$4,850.00\nReglas de programación",
+        "evidence": [
+          "live-step-41"
+        ],
+        "details": {
+          "observedText": "PAGOS\nPago de servicios\n\nPaga facturas de forma programada o inmediata.\n\nVer historial\nNuevo pago\nPago de servicios\nProveedor\nInternet · FibraNet\nElectricidad · EDE Norte\nTelefonía · Móvil Plus\nNúmero de contrato\nCuenta a debitar\nCuenta Corriente (DOP)\nCuenta de Ahorros (DOP)\nCuenta Empresarial USD (USD)\nMonto\nFecha de pago\nFrecuencia\nPago único\nSemanal\nMensual\nAvisar al completar\nCorreo electrónico\nSMS\nPush\nRevisar pago\nPagos recientes\nFibraNet · junio\nPago completado\nRD$3,200.00\nEDE Norte · junio\nPago programado\nRD$4,850.00\nReglas de programación"
+        }
+      },
+      {
+        "id": "jira-oracle-42",
+        "requirement": "Validar que se muestre \"Fecha de pago\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 42,
+        "target": "PAGOS\nPago de servicios\n\nPaga facturas de forma programada o inmediata.\n\nVer historial\nNuevo pago\nPago de servicios\nProveedor\nInternet · FibraNet\nElectricidad · EDE Norte\nTelefonía · Móvil Plus\nNúmero de contrato\nCuenta a debitar\nCuenta Corriente (DOP)\nCuenta de Ahorros (DOP)\nCuenta Empresarial USD (USD)\nMonto\nFecha de pago\nFrecuencia\nPago único\nSemanal\nMensual\nAvisar al completar\nCorreo electrónico\nSMS\nPush\nRevisar pago\nPagos recientes\nFibraNet · junio\nPago completado\nRD$3,200.00\nEDE Norte · junio\nPago programado\nRD$4,850.00\nReglas de programación",
+        "evidence": [
+          "live-step-42"
+        ],
+        "details": {
+          "observedText": "PAGOS\nPago de servicios\n\nPaga facturas de forma programada o inmediata.\n\nVer historial\nNuevo pago\nPago de servicios\nProveedor\nInternet · FibraNet\nElectricidad · EDE Norte\nTelefonía · Móvil Plus\nNúmero de contrato\nCuenta a debitar\nCuenta Corriente (DOP)\nCuenta de Ahorros (DOP)\nCuenta Empresarial USD (USD)\nMonto\nFecha de pago\nFrecuencia\nPago único\nSemanal\nMensual\nAvisar al completar\nCorreo electrónico\nSMS\nPush\nRevisar pago\nPagos recientes\nFibraNet · junio\nPago completado\nRD$3,200.00\nEDE Norte · junio\nPago programado\nRD$4,850.00\nReglas de programación"
+        }
+      },
+      {
+        "id": "jira-oracle-43",
+        "requirement": "Validar que se muestre \"Frecuencia\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 43,
+        "target": "PAGOS\nPago de servicios\n\nPaga facturas de forma programada o inmediata.\n\nVer historial\nNuevo pago\nPago de servicios\nProveedor\nInternet · FibraNet\nElectricidad · EDE Norte\nTelefonía · Móvil Plus\nNúmero de contrato\nCuenta a debitar\nCuenta Corriente (DOP)\nCuenta de Ahorros (DOP)\nCuenta Empresarial USD (USD)\nMonto\nFecha de pago\nFrecuencia\nPago único\nSemanal\nMensual\nAvisar al completar\nCorreo electrónico\nSMS\nPush\nRevisar pago\nPagos recientes\nFibraNet · junio\nPago completado\nRD$3,200.00\nEDE Norte · junio\nPago programado\nRD$4,850.00\nReglas de programación",
+        "evidence": [
+          "live-step-43"
+        ],
+        "details": {
+          "observedText": "PAGOS\nPago de servicios\n\nPaga facturas de forma programada o inmediata.\n\nVer historial\nNuevo pago\nPago de servicios\nProveedor\nInternet · FibraNet\nElectricidad · EDE Norte\nTelefonía · Móvil Plus\nNúmero de contrato\nCuenta a debitar\nCuenta Corriente (DOP)\nCuenta de Ahorros (DOP)\nCuenta Empresarial USD (USD)\nMonto\nFecha de pago\nFrecuencia\nPago único\nSemanal\nMensual\nAvisar al completar\nCorreo electrónico\nSMS\nPush\nRevisar pago\nPagos recientes\nFibraNet · junio\nPago completado\nRD$3,200.00\nEDE Norte · junio\nPago programado\nRD$4,850.00\nReglas de programación"
+        }
+      },
+      {
+        "id": "jira-oracle-44",
+        "requirement": "Validar que se muestre \"Correo electrónico\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 44,
+        "target": "PAGOS\nPago de servicios\n\nPaga facturas de forma programada o inmediata.\n\nVer historial\nNuevo pago\nPago de servicios\nProveedor\nInternet · FibraNet\nElectricidad · EDE Norte\nTelefonía · Móvil Plus\nNúmero de contrato\nCuenta a debitar\nCuenta Corriente (DOP)\nCuenta de Ahorros (DOP)\nCuenta Empresarial USD (USD)\nMonto\nFecha de pago\nFrecuencia\nPago único\nSemanal\nMensual\nAvisar al completar\nCorreo electrónico\nSMS\nPush\nRevisar pago\nPagos recientes\nFibraNet · junio\nPago completado\nRD$3,200.00\nEDE Norte · junio\nPago programado\nRD$4,850.00\nReglas de programación",
+        "evidence": [
+          "live-step-44"
+        ],
+        "details": {
+          "observedText": "PAGOS\nPago de servicios\n\nPaga facturas de forma programada o inmediata.\n\nVer historial\nNuevo pago\nPago de servicios\nProveedor\nInternet · FibraNet\nElectricidad · EDE Norte\nTelefonía · Móvil Plus\nNúmero de contrato\nCuenta a debitar\nCuenta Corriente (DOP)\nCuenta de Ahorros (DOP)\nCuenta Empresarial USD (USD)\nMonto\nFecha de pago\nFrecuencia\nPago único\nSemanal\nMensual\nAvisar al completar\nCorreo electrónico\nSMS\nPush\nRevisar pago\nPagos recientes\nFibraNet · junio\nPago completado\nRD$3,200.00\nEDE Norte · junio\nPago programado\nRD$4,850.00\nReglas de programación"
+        }
+      },
+      {
+        "id": "jira-oracle-45",
+        "requirement": "Validar que se muestre \"SMS\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 45,
+        "target": "PAGOS\nPago de servicios\n\nPaga facturas de forma programada o inmediata.\n\nVer historial\nNuevo pago\nPago de servicios\nProveedor\nInternet · FibraNet\nElectricidad · EDE Norte\nTelefonía · Móvil Plus\nNúmero de contrato\nCuenta a debitar\nCuenta Corriente (DOP)\nCuenta de Ahorros (DOP)\nCuenta Empresarial USD (USD)\nMonto\nFecha de pago\nFrecuencia\nPago único\nSemanal\nMensual\nAvisar al completar\nCorreo electrónico\nSMS\nPush\nRevisar pago\nPagos recientes\nFibraNet · junio\nPago completado\nRD$3,200.00\nEDE Norte · junio\nPago programado\nRD$4,850.00\nReglas de programación",
+        "evidence": [
+          "live-step-45"
+        ],
+        "details": {
+          "observedText": "PAGOS\nPago de servicios\n\nPaga facturas de forma programada o inmediata.\n\nVer historial\nNuevo pago\nPago de servicios\nProveedor\nInternet · FibraNet\nElectricidad · EDE Norte\nTelefonía · Móvil Plus\nNúmero de contrato\nCuenta a debitar\nCuenta Corriente (DOP)\nCuenta de Ahorros (DOP)\nCuenta Empresarial USD (USD)\nMonto\nFecha de pago\nFrecuencia\nPago único\nSemanal\nMensual\nAvisar al completar\nCorreo electrónico\nSMS\nPush\nRevisar pago\nPagos recientes\nFibraNet · junio\nPago completado\nRD$3,200.00\nEDE Norte · junio\nPago programado\nRD$4,850.00\nReglas de programación"
+        }
+      },
+      {
+        "id": "jira-oracle-46",
+        "requirement": "Validar que se muestre \"Push\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 46,
+        "target": "PAGOS\nPago de servicios\n\nPaga facturas de forma programada o inmediata.\n\nVer historial\nNuevo pago\nPago de servicios\nProveedor\nInternet · FibraNet\nElectricidad · EDE Norte\nTelefonía · Móvil Plus\nNúmero de contrato\nCuenta a debitar\nCuenta Corriente (DOP)\nCuenta de Ahorros (DOP)\nCuenta Empresarial USD (USD)\nMonto\nFecha de pago\nFrecuencia\nPago único\nSemanal\nMensual\nAvisar al completar\nCorreo electrónico\nSMS\nPush\nRevisar pago\nPagos recientes\nFibraNet · junio\nPago completado\nRD$3,200.00\nEDE Norte · junio\nPago programado\nRD$4,850.00\nReglas de programación",
+        "evidence": [
+          "live-step-46"
+        ],
+        "details": {
+          "observedText": "PAGOS\nPago de servicios\n\nPaga facturas de forma programada o inmediata.\n\nVer historial\nNuevo pago\nPago de servicios\nProveedor\nInternet · FibraNet\nElectricidad · EDE Norte\nTelefonía · Móvil Plus\nNúmero de contrato\nCuenta a debitar\nCuenta Corriente (DOP)\nCuenta de Ahorros (DOP)\nCuenta Empresarial USD (USD)\nMonto\nFecha de pago\nFrecuencia\nPago único\nSemanal\nMensual\nAvisar al completar\nCorreo electrónico\nSMS\nPush\nRevisar pago\nPagos recientes\nFibraNet · junio\nPago completado\nRD$3,200.00\nEDE Norte · junio\nPago programado\nRD$4,850.00\nReglas de programación"
+        }
+      },
+      {
+        "id": "jira-oracle-48",
+        "requirement": "Validar que se muestre \"Confirmación de pago\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 48,
+        "target": "Confirmación de pago",
+        "evidence": [
+          "live-step-48"
+        ],
+        "details": {
+          "observedText": "Confirmación de pago"
+        }
+      },
+      {
+        "id": "jira-oracle-50",
+        "requirement": "Validar que se muestre \"Pago de prueba completado correctamente\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 50,
+        "target": "Pago de prueba completado correctamente.",
+        "evidence": [
+          "live-step-50"
+        ],
+        "details": {
+          "observedText": "Pago de prueba completado correctamente."
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "Se muestra \"Pago de prueba completado correctamente\"."
+  }
+}

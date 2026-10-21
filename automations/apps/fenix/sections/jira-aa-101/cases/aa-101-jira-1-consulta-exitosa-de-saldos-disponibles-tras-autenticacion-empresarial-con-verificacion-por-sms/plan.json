@@ -1,0 +1,351 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-14T14:57:15.249Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "AA-101:jira:1",
+    "title": "Consulta exitosa de saldos disponibles tras autenticación empresarial con verificación por SMS"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Presionar \"perfil empresarial\".",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Empresarial",
+        "exact": true
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [rnc]",
+      "valueKey": "rnc",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"Enterprise\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "fill",
+      "description": "fill [usuario]",
+      "valueKey": "usuario",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"UserNameE\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "fill",
+      "description": "fill [contrasena]",
+      "valueKey": "contrasena",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"PasswordE\"]"
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"continuar inicio de sesión\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Iniciar sesión",
+        "exact": true
+      }
+    },
+    {
+      "index": 8,
+      "action": "click",
+      "description": "Solicitar el código por SMS",
+      "target": {
+        "strategy": "css",
+        "value": "div:visible:text-is(\"SMS\")"
+      }
+    },
+    {
+      "index": 9,
+      "action": "fill",
+      "description": "fill [codigo_acceso]",
+      "valueKey": "codigo_acceso",
+      "target": {
+        "strategy": "semantic",
+        "value": "segmented_code",
+        "metadata": {
+          "originalTarget": "Código de acceso",
+          "resolvedTargetName": "segmented code input group",
+          "resolvedCandidateId": "6",
+          "repairType": "jira_segmented_code",
+          "validationStatus": "runtime_resolution_required"
+        }
+      },
+      "resolutionState": "runtime_resolution_required"
+    },
+    {
+      "index": 10,
+      "action": "click",
+      "description": "Presionar \"continuar verificación de acceso\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Continuar",
+        "exact": true
+      }
+    },
+    {
+      "index": 11,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"resumen de cuentas\"",
+      "target": {
+        "strategy": "text",
+        "value": "resumen de cuentas"
+      }
+    },
+    {
+      "index": 12,
+      "action": "assertVisible",
+      "description": "Validar \"tipo\" de cada cuenta presentada.",
+      "target": {
+        "strategy": "text",
+        "value": "tipo"
+      }
+    },
+    {
+      "index": 13,
+      "action": "assertVisible",
+      "description": "Validar \"saldo disponible\" de cada cuenta presentada.",
+      "target": {
+        "strategy": "text",
+        "value": "saldo disponible"
+      }
+    },
+    {
+      "index": 14,
+      "action": "assertVisible",
+      "description": "Validar \"moneda\" de cada cuenta presentada.",
+      "target": {
+        "strategy": "text",
+        "value": "moneda"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "rnc",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "usuario",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "codigo_acceso",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Consulta exitosa de saldos disponibles tras autenticación empresarial con verificación por SMS",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Empresarial"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "rnc",
+        "technicalTargetRefs": [
+          "css:[id=\"Enterprise\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "fill",
+        "valueKey": "usuario",
+        "technicalTargetRefs": [
+          "css:[id=\"UserNameE\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "fill",
+        "valueKey": "contrasena",
+        "technicalTargetRefs": [
+          "css:[id=\"PasswordE\"]"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:div:visible:text-is(\"SMS\")"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "fill",
+        "valueKey": "codigo_acceso",
+        "technicalTargetRefs": [
+          "semantic:segmented_code"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ]
+      },
+      {
+        "index": 11,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"resumen de cuentas\"",
+        "technicalTargetRefs": [
+          "text:resumen de cuentas"
+        ]
+      },
+      {
+        "index": 12,
+        "action": "assertVisible",
+        "description": "Validar \"tipo\" de cada cuenta presentada.",
+        "technicalTargetRefs": [
+          "text:tipo"
+        ]
+      },
+      {
+        "index": 13,
+        "action": "assertVisible",
+        "description": "Validar \"saldo disponible\" de cada cuenta presentada.",
+        "technicalTargetRefs": [
+          "text:saldo disponible"
+        ]
+      },
+      {
+        "index": 14,
+        "action": "assertVisible",
+        "description": "Validar \"moneda\" de cada cuenta presentada.",
+        "technicalTargetRefs": [
+          "text:moneda"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-11",
+        "requirement": "Validar que se muestre \"resumen de cuentas\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 11,
+        "target": "Visible heading and nearby content: Resumen Todos Cuentas Tarjetas Préstamos Certificados de Depósito · Resumen Todos Cuentas Tarjetas Préstamos Certificados de Depósito",
+        "evidence": [
+          "live-step-11"
+        ],
+        "details": {
+          "observedText": "Visible heading and nearby content: Resumen Todos Cuentas Tarjetas Préstamos Certificados de Depósito · Resumen Todos Cuentas Tarjetas Préstamos Certificados de Depósito"
+        }
+      },
+      {
+        "id": "jira-oracle-12",
+        "requirement": "Validar \"tipo\" de cada cuenta presentada.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 12,
+        "target": "Visible heading and nearby content: Resumen Todos Cuentas Tarjetas Préstamos Certificados de Depósito Cuentas Cuenta de Ahorro [numero]Cuenta de Ahorro US$1,970.71 Balance Disponible Cuenta Corriente [numero]Cuenta Corrientes RD$133,575.44 Balance Disponible · Cuentas Cuenta de Ahorro [numero]Cuenta de Ahorro US$1,970.71 Balance Disponible Cuenta Corriente [numero]Cuenta Corrientes RD$133,575.44 Balance Disponible · Cuenta de Ahorro [numero]Cuenta de Ahorro US$1,970.71 Balance Disponible · Cuenta Corriente [numero]Cuenta Corrientes RD$133,575.44 Balance Disponible",
+        "evidence": [
+          "live-step-12"
+        ],
+        "details": {
+          "observedText": "Visible heading and nearby content: Resumen Todos Cuentas Tarjetas Préstamos Certificados de Depósito Cuentas Cuenta de Ahorro [numero]Cuenta de Ahorro US$1,970.71 Balance Disponible Cuenta Corriente [numero]Cuenta Corrientes RD$133,575.44 Balance Disponible · Cuentas Cuenta de Ahorro [numero]Cuenta de Ahorro US$1,970.71 Balance Disponible Cuenta Corriente [numero]Cuenta Corrientes RD$133,575.44 Balance Disponible · Cuenta de Ahorro [numero]Cuenta de Ahorro US$1,970.71 Balance Disponible · Cuenta Corriente [numero]Cuenta Corrientes RD$133,575.44 Balance Disponible"
+        }
+      },
+      {
+        "id": "jira-oracle-13",
+        "requirement": "Validar \"saldo disponible\" de cada cuenta presentada.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 13,
+        "target": "Visible heading and nearby content: Resumen Todos Cuentas Tarjetas Préstamos Certificados de Depósito Cuentas Cuenta de Ahorro [numero]Cuenta de Ahorro US$1,970.71 Balance Disponible Cuenta Corriente [numero]Cuenta Corrientes RD$133,575.44 Balance Disponible · US$1,970.71 Balance Disponible · RD$133,575.44 Balance Disponible",
+        "evidence": [
+          "live-step-13"
+        ],
+        "details": {
+          "observedText": "Visible heading and nearby content: Resumen Todos Cuentas Tarjetas Préstamos Certificados de Depósito Cuentas Cuenta de Ahorro [numero]Cuenta de Ahorro US$1,970.71 Balance Disponible Cuenta Corriente [numero]Cuenta Corrientes RD$133,575.44 Balance Disponible · US$1,970.71 Balance Disponible · RD$133,575.44 Balance Disponible"
+        }
+      },
+      {
+        "id": "jira-oracle-14",
+        "requirement": "Validar \"moneda\" de cada cuenta presentada.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 14,
+        "target": "US$1,970.71 Balance Disponible · RD$133,575.44 Balance Disponible",
+        "evidence": [
+          "live-step-14"
+        ],
+        "details": {
+          "observedText": "US$1,970.71 Balance Disponible · RD$133,575.44 Balance Disponible"
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "Se muestra el \"resumen de cuentas\" con el tipo, saldo disponible y moneda de cada cuenta presentada al cliente."
+  }
+}

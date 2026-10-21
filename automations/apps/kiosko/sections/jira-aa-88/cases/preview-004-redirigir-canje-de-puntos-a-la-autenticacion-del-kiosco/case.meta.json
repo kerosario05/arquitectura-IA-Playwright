@@ -1,0 +1,8 @@
+{
+  "appSlug": "kiosko",
+  "sectionSlug": "jira-aa-88",
+  "sourceScenarioId": "PREVIEW-004",
+  "title": "Redirigir Canje de Puntos a la autenticación del kiosco",
+  "generatedAt": "2026-10-09T19:48:43.588Z",
+  "executionEngine": "jira_semantic"
+}

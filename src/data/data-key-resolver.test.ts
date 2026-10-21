@@ -1,6 +1,31 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { resolveDataKey, formatDataKeyForLog } from "./data-key-resolver";
+import { resolveDataKey, formatDataKeyForLog, credentialRoleKeyForField } from "./data-key-resolver";
+
+test("unbound verification fields retain a unique runtime OTP binding across vocabularies", () => {
+  for (const [field, key] of [["Código", "codigo_acceso"], ["Verification code", "sms_code"]]) {
+    const runtimeEntries = [{ key, value: "654321", source: "explicit_runtime_input" },
+      { key: "token_autorizacion", value: "business-token" }];
+    const boundKey = credentialRoleKeyForField(field, runtimeEntries);
+    assert.equal(boundKey, "auth.otp");
+    const result = resolveDataKey(boundKey!, { runtimeEntries });
+    assert.equal(result.value, "654321");
+    assert.equal(result.masked, true);
+    assert.equal(formatDataKeyForLog(result).includes("654321"), false);
+  }
+});
+
+test("generic code binding rejects ambiguity and does not consume an authorization token", () => {
+  assert.equal(credentialRoleKeyForField("Código"), undefined);
+  assert.equal(credentialRoleKeyForField("Código", [{ key: "token_autorizacion", value: "token" }]), undefined);
+  const runtimeEntries = [{ key: "codigo_acceso", value: "111111" }, { key: "sms_code", value: "222222" }];
+  assert.equal(credentialRoleKeyForField("Código", runtimeEntries), undefined);
+  assert.notEqual(resolveDataKey("auth.otp", { runtimeEntries }).status, "resolved");
+  assert.equal(resolveDataKey("auth.otp", { runtimeEntries, env: { OTP_SECRET: "stale-code" } }).status, "missing_sensitive");
+  assert.equal(resolveDataKey("sms_code", { runtimeEntries }).value, "222222");
+  assert.equal(resolveDataKey("sms_code", { runtimeEntries }).masked, true);
+  assert.equal(credentialRoleKeyForField("Código de producto", runtimeEntries), undefined);
+});
 
 /**
  * FIRST_LOSS: Recording V2 already produces `sensitive=true`/`valueKey=<recorded-field-derived
@@ -139,4 +164,27 @@ test("username role resolves the same way as password", () => {
   });
   assert.equal(resolution.status, "resolved");
   assert.equal(resolution.value, "qa-user");
+});
+
+test("generic login field labels map to reusable auth keys across projects", () => {
+  assert.equal(credentialRoleKeyForField("Contraseña"), "auth.password");
+  assert.equal(credentialRoleKeyForField("Usuario"), "auth.username");
+  assert.equal(credentialRoleKeyForField("RNC"), "auth.company_identifier");
+  assert.equal(credentialRoleKeyForField("Monto de la transferencia"), undefined);
+});
+
+test("caller-scoped credential aliases preserve their source and do not change default environment lookup", () => {
+  const resolution = resolveDataKey("auth.company_identifier", {
+    env: { Identity_Provider: "synthetic-id" },
+    credentialEnvAliases: { company_identifier: ["Identity_Provider"] },
+  });
+  assert.equal(resolution.status, "resolved");
+  assert.equal(resolution.value, "synthetic-id");
+  assert.equal(resolution.source, "Identity_Provider");
+  assert.equal(resolution.masked, true);
+
+  const withoutOptIn = resolveDataKey("auth.company_identifier", {
+    env: { Identity_Provider: "synthetic-id" },
+  });
+  assert.equal(withoutOptIn.status, "missing_sensitive");
 });

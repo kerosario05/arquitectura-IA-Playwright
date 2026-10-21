@@ -57,7 +57,7 @@
     {
       "index": 3,
       "action": "fill",
-      "description": "Ingresar \"130598983\" en \"RNC:\"",
+      "description": "Ingresar \"130872392\" en \"RNC:\"",
       "target": {
         "strategy": "text",
         "value": "RNC",
@@ -69,7 +69,7 @@
     {
       "index": 4,
       "action": "fill",
-      "description": "Ingresar \"olivam\" en \"Usuario:\"",
+      "description": "Ingresar \"SAMOTA\" en \"Usuario:\"",
       "target": {
         "strategy": "text",
         "value": "Usuario",
@@ -180,11 +180,11 @@
       "description": "Seleccionar opción que contiene Cuenta Corrientes (coincidencia 1) en el campo \"account-from-select-input\"",
       "target": {
         "strategy": "recorded_visible_option_identity",
-        "value": "Cuenta Corrientes / 11311000003156 / RD$151,725.44",
+        "value": "Cuenta Corrientes / 11121000000739 / RD$829,008.27",
         "exact": false,
         "metadata": {
           "originalTarget": "account-from-select-input",
-          "resolvedTargetName": "Cuenta Corrientes / 11311000003156 / RD$151,725.44",
+          "resolvedTargetName": "Cuenta Corrientes / 11121000000739 / RD$829,008.27",
           "aiAssisted": false,
           "repairType": "target_resolution",
           "decisionStatus": "resolved",
@@ -212,11 +212,11 @@
       "description": "Seleccionar opción que contiene Cuenta de Ahorro (coincidencia 1) en el campo \"account-to-select-input\"",
       "target": {
         "strategy": "recorded_visible_option_identity",
-        "value": "Cuenta de Ahorro / 21312020003368 / US$1,670.71",
+        "value": "Cuenta de Ahorro / 21122020001253 / US$1,240.35",
         "exact": false,
         "metadata": {
           "originalTarget": "account-to-select-input",
-          "resolvedTargetName": "Cuenta de Ahorro / 21312020003368 / US$1,670.71",
+          "resolvedTargetName": "Cuenta de Ahorro / 21122020001253 / US$1,240.35",
           "aiAssisted": false,
           "repairType": "target_resolution",
           "decisionStatus": "resolved",
@@ -314,7 +314,7 @@
   "notes": [
     "Discovery completed successfully. All targets and concrete assertions passed."
   ],
-  "createdAt": "2026-10-07T21:50:51.930Z",
+  "createdAt": "2026-10-19T14:55:28.332Z",
   "metadata": {
     "authFlowRequired": false,
     "authFlowAlias": "defaultClient",
@@ -382,8 +382,8 @@
       },
       {
         "index": 3,
-        "action": "Ingresar \"130598983\" en \"RNC:\"",
-        "description": "Ingresar \"130598983\" en \"RNC:\"",
+        "action": "Ingresar \"130872392\" en \"RNC:\"",
+        "description": "Ingresar \"130872392\" en \"RNC:\"",
         "valueKey": "rnc",
         "technicalTargetRef": "role:textbox|RNC:",
         "technicalTargetRefs": [
@@ -397,8 +397,8 @@
       },
       {
         "index": 4,
-        "action": "Ingresar \"olivam\" en \"Usuario:\"",
-        "description": "Ingresar \"olivam\" en \"Usuario:\"",
+        "action": "Ingresar \"SAMOTA\" en \"Usuario:\"",
+        "description": "Ingresar \"SAMOTA\" en \"Usuario:\"",
         "valueKey": "usuario",
         "technicalTargetRef": "role:textbox|Usuario:",
         "technicalTargetRefs": [
@@ -1275,7 +1275,7 @@
       {
         "contractStepIndex": 2,
         "scenarioStepIndex": 3,
-        "originalText": "Ingresar \"130598983\" en \"RNC:\"",
+        "originalText": "Ingresar \"130872392\" en \"RNC:\"",
         "operation": "fill",
         "target": {
           "strategy": "label",
@@ -1318,7 +1318,7 @@
       {
         "contractStepIndex": 3,
         "scenarioStepIndex": 4,
-        "originalText": "Ingresar \"olivam\" en \"Usuario:\"",
+        "originalText": "Ingresar \"SAMOTA\" en \"Usuario:\"",
         "operation": "fill",
         "target": {
           "strategy": "label",

@@ -20,7 +20,7 @@ function locator(options: { count?: number; href?: string | null; visible?: bool
 }
 
 function page(
-  options: { count?: number; href?: string | null; visible?: boolean; enabled?: boolean } = {},
+  options: { count?: number; href?: string | null; visible?: boolean; enabled?: boolean; scopedCount?: number } = {},
   currentBaseUrl = baseUrl,
   liveHref = recordedHref,
 ) {

@@ -1,0 +1,2668 @@
+{
+  "recordingId": "0525478a-8560-4406-ae5e-e7a598366464",
+  "projectSlug": "portal-ventas-digital",
+  "appSlug": "portal-ventas-digital",
+  "platform": "web",
+  "baseUrl": "https://solicitudedigitalesdev/",
+  "label": "Crear cuenta",
+  "recordingGoal": {
+    "declaredGoal": "Crear cuenta",
+    "normalizedGoal": "Crear cuenta",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-10-20T16:47:34.294Z",
+  "status": "stopped",
+  "events": [
+    {
+      "t": 970,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://solicitudedigitalesdev/",
+      "seq": 0
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "0b23ab3287d9",
+      "url": "https://solicitudedigitalesdev/",
+      "seq": 1
+    },
+    {
+      "t": 1291,
+      "kind": "navigate",
+      "screenKey": "0b23ab3287d9",
+      "url": "https://solicitudedigitalesdev/",
+      "seq": 2
+    },
+    {
+      "t": 2787,
+      "interactionId": "pointer-1",
+      "kind": "note",
+      "screenKey": "0b23ab3287d9",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://solicitudedigitalesdev/",
+      "target": {
+        "label": "CuentaAhorra y maneja tu dinero forma ágil y sencilla.",
+        "role": "button",
+        "tag": "a",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"CuentaAhorra y maneja tu dinero forma ágil y sencilla.\"",
+      "observationType": "pointer",
+      "seq": 3
+    },
+    {
+      "t": 7543,
+      "interactionId": "pointer-2",
+      "kind": "note",
+      "screenKey": "0b23ab3287d9",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://solicitudedigitalesdev/",
+      "target": {
+        "label": "CuentaAhorra y maneja tu dinero forma ágil y sencilla.",
+        "role": "button",
+        "tag": "a",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"CuentaAhorra y maneja tu dinero forma ágil y sencilla.\"",
+      "observationType": "pointer",
+      "seq": 4
+    },
+    {
+      "t": 7700,
+      "interactionId": "pointer-2",
+      "kind": "tap",
+      "screenKey": "0b23ab3287d9",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://solicitudedigitalesdev/",
+      "target": {
+        "label": "CuentaAhorra y maneja tu dinero forma ágil y sencilla.",
+        "role": "button",
+        "tag": "a",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|CuentaAhorra y maneja tu dinero forma ágil y sencilla.",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#nav-item-cuentas",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "nav-item-cuentas",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#nav-item-cuentas",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a",
+                "role": "button"
+              },
+              "stableDirectAttributes": {
+                "href": "#",
+                "id": "nav-item-cuentas",
+                "role": "button"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "clippath",
+                  "stableAttributes": {
+                    "id": "clip0_2384_5575"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",3]],\"descendantEntries\":[[\"circle\",1],[\"clippath\",1],[\"defs\",1],[\"g\",1],[\"path\",6],[\"rect\",1],[\"span\",5],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "nav-app-product-types"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\",\"role\":\"button\"},\"stableDirectAttributes\":{\"href\":\"#\",\"id\":\"nav-item-cuentas\",\"role\":\"button\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"clippath\",\"stableAttributes\":{\"id\":\"clip0_2384_5575\"}}],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",3]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"clippath\\\",1],[\\\"defs\\\",1],[\\\"g\\\",1],[\\\"path\\\",6],[\\\"rect\\\",1],[\\\"span\\\",5],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 5
+    },
+    {
+      "t": 7811,
+      "kind": "navigate",
+      "screenKey": "0b23ab3287d9",
+      "url": "https://solicitudedigitalesdev/cuentas",
+      "seq": 6
+    },
+    {
+      "t": 7974,
+      "kind": "screen_change",
+      "screenKey": "0b23ab3287d9",
+      "toScreenKey": "428533996fd7",
+      "fingerprint": "ee90c082c6223212b735e3c1ecf4464600a71d038984604b640abc65139b1995",
+      "url": "https://solicitudedigitalesdev/cuentas",
+      "seq": 7
+    },
+    {
+      "t": 9700,
+      "interactionId": "pointer-3",
+      "kind": "note",
+      "screenKey": "428533996fd7",
+      "fingerprint": "ee90c082c6223212b735e3c1ecf4464600a71d038984604b640abc65139b1995",
+      "url": "https://solicitudedigitalesdev/cuentas",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Continuar\"",
+      "observationType": "pointer",
+      "seq": 8
+    },
+    {
+      "t": 10073,
+      "interactionId": "pointer-3",
+      "kind": "tap",
+      "screenKey": "428533996fd7",
+      "fingerprint": "ee90c082c6223212b735e3c1ecf4464600a71d038984604b640abc65139b1995",
+      "url": "https://solicitudedigitalesdev/cuentas",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Continuar",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#btn-solicitar-cuenta-de-ahorros-personal-en-pesos",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "btn-solicitar-cuenta-de-ahorros-personal-en-pesos",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#btn-solicitar-cuenta-de-ahorros-personal-en-pesos",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "btn-solicitar-cuenta-de-ahorros-personal-en-pesos"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"circle\",1],[\"path\",1],[\"span\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "card-cuenta-de-ahorros-personal-en-pesos"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-solicitar-cuenta-de-ahorros-personal-en-pesos\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"path\\\",1],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 9
+    },
+    {
+      "t": 17405,
+      "interactionId": "pointer-4",
+      "kind": "note",
+      "screenKey": "428533996fd7",
+      "fingerprint": "3052954e33a7b13732d294e6d02407e947bd9f9b9d8bb3deb544b323a4e731fb",
+      "url": "https://solicitudedigitalesdev/cuentas",
+      "target": {
+        "label": "control",
+        "role": "checkbox",
+        "tag": "span",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "checkbox",
+          "normalizedName": "Acepto los Términos y Condiciones de la Aplicación Móvil, Web, Portal(es) y/o Plataforma(s) Digitales y los Términos y Condiciones de Uso e Intercambio de Información Personal. Al continuar con este proceso, autorizo a EL BANCO a: a) recopilar, capturar y utilizar mis datos biométricos como mecanismos alternos de autenticación e identificación; b) a consultar mis datos en el Maestro de Cedulados de la Junta Central Electoral, el buró de crédito y en la Tesorería de Seguridad Social (TSS); c) Compartir, entregar y transmitir mi información de carácter personal: Nombre, Apellido, Cédula de Identidad, Correo Electrónico y Teléfonos con entidades y organismos públicos y gubernamentales a los fines de cumplir con la legislación y normativa aplicable.",
+          "targetTag": "span",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "el_AcceptTermsAndConditions"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"control\"",
+      "observationType": "pointer",
+      "seq": 10
+    },
+    {
+      "t": 17425,
+      "kind": "fill",
+      "screenKey": "428533996fd7",
+      "fingerprint": "3052954e33a7b13732d294e6d02407e947bd9f9b9d8bb3deb544b323a4e731fb",
+      "url": "https://solicitudedigitalesdev/cuentas",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Número de identificación",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "#x_DocumentId",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "x_DocumentId",
+            "confidence": 0.8
+          }
+        ],
+        "rawTypedValue": "40224679551",
+        "sensitive": false
+      },
+      "value": "402-2467955-1",
+      "valueSource": "user",
+      "seq": 11
+    },
+    {
+      "t": 17525,
+      "interactionId": "pointer-4",
+      "kind": "tap",
+      "screenKey": "428533996fd7",
+      "fingerprint": "3052954e33a7b13732d294e6d02407e947bd9f9b9d8bb3deb544b323a4e731fb",
+      "url": "https://solicitudedigitalesdev/cuentas",
+      "target": {
+        "label": "control",
+        "role": "checkbox",
+        "tag": "span",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "checkbox|Acepto los Términos y Condiciones de la Aplicación Móvil, Web, Portal(es) y/o Pl",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#base-ui-_r_1i_",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "base-ui-_r_1i_",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#base-ui-_r_1i_",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "span",
+                "role": "checkbox"
+              },
+              "stableDirectAttributes": {
+                "aria-labelledby": "el_AcceptTermsAndConditions",
+                "id": "base-ui-_r_1i_",
+                "role": "checkbox"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "el_AcceptTermsAndConditions"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"span\",\"role\":\"checkbox\"},\"stableDirectAttributes\":{\"id\":\"base-ui-_r_1i_\",\"role\":\"checkbox\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": false,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "checkbox",
+          "normalizedName": "Acepto los Términos y Condiciones de la Aplicación Móvil, Web, Portal(es) y/o Plataforma(s) Digitales y los Términos y Condiciones de Uso e Intercambio de Información Personal. Al continuar con este proceso, autorizo a EL BANCO a: a) recopilar, capturar y utilizar mis datos biométricos como mecanismos alternos de autenticación e identificación; b) a consultar mis datos en el Maestro de Cedulados de la Junta Central Electoral, el buró de crédito y en la Tesorería de Seguridad Social (TSS); c) Compartir, entregar y transmitir mi información de carácter personal: Nombre, Apellido, Cédula de Identidad, Correo Electrónico y Teléfonos con entidades y organismos públicos y gubernamentales a los fines de cumplir con la legislación y normativa aplicable.",
+          "targetTag": "span",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "el_AcceptTermsAndConditions"
+          },
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 12
+    },
+    {
+      "t": 17553,
+      "kind": "tap",
+      "screenKey": "428533996fd7",
+      "fingerprint": "3052954e33a7b13732d294e6d02407e947bd9f9b9d8bb3deb544b323a4e731fb",
+      "url": "https://solicitudedigitalesdev/cuentas",
+      "target": {
+        "label": "control",
+        "role": "checkbox",
+        "tag": "input",
+        "associatedField": "AtrásContinuar",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "#x_AcceptTermsAndConditions",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "x_AcceptTermsAndConditions",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#x_AcceptTermsAndConditions",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "input"
+              },
+              "stableDirectAttributes": {
+                "id": "x_AcceptTermsAndConditions"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "el_AcceptTermsAndConditions"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"input\"},\"stableDirectAttributes\":{\"id\":\"x_AcceptTermsAndConditions\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": false,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 13
+    },
+    {
+      "t": 18379,
+      "interactionId": "pointer-5",
+      "kind": "note",
+      "screenKey": "428533996fd7",
+      "fingerprint": "3052954e33a7b13732d294e6d02407e947bd9f9b9d8bb3deb544b323a4e731fb",
+      "url": "https://solicitudedigitalesdev/cuentas",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Continuar\"",
+      "observationType": "pointer",
+      "seq": 14
+    },
+    {
+      "t": 18493,
+      "interactionId": "pointer-5",
+      "kind": "tap",
+      "screenKey": "428533996fd7",
+      "fingerprint": "3052954e33a7b13732d294e6d02407e947bd9f9b9d8bb3deb544b323a4e731fb",
+      "url": "https://solicitudedigitalesdev/cuentas",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Continuar",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#btn-identity-validate",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "btn-identity-validate",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#btn-identity-validate",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "btn-identity-validate"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"circle\",1],[\"path\",1],[\"span\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "_r_1c_"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-identity-validate\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"path\\\",1],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 15
+    },
+    {
+      "t": 19719,
+      "kind": "navigate",
+      "screenKey": "428533996fd7",
+      "url": "https://solicitudedigitalesdev/validate?from=/cuentas&method=getClientInfo&productSlug=cuenta-de-ahorros-personal-en-pesos&docType=",
+      "seq": 16
+    },
+    {
+      "t": 19789,
+      "kind": "navigate",
+      "screenKey": "428533996fd7",
+      "url": "https://solicitudedigitalesdev/cuentas?method=getClientInfo&productSlug=cuenta-de-ahorros-personal-en-pesos",
+      "seq": 17
+    },
+    {
+      "t": 20268,
+      "kind": "navigate",
+      "screenKey": "428533996fd7",
+      "url": "https://solicitudedigitalesdev/cuentas?method=getClientInfo&productSlug=cuenta-de-ahorros-personal-en-pesos",
+      "seq": 18
+    },
+    {
+      "t": 21097,
+      "interactionId": "pointer-6",
+      "kind": "note",
+      "screenKey": "428533996fd7",
+      "fingerprint": "ee90c082c6223212b735e3c1ecf4464600a71d038984604b640abc65139b1995",
+      "url": "https://solicitudedigitalesdev/cuentas?method=getClientInfo&productSlug=cuenta-de-ahorros-personal-en-pesos",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Continuar\"",
+      "observationType": "pointer",
+      "seq": 19
+    },
+    {
+      "t": 21224,
+      "interactionId": "pointer-6",
+      "kind": "tap",
+      "screenKey": "428533996fd7",
+      "fingerprint": "ee90c082c6223212b735e3c1ecf4464600a71d038984604b640abc65139b1995",
+      "url": "https://solicitudedigitalesdev/cuentas?method=getClientInfo&productSlug=cuenta-de-ahorros-personal-en-pesos",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Continuar",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#btn-identity-confirm-and-continue",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "btn-identity-confirm-and-continue",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#btn-identity-confirm-and-continue",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "btn-identity-confirm-and-continue"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"circle\",1],[\"path\",1],[\"span\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "_r_2e_"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-identity-confirm-and-continue\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"path\\\",1],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 20
+    },
+    {
+      "t": 21394,
+      "kind": "navigate",
+      "screenKey": "428533996fd7",
+      "url": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "seq": 21
+    },
+    {
+      "t": 23264,
+      "interactionId": "pointer-7",
+      "kind": "tap",
+      "screenKey": "428533996fd7",
+      "fingerprint": "1575a5069fe96a116a3a282a3fded8d3dc902fec85e1326c23a6e5a56168978f",
+      "url": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "target": {
+        "label": "Seleccione",
+        "tag": "div",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "div:has(input[id=\"react-select-6-input\"])",
+            "confidence": 0.55
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Seleccione",
+          "targetTag": "div",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(input[id=\"react-select-6-input\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Seleccione",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(input[id=\"react-select-6-input\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 22
+    },
+    {
+      "t": 23422,
+      "interactionId": "pointer-8",
+      "kind": "tap",
+      "screenKey": "428533996fd7",
+      "fingerprint": "1575a5069fe96a116a3a282a3fded8d3dc902fec85e1326c23a6e5a56168978f",
+      "url": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "target": {
+        "label": "829-***-0396",
+        "role": "option",
+        "tag": "div",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "option|829-***-0396",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#react-select-6-option-1",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "react-select-6-option-1",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#react-select-6-option-1",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "div",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "id": "react-select-6-option-1",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "react-select-6-listbox"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"div\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"react-select-6-option-1\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "829-***-0396",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "react-select-6-listbox"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 23
+    },
+    {
+      "t": 23428,
+      "interactionId": "pointer-8",
+      "kind": "note",
+      "screenKey": "428533996fd7",
+      "fingerprint": "1575a5069fe96a116a3a282a3fded8d3dc902fec85e1326c23a6e5a56168978f",
+      "url": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "target": {
+        "label": "829-***-0396",
+        "role": "option",
+        "tag": "div",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "829-***-0396",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "react-select-6-listbox"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"829-***-0396\"",
+      "observationType": "pointer",
+      "seq": 24
+    },
+    {
+      "t": 23929,
+      "interactionId": "pointer-9",
+      "kind": "note",
+      "screenKey": "428533996fd7",
+      "fingerprint": "1575a5069fe96a116a3a282a3fded8d3dc902fec85e1326c23a6e5a56168978f",
+      "url": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "target": {
+        "label": "Enviar",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Enviar",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Enviar\"",
+      "observationType": "pointer",
+      "seq": 25
+    },
+    {
+      "t": 24161,
+      "interactionId": "pointer-9",
+      "kind": "tap",
+      "screenKey": "428533996fd7",
+      "fingerprint": "1575a5069fe96a116a3a282a3fded8d3dc902fec85e1326c23a6e5a56168978f",
+      "url": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "target": {
+        "label": "Enviar",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Enviar",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#btn-send-sms-otp",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "btn-send-sms-otp",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#btn-send-sms-otp",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "btn-send-sms-otp"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Enviar",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 26
+    },
+    {
+      "t": 28141,
+      "kind": "fill",
+      "screenKey": "428533996fd7",
+      "fingerprint": "1575a5069fe96a116a3a282a3fded8d3dc902fec85e1326c23a6e5a56168978f",
+      "url": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "target": {
+        "label": "Please enter verification code. Digit 1",
+        "role": "input",
+        "tag": "input",
+        "inputType": "tel",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Please enter verification code. Digit 1",
+            "confidence": 0.85
+          }
+        ],
+        "rawTypedValue": "1",
+        "sensitive": false
+      },
+      "value": "1",
+      "valueSource": "user",
+      "seq": 27
+    },
+    {
+      "t": 28397,
+      "kind": "fill",
+      "screenKey": "428533996fd7",
+      "fingerprint": "1575a5069fe96a116a3a282a3fded8d3dc902fec85e1326c23a6e5a56168978f",
+      "url": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "target": {
+        "label": "OTP digit 2",
+        "role": "input",
+        "tag": "input",
+        "inputType": "tel",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|OTP digit 2",
+            "confidence": 0.85
+          }
+        ],
+        "rawTypedValue": "2",
+        "sensitive": true
+      },
+      "value": "2",
+      "redactedKey": "otp_digit_2",
+      "valueSource": "user",
+      "seq": 28
+    },
+    {
+      "t": 28750,
+      "kind": "fill",
+      "screenKey": "428533996fd7",
+      "fingerprint": "1575a5069fe96a116a3a282a3fded8d3dc902fec85e1326c23a6e5a56168978f",
+      "url": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "target": {
+        "label": "OTP digit 3",
+        "role": "input",
+        "tag": "input",
+        "inputType": "tel",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|OTP digit 3",
+            "confidence": 0.85
+          }
+        ],
+        "rawTypedValue": "3",
+        "sensitive": true
+      },
+      "value": "3",
+      "redactedKey": "otp_digit_3",
+      "valueSource": "user",
+      "seq": 29
+    },
+    {
+      "t": 29062,
+      "kind": "fill",
+      "screenKey": "428533996fd7",
+      "fingerprint": "1575a5069fe96a116a3a282a3fded8d3dc902fec85e1326c23a6e5a56168978f",
+      "url": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "target": {
+        "label": "OTP digit 4",
+        "role": "input",
+        "tag": "input",
+        "inputType": "tel",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|OTP digit 4",
+            "confidence": 0.85
+          }
+        ],
+        "rawTypedValue": "4",
+        "sensitive": true
+      },
+      "value": "4",
+      "redactedKey": "otp_digit_4",
+      "valueSource": "user",
+      "seq": 30
+    },
+    {
+      "t": 29241,
+      "kind": "fill",
+      "screenKey": "428533996fd7",
+      "fingerprint": "1575a5069fe96a116a3a282a3fded8d3dc902fec85e1326c23a6e5a56168978f",
+      "url": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "target": {
+        "label": "OTP digit 5",
+        "role": "input",
+        "tag": "input",
+        "inputType": "tel",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|OTP digit 5",
+            "confidence": 0.85
+          }
+        ],
+        "rawTypedValue": "5",
+        "sensitive": true
+      },
+      "value": "5",
+      "redactedKey": "otp_digit_5",
+      "valueSource": "user",
+      "seq": 31
+    },
+    {
+      "t": 31124,
+      "interactionId": "pointer-10",
+      "kind": "note",
+      "screenKey": "428533996fd7",
+      "fingerprint": "1575a5069fe96a116a3a282a3fded8d3dc902fec85e1326c23a6e5a56168978f",
+      "url": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "target": {
+        "label": "Verificar",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Verificar\"",
+      "observationType": "pointer",
+      "seq": 32
+    },
+    {
+      "t": 31163,
+      "kind": "fill",
+      "screenKey": "428533996fd7",
+      "fingerprint": "1575a5069fe96a116a3a282a3fded8d3dc902fec85e1326c23a6e5a56168978f",
+      "url": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "target": {
+        "label": "OTP digit 6",
+        "role": "input",
+        "tag": "input",
+        "inputType": "tel",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|OTP digit 6",
+            "confidence": 0.85
+          }
+        ],
+        "rawTypedValue": "6",
+        "sensitive": true
+      },
+      "value": "6",
+      "redactedKey": "otp_digit_6",
+      "valueSource": "user",
+      "seq": 33
+    },
+    {
+      "t": 31365,
+      "interactionId": "pointer-10",
+      "kind": "tap",
+      "screenKey": "428533996fd7",
+      "fingerprint": "1575a5069fe96a116a3a282a3fded8d3dc902fec85e1326c23a6e5a56168978f",
+      "url": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "target": {
+        "label": "Verificar",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Verificar",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#btn-validate-sms-otp",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "btn-validate-sms-otp",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#btn-validate-sms-otp",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "btn-validate-sms-otp"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 34
+    },
+    {
+      "t": 31418,
+      "kind": "navigate",
+      "screenKey": "428533996fd7",
+      "url": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "seq": 35
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "0b23ab3287d9",
+      "title": "0b23ab3287d9",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://solicitudedigitalesdev/",
+      "firstSeenAt": 1255,
+      "controls": [],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "1e31e8f1f5de",
+      "title": "Solicita un nuevo producto",
+      "fingerprint": "c446cf54deaef16ae1773943cdbcdd823b7662d20276171a106ce509a4beae8a",
+      "url": "https://solicitudedigitalesdev/",
+      "firstSeenAt": 7794,
+      "controls": [
+        {
+          "label": "Obtener nuestra APP",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "Obtener nuestra APP"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Obtener nuestra APP",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cuenta",
+          "role": "button",
+          "tag": "a",
+          "attributes": {
+            "id": "nav-item-cuentas",
+            "role": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "nav-item-cuentas",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Tarjeta de Crédito",
+          "role": "button",
+          "tag": "a",
+          "attributes": {
+            "id": "nav-item-tarjetas-de-credito",
+            "role": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "nav-item-tarjetas-de-credito",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Préstamo",
+          "role": "button",
+          "tag": "a",
+          "attributes": {
+            "id": "nav-item-prestamos",
+            "role": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "nav-item-prestamos",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Depósito a plazo",
+          "role": "button",
+          "tag": "a",
+          "attributes": {
+            "id": "nav-item-depositos-a-plazos",
+            "role": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "nav-item-depositos-a-plazos",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Slide 1",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Slide 1"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Slide 1",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Slide 2",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Slide 2"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Slide 2",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Slide 3",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Slide 3"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Slide 3",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Previous",
+          "role": "button",
+          "tag": "a",
+          "attributes": {
+            "role": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Previous",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Next",
+          "role": "button",
+          "tag": "a",
+          "attributes": {
+            "role": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Next",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Instagram",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "Instagram"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Instagram",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Facebook",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "Facebook"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Facebook",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "LinkedIn",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "LinkedIn"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "LinkedIn",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Superintendencia de Bancos - Entidad autorizada",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "Superintendencia de Bancos - Entidad autorizada"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Superintendencia de Bancos - Entidad autorizada",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Quiénes Somos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Quiénes Somos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Productos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Productos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Contactos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Contactos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Pasos Reclamación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Pasos Reclamación",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Solicita un nuevo producto"
+      ],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "428533996fd7",
+      "title": "Selecciona la cuenta de tu preferencia",
+      "fingerprint": "ee90c082c6223212b735e3c1ecf4464600a71d038984604b640abc65139b1995",
+      "url": "https://solicitudedigitalesdev/cuentas",
+      "firstSeenAt": 7970,
+      "controls": [
+        {
+          "label": "Obtener nuestra APP",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "Obtener nuestra APP"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Obtener nuestra APP",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Comparar cuentas",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "btn-compare-products",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "btn-compare-products",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Visualización",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "btn-display",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "btn-display",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Más detalles",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "btn-ver-cuenta-de-ahorros-personal-en-pesos",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "btn-ver-cuenta-de-ahorros-personal-en-pesos",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Agregar para comparar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "btn-comparar-cuenta-de-ahorros-personal-en-pesos",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "btn-comparar-cuenta-de-ahorros-personal-en-pesos",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Continuar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "btn-solicitar-cuenta-de-ahorros-personal-en-pesos",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "btn-solicitar-cuenta-de-ahorros-personal-en-pesos",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Conoce más acerca de los costos asociados a nuestros productos y servicios",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Conoce más acerca de los costos asociados a nuestros productos y servicios  haciendo clic aquí.",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cerrar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Cerrar"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cerrar",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Instagram",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "Instagram"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Instagram",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Facebook",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "Facebook"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Facebook",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "LinkedIn",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "LinkedIn"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "LinkedIn",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Superintendencia de Bancos - Entidad autorizada",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "Superintendencia de Bancos - Entidad autorizada"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Superintendencia de Bancos - Entidad autorizada",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Quiénes Somos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Quiénes Somos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Productos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Productos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Contactos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Contactos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Pasos Reclamación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Pasos Reclamación",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Selecciona la cuenta de tu preferencia"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 4,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "e5ca713c947a",
+      "title": "Datos personales",
+      "fingerprint": "1575a5069fe96a116a3a282a3fded8d3dc902fec85e1326c23a6e5a56168978f",
+      "url": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "firstSeenAt": 21523,
+      "controls": [
+        {
+          "label": "Obtener nuestra APP",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "Obtener nuestra APP"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Obtener nuestra APP",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "OTP digit 1",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "type": "text",
+            "aria-label": "OTP digit 1"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "OTP digit 1",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "OTP digit 2",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "type": "text",
+            "aria-label": "OTP digit 2"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "OTP digit 2",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "OTP digit 3",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "type": "text",
+            "aria-label": "OTP digit 3"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "OTP digit 3",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "OTP digit 4",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "type": "text",
+            "aria-label": "OTP digit 4"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "OTP digit 4",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "OTP digit 5",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "type": "text",
+            "aria-label": "OTP digit 5"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "OTP digit 5",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "OTP digit 6",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "type": "text",
+            "aria-label": "OTP digit 6"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "OTP digit 6",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Enviar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "btn-send-sms-otp",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "btn-send-sms-otp",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "¿Tus datos se encuentran desactualizados?",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "btn-outdated-contact-data",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "btn-outdated-contact-data",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Atrás",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "btn-go-back",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "btn-go-back",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Continuar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "btn-continue",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "btn-continue",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Instagram",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "Instagram"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Instagram",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Facebook",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "Facebook"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Facebook",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "LinkedIn",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "LinkedIn"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "LinkedIn",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Superintendencia de Bancos - Entidad autorizada",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "Superintendencia de Bancos - Entidad autorizada"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Superintendencia de Bancos - Entidad autorizada",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Quiénes Somos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Quiénes Somos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Productos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Productos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Contactos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Contactos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Pasos Reclamación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Pasos Reclamación",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Datos personales"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 3,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "58501b3f747c",
+      "title": "Datos personales",
+      "fingerprint": "1575a5069fe96a116a3a282a3fded8d3dc902fec85e1326c23a6e5a56168978f",
+      "url": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "firstSeenAt": 24278,
+      "controls": [
+        {
+          "label": "Obtener nuestra APP",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "Obtener nuestra APP"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Obtener nuestra APP",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "OTP digit 1",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "type": "text",
+            "aria-label": "OTP digit 1"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "OTP digit 1",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "OTP digit 2",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "type": "text",
+            "aria-label": "OTP digit 2"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "OTP digit 2",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "OTP digit 3",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "type": "text",
+            "aria-label": "OTP digit 3"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "OTP digit 3",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "OTP digit 4",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "type": "text",
+            "aria-label": "OTP digit 4"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "OTP digit 4",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "OTP digit 5",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "type": "text",
+            "aria-label": "OTP digit 5"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "OTP digit 5",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "OTP digit 6",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "type": "text",
+            "aria-label": "OTP digit 6"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "OTP digit 6",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cargando...Enviar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "btn-send-sms-otp",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "btn-send-sms-otp",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "¿Tus datos se encuentran desactualizados?",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "btn-outdated-contact-data",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "btn-outdated-contact-data",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Atrás",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "btn-go-back",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "btn-go-back",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Continuar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "btn-continue",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "btn-continue",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Instagram",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "Instagram"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Instagram",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Facebook",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "Facebook"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Facebook",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "LinkedIn",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "LinkedIn"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "LinkedIn",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Superintendencia de Bancos - Entidad autorizada",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "Superintendencia de Bancos - Entidad autorizada"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Superintendencia de Bancos - Entidad autorizada",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Quiénes Somos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Quiénes Somos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Productos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Productos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Contactos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Contactos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Pasos Reclamación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Pasos Reclamación",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Datos personales"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 3,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "394bb25d51e0",
+      "title": "Datos personales",
+      "fingerprint": "89d3eb740b9336d2730400fd88bfb3ed981a44e8eeac257e7096969e9d43eff8",
+      "url": "https://solicitudedigitalesdev/producto/cuenta-de-ahorros-personal-en-pesos",
+      "firstSeenAt": 31498,
+      "controls": [
+        {
+          "label": "Obtener nuestra APP",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "Obtener nuestra APP"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Obtener nuestra APP",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "OTP digit 1",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "type": "text",
+            "aria-label": "OTP digit 1"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "OTP digit 1",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "OTP digit 2",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "type": "text",
+            "aria-label": "OTP digit 2"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "OTP digit 2",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "OTP digit 3",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "type": "text",
+            "aria-label": "OTP digit 3"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "OTP digit 3",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "OTP digit 4",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "type": "text",
+            "aria-label": "OTP digit 4"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "OTP digit 4",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "OTP digit 5",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "type": "text",
+            "aria-label": "OTP digit 5"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "OTP digit 5",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "OTP digit 6",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "type": "text",
+            "aria-label": "OTP digit 6"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "OTP digit 6",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "56",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "btn-resend-sms-otp",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "btn-resend-sms-otp",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Verificar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "btn-validate-sms-otp",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "btn-validate-sms-otp",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "¿Tus datos se encuentran desactualizados?",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "btn-outdated-contact-data",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "btn-outdated-contact-data",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Atrás",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "btn-go-back",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "btn-go-back",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Continuar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "btn-continue",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "btn-continue",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Instagram",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "Instagram"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Instagram",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Facebook",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "Facebook"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Facebook",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "LinkedIn",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "LinkedIn"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "LinkedIn",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Superintendencia de Bancos - Entidad autorizada",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "Superintendencia de Bancos - Entidad autorizada"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Superintendencia de Bancos - Entidad autorizada",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Quiénes Somos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Quiénes Somos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Productos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Productos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Contactos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Contactos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Pasos Reclamación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Pasos Reclamación",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Datos personales"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 3,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    }
+  ],
+  "endedAt": "2026-10-20T16:48:14.116Z",
+  "durationMs": 39822
+}

@@ -22,6 +22,10 @@ export type PermissionKey =
   | "recordings.promote"
   | "executions.view"
   | "executions.export"
+  | "testdesign.view"
+  | "testdesign.generate"
+  | "testdesign.publish_testrail"
+  | "testdesign.publish_jira"
   | "admin.users"
   | "admin.roles";
 
@@ -139,6 +143,32 @@ export const PERMISSION_MODULES: PermissionModule[] = [
     ],
   },
   {
+    key: "testdesign",
+    label: "Diseño de pruebas",
+    permissions: [
+      {
+        key: "testdesign.view",
+        label: "Ver diseño de pruebas",
+        description: "Acceder al módulo y consultar los borradores de escenarios",
+      },
+      {
+        key: "testdesign.generate",
+        label: "Generar y editar escenarios",
+        description: "Generar escenarios con IA desde historias de Jira, editarlos y guardar borradores",
+      },
+      {
+        key: "testdesign.publish_testrail",
+        label: "Subir a TestRail",
+        description: "Crear o actualizar en TestRail los casos seleccionados",
+      },
+      {
+        key: "testdesign.publish_jira",
+        label: "Publicar en Jira",
+        description: "Crear o actualizar la sub-tarea de casos de prueba en la historia de Jira",
+      },
+    ],
+  },
+  {
     key: "admin",
     label: "Administración",
     permissions: [
@@ -222,6 +252,8 @@ export const SYSTEM_ROLES: SystemRoleDefinition[] = [
       "recordings.derive",
       "executions.view",
       "executions.export",
+      "testdesign.view",
+      "testdesign.generate",
     ],
   },
   {

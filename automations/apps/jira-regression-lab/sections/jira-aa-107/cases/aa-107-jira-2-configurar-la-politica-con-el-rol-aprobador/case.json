@@ -1,0 +1,9 @@
+{
+  "id": "aa-107-jira-2-configurar-la-politica-con-el-rol-aprobador",
+  "externalId": "AA-107:jira:2",
+  "title": "Configurar la política con el rol Aprobador",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-19T01:29:30.540Z"
+}

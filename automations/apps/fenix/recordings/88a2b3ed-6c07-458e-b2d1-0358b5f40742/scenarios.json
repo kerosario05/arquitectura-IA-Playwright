@@ -140,7 +140,7 @@
           "event-7"
         ],
         "stepTemplate": "Ingresar [rnc] en \"RNC:\"",
-        "renderedStep": "Ingresar \"130047596\" en \"RNC:\"",
+        "renderedStep": "Ingresar \"130598983\" en \"RNC:\"",
         "valueKey": "rnc",
         "interactionId": "interaction-7",
         "sensitive": false,
@@ -158,7 +158,7 @@
           "event-9"
         ],
         "stepTemplate": "Ingresar [usuario] en \"Usuario:\"",
-        "renderedStep": "Ingresar \"jpmota\" en \"Usuario:\"",
+        "renderedStep": "Ingresar \"olivam\" en \"Usuario:\"",
         "valueKey": "usuario",
         "interactionId": "interaction-9",
         "sensitive": false,
@@ -1187,7 +1187,7 @@
       "oracleReadiness": true,
       "reviewReadiness": true,
       "publicationContentReadiness": true,
-      "executionReadiness": false,
+      "executionReadiness": true,
       "publicationReadiness": true,
       "missingInputs": [],
       "datasetAuthorityMismatches": [],
@@ -1200,8 +1200,8 @@
         "semanticField": "RNC:",
         "valueRole": "action_input",
         "required": true,
-        "value": "130047596",
-        "source": "RECORDED_CONFIRMED",
+        "value": "130598983",
+        "source": "CURRENT_QA_EDIT",
         "resolved": true,
         "sensitive": false,
         "stepIndex": 2,
@@ -1210,8 +1210,8 @@
         "systemGenerated": false,
         "masked": false,
         "editable": true,
-        "authority": "canonical_logical",
-        "authorityValue": "130047596",
+        "authority": "explicit_qa_edit",
+        "authorityValue": "130598983",
         "datasetAuthorityMismatch": false
       },
       {
@@ -1219,8 +1219,8 @@
         "semanticField": "Usuario:",
         "valueRole": "action_input",
         "required": true,
-        "value": "jpmota",
-        "source": "RECORDED_CONFIRMED",
+        "value": "olivam",
+        "source": "CURRENT_QA_EDIT",
         "resolved": true,
         "sensitive": false,
         "stepIndex": 3,
@@ -1229,8 +1229,8 @@
         "systemGenerated": false,
         "masked": false,
         "editable": true,
-        "authority": "canonical_logical",
-        "authorityValue": "jpmota",
+        "authority": "explicit_qa_edit",
+        "authorityValue": "olivam",
         "datasetAuthorityMismatch": false
       },
       {
@@ -1281,8 +1281,8 @@
           "semanticField": "RNC:",
           "valueRole": "action_input",
           "required": true,
-          "value": "130047596",
-          "source": "RECORDED_CONFIRMED",
+          "value": "130598983",
+          "source": "CURRENT_QA_EDIT",
           "resolved": true,
           "sensitive": false,
           "stepIndex": 2,
@@ -1291,8 +1291,8 @@
           "systemGenerated": false,
           "masked": false,
           "editable": true,
-          "authority": "canonical_logical",
-          "authorityValue": "130047596",
+          "authority": "explicit_qa_edit",
+          "authorityValue": "130598983",
           "datasetAuthorityMismatch": false
         },
         {
@@ -1300,8 +1300,8 @@
           "semanticField": "Usuario:",
           "valueRole": "action_input",
           "required": true,
-          "value": "jpmota",
-          "source": "RECORDED_CONFIRMED",
+          "value": "olivam",
+          "source": "CURRENT_QA_EDIT",
           "resolved": true,
           "sensitive": false,
           "stepIndex": 3,
@@ -1310,8 +1310,8 @@
           "systemGenerated": false,
           "masked": false,
           "editable": true,
-          "authority": "canonical_logical",
-          "authorityValue": "jpmota",
+          "authority": "explicit_qa_edit",
+          "authorityValue": "olivam",
           "datasetAuthorityMismatch": false
         },
         {
@@ -1355,8 +1355,8 @@
         }
       ],
       "resolvedValues": {
-        "rnc": "130047596",
-        "usuario": "jpmota",
+        "rnc": "130598983",
+        "usuario": "olivam",
         "contrasena": "qwerty123123",
         "sms": "123456"
       },
@@ -1425,7 +1425,7 @@
       "specHash": "be4cd8868a6db0d2664357c96c6907444d46cec281aed61586780701f6a27e71",
       "automationId": "preview-001-login-sastifactorio",
       "sectionSlug": "default-section",
-      "generatedAt": "2026-10-07T21:47:03.713Z"
+      "generatedAt": "2026-10-19T14:50:44.842Z"
     }
   }
 ]

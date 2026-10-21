@@ -1,0 +1,24 @@
+{
+  "appProfile": {
+    "appSlug": "portal-ventas-digital",
+    "source": "default",
+    "name": "solicitudedigitalesdev",
+    "baseUrl": "https://solicitudedigitalesdev/",
+    "baseUrlHash": "e77c9768c372",
+    "createdAt": "2026-10-20T19:21:23.123Z",
+    "updatedAt": "2026-10-20T19:21:23.123Z",
+    "ignoreHTTPSErrors": true
+  },
+  "baseUrl": "https://solicitudedigitalesdev/",
+  "loginMode": "password",
+  "testData": {},
+  "testDataAliases": {},
+  "testDataRefs": {},
+  "username": "adminr",
+  "password": "admin123",
+  "usernameRef": "APP_USERNAME",
+  "passwordRef": "APP_PASSWORD",
+  "missingInputBehavior": "auto_generate",
+  "ignoreHTTPSErrors": true,
+  "updatedAt": "2026-10-20T19:21:23.123Z"
+}

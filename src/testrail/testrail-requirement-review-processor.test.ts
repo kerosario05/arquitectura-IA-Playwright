@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { processApprovedRequirementReview } from "./testrail-requirement-review-processor";
+import type { RequirementReviewProcessorDependencies } from "./testrail-requirement-review-processor";
 
 const requirement = {
   key: "auth.password",
@@ -19,7 +20,7 @@ function deps(status: "pending" | "approved" | "rejected", proposals: any[] = [p
     approveProposals: () => ({ caseId: 801, approvedRequirements: status === "approved" ? [requirement] : [], status: status === "approved" ? "approved" : "rejected" }),
     sync: async (input: any) => { calls.sync.push(input); return { requirements: [requirement] }; },
     updateCase: async (caseId: number, input: any) => { calls.update.push({ caseId, input }); return { id: caseId, title: "Fixture" }; },
-  };
+  } as unknown as RequirementReviewProcessorDependencies & { calls: any };
 }
 
 describe("approved TestRail requirement review processor", () => {

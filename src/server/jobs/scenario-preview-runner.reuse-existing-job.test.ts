@@ -23,7 +23,7 @@ async function test(label: string, fn: AsyncTestFn): Promise<void> {
 }
 
 function scenario(overrides: Partial<ReuseExistingPromotedSpecScenario> = {}): ReuseExistingPromotedSpecScenario {
-  return { scenarioId: "REC-A1DCF6A5-01", caseId: 46735, specPath: "automations/apps/kiosko/sections/default-section/cases/preview-001-kiosko2/case.spec.ts", title: "Kiosko2", ...overrides };
+  return { scenarioId: "REC-A1DCF6A5-01", caseId: 46735, specPath: "automations/apps/kiosko/sections/default-section/cases/preview-001-kiosko2/case.spec.ts", title: "Kiosko2", steps: ["Abrir la aplicación", "Presionar Iniciar"], ...overrides };
 }
 
 function fakeVerify(outcomeByScenarioId: Record<string, "passed" | "failed">, calls: Array<{ specPath: string; options?: VerifyPromotedSpecOptions }>) {
@@ -105,8 +105,8 @@ async function main(): Promise<void> {
     assert.strictEqual(finalJob.status, "completed_with_failures");
   });
 
-  // case_started is emitted with the right scenario identity before verification runs.
-  await test("case_started is logged with the scenario's identity before verification", async () => {
+  // case_started is emitted with the right identity and ordered step list before verification runs.
+  await test("case_started is logged with the scenario identity and steps before verification", async () => {
     const calls: Array<{ specPath: string; options?: VerifyPromotedSpecOptions }> = [];
     const job = jobStore.create("scenario-preview", { scenarios: [scenario()], executionMode: "reuse_existing_promoted_spec" });
     await startReuseExistingPromotedSpecRun(job.id, fakeVerify({}, calls));
@@ -117,6 +117,25 @@ async function main(): Promise<void> {
     const parsed = JSON.parse(caseStartedLog!);
     assert.strictEqual(parsed.caseId, "REC-A1DCF6A5-01");
     assert.strictEqual(parsed.title, "Kiosko2");
+    assert.deepStrictEqual(parsed.steps, ["Abrir la aplicación", "Presionar Iniciar"]);
+  });
+
+  await test("live reuse logs preserve step progress and compact repetitive child output", async () => {
+    const job = jobStore.create("scenario-preview", { scenarios: [scenario()], executionMode: "reuse_existing_promoted_spec" });
+    const verify = async (_specPath: string, _timeoutMs?: number, options?: VerifyPromotedSpecOptions) => {
+      options?.onOutput?.({ stream: "stdout", line: "[promoted-step] stepIndex=1 phase=start currentUrl=https://test.local" });
+      options?.onOutput?.({ stream: "stdout", line: "[resolver] repeated verbose diagnostic line" });
+      options?.onOutput?.({ stream: "stderr", line: "repeated warning" });
+      options?.onOutput?.({ stream: "stdout", line: "[promoted-step] stepIndex=1 phase=passed currentUrl=https://test.local" });
+      return { status: "passed" as const };
+    };
+    await startReuseExistingPromotedSpecRun(job.id, verify);
+
+    const logs = jobStore.get(job.id)!.logs;
+    assert.ok(logs.some((line) => line === "[promoted-step] stepIndex=1 phase=start"));
+    assert.ok(logs.some((line) => line === "[promoted-step] stepIndex=1 phase=passed"));
+    assert.ok(logs.some((line) => line.includes("childOutputCompacted") && line.includes("suppressedLines=2")));
+    assert.ok(!logs.some((line) => line.includes("repeated verbose diagnostic line") || line.includes("repeated warning")));
   });
 
   // Never invokes discovery/AI/generation machinery — nothing beyond `verify` is called at

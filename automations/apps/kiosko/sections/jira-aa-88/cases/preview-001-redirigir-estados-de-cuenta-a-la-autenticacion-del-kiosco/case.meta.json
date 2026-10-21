@@ -1,0 +1,8 @@
+{
+  "appSlug": "kiosko",
+  "sectionSlug": "jira-aa-88",
+  "sourceScenarioId": "PREVIEW-001",
+  "title": "Redirigir Estados de cuenta a la autenticación del kiosco",
+  "generatedAt": "2026-10-09T19:46:43.626Z",
+  "executionEngine": "jira_semantic"
+}

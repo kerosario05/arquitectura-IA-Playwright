@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { randomUUID } from "crypto";
-import { loadAutomationIndex } from "../../automations/automation-index";
+import { linkJiraAutomationToTestRailCase, loadAutomationIndex } from "../../automations/automation-index";
 import { normalizeAppSlug } from "../../automations/app-profile";
 import { config, requireTestRailConfig } from "../../config/env";
 import { TestRailClient } from "../../clients/testrail.client";
@@ -16,11 +16,14 @@ import { buildRediscoveryProvenanceLine, startDiscoveryBatchRun, validatePromote
 import { buildMcpScenarioContractFromTestRailCase, evaluateCaseContractSufficiency, extractCaseContractMetadata } from "../../automations/case-contract-evaluator";
 import { normalizeTestRailCase } from "../../testrail/testrail-normalizer";
 import type { RawTestRailCase } from "../../types/testrail.types";
+import {resolveExecutionEngine,type ExecutionOrigin,type ExecutionEngine} from '../../jira/execution-origin';
 
 const ROOT = path.resolve(__dirname, "..", "..", "..");
 const LAUNCH_ARTIFACTS_DIR = path.join(ROOT, ".artifacts", "scenario-launch-runs");
 
 export type LaunchScenario = {
+  recordingId?: string;
+  recordingExecutionContract?: unknown;
   scenarioId: string;
   title: string;
   steps: string[];
@@ -49,6 +52,8 @@ export type LaunchScenario = {
 };
 
 export type LaunchExecutionInput = {
+  executionEngine?: ExecutionEngine;
+  scenarioOrigin?: ExecutionOrigin;
   appSlug: string;
   sectionSlug?: string;
   sectionName?: string;
@@ -65,6 +70,8 @@ export type LaunchExecutionInput = {
   overwrite?: boolean;
   contextOnly?: boolean;
   runtimeEntriesByCase?: Record<string, DataContextEntry[]>;
+  /** Jira per-scenario overrides: scenarioId -> step key -> value. Forwarded intact to the child job. */
+  dataOverrides?: Record<string, Record<string, string>>;
   adaptiveScenarios?: LaunchScenario[];
   publishStrategy?: "always_create" | "use_existing";
 };
@@ -114,8 +121,16 @@ export function buildDiscoveryBatchParamsFromLaunch(input: {
     testRunId: input.testRunId,
     jiraKey: input.launch.jiraKey,
     publishedCases: input.publishedCases,
+    ...(input.launch.executionEngine === "jira_semantic" && input.launch.scenarioOrigin
+      ? {
+        executionEngine: input.launch.executionEngine,
+        scenarioOrigin: input.launch.scenarioOrigin,
+        jiraSemanticScenarios: input.launch.selectedScenarios,
+      }
+      : {}),
     ...(input.launch.contextOnly === true ? { contextOnly: true } : {}),
     ...(input.launch.runtimeEntriesByCase ? { runtimeEntriesByCase: input.launch.runtimeEntriesByCase } : {}),
+    ...(input.launch.dataOverrides ? { dataOverrides: input.launch.dataOverrides } : {}),
     ...(input.routeProfile ? { routeProfile: input.routeProfile } : {}),
   };
 
@@ -218,7 +233,7 @@ function hasCompleteStructuredAdaptiveMetadata(scenario: LaunchScenario): boolea
   return Boolean(branchId && scenario.functionalBranch && requirementRefs.length > 0);
 }
 
-export function partitionLaunchScenarios(scenarios: LaunchScenario[]): {
+export function partitionLaunchScenarios(scenarios: LaunchScenario[], engine:ExecutionEngine|'legacy'='legacy'): {
   standard: LaunchScenario[];
   adaptiveFunctional: LaunchScenario[];
   routeDiscovery: LaunchScenario[];
@@ -229,7 +244,11 @@ export function partitionLaunchScenarios(scenarios: LaunchScenario[]): {
   const adaptiveFunctional: LaunchScenario[] = [];
   const nonAutomatable: LaunchScenario[] = [];
   for (const scenario of scenarios) {
-    if (classifyRouteDiscoveryEligibility(scenario).allowed) routeDiscovery.push(scenario);
+    if(engine==='jira_semantic') {
+      if(scenario.validation?.valid!==true || scenario.nonAutomatable===true || scenario.launchClassification==='nonAutomatable') nonAutomatable.push(scenario);
+      else standard.push(scenario); // Publication admission, not runtime/spec certification.
+    }
+    else if (classifyRouteDiscoveryEligibility(scenario).allowed) routeDiscovery.push(scenario);
     else if (classifyLaunchScenarioAuthority(scenario) === "nonAutomatable") nonAutomatable.push(scenario);
     else if (classifyLaunchScenarioAuthority(scenario) === "standard") standard.push(scenario);
     else adaptiveFunctional.push(scenario);
@@ -328,6 +347,20 @@ function extractPublishedCaseId(value: unknown): number | undefined {
     ?? extractPublishedCaseId(record.testRailCaseId)
     ?? extractPublishedCaseId(record.testrailCaseId)
     ?? extractPublishedCaseId(record.id);
+}
+
+/** Jira semantic launches also run newly published standard cases through the batch runner (spec reuse or Discovery fallback). */
+export function resolveLaunchExecutionCaseIds(input: {
+  engine?: ExecutionEngine | "legacy";
+  routeDiscoveryPublishedCases: unknown[];
+  existingPublishedCases: unknown[];
+  standardPublishedCases: unknown[];
+}): number[] {
+  return aggregateLaunchCaseIds(
+    input.routeDiscoveryPublishedCases,
+    input.existingPublishedCases,
+    input.engine === "jira_semantic" ? input.standardPublishedCases : [],
+  );
 }
 
 export function aggregateLaunchCaseIds(...sources: unknown[][]): number[] {
@@ -460,13 +493,14 @@ export function resolveExistingCaseExecutionPlan(input: {
     const allCandidates = input.entries.filter((entry) => entry.caseId === caseId && entry.id?.trim());
     if (allCandidates.length === 0) {
       const contract = input.caseContracts?.get(caseId);
-      const discoveryAllowed = contract?.recommendedRoute === "targeted_discovery"
-        || contract?.recommendedRoute === "full_discovery";
-      if (contract?.usable || discoveryAllowed) {
-        mcpRequired.push({ caseId, executionSource: "mcp_required", reasonCode: contract.reasonCode, mcpRequired: true });
-      } else {
-        blocked.push({ caseId, executionSource: "blocked", reasonCode: contract?.reasonCode ?? (input.caseContracts ? "case_not_found" : "automation_mapping_not_found"), mcpRequired: false });
-      }
+      // A missing promoted-spec mapping is an automatic Discovery route. Discovery
+      // remains responsible for validating the source case and deciding promotion.
+      mcpRequired.push({
+        caseId,
+        executionSource: "mcp_required",
+        reasonCode: contract?.reasonCode ?? "promoted_spec_missing",
+        mcpRequired: true,
+      });
       continue;
     }
 
@@ -499,8 +533,14 @@ export function resolveExistingCaseExecutionPlan(input: {
           sectionSlug: input.sectionSlug,
           entry,
         });
+    const jiraGeneration = entry.metadata?.specGeneration;
+    const jiraPromotionValid = entry.tags?.includes("jira_generated") === true
+      && jiraGeneration?.promotionAllowed === true
+      && jiraGeneration.specWritten === true
+      && jiraGeneration.specsValidated >= 1
+      && jiraGeneration.specsRejected === 0;
     const promotionValid = entry.status === "active"
-      && entry.pomStatus === "promoted"
+      && (entry.pomStatus === "promoted" || jiraPromotionValid)
       && entry.specVerificationStatus === "passed";
     const base = {
       caseId,
@@ -621,12 +661,13 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
   }
 
   const selectedScenarios = input.selectedScenarios ?? [];
-  const scenarioGroups = partitionLaunchScenarios(selectedScenarios);
+  const engine=resolveExecutionEngine({...input,scenarios:selectedScenarios});
+  const scenarioGroups = partitionLaunchScenarios(selectedScenarios,engine);
   const routeDiscoveryScenarios = [...scenarioGroups.routeDiscovery];
   const routeDiscoverySet = new Set(routeDiscoveryScenarios);
   const adaptiveFromSelected = scenarioGroups.adaptiveFunctional;
   const nonAutomatableFromSelected = scenarioGroups.nonAutomatable;
-  const adaptiveFromInput = (input.adaptiveScenarios ?? []).filter(
+  const adaptiveFromInput = (engine==='jira_semantic'?[]:input.adaptiveScenarios ?? []).filter(
     (scenario) => classifyLaunchScenarioAuthority(scenario) !== "nonAutomatable",
   );
   const adaptiveScenarios = Array.from(new Map(
@@ -920,6 +961,19 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
     { source: "route_discovery_publication", entries: routeDiscoveryPublishedCases },
   ]);
   const publishedCases = canonicalMapping.publishedCases;
+  for (const published of publishedCases) {
+    if (published.sourceType !== "jira_preview" || !published.launchScenarioId) continue;
+    try {
+      const link = await linkJiraAutomationToTestRailCase({
+        appSlug: input.appSlug,
+        externalId: published.launchScenarioId,
+        caseId: published.caseId,
+      });
+      console.log(`[jira-testrail-link] appSlug=${input.appSlug} externalId=${published.launchScenarioId} caseId=${published.caseId} linked=${link.linked} reason=${link.reason}`);
+    } catch (error) {
+      console.warn(`[jira-testrail-link] appSlug=${input.appSlug} externalId=${published.launchScenarioId} caseId=${published.caseId} linked=false reason=${error instanceof Error ? error.message : "link_failed"}`);
+    }
+  }
   const selectedExistingCaseIdSet = new Set(selectionPlan.existingTestRailCaseIds);
   for (const exclusion of canonicalMapping.excluded) {
     console.error(`[launch-execution] publishedCase excluded source=${exclusion.source} index=${exclusion.index} reason=${exclusion.reason}`);
@@ -1003,8 +1057,12 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
   console.log(`[launch-execution] manifest written path=${manifestPath}`);
 
   const canonicalCaseIdSet = new Set(publishedCases.map((publishedCase) => publishedCase.caseId));
-  const executionCaseIds = aggregateLaunchCaseIds(routeDiscoveryPublishedCases, existingPublishedCases)
-    .filter((caseId) => canonicalCaseIdSet.has(caseId));
+  const executionCaseIds = resolveLaunchExecutionCaseIds({
+    engine,
+    routeDiscoveryPublishedCases,
+    existingPublishedCases,
+    standardPublishedCases,
+  }).filter((caseId) => canonicalCaseIdSet.has(caseId));
   let discoveryJobId: string | undefined;
   if (executionCaseIds.length > 0) {
     const childPublishedCases = publishedCases.filter((publishedCase) => executionCaseIds.includes(publishedCase.caseId));

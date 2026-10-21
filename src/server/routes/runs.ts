@@ -10,14 +10,22 @@ import {
   resolveDiscoveryBatchIssueKeyMetadata,
   startDiscoveryBatchRun,
 } from "../jobs/discovery-batch-runner";
-import { startScenarioPreviewRun, startReuseExistingPromotedSpecRun, type ReuseExistingPromotedSpecScenario } from "../jobs/scenario-preview-runner";
+import { getJiraPreviewTestRailGuardError } from "../jira-preview-testrail-guard";
+import { startScenarioPreviewRun,startReuseExistingPromotedSpecRun, type ReuseExistingPromotedSpecScenario } from "../jobs/scenario-preview-runner";
 import { startMixedRerun } from "../jobs/mixed-rerun-orchestrator";
+import { inferLegacyJiraRerunOrigin, isScenarioEligibleForEngine, resolveExecutionEngine } from "../../jira/execution-origin";
 import { startMobileLaunchExecutionJob } from "../jobs/mobile-launch-execution-runner";
 import { prepareRerun } from "../jobs/rerun-runner";
-import { launchExecution, type LaunchScenario } from "../jobs/launch-orchestrator";
+import { launchExecution, type LaunchScenario, type LaunchExecutionInput } from "../jobs/launch-orchestrator";
 import { defectChecklistStore } from "../services/defect-checklist-store";
 import type { McpRouteProfile, McpScenario } from "../../scenarios/scenario-types";
-import type { DataContextEntry } from "../../data/data-context";
+import { buildDataContext, type DataContextEntry } from "../../data/data-context";
+import { config } from "../../config/env";
+import { loadAppConfig } from "../../automations/app-auto-resolver";
+import { resolveJiraConfiguredInputValues, jiraScenarioRuntimeValues } from "../../jira/jira-runtime-values";
+import { collectMissingJiraRequiredInputs } from "../../jira/jira-required-input-validation";
+import type { JiraScenarioInput } from "../../jira/jira-semantic-executor";
+import { buildExistingJiraCaseScenarios, resolveExistingJiraCaseValues } from "../../jira/jira-existing-case-requirements";
 
 export const runsRouter = Router();
 
@@ -36,6 +44,59 @@ const SENSITIVE_PATTERNS = [
 
 function containsSensitiveAction(steps: string[]): boolean {
   return steps.some((step) => SENSITIVE_PATTERNS.some((p) => p.test(step)));
+}
+
+function countRuntimeOverrideValues(value: unknown): { scenarios: number; fields: number } {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return { scenarios: 0, fields: 0 };
+  const counts = Object.values(value as Record<string, unknown>).map((scenarioValues) =>
+    scenarioValues && typeof scenarioValues === "object" && !Array.isArray(scenarioValues)
+      ? Object.values(scenarioValues as Record<string, unknown>).filter(item => typeof item === "string" && item.trim().length > 0).length
+      : 0,
+  );
+  return { scenarios: counts.filter(count => count > 0).length, fields: counts.reduce((sum, count) => sum + count, 0) };
+}
+
+async function findMissingJiraInputsForExecution(
+  appSlug: string,
+  scenarios: JiraScenarioInput[],
+  overrides: unknown,
+) {
+  const profile = appSlug ? await loadAppConfig(appSlug) : null;
+  const testData = (profile?.testData ?? {}) as typeof config.app.testData;
+  const testDataAliases = (profile?.testDataAliases ?? {}) as typeof config.app.testDataAliases;
+  const username = typeof profile?.username === "string" ? profile.username : undefined;
+  const password = typeof profile?.password === "string" ? profile.password : undefined;
+  const runtimeConfig = {
+    ...config,
+    app: {
+      ...config.app,
+      appProfile: appSlug,
+      name: appSlug,
+      username,
+      password,
+      testDataAliases,
+      extraLoginFields: (profile?.extraLoginFields ?? {}) as Record<string, string>,
+      testData,
+      rawTestData: testData as Record<string, unknown>,
+    },
+  };
+  const configuredValues = Object.fromEntries(buildDataContext(runtimeConfig).entries.map((entry) => [entry.key, entry.value]));
+  const valuesByScenario: Record<string, Record<string, string>> = {};
+  for (const scenario of scenarios) {
+    const requirements = scenario.inputRequirements ?? [];
+    const resolved = resolveJiraConfiguredInputValues({
+      overrides,
+      scenarioId: scenario.scenarioId,
+      displayId: scenario.scenarioId,
+      requirements,
+      testData,
+      testDataAliases,
+      profileUsername: username,
+      profilePassword: password,
+    });
+    valuesByScenario[scenario.scenarioId] = jiraScenarioRuntimeValues(resolved, configuredValues, requirements);
+  }
+  return collectMissingJiraRequiredInputs(scenarios, valuesByScenario);
 }
 
 const TECHNICAL_SLUGS = new Set(["tests", "test", "api-tests", "api tests", "qa-tests", "qa tests", "default", "unknown", "undefined", "null"]);
@@ -146,6 +207,8 @@ function normalizeLaunchScenario(value: unknown, _fallbackPrefix: string, index:
   const title = rawTitle || (testRailCaseId ? `TestRail Case ${testRailCaseId}` : `Scenario ${index + 1}`);
 
   const scenario: LaunchScenario = {
+    recordingId: typeof record.recordingId==='string'?record.recordingId:undefined,
+    recordingExecutionContract: record.recordingExecutionContract,
     scenarioId,
     title,
     steps: normalizeStringArray(record.steps),
@@ -164,6 +227,8 @@ function normalizeLaunchScenario(value: unknown, _fallbackPrefix: string, index:
       : undefined,
     publicationClassification: typeof record.publicationClassification === "string" ? record.publicationClassification : undefined,
     nonAutomatable: typeof record.nonAutomatable === "boolean" ? record.nonAutomatable : undefined,
+    validation: record.validation && typeof record.validation==='object' && typeof (record.validation as {valid?:unknown}).valid==='boolean'
+      ? {valid:(record.validation as {valid:boolean}).valid} : undefined,
     targetScreen: typeof record.targetScreen === "string" ? record.targetScreen : typeof metadata?.targetScreen === "string" ? metadata.targetScreen : undefined,
     actualChain: record.actualChain ?? metadata?.actualChain,
     requiredChain: record.requiredChain ?? metadata?.requiredChain,
@@ -278,7 +343,18 @@ export function buildRunStreamPayload(
   return payload;
 }
 
-runsRouter.post("/scenario-preview", (req, res) => {
+runsRouter.post("/scenario-preview", async (req, res, next) => {
+  let selectedEngine: ReturnType<typeof resolveExecutionEngine>;
+  try { selectedEngine = resolveExecutionEngine(req.body); } catch (error) {
+    res.status(400).json({ ok: false, error: error instanceof Error ? error.message : "INVALID_EXECUTION_ORIGIN" });
+    return;
+  }
+  console.log(`[scenario-preview] selectedExecutionEngine=${selectedEngine}`);
+  const jiraGuardError = getJiraPreviewTestRailGuardError(selectedEngine, req.body);
+  if (jiraGuardError) {
+    res.status(400).json(jiraGuardError);
+    return;
+  }
   const body = req.body as {
     functionalAppSlug?: string;
     appSlug?: string;
@@ -300,6 +376,8 @@ runsRouter.post("/scenario-preview", (req, res) => {
       status?: string;
     };
     scenarios?: McpScenario[];
+    executionEngine?: "jira_semantic" | "recording_replay";
+    scenarioOrigin?: { kind: string; jiraKey?: string; recordingId?: string };
     options?: {
       overwrite?: boolean;
       autoPromote?: boolean;
@@ -318,9 +396,7 @@ runsRouter.post("/scenario-preview", (req, res) => {
     return;
   }
 
-  const validScenarios = body.scenarios.filter(
-    (s) => s.mcpExecutable === true && s.validation?.valid !== false
-  );
+  const validScenarios = body.scenarios.filter((s) => isScenarioEligibleForEngine(selectedEngine, s));
 
   if (validScenarios.length === 0) {
     res.status(400).json({
@@ -385,11 +461,38 @@ runsRouter.post("/scenario-preview", (req, res) => {
 
   const jobPayload = {
     ...body,
+    executionEngine: selectedEngine === "jira_semantic" ? selectedEngine : undefined,
     issueKey,
     checklistUrl,
     targetAppSlug: inferredTargetAppSlug,
     targetAppName: inferredTargetAppName,
   };
+
+  if (selectedEngine === "jira_semantic") {
+    const overrideCounts = countRuntimeOverrideValues((req.body as Record<string, unknown>).dataOverrides);
+    console.log(`[scenario-preview] jira runtime data received scenarios=${overrideCounts.scenarios} fields=${overrideCounts.fields}`);
+    try {
+      const appSlug = inferredTargetAppSlug ?? normalizeMaybeSlug(body.appSlug) ?? normalizeMaybeSlug(body.targetAppSlug) ?? "";
+      const missing = await findMissingJiraInputsForExecution(
+        appSlug,
+        validScenarios as unknown as JiraScenarioInput[],
+        (req.body as Record<string, unknown>).dataOverrides,
+      );
+      if (missing.length > 0) {
+        const missingLabels = Array.from(new Set(missing.map((input) => input.label)));
+        res.status(400).json({
+          ok: false,
+          error: "JIRA_REQUIRED_DATA_MISSING",
+          message: `Completa los datos requeridos antes de ejecutar: ${missingLabels.join(", ")}.`,
+          missingInputs: missing.map(({ scenarioId, scenarioTitle, label, stepIndex }) => ({ scenarioId, scenarioTitle, label, stepIndex })),
+        });
+        return;
+      }
+    } catch (error) {
+      next(error);
+      return;
+    }
+  }
 
   console.log(`[scenario-preview] received sectionName="${body.sectionName ?? "(none)"}" sectionSlug="${body.sectionSlug ?? "(none)"}" sectionId="${body.sectionId ?? "(none)"}"`);
 
@@ -540,6 +643,23 @@ runsRouter.get("/:jobId", (req, res) => {
     res.status(404).json({ error: "Job not found" });
     return;
   }
+  const rawLogsAfter = req.query.logsAfter;
+  if (rawLogsAfter !== undefined) {
+    const logsAfter = typeof rawLogsAfter === "string" && /^\d+$/.test(rawLogsAfter)
+      ? Number(rawLogsAfter)
+      : Number.NaN;
+    if (!Number.isSafeInteger(logsAfter) || logsAfter < 0) {
+      res.status(400).json({ error: "logsAfter must be a non-negative safe integer" });
+      return;
+    }
+    res.json({
+      ...job,
+      logs: job.logs.slice(logsAfter),
+      logsOffset: Math.min(logsAfter, job.logs.length),
+      totalLogs: job.logs.length,
+    });
+    return;
+  }
   res.json(job);
 });
 
@@ -660,12 +780,13 @@ runsRouter.get("/:jobId/logs", (req, res) => {
   req.on("close", unsubscribe);
 });
 
-runsRouter.post("/:jobId/rerun", async (req, res) => {
+runsRouter.post("/:jobId/rerun", async (req, res, next) => {
   const jobId = req.params.jobId;
   const mode = (req.body?.mode as string) === "failed_only" ? "failed_only" : "all";
 
   // 1. Check memory first
-  const previous = jobStore.get(jobId);
+  const historicalJiraJob = jobStore.getPersisted(jobId);
+  const previous = jobStore.get(jobId) ?? (historicalJiraJob?.params.executionEngine === "jira_semantic" ? historicalJiraJob : undefined);
 
   if (previous) {
     if (previous.status === "running" || previous.status === "queued") {
@@ -675,6 +796,40 @@ runsRouter.post("/:jobId/rerun", async (req, res) => {
   }
 
   const memoryJobMiss = !previous;
+
+  // Jira reruns retain their explicit provenance and never enter Recording hydration/reuse.
+  if (previous?.params.executionEngine === "jira_semantic") {
+    const manifest = path.resolve(".artifacts/scenario-preview-runs", jobId, "jira-scenarios.json");
+    const all = fs.existsSync(manifest) ? JSON.parse(fs.readFileSync(manifest, "utf8")) as McpScenario[] : previous.params.scenarios as McpScenario[] | undefined;
+    if (!all?.length) { res.status(409).json({ ok: false, error: "JIRA_RERUN_SOURCE_MISSING" }); return; }
+    const resultsPath = path.resolve(".artifacts/scenario-preview-runs", jobId, "results.json");
+    const outcomes = fs.existsSync(resultsPath) ? JSON.parse(fs.readFileSync(resultsPath, "utf8")).results as Array<{ scenarioId: string; status: string }> : [];
+    const selected = mode === "all" ? all : all.filter(s => outcomes.some(r => r.scenarioId === s.scenarioId && r.status === "failed"));
+    if (!selected.length) { res.status(409).json({ ok: false, error: "NO_JIRA_SCENARIOS_TO_RERUN" }); return; }
+    const dataOverrides = req.body?.dataOverrides ?? previous.params.dataOverrides;
+    try {
+      const appSlug = String(previous.params.appSlug ?? previous.params.targetAppSlug ?? "");
+      const missing = await findMissingJiraInputsForExecution(appSlug, selected as JiraScenarioInput[], dataOverrides);
+      if (missing.length > 0) {
+        const missingLabels = Array.from(new Set(missing.map((input) => input.label)));
+        res.status(400).json({
+          ok: false,
+          error: "JIRA_REQUIRED_DATA_MISSING",
+          message: `No se inició la reejecución. Completa los datos requeridos y vuelve a intentarlo: ${missingLabels.join(", ")}.`,
+          missingInputs: missing.map(({ scenarioId, scenarioTitle, label, stepIndex }) => ({ scenarioId, scenarioTitle, label, stepIndex })),
+        });
+        return;
+      }
+    } catch (error) {
+      next(error);
+      return;
+    }
+    const newJob = jobStore.create("scenario-preview", { ...previous.params, scenarios: selected, sourceJobId: jobId, dataOverrides,
+      options: { ...(previous.params.options as Record<string, unknown> ?? {}), overwrite: true } });
+    setImmediate(() => startScenarioPreviewRun(newJob.id));
+    res.json({ ok: true, jobId: newJob.id, status: newJob.status, mode: "rerun", scenarioCount: selected.length, issueKey: previous.issueKey });
+    return;
+  }
 
   // 2. Prepare rerun from canonical artifacts by job type.
   const prepared = await prepareRerun(jobId, mode, previous?.type);
@@ -694,6 +849,34 @@ runsRouter.post("/:jobId/rerun", async (req, res) => {
       return;
     }
     res.status(400).json(prepared);
+    return;
+  }
+
+  if (prepared.jobType === "discovery-batch") {
+    const discoveryJob = jobStore.create("discovery-batch", prepared.discoveryParams);
+    const checklistIdentity = buildDiscoveryBatchChecklistIdentity({ jobId: discoveryJob.id });
+    const checklist = defectChecklistStore.getOrCreate(checklistIdentity);
+    const checklistUrl = `/checklist/${checklist.urlSlug}?jobId=${encodeURIComponent(discoveryJob.id)}`;
+    jobStore.update(discoveryJob.id, {
+      checklistUrl,
+      defectCount: checklist.defects.filter((defect) => defect.jobId === discoveryJob.id).length,
+    });
+    jobStore.appendLog(
+      discoveryJob.id,
+      `[runs:rerun] sourceJobId=${jobId} mode=${mode} selected=${prepared.selectedCount} total=${prepared.totalCount} dispatch=fresh_discovery_batch appSlug=${prepared.appSlug}`,
+    );
+    setImmediate(() => startDiscoveryBatchRun(discoveryJob.id));
+    res.json({
+      ok: true,
+      jobId: discoveryJob.id,
+      status: discoveryJob.status,
+      mode: "rerun",
+      rerunMode: mode,
+      scenarioCount: prepared.selectedCount,
+      totalOriginal: prepared.totalCount,
+      dispatch: "fresh_discovery_batch",
+      appSlug: prepared.appSlug,
+    });
     return;
   }
 
@@ -725,6 +908,69 @@ runsRouter.post("/:jobId/rerun", async (req, res) => {
     checklistUrl = `/checklist/${list.urlSlug}`;
   } else {
     console.log(`[runs:rerun] warning missing_issue_key sourceJobId=${jobId}`);
+  }
+
+  // Older Jira-generated scenario-preview jobs predate the explicit engine marker. Recover
+  // only when every selected persisted scenario carries this same Jira key and none has
+  // Recording lineage; recorded-session reruns continue through their existing path below.
+  if (prepared.jobType === "scenario-preview") {
+    const jiraOrigin = inferLegacyJiraRerunOrigin(issueKey, prepared.scenarios);
+    if (jiraOrigin) {
+      const jiraScenarios = prepared.scenarios.map((scenario) => ({
+        scenarioId: String(scenario.scenarioId),
+        title: scenario.title,
+        sourceIssueKey: scenario.sourceIssueKey,
+        steps: scenario.steps,
+        expectedResult: scenario.expectedResult,
+        preconditions: scenario.preconditions,
+        authIntent: scenario.authIntent,
+        inputRequirements: scenario.inputRequirements,
+      }));
+      const dataOverrides = req.body?.dataOverrides ?? previous?.params.dataOverrides;
+      try {
+        const appSlug = String(prepared.appSlug ?? previous?.params.appSlug ?? previous?.params.targetAppSlug ?? "");
+        const missing = await findMissingJiraInputsForExecution(appSlug, jiraScenarios as JiraScenarioInput[], dataOverrides);
+        if (missing.length > 0) {
+          const missingLabels = Array.from(new Set(missing.map((input) => input.label)));
+          res.status(400).json({
+            ok: false,
+            error: "JIRA_REQUIRED_DATA_MISSING",
+            message: `No se inició la reejecución. Completa los datos requeridos y vuelve a intentarlo: ${missingLabels.join(", ")}.`,
+            missingInputs: missing.map(({ scenarioId, scenarioTitle, label, stepIndex }) => ({ scenarioId, scenarioTitle, label, stepIndex })),
+          });
+          return;
+        }
+      } catch (error) {
+        next(error);
+        return;
+      }
+      const jiraJob = jobStore.create("scenario-preview", {
+        appSlug: prepared.appSlug,
+        targetAppSlug: prepared.targetAppSlug,
+        targetAppName: prepared.targetAppName,
+        sectionName: prepared.sectionName,
+        sectionSlug: prepared.sectionSlug,
+        scenarios: jiraScenarios,
+        jiraKey: jiraOrigin.jiraKey,
+        issueKey: jiraOrigin.jiraKey,
+        executionEngine: "jira_semantic",
+        scenarioOrigin: jiraOrigin,
+        sourceJobId: jobId,
+        rerunMode: mode,
+        rerun: true,
+        dataOverrides,
+        publishToTestRail: false,
+        createTestRun: false,
+        reportResults: false,
+        options: { ...(prepared.options ?? {}), overwrite: true, autoPromote: true, autoPom: false },
+      });
+      if (checklistUrl) jobStore.update(jiraJob.id, { issueKey: jiraOrigin.jiraKey, checklistUrl } as any);
+      jobStore.appendLog(jiraJob.id, `[runs:rerun] sourceJobId=${jobId} mode=${mode} selected=${prepared.selectedCount} total=${prepared.totalCount} dispatch=jira_semantic recoveredOrigin=scenario_source_issue_key`);
+      jobStore.appendLog(jiraJob.id, `[scenario-preview] selectedExecutionEngine=jira_semantic compiler=jira-semantic-v1 origin=${jiraOrigin.jiraKey}`);
+      setImmediate(() => startScenarioPreviewRun(jiraJob.id));
+      res.json({ ok: true, jobId: jiraJob.id, status: jiraJob.status, mode: "rerun", scenarioCount: prepared.selectedCount, issueKey: jiraOrigin.jiraKey, executionEngine: "jira_semantic" });
+      return;
+    }
   }
 
   // A rerun whose EVERY selected scenario already has a fresh, canonically-matched promoted
@@ -941,6 +1187,66 @@ runsRouter.post("/:jobId/rerun", async (req, res) => {
     console.log(
       `[launch-execution] received payload appSlug=${appSlug} scenarios=${selectedScenarios.length} existingCaseIds=${existingTestRailCaseIds.length} projectId=${body.projectId} sectionId=${body.sectionId}`,
     );
+    const dataOverrides = body.dataOverrides && typeof body.dataOverrides === "object" && !Array.isArray(body.dataOverrides)
+      ? body.dataOverrides as Record<string, Record<string, string>>
+      : undefined;
+    if (body.executionEngine === "jira_semantic") {
+      // normalizeLaunchScenario drops inputRequirements; recover them from the raw payload by scenarioId.
+      const rawById = new Map<string, Record<string, unknown>>();
+      for (const key of ["selectedScenarios", "selectedJiraScenarios"]) {
+        for (const raw of Array.isArray(body[key]) ? body[key] as unknown[] : []) {
+          const rec = raw as Record<string, unknown> | null;
+          if (rec && typeof rec.scenarioId === "string" && !rawById.has(rec.scenarioId)) rawById.set(rec.scenarioId, rec);
+        }
+      }
+      const jiraScenarios = selectedScenarios.map((scenario) => ({
+        ...scenario,
+        inputRequirements: rawById.get(scenario.scenarioId)?.inputRequirements,
+      })) as unknown as JiraScenarioInput[];
+      const missing = await findMissingJiraInputsForExecution(appSlug, jiraScenarios, dataOverrides);
+      if (missing.length > 0) {
+        const missingLabels = Array.from(new Set(missing.map((input) => input.label)));
+        res.status(400).json({
+          ok: false,
+          error: "JIRA_REQUIRED_DATA_MISSING",
+          message: `Completa los datos requeridos antes de ejecutar: ${missingLabels.join(", ")}.`,
+          missingInputs: missing.map(({ scenarioId, scenarioTitle, label, stepIndex }) => ({ scenarioId, scenarioTitle, label, stepIndex })),
+        });
+        return;
+      }
+    }
+    // Existing TestRail cases linked to Jira automations: reject unresolved required inputs before any Run exists.
+    const existingJiraScenarios = await buildExistingJiraCaseScenarios(appSlug, existingTestRailCaseIds);
+    if (existingJiraScenarios.length > 0) {
+      const runtimeEntries = body.runtimeEntriesByCase && typeof body.runtimeEntriesByCase === "object" && !Array.isArray(body.runtimeEntriesByCase)
+        ? body.runtimeEntriesByCase as Record<string, DataContextEntry[]>
+        : {};
+      const scopedOverrides: Record<string, Record<string, string>> = {};
+      for (const scenario of existingJiraScenarios) {
+        const linkedScenarioIds = selectedScenarios.filter((s) => extractCaseIdFromValue(s) === Number(scenario.scenarioId)).map((s) => s.scenarioId);
+        const explicit: Record<string, string> = {};
+        for (const id of [scenario.scenarioId, ...linkedScenarioIds]) {
+          const scoped = dataOverrides?.[id];
+          if (scoped && typeof scoped === "object") Object.assign(explicit, scoped);
+        }
+        for (const entry of Array.isArray(runtimeEntries[scenario.scenarioId]) ? runtimeEntries[scenario.scenarioId] : []) {
+          if (typeof entry?.key === "string" && typeof entry.value === "string") explicit[entry.key] = entry.value;
+        }
+        scopedOverrides[scenario.scenarioId] = explicit;
+      }
+      const withConfirmed = await resolveExistingJiraCaseValues(appSlug, existingJiraScenarios, scopedOverrides);
+      const missing = await findMissingJiraInputsForExecution(appSlug, existingJiraScenarios, withConfirmed);
+      if (missing.length > 0) {
+        const missingLabels = Array.from(new Set(missing.map((input) => input.label)));
+        res.status(400).json({
+          ok: false,
+          error: "JIRA_REQUIRED_DATA_MISSING",
+          message: `Completa los datos requeridos antes de ejecutar: ${missingLabels.join(", ")}.`,
+          missingInputs: missing.map(({ scenarioId, scenarioTitle, label, stepIndex }) => ({ scenarioId, caseId: Number(scenarioId), scenarioTitle, label, stepIndex })),
+        });
+        return;
+      }
+    }
     const launchInput = {
       appSlug: String(body.appSlug ?? ""),
       sectionSlug: body.sectionSlug as string | undefined,
@@ -950,6 +1256,8 @@ runsRouter.post("/:jobId/rerun", async (req, res) => {
       suiteId: body.suiteId ? Number(body.suiteId) : undefined,
       testrailSectionId: body.testrailSectionId ? Number(body.testrailSectionId) : undefined,
       jiraKey: body.jiraKey as string | undefined,
+      executionEngine: body.executionEngine as LaunchExecutionInput['executionEngine'],
+      scenarioOrigin: body.scenarioOrigin as LaunchExecutionInput['scenarioOrigin'],
       jiraTitle: (body.jiraTitle ?? body.storyTitle ?? body.huTitle) as string | undefined,
       sprintName: body.sprintName as string | undefined,
       selectedScenarios,
@@ -964,6 +1272,7 @@ runsRouter.post("/:jobId/rerun", async (req, res) => {
        ...(body.runtimeEntriesByCase && typeof body.runtimeEntriesByCase === "object" && !Array.isArray(body.runtimeEntriesByCase)
          ? { runtimeEntriesByCase: body.runtimeEntriesByCase as Record<string, DataContextEntry[]> }
          : {}),
+       ...(dataOverrides ? { dataOverrides } : {}),
        adaptiveScenarios: Array.isArray(body.adaptiveScenarios) ? body.adaptiveScenarios : undefined,
        publishStrategy: body.publishStrategy === "use_existing" ? "use_existing" as const : "always_create" as const,
     };
@@ -1173,12 +1482,11 @@ function findEvidenceDocxByJobId(rootDir: string, jobId: string, fileName: strin
 }
 
 /**
- * Locate a run's evidence document. `formats` is the order of preference: by default the PDF
- * (generated everywhere) and, failing that, the DOCX (only where Word is installed).
+ * Locate a run's evidence document. The default is PDF; Word remains an explicit format.
  */
 export function resolveEvidenceDocxForJob(
   jobId: string,
-  formats: EvidenceDocumentFormat[] = ["pdf", "docx"],
+  formats: EvidenceDocumentFormat[] = ["pdf"],
 ): EvidenceDocxResolution {
   const job = jobStore.get(jobId);
   const params = (job?.params ?? {}) as Record<string, unknown>;
@@ -1621,7 +1929,7 @@ runsRouter.get("/:jobId/evidence-docx/status", (req, res) => {
 });
 
 // ── Download evidence document ──
-// Serves the PDF when there is one, else the DOCX; `?format=pdf|docx` asks for one explicitly.
+// Serves PDF by default; `?format=docx` explicitly requests Word.
 // The route keeps its historical name: the panel and the BFF already call it and take the file
 // name and type from the response headers.
 runsRouter.get("/:jobId/evidence-docx", (req, res) => {

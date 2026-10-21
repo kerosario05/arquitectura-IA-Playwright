@@ -1,0 +1,230 @@
+- generic [ref=e1]:
+  - generic [ref=e32]:
+    - complementary [ref=e33]:
+      - generic [ref=e34]:
+        - generic [ref=e35]: Q
+        - generic [ref=e38]:
+          - generic [ref=e39]: QA Lab
+          - generic [ref=e40]: Santa Cruz
+      - navigation [ref=e41]:
+        - button "Panorama" [ref=e42] [cursor=pointer]
+        - button "Lanzar pruebas" [ref=e49] [cursor=pointer]
+        - button "Grabación" [ref=e55] [cursor=pointer]
+        - button "Ejecuciones" [ref=e59] [cursor=pointer]
+        - button "Configuración" [ref=e64] [cursor=pointer]
+        - button "Usuarios" [ref=e68] [cursor=pointer]
+      - generic [ref=e76]:
+        - generic [ref=e80]: Pro tip
+        - generic [ref=e81]: Programa ejecuciones nocturnas para optimizar recursos.
+      - generic [ref=e82]:
+        - generic [ref=e83]: AD
+        - generic [ref=e84]:
+          - generic [ref=e85]: Administrador
+          - generic [ref=e86]: Administrador
+    - main [ref=e87]:
+      - generic [ref=e88]:
+        - generic [ref=e89]:
+          - generic [ref=e90]:
+            - generic [ref=e92]: En vivo · 16:26
+            - generic [ref=e93]: ·
+            - generic [ref=e94]: Configura una nueva ejecución en 4 pasos
+          - heading "Lanzar pruebas" [level=1] [ref=e133]
+        - generic [ref=e96]:
+          - generic [ref=e97]:
+            - combobox "Buscar" [ref=e98]
+            - generic: Ctrl K
+          - button "Notificaciones" [ref=e100] [cursor=pointer]
+          - button "Cerrar sesión de admin" [ref=e106] [cursor=pointer]
+      - generic [ref=e135]:
+        - generic [ref=e137]:
+          - button "Proyecto" [ref=e138] [cursor=pointer]
+          - button "Fuentes" [ref=e151] [cursor=pointer]
+          - button "Casos" [ref=e158] [cursor=pointer]
+          - button "Lanzar" [ref=e166] [cursor=pointer]
+        - generic [ref=e173]:
+          - generic [ref=e212]:
+            - generic [ref=e213]: Paso dos · Conecta las fuentes
+            - heading "¿De dónde vienen los casos?" [level=2] [ref=e214]
+            - paragraph [ref=e215]: Configura las herramientas que alimentarán la ejecución.
+            - generic [ref=e217]:
+              - button "Solo TestRail Suite completa" [ref=e218] [cursor=pointer]:
+                - generic [ref=e224]: Solo TestRail
+                - generic [ref=e225]: Suite completa
+              - button "Ambos combinados Máxima cobertura" [ref=e226] [cursor=pointer]:
+                - generic [ref=e233]: Ambos combinados
+                - generic [ref=e234]: Máxima cobertura
+            - generic [ref=e252]:
+              - generic [ref=e253]: TestRail
+              - generic [ref=e260]:
+                - generic [ref=e261]: Proyecto
+                - button "Selecciona un proyecto..." [ref=e263] [cursor=pointer]
+          - generic [ref=e199]:
+            - button "Atrás" [ref=e200] [cursor=pointer]
+            - button "Generar escenarios" [disabled] [ref=e268]
+  - generic [ref=e270]:
+    - generic [ref=e271]:
+      - textbox "Buscar proyecto..." [active] [ref=e276]
+      - generic [ref=e277]: 54 de 54 proyectos
+    - generic [ref=e278]:
+      - button "Nuevo modulo Ach 0 TCs" [ref=e279] [cursor=pointer]:
+        - generic [ref=e280]: Nuevo modulo Ach
+        - generic [ref=e283]: 0 TCs
+      - button "PROYECTO B2000 0 TCs" [ref=e284] [cursor=pointer]:
+        - generic [ref=e285]: PROYECTO B2000
+        - generic [ref=e288]: 0 TCs
+      - button "PROYECTO FENIX 0 TCs" [ref=e289] [cursor=pointer]:
+        - generic [ref=e290]: PROYECTO FENIX
+        - generic [ref=e293]: 0 TCs
+      - button "IPA 0 TCs" [ref=e294] [cursor=pointer]:
+        - generic [ref=e295]: IPA
+        - generic [ref=e298]: 0 TCs
+      - button "Actualizaciones de Datos 0 TCs" [ref=e299] [cursor=pointer]:
+        - generic [ref=e300]: Actualizaciones de Datos
+        - generic [ref=e303]: 0 TCs
+      - button "PAGA TODO 0 TCs" [ref=e304] [cursor=pointer]:
+        - generic [ref=e305]: PAGA TODO
+        - generic [ref=e308]: 0 TCs
+      - button "AS400 ITC 0 TCs" [ref=e309] [cursor=pointer]:
+        - generic [ref=e310]: AS400 ITC
+        - generic [ref=e313]: 0 TCs
+      - button "Bus de Servicio 0 TCs" [ref=e314] [cursor=pointer]:
+        - generic [ref=e315]: Bus de Servicio
+        - generic [ref=e318]: 0 TCs
+      - button "Onboarding Digital 0 TCs" [ref=e319] [cursor=pointer]:
+        - generic [ref=e320]: Onboarding Digital
+        - generic [ref=e323]: 0 TCs
+      - button "FIM 0 TCs" [ref=e324] [cursor=pointer]:
+        - generic [ref=e325]: FIM
+        - generic [ref=e328]: 0 TCs
+      - button "RISK 0 TCs" [ref=e329] [cursor=pointer]:
+        - generic [ref=e330]: RISK
+        - generic [ref=e333]: 0 TCs
+      - button "ISC-Onboarding 0 TCs" [ref=e334] [cursor=pointer]:
+        - generic [ref=e335]: ISC-Onboarding
+        - generic [ref=e338]: 0 TCs
+      - button "Leasing 0 TCs" [ref=e339] [cursor=pointer]:
+        - generic [ref=e340]: Leasing
+        - generic [ref=e343]: 0 TCs
+      - button "Filing Cabinet 0 TCs" [ref=e344] [cursor=pointer]:
+        - generic [ref=e345]: Filing Cabinet
+        - generic [ref=e348]: 0 TCs
+      - button "Cierres 0 TCs" [ref=e349] [cursor=pointer]:
+        - generic [ref=e350]: Cierres
+        - generic [ref=e353]: 0 TCs
+      - button "Incidentes GDI 0 TCs" [ref=e354] [cursor=pointer]:
+        - generic [ref=e355]: Incidentes GDI
+        - generic [ref=e358]: 0 TCs
+      - button "App Bravo 0 TCs" [ref=e359] [cursor=pointer]:
+        - generic [ref=e360]: App Bravo
+        - generic [ref=e363]: 0 TCs
+      - button "Asistente Virtual 0 TCs" [ref=e364] [cursor=pointer]:
+        - generic [ref=e365]: Asistente Virtual
+        - generic [ref=e368]: 0 TCs
+      - button "Modulo de transferencias 0 TCs" [ref=e369] [cursor=pointer]:
+        - generic [ref=e370]: Modulo de transferencias
+        - generic [ref=e373]: 0 TCs
+      - button "Portal Web BSC 0 TCs" [ref=e374] [cursor=pointer]:
+        - generic [ref=e375]: Portal Web BSC
+        - generic [ref=e378]: 0 TCs
+      - button "Extreme 0 TCs" [ref=e379] [cursor=pointer]:
+        - generic [ref=e380]: Extreme
+        - generic [ref=e383]: 0 TCs
+      - button "Caja B2K 0 TCs" [ref=e384] [cursor=pointer]:
+        - generic [ref=e385]: Caja B2K
+        - generic [ref=e388]: 0 TCs
+      - button "Vts 0 TCs" [ref=e389] [cursor=pointer]:
+        - generic [ref=e390]: Vts
+        - generic [ref=e393]: 0 TCs
+      - button "Portal Empresarial 0 TCs" [ref=e394] [cursor=pointer]:
+        - generic [ref=e395]: Portal Empresarial
+        - generic [ref=e398]: 0 TCs
+      - button "OB-Administración de Crédito 0 TCs" [ref=e399] [cursor=pointer]:
+        - generic [ref=e400]: OB-Administración de Crédito
+        - generic [ref=e403]: 0 TCs
+      - button "ISC-Ubibroker 0 TCs" [ref=e404] [cursor=pointer]:
+        - generic [ref=e405]: ISC-Ubibroker
+        - generic [ref=e408]: 0 TCs
+      - button "pruebas hamler defectos 0 TCs" [ref=e409] [cursor=pointer]:
+        - generic [ref=e410]: pruebas hamler defectos
+        - generic [ref=e413]: 0 TCs
+      - button "OB-Conciliación 0 TCs" [ref=e414] [cursor=pointer]:
+        - generic [ref=e415]: OB-Conciliación
+        - generic [ref=e418]: 0 TCs
+      - button "Activos y pasivos 0 TCs" [ref=e419] [cursor=pointer]:
+        - generic [ref=e420]: Activos y pasivos
+        - generic [ref=e423]: 0 TCs
+      - button "Hamler pruebas 0 TCs" [ref=e424] [cursor=pointer]:
+        - generic [ref=e425]: Hamler pruebas
+        - generic [ref=e428]: 0 TCs
+      - button "Celula Ejecución de Operaciones 0 TCs" [ref=e429] [cursor=pointer]:
+        - generic [ref=e430]: Celula Ejecución de Operaciones
+        - generic [ref=e433]: 0 TCs
+      - button "open banking 0 TCs" [ref=e434] [cursor=pointer]:
+        - generic [ref=e435]: open banking
+        - generic [ref=e438]: 0 TCs
+      - button "ATM 0 TCs" [ref=e439] [cursor=pointer]:
+        - generic [ref=e440]: ATM
+        - generic [ref=e443]: 0 TCs
+      - button "Mantenimientos GDI 0 TCs" [ref=e444] [cursor=pointer]:
+        - generic [ref=e445]: Mantenimientos GDI
+        - generic [ref=e448]: 0 TCs
+      - button "Prevención de Fraudes | Proyecto Optimización del Backoffice 0 TCs" [ref=e449] [cursor=pointer]:
+        - generic [ref=e450]: Prevención de Fraudes | Proyecto Optimización del Backoffice
+        - generic [ref=e453]: 0 TCs
+      - button "Comprobantes Fiscales (ENCF's) 0 TCs" [ref=e454] [cursor=pointer]:
+        - generic [ref=e455]: Comprobantes Fiscales (ENCF's)
+        - generic [ref=e458]: 0 TCs
+      - button "Dynamics 365 F&O 0 TCs" [ref=e459] [cursor=pointer]:
+        - generic [ref=e460]: Dynamics 365 F&O
+        - generic [ref=e463]: 0 TCs
+      - button "IPF-5666 Depuración de Transferencias Entrantes 0 TCs" [ref=e464] [cursor=pointer]:
+        - generic [ref=e465]: IPF-5666 Depuración de Transferencias Entrantes
+        - generic [ref=e468]: 0 TCs
+      - button "Test-ai 0 TCs" [ref=e469] [cursor=pointer]:
+        - generic [ref=e470]: Test-ai
+        - generic [ref=e473]: 0 TCs
+      - button "Visa Clearing Exchange VCX 0 TCs" [ref=e474] [cursor=pointer]:
+        - generic [ref=e475]: Visa Clearing Exchange VCX
+        - generic [ref=e478]: 0 TCs
+      - button "Transferencias Recibidas Duplicadas GDI-6022 0 TCs" [ref=e479] [cursor=pointer]:
+        - generic [ref=e480]: Transferencias Recibidas Duplicadas GDI-6022
+        - generic [ref=e483]: 0 TCs
+      - button "IPF-4525-Cuenta Money Market 0 TCs" [ref=e484] [cursor=pointer]:
+        - generic [ref=e485]: IPF-4525-Cuenta Money Market
+        - generic [ref=e488]: 0 TCs
+      - button "Hamler Area de Trabajo 0 TCs" [ref=e489] [cursor=pointer]:
+        - generic [ref=e490]: Hamler Area de Trabajo
+        - generic [ref=e493]: 0 TCs
+      - button "Kiosco 0 TCs" [ref=e494] [cursor=pointer]:
+        - generic [ref=e495]: Kiosco
+        - generic [ref=e498]: 0 TCs
+      - button "VISA DEBITO DOLARES 0 TCs" [ref=e499] [cursor=pointer]:
+        - generic [ref=e500]: VISA DEBITO DOLARES
+        - generic [ref=e503]: 0 TCs
+      - button "IVR 0 TCs" [ref=e504] [cursor=pointer]:
+        - generic [ref=e505]: IVR
+        - generic [ref=e508]: 0 TCs
+      - button "SubAgentes 0 TCs" [ref=e509] [cursor=pointer]:
+        - generic [ref=e510]: SubAgentes
+        - generic [ref=e513]: 0 TCs
+      - button "API tokenizacion 0 TCs" [ref=e514] [cursor=pointer]:
+        - generic [ref=e515]: API tokenizacion
+        - generic [ref=e518]: 0 TCs
+      - button "Arquitectura automatización 0 TCs" [ref=e519] [cursor=pointer]:
+        - generic [ref=e520]: Arquitectura automatización
+        - generic [ref=e523]: 0 TCs
+      - button "Core Leasing 0 TCs" [ref=e524] [cursor=pointer]:
+        - generic [ref=e525]: Core Leasing
+        - generic [ref=e528]: 0 TCs
+      - button "App Conversacional 0 TCs" [ref=e529] [cursor=pointer]:
+        - generic [ref=e530]: App Conversacional
+        - generic [ref=e533]: 0 TCs
+      - button "Eikon 0 TCs" [ref=e534] [cursor=pointer]:
+        - generic [ref=e535]: Eikon
+        - generic [ref=e538]: 0 TCs
+      - button "Dynamics GP 0 TCs" [ref=e539] [cursor=pointer]:
+        - generic [ref=e540]: Dynamics GP
+        - generic [ref=e543]: 0 TCs
+      - button "Experiencia Unificada 0 TCs" [ref=e544] [cursor=pointer]:
+        - generic [ref=e545]: Experiencia Unificada
+        - generic [ref=e548]: 0 TCs

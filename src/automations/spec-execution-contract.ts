@@ -29,9 +29,9 @@ export type ContractSourceScenarioAuth = {
 export type ContractObservableOracle = {
   id: string;
   requirement: string;
-  type: string;
+  type: "literal_visible_text" | "navigation_transition" | "url_state" | "heading_or_control" | "auth_gate" | "field_validation" | "runtime_state" | "page_object_state" | "unsupported_or_unresolved";
   backed: boolean;
-  source?: "discovery" | "scenario" | "inferred";
+  source: "discovery" | "scenario" | "inferred";
   stepIndex?: number;
   requirementRefs?: string[];
   polarity?: AssertionPolarity;
@@ -127,6 +127,7 @@ export type SpecStepOracle = {
 };
 
 export type SpecExecutionContractStep = {
+  selectionControlKind?: "native_select";
   contractStepIndex: number;
   scenarioStepIndex: number;
   originalText: string;
@@ -1331,7 +1332,7 @@ export function buildSpecExecutionContract(
 
     const target = virtualKeyboardPlanStep
       ? buildSpecStepTarget(planStep?.target)
-      : planBackedNavigation
+      : planBackedNavigation || (operation === "navigate" && planStep?.action === "navigate")
         ? planStep?.target === "APP_BASE_URL"
           ? { strategy: "url", value: "APP_BASE_URL" }
           : buildSpecStepTarget(planStep?.target)
@@ -1605,6 +1606,7 @@ export function buildSpecExecutionContract(
       ...(scenarioStep.conditionalAction ? { conditional: true, conditionalAction: scenarioStep.conditionalAction } : {}),
       target,
       value: planStep?.value,
+      ...(planStep?.selectionControlKind ? { selectionControlKind: planStep.selectionControlKind } : {}),
       valueKey: planStep?.valueKey ?? scenarioStep.valueKey,
       ...(virtualKeyboardPlanStep?.segmentPosition ? { segmentPosition: virtualKeyboardPlanStep.segmentPosition } : {}),
       ...(entityScope ? { entityScope } : {}),

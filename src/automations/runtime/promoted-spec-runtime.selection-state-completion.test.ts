@@ -4,7 +4,7 @@ import path from "node:path";
 import test from "node:test";
 import { hasCausalSelectionTransition } from "../../discovery/selection-state-verification";
 import { recordedLocatorFactory } from "../../discovery/target-resolver";
-import { parseSerializedTechnicalTargetString } from "./promoted-spec-runtime";
+import { parseSerializedTechnicalTargetString, PromotedSpecRuntime } from "./promoted-spec-runtime";
 
 /**
  * FIRST_LOSS (recording 34034233-6dee-4ee9-9fc1-56b276205985, job 8e1ec8ae-8ca8-4eb8-a954-
@@ -42,10 +42,76 @@ test("1/reusesSharedCausalCore. postActionStability imports and calls the SAME h
 });
 
 test("2/reusesSharedTechnicalResolver. the selection-state branch resolves a certified technical target through Discovery's recordedLocatorFactory before considering field-only resolution", () => {
-  assert.match(source, /capturePromotedSelectionStateProbe\(\s*this\.page,\s*options\.target,\s*targetIdentity\s*\)/);
   const probeFn = source.slice(source.indexOf("async function capturePromotedSelectionStateProbe"), source.indexOf("type PromotedActionSurfaceSnapshot"));
   assert.match(probeFn, /recordedLocatorFactory\(page,\s*candidate,\s*true\)/);
   assert.ok(probeFn.indexOf("recordedLocatorFactory") < probeFn.indexOf("resolvePromotedFieldLocator"));
+  assert.match(probeFn, /resolvedActionLocator\?: Locator/);
+});
+
+test("2/exactActionTargetProbe. when a promoted click has an already-resolved locator, selection verification reads that same element before counting refs independently", () => {
+  const probeFn = source.slice(source.indexOf("async function capturePromotedSelectionStateProbe"), source.indexOf("type PromotedActionSurfaceSnapshot"));
+  const directProbe = probeFn.indexOf("if (resolvedActionLocator)");
+  const refEnumeration = probeFn.indexOf("const technicalProbeCandidates = await Promise.all(");
+  assert.ok(directProbe >= 0 && refEnumeration >= 0 && directProbe < refEnumeration);
+  assert.match(probeFn, /readPromotedInteractiveState\(resolvedActionLocator\)/);
+  const clickFn = extractFunction("private async clickPromotedTargetViaStructuralAuthority(options", "\n  async clickPromotedTarget(");
+  assert.match(clickFn, /capturePromotedSelectionStateProbe\([\s\S]*?resolvedLocator,\s*\)/);
+});
+
+test("2/exactOptionCloseIsObservable. if the associated-field resolver cannot resolve the owner, a certified option still retains its exact dispatched locator so closing the listbox proves selection", () => {
+  const probeFn = source.slice(source.indexOf("async function capturePromotedSelectionStateProbe"), source.indexOf("type PromotedActionSurfaceSnapshot"));
+  const directProbe = probeFn.slice(probeFn.indexOf("if (resolvedActionLocator)"), probeFn.indexOf("const technicalProbeCandidates"));
+  assert.match(directProbe, /const recordedOption = Boolean\(optionRef && selectionActivationField\?\.trim\(\)\)/);
+  assert.match(directProbe, /expectedValue: semanticNameFromRef\(optionRef!\)/);
+  assert.match(directProbe, /exactTargetLocator: resolvedActionLocator/);
+  assert.match(source, /exactOptionNoLongerVisible = expectedSelectionValue[\s\S]*?selectionProbe\?\.exactTargetLocator[\s\S]*?this\.page\.url\(\) === previousUrl[\s\S]*?await selectionProbe\.exactTargetLocator\.isVisible\(\)\.catch\(\(\) => undefined\) === false/);
+});
+
+test("closed recorded option completes without waiting to evaluate its detached element, across vocabularies", async () => {
+  for (const expectedValue of ["Delivery channel", "Savings account"]) {
+    const runtime: any = Object.create(PromotedSpecRuntime.prototype);
+    runtime.config = { enabled: true, stabilityTimeoutMs: 1000, actionTimeoutMs: 100 };
+    runtime.page = { url: () => "https://fixture.invalid/form", isClosed: () => false };
+    let evaluations = 0;
+    const locator = { isVisible: async () => false, evaluate: async () => { evaluations++; return undefined; } };
+    await runtime.postActionStability(runtime.page.url(), "selection_state_change", undefined, {}, "recorded option", {
+      locator, before: { selected: false }, strategy: "recorded-selection-option", expectedValue, exactTargetLocator: locator,
+    });
+    assert.equal(evaluations, 0, "a detached option must not consume the test timeout before closure is checked");
+  }
+});
+
+test("selection state reads carry a bounded locator timeout", async () => {
+  const runtime: any = Object.create(PromotedSpecRuntime.prototype);
+  runtime.config = { enabled: true, stabilityTimeoutMs: 1000, actionTimeoutMs: 100 };
+  runtime.page = { url: () => "https://fixture.invalid/form", isClosed: () => false };
+  let timeout: number | undefined;
+  const locator = { evaluate: async (_fn: unknown, _arg: unknown, options: { timeout: number }) => {
+    timeout = options.timeout;
+    return { selected: true };
+  } };
+  await runtime.postActionStability(runtime.page.url(), "selection_state_change", undefined, {}, "recorded option", {
+    locator, before: { selected: false }, strategy: "recorded-selection-option",
+  });
+  assert.ok(timeout !== undefined && timeout > 0 && timeout <= 100);
+});
+
+test("closed pages and failed visibility probes do not certify selection", async () => {
+  for (const pageClosed of [true, false]) {
+    const runtime: any = Object.create(PromotedSpecRuntime.prototype);
+    runtime.config = { enabled: true, stabilityTimeoutMs: 1000, actionTimeoutMs: 100 };
+    runtime.page = {
+      url: () => "https://fixture.invalid/form", isClosed: () => pageClosed,
+      waitForTimeout: async () => { throw new Error("selection remains unverified"); },
+    };
+    const locator = {
+      isVisible: async () => { throw new Error("context unavailable"); },
+      evaluate: async () => undefined,
+    };
+    await assert.rejects(runtime.postActionStability(runtime.page.url(), "selection_state_change", undefined, {}, "recorded option", {
+      locator, before: { selected: false }, strategy: "recorded-selection-option", expectedValue: "Example option", exactTargetLocator: locator,
+    }), /selection remains unverified/);
+  }
 });
 
 test("2a/exactRoleOptionProbe. a role option technical ref becomes one exact actionable probe through the shared Discovery factory", () => {
@@ -63,16 +129,17 @@ test("2a/exactRoleOptionProbe. a role option technical ref becomes one exact act
 });
 
 test("2b/capturesBaselineBeforeDispatch. the causal baseline is captured before any native/callback click and passed unchanged into postActionStability", () => {
-  const clickFn = extractFunction("async clickPromotedTarget(options", "\n  async fillPromotedField(");
+  const clickFn = extractFunction("private async clickPromotedTargetViaStructuralAuthority(options", "\n  async clickPromotedTarget(");
   const probeIndex = clickFn.indexOf("const selectionStateProbe = resolvedExpectedEffect");
-  const nativeDispatchIndex = clickFn.indexOf("nativeClickAttempted = true");
+  const nativeDispatchIndex = clickFn.indexOf("await resolvedLocator.click");
   assert.ok(probeIndex >= 0 && nativeDispatchIndex >= 0 && probeIndex < nativeDispatchIndex, "selection baseline must exist before click dispatch");
-  assert.match(clickFn, /options\.target,\s*selectionStateProbe\)/);
+  assert.match(clickFn, /options\.target,\s*selectionStateProbe,\s*options\.selectionActivationField/);
 });
 
 test("2c/retryKeepsFirstClickBaseline. callback retry reuses the first pre-dispatch probe instead of sampling an already-selected target as a new baseline", () => {
-  const clickFn = extractFunction("async clickPromotedTarget(options", "\n  async fillPromotedField(");
-  assert.equal((clickFn.match(/options\.target,\s*selectionStateProbe\)/g) ?? []).length, 5);
+  const clickFn = extractFunction("private async clickPromotedTargetViaStructuralAuthority(options", "\n  async clickPromotedTarget(");
+  assert.equal((clickFn.match(/await this\.postActionStabilityWithRecordedOptionRetry\(/g) ?? []).length, 1);
+  assert.match(clickFn, /postActionStabilityWithRecordedOptionRetry\([\s\S]{0,220}selectionStateProbe/);
   assert.equal((clickFn.match(/capturePromotedSelectionStateProbe\(/g) ?? []).length, 1);
 });
 

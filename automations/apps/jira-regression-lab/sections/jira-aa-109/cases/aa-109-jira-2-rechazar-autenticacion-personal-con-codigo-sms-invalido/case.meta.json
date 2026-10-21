@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-109",
+  "sourceScenarioId": "AA-109:jira:2",
+  "title": "Rechazar autenticación personal con código SMS inválido",
+  "generatedAt": "2026-10-17T14:10:38.780Z",
+  "executionEngine": "jira_semantic"
+}

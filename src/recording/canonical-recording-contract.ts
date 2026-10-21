@@ -1058,6 +1058,7 @@ function causalTransition(events: readonly RecordedEvent[], index: number, exclu
   const end = nextPointerBoundaryT(events, anchor.t, anchor) ?? Number.POSITIVE_INFINITY;
   let ownedTransition: RecordedEvent | undefined;
   let ownedScreenChange: RecordedEvent | undefined;
+  let screenBeforeUnmatchedRoute: RecordedEvent | undefined;
   const routeSurface = (value: string | undefined): string | undefined => value?.replace(/[?#].*$/, "");
   for (const candidate of events) {
     if (typeof candidate.seq === "number" && excludeSeqs?.has(candidate.seq)) continue;
@@ -1077,10 +1078,16 @@ function causalTransition(events: readonly RecordedEvent[], index: number, exclu
       ownedScreenChange?.toScreenKey
       && candidate.screenKey === ownedScreenChange.toScreenKey
       && routeSurface(ownedScreenChange.url) === routeSurface(anchor.url)
+      && routeSurface(candidate.url) !== routeSurface(anchor.url)
     ) {
-      return { event: ownedScreenChange };
+      screenBeforeUnmatchedRoute = ownedScreenChange;
     }
     ownedTransition = candidate;
+  }
+  // An intermediate redirect may precede a query-state transition on the original surface.
+  // Decide from the settled route inside this gesture, rather than stopping at the redirect.
+  if (screenBeforeUnmatchedRoute && routeSurface(ownedTransition?.url) !== routeSurface(anchor.url)) {
+    return { event: screenBeforeUnmatchedRoute };
   }
   if (ownedTransition) return { event: ownedTransition };
   return transitionAfter(events, index, excludeSeqs);
@@ -1860,6 +1867,18 @@ export function buildCanonicalInteractions(
     return output;
   };
   const dedupOwnerIdentity = (interaction: CanonicalInteraction): string => interaction.selectorControlId ?? interaction.controlIdentity;
+  const checkboxOwnerScope = (interaction: CanonicalInteraction): string | undefined => {
+    const scopes = [...new Set((interaction.technicalTargetCandidates ?? [])
+      .map((candidate) => candidate.structuralContext?.scopeIdentity)
+      .filter((scope): scope is NonNullable<typeof scope> => Boolean(scope?.strategy && scope.value))
+      .map((scope) => `${scope.strategy}:${scope.value}`))];
+    return scopes.length === 1 ? scopes[0] : undefined;
+  };
+  const adjacentRecordedEvents = (left: CanonicalInteraction, right: CanonicalInteraction): boolean => {
+    const leftRef = left.sourceEventRefs.at(-1)?.match(/^event-(\d+)$/);
+    const rightRef = right.sourceEventRefs[0]?.match(/^event-(\d+)$/);
+    return Boolean(leftRef && rightRef && Number(rightRef[1]) === Number(leftRef[1]) + 1);
+  };
   // A real recording still produced pairs like: interaction A targets the compound control's
   // own technical/structural owner (e.g. "structural:grid=..."), interaction B targets the
   // selected option's display value (e.g. "Cuentas de Efectivo") — same valueKey, same
@@ -1897,6 +1916,23 @@ export function buildCanonicalInteractions(
       // Fail-closed: an unresolved owner/identity is never merged by coincidental value/text
       // match — keep the raw events separate rather than guess they are the same gesture.
       && previous.admissionStatus !== "unresolved" && interaction.admissionStatus !== "unresolved";
+    // Capture V2 can report both the accessible custom checkbox owner (for example, a
+    // role=checkbox span) and its backing input as separate adjacent tap events. They have
+    // different DOM identities but the same captured field scope. Replaying both as clicks
+    // toggles the same checkbox twice, undoing the user's one acceptance. Merge only when both
+    // actions express the same resulting state and the exact captured structural scope agrees;
+    // check->uncheck transitions and controls in different scopes remain separate.
+    const previousCheckboxScope = previous ? checkboxOwnerScope(previous) : undefined;
+    const interactionCheckboxScope = checkboxOwnerScope(interaction);
+    const sameCheckboxOwnerGesture = Boolean(previous
+      && (previous.action === "check" || previous.action === "uncheck")
+      && interaction.action === previous.action
+      && previous.screenBeforeRef === interaction.screenBeforeRef
+      && !previous.transitionObserved && !interaction.transitionObserved
+      && previous.admissionStatus !== "unresolved" && interaction.admissionStatus !== "unresolved"
+      && previousCheckboxScope
+      && previousCheckboxScope === interactionCheckboxScope
+      && adjacentRecordedEvents(previous, interaction));
     const sameGestureCluster = sharedGestureEvidence && dedupOwnerIdentity(previous) === dedupOwnerIdentity(interaction);
     // The owner+option shape: raw owner identities differ, but the same structured valueKey
     // AND exactly one side has its own technical target — the other is the option/display half
@@ -1904,12 +1940,21 @@ export function buildCanonicalInteractions(
     const sameCompoundSelectionGesture = sharedGestureEvidence
       && Boolean(previous.valueKey) && previous.valueKey === interaction.valueKey
       && hasOwnTechnicalIdentity(previous) !== hasOwnTechnicalIdentity(interaction);
-    if (sameGestureCluster || sameCompoundSelectionGesture) {
+    if (sameGestureCluster || sameCompoundSelectionGesture || sameCheckboxOwnerGesture) {
       // Order-independent owner survival: whichever side actually carries technical target
       // evidence becomes the retained record — a union of technicalTargetRefs alone would keep
       // the FIRST-pushed interaction's (possibly display-only) controlIdentity/description even
       // when the owner arrived second.
-      const keepInteractionAsBase = !hasOwnTechnicalIdentity(previous) && hasOwnTechnicalIdentity(interaction);
+      const previousHasNamedCheckboxOwner = Boolean(previous.playwrightRecorderEvidence?.kind === "role"
+        && previous.playwrightRecorderEvidence.role?.toLowerCase() === "checkbox"
+        && previous.playwrightRecorderEvidence.normalizedName?.trim()
+        && !isGenericUnresolvedLabel(previous.playwrightRecorderEvidence.normalizedName));
+      const interactionHasNamedCheckboxOwner = Boolean(interaction.playwrightRecorderEvidence?.kind === "role"
+        && interaction.playwrightRecorderEvidence.role?.toLowerCase() === "checkbox"
+        && interaction.playwrightRecorderEvidence.normalizedName?.trim()
+        && !isGenericUnresolvedLabel(interaction.playwrightRecorderEvidence.normalizedName));
+      const keepInteractionAsBase = (!hasOwnTechnicalIdentity(previous) && hasOwnTechnicalIdentity(interaction))
+        || (sameCheckboxOwnerGesture && !previousHasNamedCheckboxOwner && interactionHasNamedCheckboxOwner);
       const kept = keepInteractionAsBase ? interaction : previous;
       const other = keepInteractionAsBase ? previous : interaction;
       // OWNER authority: `kept` already carries the field's own valueKey/semanticField (it is
@@ -1920,7 +1965,9 @@ export function buildCanonicalInteractions(
         kept.recordedValue = other.recordedValue;
       }
       kept.sourceEventRefs = [...new Set([...previous.sourceEventRefs, ...interaction.sourceEventRefs])];
-      kept.technicalTargetRefs = [...new Set([...previous.technicalTargetRefs, ...interaction.technicalTargetRefs])];
+      if (!sameCheckboxOwnerGesture) {
+        kept.technicalTargetRefs = [...new Set([...previous.technicalTargetRefs, ...interaction.technicalTargetRefs])];
+      }
       deduped[deduped.length - 1] = kept;
       continue;
     }

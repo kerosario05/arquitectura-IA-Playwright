@@ -1,0 +1,9 @@
+{
+  "id": "aa-105-jira-8-rechazar-un-beneficiario-con-el-alias-atlas",
+  "externalId": "AA-105:jira:8",
+  "title": "Rechazar un beneficiario con el alias Atlas",
+  "source": "discovery",
+  "appSlug": "jira-regression-lab",
+  "appConfigPath": "automations\\apps\\jira-regression-lab\\app.config.json",
+  "createdAt": "2026-10-19T06:41:40.013Z"
+}

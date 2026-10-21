@@ -1,0 +1,61 @@
+- generic [ref=e32]:
+  - complementary [ref=e33]:
+    - generic [ref=e34]:
+      - generic [ref=e35]: Q
+      - generic [ref=e38]:
+        - generic [ref=e39]: QA Lab
+        - generic [ref=e40]: Santa Cruz
+    - navigation [ref=e41]:
+      - button "Panorama" [ref=e42] [cursor=pointer]
+      - button "Lanzar pruebas" [ref=e49] [cursor=pointer]
+      - button "Grabación" [ref=e55] [cursor=pointer]
+      - button "Ejecuciones" [ref=e59] [cursor=pointer]
+      - button "Configuración" [ref=e64] [cursor=pointer]
+      - button "Usuarios" [ref=e68] [cursor=pointer]
+    - generic [ref=e76]:
+      - generic [ref=e80]: Pro tip
+      - generic [ref=e81]: Programa ejecuciones nocturnas para optimizar recursos.
+    - generic [ref=e82]:
+      - generic [ref=e83]: AD
+      - generic [ref=e84]:
+        - generic [ref=e85]: Administrador
+        - generic [ref=e86]: Administrador
+  - main [ref=e87]:
+    - generic [ref=e88]:
+      - generic [ref=e89]:
+        - generic [ref=e90]:
+          - generic [ref=e92]: En vivo · 16:27
+          - generic [ref=e93]: ·
+          - generic [ref=e94]: Configura una nueva ejecución en 4 pasos
+        - heading "Lanzar pruebas" [level=1] [ref=e133]
+      - generic [ref=e96]:
+        - generic [ref=e97]:
+          - combobox "Buscar" [ref=e98]
+          - generic: Ctrl K
+        - button "Notificaciones" [ref=e100] [cursor=pointer]
+        - button "Cerrar sesión de admin" [ref=e106] [cursor=pointer]
+    - generic [ref=e135]:
+      - generic [ref=e137]:
+        - button "Proyecto" [ref=e138] [cursor=pointer]
+        - button "Fuentes" [ref=e151] [cursor=pointer]
+        - button "Casos" [ref=e158] [cursor=pointer]
+        - button "Lanzar" [ref=e166] [cursor=pointer]
+      - generic [ref=e173]:
+        - generic [ref=e1386]:
+          - generic [ref=e1387]:
+            - generic [ref=e1388]: Paso tres · Selecciona los casos
+            - generic [ref=e1389]:
+              - generic [ref=e1390]:
+                - heading "1 casos encontrados" [level=2] [ref=e1391]
+                - generic [ref=e1392]: Arquitectura automatización · REGRESION-KIOSKO
+              - generic [ref=e1394]:
+                - generic [ref=e1395]: 0 de 1 seleccionados
+                - button "Seleccionar todos" [ref=e1396] [cursor=pointer]
+          - generic [ref=e1399]:
+            - button [ref=e1400] [cursor=pointer]
+            - generic [ref=e1401]: C53821
+            - button "Transferencia exitosa entre cuentas propias con verificación de acceso y token" [ref=e1402] [cursor=pointer]
+            - button [ref=e1405] [cursor=pointer]
+        - generic [ref=e199]:
+          - button "Atrás" [ref=e200] [cursor=pointer]
+          - button "Continuar" [disabled] [ref=e1408]

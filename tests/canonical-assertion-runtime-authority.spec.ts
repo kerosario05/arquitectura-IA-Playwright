@@ -11,6 +11,7 @@ import {
   validateSpecExecutionContract,
 } from "../src/automations/spec-execution-contract";
 import type { ExecutionPlan } from "../src/types/execution-plan.types";
+import type { ContractSourceScenario } from "../src/automations/spec-execution-contract";
 
 function assertion(overrides: Record<string, unknown> = {}) {
   return {
@@ -34,10 +35,11 @@ function plan(): ExecutionPlan {
     scenario: { source: "testrail", externalId: "PREVIEW-005", title: "Scenario" },
     requiredData: [],
     steps: [{ index: 1, action: "assertVisible", description: "Assert Target A", target: { strategy: "text", value: "Target A" } }],
+    createdAt: new Date().toISOString(),
   };
 }
 
-const canonicalScenario = {
+const canonicalScenario: ContractSourceScenario = {
   title: "Scenario",
   steps: [{ index: 1, action: "assertVisible", description: "Target A", expected: "Target A" }],
   stepRequirementRefs: [{ stepIndex: 1, requirementId: "visibility:target-a", facet: "visibility" }],
@@ -83,7 +85,7 @@ test("T5 same target success can recover the assertion", () => {
 test("T6/T7 only an authorized oracle for the same requirement can back it", () => {
   const backed = buildSpecExecutionContract(plan(), {
     ...canonicalScenario,
-    observableOracles: [{ id: "oracle-a", requirement: "visibility:target-a", type: "visibility", backed: true, source: "discovery", stepIndex: 1, target: "Target A", evidence: ["observed_assertion_match"] }],
+    observableOracles: [{ id: "oracle-a", requirement: "visibility:target-a", type: "literal_visible_text", backed: true, source: "discovery", stepIndex: 1, target: "Target A", evidence: ["observed_assertion_match"] }],
   });
   expect(backed.steps[0].required).toBe(true);
   expect(backed.steps[0].oracle?.backed).toBe(true);
@@ -99,7 +101,7 @@ test("T6/T7 only an authorized oracle for the same requirement can back it", () 
 test("T10 all canonical assertions backed can pass", () => {
   const contract = buildSpecExecutionContract(plan(), {
     ...canonicalScenario,
-    observableOracles: [{ id: "oracle-a", requirement: "visibility:target-a", type: "visibility", backed: true, source: "discovery", stepIndex: 1, target: "Target A", evidence: ["observed_assertion_match"] }],
+    observableOracles: [{ id: "oracle-a", requirement: "visibility:target-a", type: "literal_visible_text", backed: true, source: "discovery", stepIndex: 1, target: "Target A", evidence: ["observed_assertion_match"] }],
   });
   expect(validateSpecExecutionContract(contract).valid).toBe(true);
 });
@@ -137,7 +139,7 @@ test("reconciled assertion clears stale failure markers but an unresolved failur
 });
 
 test("T11/T15 negative control keeps functional accounting separate from runtime success", () => {
-  const scenario = {
+  const scenario: ContractSourceScenario = {
     ...canonicalScenario,
     observableOracles: [{ id: "nav", requirement: "other", type: "navigation_transition", backed: true, source: "discovery", stepIndex: 1, target: "Target C", evidence: ["transition_observed"] }],
   };

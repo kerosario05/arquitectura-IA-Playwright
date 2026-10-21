@@ -10,14 +10,14 @@
   "status": "active",
   "source": "discovery",
   "appProfile": "fenix",
-  "createdAt": "2026-10-05T22:11:26.256Z",
-  "updatedAt": "2026-10-05T22:11:26.256Z",
-  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-05T22-06-28-593Z\\discovered-plans.pending.json",
+  "createdAt": "2026-10-09T23:16:11.292Z",
+  "updatedAt": "2026-10-09T23:16:11.292Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-09T23-11-08-685Z\\discovered-plans.pending.json",
   "pomStatus": "promoted",
   "inlineDebugMode": false,
   "specVerificationStatus": "passed",
   "metadata": {
-    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-05T22-06-28-593Z",
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-09T23-11-08-685Z",
     "pomDiagnostics": {
       "status": "promoted",
       "inlineFallbackUsed": false,
@@ -41,7 +41,7 @@
       },
       "invocations": 0,
       "invocationsConsumed": 0,
-      "durationMs": 70784,
+      "durationMs": 87466,
       "usage": {
         "inputTokens": null,
         "cachedInputTokens": null,
@@ -77,12 +77,7 @@
         "navigation_transition"
       ],
       "errors": [],
-      "warnings": [
-        "step_index_not_explicit_in_spec:9",
-        "step_index_not_explicit_in_spec:10",
-        "step_index_not_explicit_in_spec:11",
-        "step_index_not_explicit_in_spec:12"
-      ],
+      "warnings": [],
       "finalSpec": {
         "origin": "deterministic_compiler",
         "generatedBy": "core",
@@ -98,7 +93,7 @@
       "previousSpec": {
         "existed": true,
         "hash": "dbb4e3558433250a20f0459dfa092a37bf87cb38288a5c126175f3035ef17605",
-        "lastModifiedAt": "2026-10-05T22:01:38.840Z"
+        "lastModifiedAt": "2026-10-05T22:11:26.239Z"
       }
     },
     "promotionStrategyDiagnostics": {
@@ -118,7 +113,7 @@
       "fallbackUsed": false,
       "requirePomRuntime": false,
       "specPath": "automations\\apps\\fenix\\sections\\api-tests\\cases\\preview-001-login-sastifactorio\\case.spec.ts",
-      "specHash": "dbb4e3558433250a20f0459dfa092a37bf87cb38288a5c126175f3035ef17605",
+      "specHash": "f454256b1c23c1f3e5c16d2f54e6f4f988c12c01e477ebfd3dd203dc44f20d9a",
       "specSource": "generatedSpec"
     },
     "overwritten": true,
@@ -127,5 +122,5 @@
   },
   "promotionPersisted": true,
   "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\api-tests\\cases\\preview-001-login-sastifactorio\\case.spec.ts",
-  "promotedSpecHash": "dbb4e3558433250a20f0459dfa092a37bf87cb38288a5c126175f3035ef17605"
+  "promotedSpecHash": "f454256b1c23c1f3e5c16d2f54e6f4f988c12c01e477ebfd3dd203dc44f20d9a"
 }

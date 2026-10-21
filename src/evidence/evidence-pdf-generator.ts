@@ -80,7 +80,16 @@ async function renderEvidencePdf(
     if (logo && logoPath) await fs.promises.writeFile(logoPath, logo.data);
     await fs.promises.writeFile(
       htmlPath,
-      buildEvidenceHtml(model, { logoUrl: logoPath ? pathToFileURL(logoPath).href : null, fontsDir }),
+      buildEvidenceHtml(model, {
+        logoUrl: logoPath ? pathToFileURL(logoPath).href : null,
+        fontsDir,
+        // Chromium file URLs can reject valid Windows paths beyond MAX_PATH.
+        // Embed the actual bytes instead of depending on OS URL path limits.
+        imageDataUrls: Object.fromEntries(await Promise.all(
+          [...new Set(model.scenarios.flatMap(scenario => scenario.screens.flatMap(screen => screen.images.map(image => image.path))))]
+            .map(async imagePath => [path.resolve(imagePath), `data:image/${/\.jpe?g$/i.test(imagePath) ? "jpeg" : "png"};base64,${(await fs.promises.readFile(imagePath)).toString("base64")}`]),
+        )),
+      }),
       "utf8",
     );
 
@@ -116,7 +125,7 @@ async function renderEvidencePdf(
  * embeds within a scenario — so in the DOCX a screenshot whose bytes repeat an earlier one of the
  * same scenario never shows. The PDF shows the same set.
  */
-async function dropRepeatedScreenshots(model: EvidenceDocumentModel): Promise<EvidenceDocumentModel> {
+export async function dropRepeatedScreenshots(model: EvidenceDocumentModel): Promise<EvidenceDocumentModel> {
   const scenarios = [];
   for (const scenario of model.scenarios) {
     const seen = new Set<string>();
@@ -131,11 +140,36 @@ async function dropRepeatedScreenshots(model: EvidenceDocumentModel): Promise<Ev
       images.push(image);
     }
     const retainedPaths = new Set(images.map(image => path.resolve(image.path)));
+    if (scenario.evidenceKind !== "jira_semantic") {
+      // Keep the established Recording/legacy PDF layout: deduplicate the image
+      // bytes, but leave each screen's own step block where it was.
+      const screens = scenario.screens.map(screen => ({
+        ...screen,
+        images: screen.images.filter(image => retainedPaths.has(path.resolve(image.path))),
+      }));
+      scenarios.push({ ...scenario, images, screens });
+      continue;
+    }
+
+    // Remove duplicate image bytes without moving actions between logical screens.
+    // A second screen may have the same pixels (for example during a stalled transition);
+    // its steps still belong under that screen's title even if its repeated image is omitted.
     const screens = scenario.screens.map(screen => ({
       ...screen,
+      steps: [...screen.steps],
       images: screen.images.filter(image => retainedPaths.has(path.resolve(image.path))),
     }));
-    scenarios.push({ ...scenario, images, screens });
+    // Jira evidence is screen-oriented: keep every action, but only the latest
+    // representative capture for each screen visit. This avoids showing the
+    // initial frame plus several nearly identical frames for the same screen.
+    // Recording intentionally keeps its existing image placement/layout above.
+    const retainedScreens = screens
+      .filter(screen => screen.images.length > 0 || screen.steps.length > 0)
+      .map(screen => screen.images.length > 1
+        ? { ...screen, images: [screen.images[screen.images.length - 1]] }
+        : screen);
+    const jiraImages = retainedScreens.flatMap(screen => screen.images);
+    scenarios.push({ ...scenario, images: jiraImages, screens: retainedScreens });
   }
   return { ...model, scenarios };
 }
@@ -167,7 +201,7 @@ function escapeHtml(value: string): string {
 
 export function buildEvidenceHtml(
   model: EvidenceDocumentModel,
-  assets: { logoUrl: string | null; fontsDir: string },
+  assets: { logoUrl: string | null; fontsDir: string; imageDataUrls?: Record<string, string> },
 ): string {
   const fontFaces = FONT_FILES
     .filter(font => fs.existsSync(path.join(assets.fontsDir, font.file)))
@@ -183,16 +217,16 @@ export function buildEvidenceHtml(
       const parallelClass = screen.steps.length >= 8 ? " parallel" : "";
       const steps = screen.steps.length > 0
         ? `<ol class="screen-steps${parallelClass}" style="--step-rows:${parallelRows}">${screen.steps.map(step =>
-            `<li class="screen-step">${escapeHtml(step.text)}</li>`,
+            `<li class="screen-step" value="${step.number}"${step.number === 0 ? ' style="list-style:none"' : ""}>${escapeHtml(step.text)}</li>`,
           ).join("\n")}</ol>`
         : "";
       const images = screen.images.map(image =>
-        `<p class="shot"><img src="${escapeHtml(pathToFileURL(image.path).href)}" alt=""></p>`,
+        `<p class="shot"><span style="display:block;font-size:10px;line-height:1.3;padding-bottom:4px">${escapeHtml(/^ESTADO INICIAL/.test(image.stepText) ? image.stepText : `${title}${/^Pantalla final/i.test(image.stepText) ? " - Estado final" : ""}`)}</span><img src="${escapeHtml(assets.imageDataUrls?.[path.resolve(image.path)] ?? pathToFileURL(image.path).href)}" alt=""></p>`,
       ).join("\n");
-      return `<section class="screen-evidence" data-screen-title="${escapedTitle}"><div class="screen-step-block"><h3 class="screen-title">${escapedTitle}</h3>${steps}</div>${images}</section>`;
+      return `<section class="screen-evidence" data-screen-title="${escapedTitle}"><div class="screen-step-block"><h3 class="screen-title">${escapedTitle}</h3>${steps}${screen.images.length ? "" : '<p style="font-size:10px">No se guardó una captura de esta pantalla durante la ejecución.</p>'}</div>${images}</section>`;
     }).join("\n");
     return `
-<section class="scenario" data-index="${index}">
+<section class="scenario" data-index="${index}" data-evidence-kind="${escapeHtml(scenario.evidenceKind ?? "")}">
   <table class="case">
     <colgroup><col style="width:294px"><col style="width:378px"></colgroup>
     <tr><td colspan="2">Caso de prueba: ${escapeHtml(scenario.title)}</td></tr>
@@ -280,6 +314,8 @@ const FIRST_SCENARIO_GAP = 99.7;
 // height. Word then clips a screenshot taller than the page; here it is shrunk to fit instead.
 const IMAGE_WIDTH = 432 * 96 / 72;
 const IMAGE_MAX_HEIGHT = BODY_BOTTOM - BODY_TOP - 38;
+// Keep grouped screen steps and their capture together for every evidence source.
+const JIRA_IMAGE_MAX_HEIGHT = BODY_BOTTOM - BODY_TOP - 90;
 
 window.__layoutEvidence = function () {
   document.documentElement.style.setProperty("--body-top", BODY_TOP + "px");
@@ -292,7 +328,8 @@ window.__layoutEvidence = function () {
     if (!img.complete || img.naturalWidth === 0) { brokenImages.push(decodeURIComponent(img.getAttribute("src") || "")); continue; }
     let width = IMAGE_WIDTH;
     let height = width * img.naturalHeight / img.naturalWidth;
-    if (height > IMAGE_MAX_HEIGHT) { height = IMAGE_MAX_HEIGHT; width = height * img.naturalWidth / img.naturalHeight; }
+    const maxHeight = img.closest('.scenario[data-evidence-kind="jira_semantic"]') ? JIRA_IMAGE_MAX_HEIGHT : IMAGE_MAX_HEIGHT;
+    if (height > maxHeight) { height = maxHeight; width = height * img.naturalWidth / img.naturalHeight; }
     img.style.width = width + "px";
     img.style.height = height + "px";
     imageCount++;
@@ -316,7 +353,10 @@ window.__layoutEvidence = function () {
   };
   const placeScreen = (screen, firstScreenOnScenario) => {
     const stepBlock = screen.querySelector(".screen-step-block");
-    if (!firstScreenOnScenario) newPage();
+
+    // Text-only evidence sections do not consume an otherwise blank page.
+    // Keep the next screenshot beside its own steps when the current page has no image.
+    if (!firstScreenOnScenario && screen.querySelector(".shot") && body.querySelector(".shot")) newPage();
     if (stepBlock) {
       place(stepBlock);
       const steps = stepBlock.querySelector(".screen-steps");
@@ -324,12 +364,49 @@ window.__layoutEvidence = function () {
         steps.classList.add("parallel");
       }
     }
+    const fitShotBesideSteps = (screenshot) => {
+      const img = screenshot.querySelector("img");
+      if (!img || !img.naturalWidth || !img.naturalHeight) return;
+      const marginBottom = Number.parseFloat(getComputedStyle(screenshot).marginBottom) || 0;
+      const captionHeight = img.offsetTop - screenshot.offsetTop;
+      let availableHeight = body.clientHeight - screenshot.offsetTop - marginBottom - captionHeight;
+      if (availableHeight < 180 && body.querySelectorAll(".shot").length === 1) {
+        const openingGap = body.querySelector(".first-gap");
+        if (openingGap) {
+          openingGap.remove();
+          availableHeight = body.clientHeight - screenshot.offsetTop - marginBottom - captionHeight;
+        }
+      }
+      // Keep a useful capture size. If the first page's cover gap/header leaves too
+      // little room, move the step block and image together to a fresh page.
+      if (availableHeight < 180 && stepBlock && stepBlock.parentElement === body) {
+        const earlierShots = body.querySelectorAll(".shot").length > 1;
+        if (!earlierShots) body.removeChild(stepBlock);
+        newPage().appendChild(earlierShots ? stepBlock.cloneNode(true) : stepBlock);
+        body.appendChild(screenshot);
+        availableHeight = body.clientHeight - screenshot.offsetTop - marginBottom - captionHeight;
+      }
+      const currentHeight = Number.parseFloat(img.style.height);
+      if (availableHeight <= 0 || !Number.isFinite(currentHeight) || currentHeight <= availableHeight) return;
+      const aspectRatio = img.naturalWidth / img.naturalHeight;
+      const fittedHeight = Math.max(1, availableHeight);
+      img.style.height = fittedHeight + "px";
+      img.style.width = Math.min(IMAGE_WIDTH, fittedHeight * aspectRatio) + "px";
+    };
     for (const screenshot of Array.from(screen.querySelectorAll(".shot"))) {
       body.appendChild(screenshot);
+      fitShotBesideSteps(screenshot);
       if (screenshot.offsetTop + screenshot.offsetHeight > body.clientHeight) {
         body.removeChild(screenshot);
-        newPage();
+        if (stepBlock && stepBlock.parentElement === body && !body.querySelector(".shot")) {
+          body.removeChild(stepBlock);
+          newPage().appendChild(stepBlock);
+        } else {
+          newPage();
+          if (stepBlock) body.appendChild(stepBlock.cloneNode(true));
+        }
         body.appendChild(screenshot);
+        fitShotBesideSteps(screenshot);
       }
     }
   };

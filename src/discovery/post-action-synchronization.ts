@@ -140,7 +140,12 @@ export function resolvePostActionSynchronization(
   // A successful HTTP response can arrive while an SPA is still processing authentication.
   // Keep observing the same auth gate until it changes, the recorded next target appears, or
   // an application error is shown; the network response alone is only progress at this boundary.
-  if (input.authenticationBoundaryStillActive) return { completed: false };
+  // A recorded next action may progress inside the same auth surface (for example a
+  // portalized option whose dynamic name is withheld). Technical readiness from the
+  // shared resolver is the same next-step evidence as visible text; it does not certify
+  // authentication itself. Unscoped readiness and unresolved targets remain blocked.
+  if (input.authenticationBoundaryStillActive
+    && !(input.nextTargetRequiresRuntimeResolution && input.nextTargetReady)) return { completed: false };
   const recordedSurfaceConfirmed = Boolean(input.recordedPostActionSurfaceRequired && input.recordedPostActionSurfaceReached);
   // FIRST_LOSS fix: a generic network_response/dom_validation_mutation was accepted as completion
   // even though the recording's next structured action (a selection owner/combobox with real

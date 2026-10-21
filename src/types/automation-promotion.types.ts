@@ -54,6 +54,10 @@ export type PromotedAutomationIndexEntry = {
   id: string;
   externalId?: string;
   caseId?: number;
+  /** Exact TestRail case association established from a Jira scenario publication. */
+  promotionPersisted?: boolean;
+  promotedSpecPath?: string;
+  promotedSpecHash?: string;
   title: string;
   planPath: string;
   specPath: string;

@@ -38,6 +38,7 @@ export type LocatorStrategy =
   | "xpath"
   | "semantic"
   | "registry"
+  | "url"
   | "selection_keyboard_typeahead";
 
 export type PlanTarget = {
@@ -78,6 +79,8 @@ export type InputIntent = {
 };
 
 export type ExecutionPlanStep = {
+  /** Live Discovery observation, independent of recorder evidence. */
+  selectionControlKind?: "native_select";
   index: number;
   action: PlanAction;
   description?: string;

@@ -1,0 +1,9 @@
+{
+  "id": "aa-97-jira-2-rechazo-de-inicio-de-sesion-por-contrasena-no-valida",
+  "externalId": "AA-97:jira:2",
+  "title": "Rechazo de inicio de sesión por contraseña no válida",
+  "source": "discovery",
+  "appSlug": "fenix",
+  "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+  "createdAt": "2026-10-15T18:45:19.492Z"
+}

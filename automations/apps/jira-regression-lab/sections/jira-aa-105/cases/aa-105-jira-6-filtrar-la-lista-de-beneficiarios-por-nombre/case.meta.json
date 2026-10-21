@@ -1,0 +1,8 @@
+{
+  "appSlug": "jira-regression-lab",
+  "sectionSlug": "jira-aa-105",
+  "sourceScenarioId": "AA-105:jira:6",
+  "title": "Filtrar la lista de beneficiarios por nombre",
+  "generatedAt": "2026-10-19T06:36:33.117Z",
+  "executionEngine": "jira_semantic"
+}

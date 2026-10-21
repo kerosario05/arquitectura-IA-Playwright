@@ -10,14 +10,14 @@
   "status": "active",
   "source": "discovery",
   "appProfile": "kiosko",
-  "createdAt": "2026-10-08T12:29:02.112Z",
-  "updatedAt": "2026-10-08T12:29:02.112Z",
-  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-08T12-25-29-406Z\\discovered-plans.pending.json",
+  "createdAt": "2026-10-08T15:40:00.746Z",
+  "updatedAt": "2026-10-08T15:40:00.746Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-08T15-37-23-359Z\\discovered-plans.pending.json",
   "pomStatus": "promoted",
   "inlineDebugMode": false,
   "specVerificationStatus": "passed",
   "metadata": {
-    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-08T12-25-29-406Z",
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-08T15-37-23-359Z",
     "pomDiagnostics": {
       "status": "promoted",
       "inlineFallbackUsed": false,
@@ -41,7 +41,7 @@
       },
       "invocations": 0,
       "invocationsConsumed": 0,
-      "durationMs": 84563,
+      "durationMs": 68376,
       "usage": {
         "inputTokens": null,
         "cachedInputTokens": null,
@@ -92,7 +92,7 @@
       "previousSpec": {
         "existed": true,
         "hash": "e2c8ad70f1c9494714d80e19a1c6cb6af2d85ef505d2122706bea56a6cf0a05c",
-        "lastModifiedAt": "2026-10-07T22:14:05.809Z"
+        "lastModifiedAt": "2026-10-08T12:29:02.082Z"
       }
     },
     "promotionStrategyDiagnostics": {

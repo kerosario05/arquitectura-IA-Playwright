@@ -1,0 +1,94 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-10-14T18:46:46.779Z",
+  "entries": [
+    {
+      "key": "rnc",
+      "source": "unknown",
+      "fieldName": "[id=\"Enterprise\"]",
+      "stepIndex": 4,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "usuario",
+      "source": "unknown",
+      "fieldName": "[id=\"UserNameE\"]",
+      "stepIndex": 5,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "contrasena",
+      "source": "unknown",
+      "fieldName": "[id=\"PasswordE\"]",
+      "stepIndex": 6,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "codigo_acceso",
+      "source": "unknown",
+      "fieldName": "segmented_code",
+      "stepIndex": 10,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "cuenta_origen",
+      "source": "unknown",
+      "fieldName": "(//*[normalize-space(.)='Cuenta Origen' and not(*[normalize-space(.)='Cuenta Origen'])]/following::span[normalize-space(.)='Seleccione una Cuenta'][1])[1]",
+      "stepIndex": 15,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "cuenta_destino",
+      "source": "unknown",
+      "fieldName": "(//*[normalize-space(.)='Cuenta Destino' and not(*[normalize-space(.)='Cuenta Destino'])]/following::span[normalize-space(.)='Seleccione una Cuenta'][1])[1]",
+      "stepIndex": 16,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "monto",
+      "source": "unknown",
+      "fieldName": "[id=\"transactionDetails_0__AmountPayment\"]",
+      "stepIndex": 17,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "token_transferencia",
+      "source": "unknown",
+      "fieldName": "segmented_code",
+      "stepIndex": 29,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

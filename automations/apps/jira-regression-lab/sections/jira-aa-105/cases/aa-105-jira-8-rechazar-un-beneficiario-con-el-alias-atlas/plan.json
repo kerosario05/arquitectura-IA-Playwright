@@ -1,0 +1,830 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-19T06:41:09.674Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "AA-105:jira:8",
+    "title": "Rechazar un beneficiario con el alias Atlas"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "fill",
+      "description": "fill [auth.company_identifier]",
+      "valueKey": "auth.company_identifier",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-rnc\"]"
+      }
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "fill [auth.username]",
+      "valueKey": "auth.username",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-user\"]"
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [auth.password]",
+      "valueKey": "auth.password",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"login-password\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "click Iniciar sesión",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Iniciar sesión",
+        "exact": true
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Presionar \"Beneficiarios\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "♧ Beneficiarios",
+        "exact": true
+      }
+    },
+    {
+      "index": 7,
+      "action": "assertVisible",
+      "description": "Validar que la pantalla \"Beneficiarios\" esté abierta.",
+      "target": {
+        "strategy": "text",
+        "value": "Beneficiarios"
+      }
+    },
+    {
+      "index": 8,
+      "action": "click",
+      "description": "Presionar \"Añadir beneficiario\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Añadir beneficiario",
+        "exact": true
+      }
+    },
+    {
+      "index": 9,
+      "action": "assertVisible",
+      "description": "Validar que el formulario \"Añadir beneficiario\" esté abierto.",
+      "target": {
+        "strategy": "text",
+        "value": "Añadir beneficiario"
+      }
+    },
+    {
+      "index": 10,
+      "action": "assertVisible",
+      "description": "Validar que el campo \"Nombre del beneficiario\" esté visible.",
+      "target": {
+        "strategy": "text",
+        "value": "Nombre del beneficiario"
+      }
+    },
+    {
+      "index": 11,
+      "action": "assertVisible",
+      "description": "Validar que el campo \"Alias\" esté visible.",
+      "target": {
+        "strategy": "text",
+        "value": "Alias"
+      }
+    },
+    {
+      "index": 12,
+      "action": "assertVisible",
+      "description": "Validar que el campo \"Número de cuenta\" esté visible.",
+      "target": {
+        "strategy": "text",
+        "value": "Número de cuenta"
+      }
+    },
+    {
+      "index": 13,
+      "action": "assertVisible",
+      "description": "Validar que el campo \"Entidad bancaria\" esté visible.",
+      "target": {
+        "strategy": "text",
+        "value": "Entidad bancaria"
+      }
+    },
+    {
+      "index": 14,
+      "action": "assertVisible",
+      "description": "Validar que la opción \"Correo electrónico\" esté visible.",
+      "target": {
+        "strategy": "text",
+        "value": "Correo electrónico"
+      }
+    },
+    {
+      "index": 15,
+      "action": "assertVisible",
+      "description": "Validar que la opción \"SMS\" esté visible.",
+      "target": {
+        "strategy": "text",
+        "value": "SMS"
+      }
+    },
+    {
+      "index": 16,
+      "action": "assertVisible",
+      "description": "Validar que la opción \"Notificación push\" esté visible.",
+      "target": {
+        "strategy": "text",
+        "value": "Notificación push"
+      }
+    },
+    {
+      "index": 17,
+      "action": "fill",
+      "description": "fill [initial_beneficiary_name]",
+      "valueKey": "initial_beneficiary_name",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"beneficiary-name\"]"
+      }
+    },
+    {
+      "index": 18,
+      "action": "fill",
+      "description": "fill [initial_beneficiary_alias]",
+      "valueKey": "initial_beneficiary_alias",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"beneficiary-alias\"]"
+      }
+    },
+    {
+      "index": 19,
+      "action": "fill",
+      "description": "fill [initial_beneficiary_account]",
+      "valueKey": "initial_beneficiary_account",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"beneficiary-account\"]"
+      }
+    },
+    {
+      "index": 20,
+      "action": "select",
+      "description": "fill [initial_beneficiary_bank]",
+      "valueKey": "initial_beneficiary_bank",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"beneficiary-bank\"]"
+      }
+    },
+    {
+      "index": 21,
+      "action": "click",
+      "description": "Presionar \"Guardar beneficiario\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Guardar beneficiario",
+        "exact": true
+      }
+    },
+    {
+      "index": 22,
+      "action": "assertVisible",
+      "description": "Validar que se muestre exactamente \"Beneficiario agregado correctamente.\".",
+      "target": {
+        "strategy": "text",
+        "value": "Beneficiario agregado correctamente."
+      }
+    },
+    {
+      "index": 23,
+      "action": "click",
+      "description": "Presionar \"Añadir beneficiario\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Añadir beneficiario",
+        "exact": true
+      }
+    },
+    {
+      "index": 24,
+      "action": "assertVisible",
+      "description": "Validar que el formulario \"Añadir beneficiario\" esté abierto.",
+      "target": {
+        "strategy": "text",
+        "value": "Añadir beneficiario"
+      }
+    },
+    {
+      "index": 25,
+      "action": "fill",
+      "description": "fill [duplicate_beneficiary_name]",
+      "valueKey": "duplicate_beneficiary_name",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"beneficiary-name\"]"
+      }
+    },
+    {
+      "index": 26,
+      "action": "fill",
+      "description": "fill [duplicate_beneficiary_alias]",
+      "valueKey": "duplicate_beneficiary_alias",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"beneficiary-alias\"]"
+      }
+    },
+    {
+      "index": 27,
+      "action": "fill",
+      "description": "fill [duplicate_beneficiary_account]",
+      "valueKey": "duplicate_beneficiary_account",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"beneficiary-account\"]"
+      }
+    },
+    {
+      "index": 28,
+      "action": "select",
+      "description": "fill [duplicate_beneficiary_bank]",
+      "valueKey": "duplicate_beneficiary_bank",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"beneficiary-bank\"]"
+      }
+    },
+    {
+      "index": 29,
+      "action": "click",
+      "description": "Presionar \"Guardar beneficiario\".",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Guardar beneficiario",
+        "exact": true
+      }
+    },
+    {
+      "index": 30,
+      "action": "assertVisible",
+      "description": "Validar que se muestre exactamente \"Ya existe un beneficiario con esa cuenta o alias.\".",
+      "target": {
+        "strategy": "text",
+        "value": "Ya existe un beneficiario con esa cuenta o alias."
+      }
+    },
+    {
+      "index": 31,
+      "action": "assertVisible",
+      "description": "Validar que el formulario \"Añadir beneficiario\" permanezca abierto.",
+      "target": {
+        "strategy": "text",
+        "value": "Añadir beneficiario"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "auth.company_identifier",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "auth.username",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "auth.password",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "initial_beneficiary_name",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "initial_beneficiary_alias",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "initial_beneficiary_account",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "initial_beneficiary_bank",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "duplicate_beneficiary_name",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "duplicate_beneficiary_alias",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "duplicate_beneficiary_account",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "duplicate_beneficiary_bank",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Rechazar un beneficiario con el alias Atlas",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "fill",
+        "valueKey": "auth.company_identifier",
+        "technicalTargetRefs": [
+          "css:[id=\"login-rnc\"]"
+        ]
+      },
+      {
+        "index": 3,
+        "action": "fill",
+        "valueKey": "auth.username",
+        "technicalTargetRefs": [
+          "css:[id=\"login-user\"]"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "auth.password",
+        "technicalTargetRefs": [
+          "css:[id=\"login-password\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|♧ Beneficiarios"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "assertVisible",
+        "description": "Validar que la pantalla \"Beneficiarios\" esté abierta.",
+        "technicalTargetRefs": [
+          "text:Beneficiarios"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Añadir beneficiario"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "assertVisible",
+        "description": "Validar que el formulario \"Añadir beneficiario\" esté abierto.",
+        "technicalTargetRefs": [
+          "text:Añadir beneficiario"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "assertVisible",
+        "description": "Validar que el campo \"Nombre del beneficiario\" esté visible.",
+        "technicalTargetRefs": [
+          "text:Nombre del beneficiario"
+        ]
+      },
+      {
+        "index": 11,
+        "action": "assertVisible",
+        "description": "Validar que el campo \"Alias\" esté visible.",
+        "technicalTargetRefs": [
+          "text:Alias"
+        ]
+      },
+      {
+        "index": 12,
+        "action": "assertVisible",
+        "description": "Validar que el campo \"Número de cuenta\" esté visible.",
+        "technicalTargetRefs": [
+          "text:Número de cuenta"
+        ]
+      },
+      {
+        "index": 13,
+        "action": "assertVisible",
+        "description": "Validar que el campo \"Entidad bancaria\" esté visible.",
+        "technicalTargetRefs": [
+          "text:Entidad bancaria"
+        ]
+      },
+      {
+        "index": 14,
+        "action": "assertVisible",
+        "description": "Validar que la opción \"Correo electrónico\" esté visible.",
+        "technicalTargetRefs": [
+          "text:Correo electrónico"
+        ]
+      },
+      {
+        "index": 15,
+        "action": "assertVisible",
+        "description": "Validar que la opción \"SMS\" esté visible.",
+        "technicalTargetRefs": [
+          "text:SMS"
+        ]
+      },
+      {
+        "index": 16,
+        "action": "assertVisible",
+        "description": "Validar que la opción \"Notificación push\" esté visible.",
+        "technicalTargetRefs": [
+          "text:Notificación push"
+        ]
+      },
+      {
+        "index": 17,
+        "action": "fill",
+        "valueKey": "initial_beneficiary_name",
+        "technicalTargetRefs": [
+          "css:[id=\"beneficiary-name\"]"
+        ]
+      },
+      {
+        "index": 18,
+        "action": "fill",
+        "valueKey": "initial_beneficiary_alias",
+        "technicalTargetRefs": [
+          "css:[id=\"beneficiary-alias\"]"
+        ]
+      },
+      {
+        "index": 19,
+        "action": "fill",
+        "valueKey": "initial_beneficiary_account",
+        "technicalTargetRefs": [
+          "css:[id=\"beneficiary-account\"]"
+        ]
+      },
+      {
+        "index": 20,
+        "action": "select",
+        "valueKey": "initial_beneficiary_bank",
+        "technicalTargetRefs": [
+          "css:[id=\"beneficiary-bank\"]"
+        ]
+      },
+      {
+        "index": 21,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Guardar beneficiario"
+        ]
+      },
+      {
+        "index": 22,
+        "action": "assertVisible",
+        "description": "Validar que se muestre exactamente \"Beneficiario agregado correctamente.\".",
+        "technicalTargetRefs": [
+          "text:Beneficiario agregado correctamente."
+        ]
+      },
+      {
+        "index": 23,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Añadir beneficiario"
+        ]
+      },
+      {
+        "index": 24,
+        "action": "assertVisible",
+        "description": "Validar que el formulario \"Añadir beneficiario\" esté abierto.",
+        "technicalTargetRefs": [
+          "text:Añadir beneficiario"
+        ]
+      },
+      {
+        "index": 25,
+        "action": "fill",
+        "valueKey": "duplicate_beneficiary_name",
+        "technicalTargetRefs": [
+          "css:[id=\"beneficiary-name\"]"
+        ]
+      },
+      {
+        "index": 26,
+        "action": "fill",
+        "valueKey": "duplicate_beneficiary_alias",
+        "technicalTargetRefs": [
+          "css:[id=\"beneficiary-alias\"]"
+        ]
+      },
+      {
+        "index": 27,
+        "action": "fill",
+        "valueKey": "duplicate_beneficiary_account",
+        "technicalTargetRefs": [
+          "css:[id=\"beneficiary-account\"]"
+        ]
+      },
+      {
+        "index": 28,
+        "action": "select",
+        "valueKey": "duplicate_beneficiary_bank",
+        "technicalTargetRefs": [
+          "css:[id=\"beneficiary-bank\"]"
+        ]
+      },
+      {
+        "index": 29,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Guardar beneficiario"
+        ]
+      },
+      {
+        "index": 30,
+        "action": "assertVisible",
+        "description": "Validar que se muestre exactamente \"Ya existe un beneficiario con esa cuenta o alias.\".",
+        "technicalTargetRefs": [
+          "text:Ya existe un beneficiario con esa cuenta o alias."
+        ]
+      },
+      {
+        "index": 31,
+        "action": "assertVisible",
+        "description": "Validar que el formulario \"Añadir beneficiario\" permanezca abierto.",
+        "technicalTargetRefs": [
+          "text:Añadir beneficiario"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-7",
+        "requirement": "Validar que la pantalla \"Beneficiarios\" esté abierta.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 7,
+        "target": "Beneficiarios",
+        "evidence": [
+          "live-step-7"
+        ],
+        "details": {
+          "observedText": "Beneficiarios"
+        }
+      },
+      {
+        "id": "jira-oracle-9",
+        "requirement": "Validar que el formulario \"Añadir beneficiario\" esté abierto.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 9,
+        "target": "Añadir beneficiario",
+        "evidence": [
+          "live-step-9"
+        ],
+        "details": {
+          "observedText": "Añadir beneficiario"
+        }
+      },
+      {
+        "id": "jira-oracle-10",
+        "requirement": "Validar que el campo \"Nombre del beneficiario\" esté visible.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 10,
+        "target": "Añadir beneficiario\n×\nNombre del beneficiario\nAlias\nNúmero de cuenta\nEntidad bancaria\nBanco Norte\nBanco Central\nCooperativa Sol\nNotificaciones\nCorreo electrónico\nSMS\nNotificación push\nCancelar\nGuardar beneficiario",
+        "evidence": [
+          "live-step-10"
+        ],
+        "details": {
+          "observedText": "Añadir beneficiario\n×\nNombre del beneficiario\nAlias\nNúmero de cuenta\nEntidad bancaria\nBanco Norte\nBanco Central\nCooperativa Sol\nNotificaciones\nCorreo electrónico\nSMS\nNotificación push\nCancelar\nGuardar beneficiario"
+        }
+      },
+      {
+        "id": "jira-oracle-11",
+        "requirement": "Validar que el campo \"Alias\" esté visible.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 11,
+        "target": "DESTINATARIOS\nBeneficiarios\n\nAdministra destinatarios y consulta su estado de verificación.\n\nAñadir beneficiario\n↻ Actualizar lista\nDestinatarios guardados\n2 activos\nLista de beneficiarios empresariales\nNOMBRE\tALIAS\tCUENTA\tENTIDAD\tESTADO\tACCIÓN\nSuministros Atlas\tAtlas\t•••• 7712\tBanco Norte\tVerificado\t···\nServicios Delta\tDelta\t•••• 8821\tBanco Central\tVerificado\t···\nMostrando 2 de 2\nAnterior Siguiente",
+        "evidence": [
+          "live-step-11"
+        ],
+        "details": {
+          "observedText": "DESTINATARIOS\nBeneficiarios\n\nAdministra destinatarios y consulta su estado de verificación.\n\nAñadir beneficiario\n↻ Actualizar lista\nDestinatarios guardados\n2 activos\nLista de beneficiarios empresariales\nNOMBRE\tALIAS\tCUENTA\tENTIDAD\tESTADO\tACCIÓN\nSuministros Atlas\tAtlas\t•••• 7712\tBanco Norte\tVerificado\t···\nServicios Delta\tDelta\t•••• 8821\tBanco Central\tVerificado\t···\nMostrando 2 de 2\nAnterior Siguiente"
+        }
+      },
+      {
+        "id": "jira-oracle-12",
+        "requirement": "Validar que el campo \"Número de cuenta\" esté visible.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 12,
+        "target": "Añadir beneficiario\n×\nNombre del beneficiario\nAlias\nNúmero de cuenta\nEntidad bancaria\nBanco Norte\nBanco Central\nCooperativa Sol\nNotificaciones\nCorreo electrónico\nSMS\nNotificación push\nCancelar\nGuardar beneficiario",
+        "evidence": [
+          "live-step-12"
+        ],
+        "details": {
+          "observedText": "Añadir beneficiario\n×\nNombre del beneficiario\nAlias\nNúmero de cuenta\nEntidad bancaria\nBanco Norte\nBanco Central\nCooperativa Sol\nNotificaciones\nCorreo electrónico\nSMS\nNotificación push\nCancelar\nGuardar beneficiario"
+        }
+      },
+      {
+        "id": "jira-oracle-13",
+        "requirement": "Validar que el campo \"Entidad bancaria\" esté visible.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 13,
+        "target": "Añadir beneficiario\n×\nNombre del beneficiario\nAlias\nNúmero de cuenta\nEntidad bancaria\nBanco Norte\nBanco Central\nCooperativa Sol\nNotificaciones\nCorreo electrónico\nSMS\nNotificación push\nCancelar\nGuardar beneficiario",
+        "evidence": [
+          "live-step-13"
+        ],
+        "details": {
+          "observedText": "Añadir beneficiario\n×\nNombre del beneficiario\nAlias\nNúmero de cuenta\nEntidad bancaria\nBanco Norte\nBanco Central\nCooperativa Sol\nNotificaciones\nCorreo electrónico\nSMS\nNotificación push\nCancelar\nGuardar beneficiario"
+        }
+      },
+      {
+        "id": "jira-oracle-14",
+        "requirement": "Validar que la opción \"Correo electrónico\" esté visible.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 14,
+        "target": "Añadir beneficiario\n×\nNombre del beneficiario\nAlias\nNúmero de cuenta\nEntidad bancaria\nBanco Norte\nBanco Central\nCooperativa Sol\nNotificaciones\nCorreo electrónico\nSMS\nNotificación push\nCancelar\nGuardar beneficiario",
+        "evidence": [
+          "live-step-14"
+        ],
+        "details": {
+          "observedText": "Añadir beneficiario\n×\nNombre del beneficiario\nAlias\nNúmero de cuenta\nEntidad bancaria\nBanco Norte\nBanco Central\nCooperativa Sol\nNotificaciones\nCorreo electrónico\nSMS\nNotificación push\nCancelar\nGuardar beneficiario"
+        }
+      },
+      {
+        "id": "jira-oracle-15",
+        "requirement": "Validar que la opción \"SMS\" esté visible.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 15,
+        "target": "Añadir beneficiario\n×\nNombre del beneficiario\nAlias\nNúmero de cuenta\nEntidad bancaria\nBanco Norte\nBanco Central\nCooperativa Sol\nNotificaciones\nCorreo electrónico\nSMS\nNotificación push\nCancelar\nGuardar beneficiario",
+        "evidence": [
+          "live-step-15"
+        ],
+        "details": {
+          "observedText": "Añadir beneficiario\n×\nNombre del beneficiario\nAlias\nNúmero de cuenta\nEntidad bancaria\nBanco Norte\nBanco Central\nCooperativa Sol\nNotificaciones\nCorreo electrónico\nSMS\nNotificación push\nCancelar\nGuardar beneficiario"
+        }
+      },
+      {
+        "id": "jira-oracle-16",
+        "requirement": "Validar que la opción \"Notificación push\" esté visible.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 16,
+        "target": "Añadir beneficiario\n×\nNombre del beneficiario\nAlias\nNúmero de cuenta\nEntidad bancaria\nBanco Norte\nBanco Central\nCooperativa Sol\nNotificaciones\nCorreo electrónico\nSMS\nNotificación push\nCancelar\nGuardar beneficiario",
+        "evidence": [
+          "live-step-16"
+        ],
+        "details": {
+          "observedText": "Añadir beneficiario\n×\nNombre del beneficiario\nAlias\nNúmero de cuenta\nEntidad bancaria\nBanco Norte\nBanco Central\nCooperativa Sol\nNotificaciones\nCorreo electrónico\nSMS\nNotificación push\nCancelar\nGuardar beneficiario"
+        }
+      },
+      {
+        "id": "jira-oracle-22",
+        "requirement": "Validar que se muestre exactamente \"Beneficiario agregado correctamente.\".",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 22,
+        "target": "Beneficiario agregado correctamente.",
+        "evidence": [
+          "live-step-22"
+        ],
+        "details": {
+          "observedText": "Beneficiario agregado correctamente."
+        }
+      },
+      {
+        "id": "jira-oracle-24",
+        "requirement": "Validar que el formulario \"Añadir beneficiario\" esté abierto.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 24,
+        "target": "Añadir beneficiario",
+        "evidence": [
+          "live-step-24"
+        ],
+        "details": {
+          "observedText": "Añadir beneficiario"
+        }
+      },
+      {
+        "id": "jira-oracle-30",
+        "requirement": "Validar que se muestre exactamente \"Ya existe un beneficiario con esa cuenta o alias.\".",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 30,
+        "target": "Ya existe un beneficiario con esa cuenta o alias.",
+        "evidence": [
+          "live-step-30"
+        ],
+        "details": {
+          "observedText": "Ya existe un beneficiario con esa cuenta o alias."
+        }
+      },
+      {
+        "id": "jira-oracle-31",
+        "requirement": "Validar que el formulario \"Añadir beneficiario\" permanezca abierto.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 31,
+        "target": "Añadir beneficiario",
+        "evidence": [
+          "live-step-31"
+        ],
+        "details": {
+          "observedText": "Añadir beneficiario"
+        }
+      }
+    ],
+    "auth": {
+      "required": true,
+      "gateDetected": true,
+      "insertionAfterStepIndex": 5,
+      "flowAlias": "defaultClient"
+    },
+    "expectedResult": "Al guardar un beneficiario con el alias \"Atlas\", se muestra exactamente \"Ya existe un beneficiario con esa cuenta o alias.\" y el formulario permanece abierto."
+  }
+}

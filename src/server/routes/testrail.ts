@@ -1,4 +1,5 @@
 import { Router, type Response } from "express";
+import path from "node:path";
 import { config, requireTestRailConfig } from "../../config/env";
 import { TestRailClient } from "../../clients/testrail.client";
 import { generateScenarioPreview } from "../../scenarios/scenario-preview.service";
@@ -14,6 +15,8 @@ import {
 } from "../../testrail/testrail-requirement-review-store";
 import { getProjectById, getProjectByTestRailProjectId } from "../../db/project-repository";
 import { replaceForProjectAndCase } from "../../db/project-case-input-requirement-service";
+import { loadPromotedRuntimeInputRequirements } from "../../automations/promoted-runtime-input-requirements";
+import { loadAutomationIndex } from "../../automations/automation-index";
 
 export const testrailRouter = Router();
 
@@ -80,6 +83,7 @@ type ResolveSectionCasesDependencies = {
   resolveLocalProject?: (testRailProjectId: string) => Promise<{ id: string; slug: string } | null>;
   resolveLocalProjectById?: (localProjectId: string) => Promise<{ id: string; slug: string } | null>;
   materialize?: (input: RuntimeCaseMaterializationInput) => Promise<void>;
+  derivePromotedRequirements?: (input: { appSlug: string; caseId: number; scenario: TestRailRuntimeTransformation["normalizedScenario"] }) => Promise<RuntimeCaseMaterializationInput["requirements"]>;
 };
 
 export async function resolveSectionCases(
@@ -147,12 +151,44 @@ export async function resolveSectionCases(
     String(params.sectionId),
   );
 
-  const enrichedCases = cases.map((rawCase) => {
+  if (!hasExplicitLocalProjectId) {
+    localProject = await (dependencies.resolveLocalProject ?? getProjectByTestRailProjectId)(String(effectiveProjectId));
+  }
+
+  let promotedIndex: Awaited<ReturnType<typeof loadAutomationIndex>> | undefined;
+  if (localProject) {
+    try {
+      promotedIndex = await loadAutomationIndex(path.join("automations", "apps", localProject.slug, "index.json"));
+    } catch {
+      promotedIndex = undefined;
+    }
+  }
+
+  const enrichedCases = await Promise.all(cases.map(async (rawCase) => {
     try {
       const transformation = runtimeTransformer(rawCase);
+      const promotedRequirements = localProject
+        ? await (dependencies.derivePromotedRequirements ?? (async (input) => loadPromotedRuntimeInputRequirements({
+          ...input,
+          index: promotedIndex,
+        })))(
+          { appSlug: localProject.slug, caseId: rawCase.id, scenario: transformation.normalizedScenario },
+        )
+        : [];
+      const byKey = new Map<string, RuntimeCaseMaterializationInput["requirements"][number]>();
+      // Validated promoted bindings are the complete execution contract. Text
+      // inference may assign different keys to the very same controls.
+      for (const requirement of promotedRequirements.length > 0 ? [] : transformation.inputRequirements) byKey.set(requirement.key.trim().toLowerCase(), requirement);
+      for (const requirement of promotedRequirements) {
+        const normalizedKey = requirement.key.trim().toLowerCase();
+        const existing = byKey.get(normalizedKey);
+        byKey.set(normalizedKey, existing ? { ...requirement, ...existing, source: existing.source ?? requirement.source } : requirement);
+      }
+      const inputRequirements = [...byKey.values()];
       return {
         ...rawCase,
         ...transformation,
+        inputRequirements,
         runtimeTransformStatus: "success" as const,
       };
     } catch {
@@ -166,11 +202,7 @@ export async function resolveSectionCases(
         runtimeTransformErrorCode: "runtime_transform_failed",
       };
     }
-  });
-
-  if (!hasExplicitLocalProjectId) {
-    localProject = await (dependencies.resolveLocalProject ?? getProjectByTestRailProjectId)(String(effectiveProjectId));
-  }
+  }));
   if (localProject) {
     for (const [index, rawCase] of cases.entries()) {
       const enrichedCase = enrichedCases[index];
