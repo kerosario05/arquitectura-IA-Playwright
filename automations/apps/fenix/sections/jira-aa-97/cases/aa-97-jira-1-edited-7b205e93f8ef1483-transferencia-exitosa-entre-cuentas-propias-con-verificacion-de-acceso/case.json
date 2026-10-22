@@ -1,0 +1,9 @@
+{
+  "id": "aa-97-jira-1-edited-7b205e93f8ef1483-transferencia-exitosa-entre-cuentas-propias-con-verificacion-de-acceso",
+  "externalId": "AA-97:jira:1:edited-7b205e93f8ef1483",
+  "title": "Transferencia exitosa entre cuentas propias con verificación de acceso",
+  "source": "discovery",
+  "appSlug": "fenix",
+  "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+  "createdAt": "2026-10-22T14:24:01.802Z"
+}

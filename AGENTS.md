@@ -222,6 +222,7 @@ Prefer a focused `node --import tsx --test <specific-test-files>` invocation for
 
 ### Product-specific constraints from the user
 
+- Test Design and Test Launch are two interfaces over one Jira scenario workflow: keep authored-step formatting, input requirements, and scenario serialization aligned through shared contracts where possible. Both modules must contribute verified corrections to the same project-scoped knowledge source with provenance; only validated/observed or successfully executed evidence may become learned knowledge. Do not learn from unsaved, failed, ambiguous, or merely generated steps, and never persist secrets or invented selectors. Cover the cross-module handoff with focused tests when changing either side.
 - For authored selector values that describe a generic type/category, any available compatible option is acceptable; use a repeatable choice and verify the owning field's selected value. A concrete identifier supplied in test data takes priority and must never fall back to another option if missing. This authorizes choosing among matching options, not guessing which control belongs to a field or ignoring disabled options.
 
 - Codex owns authorized Jira fixes, focused regression coverage, test execution, typechecks, QA Lab, and evidence review. Claude may be used only when explicitly requested in the current user prompt. This supersedes older role assignments in historical checkpoint entries. Any promotion or external publication must already be within the user's active authorization.
