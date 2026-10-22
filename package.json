@@ -56,6 +56,8 @@
     "test:auth-flow": "tsx src/auth/auth-flow.test.ts"
   },
   "dependencies": {
+    "@cucumber/gherkin": "^42.0.1",
+    "@cucumber/messages": "^34.2.1",
     "@google/genai": "^2.6.0",
     "@playwright/test": "^1.54.2",
     "cors": "^2.8.6",

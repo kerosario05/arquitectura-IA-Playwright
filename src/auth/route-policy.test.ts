@@ -222,6 +222,7 @@ async function main(): Promise<void> {
       ["POST", "/api/runs/discovery-batch"],
       ["POST", "/api/recordings/start"],
       ["POST", "/api/recordings/rec-1/derive"],
+      ["POST", "/api/recordings/rec-1/stop"],
       ["GET", "/api/executions"],
     ] as const) {
       const res = await call(method, route, engineerToken, {

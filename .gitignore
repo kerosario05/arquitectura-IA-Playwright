@@ -94,3 +94,9 @@ data/*.db-wal
 data/*.db-shm
 # Playwright CLI output (may contain credentials)
 .playwright-cli/
+
+# Zip de Chromium y agente que el motor sirve en /descargas (generado, ~180 MB)
+data/descargas/
+
+# Clones git del módulo Planificación de pruebas (GIT_REPOS_DIR)
+data/repos/

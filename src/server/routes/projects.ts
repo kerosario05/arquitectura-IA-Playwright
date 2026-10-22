@@ -28,6 +28,14 @@ import multer from "multer";
 import fs from "fs";
 import path from "path";
 import { getProjectGenerationConfig, upsertProjectGenerationConfig } from "../../db/project-generation-config-service";
+import {
+  deleteRepositoryConfig,
+  getRepositoryConfigBySlug,
+  publicRepositoryConfig,
+  upsertRepositoryConfig,
+} from "../../db/project-repository-config-service";
+import { normalizeRepositoryConfig, RepositoryConfigValidationError } from "../../test-planning/repository-config";
+import { GitCommandError, gitErrorStatus, testRepositoryAccess } from "../../test-planning/git-cli";
 
 export const projectsRouter = Router();
 
@@ -563,6 +571,71 @@ projectsRouter.put("/:slug/testrail", async (req, res, next) => {
     if (isValidationError(err)) { sendError(res, 400, "validation_error", msg); return; }
     if (/sharedConnection/i.test(msg)) { sendError(res, 400, "connection_error", msg); return; }
     next(err);
+  }
+});
+
+// --- Repositorio de planes de prueba (Planificación de pruebas) ---------------
+
+function sendRepositoryError(res: any, err: any, next: (err?: unknown) => void) {
+  if (err instanceof RepositoryConfigValidationError) {
+    res.status(400).json({ ok: false, error: "validation_error", message: err.message, field: err.field });
+    return;
+  }
+  if (err instanceof GitCommandError) {
+    sendError(res, gitErrorStatus(err), err.code, err.message);
+    return;
+  }
+  if (/project not found/i.test(err?.message || "")) {
+    sendError(res, 404, "project_not_found", err.message);
+    return;
+  }
+  next(err);
+}
+
+// GET /api/projects/:slug/repository
+projectsRouter.get("/:slug/repository", async (req, res, next) => {
+  try {
+    const config = await getRepositoryConfigBySlug(req.params.slug);
+    res.json({ repository: config ? publicRepositoryConfig(config) : null });
+  } catch (err) {
+    sendRepositoryError(res, err, next);
+  }
+});
+
+// PUT /api/projects/:slug/repository
+projectsRouter.put("/:slug/repository", async (req, res, next) => {
+  try {
+    const result = await upsertRepositoryConfig(req.params.slug, req.body ?? {});
+    res.json({ ok: true, action: result.action, repository: publicRepositoryConfig(result.config) });
+  } catch (err) {
+    sendRepositoryError(res, err, next);
+  }
+});
+
+// DELETE /api/projects/:slug/repository
+projectsRouter.delete("/:slug/repository", async (req, res, next) => {
+  try {
+    const removed = await deleteRepositoryConfig(req.params.slug);
+    res.json({ ok: true, removed });
+  } catch (err) {
+    sendRepositoryError(res, err, next);
+  }
+});
+
+// POST /api/projects/:slug/repository/test — body = unsaved form values, or empty to test the saved config.
+projectsRouter.post("/:slug/repository/test", async (req, res, next) => {
+  try {
+    const body = req.body ?? {};
+    const config = body.repoUrl
+      ? normalizeRepositoryConfig(body)
+      : await getRepositoryConfigBySlug(req.params.slug);
+    if (!config) {
+      sendError(res, 404, "repository_not_configured", "El proyecto no tiene un repositorio configurado.");
+      return;
+    }
+    res.json(await testRepositoryAccess(config));
+  } catch (err) {
+    sendRepositoryError(res, err, next);
   }
 });
 

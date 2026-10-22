@@ -115,6 +115,21 @@ CREATE TABLE IF NOT EXISTS ProjectTestRailConfiguration (
   updatedAt              TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR})
 );
 
+-- Git repository holding the project's test-plan-<HU>.md files (Planificación de pruebas).
+CREATE TABLE IF NOT EXISTS ProjectRepositoryConfiguration (
+  projectId              TEXT    PRIMARY KEY COLLATE NOCASE
+                                 REFERENCES Projects(id) ON DELETE CASCADE,
+  repoUrl                TEXT    NOT NULL,
+  defaultBranch          TEXT    NOT NULL,
+  specsPath              TEXT    NOT NULL,
+  filePattern            TEXT    NOT NULL,
+  protectedBranchesJson  TEXT    NOT NULL DEFAULT '[]',
+  credentialSecretRef    TEXT,                    -- env:VAR; NULL = machine git credentials
+  enabled                INTEGER NOT NULL DEFAULT 1,
+  createdAt              TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  updatedAt              TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR})
+);
+
 CREATE TABLE IF NOT EXISTS ProjectKnowledge (
   projectId     TEXT    PRIMARY KEY COLLATE NOCASE
                         REFERENCES Projects(id) ON DELETE CASCADE,
@@ -299,4 +314,29 @@ CREATE TABLE IF NOT EXISTS TestDesignEvent (
 
 CREATE INDEX IF NOT EXISTS IX_TestDesignEvent_time ON TestDesignEvent (occurredAt, eventType);
 CREATE INDEX IF NOT EXISTS IX_TestDesignEvent_project ON TestDesignEvent (projectSlug, occurredAt);
+
+-- QA review of a test-plan-<HU>.md (Planificación de pruebas). Append-only: one row per
+-- "aceptar como válido" or per commit of changes. No foreign keys, like TestDesignEvent.
+CREATE TABLE IF NOT EXISTS TestPlanReview (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  projectSlug    TEXT    NOT NULL COLLATE NOCASE,
+  branch         TEXT    NOT NULL,
+  issueKey       TEXT    NOT NULL COLLATE NOCASE,
+  filePath       TEXT    NOT NULL,
+  outcome        TEXT    NOT NULL,   -- accepted | committed
+  headSha        TEXT    NOT NULL,   -- branch head the reviewer looked at
+  blobSha        TEXT    NOT NULL,   -- file content considered valid (the new blob when committed)
+  commitSha      TEXT,               -- commit pushed by the reviewer (committed only)
+  scenarioCount  INTEGER NOT NULL DEFAULT 0,
+  editedCount    INTEGER NOT NULL DEFAULT 0,
+  addedCount     INTEGER NOT NULL DEFAULT 0,
+  removedCount   INTEGER NOT NULL DEFAULT 0,
+  note           TEXT,
+  userId         TEXT    COLLATE NOCASE,
+  userName       TEXT,
+  reviewedAt     TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR})
+);
+
+CREATE INDEX IF NOT EXISTS IX_TestPlanReview_file ON TestPlanReview (projectSlug, filePath, reviewedAt);
+CREATE INDEX IF NOT EXISTS IX_TestPlanReview_time ON TestPlanReview (reviewedAt);
 `;

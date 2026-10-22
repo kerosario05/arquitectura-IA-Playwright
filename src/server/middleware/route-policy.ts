@@ -82,6 +82,10 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   R("POST", "/api/projects/:slug/refresh-status", ["projects.edit"], "required"),
   R("PUT", "/api/projects/:slug/jira", ["projects.edit"], "required"),
   R("PUT", "/api/projects/:slug/testrail", ["projects.edit"], "required"),
+  R("GET", "/api/projects/:slug/repository", ["projects.view"], "required"),
+  R("PUT", "/api/projects/:slug/repository", ["projects.edit"], "required"),
+  R("DELETE", "/api/projects/:slug/repository", ["projects.edit"], "required"),
+  R("POST", "/api/projects/:slug/repository/test", ["projects.edit"], "required"),
   R("POST", "/api/projects/:slug/materialize", ["projects.materialize"], "required"),
   R("DELETE", "/api/projects/:slug", ["projects.delete"], "required"),
   R("GET", "/api/projects/:projectSlug/cases/:caseId/input-requirements", ["projects.view"], "required"),
@@ -135,6 +139,14 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   R("DELETE", "/api/recordings/:recordingId", ["recordings.create"], "required"),
   R("GET", "/api/recordings/:recordingId", ["recordings.view"], "required"),
 
+  // --- local agent (Chromium on the user's PC for recordings) ----------
+  // The agent itself never calls these: its WebSockets authenticate apart
+  // (agent id + optional LOCAL_AGENT_KEY). These are the panel's questions
+  // about the agent on the caller's own PC.
+  R("GET", "/api/local-agent/status", ["recordings.view"]),
+  R("POST", "/api/local-agent/install", ["recordings.create"]),
+  R("POST", "/api/local-agent/select", ["recordings.create"]),
+
   // --- executions --------------------------------------------------------
   R("GET", "/api/executions", ["executions.view"], "optional"),
   R("GET", "/api/executions/:launchId", ["executions.view"]),
@@ -168,6 +180,19 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   R("POST", "/api/test-design/drafts/:draftId/generate", ["testdesign.generate"]),
   R("POST", "/api/test-design/drafts/:draftId/publish/testrail", ["testdesign.publish_testrail"]),
   R("POST", "/api/test-design/drafts/:draftId/publish/jira", ["testdesign.publish_jira"]),
+
+  // --- test planning (test-plan-<HU>.md files in the project's git repo) ---
+  R("GET", "/api/test-planning/projects", ["testplanning.view"], "optional"),
+  R("GET", "/api/test-planning/projects/:slug/branches", ["testplanning.view"], "required"),
+  R("POST", "/api/test-planning/projects/:slug/fetch", ["testplanning.sync"], "required"),
+  R("POST", "/api/test-planning/projects/:slug/pull", ["testplanning.sync"], "required"),
+  R("GET", "/api/test-planning/projects/:slug/plans", ["testplanning.view"], "required"),
+  R("GET", "/api/test-planning/projects/:slug/plan", ["testplanning.view"], "required"),
+  R("POST", "/api/test-planning/projects/:slug/plan/preview", ["testplanning.edit"], "required"),
+  R("POST", "/api/test-planning/projects/:slug/plan/commit", ["testplanning.edit", "testplanning.commit"], "required"),
+  R("POST", "/api/test-planning/projects/:slug/plan/accept", ["testplanning.edit"], "required"),
+  // Dashboard summary: readable from the dashboard or the module itself, narrowed to the caller's projects.
+  ANY("GET", "/api/test-planning/metrics", ["dashboard.view", "testplanning.view"], "optional"),
 
   // --- external catalogues (read-only reference data) ---------------------
   // Test design picks its Jira project and TestRail destination from these

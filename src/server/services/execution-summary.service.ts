@@ -272,7 +272,13 @@ function hasEvidenceDocx(jobId?: string): boolean {
         if (e.isDirectory()) {
           // Only descend where the jobId could live to keep the scan cheap.
           if (e.name === jobId) {
-            if (fs.existsSync(path.join(full, "evidencia.docx"))) return true;
+            // Sin Word (servidor) solo se genera el PDF; cualquiera de los dos cuenta como evidencia.
+            if (
+              fs.existsSync(path.join(full, "evidencia.docx")) ||
+              fs.existsSync(path.join(full, "evidencia.pdf"))
+            ) {
+              return true;
+            }
           }
           stack.push(full);
         }
