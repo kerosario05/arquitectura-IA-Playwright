@@ -71,8 +71,9 @@ export function resolveJiraGenerationKnowledge(appSlug: string, issues: JiraIssu
         // A sibling route is cut after the click the story describes: later
         // clicks belong to another flow.
         actions: (exactIssue.length ? route.actions : cutAfterClick(route.actions, matchedClick(route)))
-          .map(action => ({action:action.action,...(action.field?{field:action.field}:{}),...(action.action==='press'&&/^(?:Enter|Tab|Escape|ArrowUp|ArrowDown|ArrowLeft|ArrowRight)$/.test(action.key??'')?{key:action.key}:{})})),
+          .map(action => ({action:action.action,...(action.field?{field:action.field}:{}),...(action.targetKind?{targetKind:action.targetKind}:{}),...(action.action==='press'&&/^(?:Enter|Tab|Escape|ArrowUp|ArrowDown|ArrowLeft|ArrowRight)$/.test(action.key??'')?{key:action.key}:{})})),
         startsFrom: route.startsFrom, sourceIssueKey: route.sourceIssueKey,
+        ...(route.sourceIssueKey===issue.key && route.observables?.length ? {observables:route.observables} : {}),
         evidenceRefs: route.evidenceRefs, validatedAt: route.validatedAt }));
     diagnostics.push({ sourceIssueKey: issue.key, candidatesScanned: scoped.length,
       eligibleRoutes: eligible.length, selectedRoutes: selected.length,

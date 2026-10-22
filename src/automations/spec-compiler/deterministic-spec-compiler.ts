@@ -9,6 +9,7 @@ import { ACTION_RUNTIME_METHOD_BY_OPERATION } from "../../types/pom-ownership";
 import { buildPortablePathFromSpec } from "../spec-generator-pom";
 import type { CertifiedTechnicalTarget } from "../technical-target-materializer";
 import { isUniqueLineage } from "../../db/recording-route-observation-repository";
+import { VISIBLE_DATE_TIME_REGEX_SOURCE, VISIBLE_DATE_TIME_TARGET } from "../../discovery/observable-snapshot-matcher";
 
 /**
  * First kernel of the deterministic (non-AI) spec compiler.
@@ -1004,6 +1005,30 @@ function compileNavigationTransitionOracle(
   });
 }
 
+function compileNegativeVisibilityOracle(
+  step: SpecExecutionContractStep,
+  lines: string[],
+  bindings: SpecCompileBinding[],
+  unsupportedCapabilities: string[],
+): void {
+  const oracle=step.oracle;
+  const target=oracle?.target?.trim();
+  if(!oracle?.backed || oracle.polarity!=="negative" || !target) {
+    unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:negative_visibility_unbacked_or_unresolved`);
+    return;
+  }
+  lines.push(`    await promotedRuntime.expectPromotedVisible({`);
+  lines.push(`      stepIndex: ${step.scenarioStepIndex},`);
+  lines.push(`      target: ${jsonLiteral(`text:${target}`)},`);
+  lines.push(`      description: ${jsonLiteral(oracle.requirement??step.originalText)},`);
+  lines.push(`      polarity: 'negative',`);
+  lines.push(`      negativeVisibilityTarget: ${jsonLiteral(target)},`);
+  // Runtime owns the fresh snapshot, stability and absence checks, shared with Discovery.
+  lines.push(`      assertion: async () => {},`);
+  lines.push(`    });`);
+  bindings.push({scenarioStepIndex:step.scenarioStepIndex,operation:step.operation,runtimeMethod:"expectPromotedVisible",targetRef:`text:${target}`});
+}
+
 function compileVisibleTextOracle(
   step: SpecExecutionContractStep,
   lines: string[],
@@ -1012,17 +1037,31 @@ function compileVisibleTextOracle(
 ): void {
   const oracle = step.oracle;
   const target = oracle?.target?.trim();
-  if (!oracle || !["literal_visible_text", "heading_or_control"].includes(oracle.type) || !target) {
+  const targets = [...new Set((oracle?.targets ?? (target ? [target] : [])).map((value) => value.trim()).filter(Boolean))];
+  const hasDateTimePattern = targets.includes(VISIBLE_DATE_TIME_TARGET);
+  const visibleTargets = targets.filter((value) => value !== VISIBLE_DATE_TIME_TARGET);
+  const supportedVisibleOracle = ["literal_visible_text", "heading_or_control"].includes(oracle?.type ?? "")
+    || (oracle?.type === "page_object_state" && oracle.implementationKind === "heading_or_control");
+  if (!oracle || !oracle.backed || !supportedVisibleOracle || (!target && !hasDateTimePattern)) {
     unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:oracle_unsupported:${oracle?.type ?? "none"}`);
     return;
   }
-  const targetRef = `text:${target}`;
+  const targetRef = hasDateTimePattern && visibleTargets.length === 0
+    ? "pattern:date_time"
+    : `text:${visibleTargets.join(" | ") || target}`;
   lines.push(`    await promotedRuntime.expectPromotedVisible({`);
   lines.push(`      stepIndex: ${step.scenarioStepIndex},`);
   lines.push(`      target: '${escapeString(targetRef)}',`);
   if (oracle.requirement) lines.push(`      description: '${escapeString(oracle.requirement)}',`);
   lines.push(`      polarity: 'positive',`);
-  lines.push(`      assertion: async () => { await expect(page.getByText('${escapeString(target)}', { exact: true })).toBeVisible(); }`);
+  if (hasDateTimePattern) {
+    lines.push(`      assertion: async () => { await expect(page.getByText(new RegExp(${jsonLiteral(VISIBLE_DATE_TIME_REGEX_SOURCE)}, 'i')).filter({ visible: true }).first()).toBeVisible(); }`);
+  } else if (visibleTargets.length > 1) {
+    lines.push(`      assertion: async () => { await Promise.all(${jsonLiteral(visibleTargets)}.map((text) => expect(page.getByText(text, { exact: true }).filter({ visible: true }).first()).toBeVisible())); }`);
+  } else {
+    const exactTarget = visibleTargets[0] ?? target!;
+    lines.push(`      assertion: async () => { await expect(page.getByText('${escapeString(exactTarget)}', { exact: true }).filter({ visible: true }).first()).toBeVisible(); }`);
+  }
   lines.push(`    });`);
 
   bindings.push({
@@ -1180,8 +1219,11 @@ export function compileDeterministicSpec(contract: SpecExecutionContract, compil
     // when present, is always emitted first; the oracle never replaces it.
     const isSupportedAction = SUPPORTED_OPERATIONS.has(step.operation);
     const hasNavigationOracle = step.oracle?.type === "navigation_transition";
-    const hasVisibleTextOracle = ["literal_visible_text", "heading_or_control"].includes(step.oracle?.type ?? "");
+    const hasVisibleTextOracle = ["literal_visible_text", "heading_or_control"].includes(step.oracle?.type ?? "")
+      || (step.oracle?.type === "page_object_state" && step.oracle.implementationKind === "heading_or_control");
     const hasAuthGateOracle = step.oracle?.type === "auth_gate";
+    const hasNegativeVisibilityOracle = step.oracle?.type === "negative_visibility";
+    const hasCredentialRejectionOracle = step.oracle?.type === "credential_rejection";
 
     if (isSupportedAction) {
       switch (step.operation as SpecCompilerSupportedOperation) {
@@ -1207,7 +1249,7 @@ export function compileDeterministicSpec(contract: SpecExecutionContract, compil
           );
           break;
       }
-    } else if (!hasNavigationOracle && !hasVisibleTextOracle && !hasAuthGateOracle) {
+    } else if (!hasNavigationOracle && !hasVisibleTextOracle && !hasAuthGateOracle && !hasNegativeVisibilityOracle && !hasCredentialRejectionOracle) {
       unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:operation_unsupported:${step.operation}`);
     }
 
@@ -1216,6 +1258,18 @@ export function compileDeterministicSpec(contract: SpecExecutionContract, compil
     }
     if (hasVisibleTextOracle) {
       compileVisibleTextOracle(step, lines, bindings, unsupportedCapabilities);
+    }
+    if (hasNegativeVisibilityOracle) {
+      compileNegativeVisibilityOracle(step,lines,bindings,unsupportedCapabilities);
+    }
+    if (hasCredentialRejectionOracle) {
+      const target = step.oracle?.target?.trim();
+      if (!step.oracle?.backed || !target) {
+        unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:credential_rejection_unbacked`);
+      } else {
+        lines.push(`    await promotedRuntime.expectPromotedVisible({ stepIndex: ${step.scenarioStepIndex}, target: ${jsonLiteral(`text:${target}`)}, polarity: 'positive', credentialRejectionTarget: ${jsonLiteral(target)}, assertion: async () => {} });`);
+        bindings.push({scenarioStepIndex:step.scenarioStepIndex,operation:step.operation,runtimeMethod:"expectPromotedVisible",targetRef:`text:${target}`});
+      }
     }
     if (hasAuthGateOracle) {
       if (!step.oracle?.backed || step.oracle.mechanism?.source !== "auth_gate_detector") {

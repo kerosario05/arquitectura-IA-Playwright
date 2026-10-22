@@ -1,0 +1,1775 @@
+{
+  "appSlug": "fenix",
+  "sectionSlug": "demoblaze",
+  "scenarioId": "C55032",
+  "scenarioTitle": "Transferencia exitosa entre cuentas propias con verificación de acceso y token",
+  "stepCount": 34,
+  "sourceExpectedResultPresent": true,
+  "requiredAssertionCount": 19,
+  "observableOracles": [
+    {
+      "id": "observed-01",
+      "requirement": "comisión",
+      "type": "literal_visible_text",
+      "backed": true,
+      "source": "discovery",
+      "target": "comisión",
+      "evidence": [
+        "assertion_resolved_during_discovery"
+      ]
+    },
+    {
+      "id": "observed-02",
+      "requirement": "tasa de cambio",
+      "type": "literal_visible_text",
+      "backed": true,
+      "source": "discovery",
+      "target": "tasa de cambio",
+      "evidence": [
+        "assertion_resolved_during_discovery"
+      ]
+    },
+    {
+      "id": "observed-03",
+      "requirement": "total a debitar",
+      "type": "literal_visible_text",
+      "backed": true,
+      "source": "discovery",
+      "target": "total a debitar",
+      "evidence": [
+        "assertion_resolved_during_discovery"
+      ]
+    },
+    {
+      "id": "expected-01",
+      "requirement": "El comprobante de transacción exitosa muestra la referencia de la operación.",
+      "type": "heading_or_control",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 30,
+      "requirementRefs": [
+        "requirement:testrail:case:55032:step:30:assertion"
+      ],
+      "polarity": "positive",
+      "target": "Comprobante",
+      "evidence": [
+        "causal_snapshot_semantic_match:true",
+        "snapshot_step_index:29",
+        "snapshot_captured_at:2026-10-22T00:09:42.359Z",
+        "observed_concept:receipt",
+        "observed_concept:transaction",
+        "observed_concept:success",
+        "observed_concept:reference"
+      ],
+      "details": {
+        "visibleTargets": [
+          "Comprobante",
+          "Transacción Exitosa",
+          "# Referencia:"
+        ],
+        "snapshotStepIndex": 29,
+        "snapshotUrl": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+        "snapshotCapturedAt": "2026-10-22T00:09:42.359Z"
+      }
+    },
+    {
+      "id": "reconciled-navigation-7",
+      "requirement": "Validar que se muestre la pantalla de \"verificación de usuario\".",
+      "type": "navigation_transition",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 7,
+      "requirementRefs": [
+        "requirement:testrail:case:55032:step:7:assertion"
+      ],
+      "polarity": "positive",
+      "target": "Iniciar sesión",
+      "evidence": [
+        "transition_observed:true",
+        "click_target:Iniciar sesión",
+        "after_url:https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+        "satisfied_by:navigation_transition"
+      ],
+      "details": {
+        "transitionObserved": true,
+        "clickTarget": "Iniciar sesión",
+        "resolvedTarget": null,
+        "sourceActionStepIndex": 6,
+        "expectedUrl": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+        "satisfiedBy": "navigation_transition"
+      }
+    },
+    {
+      "id": "reconciled-snapshot-11",
+      "requirement": "Validar que se muestre \"resumen de sus productos\"",
+      "type": "heading_or_control",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 11,
+      "requirementRefs": [
+        "requirement:testrail:case:55032:step:11:assertion"
+      ],
+      "polarity": "positive",
+      "target": "Resumen",
+      "evidence": [
+        "causal_snapshot_semantic_match:true",
+        "snapshot_step_index:10",
+        "snapshot_captured_at:2026-10-22T00:08:47.295Z",
+        "observed_concept:summary",
+        "observed_concept:product"
+      ],
+      "details": {
+        "visibleTargets": [
+          "Resumen",
+          "Cuentas por Pagar"
+        ],
+        "snapshotStepIndex": 10,
+        "snapshotUrl": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+        "snapshotCapturedAt": "2026-10-22T00:08:47.295Z"
+      }
+    },
+    {
+      "id": "reconciled-snapshot-18",
+      "requirement": "Validar que se muestre \"la confirmación de la transferencia\"",
+      "type": "heading_or_control",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 18,
+      "requirementRefs": [
+        "requirement:testrail:case:55032:step:18:assertion"
+      ],
+      "polarity": "positive",
+      "target": "Transferencias a Mis Cuentas",
+      "evidence": [
+        "causal_snapshot_semantic_match:true",
+        "snapshot_step_index:17",
+        "snapshot_captured_at:2026-10-22T00:09:19.507Z",
+        "observed_concept:confirmation",
+        "observed_concept:transfer"
+      ],
+      "details": {
+        "visibleTargets": [
+          "Transferencias a Mis Cuentas"
+        ],
+        "snapshotStepIndex": 17,
+        "snapshotUrl": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+        "snapshotCapturedAt": "2026-10-22T00:09:19.507Z"
+      }
+    },
+    {
+      "id": "reconciled-snapshot-19",
+      "requirement": "Validar que la confirmación muestre las \"cuentas seleccionadas\".",
+      "type": "heading_or_control",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 19,
+      "requirementRefs": [
+        "requirement:testrail:case:55032:step:19:assertion"
+      ],
+      "polarity": "positive",
+      "target": "Cuenta Origen",
+      "evidence": [
+        "causal_snapshot_semantic_match:true",
+        "snapshot_step_index:17",
+        "snapshot_captured_at:2026-10-22T00:09:19.507Z",
+        "observed_concept:product",
+        "observed_concept:account",
+        "observed_concept:selected"
+      ],
+      "details": {
+        "visibleTargets": [
+          "Cuenta Origen",
+          "Cuenta Destino"
+        ],
+        "snapshotStepIndex": 17,
+        "snapshotUrl": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+        "snapshotCapturedAt": "2026-10-22T00:09:19.507Z"
+      }
+    },
+    {
+      "id": "reconciled-snapshot-20",
+      "requirement": "Validar que la confirmación muestre el \"monto\".",
+      "type": "heading_or_control",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 20,
+      "requirementRefs": [
+        "requirement:testrail:case:55032:step:20:assertion"
+      ],
+      "polarity": "positive",
+      "target": "Monto a Acreditar",
+      "evidence": [
+        "causal_snapshot_semantic_match:true",
+        "snapshot_step_index:17",
+        "snapshot_captured_at:2026-10-22T00:09:19.507Z",
+        "observed_concept:amount"
+      ],
+      "details": {
+        "visibleTargets": [
+          "Monto a Acreditar"
+        ],
+        "snapshotStepIndex": 17,
+        "snapshotUrl": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+        "snapshotCapturedAt": "2026-10-22T00:09:19.507Z"
+      }
+    },
+    {
+      "id": "reconciled-snapshot-22",
+      "requirement": "Validar que la confirmación muestre los \"impuestos\".",
+      "type": "heading_or_control",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 22,
+      "requirementRefs": [
+        "requirement:testrail:case:55032:step:22:assertion"
+      ],
+      "polarity": "positive",
+      "target": "Impuesto 0.20%",
+      "evidence": [
+        "causal_snapshot_semantic_match:true",
+        "snapshot_step_index:17",
+        "snapshot_captured_at:2026-10-22T00:09:19.507Z",
+        "observed_concept:tax"
+      ],
+      "details": {
+        "visibleTargets": [
+          "Impuesto 0.20%"
+        ],
+        "snapshotStepIndex": 17,
+        "snapshotUrl": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+        "snapshotCapturedAt": "2026-10-22T00:09:19.507Z"
+      }
+    },
+    {
+      "id": "reconciled-navigation-26",
+      "requirement": "Validar que se muestre la pantalla de \"validación de identidad\".",
+      "type": "navigation_transition",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 26,
+      "requirementRefs": [
+        "requirement:testrail:case:55032:step:26:assertion"
+      ],
+      "polarity": "positive",
+      "target": "Continuar",
+      "evidence": [
+        "transition_observed:true",
+        "click_target:Continuar",
+        "after_url:https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+        "satisfied_by:navigation_transition"
+      ],
+      "details": {
+        "transitionObserved": true,
+        "clickTarget": "Continuar",
+        "resolvedTarget": null,
+        "sourceActionStepIndex": 25,
+        "expectedUrl": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+        "satisfiedBy": "navigation_transition"
+      }
+    },
+    {
+      "id": "reconciled-snapshot-30",
+      "requirement": "Validar que se muestre \"comprobante de transacción exitosa\"",
+      "type": "heading_or_control",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 30,
+      "requirementRefs": [
+        "requirement:testrail:case:55032:step:30:assertion"
+      ],
+      "polarity": "positive",
+      "target": "Comprobante",
+      "evidence": [
+        "causal_snapshot_semantic_match:true",
+        "snapshot_step_index:29",
+        "snapshot_captured_at:2026-10-22T00:09:42.359Z",
+        "observed_concept:receipt",
+        "observed_concept:transaction",
+        "observed_concept:success"
+      ],
+      "details": {
+        "visibleTargets": [
+          "Comprobante",
+          "Transacción Exitosa"
+        ],
+        "snapshotStepIndex": 29,
+        "snapshotUrl": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+        "snapshotCapturedAt": "2026-10-22T00:09:42.359Z"
+      }
+    },
+    {
+      "id": "reconciled-snapshot-31",
+      "requirement": "Validar que el comprobante muestre el \"monto de la transferencia\".",
+      "type": "heading_or_control",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 31,
+      "requirementRefs": [
+        "requirement:testrail:case:55032:step:31:assertion"
+      ],
+      "polarity": "positive",
+      "target": "Monto a Acreditar:",
+      "evidence": [
+        "causal_snapshot_semantic_match:true",
+        "snapshot_step_index:29",
+        "snapshot_captured_at:2026-10-22T00:09:42.359Z",
+        "observed_concept:amount",
+        "observed_concept:transfer"
+      ],
+      "details": {
+        "visibleTargets": [
+          "Monto a Acreditar:",
+          "Transferencias a Mis Cuentas"
+        ],
+        "snapshotStepIndex": 29,
+        "snapshotUrl": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+        "snapshotCapturedAt": "2026-10-22T00:09:42.359Z"
+      }
+    },
+    {
+      "id": "reconciled-snapshot-32",
+      "requirement": "Validar que el comprobante muestre las \"cuentas involucradas\".",
+      "type": "heading_or_control",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 32,
+      "requirementRefs": [
+        "requirement:testrail:case:55032:step:32:assertion"
+      ],
+      "polarity": "positive",
+      "target": "Cuenta Origen",
+      "evidence": [
+        "causal_snapshot_semantic_match:true",
+        "snapshot_step_index:29",
+        "snapshot_captured_at:2026-10-22T00:09:42.359Z",
+        "observed_concept:product",
+        "observed_concept:account",
+        "observed_concept:selected"
+      ],
+      "details": {
+        "visibleTargets": [
+          "Cuenta Origen",
+          "Cuenta Destino"
+        ],
+        "snapshotStepIndex": 29,
+        "snapshotUrl": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+        "snapshotCapturedAt": "2026-10-22T00:09:42.359Z"
+      }
+    },
+    {
+      "id": "reconciled-snapshot-33",
+      "requirement": "Validar que el comprobante muestre la \"fecha y hora\".",
+      "type": "heading_or_control",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 33,
+      "requirementRefs": [
+        "requirement:testrail:case:55032:step:33:assertion"
+      ],
+      "polarity": "positive",
+      "target": "__visible_date_time__",
+      "evidence": [
+        "causal_snapshot_semantic_match:true",
+        "snapshot_step_index:29",
+        "snapshot_captured_at:2026-10-22T00:09:42.359Z",
+        "observed_concept:date_time"
+      ],
+      "details": {
+        "visibleTargets": [
+          "__visible_date_time__"
+        ],
+        "visibleTextPattern": "date_time",
+        "snapshotStepIndex": 29,
+        "snapshotUrl": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+        "snapshotCapturedAt": "2026-10-22T00:09:42.359Z"
+      }
+    },
+    {
+      "id": "reconciled-snapshot-34",
+      "requirement": "Validar que el comprobante muestre la \"referencia de la operación\".",
+      "type": "heading_or_control",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 34,
+      "requirementRefs": [
+        "requirement:testrail:case:55032:step:34:assertion"
+      ],
+      "polarity": "positive",
+      "target": "# Referencia:",
+      "evidence": [
+        "causal_snapshot_semantic_match:true",
+        "snapshot_step_index:29",
+        "snapshot_captured_at:2026-10-22T00:09:42.359Z",
+        "observed_concept:reference",
+        "observed_concept:transaction"
+      ],
+      "details": {
+        "visibleTargets": [
+          "# Referencia:",
+          "Transacción Exitosa"
+        ],
+        "snapshotStepIndex": 29,
+        "snapshotUrl": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+        "snapshotCapturedAt": "2026-10-22T00:09:42.359Z"
+      }
+    },
+    {
+      "id": "reconciled-causal-snapshot-21",
+      "requirement": "Validar que la confirmación muestre la \"comisión\".",
+      "type": "heading_or_control",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 21,
+      "requirementRefs": [
+        "requirement:testrail:case:55032:step:21:assertion"
+      ],
+      "polarity": "positive",
+      "target": "Comisión",
+      "evidence": [
+        "causal_snapshot_semantic_match:true",
+        "recovered_after_assertion_resolution_miss:true",
+        "snapshot_step_index:17",
+        "snapshot_captured_at:2026-10-22T00:09:19.507Z",
+        "observed_concept:commission"
+      ],
+      "details": {
+        "visibleTargets": [
+          "Comisión"
+        ],
+        "snapshotStepIndex": 17,
+        "snapshotUrl": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+        "snapshotCapturedAt": "2026-10-22T00:09:19.507Z"
+      }
+    },
+    {
+      "id": "reconciled-causal-snapshot-23",
+      "requirement": "Validar que se muestre \"tasa de cambio\"",
+      "type": "heading_or_control",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 23,
+      "requirementRefs": [
+        "requirement:testrail:case:55032:step:23:assertion"
+      ],
+      "polarity": "positive",
+      "target": "Tasa de Cambio",
+      "evidence": [
+        "causal_snapshot_semantic_match:true",
+        "recovered_after_assertion_resolution_miss:true",
+        "snapshot_step_index:17",
+        "snapshot_captured_at:2026-10-22T00:09:19.507Z",
+        "observed_concept:exchange_rate"
+      ],
+      "details": {
+        "visibleTargets": [
+          "Tasa de Cambio"
+        ],
+        "snapshotStepIndex": 17,
+        "snapshotUrl": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+        "snapshotCapturedAt": "2026-10-22T00:09:19.507Z"
+      }
+    },
+    {
+      "id": "reconciled-causal-snapshot-24",
+      "requirement": "Validar que la confirmación muestre el \"total a debitar\".",
+      "type": "heading_or_control",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 24,
+      "requirementRefs": [
+        "requirement:testrail:case:55032:step:24:assertion"
+      ],
+      "polarity": "positive",
+      "target": "Total a Debitar",
+      "evidence": [
+        "causal_snapshot_semantic_match:true",
+        "recovered_after_assertion_resolution_miss:true",
+        "snapshot_step_index:17",
+        "snapshot_captured_at:2026-10-22T00:09:19.507Z",
+        "observed_concept:total_debit"
+      ],
+      "details": {
+        "visibleTargets": [
+          "Total a Debitar"
+        ],
+        "snapshotStepIndex": 17,
+        "snapshotUrl": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+        "snapshotCapturedAt": "2026-10-22T00:09:19.507Z"
+      }
+    }
+  ],
+  "oracleTypes": [
+    "literal_visible_text",
+    "heading_or_control",
+    "navigation_transition"
+  ],
+  "availablePageObjectCount": 2,
+  "mode": "deterministic",
+  "functionalExecutionEnabled": true,
+  "provider": null,
+  "model": null,
+  "skill": {
+    "name": null,
+    "version": null,
+    "hash": null,
+    "loaded": false
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "C55032",
+    "title": "Transferencia exitosa entre cuentas propias con verificación de acceso y token",
+    "appSlug": "fenix",
+    "sectionSlug": "demoblaze",
+    "auth": {
+      "gateDetected": true,
+      "required": false,
+      "stage": "otp",
+      "insertionAfterStepIndex": 6,
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    },
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Abrir la aplicación configurada del proyecto",
+        "operation": "navigate",
+        "target": {
+          "strategy": "url",
+          "value": "APP_BASE_URL"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Presionar \"perfil empresarial\".",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Empresarial"
+        },
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Empresarial",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Ingresar el RNC en \"RNC\".",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "RNC"
+        },
+        "valueKey": "rnc",
+        "authGateExpected": true,
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "RNC",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Ingresar el usuario en \"Usuario\".",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Usuario"
+        },
+        "valueKey": "usuario",
+        "authGateExpected": true,
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Usuario",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 4,
+        "scenarioStepIndex": 5,
+        "originalText": "Ingresar la contraseña en \"Contraseña\".",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Contraseña"
+        },
+        "valueKey": "contrasena",
+        "authGateExpected": true,
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Contraseña",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 5,
+        "scenarioStepIndex": 6,
+        "originalText": "Presionar \"Iniciar sesión\".",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Iniciar sesión"
+        },
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Iniciar sesión",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 6,
+        "scenarioStepIndex": 7,
+        "originalText": "Validar que se muestre la pantalla de \"verificación de usuario\".",
+        "operation": "assertState",
+        "target": {
+          "strategy": "text",
+          "value": "se muestre la pantalla de \"verificación de usuario\""
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "navigation_transition",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "url_state",
+          "mechanism": {
+            "source": "url_state",
+            "method": "expectPromotedVisible",
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "navigation_transition",
+              "urlPattern": "https://qa1.santacruz.do/onlinebanking/IdentifyUser"
+            }
+          },
+          "sourceActionStepIndex": 6,
+          "requirement": "Validar que se muestre la pantalla de \"verificación de usuario\".",
+          "target": "Iniciar sesión",
+          "requirementRefs": [
+            "requirement:testrail:case:55032:step:7:assertion"
+          ]
+        },
+        "assertionIntent": "validation_present",
+        "polarity": "positive",
+        "subject": "verificación de usuario",
+        "expectedState": "se muestre la pantalla de \"verificación de usuario\"",
+        "requirementRefs": [
+          "requirement:testrail:case:55032:step:7:assertion"
+        ],
+        "sourceActionStepIndex": 6,
+        "evidenceRefs": [
+          "oracle:reconciled-navigation-7"
+        ]
+      },
+      {
+        "contractStepIndex": 7,
+        "scenarioStepIndex": 8,
+        "originalText": "Presionar \"SMS\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "SMS"
+        },
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "SMS",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "requirementRefs": [
+          "requirement:testrail:case:55032:step:7:assertion"
+        ],
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 8,
+        "scenarioStepIndex": 9,
+        "originalText": "Ingresar el código de acceso en \"Código\".",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Código"
+        },
+        "valueKey": "codigo_acceso",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Código",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "#IdentifyUserForm"
+          },
+          "segmentCount": 6,
+          "runtimeResolutionRequired": true,
+          "captureMatchCount": 1
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 9,
+        "scenarioStepIndex": 10,
+        "originalText": "Presionar \"continuar\".",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "continuar"
+        },
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "continuar",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 10,
+        "scenarioStepIndex": 11,
+        "originalText": "Validar que se muestre \"resumen de sus productos\"",
+        "operation": "assertState",
+        "target": {
+          "strategy": "text",
+          "value": "se muestre \"resumen de sus productos\""
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "heading_or_control",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "heading_or_control",
+          "requirement": "Validar que se muestre \"resumen de sus productos\"",
+          "target": "Resumen",
+          "requirementRefs": [
+            "requirement:testrail:case:55032:step:11:assertion"
+          ],
+          "targets": [
+            "Resumen",
+            "Cuentas por Pagar"
+          ]
+        },
+        "assertionIntent": "validation_present",
+        "polarity": "positive",
+        "subject": "resumen de sus productos",
+        "expectedState": "se muestre \"resumen de sus productos\"",
+        "requirementRefs": [
+          "requirement:testrail:case:55032:step:11:assertion"
+        ],
+        "evidenceRefs": [
+          "oracle:reconciled-snapshot-11"
+        ]
+      },
+      {
+        "contractStepIndex": 11,
+        "scenarioStepIndex": 12,
+        "originalText": "Presionar \"Transferencias\".",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Transferencias"
+        },
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Transferencias",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "requirementRefs": [
+          "requirement:testrail:case:55032:step:11:assertion"
+        ],
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 12,
+        "scenarioStepIndex": 13,
+        "originalText": "Presionar \"Cuentas Propias\".",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Cuentas Propias"
+        },
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Cuentas Propias",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 13,
+        "scenarioStepIndex": 14,
+        "originalText": "Seleccionar la cuenta de origen en \"Cuenta de origen\".",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "Cuenta de origen"
+        },
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Cuenta de origen",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "resolvedExecutionTarget": "Cuenta Corriente",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 14,
+        "scenarioStepIndex": 15,
+        "originalText": "Seleccionar la cuenta de destino en \"Cuenta de destino\".",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "Cuenta de destino"
+        },
+        "selectionActivationField": "Monto",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Cuenta de destino",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "resolvedExecutionTarget": "Cuenta de Ahorros",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 15,
+        "scenarioStepIndex": 16,
+        "originalText": "Ingresar el monto en \"Monto\".",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Monto"
+        },
+        "valueKey": "monto",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[data-val=\"true\"][data-val-number=\"The field AmountPayment must be a number.\"][data-val-range=\"Monto a transferir debe ser mayor que 0.\"][data-val-range-max=\"1.79769313486232E+308\"][data-val-range-min=\"0.01\"][data-val-required=\"El campo 'Monto' es requerido.\"][id=\"transactionDetails_0__AmountPayment\"][name=\"transactionDetails[0].AmountPayment\"]",
+              "confidence": 0.95
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "input",
+              "role": "textbox"
+            },
+            "stableDirectAttributes": {
+              "data-val": "true",
+              "data-val-number": "The field AmountPayment must be a number.",
+              "data-val-range": "Monto a transferir debe ser mayor que 0.",
+              "data-val-range-max": "1.79769313486232E+308",
+              "data-val-range-min": "0.01",
+              "data-val-required": "El campo 'Monto' es requerido.",
+              "id": "transactionDetails_0__AmountPayment",
+              "name": "transactionDetails[0].AmountPayment"
+            },
+            "stableDescendants": [],
+            "semanticShape": []
+          },
+          "confidence": 0.95,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 16,
+        "scenarioStepIndex": 17,
+        "originalText": "Presionar \"Continuar\".",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Continuar"
+        },
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Continuar",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 17,
+        "scenarioStepIndex": 18,
+        "originalText": "Validar que se muestre \"la confirmación de la transferencia\"",
+        "operation": "assertState",
+        "target": {
+          "strategy": "text",
+          "value": "se muestre \"la confirmación de la transferencia\""
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "heading_or_control",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "heading_or_control",
+          "requirement": "Validar que se muestre \"la confirmación de la transferencia\"",
+          "target": "Transferencias a Mis Cuentas",
+          "requirementRefs": [
+            "requirement:testrail:case:55032:step:18:assertion"
+          ],
+          "targets": [
+            "Transferencias a Mis Cuentas"
+          ]
+        },
+        "assertionIntent": "validation_present",
+        "polarity": "positive",
+        "subject": "la confirmación de la transferencia",
+        "expectedState": "se muestre \"la confirmación de la transferencia\"",
+        "requirementRefs": [
+          "requirement:testrail:case:55032:step:18:assertion"
+        ],
+        "evidenceRefs": [
+          "oracle:reconciled-snapshot-18"
+        ]
+      },
+      {
+        "contractStepIndex": 18,
+        "scenarioStepIndex": 19,
+        "originalText": "Validar que la confirmación muestre las \"cuentas seleccionadas\".",
+        "operation": "assertState",
+        "target": {
+          "strategy": "text",
+          "value": "la confirmación muestre las \"cuentas seleccionadas\""
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "heading_or_control",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "heading_or_control",
+          "requirement": "Validar que la confirmación muestre las \"cuentas seleccionadas\".",
+          "target": "Cuenta Origen",
+          "requirementRefs": [
+            "requirement:testrail:case:55032:step:19:assertion"
+          ],
+          "targets": [
+            "Cuenta Origen",
+            "Cuenta Destino"
+          ]
+        },
+        "assertionIntent": "validation_present",
+        "polarity": "positive",
+        "subject": "cuentas seleccionadas",
+        "expectedState": "la confirmación muestre las \"cuentas seleccionadas\"",
+        "requirementRefs": [
+          "requirement:testrail:case:55032:step:19:assertion"
+        ],
+        "evidenceRefs": [
+          "oracle:reconciled-snapshot-19"
+        ]
+      },
+      {
+        "contractStepIndex": 19,
+        "scenarioStepIndex": 20,
+        "originalText": "Validar que la confirmación muestre el \"monto\".",
+        "operation": "assertState",
+        "target": {
+          "strategy": "text",
+          "value": "la confirmación muestre el \"monto\""
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "heading_or_control",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "heading_or_control",
+          "requirement": "Validar que la confirmación muestre el \"monto\".",
+          "target": "Monto a Acreditar",
+          "requirementRefs": [
+            "requirement:testrail:case:55032:step:20:assertion"
+          ],
+          "targets": [
+            "Monto a Acreditar"
+          ]
+        },
+        "assertionIntent": "validation_present",
+        "polarity": "positive",
+        "subject": "monto",
+        "expectedState": "la confirmación muestre el \"monto\"",
+        "requirementRefs": [
+          "requirement:testrail:case:55032:step:20:assertion"
+        ],
+        "evidenceRefs": [
+          "oracle:reconciled-snapshot-20"
+        ]
+      },
+      {
+        "contractStepIndex": 20,
+        "scenarioStepIndex": 21,
+        "originalText": "Validar que la confirmación muestre la \"comisión\".",
+        "operation": "assertState",
+        "target": {
+          "strategy": "text",
+          "value": "la confirmación muestre la \"comisión\""
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "heading_or_control",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "heading_or_control",
+          "requirement": "Validar que la confirmación muestre la \"comisión\".",
+          "target": "Comisión",
+          "requirementRefs": [
+            "requirement:testrail:case:55032:step:21:assertion"
+          ],
+          "targets": [
+            "Comisión"
+          ]
+        },
+        "assertionIntent": "validation_present",
+        "polarity": "positive",
+        "subject": "comisión",
+        "expectedState": "la confirmación muestre la \"comisión\"",
+        "requirementRefs": [
+          "requirement:testrail:case:55032:step:21:assertion"
+        ],
+        "evidenceRefs": [
+          "oracle:reconciled-causal-snapshot-21"
+        ]
+      },
+      {
+        "contractStepIndex": 21,
+        "scenarioStepIndex": 22,
+        "originalText": "Validar que la confirmación muestre los \"impuestos\".",
+        "operation": "assertState",
+        "target": {
+          "strategy": "text",
+          "value": "la confirmación muestre los \"impuestos\""
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "heading_or_control",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "heading_or_control",
+          "requirement": "Validar que la confirmación muestre los \"impuestos\".",
+          "target": "Impuesto 0.20%",
+          "requirementRefs": [
+            "requirement:testrail:case:55032:step:22:assertion"
+          ],
+          "targets": [
+            "Impuesto 0.20%"
+          ]
+        },
+        "assertionIntent": "validation_present",
+        "polarity": "positive",
+        "subject": "impuestos",
+        "expectedState": "la confirmación muestre los \"impuestos\"",
+        "requirementRefs": [
+          "requirement:testrail:case:55032:step:22:assertion"
+        ],
+        "evidenceRefs": [
+          "oracle:reconciled-snapshot-22"
+        ]
+      },
+      {
+        "contractStepIndex": 22,
+        "scenarioStepIndex": 23,
+        "originalText": "Validar que se muestre \"tasa de cambio\"",
+        "operation": "assertState",
+        "target": {
+          "strategy": "text",
+          "value": "se muestre \"tasa de cambio\""
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "heading_or_control",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "heading_or_control",
+          "requirement": "Validar que se muestre \"tasa de cambio\"",
+          "target": "Tasa de Cambio",
+          "requirementRefs": [
+            "requirement:testrail:case:55032:step:23:assertion"
+          ],
+          "targets": [
+            "Tasa de Cambio"
+          ]
+        },
+        "assertionIntent": "validation_present",
+        "polarity": "positive",
+        "subject": "tasa de cambio",
+        "expectedState": "se muestre \"tasa de cambio\"",
+        "requirementRefs": [
+          "requirement:testrail:case:55032:step:23:assertion"
+        ],
+        "evidenceRefs": [
+          "oracle:reconciled-causal-snapshot-23"
+        ]
+      },
+      {
+        "contractStepIndex": 23,
+        "scenarioStepIndex": 24,
+        "originalText": "Validar que la confirmación muestre el \"total a debitar\".",
+        "operation": "assertState",
+        "target": {
+          "strategy": "text",
+          "value": "la confirmación muestre el \"total a debitar\""
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "heading_or_control",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "heading_or_control",
+          "requirement": "Validar que la confirmación muestre el \"total a debitar\".",
+          "target": "Total a Debitar",
+          "requirementRefs": [
+            "requirement:testrail:case:55032:step:24:assertion"
+          ],
+          "targets": [
+            "Total a Debitar"
+          ]
+        },
+        "assertionIntent": "validation_present",
+        "polarity": "positive",
+        "subject": "total a debitar",
+        "expectedState": "la confirmación muestre el \"total a debitar\"",
+        "requirementRefs": [
+          "requirement:testrail:case:55032:step:24:assertion"
+        ],
+        "evidenceRefs": [
+          "oracle:reconciled-causal-snapshot-24"
+        ]
+      },
+      {
+        "contractStepIndex": 24,
+        "scenarioStepIndex": 25,
+        "originalText": "Presionar \"Continuar\".",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Continuar"
+        },
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Continuar",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "requirementRefs": [
+          "requirement:testrail:case:55032:step:24:assertion"
+        ],
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 25,
+        "scenarioStepIndex": 26,
+        "originalText": "Validar que se muestre la pantalla de \"validación de identidad\".",
+        "operation": "assertState",
+        "target": {
+          "strategy": "text",
+          "value": "se muestre la pantalla de \"validación de identidad\""
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "navigation_transition",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "url_state",
+          "mechanism": {
+            "source": "url_state",
+            "method": "expectPromotedVisible",
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "navigation_transition",
+              "urlPattern": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary"
+            }
+          },
+          "sourceActionStepIndex": 25,
+          "requirement": "Validar que se muestre la pantalla de \"validación de identidad\".",
+          "target": "Continuar",
+          "requirementRefs": [
+            "requirement:testrail:case:55032:step:26:assertion"
+          ]
+        },
+        "assertionIntent": "validation_present",
+        "polarity": "positive",
+        "subject": "validación de identidad",
+        "expectedState": "se muestre la pantalla de \"validación de identidad\"",
+        "requirementRefs": [
+          "requirement:testrail:case:55032:step:26:assertion"
+        ],
+        "sourceActionStepIndex": 25,
+        "evidenceRefs": [
+          "oracle:reconciled-navigation-26"
+        ]
+      },
+      {
+        "contractStepIndex": 26,
+        "scenarioStepIndex": 27,
+        "originalText": "Presionar \"SMS\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "SMS"
+        },
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "SMS",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "requirementRefs": [
+          "requirement:testrail:case:55032:step:26:assertion"
+        ],
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 27,
+        "scenarioStepIndex": 28,
+        "originalText": "Ingresar el token de autorización en \"Token\".",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Token"
+        },
+        "valueKey": "token_autorizacion",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Token",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "#requestchallengeform"
+          },
+          "segmentCount": 6,
+          "runtimeResolutionRequired": true,
+          "captureMatchCount": 1
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 28,
+        "scenarioStepIndex": 29,
+        "originalText": "Presionar \"Autorizar transferencia\".",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Continuar"
+        },
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Continuar",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 29,
+        "scenarioStepIndex": 30,
+        "originalText": "Validar que se muestre \"comprobante de transacción exitosa\"",
+        "operation": "assertState",
+        "target": {
+          "strategy": "text",
+          "value": "se muestre \"comprobante de transacción exitosa\""
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "heading_or_control",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "heading_or_control",
+          "requirement": "El comprobante de transacción exitosa muestra la referencia de la operación.",
+          "target": "Comprobante",
+          "requirementRefs": [
+            "requirement:testrail:case:55032:step:30:assertion"
+          ],
+          "targets": [
+            "Comprobante",
+            "Transacción Exitosa",
+            "# Referencia:"
+          ]
+        },
+        "assertionIntent": "validation_present",
+        "polarity": "positive",
+        "subject": "comprobante de transacción exitosa",
+        "expectedState": "se muestre \"comprobante de transacción exitosa\"",
+        "requirementRefs": [
+          "requirement:testrail:case:55032:step:30:assertion"
+        ],
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      },
+      {
+        "contractStepIndex": 30,
+        "scenarioStepIndex": 31,
+        "originalText": "Validar que el comprobante muestre el \"monto de la transferencia\".",
+        "operation": "assertState",
+        "target": {
+          "strategy": "text",
+          "value": "el comprobante muestre el \"monto de la transferencia\""
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "heading_or_control",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "heading_or_control",
+          "requirement": "Validar que el comprobante muestre el \"monto de la transferencia\".",
+          "target": "Monto a Acreditar:",
+          "requirementRefs": [
+            "requirement:testrail:case:55032:step:31:assertion"
+          ],
+          "targets": [
+            "Monto a Acreditar:",
+            "Transferencias a Mis Cuentas"
+          ]
+        },
+        "assertionIntent": "validation_present",
+        "polarity": "positive",
+        "subject": "monto de la transferencia",
+        "expectedState": "el comprobante muestre el \"monto de la transferencia\"",
+        "requirementRefs": [
+          "requirement:testrail:case:55032:step:31:assertion"
+        ],
+        "evidenceRefs": [
+          "oracle:reconciled-snapshot-31"
+        ]
+      },
+      {
+        "contractStepIndex": 31,
+        "scenarioStepIndex": 32,
+        "originalText": "Validar que el comprobante muestre las \"cuentas involucradas\".",
+        "operation": "assertState",
+        "target": {
+          "strategy": "text",
+          "value": "el comprobante muestre las \"cuentas involucradas\""
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "heading_or_control",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "heading_or_control",
+          "requirement": "Validar que el comprobante muestre las \"cuentas involucradas\".",
+          "target": "Cuenta Origen",
+          "requirementRefs": [
+            "requirement:testrail:case:55032:step:32:assertion"
+          ],
+          "targets": [
+            "Cuenta Origen",
+            "Cuenta Destino"
+          ]
+        },
+        "assertionIntent": "validation_present",
+        "polarity": "positive",
+        "subject": "cuentas involucradas",
+        "expectedState": "el comprobante muestre las \"cuentas involucradas\"",
+        "requirementRefs": [
+          "requirement:testrail:case:55032:step:32:assertion"
+        ],
+        "evidenceRefs": [
+          "oracle:reconciled-snapshot-32"
+        ]
+      },
+      {
+        "contractStepIndex": 32,
+        "scenarioStepIndex": 33,
+        "originalText": "Validar que el comprobante muestre la \"fecha y hora\".",
+        "operation": "assertState",
+        "target": {
+          "strategy": "text",
+          "value": "el comprobante muestre la \"fecha y hora\""
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "heading_or_control",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "heading_or_control",
+          "requirement": "Validar que el comprobante muestre la \"fecha y hora\".",
+          "target": "__visible_date_time__",
+          "requirementRefs": [
+            "requirement:testrail:case:55032:step:33:assertion"
+          ],
+          "targets": [
+            "__visible_date_time__"
+          ]
+        },
+        "assertionIntent": "validation_present",
+        "polarity": "positive",
+        "subject": "fecha y hora",
+        "expectedState": "el comprobante muestre la \"fecha y hora\"",
+        "requirementRefs": [
+          "requirement:testrail:case:55032:step:33:assertion"
+        ],
+        "evidenceRefs": [
+          "oracle:reconciled-snapshot-33"
+        ]
+      },
+      {
+        "contractStepIndex": 33,
+        "scenarioStepIndex": 34,
+        "originalText": "Validar que el comprobante muestre la \"referencia de la operación\".",
+        "operation": "assertState",
+        "target": {
+          "strategy": "text",
+          "value": "el comprobante muestre la \"referencia de la operación\""
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "heading_or_control",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "heading_or_control",
+          "requirement": "Validar que el comprobante muestre la \"referencia de la operación\".",
+          "target": "# Referencia:",
+          "requirementRefs": [
+            "requirement:testrail:case:55032:step:34:assertion"
+          ],
+          "targets": [
+            "# Referencia:",
+            "Transacción Exitosa"
+          ]
+        },
+        "assertionIntent": "validation_present",
+        "polarity": "positive",
+        "subject": "referencia de la operación",
+        "expectedState": "el comprobante muestre la \"referencia de la operación\"",
+        "requirementRefs": [
+          "requirement:testrail:case:55032:step:34:assertion"
+        ],
+        "evidenceRefs": [
+          "oracle:reconciled-snapshot-34"
+        ]
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 34,
+      "representedScenarioSteps": 34,
+      "missingScenarioSteps": []
+    }
+  },
+  "executionContractChars": 26694,
+  "promptChars": null,
+  "specGenerationAttempts": 0,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": true,
+  "promotionAllowed": true,
+  "failedGatesAttempt1": [],
+  "finalSpec": {
+    "origin": "deterministic_compiler",
+    "generatedBy": "core",
+    "strategy": "deterministic_compiler",
+    "fallback": null
+  }
+}

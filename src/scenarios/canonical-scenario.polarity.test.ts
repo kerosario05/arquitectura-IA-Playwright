@@ -62,6 +62,16 @@ test("canonical validation_present resolves to positive polarity", () => {
   });
 });
 
+test("canonical validation_present preserves explicit negative visibility polarity", () => {
+  assert.deepEqual(resolveCanonicalAssertionPolarity({
+    intent: "validation_present",
+    expectedState: 'no se muestre "comprobante de transacción exitosa"',
+  }), {
+    polarity: "negative",
+    reason: "absence",
+  });
+});
+
 test("canonical disabled state is positive state evidence, not a forbidden transition", () => {
   assert.deepEqual(resolveCanonicalAssertionPolarity({ intent: "state_assertion", expectedState: "advance action is disabled" }), {
     polarity: "positive",

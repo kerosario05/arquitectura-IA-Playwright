@@ -7,6 +7,7 @@ import { createHash } from "node:crypto";
 import { buildRuntimeControlIdentity } from "../types/control-identity";
 import { classifyActionability, isFrameworkActionOwner, type ActionabilityKind } from "../recording/actionability-contract";
 import { normalizeStructuralOwnerIdentity, type StructuralOwnerIdentityInput } from "../recording/structural-owner-identity";
+import { VISIBLE_DATE_TIME_REGEX_SOURCE } from "../discovery/observable-snapshot-matcher";
 
 type RawDomElement = {
   id: string;
@@ -37,6 +38,7 @@ type RawDomElement = {
   pointerEvents?: string;
   actionOwner?: boolean;
   structuralOwnerIdentityInput?: StructuralOwnerIdentityInput;
+  semanticSignals?: string[];
 };
 
 const MAX_ELEMENTS = 300;
@@ -80,7 +82,7 @@ function getSummary(elements: SnapshotElement[]): PageSnapshot["summary"] {
 }
 
 export async function scanCurrentPage(page: Page): Promise<PageSnapshot> {
-  const rawElements = await page.evaluate(({ maxElements, actionabilityContract, actionOwnerContract }) => {
+  const rawElements = await page.evaluate(({ maxElements, actionabilityContract, actionOwnerContract, dateTimeRegexSource }) => {
     const classifyActionability = new Function(`return ${actionabilityContract}`)() as (signals: {
       tagName?: string;
       role?: string;
@@ -170,6 +172,12 @@ export async function scanCurrentPage(page: Page): Promise<PageSnapshot> {
       }
 
       const text = (el.textContent || "").replace(/\s+/g, " ").trim() || undefined;
+      // innerText reflects rendered content and excludes hidden stale templates;
+      // keep textContent as the existing sanitized snapshot payload.
+      const renderedText = el.innerText || "";
+      const semanticSignals = renderedText && new RegExp(dateTimeRegexSource, "i").test(renderedText)
+        ? ["date_time_value"]
+        : undefined;
       const placeholder = (el as HTMLInputElement).placeholder || undefined;
       const name = el.getAttribute("aria-label") || el.getAttribute("name") || undefined;
       const idAttr = el.getAttribute("id");
@@ -295,7 +303,8 @@ export async function scanCurrentPage(page: Page): Promise<PageSnapshot> {
             return childRole ? `${childTag}:${childRole}` : childTag;
           }),
         },
-        score
+        score,
+        semanticSignals,
       });
     }
 
@@ -305,6 +314,7 @@ export async function scanCurrentPage(page: Page): Promise<PageSnapshot> {
     maxElements: MAX_ELEMENTS,
     actionabilityContract: `(${classifyActionability.toString()})`,
     actionOwnerContract: `(${isFrameworkActionOwner.toString()})`,
+    dateTimeRegexSource: VISIBLE_DATE_TIME_REGEX_SOURCE,
   });
 
   const identityKeys = rawElements.map((raw) => JSON.stringify(normalizeStructuralOwnerIdentity(raw.structuralOwnerIdentityInput ?? {})))
@@ -365,6 +375,7 @@ export async function scanCurrentPage(page: Page): Promise<PageSnapshot> {
       pointerEvents: raw.pointerEvents,
       actionOwner: raw.actionOwner,
       structuralOwnerIdentity,
+      ...(raw.semanticSignals?.length ? { semanticSignals: [...raw.semanticSignals] } : {}),
       controlIdentity: buildRuntimeControlIdentity({
         tagName: raw.tagName,
         inputType: raw.inputType,

@@ -20,6 +20,7 @@ import {
 } from "./test-promoted-browser-mode";
 import { MAX_SCENARIO_ATTEMPTS, shouldRetryScenario } from "../discovery/pre-business-retry-policy";
 import { instrumentPromotedJiraSpecForEvidence, jiraReuseEvidenceOptions } from "../jira/jira-reuse-evidence";
+import { runtimeEnvNameForValueKey } from "../automations/runtime/promoted-spec-runtime";
 
 function printUsage(): void {
   console.log(`
@@ -213,8 +214,14 @@ export async function preparePromotedRuntimeInputs(options: {
   caseId: number;
   baseEnv: NodeJS.ProcessEnv;
   requiredKeys: string[];
+  /**
+   * Value keys a compiled spec reads as process.env['PROMOTED_<KEY>']. Unlike requiredKeys these
+   * are populated from the runtime context when present but never gate the run: the same env may be
+   * satisfied by configured test data that this function does not own.
+   */
+  promotedEnvValueKeys?: string[];
 }): Promise<PromotedRuntimeInputResult> {
-  if (options.requiredKeys.length === 0) {
+  if (options.requiredKeys.length === 0 && !(options.promotedEnvValueKeys?.length)) {
     return { ok: true, env: { ...options.baseEnv }, resolvedKeys: [], resolvedSources: {} };
   }
 
@@ -250,6 +257,12 @@ export async function preparePromotedRuntimeInputs(options: {
 
   const childEnv: NodeJS.ProcessEnv = { ...options.baseEnv };
   const runtimeDataOverrides: Record<string, string> = {};
+  for (const key of options.promotedEnvValueKeys ?? []) {
+    const value = getRuntimeValue(explicitByKey, key) ?? getRuntimeValue(byKey, key);
+    if (typeof value !== "string" || value.trim() === "") continue;
+    childEnv[runtimeEnvNameForValueKey(key)] = value;
+    runtimeDataOverrides[key] = value;
+  }
   for (const key of options.requiredKeys) {
     const envName = PROMOTED_RUNTIME_INPUT_ENV[key];
     const explicitValue = getRuntimeValue(explicitByKey, key);
@@ -270,6 +283,14 @@ export async function preparePromotedRuntimeInputs(options: {
     resolvedKeys: options.requiredKeys,
     resolvedSources,
   };
+}
+
+/** Value keys of every process.env['PROMOTED_<KEY>'] read in a compiled spec (lower-case, as stored in runtime context). */
+export function resolvePromotedEnvValueKeys(specSource: string): string[] {
+  return Array.from(new Set(Array.from(
+    specSource.matchAll(/process\.env\[(?:'|")PROMOTED_([A-Z0-9_]+)(?:'|")\]/g),
+    (match) => match[1].toLowerCase(),
+  )));
 }
 
 export function resolvePromotedRuntimeInputKeys(specSource: string): string[] {
@@ -599,6 +620,7 @@ async function main(): Promise<void> {
       caseId: Number(options.caseId),
       baseEnv: projectScopedPlaywrightEnv,
       requiredKeys,
+      promotedEnvValueKeys: resolvePromotedEnvValueKeys(specSource),
     });
     if (!runtimeInputs.ok) {
       console.error(`[test:promoted] pre-browser input gate blocked missingKey=${runtimeInputs.missingKey}`);

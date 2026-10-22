@@ -517,6 +517,15 @@ function readLaunchPublishedCases(launchId: string | undefined): Array<Record<st
   }
 }
 
+function readLaunchTestRail(launchId: string): Record<string, unknown> | undefined {
+  try {
+    const manifest = JSON.parse(fs.readFileSync(path.join(SCENARIO_LAUNCH_RUNS_DIR, launchId, "launch-manifest.json"), "utf-8")) as { testRail?: Record<string, unknown> };
+    return manifest.testRail;
+  } catch {
+    return undefined;
+  }
+}
+
 /** Reconstructs a discovery-batch rerun from its own batch result and launch selection.
  * This job type never writes preview-scenarios.json; its selected TestRail case IDs are
  * persisted by discovery:batch and its launch manifest. */
@@ -575,12 +584,18 @@ async function prepareRerunFromDiscoveryBatchJob(
     : typeof result.args?.app === "string" && result.args.app.trim()
       ? result.args.app
       : "default";
+  // launchId is not reused below, so carry the launch's TestRail scope over explicitly; without it
+  // the batch falls back to env defaults and may not find the case ("Selected 0 cases").
+  const launchTestRail = launchId ? readLaunchTestRail(launchId) : undefined;
+  const projectId = positiveCaseId(sourceParams.testRailProjectId) ?? positiveCaseId(launchTestRail?.projectId);
+  const suiteId = positiveCaseId(sourceParams.testRailSuiteId) ?? positiveCaseId(launchTestRail?.suiteId);
+  const sectionId = positiveCaseId(sourceParams.testRailSectionId ?? sourceParams.sectionId) ?? positiveCaseId(launchTestRail?.sectionId);
   const discoveryParams: Record<string, unknown> = {
     caseIds: selectedIds,
     appSlug,
-    ...(positiveCaseId(sourceParams.testRailProjectId) ? { testRailProjectId: positiveCaseId(sourceParams.testRailProjectId) } : {}),
-    ...(positiveCaseId(sourceParams.testRailSuiteId) ? { testRailSuiteId: positiveCaseId(sourceParams.testRailSuiteId) } : {}),
-    ...(positiveCaseId(sourceParams.testRailSectionId ?? sourceParams.sectionId) ? { testRailSectionId: positiveCaseId(sourceParams.testRailSectionId ?? sourceParams.sectionId) } : {}),
+    ...(projectId ? { testRailProjectId: projectId } : {}),
+    ...(suiteId ? { testRailSuiteId: suiteId } : {}),
+    ...(sectionId ? { testRailSectionId: sectionId } : {}),
     ...(typeof sourceParams.sectionName === "string" ? { sectionName: sourceParams.sectionName } : {}),
     ...(typeof sourceParams.sectionSlug === "string" ? { sectionSlug: sourceParams.sectionSlug } : {}),
     ...(typeof sourceParams.testRunId === "number" ? { testRunId: sourceParams.testRunId } : {}),

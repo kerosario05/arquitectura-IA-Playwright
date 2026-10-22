@@ -26,6 +26,14 @@ test('renaming a field never reuses a value key from the old step position',asyn
  assert.equal(edited.inputRequirements[0].label,'Documento');
  assert.equal(edited.reviewConfiguration?.uiTargets,undefined);
 });
+
+test('conditional diagnostics follow the edited step position in the response',async()=>{
+ const source={...issue,description:'El resumen muestra el monto, la comisión cuando aplique.'};
+ const patch={title:original.title,steps:[original.steps[0],'Presionar "Consultar"','Validar que se muestre "Comisión" en otra pantalla.','Validar que se muestre "Resultado"'],expectedResult:original.expectedResult};
+ const [edited]=await reviewEditedJiraScenarios(source,[original],original.scenarioId,patch);
+ assert.ok(edited.validation.issues.some(item=>item.code==='JIRA_CONDITION_STEP_UNSUPPORTED' && item.stepIndex===3 && item.step===patch.steps[2]));
+ assert.equal(edited.validation.valid,false);
+});
 test('unsupported manual steps and loss of acceptance coverage block launch rather than certify edits',async()=>{
  const [edited]=await reviewEditedJiraScenarios(issue,[original],original.scenarioId,{...original,steps:['Hacer todo automáticamente']});
  assert.equal(edited.validation.valid,false);

@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import path from "node:path";
+import { compileDeterministicSpec } from "./spec-compiler/deterministic-spec-compiler";
 import { buildSpecExecutionContract, resolveAuthGateFillScenarioStepIndices, type ScenarioStepLike, type SpecExecutionContractAuth } from "./spec-execution-contract";
 
 /**
@@ -28,6 +30,38 @@ const CREDENTIAL_PLAN_STEPS = [
   { index: 4, valueKey: "" },
   { index: 13, valueKey: "monto" },
 ];
+
+test("disabled AuthFlow with an auth data key preserves all five manual action bindings", () => {
+  for (const appSlug of ["fixture-bank", "fixture-store"]) {
+    const actions = ["click", "fill", "fill", "fill", "click"];
+    const plan = {
+      version: "1.0", source: "discovery_generated", status: "validated",
+      scenario: { externalId: "S-manual", title: "Manual rejection" }, requiredData: [],
+      createdAt: new Date().toISOString(),
+      metadata: { authFlowRequired: false, authGateDetectedDuringDiscovery: true, authGateStage: "credentials" },
+      steps: actions.map((action, offset) => ({
+        index: offset + 2, action,
+        description: action === "fill" ? `Ingresar el dato en "Campo ${offset + 2}"` : `Presionar "Botón ${offset + 2}"`,
+        target: { strategy: "css", value: `#control-${offset + 2}` },
+        ...(action === "fill" ? { valueKey: ["identifier", "auth.username", "contrasena"][offset - 1] } : {}),
+      })),
+    } as any;
+    const contract = buildSpecExecutionContract(plan, {
+      steps: plan.steps.map((s: any) => ({ index: s.index, action: s.description })),
+    }, { appSlug });
+    assert.equal(contract.auth?.required, false);
+    assert.equal(contract.auth?.aggregate, undefined);
+    const compiled = compileDeterministicSpec(contract, {
+      targetSpecPath: path.resolve(`automations/apps/${appSlug}/cases/manual/case.spec.ts`),
+    });
+    assert.deepEqual(compiled.unsupportedCapabilities, []);
+    const required = contract.steps.filter(s => s.required !== false && ["fill", "press", "click"].includes(s.operation));
+    const bindings = compiled.bindings.filter(b => b.runtimeMethod !== "expectPromotedVisible" && ["fill", "press", "click"].includes(b.operation));
+    assert.equal(required.length, 5);
+    assert.deepEqual(bindings.map(b => b.scenarioStepIndex), required.map(s => s.scenarioStepIndex));
+    assert.doesNotMatch(compiled.source, /authFlow.ensureAuthenticated/);
+  }
+});
 
 test("1/structuredCredentialAuthority. only the steps owning a structured credential ROLE are marked", () => {
   const auth: SpecExecutionContractAuth = { gateDetected: true, required: false, stage: "identification_input" };

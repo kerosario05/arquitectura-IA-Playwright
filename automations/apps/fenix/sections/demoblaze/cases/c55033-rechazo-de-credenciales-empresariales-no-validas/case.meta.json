@@ -1,0 +1,10 @@
+{
+  "appSlug": "fenix",
+  "sectionSlug": "demoblaze",
+  "sectionName": "demoblaze",
+  "sectionId": 4769,
+  "sourceScenarioId": "C55033",
+  "testRailCaseId": 55033,
+  "generatedAt": "2026-10-22T12:22:00.733Z",
+  "title": "Rechazo de credenciales empresariales no válidas"
+}

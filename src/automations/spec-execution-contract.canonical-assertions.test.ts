@@ -73,3 +73,86 @@ test("classifies recorded Spanish system observations as visible text assertions
   assert.equal(contract.steps[0]?.oracle?.target, "¡Hola!");
   assert.equal(contract.steps[0]?.required, true);
 });
+
+test("keeps a snapshot-backed oracle when its canonical requirement reference matches", () => {
+  const canonical = canonicalizeTestRailCase({
+    id: 906,
+    title: "Visible result",
+    custom_steps_separated: [{ content: 'Validar que se muestre "Transfer receipt".' }],
+  });
+  const canonicalStep = canonical.steps[0]!;
+  const requirementId = canonicalStep.requirementRefs?.[0];
+  assert.ok(requirementId);
+  const contract = buildSpecExecutionContract({
+    scenario: { externalId: "C906", title: canonical.title },
+    steps: [{ index: 1, action: "assert" }],
+  } as any, {
+    steps: [{
+      index: 1,
+      action: canonicalStep.action,
+      expected: canonicalStep.expected,
+      requirementRefs: canonicalStep.requirementRefs,
+      canonicalAssertion: canonicalStep.canonicalAssertion,
+    }],
+    requirements: canonical.requirements,
+    stepRequirementRefs: [{ stepIndex: 1, requirementId }],
+    observableOracles: [{
+      id: "observed-receipt",
+      requirement: canonicalStep.action,
+      requirementRefs: [requirementId],
+      type: "page_object_state",
+      backed: true,
+      source: "discovery",
+      stepIndex: 1,
+      target: "Transfer receipt",
+      details: { visibleTargets: ["Transfer receipt"] },
+      evidence: ["causal_snapshot_visible_text"],
+    }],
+  } as any);
+
+  const assertion = contract.steps[0]!;
+  assert.equal(assertion.operation, "assertState");
+  assert.equal(assertion.oracle?.backed, true);
+  assert.deepEqual(assertion.oracle?.requirementRefs, [requirementId]);
+  assert.equal(assertion.executionStatus, "executed");
+});
+
+test("does not bind a backed oracle from a different canonical requirement", () => {
+  const canonical = canonicalizeTestRailCase({
+    id: 907,
+    title: "Visible result",
+    custom_steps_separated: [{ content: 'Validar que se muestre "Transfer receipt".' }],
+  });
+  const canonicalStep = canonical.steps[0]!;
+  const requirementId = canonicalStep.requirementRefs?.[0];
+  assert.ok(requirementId);
+  const contract = buildSpecExecutionContract({
+    scenario: { externalId: "C907", title: canonical.title },
+    steps: [{ index: 1, action: "assert" }],
+  } as any, {
+    steps: [{
+      index: 1,
+      action: canonicalStep.action,
+      expected: canonicalStep.expected,
+      requirementRefs: canonicalStep.requirementRefs,
+      canonicalAssertion: canonicalStep.canonicalAssertion,
+    }],
+    requirements: canonical.requirements,
+    stepRequirementRefs: [{ stepIndex: 1, requirementId }],
+    observableOracles: [{
+      id: "observed-unrelated",
+      requirement: canonicalStep.action,
+      requirementRefs: ["unrelated-requirement"],
+      type: "page_object_state",
+      backed: true,
+      source: "discovery",
+      stepIndex: 1,
+      target: "Transfer receipt",
+      evidence: ["causal_snapshot_visible_text"],
+    }],
+  } as any);
+
+  const assertion = contract.steps[0]!;
+  assert.equal(assertion.oracle, undefined);
+  assert.equal(assertion.executionStatus, "unresolved");
+});

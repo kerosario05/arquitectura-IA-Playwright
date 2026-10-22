@@ -222,6 +222,8 @@ Prefer a focused `node --import tsx --test <specific-test-files>` invocation for
 
 ### Product-specific constraints from the user
 
+- For authored selector values that describe a generic type/category, any available compatible option is acceptable; use a repeatable choice and verify the owning field's selected value. A concrete identifier supplied in test data takes priority and must never fall back to another option if missing. This authorizes choosing among matching options, not guessing which control belongs to a field or ignoring disabled options.
+
 - Codex owns authorized Jira fixes, focused regression coverage, test execution, typechecks, QA Lab, and evidence review. Claude may be used only when explicitly requested in the current user prompt. This supersedes older role assignments in historical checkpoint entries. Any promotion or external publication must already be within the user's active authorization.
 - When changing portal-comercial list inputs, preserve Fenix's existing account-list behavior. Make list options editable from values actually observed in the recording; do not change Fenix's account-list resolution.
 - For Kiosko virtual keyboards, consolidate digits into an editable runtime text field only when evidence confirms a virtual keyboard. Keep the observed per-key steps and bind their values to the single field. Do not create fields for ordinary pages or change unrelated recording behavior.

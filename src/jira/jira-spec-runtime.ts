@@ -15,6 +15,7 @@ import { buildJiraDomOptionSnapshot, chooseJiraDomTarget, locatorForJiraDomCandi
 import { isJiraDomAssertionSupported } from "./jira-dom-assertion-ai";
 import { jiraCredentialRejectionMatches, jiraAlertErrorEquivalenceMatches, readVisibleJiraAlertTexts, stripJiraNotificationChannelWord } from "./jira-assertion-matching";
 import { settleJiraAction } from "./jira-action-settlement";
+export { settleJiraAction } from "./jira-action-settlement";
 import { ensureJiraDownloadObserver } from "./jira-download-assertion";
 import { chooseJiraMatchingOption, jiraOptionTextMatches, jiraOptionSearchRoot, jiraOptionBelongsToRoot } from "./jira-option-choice";
 import { isJiraRangeMetadataAssertion, jiraNumericValueMatches, jiraRangeMetadataAssertionMatches, setJiraRangeControlValue } from "./jira-range-control";

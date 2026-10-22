@@ -6,6 +6,16 @@ import {jiraScenarioGenerationInstructions} from "./jira-input-requirements";
 import {auditGeneratedJiraSyntax,generateJiraScenarios,normalizeJiraGeneratedSteps} from "./jira-scenario-generator";
 import type {JiraIssueSource} from "../scenarios/scenario-types";
 import {repairMissingJiraReviewTransition} from './jira-generation-contract';
+test('negative rejection evidence never creates a successful summary transition',async()=>{
+ for(const [password,submit,receipt] of [['Contraseña','Iniciar sesión','comprobante de operación exitosa'],['Password','Sign in','successful receipt']]) {
+  const source={key:'REJECTION',description:`Ingresar ${password}. El resumen muestra monto y comisión. Revisar la información antes de continuar. Autorizar la operación. Se muestra el ${receipt}. Si las credenciales no son válidas, informar el error y no mostrar el comprobante.`} as JiraIssueSource;
+  const steps=['Abrir la aplicación configurada del proyecto',`Ingresar contraseña no válida en "${password}"`,`Presionar "${submit}"`,`Validar que el campo "${password}" muestre un error de validación.`,`Validar que no se muestre "${receipt}"`];
+  const draft={sourceIssueKey:source.key,title:'Rechazo de credenciales',steps,expectedResult:''};
+  const repaired=repairMissingJiraReviewTransition(draft,source);
+  assert.deepEqual(repaired.steps,steps);
+  assert.deepEqual(await auditGeneratedJiraSyntax([repaired],[source]),[]);
+ }
+});
 test('review transition cannot be anchored to shared field names on a later receipt',()=>{
  const source={description:'El resumen muestra monto y comisión. El cliente revisa la información antes de continuar. Se muestra validación de identidad para autorizar. El comprobante muestra monto y referencia.'} as JiraIssueSource;
  const steps=['Validar que se muestre "monto" en la confirmación.','Presionar "Continuar"','Validar que se muestre "validación de identidad"','Presionar "Autorizar"','Validar que se muestre "monto" en el comprobante.','Validar que se muestre "referencia" en el comprobante.'];
@@ -18,7 +28,7 @@ test('review transition cannot be anchored to shared field names on a later rece
 test('compound confirmation summary preserves source-backed conditional checks without blocking launch',async()=>{
  for(const subject of ['descuento','tasa de cambio']) {
   const source={key:'HU-CONDITION',description:`AC1 — Confirmación\nEl resumen presenta el monto, los impuestos y la ${subject} cuando aplique.`} as JiraIssueSource;
-  for(const suffix of ['', ' cuando aplique']) {
+  for(const suffix of ['', ' cuando aplique', ' aplicable']) {
    const draft={sourceIssueKey:source.key,title:'Revisar confirmación',acceptanceCriteriaRefs:['AC1.1'],steps:[
     'Abrir la aplicación configurada del proyecto',
     'Validar que el resumen de confirmación muestre el monto.',
@@ -452,8 +462,9 @@ test('AA-97 rejection language normalizes to supported observations without inve
  assert.deepEqual(await auditGeneratedJiraSyntax(normalized,[issue]),[]);
  const rejected=normalized[0];
  const generated=await generateJiraScenarios([issue],'portal-comercial',{providerType:'fake',providerName:'fixture',model:'fixture',async completeJson(){return {rawText:'',parsedJson:{scenarios:[{...rejected,expectedResult:'Fenix informa el problema de credenciales y no presenta la operación como "exitosa".'}]},model:'fixture',providerName:'fixture',durationMs:0};}});
- assert.equal(generated.scenarios[0].validation.valid,false);
- assert.ok(generated.scenarios[0].validation.errors.some(error=>error.startsWith('JIRA_ACCEPTANCE_COVERAGE_INCOMPLETE:')));
+ assert.equal(generated.scenarios[0].validation.valid,true);
+ assert.deepEqual(generated.scenarios[0].validation.errors,[]);
+ assert.ok(generated.rejected.some(item=>item.reason.startsWith('JIRA_ACCEPTANCE_COVERAGE_INCOMPLETE:')));
  assert.equal(generated.scenarios[0].expectedResult,'Se informa problema de credenciales y no se presenta operación exitosa.');
 });
 
@@ -482,8 +493,9 @@ test('Jira generation repairs unsupported assertions and excludes non-executable
  }});
  assert.equal(call,3,'unsupported assertion is repaired and missing source obligations receive a coverage pass');
  assert.equal(result.scenarios.length,1);
- assert.equal(result.scenarios[0].validation.valid,false);
- assert.ok(result.scenarios[0].validation.errors.some(error=>error.startsWith('JIRA_ACCEPTANCE_COVERAGE_INCOMPLETE:')));
+ assert.equal(result.scenarios[0].validation.valid,true);
+ assert.deepEqual(result.scenarios[0].validation.errors,[]);
+ assert.ok(result.rejected.some(item=>item.reason.startsWith('JIRA_ACCEPTANCE_COVERAGE_INCOMPLETE:')));
  assert.equal(result.scenarios.some(s=>s.validation.errors.includes('JIRA_ASSERTION_CAPABILITY_UNSUPPORTED')),false);
  assert.ok(result.rejected.some(item=>item.title===unsupported.title));
  assert.ok(result.rejected.some(item=>item.title===emptyFailure.title && item.reason==='jira_failure_condition_not_executable'));

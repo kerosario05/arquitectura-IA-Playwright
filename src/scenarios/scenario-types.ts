@@ -615,6 +615,7 @@ export type ScenarioValidationResult = {
   valid: boolean;
   errors: string[];
   warnings: string[];
+  issues?: Array<{ code: string; stepIndex: number; step: string }>;
 };
 
 export type ValidatedScenario = McpScenario & {

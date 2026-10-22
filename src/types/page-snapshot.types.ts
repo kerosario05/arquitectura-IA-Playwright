@@ -56,6 +56,8 @@ export type SnapshotElement = {
   pointerEvents?: string;
   actionOwner?: boolean;
   structuralOwnerIdentity?: StructuralOwnerIdentity;
+  /** Sanitized, value-free classifications derived from visible rendered text. */
+  semanticSignals?: string[];
 };
 
 export type PageSnapshot = {

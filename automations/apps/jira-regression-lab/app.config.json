@@ -1,85 +1,9 @@
 {
-  "appProfile": {
-    "appSlug": "jira-regression-lab",
-    "source": "local-test",
-    "name": "Northstar Enterprise Demo",
-    "baseUrl": "http://127.0.0.1:4173",
-    "createdAt": "2026-10-16T17:17:22.0097010Z",
-    "updatedAt": "2026-10-16T17:17:22.0097010Z",
-    "ignoreHTTPSErrors": false
-  },
+  "name": "Northstar Enterprise Demo",
   "baseUrl": "http://127.0.0.1:4173",
-  "loginMode": "password",
-  "testData": {
-    "auth.company_identifier": "101010101",
-    "auth.username": "qa_empresa",
-    "auth.password": "DemoPass2026",
-    "auth.access_code": "123456",
-    "auth.security_token": "654321",
-    "rnc": "101010101",
-    "usuario": "qa_empresa",
-    "contrasena": "DemoPass2026",
-    "codigo": "123456",
-    "token": "654321",
-    "cuenta_origen": "Cuenta Corriente",
-    "cuenta_destino": "Cuenta de Ahorros",
-    "monto": "10",
-    "moneda": "USD",
-    "proveedor": "Internet",
-    "numero_contrato": "12345"
-  },
-  "testDataAliases": {
-    "auth.company_identifier": [
-      "RNC",
-      "identificación empresarial",
-      "company identifier"
-    ],
-    "auth.username": [
-      "usuario",
-      "username"
-    ],
-    "auth.password": [
-      "contraseña",
-      "password"
-    ],
-    "auth.access_code": [
-      "código de acceso",
-      "otp",
-      "sms code"
-    ],
-    "auth.security_token": [
-      "token de seguridad",
-      "transfer token"
-    ],
-    "cuenta_origen": [
-      "cuenta origen",
-      "cuenta de origen",
-      "source account"
-    ],
-    "cuenta_destino": [
-      "cuenta destino",
-      "cuenta de destino",
-      "destination account"
-    ],
-    "monto": [
-      "amount",
-      "transfer amount"
-    ],
-    "moneda": [
-      "currency"
-    ]
-  },
-  "testDataRefs": {},
-  "username": "qa_empresa",
-  "password": "DemoPass2026",
-  "usernameRef": "auth.username",
-  "passwordRef": "auth.password",
+  "loginMode": "manual",
+  "testData": {},
+  "testDataAliases": {},
   "missingInputBehavior": "fail",
-  "ignoreHTTPSErrors": false,
-  "updatedAt": "2026-10-19T13:25:07.900Z",
-  "lastUsedSource": {
-    "type": "explicit",
-    "sectionName": null,
-    "updatedAt": "2026-10-19T13:25:07.900Z"
-  }
+  "ignoreHTTPSErrors": true
 }

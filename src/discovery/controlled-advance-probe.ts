@@ -553,7 +553,7 @@ export function buildControlledAdvanceProbeOracles(input: {
   assertions: Array<{ index: number; requirement: string; requirementRefs?: string[]; intent: CanonicalAssertionIntent; polarity?: AssertionPolarity }>;
 }) {
   const { result } = input;
-  return input.assertions.map((assertion) => {
+  return input.assertions.filter((assertion) => assertion.polarity !== "negative").map((assertion) => {
     const validationIntent = assertion.intent === "validation_present";
     return {
       id: `controlled-advance-${assertion.intent}-${assertion.index}`,

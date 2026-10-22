@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "recordingId": "3cd40992-95ce-4482-8002-44182c32e7c7",
+  "recordingId": "a85f11af-b68a-4cc5-ab2a-bc5dd5b1cd64",
   "projectSlug": "fenix",
   "appSlug": "fenix",
   "platform": "web",
@@ -21,25 +21,27 @@
       "semanticField": "account-from-select-input",
       "surfaceRef": "60d370b39a8d|60d370b39a8d|account-from-select-input|selection|option-surface",
       "options": [
-        "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
-        "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
+        "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
+        "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+        "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
       ],
       "observationRefs": [
         "obs-28"
       ],
-      "selectedOption": "Cuenta Corrientes / 11311000003156 / RD$162,312.94"
+      "selectedOption": "Cuenta Corrientes / 11121000000739 / RD$753,259.23"
     },
     {
       "selectorRef": "60d370b39a8d|account-to-select-input|selection",
       "semanticField": "account-to-select-input",
       "surfaceRef": "60d370b39a8d|60d370b39a8d|account-to-select-input|selection|option-surface",
       "options": [
-        "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
+        "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+        "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
       ],
       "observationRefs": [
         "obs-31"
       ],
-      "selectedOption": "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
+      "selectedOption": "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
     }
   ],
   "semanticScreens": [
@@ -341,8 +343,8 @@
       "componentId": "60d370b39a8d:control:60d370b39a8d|control|amount_or_text|segment:40",
       "componentType": "textbox",
       "screenIdentity": "60d370b39a8d",
-      "label": "Reenviar código en 29 segundos...",
-      "associatedField": "Reenviar código en  29 segundos...",
+      "label": "Reenviar código en 27 segundos...",
+      "associatedField": "Reenviar código en  27 segundos...",
       "needsReview": false,
       "reviewReason": "explicit_associated_label",
       "observationRefs": [
@@ -353,8 +355,8 @@
       "componentId": "60d370b39a8d:control:60d370b39a8d|control|amount_or_text|segment:41",
       "componentType": "textbox",
       "screenIdentity": "60d370b39a8d",
-      "label": "Reenviar código en 28 segundos...",
-      "associatedField": "Reenviar código en  28 segundos...",
+      "label": "Reenviar código en 27 segundos...",
+      "associatedField": "Reenviar código en  27 segundos...",
       "needsReview": false,
       "reviewReason": "explicit_associated_label",
       "observationRefs": [
@@ -377,8 +379,8 @@
       "componentId": "60d370b39a8d:control:60d370b39a8d|control|amount_or_text|segment:43",
       "componentType": "textbox",
       "screenIdentity": "60d370b39a8d",
-      "label": "Reenviar código en 27 segundos...",
-      "associatedField": "Reenviar código en  27 segundos...",
+      "label": "Reenviar código en 26 segundos...",
+      "associatedField": "Reenviar código en  26 segundos...",
       "needsReview": false,
       "reviewReason": "explicit_associated_label",
       "observationRefs": [
@@ -469,7 +471,7 @@
       "valueKey": "rnc",
       "valueRole": "action_input",
       "technicalTargetRef": "60d370b39a8d:control:role:textbox|RNC:",
-      "afterState": "130598983",
+      "afterState": "130872392",
       "provenance": "OBSERVED",
       "confidence": 0.9,
       "classification": "FUNCTIONAL_ACTION"
@@ -495,7 +497,7 @@
       "valueKey": "usuario",
       "valueRole": "action_input",
       "technicalTargetRef": "60d370b39a8d:control:role:textbox|Usuario:",
-      "afterState": "olivam",
+      "afterState": "SAMOTA",
       "provenance": "OBSERVED",
       "confidence": 0.9,
       "classification": "FUNCTIONAL_ACTION"
@@ -730,7 +732,7 @@
       "controlAffordance": "selectable",
       "valueKey": "account_from_select_input_seleccion",
       "technicalTargetRef": "60d370b39a8d:selection:css:div:has(> select[id=\"account-from-select-input\"])",
-      "afterState": "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
+      "afterState": "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
       "provenance": "OBSERVED",
       "confidence": 0.9,
       "classification": "FUNCTIONAL_ACTION"
@@ -767,7 +769,7 @@
       "controlAffordance": "selectable",
       "valueKey": "account_to_select_input_seleccion",
       "technicalTargetRef": "60d370b39a8d:selection:css:div:has(> select[id=\"account-to-select-input\"])",
-      "afterState": "Cuenta de Ahorro / 21312020003368 / US$1,495.71",
+      "afterState": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
       "provenance": "OBSERVED",
       "confidence": 0.9,
       "classification": "FUNCTIONAL_ACTION"
@@ -887,10 +889,10 @@
       "action": "fill",
       "screenIdentity": "60d370b39a8d",
       "componentType": "textbox",
-      "field": "Reenviar código en 29 segundos...",
-      "associatedField": "Reenviar código en  29 segundos...",
+      "field": "Reenviar código en 27 segundos...",
+      "associatedField": "Reenviar código en  27 segundos...",
       "controlAffordance": "editable",
-      "valueKey": "reenviar_codigo_en_29_segundos",
+      "valueKey": "reenviar_codigo_en_27_segundos",
       "valueRole": "action_input",
       "technicalTargetRef": "60d370b39a8d:control:id:requestchallengeform",
       "provenance": "OBSERVED",
@@ -902,10 +904,10 @@
       "action": "fill",
       "screenIdentity": "60d370b39a8d",
       "componentType": "textbox",
-      "field": "Reenviar código en 28 segundos...",
-      "associatedField": "Reenviar código en  28 segundos...",
+      "field": "Reenviar código en 27 segundos...",
+      "associatedField": "Reenviar código en  27 segundos...",
       "controlAffordance": "editable",
-      "valueKey": "reenviar_codigo_en_28_segundos",
+      "valueKey": "reenviar_codigo_en_27_segundos",
       "valueRole": "action_input",
       "technicalTargetRef": "60d370b39a8d:control:id:requestchallengeform",
       "provenance": "OBSERVED",
@@ -932,10 +934,10 @@
       "action": "fill",
       "screenIdentity": "60d370b39a8d",
       "componentType": "textbox",
-      "field": "Reenviar código en 27 segundos...",
-      "associatedField": "Reenviar código en  27 segundos...",
+      "field": "Reenviar código en 26 segundos...",
+      "associatedField": "Reenviar código en  26 segundos...",
       "controlAffordance": "editable",
-      "valueKey": "reenviar_codigo_en_27_segundos",
+      "valueKey": "reenviar_codigo_en_26_segundos",
       "valueRole": "action_input",
       "technicalTargetRef": "60d370b39a8d:control:id:requestchallengeform",
       "provenance": "OBSERVED",
@@ -985,16 +987,16 @@
       "valueKey": "rnc",
       "semanticField": "RNC:",
       "valueRole": "action_input",
-      "value": "130598983",
-      "rawTypedValue": "130598983",
-      "committedValue": "130598983",
+      "value": "130872392",
+      "rawTypedValue": "130872392",
+      "committedValue": "130872392",
       "source": "RECORDED_CONFIRMED",
       "verified": true,
       "confidence": 0.9,
       "sensitive": false,
       "generated": false,
       "instanceIdentity": "60d370b39a8d:control:role:textbox|RNC:",
-      "recordingId": "3cd40992-95ce-4482-8002-44182c32e7c7",
+      "recordingId": "a85f11af-b68a-4cc5-ab2a-bc5dd5b1cd64",
       "needsReview": false,
       "reviewReason": "stable_business_label"
     },
@@ -1002,16 +1004,16 @@
       "valueKey": "usuario",
       "semanticField": "Usuario:",
       "valueRole": "action_input",
-      "value": "olivam",
-      "rawTypedValue": "olivam",
-      "committedValue": "olivam",
+      "value": "SAMOTA",
+      "rawTypedValue": "SAMOTA",
+      "committedValue": "SAMOTA",
       "source": "RECORDED_CONFIRMED",
       "verified": true,
       "confidence": 0.9,
       "sensitive": false,
       "generated": false,
       "instanceIdentity": "60d370b39a8d:control:role:textbox|Usuario:",
-      "recordingId": "3cd40992-95ce-4482-8002-44182c32e7c7",
+      "recordingId": "a85f11af-b68a-4cc5-ab2a-bc5dd5b1cd64",
       "needsReview": false,
       "reviewReason": "stable_business_label"
     },
@@ -1025,7 +1027,7 @@
       "sensitive": true,
       "generated": false,
       "instanceIdentity": "60d370b39a8d:control:role:textbox|Contraseña:",
-      "recordingId": "3cd40992-95ce-4482-8002-44182c32e7c7",
+      "recordingId": "a85f11af-b68a-4cc5-ab2a-bc5dd5b1cd64",
       "needsReview": false,
       "reviewReason": "stable_business_label"
     },
@@ -1039,7 +1041,7 @@
       "sensitive": false,
       "generated": false,
       "instanceIdentity": "60d370b39a8d:control:id:IdentifyUserForm",
-      "recordingId": "3cd40992-95ce-4482-8002-44182c32e7c7",
+      "recordingId": "a85f11af-b68a-4cc5-ab2a-bc5dd5b1cd64",
       "needsReview": false,
       "reviewReason": "explicit_associated_label"
     },
@@ -1047,14 +1049,14 @@
       "valueKey": "account_from_select_input_seleccion",
       "semanticField": "account-from-select-input",
       "valueRole": "action_input",
-      "value": "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
+      "value": "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
       "source": "RECORDED_CONFIRMED",
       "verified": true,
       "confidence": 0.9,
       "sensitive": false,
       "generated": false,
       "instanceIdentity": "60d370b39a8d:selection:css:div:has(> select[id=\"account-from-select-input\"])",
-      "recordingId": "3cd40992-95ce-4482-8002-44182c32e7c7",
+      "recordingId": "a85f11af-b68a-4cc5-ab2a-bc5dd5b1cd64",
       "needsReview": false,
       "reviewReason": "explicit_associated_label"
     },
@@ -1062,14 +1064,14 @@
       "valueKey": "account_to_select_input_seleccion",
       "semanticField": "account-to-select-input",
       "valueRole": "action_input",
-      "value": "Cuenta de Ahorro / 21312020003368 / US$1,495.71",
+      "value": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
       "source": "RECORDED_CONFIRMED",
       "verified": true,
       "confidence": 0.9,
       "sensitive": false,
       "generated": false,
       "instanceIdentity": "60d370b39a8d:selection:css:div:has(> select[id=\"account-to-select-input\"])",
-      "recordingId": "3cd40992-95ce-4482-8002-44182c32e7c7",
+      "recordingId": "a85f11af-b68a-4cc5-ab2a-bc5dd5b1cd64",
       "needsReview": false,
       "reviewReason": "explicit_associated_label"
     },
@@ -1086,7 +1088,7 @@
       "sensitive": false,
       "generated": false,
       "instanceIdentity": "60d370b39a8d:control:css:#transactionDetails_0__AmountPayment",
-      "recordingId": "3cd40992-95ce-4482-8002-44182c32e7c7",
+      "recordingId": "a85f11af-b68a-4cc5-ab2a-bc5dd5b1cd64",
       "needsReview": false,
       "reviewReason": "explicit_associated_label"
     },
@@ -1100,21 +1102,7 @@
       "sensitive": false,
       "generated": false,
       "instanceIdentity": "60d370b39a8d:control:id:requestchallengeform",
-      "recordingId": "3cd40992-95ce-4482-8002-44182c32e7c7",
-      "needsReview": false,
-      "reviewReason": "explicit_associated_label"
-    },
-    {
-      "valueKey": "reenviar_codigo_en_28_segundos",
-      "semanticField": "Reenviar código en 28 segundos...",
-      "valueRole": "action_input",
-      "source": "RECORDED_CONFIRMED",
-      "verified": true,
-      "confidence": 0.9,
-      "sensitive": false,
-      "generated": false,
-      "instanceIdentity": "60d370b39a8d:control:id:requestchallengeform",
-      "recordingId": "3cd40992-95ce-4482-8002-44182c32e7c7",
+      "recordingId": "a85f11af-b68a-4cc5-ab2a-bc5dd5b1cd64",
       "needsReview": false,
       "reviewReason": "explicit_associated_label"
     },
@@ -1128,7 +1116,7 @@
       "sensitive": false,
       "generated": false,
       "instanceIdentity": "60d370b39a8d:control:id:requestchallengeform",
-      "recordingId": "3cd40992-95ce-4482-8002-44182c32e7c7",
+      "recordingId": "a85f11af-b68a-4cc5-ab2a-bc5dd5b1cd64",
       "needsReview": false,
       "reviewReason": "explicit_associated_label"
     },
@@ -1142,7 +1130,7 @@
       "sensitive": false,
       "generated": false,
       "instanceIdentity": "60d370b39a8d:control:id:requestchallengeform",
-      "recordingId": "3cd40992-95ce-4482-8002-44182c32e7c7",
+      "recordingId": "a85f11af-b68a-4cc5-ab2a-bc5dd5b1cd64",
       "needsReview": false,
       "reviewReason": "explicit_associated_label"
     }
@@ -1261,7 +1249,7 @@
       "label": "RNC:",
       "tag": "input",
       "role": "input",
-      "afterValue": "130598983",
+      "afterValue": "130872392",
       "semanticField": "RNC:",
       "needsReview": false,
       "reviewReason": "stable_business_label",
@@ -1286,7 +1274,7 @@
       "technicalTargetRef": "60d370b39a8d:control:role:textbox|RNC:",
       "validatedByInteraction": true,
       "editingSessionRef": "edit-1",
-      "inputValue": "130598983",
+      "inputValue": "130872392",
       "selectable": false,
       "editable": true
     },
@@ -1313,7 +1301,7 @@
       "label": "Usuario:",
       "tag": "input",
       "role": "input",
-      "afterValue": "olivam",
+      "afterValue": "SAMOTA",
       "semanticField": "Usuario:",
       "needsReview": false,
       "reviewReason": "stable_business_label",
@@ -1338,7 +1326,7 @@
       "technicalTargetRef": "60d370b39a8d:control:role:textbox|Usuario:",
       "validatedByInteraction": true,
       "editingSessionRef": "edit-2",
-      "inputValue": "olivam",
+      "inputValue": "SAMOTA",
       "selectable": false,
       "editable": true
     },
@@ -1806,10 +1794,11 @@
       "tag": "select",
       "role": "option",
       "associatedField": "account-from-select-input",
-      "afterValue": "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
+      "afterValue": "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
       "observedOptions": [
-        "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
-        "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
+        "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
+        "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+        "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
       ],
       "compoundRole": "selection",
       "semanticField": "account-from-select-input",
@@ -1826,17 +1815,18 @@
       "technicalTargetRef": "60d370b39a8d:selection:css:div:has(> select[id=\"account-from-select-input\"])",
       "dynamicLifecycle": {
         "triggerTechnicalTarget": "id:account-from-select-input",
-        "selectedOption": "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
+        "selectedOption": "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
         "options": [
-          "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
-          "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
+          "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
+          "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+          "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
         ]
       },
       "validatedByInteraction": true,
       "selectorControlId": "60d370b39a8d|account-from-select-input|selection",
       "optionSurfaceId": "60d370b39a8d|60d370b39a8d|account-from-select-input|selection|option-surface",
       "optionInventoryObserved": true,
-      "selectedOptionObserved": "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
+      "selectedOptionObserved": "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
       "selectable": true,
       "editable": false
     },
@@ -1917,9 +1907,10 @@
       "tag": "select",
       "role": "option",
       "associatedField": "account-to-select-input",
-      "afterValue": "Cuenta de Ahorro / 21312020003368 / US$1,495.71",
+      "afterValue": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
       "observedOptions": [
-        "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
+        "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+        "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
       ],
       "compoundRole": "selection",
       "semanticField": "account-to-select-input",
@@ -1936,15 +1927,17 @@
       "technicalTargetRef": "60d370b39a8d:selection:css:div:has(> select[id=\"account-to-select-input\"])",
       "dynamicLifecycle": {
         "triggerTechnicalTarget": "id:account-to-select-input",
-        "selectedOption": "Cuenta de Ahorro / 21312020003368 / US$1,495.71",
+        "selectedOption": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
         "options": [
-          "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
+          "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+          "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
         ]
       },
       "validatedByInteraction": true,
       "selectorControlId": "60d370b39a8d|account-to-select-input|selection",
       "optionSurfaceId": "60d370b39a8d|60d370b39a8d|account-to-select-input|selection|option-surface",
-      "selectedOptionObserved": "Cuenta de Ahorro / 21312020003368 / US$1,495.71",
+      "optionInventoryObserved": true,
+      "selectedOptionObserved": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
       "selectable": true,
       "editable": false
     },
@@ -2221,8 +2214,8 @@
       "label": "control",
       "tag": "input",
       "role": "input",
-      "associatedField": "Reenviar código en  29 segundos...",
-      "semanticField": "Reenviar código en 29 segundos...",
+      "associatedField": "Reenviar código en  27 segundos...",
+      "semanticField": "Reenviar código en 27 segundos...",
       "needsReview": false,
       "reviewReason": "explicit_associated_label",
       "locatorCandidates": [
@@ -2247,8 +2240,8 @@
       "label": "control",
       "tag": "input",
       "role": "input",
-      "associatedField": "Reenviar código en  28 segundos...",
-      "semanticField": "Reenviar código en 28 segundos...",
+      "associatedField": "Reenviar código en  27 segundos...",
+      "semanticField": "Reenviar código en 27 segundos...",
       "needsReview": false,
       "reviewReason": "explicit_associated_label",
       "locatorCandidates": [
@@ -2299,8 +2292,8 @@
       "label": "control",
       "tag": "input",
       "role": "input",
-      "associatedField": "Reenviar código en  27 segundos...",
-      "semanticField": "Reenviar código en 27 segundos...",
+      "associatedField": "Reenviar código en  26 segundos...",
+      "semanticField": "Reenviar código en 26 segundos...",
       "needsReview": false,
       "reviewReason": "explicit_associated_label",
       "locatorCandidates": [
@@ -3434,32 +3427,6 @@
       "status": "OBSERVED",
       "screenIdentity": "2f3e1044a78b",
       "componentType": "a",
-      "label": "\n                                 \n                                 Avance de Efectivo\n                            ",
-      "tag": "a",
-      "role": "a",
-      "attributes": {
-        "id": "CREDITCARD_WITHDRAWAL"
-      },
-      "semanticField": null,
-      "needsReview": true,
-      "reviewReason": "no_durable_semantic_field_evidence",
-      "locatorCandidates": [
-        {
-          "strategy": "aria-label",
-          "value": "CREDITCARD_WITHDRAWAL",
-          "confidence": 0.9
-        }
-      ],
-      "confidence": 0.9,
-      "technicalTargetRef": "2f3e1044a78b:control:14",
-      "selectable": false,
-      "editable": false
-    },
-    {
-      "observationId": "screen-2f3e1044a78b-control-15",
-      "status": "OBSERVED",
-      "screenIdentity": "2f3e1044a78b",
-      "componentType": "a",
       "label": "\n                                 \n                                 Solicitudes Digitales\n                            ",
       "tag": "a",
       "role": "a",
@@ -3477,12 +3444,12 @@
         }
       ],
       "confidence": 0.9,
-      "technicalTargetRef": "2f3e1044a78b:control:15",
+      "technicalTargetRef": "2f3e1044a78b:control:14",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-2f3e1044a78b-control-16",
+      "observationId": "screen-2f3e1044a78b-control-15",
       "status": "OBSERVED",
       "screenIdentity": "2f3e1044a78b",
       "componentType": "a",
@@ -3501,12 +3468,12 @@
         }
       ],
       "confidence": 0.7,
-      "technicalTargetRef": "2f3e1044a78b:control:16",
+      "technicalTargetRef": "2f3e1044a78b:control:15",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-2f3e1044a78b-control-17",
+      "observationId": "screen-2f3e1044a78b-control-16",
       "status": "OBSERVED",
       "screenIdentity": "2f3e1044a78b",
       "componentType": "a",
@@ -3527,12 +3494,12 @@
         }
       ],
       "confidence": 0.9,
-      "technicalTargetRef": "2f3e1044a78b:control:17",
+      "technicalTargetRef": "2f3e1044a78b:control:16",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-2f3e1044a78b-control-18",
+      "observationId": "screen-2f3e1044a78b-control-17",
       "status": "OBSERVED",
       "screenIdentity": "2f3e1044a78b",
       "componentType": "a",
@@ -3551,12 +3518,12 @@
         }
       ],
       "confidence": 0.7,
-      "technicalTargetRef": "2f3e1044a78b:control:18",
+      "technicalTargetRef": "2f3e1044a78b:control:17",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-2f3e1044a78b-control-19",
+      "observationId": "screen-2f3e1044a78b-control-18",
       "status": "OBSERVED",
       "screenIdentity": "2f3e1044a78b",
       "componentType": "a",
@@ -3577,12 +3544,12 @@
         }
       ],
       "confidence": 0.9,
-      "technicalTargetRef": "2f3e1044a78b:control:19",
+      "technicalTargetRef": "2f3e1044a78b:control:18",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-2f3e1044a78b-control-20",
+      "observationId": "screen-2f3e1044a78b-control-19",
       "status": "OBSERVED",
       "screenIdentity": "2f3e1044a78b",
       "componentType": "a",
@@ -3599,6 +3566,32 @@
         {
           "strategy": "aria-label",
           "value": "all-t0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "2f3e1044a78b:control:19",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-2f3e1044a78b-control-20",
+      "status": "OBSERVED",
+      "screenIdentity": "2f3e1044a78b",
+      "componentType": "a",
+      "label": "Cuentas",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "id": "account-tab-t1"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "account-tab-t1",
           "confidence": 0.9
         }
       ],
@@ -3946,32 +3939,6 @@
       "status": "OBSERVED",
       "screenIdentity": "91de29fc82e6",
       "componentType": "a",
-      "label": "\n                                 \n                                 Avance de Efectivo\n                            ",
-      "tag": "a",
-      "role": "a",
-      "attributes": {
-        "id": "CREDITCARD_WITHDRAWAL"
-      },
-      "semanticField": null,
-      "needsReview": true,
-      "reviewReason": "no_durable_semantic_field_evidence",
-      "locatorCandidates": [
-        {
-          "strategy": "aria-label",
-          "value": "CREDITCARD_WITHDRAWAL",
-          "confidence": 0.9
-        }
-      ],
-      "confidence": 0.9,
-      "technicalTargetRef": "91de29fc82e6:control:14",
-      "selectable": false,
-      "editable": false
-    },
-    {
-      "observationId": "screen-91de29fc82e6-control-15",
-      "status": "OBSERVED",
-      "screenIdentity": "91de29fc82e6",
-      "componentType": "a",
       "label": "\n                                 \n                                 Solicitudes Digitales\n                            ",
       "tag": "a",
       "role": "a",
@@ -3989,12 +3956,12 @@
         }
       ],
       "confidence": 0.9,
-      "technicalTargetRef": "91de29fc82e6:control:15",
+      "technicalTargetRef": "91de29fc82e6:control:14",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-91de29fc82e6-control-16",
+      "observationId": "screen-91de29fc82e6-control-15",
       "status": "OBSERVED",
       "screenIdentity": "91de29fc82e6",
       "componentType": "a",
@@ -4013,12 +3980,12 @@
         }
       ],
       "confidence": 0.7,
-      "technicalTargetRef": "91de29fc82e6:control:16",
+      "technicalTargetRef": "91de29fc82e6:control:15",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-91de29fc82e6-control-17",
+      "observationId": "screen-91de29fc82e6-control-16",
       "status": "OBSERVED",
       "screenIdentity": "91de29fc82e6",
       "componentType": "a",
@@ -4039,12 +4006,12 @@
         }
       ],
       "confidence": 0.9,
-      "technicalTargetRef": "91de29fc82e6:control:17",
+      "technicalTargetRef": "91de29fc82e6:control:16",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-91de29fc82e6-control-18",
+      "observationId": "screen-91de29fc82e6-control-17",
       "status": "OBSERVED",
       "screenIdentity": "91de29fc82e6",
       "componentType": "a",
@@ -4063,12 +4030,12 @@
         }
       ],
       "confidence": 0.7,
-      "technicalTargetRef": "91de29fc82e6:control:18",
+      "technicalTargetRef": "91de29fc82e6:control:17",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-91de29fc82e6-control-19",
+      "observationId": "screen-91de29fc82e6-control-18",
       "status": "OBSERVED",
       "screenIdentity": "91de29fc82e6",
       "componentType": "a",
@@ -4089,6 +4056,35 @@
         }
       ],
       "confidence": 0.9,
+      "technicalTargetRef": "91de29fc82e6:control:18",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-91de29fc82e6-control-19",
+      "status": "OBSERVED",
+      "screenIdentity": "91de29fc82e6",
+      "componentType": "textarea",
+      "label": "Agregar un comentario...",
+      "tag": "textarea",
+      "role": "textarea",
+      "attributes": {
+        "id": "trx-comment",
+        "name": "transactionDetails[0].Description",
+        "placeholder": "Agregar un comentario..."
+      },
+      "placeholder": "Agregar un comentario...",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "trx-comment",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
       "technicalTargetRef": "91de29fc82e6:control:19",
       "selectable": false,
       "editable": false
@@ -4098,7 +4094,7 @@
       "status": "OBSERVED",
       "screenIdentity": "91de29fc82e6",
       "componentType": "a",
-      "label": "\n         \n         Volver Atrás\n    ",
+      "label": "Cancelar",
       "tag": "a",
       "role": "a",
       "attributes": {},
@@ -4108,7 +4104,7 @@
       "locatorCandidates": [
         {
           "strategy": "text",
-          "value": "\n         \n         Volver Atrás\n    ",
+          "value": "Cancelar",
           "confidence": 0.7
         }
       ],
@@ -4456,32 +4452,6 @@
       "status": "OBSERVED",
       "screenIdentity": "2d24eece7e18",
       "componentType": "a",
-      "label": "\n                                 \n                                 Avance de Efectivo\n                            ",
-      "tag": "a",
-      "role": "a",
-      "attributes": {
-        "id": "CREDITCARD_WITHDRAWAL"
-      },
-      "semanticField": null,
-      "needsReview": true,
-      "reviewReason": "no_durable_semantic_field_evidence",
-      "locatorCandidates": [
-        {
-          "strategy": "aria-label",
-          "value": "CREDITCARD_WITHDRAWAL",
-          "confidence": 0.9
-        }
-      ],
-      "confidence": 0.9,
-      "technicalTargetRef": "2d24eece7e18:control:14",
-      "selectable": false,
-      "editable": false
-    },
-    {
-      "observationId": "screen-2d24eece7e18-control-15",
-      "status": "OBSERVED",
-      "screenIdentity": "2d24eece7e18",
-      "componentType": "a",
       "label": "\n                                 \n                                 Solicitudes Digitales\n                            ",
       "tag": "a",
       "role": "a",
@@ -4499,12 +4469,12 @@
         }
       ],
       "confidence": 0.9,
-      "technicalTargetRef": "2d24eece7e18:control:15",
+      "technicalTargetRef": "2d24eece7e18:control:14",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-2d24eece7e18-control-16",
+      "observationId": "screen-2d24eece7e18-control-15",
       "status": "OBSERVED",
       "screenIdentity": "2d24eece7e18",
       "componentType": "a",
@@ -4523,12 +4493,12 @@
         }
       ],
       "confidence": 0.7,
-      "technicalTargetRef": "2d24eece7e18:control:16",
+      "technicalTargetRef": "2d24eece7e18:control:15",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-2d24eece7e18-control-17",
+      "observationId": "screen-2d24eece7e18-control-16",
       "status": "OBSERVED",
       "screenIdentity": "2d24eece7e18",
       "componentType": "a",
@@ -4549,12 +4519,12 @@
         }
       ],
       "confidence": 0.9,
-      "technicalTargetRef": "2d24eece7e18:control:17",
+      "technicalTargetRef": "2d24eece7e18:control:16",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-2d24eece7e18-control-18",
+      "observationId": "screen-2d24eece7e18-control-17",
       "status": "OBSERVED",
       "screenIdentity": "2d24eece7e18",
       "componentType": "a",
@@ -4573,12 +4543,12 @@
         }
       ],
       "confidence": 0.7,
-      "technicalTargetRef": "2d24eece7e18:control:18",
+      "technicalTargetRef": "2d24eece7e18:control:17",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-2d24eece7e18-control-19",
+      "observationId": "screen-2d24eece7e18-control-18",
       "status": "OBSERVED",
       "screenIdentity": "2d24eece7e18",
       "componentType": "a",
@@ -4599,12 +4569,12 @@
         }
       ],
       "confidence": 0.9,
-      "technicalTargetRef": "2d24eece7e18:control:19",
+      "technicalTargetRef": "2d24eece7e18:control:18",
       "selectable": false,
       "editable": false
     },
     {
-      "observationId": "screen-2d24eece7e18-control-20",
+      "observationId": "screen-2d24eece7e18-control-19",
       "status": "OBSERVED",
       "screenIdentity": "2d24eece7e18",
       "componentType": "a",
@@ -4623,6 +4593,30 @@
         }
       ],
       "confidence": 0.7,
+      "technicalTargetRef": "2d24eece7e18:control:19",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-2d24eece7e18-control-20",
+      "status": "OBSERVED",
+      "screenIdentity": "2d24eece7e18",
+      "componentType": "a",
+      "label": "Inicio -",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Inicio - ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
       "technicalTargetRef": "2d24eece7e18:control:20",
       "selectable": false,
       "editable": false
@@ -4633,8 +4627,8 @@
       "editingSessionId": "edit-1",
       "controlIdentity": "60d370b39a8d|RNC:|amount_or_text",
       "screenIdentity": "60d370b39a8d",
-      "startedAt": 27094,
-      "endedAt": 33229,
+      "startedAt": 11422,
+      "endedAt": 17351,
       "rawEventRefs": [
         "event-5",
         "event-7"
@@ -4645,16 +4639,16 @@
         "60d370b39a8d:60d370b39a8d|RNC:|amount_or_text",
         "60d370b39a8d:role:textbox|RNC:"
       ],
-      "inputValue": "130598983",
-      "rawTypedValue": "130598983",
-      "finalValue": "130598983"
+      "inputValue": "130872392",
+      "rawTypedValue": "130872392",
+      "finalValue": "130872392"
     },
     {
       "editingSessionId": "edit-2",
       "controlIdentity": "60d370b39a8d|Usuario:|amount_or_text",
       "screenIdentity": "60d370b39a8d",
-      "startedAt": 33192,
-      "endedAt": 40270,
+      "startedAt": 17321,
+      "endedAt": 19887,
       "rawEventRefs": [
         "event-6",
         "event-9"
@@ -4665,16 +4659,16 @@
         "60d370b39a8d:60d370b39a8d|Usuario:|amount_or_text",
         "60d370b39a8d:role:textbox|Usuario:"
       ],
-      "inputValue": "olivam",
-      "rawTypedValue": "olivam",
-      "finalValue": "olivam"
+      "inputValue": "SAMOTA",
+      "rawTypedValue": "SAMOTA",
+      "finalValue": "SAMOTA"
     },
     {
       "editingSessionId": "edit-3",
       "controlIdentity": "60d370b39a8d|Contraseña:|amount_or_text",
       "screenIdentity": "60d370b39a8d",
-      "startedAt": 40263,
-      "endedAt": 46245,
+      "startedAt": 19858,
+      "endedAt": 30876,
       "rawEventRefs": [
         "event-8",
         "event-10"
@@ -4690,8 +4684,8 @@
       "editingSessionId": "edit-4",
       "controlIdentity": "60d370b39a8d|SMS|amount_or_text|segment:13",
       "screenIdentity": "60d370b39a8d",
-      "startedAt": 114545,
-      "endedAt": 114545,
+      "startedAt": 60424,
+      "endedAt": 60424,
       "rawEventRefs": [
         "event-14"
       ],
@@ -4706,8 +4700,8 @@
       "editingSessionId": "edit-5",
       "controlIdentity": "60d370b39a8d|SMS|amount_or_text|segment:14",
       "screenIdentity": "60d370b39a8d",
-      "startedAt": 116001,
-      "endedAt": 116001,
+      "startedAt": 61453,
+      "endedAt": 61453,
       "rawEventRefs": [
         "event-15"
       ],
@@ -4722,8 +4716,8 @@
       "editingSessionId": "edit-6",
       "controlIdentity": "60d370b39a8d|SMS|amount_or_text|segment:15",
       "screenIdentity": "60d370b39a8d",
-      "startedAt": 116504,
-      "endedAt": 116504,
+      "startedAt": 61857,
+      "endedAt": 61857,
       "rawEventRefs": [
         "event-16"
       ],
@@ -4738,8 +4732,8 @@
       "editingSessionId": "edit-7",
       "controlIdentity": "60d370b39a8d|SMS|amount_or_text|segment:16",
       "screenIdentity": "60d370b39a8d",
-      "startedAt": 116994,
-      "endedAt": 116994,
+      "startedAt": 62197,
+      "endedAt": 62197,
       "rawEventRefs": [
         "event-17"
       ],
@@ -4754,8 +4748,8 @@
       "editingSessionId": "edit-8",
       "controlIdentity": "60d370b39a8d|SMS|amount_or_text|segment:17",
       "screenIdentity": "60d370b39a8d",
-      "startedAt": 117549,
-      "endedAt": 117549,
+      "startedAt": 62623,
+      "endedAt": 62623,
       "rawEventRefs": [
         "event-18"
       ],
@@ -4770,8 +4764,8 @@
       "editingSessionId": "edit-9",
       "controlIdentity": "60d370b39a8d|SMS|amount_or_text|segment:18",
       "screenIdentity": "60d370b39a8d",
-      "startedAt": 118016,
-      "endedAt": 118016,
+      "startedAt": 62871,
+      "endedAt": 62871,
       "rawEventRefs": [
         "event-19"
       ],
@@ -4786,8 +4780,8 @@
       "editingSessionId": "edit-10",
       "controlIdentity": "60d370b39a8d|Continuar|amount_or_text",
       "screenIdentity": "60d370b39a8d",
-      "startedAt": 121336,
-      "endedAt": 218120,
+      "startedAt": 65298,
+      "endedAt": 104161,
       "rawEventRefs": [
         "event-20",
         "event-45"
@@ -4802,8 +4796,8 @@
       "editingSessionId": "edit-11",
       "controlIdentity": "60d370b39a8d|SMS|amount_or_text|segment:20",
       "screenIdentity": "60d370b39a8d",
-      "startedAt": 121355,
-      "endedAt": 121355,
+      "startedAt": 65311,
+      "endedAt": 65311,
       "rawEventRefs": [
         "event-21"
       ],
@@ -4818,8 +4812,8 @@
       "editingSessionId": "edit-12",
       "controlIdentity": "60d370b39a8d|account-from-select-input|selection",
       "screenIdentity": "60d370b39a8d",
-      "startedAt": 154701,
-      "endedAt": 154701,
+      "startedAt": 76400,
+      "endedAt": 76400,
       "rawEventRefs": [
         "event-28"
       ],
@@ -4830,14 +4824,14 @@
       ],
       "compoundRole": "selection",
       "semanticField": "account-from-select-input",
-      "finalValue": "Cuenta Corrientes / 11311000003156 / RD$162,312.94"
+      "finalValue": "Cuenta Corrientes / 11121000000739 / RD$753,259.23"
     },
     {
       "editingSessionId": "edit-13",
       "controlIdentity": "60d370b39a8d|account-to-select-input|selection",
       "screenIdentity": "60d370b39a8d",
-      "startedAt": 160932,
-      "endedAt": 160932,
+      "startedAt": 83234,
+      "endedAt": 83234,
       "rawEventRefs": [
         "event-31"
       ],
@@ -4848,14 +4842,14 @@
       ],
       "compoundRole": "selection",
       "semanticField": "account-to-select-input",
-      "finalValue": "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
+      "finalValue": "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
     },
     {
       "editingSessionId": "edit-14",
       "controlIdentity": "60d370b39a8d|US$|amount_or_text",
       "screenIdentity": "60d370b39a8d",
-      "startedAt": 161502,
-      "endedAt": 164542,
+      "startedAt": 85200,
+      "endedAt": 89246,
       "rawEventRefs": [
         "event-32",
         "event-34"
@@ -4875,8 +4869,8 @@
       "editingSessionId": "edit-15",
       "controlIdentity": "60d370b39a8d|control|amount_or_text|segment:38",
       "screenIdentity": "60d370b39a8d",
-      "startedAt": 212975,
-      "endedAt": 212975,
+      "startedAt": 97670,
+      "endedAt": 97670,
       "rawEventRefs": [
         "event-39"
       ],
@@ -4891,8 +4885,8 @@
       "editingSessionId": "edit-16",
       "controlIdentity": "60d370b39a8d|control|amount_or_text|segment:39",
       "screenIdentity": "60d370b39a8d",
-      "startedAt": 213335,
-      "endedAt": 213335,
+      "startedAt": 98683,
+      "endedAt": 98683,
       "rawEventRefs": [
         "event-40"
       ],
@@ -4907,8 +4901,8 @@
       "editingSessionId": "edit-17",
       "controlIdentity": "60d370b39a8d|control|amount_or_text|segment:40",
       "screenIdentity": "60d370b39a8d",
-      "startedAt": 214009,
-      "endedAt": 214009,
+      "startedAt": 98968,
+      "endedAt": 98968,
       "rawEventRefs": [
         "event-41"
       ],
@@ -4917,14 +4911,14 @@
       "technicalTargetRefs": [
         "60d370b39a8d:id:requestchallengeform"
       ],
-      "semanticField": "Reenviar código en  29 segundos..."
+      "semanticField": "Reenviar código en  27 segundos..."
     },
     {
       "editingSessionId": "edit-18",
       "controlIdentity": "60d370b39a8d|control|amount_or_text|segment:41",
       "screenIdentity": "60d370b39a8d",
-      "startedAt": 214605,
-      "endedAt": 214605,
+      "startedAt": 99312,
+      "endedAt": 99312,
       "rawEventRefs": [
         "event-42"
       ],
@@ -4933,14 +4927,14 @@
       "technicalTargetRefs": [
         "60d370b39a8d:id:requestchallengeform"
       ],
-      "semanticField": "Reenviar código en  28 segundos..."
+      "semanticField": "Reenviar código en  27 segundos..."
     },
     {
       "editingSessionId": "edit-19",
       "controlIdentity": "60d370b39a8d|control|amount_or_text|segment:42",
       "screenIdentity": "60d370b39a8d",
-      "startedAt": 215196,
-      "endedAt": 215196,
+      "startedAt": 99714,
+      "endedAt": 99714,
       "rawEventRefs": [
         "event-43"
       ],
@@ -4955,8 +4949,8 @@
       "editingSessionId": "edit-20",
       "controlIdentity": "60d370b39a8d|control|amount_or_text|segment:43",
       "screenIdentity": "60d370b39a8d",
-      "startedAt": 215692,
-      "endedAt": 215692,
+      "startedAt": 100169,
+      "endedAt": 100169,
       "rawEventRefs": [
         "event-44"
       ],
@@ -4965,14 +4959,14 @@
       "technicalTargetRefs": [
         "60d370b39a8d:id:requestchallengeform"
       ],
-      "semanticField": "Reenviar código en  27 segundos..."
+      "semanticField": "Reenviar código en  26 segundos..."
     },
     {
       "editingSessionId": "edit-21",
       "controlIdentity": "60d370b39a8d|control|amount_or_text|segment:45",
       "screenIdentity": "60d370b39a8d",
-      "startedAt": 218127,
-      "endedAt": 218127,
+      "startedAt": 104169,
+      "endedAt": 104169,
       "rawEventRefs": [
         "event-46"
       ],
@@ -5065,8 +5059,8 @@
       "semanticField": "RNC:",
       "action": "fill",
       "valueKey": "rnc",
-      "recordedValue": "130598983",
-      "rawTypedValue": "130598983",
+      "recordedValue": "130872392",
+      "rawTypedValue": "130872392",
       "sourceEventRefs": [
         "event-7"
       ],
@@ -5091,8 +5085,8 @@
       "semanticField": "Usuario:",
       "action": "fill",
       "valueKey": "usuario",
-      "recordedValue": "olivam",
-      "rawTypedValue": "olivam",
+      "recordedValue": "SAMOTA",
+      "rawTypedValue": "SAMOTA",
       "sourceEventRefs": [
         "event-9"
       ],
@@ -5435,7 +5429,7 @@
       "semanticField": "account-from-select-input",
       "action": "select",
       "valueKey": "account_from_select_input_seleccion",
-      "recordedValue": "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
+      "recordedValue": "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
       "sourceEventRefs": [
         "event-28"
       ],
@@ -5445,12 +5439,13 @@
       "selectorControlId": "selector:id:account-from-select-input",
       "optionSurfaceId": "60d370b39a8d|selector:id:account-from-select-input|option-surface",
       "observedOptions": [
-        "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
-        "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
+        "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
+        "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+        "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
       ],
       "playwrightRecorderEvidence": {
         "kind": "text",
-        "normalizedName": "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
+        "normalizedName": "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
         "scopeIdentity": {
           "strategy": "css",
           "value": "div:has(> select[id=\"account-from-select-input\"])"
@@ -5472,21 +5467,26 @@
               "disabled": false
             },
             {
-              "value": "-192973383173",
-              "label": "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
+              "value": "-96230319813",
+              "label": "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
               "disabled": false
             },
             {
-              "value": "-178671134322",
-              "label": "Cuenta de Ahorro / 21312020003368 / US$1,495.71",
+              "value": "-195112204072",
+              "label": "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+              "disabled": false
+            },
+            {
+              "value": "-128943207314",
+              "label": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
               "disabled": false
             }
           ],
           "clickedOption": {
-            "value": "-192973383173",
-            "label": "Cuenta Corrientes / 11311000003156 / RD$162,312.94"
+            "value": "-96230319813",
+            "label": "Cuenta Corrientes / 11121000000739 / RD$753,259.23"
           },
-          "selectedValue": "-192973383173",
+          "selectedValue": "-96230319813",
           "selectionMode": "index",
           "selectedOptionIndex": 0
         },
@@ -5565,7 +5565,7 @@
       "semanticField": "account-to-select-input",
       "action": "select",
       "valueKey": "account_to_select_input_seleccion",
-      "recordedValue": "Cuenta de Ahorro / 21312020003368 / US$1,495.71",
+      "recordedValue": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
       "sourceEventRefs": [
         "event-31"
       ],
@@ -5575,11 +5575,12 @@
       "selectorControlId": "selector:id:account-to-select-input",
       "optionSurfaceId": "60d370b39a8d|selector:id:account-to-select-input|option-surface",
       "observedOptions": [
-        "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
+        "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+        "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
       ],
       "playwrightRecorderEvidence": {
         "kind": "text",
-        "normalizedName": "Cuenta de Ahorro / 21312020003368 / US$1,495.71",
+        "normalizedName": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
         "scopeIdentity": {
           "strategy": "css",
           "value": "div:has(> select[id=\"account-to-select-input\"])"
@@ -5601,18 +5602,23 @@
               "disabled": false
             },
             {
-              "value": "-178671134322",
-              "label": "Cuenta de Ahorro / 21312020003368 / US$1,495.71",
+              "value": "-195112204072",
+              "label": "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+              "disabled": false
+            },
+            {
+              "value": "-128943207314",
+              "label": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
               "disabled": false
             }
           ],
           "clickedOption": {
-            "value": "-178671134322",
-            "label": "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
+            "value": "-128943207314",
+            "label": "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
           },
-          "selectedValue": "-178671134322",
+          "selectedValue": "-195112204072",
           "selectionMode": "index",
-          "selectedOptionIndex": 0
+          "selectedOptionIndex": 1
         },
         "captureMatchCount": 1
       },
@@ -6005,8 +6011,8 @@
   "gridMetadata": {
     "detected": true,
     "grids": 8,
-    "rows": 24,
-    "cells": 150,
+    "rows": 38,
+    "cells": 230,
     "headers": [
       "Alias",
       "Número",

@@ -1,0 +1,10 @@
+{
+  "id": "c55032-transferencia-exitosa-entre-cuentas-propias-con-verificacion-de-acceso-y-token",
+  "externalId": "C55032",
+  "caseId": 55032,
+  "title": "Transferencia exitosa entre cuentas propias con verificación de acceso y token",
+  "source": "discovery",
+  "appSlug": "fenix",
+  "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+  "createdAt": "2026-10-22T00:11:21.826Z"
+}

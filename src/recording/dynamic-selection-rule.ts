@@ -27,9 +27,16 @@ export function encodeSelectionRule(rule: DynamicSelectionRule): string {
 
 const normalize = (text: string) => text.normalize("NFKC").replace(/\s+/g, " ").trim().toLocaleLowerCase();
 
+// Fallback grammar: accent-insensitive, word-final plural dropped ("Ahorros" ~ "Ahorro", "Corrientes" ~ "Corriente").
+const stem = (text: string) => normalize(text).normalize("NFD").replace(/[̀-ͯ]/g, "")
+  .split(" ").map(word => (word.length > 3 ? word.replace(/(es|s)$/, "") : word)).join(" ");
+
 export function matchingSelectionOptions<T extends { label: string; value: string; disabled?: boolean }>(options: T[], rule: DynamicSelectionRule): T[] {
-  return options.filter(option => option.value && !option.disabled
-    && rule.terms.every(term => normalize(option.label).includes(normalize(term))));
+  const selectable = options.filter(option => option.value && !option.disabled);
+  const strict = selectable.filter(option => rule.terms.every(term => normalize(option.label).includes(normalize(term))));
+  // Terms are authored from a displayed value that can differ from the option text only by plural/accent.
+  return strict.length > 0 ? strict
+    : selectable.filter(option => rule.terms.every(term => stem(option.label).includes(stem(term))));
 }
 
 export function selectionRuleDescription(value: string): string {

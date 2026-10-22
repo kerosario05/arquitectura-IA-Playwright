@@ -1,4 +1,8 @@
 import path from "node:path";
+import { runtimeFillValuesMatch, type RuntimeFillFormat } from "./runtime-fill-value";
+import { classifyAssertionPolarity } from "../scenarios/canonical-scenario";
+import { findActionServerError, isTerminalAuthenticationClientError } from "./action-http-outcome";
+import { isCredentialRejectionExpectation, isCredentialRejectionMessage } from "./feedback-message-resolver";
 import { mkdir, writeFile } from "node:fs/promises";
 import type { Locator, Page } from "@playwright/test";
 import { createAIExplorer, type AIExplorer } from "../ai/ai-explorer";
@@ -53,8 +57,10 @@ import {
   resolveRowScopedAssertion,
   resolveStructuralRowAssertion,
   resolveEntityWithinContainerAssertion,
+  classifyNegativeVisibility,
   type AssertionTargetInput,
-  type ExpectedResultConsumption
+  type ExpectedResultConsumption,
+  type NegativeVisibilityEvidence
 } from "./assertion-resolver";
 import {
   attemptAssertionRecovery,
@@ -83,7 +89,7 @@ import { hasReusableStructuralClickIdentity } from "../recording/canonical-recor
 import type { PageSnapshot } from "../types/page-snapshot.types";
 import type { TestDataMap, TestDataValue, MissingInputBehavior, ExpectedResultMode } from "../types/env.types";
 import { config as envConfig } from "../config/env";
-import { detectAuthGate, type AuthGateDetection } from "./auth-gate-detector";
+import { detectAuthGate, declaredActionsOwnAuthStage, type AuthGateDetection } from "./auth-gate-detector";
 import { resolveAuthInputs, validateRequiredInputs, logAuthResolution, type AuthInputResolverConfig } from "./auth-input-resolver";
 import { loadRouteProfile } from "../automations/app-profile";
 import { resolveMissingIntermediateStep, type MissingIntermediateStepResolution, type DiscoveryCandidate, type DiscoverySnapshot } from "./missing-intermediate-step-resolver";
@@ -100,12 +106,12 @@ import { waitForStablePageState, type PageStabilityOptions } from "./page-stabil
 import { isGenericUnresolvedLabel } from "../recording/trace-normalizer";
 import { isRecordedDialogContainerTap } from "../recording/recorded-action-semantics";
 import { isCompatibleSegmentValue, isProjectableFirstSegment } from "./segmented-fill-projection";
-import { observeSegmentedCodeEvidence } from "./observed-segmented-code";
+import { observeSegmentedCodeEvidence, resolveSegmentedInputForm } from "./observed-segmented-code";
 import { parseProductConditionTarget, matchesProductCondition, type ProductCondition } from "./product-condition-parser";
 import { detectTransientScreen } from "./transient-screen-detector";
 import { evaluateEarlyCompletionPolicy, type EarlyCompletionPolicyResult } from "./early-completion-policy";
 import { detectSelectionSuccess, isSelectionLikeTarget, isSubmitLikeTarget, promoteToClickableAncestor, type SelectionDiagnostics } from "./selection-state-detector";
-import { resolveDataKey, formatDataKeyForLog, credentialRoleKeyForField, runtimeInputKeyForField, type DataKeyResolution } from "../data/data-key-resolver";
+import { resolveDataKey, formatDataKeyForLog, credentialRoleKeyForField, runtimeCredentialRoleInputCountForField, runtimeCredentialRoleKeyForField, runtimeInputKeyForField, type DataKeyResolution } from "../data/data-key-resolver";
 import { type AutoGenerateConfig } from "../data/auto-test-data-generator";
 import {
   captureAssertionObservationSnapshot,
@@ -400,13 +406,7 @@ export type SafeNetworkEvent = {
   chainCompleted?: boolean;
 };
 
-/** Only action-scoped application transports can veto a successful click.
- * Paths are privacy-redacted and cannot establish that a later response retries this request. */
-export function findActionServerError(events: readonly SafeNetworkEvent[]): SafeNetworkEvent | undefined {
-  return events.find((event) => event.sameOrigin === true
-    && ["xhr", "fetch", "document"].includes(event.resourceType) && event.state !== "pending"
-    && event.status !== undefined && event.status >= 500 && event.status < 600);
-}
+export { findActionServerError, isTerminalAuthenticationClientError } from "./action-http-outcome";
 
 export type SafeRedirectHop = {
   status: number;
@@ -569,6 +569,38 @@ export function isNewSurfaceObserved(
   return Boolean(afterScreenKey) && afterScreenKey !== beforeScreenKey;
 }
 
+/** A terminal validation oracle owns an expected rejection, never an automatic PASS. */
+/** Keep the classified response available to subsequent assertions after an expected rejection. */
+export function withObservedAuthenticationOutcome(step: DiscoveryStepResult, outcome?: AuthenticationOutcome): DiscoveryStepResult {
+  return outcome ? {...step,authenticationOutcome:outcome} : step;
+}
+
+export function shouldEvaluateExpectedAuthenticationRejection(input: {
+  outcome?: AuthenticationOutcome;
+  currentStepIndex: number;
+  actionTargets: ReadonlyArray<{ index: number }>;
+  assertionTargets: ReadonlyArray<AssertionTargetInput>;
+}): boolean {
+  const outcome = input.outcome;
+  // A completed, explicit auth 4xx plus an observed error surface is already a
+  // terminal rejection boundary. Some apps keep a spinner mounted after the
+  // rejected response, so requiring generic page stability here would discard
+  // the stronger request/response evidence and strand the declared assertions.
+  if (outcome?.classification !== "AUTH_REJECTED"
+    || !outcome.errorSurfaceObserved || outcome.businessSurfaceReached) return false;
+  const rejectedHttpStatus = outcome.authHttpStatus ?? outcome.authSubmissionStatus;
+  if (!outcome.authRequestObserved || !outcome.authResponseObserved
+    || rejectedHttpStatus === undefined || rejectedHttpStatus < 400 || rejectedHttpStatus >= 500) return false;
+  if (input.actionTargets.some((action) => action.index > input.currentStepIndex)) return false;
+  return input.assertionTargets.some((assertion) =>
+    assertion.index >= input.currentStepIndex
+    && assertion.source === "action"
+    && assertion.canonicalAssertion?.intent === "validation_present"
+    && isCredentialRejectionExpectation(assertion.action || assertion.target)
+    && (assertion.canonicalAssertion.polarity ?? classifyAssertionPolarity(assertion.action).polarity) === "positive",
+  );
+}
+
 /** Classifies the authentication boundary from safe, status/path-only runtime evidence. */
 export function classifyAuthenticationOutcome(input: {
   beforeAuthDetected: boolean;
@@ -718,6 +750,7 @@ export type NetworkObservationWindow = {
     signal?: string;
     pendingCount: number;
     responseObserved: boolean;
+    terminalClientError?: { sameOrigin?: boolean; method: string; resourceType: string; state: "completed" | "pending" | "failed"; status?: number };
     requestFailed: boolean;
     lastProgressAt: number;
   };
@@ -1024,12 +1057,24 @@ export function startNetworkObservation(page: Page, stepIndex: number, maxEvents
     getProgressState: () => {
       const progressed = progressRevision > progressRevisionRead;
       progressRevisionRead = progressRevision;
+      const terminalClientError = snapshot().find((event) => event.sameOrigin === true
+        && ["xhr", "fetch", "document"].includes(event.resourceType)
+        && !["GET", "HEAD", "OPTIONS"].includes(event.method.toUpperCase())
+        && event.state === "completed"
+        && event.status !== undefined && event.status >= 400 && event.status < 500);
       return {
         active: snapshot().some((event) => event.state === "pending" && isRelevantEvent(event)),
         progressed,
         signal: lastProgressSignal,
         pendingCount: snapshot().filter((event) => event.state === "pending" && isRelevantEvent(event)).length,
         responseObserved: snapshot().some((event) => event.state === "completed" && isRelevantEvent(event)),
+        ...(terminalClientError ? { terminalClientError: {
+          sameOrigin: terminalClientError.sameOrigin,
+          method: terminalClientError.method,
+          resourceType: terminalClientError.resourceType,
+          state: terminalClientError.state,
+          status: terminalClientError.status,
+        } } : {}),
         // ponytail: reuses the exact non-terminal-failure test already used a few hundred lines
         // down (relevantNetworkSettled's failed branch) instead of a new classifier -- a
         // subrequest (never the document) that already got a real 2xx response before the
@@ -1097,22 +1142,6 @@ async function readCommittedEditableValue(locator: Locator, verificationLocator?
   return structuralValue;
 }
 
-function runtimeValuesMatch(expected: string, actual: string): boolean {
-  const normalize = (value: string) => value.trim().toLowerCase().replace(/\s+/g, "");
-  const expectedNormalized = normalize(expected);
-  const actualNormalized = normalize(actual);
-  if (expectedNormalized === actualNormalized) return true;
-  const isoDate = expectedNormalized.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  const localizedDate = actualNormalized.match(/^(\d{2})[\/-](\d{2})[\/-](\d{4})$/);
-  if (isoDate && localizedDate
-    && isoDate[1] === localizedDate[3]
-    && isoDate[2] === localizedDate[2]
-    && isoDate[3] === localizedDate[1]) return true;
-  const expectedDigits = expectedNormalized.replace(/\D/g, "");
-  const actualDigits = actualNormalized.replace(/\D/g, "");
-  return expectedDigits.length > 0 && expectedDigits === actualDigits;
-}
-
 const RUNTIME_FILL_BLUR_TIMEOUT_MS = 250;
 
 async function bestEffortRuntimeFillBlur(locator: Locator): Promise<void> {
@@ -1131,6 +1160,32 @@ async function bestEffortRuntimeFillBlur(locator: Locator): Promise<void> {
 }
 
 async function commitAndVerifyRuntimeFill(locator: Locator, value: string, verificationLocator?: Locator): Promise<string> {
+  // Capture formatting authority before writing. Native numeric semantics or an already
+  // observed fixed-decimal mask allow numeric comparison; OTP/identifier fields keep their
+  // original string/mask contract. Never infer numeric intent from an app or field name.
+  const observedFormat = await locator.evaluate((element): RuntimeFillFormat => {
+    const type = (element.getAttribute("type") ?? "text").toLowerCase();
+    if (type === "password" || element.getAttribute("autocomplete") === "one-time-code") return { numeric: false };
+    const initial = "value" in element ? String((element as HTMLInputElement).value ?? "") : "";
+    const observedDecimal = type === "text" ? initial.match(/^[+-]?(?:0|[1-9]\d*)([.,])0+$/) : null;
+    const numeric = type === "number" || element.getAttribute("role") === "spinbutton"
+      || element.getAttribute("inputmode") === "decimal" || element.hasAttribute("data-val-number")
+      || Boolean(observedDecimal);
+    let decimalSeparator: "." | "," = ".";
+    if (type !== "number") {
+      if (observedDecimal) decimalSeparator = observedDecimal[1] as "." | ",";
+      else {
+        try {
+          const lang = element.closest("[lang]")?.getAttribute("lang") || element.ownerDocument.documentElement.lang || navigator.language;
+          if (new Intl.NumberFormat(lang).formatToParts(1.1).some((part) => part.type === "decimal" && part.value === ",")) decimalSeparator = ",";
+        } catch { /* retain canonical decimal notation when no locale is available */ }
+      }
+    }
+    return { numeric, decimalSeparator };
+  }).catch(() => undefined);
+  // Test doubles and failed observations do not grant numeric authority.
+  const format = observedFormat && typeof observedFormat === "object" ? observedFormat : undefined;
+
   // Code digit widgets may commit their model on native keyboard events rather
   // than input alone. Preserve that interaction only for an explicitly named
   // verification digit; ordinary inputs retain atomic fill semantics.
@@ -1154,7 +1209,7 @@ async function commitAndVerifyRuntimeFill(locator: Locator, value: string, verif
   await bestEffortRuntimeFillBlur(locator);
   await locator.page().waitForTimeout(100).catch(() => undefined);
   let actual = await readCommittedEditableValue(locator, verificationLocator);
-  if (!runtimeValuesMatch(value, actual)) {
+  if (!runtimeFillValuesMatch(value, actual, format)) {
     // A grid may replace its input on blur. Reacquire only a unique editable
     // control from the same certified cell, then use fill() so masks and
     // framework-controlled inputs replace the value atomically. Typing into a
@@ -1170,7 +1225,7 @@ async function commitAndVerifyRuntimeFill(locator: Locator, value: string, verif
     await locator.page().waitForTimeout(100).catch(() => undefined);
     actual = await readCommittedEditableValue(locator, verificationLocator);
   }
-  if (!runtimeValuesMatch(value, actual)) {
+  if (!runtimeFillValuesMatch(value, actual, format)) {
     const expectedDigits = value.replace(/\D/g, "");
     const actualDigits = actual.replace(/\D/g, "");
     const digitRelation = actualDigits.startsWith(expectedDigits)
@@ -1185,6 +1240,7 @@ async function commitAndVerifyRuntimeFill(locator: Locator, value: string, verif
         + `expectedDigitCount=${expectedDigits.length} actualDigitCount=${actualDigits.length} digitRelation=${digitRelation}`,
     );
   }
+  console.log(`[runtime-fill-readback] matched=true comparison=${format?.numeric ? "numeric_format" : "text_or_mask"}`);
   return actual;
 }
 
@@ -2124,7 +2180,8 @@ export function isUnboundSemanticFillTarget(
 /** Keep authored field-to-data identity separate from live control resolution. */
 export function bindAuthoredRuntimeField(
   scenario: Pick<TestScenario, "source" | "recordingId" | "recordedScenarioId" | "recordingExecutionContract">,
-  target: Pick<ActionTargetItem, "actionType" | "target" | "selectionField" | "associatedField" | "valueKey" | "valueSource" | "value" | "entityScope" | "rowScope">,
+  target: Pick<ActionTargetItem, "actionType" | "target" | "selectionField" | "associatedField" | "valueKey" | "valueSource" | "value" | "entityScope" | "rowScope">
+    & Partial<Pick<ActionTargetItem, "action">>,
   entries: ReadonlyArray<{ key: string }>,
 ): boolean {
   if (scenario.recordingId || scenario.recordedScenarioId || scenario.recordingExecutionContract
@@ -2133,7 +2190,18 @@ export function bindAuthoredRuntimeField(
     || target.valueKey || target.valueSource === "literal"
     || (typeof target.value === "string" && target.value.trim())) return false;
   const field = target.selectionField ?? target.associatedField ?? target.target;
-  const key = runtimeInputKeyForField(field, entries);
+  // A field can abbreviate the authored data identity: "Enter the authorization token in
+  // Token" names both the value and the control. Preserve that full value description when
+  // it matches exactly one explicit case key; never merge it with a login OTP by broad role.
+  const authoredValue = target.actionType === "action_fill"
+    ? target.action?.trim().match(/^(?:ingresar|introducir|escribir|enter|input|type)\s+(.+?)\s+(?:en|in|into)\s+["“]([^"”]+)["”]\s*\.?$/i)
+    : undefined;
+  const describedKey = authoredValue && runtimeInputKeyForField(field, [{ key: authoredValue[2] }])
+    ? runtimeInputKeyForField(authoredValue[1], entries)
+    : undefined;
+  const key = runtimeInputKeyForField(field, entries)
+    ?? describedKey
+    ?? runtimeCredentialRoleKeyForField(field, entries);
   if (!key) return false;
   target.valueKey = key;
   target.valueSource = "test_data";
@@ -3647,6 +3715,15 @@ export function evaluateEarlyCompletion(
   for (let i = 0; i < resolutionResults.length; i++) {
     const res = resolutionResults[i];
     const input = assertionsToResolve[i];
+    // Absence cannot be inferred from this opportunistic snapshot. Keep a negative
+    // assertion pending until its explicit execution obtains fresh stability or
+    // the existing terminal-rejection boundary. Passive classification must not
+    // turn an unresolved/failed negative outcome into a skippable descriptor.
+    if (input && classifyNegativeVisibility(input)) {
+      if (res.status === "passed") satisfiedAssertions.push(res.assertionText);
+      else pendingAssertions.push(res.assertionText);
+      continue;
+    }
     const isExpectedSource = input?.source === "expected";
 
     const isWeakDescriptor = (isExpectedSource && (
@@ -3985,6 +4062,10 @@ function resolveControlledAdvanceAssertions(
   return scenario.steps.flatMap((step) => {
     const refs = Array.isArray(step.requirementRefs) ? step.requirementRefs : [];
     return refs.flatMap((ref) => (byId.get(ref)?.assertionIntents ?? []).flatMap((intent) => {
+      // Controlled-advance probes certify form validation/blocked transitions, not the
+      // absence of an unrelated success artifact. Negative visibility has its own fresh,
+      // stable-snapshot resolver and must never be overwritten by this probe.
+      if (byId.get(ref)?.polarity === "negative") return [];
       const key = `${ref}:${intent}`;
       if (seen.has(key)) return [];
       seen.add(key);
@@ -4375,7 +4456,8 @@ async function tryAuthGateRecovery(
   page: Page,
   snapshot: PageSnapshot,
   options: CaseDiscoveryOptions,
-  nextPendingTarget?: string
+  nextPendingTarget?: string,
+  declaredActions?: ReadonlyArray<Pick<ActionTargetItem, "action" | "target" | "actionType">>
 ): Promise<{ recovered: boolean; error?: string; diagnostics?: any; authGateState?: AuthGateState }> {
   const { env, missingInputBehavior = "fail", loginMode } = options;
 
@@ -4405,6 +4487,25 @@ async function tryAuthGateRecovery(
   // AuthFlow remains responsible for non-classic gates.
   if (detection.gateType === "classic_login") {
     console.log(`[auth-gate] classic_login delegated=true owner=scenario_actions`);
+    return {
+      recovered: false,
+      diagnostics: {
+        detected: true,
+        gateType: detection.gateType,
+        stage: detection.stage,
+        confidence: detection.confidence,
+        requiredInputs: detection.requiredInputs,
+        delegated: true,
+      },
+    };
+  }
+
+  // The declared action sequence owns a gate stage when it contains an explicit action for
+  // that stage (e.g. a code field for OTP). AuthFlow stays reserved for undeclared flows and
+  // is never reached for a stage the scenario drives itself.
+  const declaredAuthActions = declaredActions ?? parseScenarioStepsForDiscovery(options.scenario).actionTargets;
+  if (declaredActionsOwnAuthStage(detection.stage, declaredAuthActions)) {
+    console.log(`[auth-gate] stage=${detection.stage} delegated=true owner=scenario_actions reason=declared_stage_action`);
     return {
       recovered: false,
       diagnostics: {
@@ -7071,6 +7172,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       const containmentInput = assertionTargetInputs.find((input) => input.canonicalAssertion?.oracleType === "entity_within_container");
       const structuralRowInput = assertionTargetInputs.find((input) => input.canonicalAssertion?.oracleType === "structural_row_count");
       const exactStructuredAssertion = Boolean(rowScopedInput || containmentInput || structuralRowInput);
+      const negativeVisibilityPending = assertionTargetInputs.some((input) => classifyNegativeVisibility(input) !== undefined);
 
       while (retryCount < ASSERTION_RETRY_COUNT) {
         const executedActionsForAssertions = steps
@@ -7131,17 +7233,91 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         } else if (structuralRowInput) {
           resolutionResults = [await resolveStructuralRowAssertion(page, structuralRowInput)];
         } else {
+          // An absence assertion needs a fresh, stable snapshot taken now (never the pre-action one).
+          let negativeVisibility: NegativeVisibilityEvidence | undefined;
+          if (negativeVisibilityPending) {
+            const negativeStability = await waitForStablePageState(page, { timeoutMs: 10000, pollMs: 500, stableForMs: 800 }).catch(() => undefined);
+            snapshotForAssertion = await scanCurrentPage(page).catch(() => snapshotForAssertion);
+            const authOutcome = [...steps].reverse().find((step) => step.authenticationOutcome)?.authenticationOutcome;
+            // Reuse the action's classified AUTH_REJECTED boundary. The forbidden-success assertion
+            // always needs a fresh nonblank snapshot with the artifact absent; normal absence also
+            // needs that snapshot to be stable, while terminal 4xx auth rejection is independent
+            // evidence when the app leaves a stale loading indicator mounted.
+            const feedbackOnScreen = snapshotForAssertion.elements.some((element: any) =>
+              element.visible !== false
+              && ((/^(?:alert|status|dialog|alertdialog)$/i.test(String(element.role ?? ""))
+                && /error|invalid|incorrect|failed|fall[oó]|inv[aá]lid/i.test(String(element.text ?? element.label ?? element.name ?? "")))
+                || isCredentialRejectionMessage(String(element.text ?? element.label ?? element.name ?? ""))));
+            const feedbackAsserted = steps.some((step) =>
+              step.canonicalAssertion?.intent === "validation_present"
+              && step.canonicalAssertion.polarity !== "negative"
+              && (step.assertionStatus === "passed" || step.assertionStatus === "satisfied_by_children" || step.assertionStatus === "satisfied_by_previous_assertion"));
+            negativeVisibility = {
+              snapshotStable: negativeStability?.finalStable === true,
+              ...(authOutcome && authOutcome.businessSurfaceReached !== true
+                ? { authRejection: {
+                    classification: authOutcome.classification,
+                    authHttpStatus: authOutcome.authHttpStatus,
+                    errorSurfaceObserved: authOutcome.errorSurfaceObserved,
+                    businessSurfaceReached: authOutcome.businessSurfaceReached,
+                    positiveFeedbackObserved: feedbackOnScreen && feedbackAsserted,
+                  } }
+                : {}),
+            };
+          }
           resolutionResults = resolveAssertionTargets(snapshotForAssertion, assertionTargetInputs, {
             executedActions: executedActionsForAssertions,
-            appConfig: (options as any).appConfig
+            appConfig: (options as any).appConfig,
+            ...(negativeVisibility ? { negativeVisibility } : {}),
           });
         }
-        
+
+        // A negative-auth scenario may specify visible credential-error wording even when the
+        // application communicates rejection only through the completed auth response. Bind
+        // that assertion to the observed terminal rejection (never to a click alone), but only
+        // for credential-rejection language, a stable AUTH_REJECTED 4xx boundary, and no later
+        // business actions. The separate negative-visibility assertion still proves that no
+        // success artifact appeared on the stable auth surface.
+        const priorAuthenticationOutcome = [...steps].reverse()
+          .find((step) => step.authenticationOutcome)?.authenticationOutcome;
+        const expectedCredentialRejection = shouldEvaluateExpectedAuthenticationRejection({
+          outcome: priorAuthenticationOutcome,
+          currentStepIndex: es.stepIndex,
+          actionTargets: parsed.actionTargets,
+          // Only the executing declaration can consume the response here. A later
+          // rejection check must not certify an unrelated current assertion.
+          assertionTargets: assertionTargetInputs,
+        });
+        if (expectedCredentialRejection && resolutionResults.some((result) =>
+          result.status === "failed" || result.status === "needs_assertion_resolution")) {
+          resolutionResults = resolutionResults.map((result) => result.status === "failed" || result.status === "needs_assertion_resolution"
+            ? {
+                ...result,
+                status: "passed" as const,
+                classification: "feedback_message" as const,
+                matchedText: undefined,
+                confidence: 0.95,
+                reason: "credential_rejection_confirmed_by_terminal_auth_response",
+                matchReason: "terminal_auth_rejection_oracle",
+                structuralSignals: [...(result.structuralSignals ?? []), "terminal_auth_rejection_observed"],
+                assertionDiagnostics: {
+                  ...(result.assertionDiagnostics ?? {}),
+                  oracleType: "terminal_auth_rejection",
+                  authHttpStatus: priorAuthenticationOutcome?.authHttpStatus ?? priorAuthenticationOutcome?.authSubmissionStatus,
+                  errorSurfaceObserved: true,
+                  businessSurfaceReached: false,
+                  visibleFeedbackMessageObserved: result.matchedText !== undefined,
+                },
+              }
+            : result);
+          console.log(`[assertion] credential_rejection_oracle=true step=${es.stepIndex} verdict=passed evidence=terminal_auth_rejection`);
+        }
+
         // Check if any assertion passed
         const anyPassed = resolutionResults.some(r => r.status === "passed" || r.status === "satisfied_by_children" || r.status === "satisfied_by_previous_assertion");
-        
+
         // Semantic assertion pre-check: resolve by DOM signal before falling back to text matching
-        if (!anyPassed && resolutionResults.length > 0 && !exactStructuredAssertion) {
+        if (!anyPassed && resolutionResults.length > 0 && !exactStructuredAssertion && !negativeVisibilityPending) {
           for (const r of resolutionResults) {
             if (r.status === "failed" || r.status === "needs_assertion_resolution") {
               try {
@@ -7342,7 +7518,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         } else if (assertionResult.status === "failed" || assertionResult.status === "needs_assertion_resolution") {
           // ── LOCAL ASSERTION RECOVERY ──
           // Try to recover failed assertion using accent-insensitive matching, aliases, plural/singular variants, etc.
-          const recoveryResult = exactStructuredAssertion
+          // Text-matching recovery would "recover" an absence assertion by finding the forbidden text.
+          const recoveryResult = exactStructuredAssertion || negativeVisibilityPending
             ? { recovered: false, decision: "not_recovered" as const, matchedText: "", confidence: 0, recoveryAttempts: [] }
             : attemptAssertionRecovery(currentSnapshot, assertionResult.assertionText, {
                 routeProfile,
@@ -7503,7 +7680,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             }
 
             // AI Repair for assertions: attempt assertion_resolution after local recovery fails
-            if (assertionResult.status === "needs_assertion_resolution" && !options.disableAiRepair && envTrue("AI_REPAIR_ENABLED", false) && envTrue("AI_REPAIR_USE_CONTEXT_PACK", true)) {
+            if (assertionResult.status === "needs_assertion_resolution" && !negativeVisibilityPending && !options.disableAiRepair && envTrue("AI_REPAIR_ENABLED", false) && envTrue("AI_REPAIR_USE_CONTEXT_PACK", true)) {
             const aiAssertionStartTime = Date.now();
             console.log(`[ai-repair:assertion] enabled provider=${process.env.AI_PROVIDER ?? "unknown"} model=${process.env.AI_MODEL ?? "unknown"}`);
             console.log(`[ai-repair:assertion] failure=assertion_not_satisfied target="${assertionResult.assertionText}"`);
@@ -7889,7 +8066,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       console.log(`[runtime-field-binding] stepIndex=${orderedItem.index} source=explicit_case_input`);
     }
     if (isUnboundSemanticFillTarget(scenario, normalizedActionTarget) && !normalizedActionTarget.valueKey) {
-      const credentialKey = credentialRoleKeyForField(normalizedActionTarget.target, options.runtimeEntries);
+      const explicitRoleInputCount = runtimeCredentialRoleInputCountForField(
+        normalizedActionTarget.target,
+        options.runtimeEntries ?? [],
+      );
+      const credentialKey = explicitRoleInputCount > 1
+        ? undefined
+        : credentialRoleKeyForField(normalizedActionTarget.target, options.runtimeEntries);
       if (credentialKey) {
         normalizedActionTarget.valueKey = credentialKey;
         normalizedActionTarget.valueSource ??= "unknown";
@@ -8197,12 +8380,19 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       // entirely for this evidence shape.
       if (!normalizedActionTarget.playwrightRecorderEvidence
         && isUnboundSemanticFillTarget(scenario, normalizedActionTarget)
-        && normalizedActionTarget.valueKey === "auth.otp") {
-        normalizedActionTarget.playwrightRecorderEvidence = await observeSegmentedCodeEvidence(page);
+        && normalizedActionTarget.valueKey) {
+        normalizedActionTarget.playwrightRecorderEvidence = await observeSegmentedCodeEvidence(page, normalizedActionTarget.valueKey);
       }
       if (normalizedActionTarget.playwrightRecorderEvidence?.kind === "segmented_input") {
         const segmentedResult = await attemptSegmentedInputFill(page, normalizedActionTarget.playwrightRecorderEvidence, fillValue);
         if (segmentedResult.ok) {
+          const verifiedForm = isUnboundSemanticFillTarget(scenario, normalizedActionTarget)
+            ? await resolveSegmentedInputForm(page, normalizedActionTarget.playwrightRecorderEvidence)
+            : undefined;
+          if (verifiedForm) {
+            activeContainer = { type: "form", reason: "form_opened", containerLocator: verifiedForm,
+              verifiedSegmentedInput: true, detectedAt: new Date().toISOString() };
+          }
           console.log(`[discovery:case] Segmented input filled: target=${normalizedActionTarget.target} segmentCount=${segmentedResult.segmentCount}`);
           const postFillScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
           currentSnapshot = postFillScan.snapshot;
@@ -8323,7 +8513,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
               diagnostics: { detected: false, reason: selectionFailureReason },
               error: `Selection surface resolution failed: ${selectionFailureReason}`,
             }
-          : await tryAuthGateRecovery(page, currentSnapshot, options, actionTarget.target);
+          : await tryAuthGateRecovery(page, currentSnapshot, options, actionTarget.target, parsed.actionTargets);
         if (selectionFailureReason) {
           console.log(`[discovery:case] Auth gate recovery skipped for selection failure reason=${selectionFailureReason}`);
         }
@@ -9508,6 +9698,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     // Get previous target from relation context or route history
     const previousTarget = actionTarget.relationContext || routeHistory[routeHistory.length - 1];
 
+    if (actionTarget.actionType === "action_select") {
+      bindAuthoredRuntimeField(scenario, actionTarget,
+        options.runtimeEntries ?? Object.keys(options.scenarioDataOverrides ?? {}).map(key => ({ key })));
+    }
     // Selection steps can be backed by runtime data just like fills. Resolve
     // the value through the same provenance-aware resolver before opening a
     // row-scoped editor; no option is inferred from position or demo data.
@@ -10159,7 +10353,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
               diagnostics: { detected: false, reason: selectionFailureReason },
               error: `Selection surface resolution failed: ${selectionFailureReason}`,
             }
-          : await tryAuthGateRecovery(page, currentSnapshot, options, actionTarget.target);
+          : await tryAuthGateRecovery(page, currentSnapshot, options, actionTarget.target, parsed.actionTargets);
         if (selectionFailureReason) {
           console.log(`[discovery:case] Auth gate recovery skipped for selection failure reason=${selectionFailureReason}`);
         }
@@ -10736,12 +10930,15 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
 
-        const ambiguousReason = actionTarget.associatedEntity
+        const explicitSelectionIdentityRequired = resolution.selectionDiagnostics?.failureReason === "ambiguous_option";
+        const ambiguousReason = explicitSelectionIdentityRequired
+          ? `Hay ${resolution.selectionDiagnostics?.optionCandidateCount ?? 0} opciones compatibles en el campo. Especifica un identificador o el texto completo de la opción en los datos de prueba.`
+          : actionTarget.associatedEntity
           ? `Ambiguous target: ${resolution.matchReason} (${resolution.candidates?.length ?? 0} matches). Target has associated entity "${actionTarget.associatedEntity}" that could disambiguate context.`
           : `Ambiguous target: ${resolution.matchReason} (${resolution.candidates?.length ?? 0} matches).`;
 
         // AI Repair for selection: attempt selection_resolution after local resolvers fail due to ambiguity
-        if (!options.disableAiRepair && envTrue("AI_REPAIR_ENABLED", false) && envTrue("AI_REPAIR_USE_CONTEXT_PACK", true)) {
+        if (!explicitSelectionIdentityRequired && !options.disableAiRepair && envTrue("AI_REPAIR_ENABLED", false) && envTrue("AI_REPAIR_USE_CONTEXT_PACK", true)) {
           const aiSelectionStartTime = Date.now();
           console.log(`[ai-repair:selection] enabled provider=${process.env.AI_PROVIDER ?? "unknown"} model=${process.env.AI_MODEL ?? "unknown"}`);
           console.log(`[ai-repair:selection] failure=ambiguous_selection target="${actionTarget.target}"`);
@@ -10924,6 +11121,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           snapshotTitle: scan.title,
           elementsFound: scan.elementsCount,
           error: ambiguousReason,
+          selectionDiagnostics: resolution.selectionDiagnostics,
           evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
           aiDiagnostics: (resolution as any).aiDiagnostics,
           aiSelectionRepairDiagnostics: (resolution as any).aiSelectionRepairDiagnostics,
@@ -10934,7 +11132,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
         failedAtStep = actionTarget.index;
         failedTarget = actionTarget.target;
-        failedReason = actionTarget.associatedEntity ? "needs_associated_target_resolution" : "ambiguous_target";
+        failedReason = explicitSelectionIdentityRequired ? "ambiguous_option"
+          : actionTarget.associatedEntity ? "needs_associated_target_resolution" : "ambiguous_target";
 
         await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
         await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
@@ -12167,8 +12366,26 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         if (element.visible === false) return false;
         const role = String(element.role ?? "").toLowerCase();
         const text = String(element.text ?? element.label ?? element.name ?? "");
-        return (role === "alert" || role === "status") && /error|invalid|incorrect|failed|fall[oó]|inv[aá]lid/i.test(text);
+        return ((role === "alert" || role === "status" || role === "dialog" || role === "alertdialog")
+          && /error|invalid|incorrect|failed|fall[oó]|inv[aá]lid/i.test(text))
+          || isCredentialRejectionMessage(text);
       }));
+      const terminalAuthClientError = isTerminalAuthenticationClientError({
+        beforeAuthDetected: authDetectionBeforeClick.detected,
+        afterAuthDetected: afterAuth?.detected === true,
+        hasLaterExecutableActions: parsed.actionTargets.some((candidate) => candidate.index > actionTarget.index),
+        events: progress.terminalClientError ? [progress.terminalClientError] : [],
+      });
+      if (terminalAuthClientError) {
+        // The same-origin auth submission returned a terminal client rejection and the page is
+        // still on the auth gate. Stop polling now so transient feedback is captured before an
+        // inactivity/expiry dialog replaces it. This closes observation only; later assertion
+        // resolution still requires the declared rejection message and any negative checks.
+        postActionSyncSignal = "auth_client_error_response";
+        markCriticalPath("post_action_sync_returned");
+        console.log(`[post-action-sync] phase=after signal=auth_client_error_response status=${progress.terminalClientError?.status ?? "unknown"} sameOrigin=true authSurface=true laterExecutableActions=false`);
+        return { completed: true, signal: "auth_client_error_response" };
+      }
       // FIRST_LOSS fix: a same-surface, structured selection/toggle action (recordingActionType
       // select|check|uncheck|radio|toggle -- never inferred from target text) with no network
       // request, no route change, and no DOM signal the shared observers track otherwise has no
@@ -12581,7 +12798,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       if (element.visible === false) return false;
       const role = String(element.role ?? "").toLowerCase();
       const text = String(element.text ?? element.label ?? element.name ?? "");
-      return (role === "alert" || role === "status") && /error|invalid|incorrect|failed|fall[oó]|inv[aá]lid/i.test(text);
+      return ((role === "alert" || role === "status" || role === "dialog" || role === "alertdialog")
+        && /error|invalid|incorrect|failed|fall[oó]|inv[aá]lid/i.test(text))
+        || isCredentialRejectionMessage(text);
     }));
     const authBoundaryAttempted = shouldClassifyAuthenticationBoundary({
       authDetectedBeforeAction: authDetectionBeforeClick.detected,
@@ -12623,9 +12842,18 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         console.log(`[auth-outcome] boundaryCompleted=true completedAfterStepIndex=${actionTarget.index}`);
       }
     }
+    const expectedAuthenticationRejection = shouldEvaluateExpectedAuthenticationRejection({
+      outcome: authenticationOutcome,
+      currentStepIndex: actionTarget.index,
+      actionTargets: parsed.actionTargets,
+      assertionTargets: parsed.assertionTargets,
+    });
+    if (expectedAuthenticationRejection) {
+      console.log("[auth-outcome] expectedRejection=true verdict=pending_declared_assertions");
+    }
     const authFailure = authenticationOutcome && (
       authenticationOutcome.classification === "AUTH_INFRASTRUCTURE_FAILURE"
-      || authenticationOutcome.classification === "AUTH_REJECTED"
+      || (authenticationOutcome.classification === "AUTH_REJECTED" && !expectedAuthenticationRejection)
       || authenticationOutcome.classification === "AUTH_TIMEOUT_WITH_PROGRESS"
       || authenticationOutcome.classification === "POST_AUTH_NAVIGATION_FAILURE"
     ) ? authenticationOutcome : undefined;
@@ -12687,7 +12915,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         failedAtStep, failedTarget, failedReason, allDiscoveredObjects,
       );
     }
-    if (postActionSyncSignal === "application_error") {
+    if (postActionSyncSignal === "application_error" && !expectedAuthenticationRejection) {
       failedAtStep = actionTarget.index;
       failedTarget = actionTarget.target;
       failedReason = "application_error_visible";
@@ -14057,7 +14285,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     // destination was ready and observe a transient fallback surface instead.  Keep the
     // decision structural and recording-generic: it relies only on the same resolver
     // authority already used by postActionCompletionProbe, never on app labels/routes.
-    if (transitionDetected && !postActionNextTargetVisible && !postActionNextTargetReady) {
+    // A declared credential rejection is already a terminal, action-owned outcome once
+    // the auth request and rejection surface have been classified. A decorative page-wide
+    // spinner must not hold that negative scenario in another generic loading wait.
+    if (transitionDetected && !postActionNextTargetVisible && !postActionNextTargetReady && !expectedAuthenticationRejection) {
       try {
         const loadingDone = await page.waitForFunction(PAGE_LOADING_STATE_PREDICATE, { timeout: 30000 });
         if (loadingDone) {
@@ -14109,7 +14340,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       executedActionOrders.add(currentActionOrder);
     }
 
-    steps.push({
+    steps.push(withObservedAuthenticationOutcome({
       index: actionTarget.index,
       action: actionTarget.action,
       status: "found",
@@ -14154,7 +14385,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             executedAction: actionTarget.action
           }
         : undefined) as any
-    });
+    }, authenticationOutcome));
 
       const planControlIdentity = currentSnapshot.elements.find((element) => element.id === resolution.candidateId)?.controlIdentity;
       activePlanInputMetadata = {

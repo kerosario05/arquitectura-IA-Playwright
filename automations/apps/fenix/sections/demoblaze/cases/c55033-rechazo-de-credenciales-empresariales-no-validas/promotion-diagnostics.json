@@ -1,0 +1,20 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\fenix\\sections\\demoblaze\\cases\\c55033-rechazo-de-credenciales-empresariales-no-validas\\case.spec.ts",
+  "specHash": "6491a290a7590abd0fc4a2499ff112d48793335c9cb3a6ea43f4a9710ff3bdfa",
+  "specSource": "generatedSpec"
+}

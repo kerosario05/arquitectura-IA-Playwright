@@ -1,0 +1,10 @@
+{
+  "id": "c55033-rechazo-de-credenciales-empresariales-no-validas",
+  "externalId": "C55033",
+  "caseId": 55033,
+  "title": "Rechazo de credenciales empresariales no válidas",
+  "source": "discovery",
+  "appSlug": "fenix",
+  "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+  "createdAt": "2026-10-22T12:23:00.962Z"
+}

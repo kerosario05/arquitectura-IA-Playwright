@@ -1,4 +1,5 @@
 import type { Locator, Page } from "@playwright/test";
+import { settleJiraAction } from "./jira-action-settlement";
 import { createHash } from "node:crypto";
 import { expect } from "@playwright/test";
 import { scanCurrentPage } from "../explorer/page-scanner";
@@ -1438,14 +1439,14 @@ export function createJiraPlaywrightPort(page: Page, baseUrl: string, authFlow?:
   const selectedValues = new Map<string, string>();
   return {
     baseUrl,
-    async navigate() { await page.goto(baseUrl, { waitUntil: "domcontentloaded" }); },
+    async navigate() { await settleJiraAction(page, () => page.goto(baseUrl, { waitUntil: "domcontentloaded" }), baseUrl); },
     async navigateTo(url) {
       const requested = new URL(url);
       const base = new URL(baseUrl);
       if (requested.origin !== base.origin || !["http:", "https:"].includes(requested.protocol) || requested.username || requested.password) {
         throw new Error("JIRA_ROUTE_OUTSIDE_APP_ORIGIN");
       }
-      await page.goto(requested.toString(), { waitUntil: "domcontentloaded" });
+      await settleJiraAction(page, () => page.goto(requested.toString(), { waitUntil: "domcontentloaded" }), baseUrl);
     },
     async authenticate(observedStage) {
       if (!authFlow) throw new Error("JIRA_AUTH_FLOW_UNAVAILABLE");
@@ -1525,6 +1526,7 @@ export function createJiraPlaywrightPort(page: Page, baseUrl: string, authFlow?:
       return { observedText: result.candidateText || target };
     },
     async act(step, target, value, semanticContext) {
+      return settleJiraAction(page, async (): Promise<PlanTarget> => {
       // Jira prose can describe a choice as "enter X" even when the live page
       // exposes a native/custom combobox. Let the observed DOM correct that
       // action classification before target resolution, while leaving ordinary
@@ -1700,6 +1702,7 @@ export function createJiraPlaywrightPort(page: Page, baseUrl: string, authFlow?:
         lastClickLoadingObservations = [...new Set([...lastClickLoadingObservations, ...currentlyVisibleLoading])];
       }
       return durable;
+      });
     },
     async assertAbsent(target) { await assertJiraSpecAbsentText(page,target); return {absent:true}; },
     observeVisibleTable: () => observeJiraVisibleTableRows(page),

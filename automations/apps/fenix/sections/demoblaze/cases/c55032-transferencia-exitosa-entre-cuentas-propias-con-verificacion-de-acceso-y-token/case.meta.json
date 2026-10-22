@@ -1,0 +1,10 @@
+{
+  "appSlug": "fenix",
+  "sectionSlug": "demoblaze",
+  "sectionName": "demoblaze",
+  "sectionId": 4769,
+  "sourceScenarioId": "C55032",
+  "testRailCaseId": 55032,
+  "generatedAt": "2026-10-22T00:09:48.983Z",
+  "title": "Transferencia exitosa entre cuentas propias con verificación de acceso y token"
+}

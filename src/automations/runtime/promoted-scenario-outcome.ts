@@ -2,6 +2,8 @@ export type ScenarioOutcomeCheck = {
   hasFinalAssertion: boolean;
   failureMessages: string[];
   expectedVisibleTargets: string[];
+  /** A declared credential-rejection assertion already passed: the auth-gate rejection screen is terminal. */
+  terminalRejectionObserved?: boolean;
 };
 
 function normalized(value: string): string {

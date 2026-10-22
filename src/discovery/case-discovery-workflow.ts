@@ -1,5 +1,8 @@
 import path from "node:path";
-import { writeFile, readdir, readFile } from "node:fs/promises";
+import { persistClassicJiraDiscoveryRoute } from "../jira/jira-knowledge-learning";
+import { jiraProfileRevision } from "../jira/jira-knowledge-repository";
+import { isCredentialRejectionExpectation } from "./feedback-message-resolver";
+import { mkdir, writeFile, readdir, readFile } from "node:fs/promises";
 import { chromium, firefox, webkit } from "@playwright/test";
 import { createAIExplorer } from "../ai/ai-explorer";
 import { config as envConfig, requireTestRailConfig } from "../config/env";
@@ -34,6 +37,7 @@ import { transformTestRailCaseForRuntime } from "../testrail/testrail-runtime-tr
 import { launchRuntimeBrowserSession } from "../browser/browser-session";
 import { buildControlledAdvanceProbeOracles, type CanonicalAssertionIntent } from "./controlled-advance-probe";
 import { getProjectConfigurationBySlug } from "../db/project-reader";
+import { resolveObservableSnapshotMatch } from "./observable-snapshot-matcher";
 
 export type CaseDiscoveryWorkflowOptions = {
   caseId?: number;
@@ -446,6 +450,145 @@ function findAssertionStepIndexAfter(
   return assertions[0];
 }
 
+type CompoundOracleScenarioStep = {
+  index: number;
+  action: string;
+  expected?: string;
+  polarity?: AssertionPolarity;
+  requirementRefs?: string[];
+  canonicalAssertion?: import("../scenarios/canonical-scenario").CanonicalAssertion;
+};
+
+const NEGATIVE_CLAUSE_PATTERN = /^(?:que\s+)?(?:no|ni|sin)\b|\bno\s+(?:se|hay|debe|aparece|muestra|permite|existe)\b|\b(?:sin que|without|does not|do not|not displayed|not shown)\b/;
+const COMPOUND_CLAUSE_SEPARATOR = /\s*(?:;|,|\by\b|\band\b|\bpero\b|\bbut\b)\s*/;
+const COMPOUND_CLAUSE_BINDING_THRESHOLD = 0.5;
+
+function isPassedDiscoveryAssertion(step: DiscoveryStepResult): boolean {
+  // A bare `found` action status is not evidence: require an actual passing/satisfied assertion status.
+  return isAssertionLikeStep(step)
+    && (step.assertionStatus === "passed"
+      || step.assertionStatus === "satisfied_by_children"
+      || step.assertionStatus === "satisfied_by_previous_assertion");
+}
+
+/**
+ * A narrative that combines a positive rejection clause with a negative absence clause is
+ * resolvable only when EVERY clause binds to a declared, observed assertion:
+ *  - positive clause: observed auth rejection (4xx on the auth submission, no business surface)
+ *    and either passed visible rejection feedback or clause language that describes the rejection;
+ *  - negative clause: a passed declared negative-polarity assertion whose wording covers the clause.
+ * HTTP status alone, missing feedback alone, or an unmatched clause leaves it unbacked.
+ * Returns undefined when the line is not a positive+negative compound.
+ */
+export function resolveCompoundRejectionOracle(input: {
+  line: string;
+  scenarioSteps: CompoundOracleScenarioStep[];
+  steps: DiscoveryStepResult[];
+  canonicalRequirements?: CanonicalRequirement[];
+}): { backed: boolean; stepIndex?: number; evidence: string[]; clauses: Array<{ clause: string; polarity: AssertionPolarity; boundStepIndex?: number }> } | undefined {
+  const clauses = normalizeOracleText(input.line)
+    .split(COMPOUND_CLAUSE_SEPARATOR)
+    .map((clause) => clause.trim())
+    .filter(Boolean)
+    .map((clause) => ({
+      clause,
+      polarity: (NEGATIVE_CLAUSE_PATTERN.test(clause) ? "negative" : "positive") as AssertionPolarity,
+      boundStepIndex: undefined as number | undefined,
+    }));
+  if (clauses.length < 2
+    || !clauses.some((entry) => entry.polarity === "negative")
+    || !clauses.some((entry) => entry.polarity === "positive")) return undefined;
+
+  const evidence: string[] = [];
+  const stepText = (index: number | undefined, fallback: string) => {
+    const declared = input.scenarioSteps.find((step) => step.index === index);
+    return declared ? `${declared.action} ${declared.expected ?? ""}` : fallback;
+  };
+  const rejection = input.steps.find((step) => {
+    const outcome = step.authenticationOutcome;
+    const status = outcome?.authHttpStatus ?? outcome?.authSubmissionStatus;
+    return outcome?.classification === "AUTH_REJECTED"
+      && outcome.errorSurfaceObserved === true
+      && outcome.businessSurfaceReached !== true
+      && status !== undefined && status >= 400 && status < 500;
+  });
+  evidence.push(`auth_rejection_observed:${Boolean(rejection)}`);
+  const feedbackSteps = input.steps.filter((step) =>
+    isPassedDiscoveryAssertion(step)
+    && step.canonicalAssertion?.intent === "validation_present"
+    && step.canonicalAssertion.polarity !== "negative",
+  );
+  const declaredNegativeSteps = input.scenarioSteps.filter((step) =>
+    isAssertionAction(step.action)
+    && (step.polarity === "negative"
+      || step.canonicalAssertion?.polarity === "negative"
+      || resolveObservableOraclePolarity(step.requirementRefs, input.canonicalRequirements) === "negative"),
+  );
+  const positiveRejectionClauses = clauses.filter((entry) => entry.polarity === "positive"
+    && /\b(?:credencial\w*|credential\w*|contrasen\w*|password\w*|usuario\w*|login|autentic\w*|rechaz\w*|deneg\w*|invalid\w*|invalido\w*|codigo de acceso|inicio de sesion)\b/.test(entry.clause));
+
+  for (const entry of clauses) {
+    const candidates = entry.polarity === "positive"
+      ? (rejection ? feedbackSteps : [])
+      : input.steps.filter((step) => isPassedDiscoveryAssertion(step)
+        && declaredNegativeSteps.some((declared) => declared.index === step.index));
+    const bound = candidates.find((step) =>
+      scoreSemanticEquivalence(entry.clause, stepText(step.index, step.targetText ?? step.action)) >= COMPOUND_CLAUSE_BINDING_THRESHOLD);
+    const rejectionClauseBoundToOutcome = entry.polarity === "positive"
+      && !bound
+      && rejection !== undefined
+      && positiveRejectionClauses.includes(entry);
+    entry.boundStepIndex = bound?.index ?? (rejectionClauseBoundToOutcome ? rejection.index : undefined);
+    evidence.push(`clause_${entry.polarity}_bound:${entry.boundStepIndex !== undefined}`);
+    if (rejectionClauseBoundToOutcome) evidence.push("positive_rejection_clause_bound_to_auth_submission_outcome:true");
+  }
+
+  const backed = clauses.every((entry) => entry.boundStepIndex !== undefined);
+  const negativeBinding = clauses.find((entry) => entry.polarity === "negative")?.boundStepIndex;
+  return { backed, stepIndex: backed ? negativeBinding : undefined, evidence, clauses };
+}
+
+type IndexedPageSnapshot = { stepIndex: number; snapshot: PageSnapshot; snapshotPath?: string };
+
+function findAssertionSnapshot(
+  requirement: string,
+  assertionStepIndex: number,
+  scenarioSteps: Array<{ index: number; action: string; expected?: string }>,
+  caseResult: CaseDiscoveryResult,
+  snapshots: IndexedPageSnapshot[],
+): { match: NonNullable<ReturnType<typeof resolveObservableSnapshotMatch>>; observation: IndexedPageSnapshot; actionStepIndex: number } | undefined {
+  const assertionStep = scenarioSteps.find((step) => step.index === assertionStepIndex);
+  if (!assertionStep || !isAssertionAction(assertionStep.action)) return undefined;
+  const actionStep = [...scenarioSteps]
+    .filter((step) => step.index < assertionStepIndex && !isAssertionAction(step.action))
+    .sort((a, b) => b.index - a.index)[0];
+  if (!actionStep) return undefined;
+  const executedAction = caseResult.steps.find((step) => step.index === actionStep.index);
+  if (!executedAction || executedAction.status !== "found") return undefined;
+  const observation = snapshots.find((entry) => entry.stepIndex === actionStep.index);
+  if (!observation) return undefined;
+  const match = resolveObservableSnapshotMatch(requirement, observation.snapshot);
+  if (!match) return undefined;
+  return { match, observation, actionStepIndex: actionStep.index };
+}
+
+function matchExpectedLineToAssertion(
+  line: string,
+  scenarioSteps: Array<{ index: number; action: string; expected?: string }>,
+): number | undefined {
+  const wanted = normalizeOracleText(extractQuotedAssertionTarget(line) ?? line);
+  const candidates = scenarioSteps.filter((step) => isAssertionAction(step.action));
+  const exact = candidates.find((step) => {
+    const authored = normalizeOracleText(`${extractQuotedAssertionTarget(step.action) ?? step.action} ${step.expected ?? ""}`);
+    return authored.includes(wanted) || wanted.includes(authored);
+  });
+  if (exact) return exact.index;
+  const ranked = candidates
+    .map((step) => ({ step, score: scoreSemanticEquivalence(line, `${step.action} ${step.expected ?? ""}`) }))
+    .sort((a, b) => b.score - a.score);
+  return ranked[0]?.score >= 0.3 ? ranked[0].step.index : undefined;
+}
+
 function buildExpectedObservableOracles(
   expectedLines: string[],
   observedAssertions: string[],
@@ -465,6 +608,7 @@ function buildExpectedObservableOracles(
   expectedResultRequirementRefs?: string[],
   recordingOutcomePolarity?: AssertionPolarity,
   finalSnapshot?: PageSnapshot,
+  snapshotObservations: IndexedPageSnapshot[] = [],
 ): SpecGenerationObservableOracle[] {
   const transitionEvidence = caseResult.runtimeEvidenceTrace?.clickActions
     ?.filter((click) => click.success && (click.transitionDetected === true || Boolean(click.postClickUiChange)))
@@ -546,6 +690,12 @@ function buildExpectedObservableOracles(
     let target: string | undefined;
     let polarity: AssertionPolarity | undefined;
     const expectedVisibleText = extractQuotedAssertionTarget(line);
+    const compound = resolveCompoundRejectionOracle({
+      line,
+      scenarioSteps: scenarioSteps ?? [],
+      steps: caseResult.steps,
+      canonicalRequirements,
+    });
 
     const passedVisibilityStep = positiveRecordedVisibility(line) && expectedVisibleText
       ? caseResult.steps.find((step) => {
@@ -560,6 +710,11 @@ function buildExpectedObservableOracles(
           && normalizeOracleText(sourceLiteral) === normalizeOracleText(expectedVisibleText)
           && normalizeOracleText(observedLiteral) === normalizeOracleText(expectedVisibleText));
       }) : undefined;
+    const assertionStepIndex = matchExpectedLineToAssertion(line, scenarioSteps ?? []);
+    const assertionPolarity = resolveScenarioAssertionPolarity(line, assertionStepIndex);
+    const observedAtAssertion = assertionStepIndex === undefined || assertionPolarity === "negative"
+      ? undefined
+      : findAssertionSnapshot(line, assertionStepIndex, scenarioSteps ?? [], caseResult, snapshotObservations);
 
     if (passedVisibilityStep) {
       type = "literal_visible_text";
@@ -567,6 +722,34 @@ function buildExpectedObservableOracles(
       target = expectedVisibleText;
       stepIndex = passedVisibilityStep.index;
       evidence.push("exact_literal_in_passed_recorded_visibility_assertion:true");
+    } else if (observedAtAssertion) {
+      type = "heading_or_control";
+      backed = true;
+      stepIndex = assertionStepIndex;
+      target = observedAtAssertion.match.targets.find((value) => value !== "__visible_date_time__")
+        ?? observedAtAssertion.match.targets[0];
+      evidence.push(
+        "causal_snapshot_semantic_match:true",
+        `snapshot_step_index:${observedAtAssertion.actionStepIndex}`,
+        `snapshot_captured_at:${observedAtAssertion.observation.snapshot.capturedAt}`,
+        ...observedAtAssertion.match.concepts.map((concept) => `observed_concept:${concept}`),
+      );
+      details = {
+        visibleTargets: observedAtAssertion.match.targets,
+        ...(observedAtAssertion.match.dateTimePattern ? { visibleTextPattern: "date_time" } : {}),
+        snapshotStepIndex: observedAtAssertion.actionStepIndex,
+        snapshotUrl: observedAtAssertion.observation.snapshot.url,
+        snapshotCapturedAt: observedAtAssertion.observation.snapshot.capturedAt,
+      };
+    } else if (compound && !literalSignal) {
+      // Fail-closed: a positive+negative compound never falls through to weaker single-signal
+      // branches (feedback presence, structural evidence); it is backed only clause by clause.
+      type = compound.backed ? "runtime_state" : "unsupported_or_unresolved";
+      backed = compound.backed;
+      stepIndex = compound.stepIndex;
+      evidence.push(...compound.evidence);
+      details = { compound: true, clauses: compound.clauses };
+      console.log(`[observable-oracle] type=${type} compound=true backed=${backed} clauses=${compound.clauses.length} scenarioStepIndex=${stepIndex ?? "na"}`);
     } else if (authSignal && (authGateEvidence?.authGateDiagnostics?.detected || authMetadata?.authGateDetectedDuringDiscovery === true)) {
       type = "auth_gate";
       backed = true;
@@ -847,6 +1030,7 @@ export function buildPromotionSourceScenario(
   scenario: TestScenario,
   caseResult: CaseDiscoveryResult,
   finalSnapshot?: PageSnapshot,
+  snapshotObservations: IndexedPageSnapshot[] = [],
 ): SpecGenerationSourceScenario {
   const canonicalRequirements = (scenario as TestScenario & { canonicalRequirements?: CanonicalRequirement[] }).canonicalRequirements;
   const expectedResultRequirementRefs = (scenario as TestScenario & { expectedResultRequirementRefs?: string[] }).expectedResultRequirementRefs;
@@ -1035,11 +1219,27 @@ export function buildPromotionSourceScenario(
   const expectedResult = [terminalRecordedFeedbackCompleted ? "" : rawExpected.trim(), ...stepExpected, ...expectedFromConsumption]
     .filter((value) => value.length > 0)
     .join("\n");
-  const observedAssertionsFromSteps = caseResult.steps
+  const observedPositiveAssertionSteps = caseResult.steps
     .filter((step) => isAssertionLikeStep(step))
     .filter((step) => step.status === "found" || step.assertionStatus === "passed")
-    .filter((step) => !terminalOutcomeObservationIndexes.has(step.index))
-    .flatMap((step) => [
+    .filter((step) => {
+      const declared = scenario.steps.find((candidate) => candidate.index === step.index);
+      const text = normalizeOracleText(`${declared?.action ?? step.targetText ?? step.action ?? ""} ${declared?.expected ?? ""}`);
+      const refs = Array.isArray((declared as (typeof declared & { requirementRefs?: string[] }) | undefined)?.requirementRefs)
+        ? (declared as (typeof declared & { requirementRefs?: string[] })).requirementRefs
+        : undefined;
+      return declared?.polarity !== "negative"
+        && declared?.canonicalAssertion?.polarity !== "negative"
+        && resolveObservableOraclePolarity(refs, canonicalRequirements) !== "negative"
+        && !NEGATIVE_CLAUSE_PATTERN.test(text);
+    })
+    .filter((step) => !terminalOutcomeObservationIndexes.has(step.index));
+  const observedAssertionsFromSteps = observedPositiveAssertionSteps
+    // Feedback expectations can paraphrase the actual message. Only the observed
+    // message is a visible literal; the authored expectation is its requirement.
+    .flatMap((step) => step.assertionClassification === "feedback_message"
+      ? [(step.matchedText ?? "").trim()]
+      : [
       (step.targetText ?? step.action ?? "").trim(),
       (step.matchedText ?? "").trim(),
     ])
@@ -1059,6 +1259,7 @@ export function buildPromotionSourceScenario(
       step.status === "satisfied_by_previous_assertion"
       || step.assertionStatus === "satisfied_by_previous_assertion"
     );
+  const satisfiedByPreviousAssertionIndexes = new Set(satisfiedByPreviousAssertionSteps.map((step) => step.index));
   const transitionEvidence = caseResult.runtimeEvidenceTrace?.clickActions
     ?.filter((click) => click.success && (click.transitionDetected === true || Boolean(click.postClickUiChange)))
     ?? [];
@@ -1148,6 +1349,32 @@ export function buildPromotionSourceScenario(
           },
         };
       }
+      const snapshotOracle = findAssertionSnapshot(requirement, step.index, scenario.steps, caseResult, snapshotObservations);
+      if (snapshotOracle) {
+        console.log(`[observable-oracle-reconciled] type=heading_or_control backed=true step=${step.index} snapshotStepIndex=${snapshotOracle.actionStepIndex} targets=${snapshotOracle.match.targets.length}`);
+        return {
+          id: `reconciled-snapshot-${step.index}`,
+          requirement,
+          type: "heading_or_control" as const,
+          backed: true,
+          source: "discovery" as const,
+          stepIndex: step.index,
+          target: snapshotOracle.match.targets.find((value) => value !== "__visible_date_time__") ?? snapshotOracle.match.targets[0],
+          evidence: [
+            "causal_snapshot_semantic_match:true",
+            `snapshot_step_index:${snapshotOracle.actionStepIndex}`,
+            `snapshot_captured_at:${snapshotOracle.observation.snapshot.capturedAt}`,
+            ...snapshotOracle.match.concepts.map((concept) => `observed_concept:${concept}`),
+          ],
+          details: {
+            visibleTargets: snapshotOracle.match.targets,
+            ...(snapshotOracle.match.dateTimePattern ? { visibleTextPattern: "date_time" } : {}),
+            snapshotStepIndex: snapshotOracle.actionStepIndex,
+            snapshotUrl: snapshotOracle.observation.snapshot.url,
+            snapshotCapturedAt: snapshotOracle.observation.snapshot.capturedAt,
+          },
+        };
+      }
       console.log(
         `[observable-oracle-reconciled] type=unsupported_or_unresolved backed=false step=${step.index} text="${requirement.slice(0, 120)}"`
       );
@@ -1162,6 +1389,46 @@ export function buildPromotionSourceScenario(
       };
     })
     .filter((oracle): oracle is SpecGenerationObservableOracle => oracle !== null);
+  // A failed/unresolved assertion can still be verified from the settled snapshot
+  // captured immediately after its own preceding successful action. Discovery's
+  // live text resolver may miss composite/domain wording (for example, "total a
+  // debitar" rendered as "Total debitado"). Reconcile only positive semantic
+  // assertions through that causal snapshot; never let a visible positive label
+  // satisfy a negative assertion or an assertion with no causal observation.
+  const causalSnapshotOracles: SpecGenerationObservableOracle[] = scenario.steps.flatMap((scenarioStep) => {
+    if (!isAssertionAction(scenarioStep.action) || satisfiedByPreviousAssertionIndexes.has(scenarioStep.index)) return [];
+    const requirement = (scenarioStep.action ?? "").trim();
+    if (!requirement || NEGATIVE_CLAUSE_PATTERN.test(normalizeOracleText(requirement))) return [];
+    const polarity = resolveScenarioStepPolarity(scenarioStep.index, requirement);
+    if (polarity === "negative") return [];
+    const snapshotOracle = findAssertionSnapshot(requirement, scenarioStep.index, scenario.steps, caseResult, snapshotObservations);
+    if (!snapshotOracle) return [];
+    console.log(`[observable-oracle-reconciled] type=heading_or_control backed=true step=${scenarioStep.index} snapshotStepIndex=${snapshotOracle.actionStepIndex} source=causal_snapshot_recovery targets=${snapshotOracle.match.targets.length}`);
+    return [{
+      id: `reconciled-causal-snapshot-${scenarioStep.index}`,
+      requirement,
+      type: "heading_or_control" as const,
+      backed: true,
+      source: "discovery" as const,
+      stepIndex: scenarioStep.index,
+      ...(polarity ? { polarity } : {}),
+      target: snapshotOracle.match.targets.find((value) => value !== "__visible_date_time__") ?? snapshotOracle.match.targets[0],
+      evidence: [
+        "causal_snapshot_semantic_match:true",
+        "recovered_after_assertion_resolution_miss:true",
+        `snapshot_step_index:${snapshotOracle.actionStepIndex}`,
+        `snapshot_captured_at:${snapshotOracle.observation.snapshot.capturedAt}`,
+        ...snapshotOracle.match.concepts.map((concept) => `observed_concept:${concept}`),
+      ],
+      details: {
+        visibleTargets: snapshotOracle.match.targets,
+        ...(snapshotOracle.match.dateTimePattern ? { visibleTextPattern: "date_time" } : {}),
+        snapshotStepIndex: snapshotOracle.actionStepIndex,
+        snapshotUrl: snapshotOracle.observation.snapshot.url,
+        snapshotCapturedAt: snapshotOracle.observation.snapshot.capturedAt,
+      },
+    }];
+  });
   const expectedLines = dedupeLower(splitMultilineValue(expectedResult));
   const discoveryStepByIndex = new Map(caseResult.steps.map((step) => [step.index, step]));
   const scenarioSteps = scenario.steps.map((step) => ({
@@ -1214,6 +1481,7 @@ export function buildPromotionSourceScenario(
   const controlledAdvanceAssertions = scenario.steps.flatMap((step) => {
     const refs = Array.isArray(step.requirementRefs) ? step.requirementRefs : [];
     return refs.flatMap((ref) => (((canonicalRequirementById.get(ref) as (CanonicalRequirement & { assertionIntents?: CanonicalAssertionIntent[] }) | undefined)?.assertionIntents ?? []).flatMap((intent) => {
+      if (canonicalRequirementById.get(ref)?.polarity === "negative") return [];
       const key = `${ref}:${intent}`;
       if (seenControlledAdvanceAssertions.has(key)) return [];
       seenControlledAdvanceAssertions.add(key);
@@ -1232,6 +1500,44 @@ export function buildPromotionSourceScenario(
     evidence: string[];
   }> = [];
   const observableOraclesRaw: SpecGenerationObservableOracle[] = [
+    ...caseResult.steps
+      .filter((step) => step.assertionStatus === "passed"
+        && step.assertionDiagnostics?.oracleType === "negative_visibility"
+        && typeof step.assertionDiagnostics.forbiddenTarget === "string"
+        && step.assertionDiagnostics.forbiddenTarget.trim().length > 0
+        && Number(step.assertionDiagnostics.visibleElementCount) > 0
+        && (step.assertionDiagnostics.snapshotStable === true
+          || (() => {
+            const auth=step.assertionDiagnostics.authRejectionBoundary as Record<string,unknown> | undefined;
+            return auth?.classification === "AUTH_REJECTED"
+              && typeof auth.authHttpStatus === "number" && auth.authHttpStatus >= 400 && auth.authHttpStatus < 500
+              && auth.errorSurfaceObserved === true && auth.businessSurfaceReached !== true;
+          })())
+        && (resolveScenarioStepPolarity(step.index, step.action) === "negative"
+          || NEGATIVE_CLAUSE_PATTERN.test(normalizeOracleText(step.action))))
+      .map((step): SpecGenerationObservableOracle => ({
+        id: `negative-visibility-${step.index}`,
+        requirement: scenario.steps.find((candidate) => candidate.index === step.index)?.action ?? step.action,
+        stepIndex: step.index,
+        type: "negative_visibility",
+        polarity: "negative",
+        backed: true,
+        source: "discovery",
+        target: (step.assertionDiagnostics!.forbiddenTarget as string).trim(),
+        evidence: ["declared_negative_visibility_checked_during_discovery"],
+      })),
+    ...observedPositiveAssertionSteps
+      .filter((step) => step.assertionClassification === "feedback_message" && Boolean(step.matchedText?.trim()))
+      .map((step): SpecGenerationObservableOracle => ({
+        id: `feedback-${step.index}`,
+        requirement: scenario.steps.find((candidate) => candidate.index === step.index)?.action ?? step.action,
+        stepIndex: step.index,
+        type: isCredentialRejectionExpectation(step.action) ? "credential_rejection" : "literal_visible_text",
+        backed: true,
+        source: "discovery",
+        target: step.matchedText!.trim(),
+        evidence: ["visible_feedback_observed_during_discovery"],
+      })),
     ...observedAssertions.map((assertion, index) => ({
       id: `observed-${String(index + 1).padStart(2, "0")}`,
       requirement: assertion,
@@ -1254,25 +1560,27 @@ export function buildPromotionSourceScenario(
       expectedResultRequirementRefs,
       recordingOutcomePolarity,
       finalSnapshot,
+      snapshotObservations,
     ),
     ...satisfiedReconciledOracles,
+    ...causalSnapshotOracles,
   ];
 
-  // Finalization: a provisional unsupported_or_unresolved (backed=false) for a
-  // scenarioStepIndex that already has a backed, supported reconciled oracle must
-  // not remain as a blocking obligation.
+  // Finalization: a weaker unbacked oracle emitted by a probe must not remain a
+  // blocking obligation when the same scenario step has a supported oracle
+  // backed by its causal runtime snapshot. Step identity is the shared source
+  // contract here; unsupported requirements without a backed oracle stay intact.
   const backedStepIndexes = new Set<number>(
     observableOraclesRaw
       .filter((oracle) => oracle.backed === true && oracle.type !== "unsupported_or_unresolved" && typeof oracle.stepIndex === "number")
       .map((oracle) => oracle.stepIndex as number)
   );
   const filteredObservableOracles = observableOraclesRaw.filter((oracle) => {
-    const provisional = oracle.type === "unsupported_or_unresolved"
-      && oracle.backed === false
+    const provisional = oracle.backed !== true
       && typeof oracle.stepIndex === "number"
       && backedStepIndexes.has(oracle.stepIndex as number);
     if (provisional) {
-      console.log(`[observable-oracle-finalize] scenarioStepIndex=${oracle.stepIndex} supportedBackedOracle=true provisionalUnresolvedRemoved=true`);
+      console.log(`[observable-oracle-finalize] scenarioStepIndex=${oracle.stepIndex} supportedBackedOracle=true unbackedDuplicateRemoved=true type=${oracle.type}`);
     }
     return !provisional;
   });
@@ -1288,7 +1596,13 @@ export function buildPromotionSourceScenario(
       action: step.action,
       description: step.action,
       expected: step.expected?.trim() || undefined,
-      valueKey: (step as typeof step & { valueKey?: string }).valueKey,
+      // A captured selection's display sentence is rewritten (e.g. "opción que contiene …"), which
+      // drops its "[valueKey]" token. The matched recording action still owns that data binding;
+      // without it the deterministic compiler has no value authority for the select step.
+      valueKey: (step as typeof step & { valueKey?: string }).valueKey
+        ?? (recordingActionByScenarioStepIndex.get(step.index)?.actionType === "select"
+          ? (recordingActionByScenarioStepIndex.get(step.index) as { valueKey?: string } | undefined)?.valueKey
+          : undefined),
       polarity: (step as typeof step & { polarity?: AssertionPolarity }).polarity,
       // Recording technical authority (owner/stableDescendants/semanticShape) must survive into
       // this persisted SpecGenerationSourceScenario — this is the actual object
@@ -1801,23 +2115,59 @@ function reconcileDiscoveryStatusAfterLocalClosure(
   };
 }
 
-async function loadLatestSnapshot(dir: string): Promise<{ snapshot?: PageSnapshot; snapshotPath?: string }> {
+async function captureFinalStableSnapshot(outputDir: string, page: import("@playwright/test").Page, stepIndex: number): Promise<void> {
+  try {
+    const [{ scanCurrentPage }, { waitForVisualSettle }, { loadEvidenceConfig }] = await Promise.all([
+      import("../explorer/page-scanner"),
+      import("../evidence/screen-settle"),
+      import("../evidence/evidence-types"),
+    ]);
+    const evidenceConfig = loadEvidenceConfig();
+    const settled = await waitForVisualSettle(page, {
+      timeoutMs: evidenceConfig.finalSettleTimeoutMs,
+      quietMs: evidenceConfig.settleQuietMs,
+    });
+    if (!settled.settled || page.isClosed()) {
+      console.log(`[discovery-final-snapshot] captured=false step=${stepIndex} reason=${settled.loaderVisible ? "loader_visible" : "not_settled"}`);
+      return;
+    }
+    const snapshot = await scanCurrentPage(page);
+    const directory = path.join(outputDir, "evidence");
+    await mkdir(directory, { recursive: true });
+    await writeFile(path.join(directory, "final-snapshot.json"), JSON.stringify({ ...snapshot, discoveryStepIndex: stepIndex }, null, 2), "utf-8");
+    console.log(`[discovery-final-snapshot] captured=true step=${stepIndex} elements=${snapshot.elements.length} capturedAt=${snapshot.capturedAt}`);
+  } catch (error) {
+    console.log(`[discovery-final-snapshot] captured=false reason=${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+async function loadSnapshotObservations(dir: string): Promise<IndexedPageSnapshot[]> {
   try {
     const files = await readdir(dir);
-    const candidates = files
-      .filter((f) => f.endsWith("-snapshot.json"))
-      .sort((a, b) => {
-        const stepA = Number(a.match(/step-(\d+)-snapshot\.json$/)?.[1] ?? -1);
-        const stepB = Number(b.match(/step-(\d+)-snapshot\.json$/)?.[1] ?? -1);
-        return stepA - stepB || a.localeCompare(b);
-      });
-    const last = candidates[candidates.length - 1];
-    if (!last) return {};
-    const snapshotPath = path.join(dir, last);
-    return { snapshotPath, snapshot: JSON.parse(await readFile(snapshotPath, "utf-8")) as PageSnapshot };
+    const candidates = files.filter((file) => file.endsWith("-snapshot.json") || file === "final-snapshot.json");
+    const observations: IndexedPageSnapshot[] = [];
+    for (const file of candidates) {
+      const snapshotPath = path.join(dir, file);
+      const parsed = JSON.parse(await readFile(snapshotPath, "utf-8")) as PageSnapshot & { discoveryStepIndex?: number };
+      const filenameIndex = Number(file.match(/step-(\d+)-snapshot\.json$/)?.[1]);
+      const stepIndex = Number.isInteger(parsed.discoveryStepIndex)
+        ? parsed.discoveryStepIndex!
+        : Number.isInteger(filenameIndex) ? filenameIndex : undefined;
+      if (stepIndex === undefined) continue;
+      const { discoveryStepIndex: _ignored, ...snapshot } = parsed;
+      observations.push({ stepIndex, snapshot: snapshot as PageSnapshot, snapshotPath });
+    }
+    return observations.sort((a, b) => a.stepIndex - b.stepIndex
+      || Number(a.snapshotPath?.endsWith("final-snapshot.json")) - Number(b.snapshotPath?.endsWith("final-snapshot.json")));
   } catch {
-    return {};
+    return [];
   }
+}
+
+async function loadLatestSnapshot(dir: string): Promise<{ snapshot?: PageSnapshot; snapshotPath?: string }> {
+  const observations = await loadSnapshotObservations(dir);
+  const latest = observations[observations.length - 1];
+  return latest ? { snapshot: latest.snapshot, snapshotPath: latest.snapshotPath } : {};
 }
 
 export function collectLocalPendingAssertionDiagnostics(
@@ -2722,6 +3072,14 @@ export async function runCaseDiscoveryWorkflow(
           console.log(`[evidence:scenario] classificationFromPlan scenario=${caseResult.scenarioId} evidenceKind=${kind} isDetail=${isDetail} lastActionTarget="${lastTarget}"`);
         }
         await finalizeDiscoveryEvidence(evidenceRecorder, caseResult || undefined, page);
+        if (caseResult && page && !page.isClosed()) {
+          const lastSuccessfulAction = [...caseResult.steps].reverse().find((step) =>
+            step.status === "found" && !isAssertionLikeStep(step),
+          );
+          if (lastSuccessfulAction) {
+            await captureFinalStableSnapshot(outputDir, page, lastSuccessfulAction.index);
+          }
+        }
 
         // Log status after finalization to verify evidence gate status propagation
         if (caseResult) {
@@ -3134,8 +3492,23 @@ export async function runCaseDiscoveryWorkflow(
     console.log(`[discovery:workflow] Overwrite enabled: ${options.overwrite === true}`);
 
     const promotionResultPath = path.join(outputDir, "promotion-result.json");
-    const finalSnapshot = await loadLatestSnapshot(path.join(outputDir, "evidence"));
-    const sourceScenario = buildPromotionSourceScenario(scenario, caseResult, finalSnapshot.snapshot);
+    const snapshotObservations = await loadSnapshotObservations(path.join(outputDir, "evidence"));
+    const finalSnapshot = snapshotObservations[snapshotObservations.length - 1];
+    const sourceScenario = buildPromotionSourceScenario(scenario, caseResult, finalSnapshot?.snapshot, snapshotObservations);
+    if (!options.contextOnly) {
+      try {
+        const learning = await persistClassicJiraDiscoveryRoute({scenario,plan:caseResult.candidatePlan,
+          sourceScenario,
+          status:caseResult.status,appSlug:workflowAppSlug,
+          profileRevision:jiraProfileRevision(options.appProfile ?? {baseUrl:activeConfig.app.baseUrl,loginMode:activeConfig.app.loginMode}),
+          jobId:options.runId ?? path.basename(outputDir),
+          evidenceRefs:snapshotObservations.map(item=>item.snapshotPath).filter((ref):ref is string=>typeof ref==='string'),
+        });
+        console.log(`[jira-knowledge-learning] status=${learning.status}`);
+      } catch {
+        console.log('[jira-knowledge-learning] status=failed reason=knowledge_storage_unavailable');
+      }
+    }
     if (options.contextOnly) {
       if (!caseResult.candidatePlan || !sourceScenario.steps?.length) {
         return { ...caseResult, status: "discovery_failed", failedReason: "insufficient_context", outputDir } as any;

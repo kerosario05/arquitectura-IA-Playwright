@@ -1,6 +1,6 @@
 import { computeTokenScore, normalizeText } from "./target-resolver";
 import { resolveCatalogListAssertion, isCatalogListAssertion } from "./catalog-list-resolver";
-import { resolveFeedbackMessageAssertion, isFeedbackAssertion } from "./feedback-message-resolver";
+import { resolveFeedbackMessageAssertion, isFeedbackAssertion, isCredentialRejectionExpectation } from "./feedback-message-resolver";
 import { resolveCompoundFormFieldsAssertion, parseCompoundFormFieldsAssertion } from "./compound-form-fields-resolver";
 import type { PageSnapshot, SnapshotElement } from "../types/page-snapshot.types";
 import type { Locator, Page } from "@playwright/test";
@@ -539,6 +539,9 @@ function detectAssertionConsumption(
   evidence?: string;
   consumedByAction?: string;
 } {
+  // Form fields and a completed fill/click are not evidence of credential rejection.
+  // Leave this expectation to visible feedback or the classified terminal response.
+  if (isCredentialRejectionExpectation(assertionText)) return { consumed: false };
   const normalizedAssertion = normalizeText(assertionText);
   const assertionTokens = tokenizeForConsumption(assertionText);
   const fieldGroups = extractQuotedOrDelimitedFieldGroups(assertionText);
@@ -1148,6 +1151,122 @@ export function buildConcreteAssertionsFromExpected(
   };
 }
 
+/**
+ * Runtime evidence that lets an explicit absence assertion pass. Supplied only by the
+ * discovery runner after taking a fresh snapshot. Ordinary absence requires a stable
+ * snapshot; a terminal auth rejection can independently establish the boundary.
+ */
+export type NegativeVisibilityEvidence = {
+  /** True only when this snapshot was captured after the page reported a final stable state. */
+  snapshotStable?: boolean;
+  /** Present when the run observed a completed authentication rejection. */
+  authRejection?: {
+    classification?: string;
+    authHttpStatus?: number;
+    errorSurfaceObserved?: boolean;
+    businessSurfaceReached?: boolean;
+    /** Optional visible feedback; the auth rejection boundary is independently observed. */
+    positiveFeedbackObserved?: boolean;
+  };
+};
+
+const NEGATIVE_VISIBILITY_LANGUAGE = /\b(?:que\s+)?no\s+se\s+(?:muestr\w*|visualiz\w*|vea\w*|despliegu\w*|present\w*|aparezc\w*)\b|\bque\s+no\s+aparezc\w*|\bno\s+(?:debe|deberia)\s+(?:mostrarse|visualizarse|aparecer)\b|\b(?:should|must)\s+not\s+(?:be\s+)?(?:shown|displayed|visible|appear)\b|\bis\s+not\s+(?:shown|displayed|visible)\b/;
+
+/**
+ * Returns a value only when the assertion explicitly declares negative visibility polarity
+ * (canonical polarity, or unambiguous "no se muestre"-style language). `target` is undefined
+ * when the forbidden subject cannot be isolated; callers must then block, never fall back to a
+ * positive lookup. Blocked-transition intents are not visibility assertions.
+ */
+export function classifyNegativeVisibility(input: AssertionTargetInput): { target?: string } | undefined {
+  const canonical = input.canonicalAssertion;
+  if (canonical?.polarity === "positive" || canonical?.intent === "transition_blocked") return undefined;
+  const language = normalizeText(input.action || input.target);
+  if (canonical?.polarity !== "negative" && !NEGATIVE_VISIBILITY_LANGUAGE.test(language)) return undefined;
+  const quoted = (input.action || "").match(/["“‘']([^"”’']+)["”’']/)?.[1]?.trim();
+  const target = (quoted ?? normalizeText(input.target)
+    .replace(/^(?:validar|verificar|comprobar|confirmar)\s+que\s+/, "")
+    .replace(NEGATIVE_VISIBILITY_LANGUAGE, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/^(?:el|la|los|las|un|una)\s+/, "")).trim();
+  return target ? { target } : {};
+}
+
+function findVisibleForbiddenText(snapshot: PageSnapshot, target: string): string | undefined {
+  const wanted = normalizeText(target);
+  const tokens = wanted.split(/\s+/).filter((token) => token.length > 2);
+  for (const element of snapshot.elements ?? []) {
+    if (element.visible === false) continue;
+    for (const value of [element.text, element.label, element.accessibleName, element.ariaLabel, element.title, element.name, element.placeholder]) {
+      if (typeof value !== "string" || !value.trim()) continue;
+      const normalized = normalizeText(value);
+      if (normalized.includes(wanted) || (tokens.length > 0 && tokens.every((token) => normalized.includes(token)))) return value.trim();
+    }
+  }
+  return undefined;
+}
+
+function resolveNegativeVisibilityAssertion(
+  snapshot: PageSnapshot,
+  assertion: AssertionTargetInput,
+  negative: { target?: string },
+  evidence: NegativeVisibilityEvidence | undefined,
+  visibleTexts: string[],
+): AssertionResolutionResult {
+  const diagnostics: Record<string, unknown> = {
+    oracleType: "negative_visibility",
+    polarity: "negative",
+    forbiddenTarget: negative.target,
+    snapshotStable: evidence?.snapshotStable === true,
+    ...(evidence?.authRejection ? { authRejectionBoundary: { ...evidence.authRejection } } : {}),
+  };
+  const result = (status: AssertionResolutionStatus, reason: string, confidence: number): AssertionResolutionResult => {
+    console.log(`[assertion] negative_visibility target="${negative.target ?? ""}" status=${status} reason=${reason}`);
+    // matchedText is deliberately never set: downstream treats a matched text as runtime-found.
+    return {
+      assertionText: assertion.target,
+      normalizedAssertion: normalizeText(assertion.target),
+      classification: "passive_visibility",
+      status,
+      confidence,
+      reason,
+      closestCandidates: [],
+      visibleTexts,
+      assertionDiagnostics: diagnostics,
+    };
+  };
+  if (!negative.target) return result("needs_assertion_resolution", "negative_visibility_target_unresolved", 0);
+  const present = findVisibleForbiddenText(snapshot, negative.target);
+  if (present) {
+    diagnostics.observedForbiddenText = present;
+    return result("failed", "negative_visibility_target_present", 0);
+  }
+  const visibleElementCount = (snapshot.elements ?? []).filter((element) => element.visible !== false
+    && [element.text, element.label, element.accessibleName, element.ariaLabel, element.title, element.name]
+      .some((value) => typeof value === "string" && value.trim())).length;
+  diagnostics.visibleElementCount = visibleElementCount;
+  if (visibleElementCount === 0) return result("needs_assertion_resolution", "negative_visibility_blank_snapshot", 0);
+  const auth = evidence?.authRejection;
+  let terminalAuthRejection = false;
+  if (auth) {
+    const rejectedHttpStatus = typeof auth.authHttpStatus === "number" && auth.authHttpStatus >= 400 && auth.authHttpStatus < 500;
+    if (auth.classification !== "AUTH_REJECTED" || !rejectedHttpStatus || auth.errorSurfaceObserved !== true || auth.businessSurfaceReached === true) {
+      return result("needs_assertion_resolution", "negative_visibility_auth_rejection_boundary_unmet", 0);
+    }
+    terminalAuthRejection = true;
+  }
+  // A fresh, nonblank snapshot has already been checked above. A terminal auth
+  // 4xx with an observed error surface and no business surface proves that the
+  // forbidden success artifact cannot be the outcome, even if the app leaves a
+  // stale loading indicator mounted. Without that independent boundary, stability
+  // remains mandatory so a transient/blank page cannot satisfy absence.
+  if (evidence?.snapshotStable !== true && !terminalAuthRejection) {
+    return result("needs_assertion_resolution", "negative_visibility_snapshot_unstable", 0);
+  }
+  return result("passed", terminalAuthRejection ? "negative_visibility_absent_terminal_auth_rejection" : "negative_visibility_absent_stable_snapshot", terminalAuthRejection ? 0.95 : 0.9);
+}
+
 export function resolveAssertionTargets(
   snapshot: PageSnapshot,
   assertionTargets: AssertionTargetInput[],
@@ -1155,6 +1274,7 @@ export function resolveAssertionTargets(
     childSignalsByIndex?: Record<number, string[]>;
     executedActions?: Array<{ action: string; target: string; status: string }>;
     appConfig?: any; // app.config.json with assertionAliases/uiAliases
+    negativeVisibility?: NegativeVisibilityEvidence;
   }
 ): AssertionResolutionResult[] {
   const visibleTexts = uniqueVisibleTexts(snapshot);
@@ -1201,7 +1321,9 @@ export function resolveAssertionTargets(
   for (const assertion of assertionTargets) {
     const structuredOracleType = assertion.canonicalAssertion?.oracleType
       ?? (assertion.rowScope !== undefined || assertion.expectedValueKey ? "row_scoped_value" : undefined);
-    const isPassiveVisibility = !structuredOracleType && /validar que|assertion.*visible/i.test(assertion.action || assertion.target);
+    const isPassiveVisibility = !structuredOracleType
+      && !isCredentialRejectionExpectation(assertion.action || assertion.target)
+      && /\b(?:validar|verificar|comprobar|confirmar)\b|assertion.*visible/i.test(assertion.action || assertion.target);
     if (structuredOracleType) {
       console.log(`[assertion] classified target="${assertion.target}" type=${structuredOracleType} source=canonical`);
     } else if (isPassiveVisibility) {
@@ -1257,8 +1379,15 @@ export function resolveAssertionTargets(
         },
       } as AssertionResolutionResult;
     }
+    // Explicit absence is never a positive lookup: it passes only on stable runtime absence.
+    const negativeVisibility = classifyNegativeVisibility(assertion);
+    if (negativeVisibility) {
+      return resolveNegativeVisibilityAssertion(snapshot, assertion, negativeVisibility, options?.negativeVisibility, visibleTexts);
+    }
     const { target: extractedTarget, kind } = extractAssertionTarget(assertion.target);
-    const isPassiveVisibility = !structuredOracleType && /validar que|assertion.*visible/i.test(assertion.action || assertion.target);
+    const isPassiveVisibility = !structuredOracleType
+      && !isCredentialRejectionExpectation(assertion.action || assertion.target)
+      && /\b(?:validar|verificar|comprobar|confirmar)\b|assertion.*visible/i.test(assertion.action || assertion.target);
 
     // Task 2 & 3: Resolve target with aliases
     console.log(`[assertion] resolving target="${extractedTarget}" candidates=${snapshot.elements?.length ?? 0}`);

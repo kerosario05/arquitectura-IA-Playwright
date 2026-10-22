@@ -178,3 +178,19 @@ test("7/multiOptionOrderIndependent. a structural fixture equivalent to three si
     );
   }
 });
+
+test("8/selectValueKeySurvivesRewrittenSentence. a rule-rewritten select step keeps its recording valueKey so the compiler has value authority", () => {
+  const step = {
+    index: 1,
+    action: 'Seleccionar opción que contiene Alpha (coincidencia 1) en el campo "synthetic-select"',
+    dataHints: [],
+  } as TestScenarioStep;
+  const scenario = {
+    ...buildScenario([step]),
+    recordingExecutionContract: {
+      actions: [{ actionType: "select", humanStep: 'Seleccionar [synthetic_select_value] en "synthetic-select"', semanticField: "synthetic-select", valueKey: "synthetic_select_value" }],
+    },
+  } as unknown as TestScenario;
+  const sourceScenario = buildPromotionSourceScenario(scenario, buildCaseResult());
+  assert.equal((sourceScenario.steps?.find((s) => s.index === 1) as any)?.valueKey, "synthetic_select_value");
+});

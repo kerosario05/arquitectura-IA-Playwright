@@ -4,12 +4,13 @@ import path from 'node:path';
 import { withTransaction, withConnection, resolveDriverName } from '../db/sql-connection';
 import type { DbConnection } from '../db/db-connection';
 
-export type JiraLearnedAction = { action: 'navigate' | 'click' | 'fill' | 'select' | 'press'; field?: string; dataRef?: string; key?: string };
+export type JiraLearnedAction = { action: 'navigate' | 'click' | 'fill' | 'select' | 'press'; field?: string; dataRef?: string; key?: string; targetKind?: 'observed_control' | 'semantic_request' };
 export type JiraLearnedRoute = {
   schemaVersion: 1; engine: 'jira_semantic'; appSlug: string; id: string;
   profileRevision: string; sourceIssueKey: string; scenarioId: string; jobId: string;
   validatedAt: string; startsFrom: 'project_entry' | 'authenticated_state';
   actions: JiraLearnedAction[]; evidenceRefs: string[];
+  observables?: Array<{ requirement: string; target: string }>;
   invalidatedAt?: string;
 };
 

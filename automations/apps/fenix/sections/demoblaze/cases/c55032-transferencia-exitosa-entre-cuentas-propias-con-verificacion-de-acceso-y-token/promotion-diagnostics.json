@@ -1,0 +1,20 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\fenix\\sections\\demoblaze\\cases\\c55032-transferencia-exitosa-entre-cuentas-propias-con-verificacion-de-acceso-y-token\\case.spec.ts",
+  "specHash": "d08c634acf87c0822c25b963303a3f6b29afd48121062d8f4415d704c7a22a0c",
+  "specSource": "generatedSpec"
+}

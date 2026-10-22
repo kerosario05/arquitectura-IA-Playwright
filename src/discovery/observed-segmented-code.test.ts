@@ -3,9 +3,45 @@ import test from "node:test";
 import { chromium } from "@playwright/test";
 import { observeSegmentedCodeEvidence } from "./observed-segmented-code";
 import { attemptSegmentedInputFill } from "./target-resolver";
+import { bindAuthoredRuntimeField, parseScenarioStepsForDiscovery } from "./case-discovery";
+import { detectCredentialRole, resolveDataKey } from "../data/data-key-resolver";
+import type { TestScenario } from "../types/testrail.types";
 
 const slots = (name: string, count = 6) => Array.from({ length: count }, (_, index) =>
   `<input type="text" name="${name}" tabindex="${index + 1}" maxlength="1">`).join("");
+
+test("login and authorization keep independent data through segmented observation and serialized execution", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    const entries = [{ key: "codigo_acceso", value: "123456", source: "explicit_runtime_input" },
+      { key: "token_autorizacion", value: "654321", source: "explicit_runtime_input" }];
+    const scenario: TestScenario = { source: "testrail", caseId: 1, externalId: "synthetic", title: "synthetic",
+      steps: [
+        { index: 1, action: 'Ingresar el código de acceso en "Código".', dataHints: [] },
+        { index: 2, action: 'Ingresar el token de autorización en "Token".', dataHints: [] },
+      ] };
+    const targets = parseScenarioStepsForDiscovery(scenario).actionTargets;
+    for (const [index, target] of targets.entries()) {
+      await page.setContent(`<form id="verification">${slots(index === 0 ? "verification[]" : "authorization[]")}</form>`);
+      assert.equal(bindAuthoredRuntimeField(scenario, target, entries), true);
+      assert.equal(target.valueKey, entries[index].key);
+      const observed = await observeSegmentedCodeEvidence(page, target.valueKey);
+      assert.equal(observed?.kind, "segmented_input", target.valueKey);
+      const plan = JSON.parse(JSON.stringify({ valueKey: target.valueKey, playwrightRecorderEvidence: observed }));
+      const resolved = resolveDataKey(plan.valueKey, { runtimeEntries: entries });
+      assert.equal(resolved.source, "explicit_runtime_input");
+      assert.equal(resolved.masked, true);
+      assert.equal((await attemptSegmentedInputFill(page, plan.playwrightRecorderEvidence, resolved.value!)).ok, true);
+      assert.equal(await page.locator('input[type="text"]').evaluateAll(elements => elements.map(el => (el as HTMLInputElement).value).join("")), entries[index].value);
+      assert.equal(JSON.stringify(plan).includes(entries[index].value), false);
+    }
+    assert.equal(detectCredentialRole("token_autorizacion"), undefined, "widget support never reclassifies the data as a login OTP");
+    assert.equal(resolveDataKey("auth.otp", { runtimeEntries: entries }).value, entries[0].value);
+    assert.equal(await observeSegmentedCodeEvidence(page, "monto"), undefined);
+    assert.equal(await observeSegmentedCodeEvidence(page, "tokenized_label"), undefined);
+  } finally { await browser.close(); }
+});
 
 test("observed ordered code group survives plan serialization and uses existing segmented runtime", async () => {
   const browser = await chromium.launch({ headless: true });

@@ -69,6 +69,7 @@ function normalizeText(text: string): string {
 }
 
 function isFeedbackAssertion(assertionText: string): boolean {
+  if (isCredentialRejectionExpectation(assertionText)) return true;
   for (const pattern of FEEDBACK_ASSERTION_PATTERNS) {
     if (pattern.test(assertionText)) return true;
   }
@@ -82,6 +83,19 @@ function isFeedbackAssertion(assertionText: string): boolean {
   }
 
   return false;
+}
+
+export function isCredentialRejectionExpectation(text: string): boolean {
+  const normalized = normalizeText(text);
+  return /\b(credenciales|credentials|autenticacion|authentication)\b/.test(normalized)
+    && /\b(problema|error|invalid\w*|incorrect\w*|rechaz\w*|reject\w*|denied|failed|failure)\b/.test(normalized)
+    && !/\b(no se muestre|no mostrar|not visible|not shown|must not|does not)\b/.test(normalized);
+}
+
+export function isCredentialRejectionMessage(text: string): boolean {
+  const normalized = normalizeText(text);
+  return /\b(credenciales|credentials|autenticacion|authentication|usuario|username|contrasena|password)\b/.test(normalized)
+    && /\b(invalid\w*|incorrect\w*|rechaz\w*|reject\w*|denied|failed|failure)\b/.test(normalized);
 }
 
 function detectFeedbackMessageType(element: SnapshotElement): FeedbackMessageType | null {
@@ -157,7 +171,27 @@ export function resolveFeedbackMessageAssertion(
   }
 
   const normalizedAssertion = normalizeText(assertionText);
+  const credentialRejection = isCredentialRejectionExpectation(assertionText);
   const messages = findFeedbackMessages(snapshot);
+  // Authentication products often render a rejection inside a generic modal body
+  // without role=alert/dialog or a feedback-specific class. The visible message itself
+  // is still authoritative when it explicitly names invalid credentials; do not make
+  // the accessible-role convention a requirement for recognizing that outcome.
+  if (credentialRejection) {
+    for (const element of snapshot.elements) {
+      if (element.visible === false) continue;
+      const text = [element.text, element.label, element.accessibleName, element.ariaLabel]
+        .find((value): value is string => typeof value === "string" && isCredentialRejectionMessage(value));
+      if (!text || messages.some((message) => normalizeText(message.text) === normalizeText(text))) continue;
+      messages.push({
+        type: "dialog",
+        text: text.trim(),
+        visible: true,
+        ...(element.role ? { role: element.role } : {}),
+        ...((element as any).className ? { className: (element as any).className } : {}),
+      });
+    }
+  }
 
   const evidence: string[] = [];
   let capturedMessage: FeedbackMessageEvidence | undefined;
@@ -178,7 +212,9 @@ export function resolveFeedbackMessageAssertion(
       
       let matches = false;
       
-      if (normalizedAssertion.includes("éxito") || normalizedAssertion.includes("exito") || normalizedAssertion.includes("success")) {
+      if (credentialRejection) {
+        matches = isCredentialRejectionMessage(msg.text);
+      } else if (normalizedAssertion.includes("éxito") || normalizedAssertion.includes("exito") || normalizedAssertion.includes("success")) {
         matches = /éxito|exito|success|ok|completed|added/i.test(msg.text);
       } else if (normalizedAssertion.includes("error")) {
         matches = /error|failed|failure/i.test(msg.text);
@@ -200,7 +236,7 @@ export function resolveFeedbackMessageAssertion(
     }
   }
 
-  if (!capturedMessage && messages.length > 0) {
+  if (!credentialRejection && !capturedMessage && messages.length > 0) {
     const visibleMsg = messages.find(m => m.visible);
     if (visibleMsg) {
       capturedMessage = visibleMsg;

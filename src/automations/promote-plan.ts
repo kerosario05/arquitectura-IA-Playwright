@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { createHash } from "node:crypto";
+import { resolveDataKey } from "../data/data-key-resolver";
 import { config as envConfig } from "../config/env";
 import { validateExecutionPlan } from "../plans/execution-plan-validator";
 import type { ExecutionPlan, ExecutionPlanStep, PlanTarget } from "../types/execution-plan.types";
@@ -1345,8 +1346,9 @@ async function registerPOMCandidatesForBlockedPromotion(
 }
 
 /**
- * Pure precedence merge for already-resolved runtime input authority. Never resolves data
- * itself -- both inputs are already-resolved entries. Scenario-scoped runtimeEntries (which may
+ * Merge already-resolved runtime inputs and materialize the plan's canonical key bindings
+ * through Discovery's shared resolver (no generation or environment fallback).
+ * Scenario-scoped runtimeEntries (which may
  * carry CURRENT_QA_EDIT-sourced overrides from the caller's own resolver, e.g. Discovery) win
  * over static/configured dataContextEntries for the same key -- the same precedence Discovery's
  * own resolveDataKey already gives runtimeEntries over configured data.
@@ -1354,8 +1356,9 @@ async function registerPOMCandidatesForBlockedPromotion(
 export function buildRuntimeInputValues(
   dataContextEntries: DataContextEntry[],
   runtimeEntries: DataContextEntry[] | undefined,
+  requiredValueKeys: string[] = [],
 ): Record<string, string> {
-  return {
+  const values = {
     ...Object.fromEntries(
       dataContextEntries
         .filter((entry) => entry.value.trim().length > 0)
@@ -1367,6 +1370,14 @@ export function buildRuntimeInputValues(
         .map((entry) => [entry.key, entry.value])
     ),
   };
+  // Discovery may bind an authored input to a canonical credential key.
+  // Materialize that same binding for the child spec, using the shared resolver
+  // rather than inventing aliases or transporting sensitive literals in source.
+  for (const key of new Set(requiredValueKeys)) {
+    const resolution = resolveDataKey(key, { testData: values, runtimeEntries });
+    if (resolution.status === "resolved" && resolution.value?.trim()) values[key] = resolution.value;
+  }
+  return values;
 }
 
 export async function promoteExecutionPlan(
@@ -1509,14 +1520,15 @@ export async function promoteExecutionPlan(
   }
 
   // Already-resolved runtime input authority the promotion pipeline holds -- computed once,
-  // reused as-is by the functionalExecution child env below. Never re-resolved downstream; never
+  // including canonical plan bindings, reused as-is by the functionalExecution child env below; never
   // logged (see materializePromotedRuntimeEnv). input.runtimeEntries (scenario-scoped, may carry
   // CURRENT_QA_EDIT-sourced overrides from the caller's own resolver, e.g. Discovery) takes
   // precedence over static/configured dataContext entries for the same key -- same precedence
   // Discovery's own resolveDataKey already gives runtimeEntries over configured data.
   const runtimeForData = input.fullConfig ?? envConfig;
   const dataContext = buildDataContext(runtimeForData);
-  const runtimeInputValues = buildRuntimeInputValues(dataContext.entries, input.runtimeEntries);
+  const runtimeInputValues = buildRuntimeInputValues(dataContext.entries, input.runtimeEntries,
+    plan.steps.flatMap(step => step.valueKey ? [step.valueKey] : []));
   if (appPaths.caseDir) {
     const promotedDataManifest = buildPromotedDataManifest(plan, dataContext);
     savePromotedDataManifestSync(path.join(appPaths.caseDir, "promoted-data.json"), promotedDataManifest);

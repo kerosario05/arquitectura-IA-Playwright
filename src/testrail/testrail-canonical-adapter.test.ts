@@ -69,6 +69,7 @@ test("assigns stable identity and semantic polarity to assertion steps", () => {
       { content: "Fill the form" },
       { content: "Validar que se muestre la validación" },
       { content: "Validar que no permita continuar" },
+      { content: 'Validar que no se muestre "comprobante de transacción exitosa"' },
     ],
     custom_expected: "The invalid form remains blocked",
   });
@@ -77,11 +78,14 @@ test("assigns stable identity and semantic polarity to assertion steps", () => {
     undefined,
     ["requirement:testrail:case:903:step:2:assertion"],
     ["requirement:testrail:case:903:step:3:assertion"],
+    ["requirement:testrail:case:903:step:4:assertion"],
   ]);
   assert.equal(canonical.requirements.find((item) => item.requirementId.endsWith("step:2:assertion"))?.polarity, "positive");
   assert.equal(canonical.requirements.find((item) => item.requirementId.endsWith("step:2:assertion"))?.polarityResolvedAt, "canonical_adapter");
   assert.equal(canonical.requirements.find((item) => item.requirementId.endsWith("step:3:assertion"))?.polarity, "negative");
   assert.equal(canonical.steps[2]?.canonicalAssertion?.polarity, "negative");
+  assert.equal(canonical.requirements.find((item) => item.requirementId.endsWith("step:4:assertion"))?.polarity, "negative");
+  assert.equal(canonical.steps[3]?.canonicalAssertion?.polarity, "negative");
   assert.deepEqual(canonical.expectedResultRequirementRefs, []);
 });
 

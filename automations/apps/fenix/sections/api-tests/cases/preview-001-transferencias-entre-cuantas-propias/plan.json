@@ -57,7 +57,7 @@
     {
       "index": 3,
       "action": "fill",
-      "description": "Ingresar \"130598983\" en \"RNC:\"",
+      "description": "Ingresar \"130872392\" en \"RNC:\"",
       "target": {
         "strategy": "text",
         "value": "RNC",
@@ -69,7 +69,7 @@
     {
       "index": 4,
       "action": "fill",
-      "description": "Ingresar \"olivam\" en \"Usuario:\"",
+      "description": "Ingresar \"SAMOTA\" en \"Usuario:\"",
       "target": {
         "strategy": "text",
         "value": "Usuario",
@@ -177,14 +177,14 @@
     {
       "index": 12,
       "action": "click",
-      "description": "Seleccionar opción que contiene Cuenta Corrientes (coincidencia 1) en el campo \"account-from-select-input\"",
+      "description": "Seleccionar opción que contiene Cuenta Corriente (coincidencia 1) en el campo \"account-from-select-input\"",
       "target": {
         "strategy": "recorded_visible_option_identity",
-        "value": "Cuenta Corrientes / 11311000003156 / RD$152,330.44",
+        "value": "Cuenta Corrientes / 11121000000739 / RD$750,161.73",
         "exact": false,
         "metadata": {
           "originalTarget": "account-from-select-input",
-          "resolvedTargetName": "Cuenta Corrientes / 11311000003156 / RD$152,330.44",
+          "resolvedTargetName": "Cuenta Corrientes / 11121000000739 / RD$750,161.73",
           "aiAssisted": false,
           "repairType": "target_resolution",
           "decisionStatus": "resolved",
@@ -209,14 +209,14 @@
     {
       "index": 14,
       "action": "click",
-      "description": "Seleccionar opción que contiene Cuenta de Ahorro (coincidencia 1) en el campo \"account-to-select-input\"",
+      "description": "Seleccionar opción que contiene Cuenta de Ahorros (coincidencia 1) en el campo \"account-to-select-input\"",
       "target": {
         "strategy": "recorded_visible_option_identity",
-        "value": "Cuenta de Ahorro / 21312020003368 / US$1,660.71",
+        "value": "Cuenta de Ahorro / 21122020001253 / US$1,286.35",
         "exact": false,
         "metadata": {
           "originalTarget": "account-to-select-input",
-          "resolvedTargetName": "Cuenta de Ahorro / 21312020003368 / US$1,660.71",
+          "resolvedTargetName": "Cuenta de Ahorro / 21122020001253 / US$1,286.35",
           "aiAssisted": false,
           "repairType": "target_resolution",
           "decisionStatus": "resolved",
@@ -314,7 +314,7 @@
   "notes": [
     "Discovery completed successfully. All targets and concrete assertions passed."
   ],
-  "createdAt": "2026-10-07T21:32:18.890Z",
+  "createdAt": "2026-10-21T21:26:25.451Z",
   "metadata": {
     "authFlowRequired": false,
     "authFlowAlias": "defaultClient",
@@ -382,8 +382,8 @@
       },
       {
         "index": 3,
-        "action": "Ingresar \"130598983\" en \"RNC:\"",
-        "description": "Ingresar \"130598983\" en \"RNC:\"",
+        "action": "Ingresar \"130872392\" en \"RNC:\"",
+        "description": "Ingresar \"130872392\" en \"RNC:\"",
         "valueKey": "rnc",
         "technicalTargetRef": "role:textbox|RNC:",
         "technicalTargetRefs": [
@@ -397,8 +397,8 @@
       },
       {
         "index": 4,
-        "action": "Ingresar \"olivam\" en \"Usuario:\"",
-        "description": "Ingresar \"olivam\" en \"Usuario:\"",
+        "action": "Ingresar \"SAMOTA\" en \"Usuario:\"",
+        "description": "Ingresar \"SAMOTA\" en \"Usuario:\"",
         "valueKey": "usuario",
         "technicalTargetRef": "role:textbox|Usuario:",
         "technicalTargetRefs": [
@@ -635,12 +635,13 @@
       },
       {
         "index": 17,
-        "action": "Seleccionar opción que contiene Cuenta Corrientes (coincidencia 1) en el campo \"account-from-select-input\"",
-        "description": "Seleccionar opción que contiene Cuenta Corrientes (coincidencia 1) en el campo \"account-from-select-input\"",
+        "action": "Seleccionar opción que contiene Cuenta Corriente (coincidencia 1) en el campo \"account-from-select-input\"",
+        "description": "Seleccionar opción que contiene Cuenta Corriente (coincidencia 1) en el campo \"account-from-select-input\"",
+        "valueKey": "account_from_select_input_seleccion",
         "technicalTargetRefs": [],
         "playwrightRecorderEvidence": {
           "kind": "text",
-          "normalizedName": "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
+          "normalizedName": "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
           "scopeIdentity": {
             "strategy": "css",
             "value": "div:has(> select[id=\"account-from-select-input\"])"
@@ -662,21 +663,26 @@
                 "disabled": false
               },
               {
-                "value": "-192973383173",
-                "label": "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
+                "value": "-96230319813",
+                "label": "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
                 "disabled": false
               },
               {
-                "value": "-178671134322",
-                "label": "Cuenta de Ahorro / 21312020003368 / US$1,495.71",
+                "value": "-195112204072",
+                "label": "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+                "disabled": false
+              },
+              {
+                "value": "-128943207314",
+                "label": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
                 "disabled": false
               }
             ],
             "clickedOption": {
-              "value": "-192973383173",
-              "label": "Cuenta Corrientes / 11311000003156 / RD$162,312.94"
+              "value": "-96230319813",
+              "label": "Cuenta Corrientes / 11121000000739 / RD$753,259.23"
             },
-            "selectedValue": "-192973383173",
+            "selectedValue": "-96230319813",
             "selectionMode": "index",
             "selectedOptionIndex": 0
           },
@@ -733,12 +739,13 @@
       },
       {
         "index": 19,
-        "action": "Seleccionar opción que contiene Cuenta de Ahorro (coincidencia 1) en el campo \"account-to-select-input\"",
-        "description": "Seleccionar opción que contiene Cuenta de Ahorro (coincidencia 1) en el campo \"account-to-select-input\"",
+        "action": "Seleccionar opción que contiene Cuenta de Ahorros (coincidencia 1) en el campo \"account-to-select-input\"",
+        "description": "Seleccionar opción que contiene Cuenta de Ahorros (coincidencia 1) en el campo \"account-to-select-input\"",
+        "valueKey": "account_to_select_input_seleccion",
         "technicalTargetRefs": [],
         "playwrightRecorderEvidence": {
           "kind": "text",
-          "normalizedName": "Cuenta de Ahorro / 21312020003368 / US$1,495.71",
+          "normalizedName": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
           "scopeIdentity": {
             "strategy": "css",
             "value": "div:has(> select[id=\"account-to-select-input\"])"
@@ -760,18 +767,23 @@
                 "disabled": false
               },
               {
-                "value": "-178671134322",
-                "label": "Cuenta de Ahorro / 21312020003368 / US$1,495.71",
+                "value": "-195112204072",
+                "label": "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+                "disabled": false
+              },
+              {
+                "value": "-128943207314",
+                "label": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
                 "disabled": false
               }
             ],
             "clickedOption": {
-              "value": "-178671134322",
-              "label": "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
+              "value": "-128943207314",
+              "label": "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
             },
-            "selectedValue": "-178671134322",
+            "selectedValue": "-195112204072",
             "selectionMode": "index",
-            "selectedOptionIndex": 0
+            "selectedOptionIndex": 1
           },
           "captureMatchCount": 1
         },
@@ -1275,7 +1287,7 @@
       {
         "contractStepIndex": 2,
         "scenarioStepIndex": 3,
-        "originalText": "Ingresar \"130598983\" en \"RNC:\"",
+        "originalText": "Ingresar \"130872392\" en \"RNC:\"",
         "operation": "fill",
         "target": {
           "strategy": "label",
@@ -1318,7 +1330,7 @@
       {
         "contractStepIndex": 3,
         "scenarioStepIndex": 4,
-        "originalText": "Ingresar \"olivam\" en \"Usuario:\"",
+        "originalText": "Ingresar \"SAMOTA\" en \"Usuario:\"",
         "operation": "fill",
         "target": {
           "strategy": "label",
@@ -1947,12 +1959,13 @@
       {
         "contractStepIndex": 16,
         "scenarioStepIndex": 17,
-        "originalText": "Seleccionar opción que contiene Cuenta Corrientes (coincidencia 1) en el campo \"account-from-select-input\"",
+        "originalText": "Seleccionar opción que contiene Cuenta Corriente (coincidencia 1) en el campo \"account-from-select-input\"",
         "operation": "select",
         "target": {
           "strategy": "text",
           "value": "account-from-select-input"
         },
+        "valueKey": "account_from_select_input_seleccion",
         "associatedField": "account-from-select-input",
         "technicalTargetRefs": [],
         "certifiedTechnicalTarget": {
@@ -1972,7 +1985,7 @@
         },
         "playwrightRecorderEvidence": {
           "kind": "text",
-          "normalizedName": "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
+          "normalizedName": "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
           "scopeIdentity": {
             "strategy": "css",
             "value": "div:has(> select[id=\"account-from-select-input\"])"
@@ -1994,21 +2007,26 @@
                 "disabled": false
               },
               {
-                "value": "-192973383173",
-                "label": "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
+                "value": "-96230319813",
+                "label": "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
                 "disabled": false
               },
               {
-                "value": "-178671134322",
-                "label": "Cuenta de Ahorro / 21312020003368 / US$1,495.71",
+                "value": "-195112204072",
+                "label": "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+                "disabled": false
+              },
+              {
+                "value": "-128943207314",
+                "label": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
                 "disabled": false
               }
             ],
             "clickedOption": {
-              "value": "-192973383173",
-              "label": "Cuenta Corrientes / 11311000003156 / RD$162,312.94"
+              "value": "-96230319813",
+              "label": "Cuenta Corrientes / 11121000000739 / RD$753,259.23"
             },
-            "selectedValue": "-192973383173",
+            "selectedValue": "-96230319813",
             "selectionMode": "index",
             "selectedOptionIndex": 0
           },
@@ -2021,6 +2039,7 @@
           "kind": "runtime",
           "runtimeMethod": "clickPromotedTarget"
         },
+        "resolvedExecutionTarget": "Cuenta Corrientes / 11121000000739 / RD$750,161.73",
         "evidenceRefs": []
       },
       {
@@ -2075,8 +2094,8 @@
           "confidence": 0.85,
           "certificationTier": 3
         },
-        "required": false,
-        "executionStatus": "skipped",
+        "required": true,
+        "executionStatus": "executed",
         "implementation": {
           "kind": "runtime",
           "runtimeMethod": "clickPromotedTarget"
@@ -2086,12 +2105,13 @@
       {
         "contractStepIndex": 18,
         "scenarioStepIndex": 19,
-        "originalText": "Seleccionar opción que contiene Cuenta de Ahorro (coincidencia 1) en el campo \"account-to-select-input\"",
+        "originalText": "Seleccionar opción que contiene Cuenta de Ahorros (coincidencia 1) en el campo \"account-to-select-input\"",
         "operation": "select",
         "target": {
           "strategy": "text",
           "value": "account-to-select-input"
         },
+        "valueKey": "account_to_select_input_seleccion",
         "selectionActivationField": "US$",
         "associatedField": "account-to-select-input",
         "technicalTargetRefs": [],
@@ -2112,7 +2132,7 @@
         },
         "playwrightRecorderEvidence": {
           "kind": "text",
-          "normalizedName": "Cuenta de Ahorro / 21312020003368 / US$1,495.71",
+          "normalizedName": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
           "scopeIdentity": {
             "strategy": "css",
             "value": "div:has(> select[id=\"account-to-select-input\"])"
@@ -2134,18 +2154,23 @@
                 "disabled": false
               },
               {
-                "value": "-178671134322",
-                "label": "Cuenta de Ahorro / 21312020003368 / US$1,495.71",
+                "value": "-195112204072",
+                "label": "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+                "disabled": false
+              },
+              {
+                "value": "-128943207314",
+                "label": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
                 "disabled": false
               }
             ],
             "clickedOption": {
-              "value": "-178671134322",
-              "label": "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
+              "value": "-128943207314",
+              "label": "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
             },
-            "selectedValue": "-178671134322",
+            "selectedValue": "-195112204072",
             "selectionMode": "index",
-            "selectedOptionIndex": 0
+            "selectedOptionIndex": 1
           },
           "captureMatchCount": 1
         },
@@ -2156,6 +2181,7 @@
           "kind": "runtime",
           "runtimeMethod": "clickPromotedTarget"
         },
+        "resolvedExecutionTarget": "Cuenta de Ahorro / 21122020001253 / US$1,286.35",
         "evidenceRefs": []
       },
       {
@@ -2774,8 +2800,8 @@
     ],
     "unresolvedRequiredOracles": [],
     "diagnostics": {
-      "requiredScenarioSteps": 29,
-      "representedScenarioSteps": 29,
+      "requiredScenarioSteps": 30,
+      "representedScenarioSteps": 30,
       "missingScenarioSteps": []
     }
   }

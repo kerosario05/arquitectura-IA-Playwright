@@ -29,7 +29,7 @@ export type ContractSourceScenarioAuth = {
 export type ContractObservableOracle = {
   id: string;
   requirement: string;
-  type: "literal_visible_text" | "navigation_transition" | "url_state" | "heading_or_control" | "auth_gate" | "field_validation" | "runtime_state" | "page_object_state" | "unsupported_or_unresolved";
+  type: "literal_visible_text" | "negative_visibility" | "credential_rejection" | "navigation_transition" | "url_state" | "heading_or_control" | "auth_gate" | "field_validation" | "runtime_state" | "page_object_state" | "unsupported_or_unresolved";
   backed: boolean;
   source: "discovery" | "scenario" | "inferred";
   stepIndex?: number;
@@ -111,7 +111,7 @@ export type SpecOracleMechanism = {
 };
 
 function oracleRequiresPolarity(type: string): boolean {
-  return type === "navigation_transition" || type === "url_state";
+  return type === "navigation_transition" || type === "url_state" || type === "negative_visibility";
 }
 
 export type SpecStepOracle = {
@@ -124,6 +124,9 @@ export type SpecStepOracle = {
   requirement?: string;
   /** Exact, observed UI text used to compile a backed visible-text oracle. */
   target?: string;
+  /** Multiple exact labels required to establish a composite visible outcome. */
+  targets?: string[];
+  requirementRefs?: string[];
 };
 
 export type SpecExecutionContractStep = {
@@ -428,6 +431,10 @@ function resolveStepOracle(
         sourceActionStepIndex: findSourceActionStepIndex(direct, planSteps),
         requirement: direct.requirement,
         target: direct.target,
+        requirementRefs: direct.requirementRefs ? [...direct.requirementRefs] : undefined,
+        targets: Array.isArray(direct.details?.visibleTargets)
+          ? direct.details.visibleTargets.filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+          : undefined,
       },
       evidenceRefs
     };
@@ -604,7 +611,10 @@ function resolveAuthContext(
     insertionAfterStepIndex: sourceScenario?.auth?.insertionAfterStepIndex ?? metadata.authFlowInsertionAfterStepIndex,
     flowAlias: sourceScenario?.auth?.flowAlias ?? metadata.authFlowAlias,
     flowLanding: sourceScenario?.auth?.flowLanding ?? metadata.authFlowLanding,
-    ...(coveredScenarioStepIndices.length > 0
+    // Data bindings alone do not delegate execution to AuthFlow. In particular,
+    // negative/manual logins can retain auth.* keys while the helper is disabled.
+    // An aggregate would suppress those actions without emitting a helper call.
+    ...(authRequired && !hasExplicitCredentialLogin && coveredScenarioStepIndices.length > 0
       ? {
           aggregate: {
             kind: "auth_flow" as const,
@@ -844,6 +854,10 @@ function oracleToStepOracle(
       sourceActionStepIndex: findSourceActionStepIndex(oracle, planSteps),
       requirement: oracle.requirement,
       target: oracle.target,
+      requirementRefs: oracle.requirementRefs ? [...oracle.requirementRefs] : undefined,
+      targets: Array.isArray(oracle.details?.visibleTargets)
+        ? oracle.details.visibleTargets.filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+        : undefined,
     },
     evidenceRefs: [`oracle:${oracle.id}`]
   };
@@ -886,10 +900,51 @@ function resolveScenarioStepOracle(
   return { evidenceRefs: [] };
 }
 
+function isResolvedSelectionOptionClick(step: ExecutionPlanStep): boolean {
+  if (step.action !== "click" || !step.target || typeof step.target !== "object") return false;
+  const strategy = String(step.target.strategy ?? "");
+  return strategy === "selection_keyboard_typeahead"
+    || strategy === "visible_label_custom_selection_state_verified"
+    || strategy === "recorded_visible_option_identity"
+    || strategy === "recorded_native_select_option"
+    || strategy === "field_heading_native_select_option"
+    || strategy === "grid_native_select_option"
+    || strategy === "ordinal_selection"
+    || strategy.startsWith("selection_option_");
+}
+
+function getScenarioSelectionField(step: ScenarioStepLike): string | undefined {
+  if (step.selectionField?.trim()) return step.selectionField.trim();
+  return [step.description, step.action]
+    .filter((text): text is string => typeof text === "string" && text.trim().length > 0)
+    .flatMap((text) => parseStepIntent(text))
+    .find((intent) => intent.type === "action_select" && (intent.selectionField?.trim() || intent.actionTarget?.trim()))
+    ?.selectionField?.trim()
+    ?? [step.description, step.action]
+      .filter((text): text is string => typeof text === "string" && text.trim().length > 0)
+      .flatMap((text) => parseStepIntent(text))
+      .find((intent) => intent.type === "action_select" && intent.actionTarget?.trim())
+      ?.actionTarget?.trim();
+}
+
+function getPlanSelectionField(step: ExecutionPlanStep): string | undefined {
+  return [step.description]
+    .filter((text): text is string => typeof text === "string" && text.trim().length > 0)
+    .flatMap((text) => parseStepIntent(text))
+    .find((intent) => intent.type === "action_select" && (intent.selectionField?.trim() || intent.actionTarget?.trim()))
+    ?.selectionField?.trim()
+    ?? [step.description]
+      .filter((text): text is string => typeof text === "string" && text.trim().length > 0)
+      .flatMap((text) => parseStepIntent(text))
+      .find((intent) => intent.type === "action_select" && intent.actionTarget?.trim())
+      ?.actionTarget?.trim();
+}
+
 function findCompatiblePlanStep(
   scenarioStep: ScenarioStepLike,
   operation: SpecStepOperation,
-  planSteps: ExecutionPlanStep[]
+  planSteps: ExecutionPlanStep[],
+  scenarioSteps?: readonly ScenarioStepLike[],
 ): ExecutionPlanStep | undefined {
   // For fill instructions, the first quoted value is the data to type (for example a single OTP
   // character), not the control target. Resolve the field target from the shared step-intent
@@ -940,7 +995,11 @@ function findCompatiblePlanStep(
     const originalTarget = typeof step.target === "object" && step.target?.metadata && typeof step.target.metadata.originalTarget === "string"
       ? normalizeOracleMatch(step.target.metadata.originalTarget)
       : "";
-    return planTarget === normalizedScenarioTarget || originalTarget === normalizedScenarioTarget;
+    // Discovery resolves an authored target to a live control whose name can coincide with
+    // another step's target (e.g. "Autorizar transferencia" resolved to a "Continuar" submit).
+    // The recorded originalTarget is the authored identity and wins over the resolved name.
+    if (originalTarget) return originalTarget === normalizedScenarioTarget;
+    return planTarget === normalizedScenarioTarget;
   };
 
   // A Recording contract starts with its first business action while the
@@ -974,6 +1033,35 @@ function findCompatiblePlanStep(
     });
     if (byTarget.length === 1) return byTarget[0];
 
+    // Repeated labels (for example two "SMS" choices or multiple "Continuar" buttons)
+    // cannot be paired by label alone, and source scenario indexes can shift when assertion
+    // rows are omitted from the physical plan. Preserve their occurrence-specific plan
+    // authority only when the complete ordered occurrence sets on BOTH sides have the same
+    // cardinality and each occurrence has the same operation and normalized target. This is
+    // sequence lineage from two authored artifacts, never a positional DOM locator; if either
+    // side has an extra/missing occurrence or an incompatible action, stay fail-closed.
+    if (byTarget.length > 1 && scenarioSteps) {
+      const scenarioOccurrences = scenarioSteps.filter((candidate) => {
+        if (candidate.conditionalAction) return false;
+        if (classifyScenarioAction(candidate.action, candidate.canonicalAssertion, candidate.conditionalAction) !== operation) {
+          return false;
+        }
+        const candidateTarget = operation === "fill"
+          ? [candidate.description, candidate.action]
+              .filter((text): text is string => typeof text === "string" && text.trim().length > 0)
+              .flatMap((text) => parseStepIntent(text))
+              .find((intent) => intent.type === "action_fill" && intent.actionTarget?.trim())
+              ?.actionTarget?.trim()
+          : extractQuotedText(candidate.expected) ?? extractQuotedText(candidate.description);
+        return typeof candidateTarget === "string"
+          && normalizeOracleMatch(candidateTarget) === normalizedScenarioTarget;
+      });
+      if (scenarioOccurrences.length === byTarget.length) {
+        const occurrenceIndex = scenarioOccurrences.findIndex((candidate) => candidate.index === scenarioStep.index);
+        if (occurrenceIndex >= 0) return byTarget[occurrenceIndex];
+      }
+    }
+
   }
 
   // Some recorded selections are executed by a click-level plan action, and
@@ -989,6 +1077,21 @@ function findCompatiblePlanStep(
       || normalizeOracleMatch(step.description).includes(normalizedScenarioTarget);
   });
   if (byDescription.length === 1) return byDescription[0];
+
+  // Discovery can resolve a custom dropdown choice as a click on the observed option rather
+  // than as a native select or keyboard typeahead. Bind that click back to a scenario select
+  // only through its parsed field relation, and require one matching option action in the plan.
+  if (operation === "select") {
+    const scenarioField = getScenarioSelectionField(scenarioStep);
+    if (scenarioField) {
+      const bySelectionField = planSteps.filter((step) =>
+        isResolvedSelectionOptionClick(step)
+        && normalizeOracleMatch(getPlanSelectionField(step) ?? "") === normalizeOracleMatch(scenarioField)
+        && Boolean(step.target && typeof step.target === "object" && step.target.value?.trim())
+      );
+      if (bySelectionField.length === 1) return bySelectionField[0];
+    }
+  }
 
   return undefined;
 }
@@ -1163,6 +1266,7 @@ function resolveResolvedExecutionTarget(
   operation: SpecStepOperation,
   observableOracles: ContractObservableOracle[],
   planStep?: ExecutionPlanStep,
+  planSteps: ExecutionPlanStep[] = [],
 ): string | undefined {
   if (operation !== "select") return undefined;
   for (const oracle of observableOracles) {
@@ -1190,6 +1294,19 @@ function resolveResolvedExecutionTarget(
     && planStep.target.value.trim()
   ) {
     return planStep.target.value.trim();
+  }
+  if (planStep && isResolvedSelectionOptionClick(planStep)) {
+    const scenarioField = getScenarioSelectionField(scenarioStep);
+    const matchedOptions = planSteps.filter((candidate) =>
+      isResolvedSelectionOptionClick(candidate)
+      && scenarioField
+      && normalizeOracleMatch(getPlanSelectionField(candidate) ?? "") === normalizeOracleMatch(scenarioField)
+      && Boolean(candidate.target && typeof candidate.target === "object" && candidate.target.value?.trim())
+    );
+    if (matchedOptions.length === 1 && matchedOptions[0] === planStep
+      && planStep.target && typeof planStep.target === "object") {
+      return planStep.target.value?.trim() || undefined;
+    }
   }
   return undefined;
 }
@@ -1274,7 +1391,7 @@ export function buildSpecExecutionContract(
     // navigate/click). Actions look up a traceable plan step for implementation only.
     let planStep = isAssertion
       ? undefined
-      : virtualKeyboardPlanStep ?? findCompatiblePlanStep(scenarioStep, operation, plan.steps);
+    : virtualKeyboardPlanStep ?? findCompatiblePlanStep(scenarioStep, operation, plan.steps, scenarioSteps);
     if (virtualKeyboardPlanStep) {
       operation = "click";
       console.log(`[execution-contract-step] scenarioStepIndex=${scenarioStep.index} operation=click sourceOperation=fill reason=validated_virtual_keyboard_sequence segmentPosition=${virtualKeyboardPlanStep.segmentPosition}`);
@@ -1307,7 +1424,7 @@ export function buildSpecExecutionContract(
       if (planStep?.action === "press") {
         operation = "press";
       } else if (!planStep) {
-        const pressCandidate = findCompatiblePlanStep(scenarioStep, "press", plan.steps);
+        const pressCandidate = findCompatiblePlanStep(scenarioStep, "press", plan.steps, scenarioSteps);
         if (pressCandidate) {
           operation = "press";
           planStep = pressCandidate;
@@ -1321,7 +1438,9 @@ export function buildSpecExecutionContract(
         ? resolveStepOracle(planStep, observableOracles, plan.steps, scenarioStep.index)
         : resolveScenarioStepOracle(scenarioStep, observableOracles, plan.steps);
     const canonicalIds = canonicalRequirementIds(sourceScenario, scenarioStep.index);
-    if (isAssertion && canonicalIds.length > 0 && oracleResult.oracle && !canonicalIds.includes(oracleResult.oracle.requirement ?? "")) {
+    if (isAssertion && canonicalIds.length > 0 && oracleResult.oracle
+      && (!oracleResult.oracle.requirementRefs
+        || !canonicalIds.some((requirementId) => oracleResult.oracle!.requirementRefs!.includes(requirementId)))) {
       oracleResult = { evidenceRefs: [] };
     }
     const oracle = oracleResult.oracle;
@@ -1330,7 +1449,25 @@ export function buildSpecExecutionContract(
       ? resolveImplementationDescriptor(planStep, options.pageObjectRegistry)
       : undefined;
 
-    const target = virtualKeyboardPlanStep
+    // Discovery may resolve an authored click label to the live control's different visible
+    // name (authored "perfil empresarial" -> live "Empresarial"). The authored text is not on
+    // the page, so the validated resolved name is the executable text authority. Only applies
+    // when the step has no recorded owner and discovery validated the resolution.
+    const planMeta = typeof planStep?.target === "object" ? planStep.target?.metadata : undefined;
+    const resolvedClickName = operation === "click"
+      && !scenarioStep.technicalTargetRef?.trim()
+      && !scenarioStep.playwrightRecorderEvidence
+      && planMeta?.validationStatus === "passed"
+      && typeof planMeta.resolvedTargetName === "string"
+      && typeof planMeta.originalTarget === "string"
+      && planMeta.resolvedTargetName.trim().length > 0
+      && !normalizeOracleMatch(planMeta.resolvedTargetName).includes(normalizeOracleMatch(planMeta.originalTarget))
+      ?planMeta.resolvedTargetName.trim()
+      : undefined;
+
+    const target = resolvedClickName
+      ? { strategy: "text", value: resolvedClickName }
+      : virtualKeyboardPlanStep
       ? buildSpecStepTarget(planStep?.target)
       : planBackedNavigation || (operation === "navigate" && planStep?.action === "navigate")
         ? planStep?.target === "APP_BASE_URL"
@@ -1339,7 +1476,7 @@ export function buildSpecExecutionContract(
         : buildScenarioStepTarget(scenarioStep, operation)
         ?? (planStep ? buildSpecStepTarget(planStep.target) : undefined);
 
-    const resolvedExecutionTarget = resolveResolvedExecutionTarget(scenarioStep, operation, observableOracles, planStep);
+    const resolvedExecutionTarget = resolveResolvedExecutionTarget(scenarioStep, operation, observableOracles, planStep, plan.steps);
     // A recording can attach the previous/default option to a selection step when
     // its option event was associated with the wrong semantic field. The validated
     // selection value is the authority for an option identity; carrying a different

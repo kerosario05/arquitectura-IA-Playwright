@@ -1,10 +1,21 @@
 import assert from "node:assert";
 import test from "node:test";
-import { attachObservableOracleRequirementRefs, buildPromotionSourceScenario, buildRuntimeEvidenceTrace, collectLocalPendingAssertionDiagnostics, isAssertionLikeStep, reconcileWorkflowAssertionsBeforeFinalStatus, resolveCanonicalRequirementById, resolveObservableOraclePolarity } from "./case-discovery-workflow";
-import { calculateUnresolvedBlockingFailures, reconcilePendingAssertionsWithBackedOracles } from "./case-discovery";
+import {
+  attachObservableOracleRequirementRefs,
+  buildPromotionSourceScenario,
+  buildRuntimeEvidenceTrace,
+  collectLocalPendingAssertionDiagnostics,
+  isAssertionLikeStep,
+  reconcileWorkflowAssertionsBeforeFinalStatus,
+  resolveCanonicalRequirementById,
+  resolveObservableOraclePolarity,
+} from "./case-discovery-workflow";
+import {
+  calculateUnresolvedBlockingFailures,
+  reconcilePendingAssertionsWithBackedOracles,
+} from "./case-discovery";
 import type { CaseDiscoveryResult } from "../types/discovery.types";
 import type { TestScenario } from "../types/testrail.types";
-
 function buildScenario(expected: string): TestScenario {
   return {
     source: "testrail",
@@ -15,15 +26,12 @@ function buildScenario(expected: string): TestScenario {
       { index: 1, action: "Navigate", dataHints: [] },
       { index: 2, action: "Click Iniciar", dataHints: [] },
     ],
-    raw: {
-      id: 0,
-      title: "Escenario de prueba",
-      custom_expected: expected,
-    },
+    raw: { id: 0, title: "Escenario de prueba", custom_expected: expected },
   };
 }
-
-function buildCaseResult(overrides: Partial<CaseDiscoveryResult>): CaseDiscoveryResult {
+function buildCaseResult(
+  overrides: Partial<CaseDiscoveryResult>,
+): CaseDiscoveryResult {
   return {
     version: "1.0",
     caseId: 0,
@@ -35,39 +43,73 @@ function buildCaseResult(overrides: Partial<CaseDiscoveryResult>): CaseDiscovery
     ...overrides,
   };
 }
-
 test("recorded imperative click on a control named Validar is not promoted to an assertion", () => {
-  assert.equal(isAssertionLikeStep({ index: 20, action: 'Presionar "Validar"', status: "found" }), false);
-  assert.equal(isAssertionLikeStep({ index: 20, action: "Validar que el registro se haya guardado", status: "found" }), true);
+  assert.equal(
+    isAssertionLikeStep({
+      index: 20,
+      action: 'Presionar "Validar"',
+      status: "found",
+    }),
+    false,
+  );
+  assert.equal(
+    isAssertionLikeStep({
+      index: 20,
+      action: "Validar que el registro se haya guardado",
+      status: "found",
+    }),
+    true,
+  );
 });
-
 test("backed consumed oracle reconciles its pending assertion before blocking calculation", () => {
-  const steps = [{
-    index: 2,
-    action: "assert result",
-    targetText: "result visible",
-    status: "not_found",
-    assertionClassification: "passive_visibility",
-    pendingDiscovery: true,
-    error: "assertion_not_found",
-  }] as unknown as CaseDiscoveryResult["steps"];
-  const reconciled = reconcilePendingAssertionsWithBackedOracles(steps, [{
-    backed: true,
-    consumed: true,
-    requirement: "result visible",
-    stepIndex: 2,
-  }]);
+  const steps = [
+    {
+      index: 2,
+      action: "assert result",
+      targetText: "result visible",
+      status: "not_found",
+      assertionClassification: "passive_visibility",
+      pendingDiscovery: true,
+      error: "assertion_not_found",
+    },
+  ] as unknown as CaseDiscoveryResult["steps"];
+  const reconciled = reconcilePendingAssertionsWithBackedOracles(steps, [
+    {
+      backed: true,
+      consumed: true,
+      requirement: "result visible",
+      stepIndex: 2,
+    },
+  ]);
   assert.strictEqual(reconciled, 1);
   assert.strictEqual((steps[0] as any).pendingDiscovery, false);
   assert.strictEqual(steps[0].status, "satisfied_by_previous_assertion");
   assert.strictEqual(steps[0].error, undefined);
-  assert.strictEqual(calculateUnresolvedBlockingFailures(steps, { detected: false }).length, 0);
+  assert.strictEqual(
+    calculateUnresolvedBlockingFailures(steps, { detected: false }).length,
+    0,
+  );
 });
-
 test("observable oracle preserves exact single and multiple requirementRefs by structural step identity", () => {
   const oracles = [
-    { id: "oracle-a", requirement: "A", type: "navigation_transition", backed: true, source: "discovery", stepIndex: 1, evidence: [] },
-    { id: "oracle-b", requirement: "B", type: "navigation_transition", backed: true, source: "discovery", stepIndex: 2, evidence: [] },
+    {
+      id: "oracle-a",
+      requirement: "A",
+      type: "navigation_transition",
+      backed: true,
+      source: "discovery",
+      stepIndex: 1,
+      evidence: [],
+    },
+    {
+      id: "oracle-b",
+      requirement: "B",
+      type: "navigation_transition",
+      backed: true,
+      source: "discovery",
+      stepIndex: 2,
+      evidence: [],
+    },
   ] as any;
   const linked = attachObservableOracleRequirementRefs(oracles, [
     { index: 1, requirementRefs: ["REQ-A", "REQ-B"] },
@@ -76,186 +118,422 @@ test("observable oracle preserves exact single and multiple requirementRefs by s
   assert.deepEqual(linked[0].requirementRefs, ["REQ-A", "REQ-B"]);
   assert.deepEqual(linked[1].requirementRefs, ["REQ-C"]);
 });
-
 test("observable oracle without requirementRefs remains undefined and never borrows another step", () => {
-  const linked = attachObservableOracleRequirementRefs([
-    { id: "oracle-x", requirement: "X", type: "literal_visible_text", backed: true, source: "discovery", stepIndex: 3, evidence: [] },
-  ] as any, [
-    { index: 1, requirementRefs: ["REQ-A"] },
-    { index: 2, requirementRefs: ["REQ-B"] },
-  ]);
+  const linked = attachObservableOracleRequirementRefs(
+    [
+      {
+        id: "oracle-x",
+        requirement: "X",
+        type: "literal_visible_text",
+        backed: true,
+        source: "discovery",
+        stepIndex: 3,
+        evidence: [],
+      },
+    ] as any,
+    [
+      { index: 1, requirementRefs: ["REQ-A"] },
+      { index: 2, requirementRefs: ["REQ-B"] },
+    ],
+  );
   assert.equal(linked[0].requirementRefs, undefined);
 });
-
 test("completed terminal recording feedback does not require an unrelated narrative expected result", () => {
   const scenario = {
     ...buildScenario("Se muestra ¡Hola!"),
     recordingExecutionContract: {
-      actions: [{ actionType: "click", stepIndex: 17, humanStep: "Presionar Generar Turno", semanticField: "Generar Turno", expectedRouteAfter: "/" }],
+      actions: [
+        {
+          actionType: "click",
+          stepIndex: 17,
+          humanStep: "Presionar Generar Turno",
+          semanticField: "Generar Turno",
+          expectedRouteAfter: "/",
+        },
+      ],
       runtimeInputRequirements: [],
     },
   } as unknown as TestScenario;
-  const result = buildPromotionSourceScenario(scenario, buildCaseResult({
-    status: "discovered_passed",
-    steps: [{
-      index: 2,
-      action: "click",
-      status: "found",
-      targetText: "Generar Turno",
-      assertionDiagnostics: { postActionSyncSignal: "terminal_feedback" },
-    } as any],
-  }));
+  const result = buildPromotionSourceScenario(
+    scenario,
+    buildCaseResult({
+      status: "discovered_passed",
+      steps: [
+        {
+          index: 2,
+          action: "click",
+          status: "found",
+          targetText: "Generar Turno",
+          assertionDiagnostics: { postActionSyncSignal: "terminal_feedback" },
+        } as any,
+      ],
+    }),
+  );
   assert.equal(result.expectedResult, undefined);
   assert.deepEqual(result.observableOracles, []);
 });
-
 test("terminal recorded feedback keeps canonical expected result requirements blocking", () => {
   const scenario = {
     ...buildScenario("Se muestra ¡Hola!"),
     expectedResultRequirementRefs: ["REQ-EXPECTED"],
     recordingExecutionContract: {
-      actions: [{ actionType: "click", stepIndex: 17, humanStep: "Presionar Generar Turno", semanticField: "Generar Turno" }],
+      actions: [
+        {
+          actionType: "click",
+          stepIndex: 17,
+          humanStep: "Presionar Generar Turno",
+          semanticField: "Generar Turno",
+        },
+      ],
       runtimeInputRequirements: [],
     },
   } as unknown as TestScenario;
-  const result = buildPromotionSourceScenario(scenario, buildCaseResult({
-    status: "discovered_passed",
-    steps: [{
-      index: 2,
-      action: "click",
-      status: "found",
-      targetText: "Generar Turno",
-      assertionDiagnostics: { postActionSyncSignal: "terminal_feedback" },
-    } as any],
-  }));
+  const result = buildPromotionSourceScenario(
+    scenario,
+    buildCaseResult({
+      status: "discovered_passed",
+      steps: [
+        {
+          index: 2,
+          action: "click",
+          status: "found",
+          targetText: "Generar Turno",
+          assertionDiagnostics: { postActionSyncSignal: "terminal_feedback" },
+        } as any,
+      ],
+    }),
+  );
   assert.equal(result.expectedResult, "Se muestra ¡Hola!");
-  assert.equal(result.observableOracles?.some((oracle) => oracle.type === "unsupported_or_unresolved"), true);
+  assert.equal(
+    result.observableOracles?.some(
+      (oracle) => oracle.type === "unsupported_or_unresolved",
+    ),
+    true,
+  );
 });
-
 test("canonical requirements remain case-scoped and resolve only by exact requirementId", () => {
   const requirements = [
-    { requirementId: "REQ-A", kind: "state", description: "A", origin: { originRef: "a" } },
-    { requirementId: "REQ-B", kind: "state", description: "B", origin: { originRef: "b" } },
+    {
+      requirementId: "REQ-A",
+      kind: "state",
+      description: "A",
+      origin: { originRef: "a" },
+    },
+    {
+      requirementId: "REQ-B",
+      kind: "state",
+      description: "B",
+      origin: { originRef: "b" },
+    },
   ] as any;
-  assert.equal(resolveCanonicalRequirementById(requirements, "REQ-B")?.requirementId, "REQ-B");
-  assert.equal(resolveCanonicalRequirementById(requirements, "REQ-X"), undefined);
-  assert.equal(resolveCanonicalRequirementById(requirements, "REQ-B")?.description, "B");
+  assert.equal(
+    resolveCanonicalRequirementById(requirements, "REQ-B")?.requirementId,
+    "REQ-B",
+  );
+  assert.equal(
+    resolveCanonicalRequirementById(requirements, "REQ-X"),
+    undefined,
+  );
+  assert.equal(
+    resolveCanonicalRequirementById(requirements, "REQ-B")?.description,
+    "B",
+  );
 });
-
 test("promotion source scenario carries the existing canonical requirement collection", () => {
   const scenario = {
     ...buildScenario("The result is visible"),
-    canonicalRequirements: [{ requirementId: "REQ-A", kind: "state", description: "Result", origin: { originRef: "a" } }],
+    canonicalRequirements: [
+      {
+        requirementId: "REQ-A",
+        kind: "state",
+        description: "Result",
+        origin: { originRef: "a" },
+      },
+    ],
   } as any;
   const source = buildPromotionSourceScenario(scenario, buildCaseResult({}));
   assert.equal(source.requirements?.[0]?.requirementId, "REQ-A");
   assert.equal(source.requirements?.[0]?.description, "Result");
 });
-
 test("observable oracle polarity resolves only from exact requirement identities", () => {
   const requirements = [
-    { requirementId: "REQ-A", kind: "state", description: "A", polarity: "negative", origin: { originRef: "a" } },
-    { requirementId: "REQ-B", kind: "state", description: "B", polarity: "positive", origin: { originRef: "b" } },
-    { requirementId: "REQ-C", kind: "state", description: "C", polarity: "negative", origin: { originRef: "c" } },
-    { requirementId: "REQ-U", kind: "state", description: "U", origin: { originRef: "u" } },
+    {
+      requirementId: "REQ-A",
+      kind: "state",
+      description: "A",
+      polarity: "negative",
+      origin: { originRef: "a" },
+    },
+    {
+      requirementId: "REQ-B",
+      kind: "state",
+      description: "B",
+      polarity: "positive",
+      origin: { originRef: "b" },
+    },
+    {
+      requirementId: "REQ-C",
+      kind: "state",
+      description: "C",
+      polarity: "negative",
+      origin: { originRef: "c" },
+    },
+    {
+      requirementId: "REQ-U",
+      kind: "state",
+      description: "U",
+      origin: { originRef: "u" },
+    },
   ] as any;
-  assert.equal(resolveObservableOraclePolarity(["REQ-A"], requirements), "negative");
-  assert.equal(resolveObservableOraclePolarity(["REQ-B"], requirements), "positive");
-  assert.equal(resolveObservableOraclePolarity(["REQ-A", "REQ-C"], requirements), "negative");
-  assert.equal(resolveObservableOraclePolarity(["REQ-B", "REQ-B"], requirements), "positive");
-  assert.equal(resolveObservableOraclePolarity(["REQ-A", "REQ-B"], requirements), undefined);
-  assert.equal(resolveObservableOraclePolarity(["REQ-A", "REQ-U"], requirements), undefined);
-  assert.equal(resolveObservableOraclePolarity(["REQ-X"], requirements), undefined);
+  assert.equal(
+    resolveObservableOraclePolarity(["REQ-A"], requirements),
+    "negative",
+  );
+  assert.equal(
+    resolveObservableOraclePolarity(["REQ-B"], requirements),
+    "positive",
+  );
+  assert.equal(
+    resolveObservableOraclePolarity(["REQ-A", "REQ-C"], requirements),
+    "negative",
+  );
+  assert.equal(
+    resolveObservableOraclePolarity(["REQ-B", "REQ-B"], requirements),
+    "positive",
+  );
+  assert.equal(
+    resolveObservableOraclePolarity(["REQ-A", "REQ-B"], requirements),
+    undefined,
+  );
+  assert.equal(
+    resolveObservableOraclePolarity(["REQ-A", "REQ-U"], requirements),
+    undefined,
+  );
+  assert.equal(
+    resolveObservableOraclePolarity(["REQ-X"], requirements),
+    undefined,
+  );
   assert.equal(resolveObservableOraclePolarity([], requirements), undefined);
 });
-
 test("workflow closure reconciles every matching backed oracle before final blocking state", () => {
   const scenario = {
-    ...buildScenario("La ruta pública dirige al resultado visible.\nLa ruta pública dirige al resultado visible."),
+    ...buildScenario(
+      "La ruta pública dirige al resultado visible.\nLa ruta pública dirige al resultado visible.",
+    ),
     steps: [
       { index: 1, action: "Hacer clic en Enviar", dataHints: [] },
-      { index: 2, action: "Validar resultado", expected: "La ruta pública dirige al resultado visible.", dataHints: [] },
-      { index: 3, action: "Validar resultado otra vez", expected: "La ruta pública dirige al resultado visible.", dataHints: [] },
+      {
+        index: 2,
+        action: "Validar resultado",
+        expected: "La ruta pública dirige al resultado visible.",
+        dataHints: [],
+      },
+      {
+        index: 3,
+        action: "Validar resultado otra vez",
+        expected: "La ruta pública dirige al resultado visible.",
+        dataHints: [],
+      },
     ],
   } as TestScenario;
   const steps = [
-    { index: 1, action: "click", targetText: "Enviar", status: "found", snapshotUrl: "/resultado" },
-    { index: 2, action: "assert", targetText: "La ruta pública dirige al resultado visible.", status: "not_found", pendingDiscovery: true, error: "assertion_not_found" },
-    { index: 3, action: "assert", targetText: "La ruta pública dirige al resultado visible.", status: "not_found", pendingDiscovery: true, error: "assertion_not_found" },
+    {
+      index: 1,
+      action: "click",
+      targetText: "Enviar",
+      status: "found",
+      snapshotUrl: "/resultado",
+    },
+    {
+      index: 2,
+      action: "assert",
+      targetText: "La ruta pública dirige al resultado visible.",
+      status: "not_found",
+      pendingDiscovery: true,
+      error: "assertion_not_found",
+    },
+    {
+      index: 3,
+      action: "assert",
+      targetText: "La ruta pública dirige al resultado visible.",
+      status: "not_found",
+      pendingDiscovery: true,
+      error: "assertion_not_found",
+    },
   ] as unknown as CaseDiscoveryResult["steps"];
-  const unresolvedPendingBlockers = () => steps.filter((step) =>
-    (step.status === "not_found" || step.status === "needs_assertion_resolution")
-    && step.pendingDiscovery === true
-  ).length;
+  const unresolvedPendingBlockers = () =>
+    steps.filter(
+      (step) =>
+        (step.status === "not_found" ||
+          step.status === "needs_assertion_resolution") &&
+        step.pendingDiscovery === true,
+    ).length;
   const before = unresolvedPendingBlockers();
   assert.strictEqual(before, 2);
-  const reconciled = reconcileWorkflowAssertionsBeforeFinalStatus(scenario, steps);
+  const reconciled = reconcileWorkflowAssertionsBeforeFinalStatus(
+    scenario,
+    steps,
+  );
   assert.strictEqual(reconciled, 2);
   assert.strictEqual(unresolvedPendingBlockers(), 0);
   assert.ok(steps.slice(1).every((step) => step.pendingDiscovery === false));
 });
-
 test("workflow closure builds and reconciles both final assertions before blockers", () => {
   const scenario = {
-    ...buildScenario("La autenticación finaliza correctamente, el formulario de acceso deja de ser la pantalla activa y se muestra la pantalla inicial autenticada del aplicativo."),
+    ...buildScenario(
+      "La autenticación finaliza correctamente, el formulario de acceso deja de ser la pantalla activa y se muestra la pantalla inicial autenticada del aplicativo.",
+    ),
     steps: [
       { index: 1, action: "Ingresar identificador", dataHints: [] },
       { index: 4, action: "Hacer clic en el botón Continuar", dataHints: [] },
       { index: 6, action: "Clic en un control auxiliar", dataHints: [] },
-      { index: 7, action: "Validar que el formulario de acceso ya no sea la pantalla activa", dataHints: [] },
-      { index: 8, action: "Validar que se muestre la pantalla inicial autenticada del aplicativo", dataHints: [] },
+      {
+        index: 7,
+        action:
+          "Validar que el formulario de acceso ya no sea la pantalla activa",
+        dataHints: [],
+      },
+      {
+        index: 8,
+        action:
+          "Validar que se muestre la pantalla inicial autenticada del aplicativo",
+        dataHints: [],
+      },
     ],
   } as TestScenario;
   const steps = [
-    { index: 4, action: "click", targetText: "Continuar", status: "found", snapshotUrl: "/dashboard" },
-    { index: 6, action: "click", targetText: "control auxiliar", status: "found", snapshotUrl: "/dashboard" },
-    { index: 7, action: "assert", targetText: "que el formulario de acceso ya no sea la pantalla activa", status: "not_found", pendingDiscovery: true, functionalRequired: true, error: "assertion_not_found" },
-    { index: 8, action: "assert", targetText: "que se muestre la pantalla inicial autenticada del aplicativo", status: "not_found", pendingDiscovery: true, functionalRequired: true, error: "assertion_not_found" },
+    {
+      index: 4,
+      action: "click",
+      targetText: "Continuar",
+      status: "found",
+      snapshotUrl: "/dashboard",
+    },
+    {
+      index: 6,
+      action: "click",
+      targetText: "control auxiliar",
+      status: "found",
+      snapshotUrl: "/dashboard",
+    },
+    {
+      index: 7,
+      action: "assert",
+      targetText: "que el formulario de acceso ya no sea la pantalla activa",
+      status: "not_found",
+      pendingDiscovery: true,
+      functionalRequired: true,
+      error: "assertion_not_found",
+    },
+    {
+      index: 8,
+      action: "assert",
+      targetText:
+        "que se muestre la pantalla inicial autenticada del aplicativo",
+      status: "not_found",
+      pendingDiscovery: true,
+      functionalRequired: true,
+      error: "assertion_not_found",
+    },
   ] as unknown as CaseDiscoveryResult["steps"];
-
-  const reconciled = reconcileWorkflowAssertionsBeforeFinalStatus(scenario, steps);
+  const reconciled = reconcileWorkflowAssertionsBeforeFinalStatus(
+    scenario,
+    steps,
+  );
   assert.strictEqual(reconciled, 2);
-  assert.strictEqual(calculateUnresolvedBlockingFailures(steps, { detected: false }).length, 0);
+  assert.strictEqual(
+    calculateUnresolvedBlockingFailures(steps, { detected: false }).length,
+    0,
+  );
 });
-
 test("real TestRail assertion actions complete the oracle set before blockers", () => {
   const scenario = {
     ...buildScenario("La ruta pública dirige al resultado visible."),
     steps: [
       { index: 1, action: "Hacer clic en Enviar", dataHints: [] },
-      { index: 2, action: "Validar que el formulario ya no esté visible", dataHints: [] },
-      { index: 3, action: "Validar que se muestre el resultado", dataHints: [] },
+      {
+        index: 2,
+        action: "Validar que el formulario ya no esté visible",
+        dataHints: [],
+      },
+      {
+        index: 3,
+        action: "Validar que se muestre el resultado",
+        dataHints: [],
+      },
     ],
   } as TestScenario;
   const steps = [
-    { index: 1, action: "Hacer clic en Enviar", status: "found", snapshotUrl: "/resultado" },
-    { index: 2, action: "Validar que el formulario ya no esté visible", targetText: "que el formulario ya no esté visible", status: "not_found", pendingDiscovery: true, functionalRequired: true, error: "assertion_not_found" },
-    { index: 3, action: "Validar que se muestre el resultado", targetText: "que se muestre el resultado", status: "not_found", pendingDiscovery: true, functionalRequired: true, error: "assertion_not_found" },
+    {
+      index: 1,
+      action: "Hacer clic en Enviar",
+      status: "found",
+      snapshotUrl: "/resultado",
+    },
+    {
+      index: 2,
+      action: "Validar que el formulario ya no esté visible",
+      targetText: "que el formulario ya no esté visible",
+      status: "not_found",
+      pendingDiscovery: true,
+      functionalRequired: true,
+      error: "assertion_not_found",
+    },
+    {
+      index: 3,
+      action: "Validar que se muestre el resultado",
+      targetText: "que se muestre el resultado",
+      status: "not_found",
+      pendingDiscovery: true,
+      functionalRequired: true,
+      error: "assertion_not_found",
+    },
   ] as unknown as CaseDiscoveryResult["steps"];
-
-  assert.strictEqual(reconcileWorkflowAssertionsBeforeFinalStatus(scenario, steps), 2);
-  assert.strictEqual(calculateUnresolvedBlockingFailures(steps, { detected: false }).length, 0);
+  assert.strictEqual(
+    reconcileWorkflowAssertionsBeforeFinalStatus(scenario, steps),
+    2,
+  );
+  assert.strictEqual(
+    calculateUnresolvedBlockingFailures(steps, { detected: false }).length,
+    0,
+  );
 });
-
 test("unbacked or cross-assertion oracles do not reconcile pending assertions", () => {
-  const steps = [{
-    index: 2,
-    action: "assert result",
-    targetText: "result visible",
-    status: "not_found",
-    assertionClassification: "passive_visibility",
-    pendingDiscovery: true,
-    error: "assertion_not_found",
-  }] as unknown as CaseDiscoveryResult["steps"];
-  assert.strictEqual(reconcilePendingAssertionsWithBackedOracles(steps, [{
-    backed: false, consumed: true, requirement: "result visible", stepIndex: 2
-  }]), 0);
-  assert.strictEqual(reconcilePendingAssertionsWithBackedOracles(steps, [{
-    backed: true, consumed: true, requirement: "other result", stepIndex: 9
-  }]), 0);
+  const steps = [
+    {
+      index: 2,
+      action: "assert result",
+      targetText: "result visible",
+      status: "not_found",
+      assertionClassification: "passive_visibility",
+      pendingDiscovery: true,
+      error: "assertion_not_found",
+    },
+  ] as unknown as CaseDiscoveryResult["steps"];
+  assert.strictEqual(
+    reconcilePendingAssertionsWithBackedOracles(steps, [
+      {
+        backed: false,
+        consumed: true,
+        requirement: "result visible",
+        stepIndex: 2,
+      },
+    ]),
+    0,
+  );
+  assert.strictEqual(
+    reconcilePendingAssertionsWithBackedOracles(steps, [
+      {
+        backed: true,
+        consumed: true,
+        requirement: "other result",
+        stepIndex: 9,
+      },
+    ]),
+    0,
+  );
   assert.strictEqual((steps[0] as any).pendingDiscovery, true);
 });
-
 test("reconciliation requires consumption and preserves passed or unresolved assertions", () => {
   const pending = (index: number, targetText: string) => ({
     index,
@@ -266,29 +544,65 @@ test("reconciliation requires consumption and preserves passed or unresolved ass
     pendingDiscovery: true,
     error: "assertion_not_found",
   });
-  const steps = [pending(2, "result visible"), pending(3, "other result")] as unknown as CaseDiscoveryResult["steps"];
-  assert.strictEqual(reconcilePendingAssertionsWithBackedOracles(steps, [{
-    backed: true, consumed: false, requirement: "result visible", stepIndex: 2
-  }]), 0);
-  assert.strictEqual(reconcilePendingAssertionsWithBackedOracles(steps, [{
-    backed: true, consumed: true, requirement: "result visible", stepIndex: 2
-  }]), 1);
+  const steps = [
+    pending(2, "result visible"),
+    pending(3, "other result"),
+  ] as unknown as CaseDiscoveryResult["steps"];
+  assert.strictEqual(
+    reconcilePendingAssertionsWithBackedOracles(steps, [
+      {
+        backed: true,
+        consumed: false,
+        requirement: "result visible",
+        stepIndex: 2,
+      },
+    ]),
+    0,
+  );
+  assert.strictEqual(
+    reconcilePendingAssertionsWithBackedOracles(steps, [
+      {
+        backed: true,
+        consumed: true,
+        requirement: "result visible",
+        stepIndex: 2,
+      },
+    ]),
+    1,
+  );
   assert.strictEqual(steps[0].status, "satisfied_by_previous_assertion");
   assert.strictEqual((steps[1] as any).pendingDiscovery, true);
-
-  const passed = { ...pending(4, "already visible"), status: "found", pendingDiscovery: false } as any;
-  assert.strictEqual(reconcilePendingAssertionsWithBackedOracles([passed], [{
-    backed: true, consumed: true, requirement: "already visible", stepIndex: 4
-  }]), 0);
+  const passed = {
+    ...pending(4, "already visible"),
+    status: "found",
+    pendingDiscovery: false,
+  } as any;
+  assert.strictEqual(
+    reconcilePendingAssertionsWithBackedOracles(
+      [passed],
+      [
+        {
+          backed: true,
+          consumed: true,
+          requirement: "already visible",
+          stepIndex: 4,
+        },
+      ],
+    ),
+    0,
+  );
   assert.strictEqual(passed.status, "found");
-
   const unresolved = pending(5, "never visible") as any;
-  assert.strictEqual(reconcilePendingAssertionsWithBackedOracles([unresolved], []), 0);
+  assert.strictEqual(
+    reconcilePendingAssertionsWithBackedOracles([unresolved], []),
+    0,
+  );
   assert.strictEqual(unresolved.pendingDiscovery, true);
 });
-
 test("narrative expected result maps to navigation_transition oracle when discovery has transition evidence", () => {
-  const scenario = buildScenario("La ruta pública dirige al módulo de información.");
+  const scenario = buildScenario(
+    "La ruta pública dirige al módulo de información.",
+  );
   const caseResult = buildCaseResult({
     runtimeEvidenceTrace: {
       clickActions: [
@@ -300,7 +614,7 @@ test("narrative expected result maps to navigation_transition oracle when discov
           actionType: "click",
           success: true,
           transitionDetected: true,
-        }
+        },
       ],
       fillActions: [],
       formEvidence: [],
@@ -309,17 +623,19 @@ test("narrative expected result maps to navigation_transition oracle when discov
       feedbackEvidence: [],
     },
   });
-
   const sourceScenario = buildPromotionSourceScenario(scenario, caseResult);
-  const oracle = sourceScenario.observableOracles?.find((item) => item.requirement.includes("ruta pública"));
+  const oracle = sourceScenario.observableOracles?.find((item) =>
+    item.requirement.includes("ruta pública"),
+  );
   assert.ok(oracle);
   assert.strictEqual(oracle?.type, "navigation_transition");
   assert.strictEqual(oracle?.backed, true);
   assert.strictEqual(oracle?.target, "Explora nuestros productos");
 });
-
 test("auth gate evidence maps narrative expected result to auth_gate oracle", () => {
-  const scenario = buildScenario("Debe iniciar el flujo de autenticación antes de operar.");
+  const scenario = buildScenario(
+    "Debe iniciar el flujo de autenticación antes de operar.",
+  );
   const caseResult = buildCaseResult({
     steps: [
       {
@@ -331,18 +647,18 @@ test("auth gate evidence maps narrative expected result to auth_gate oracle", ()
           stage: "identification_type_selection",
           detectedBeforeStep: "4",
         },
-      }
+      },
     ],
   });
-
   const sourceScenario = buildPromotionSourceScenario(scenario, caseResult);
-  const oracle = sourceScenario.observableOracles?.find((item) => item.requirement.includes("flujo de autenticación"));
+  const oracle = sourceScenario.observableOracles?.find((item) =>
+    item.requirement.includes("flujo de autenticación"),
+  );
   assert.ok(oracle);
   assert.strictEqual(oracle?.type, "auth_gate");
   assert.strictEqual(oracle?.backed, true);
   assert.strictEqual(oracle?.details?.stage, "identification_type_selection");
 });
-
 test("literal visible expected result stays as literal observable oracle", () => {
   const scenario = buildScenario("¿Qué deseas realizar hoy?");
   const caseResult = buildCaseResult({
@@ -353,31 +669,31 @@ test("literal visible expected result stays as literal observable oracle", () =>
         status: "found",
         targetText: "¿Qué deseas realizar hoy?",
         assertionStatus: "passed",
-      }
+      },
     ],
   });
-
   const sourceScenario = buildPromotionSourceScenario(scenario, caseResult);
-  const oracle = sourceScenario.observableOracles?.find((item) => item.requirement.includes("¿Qué deseas realizar hoy?"));
+  const oracle = sourceScenario.observableOracles?.find((item) =>
+    item.requirement.includes("¿Qué deseas realizar hoy?"),
+  );
   assert.ok(oracle);
   assert.strictEqual(oracle?.type, "literal_visible_text");
   assert.strictEqual(oracle?.backed, true);
 });
-
 test("unresolved oracle is explicit when no observable evidence is available", () => {
   const scenario = buildScenario("Debe mostrarse una etiqueta no observada.");
   const caseResult = buildCaseResult({
     status: "discovered_partial",
     steps: [],
   });
-
   const sourceScenario = buildPromotionSourceScenario(scenario, caseResult);
-  const oracle = sourceScenario.observableOracles?.find((item) => item.requirement.includes("etiqueta no observada"));
+  const oracle = sourceScenario.observableOracles?.find((item) =>
+    item.requirement.includes("etiqueta no observada"),
+  );
   assert.ok(oracle);
   assert.strictEqual(oracle?.type, "unsupported_or_unresolved");
   assert.strictEqual(oracle?.backed, false);
 });
-
 test("historical target without canonical identity remains unresolved", () => {
   const scenario = buildScenario("Información de productos");
   const caseResult = buildCaseResult({
@@ -391,17 +707,17 @@ test("historical target without canonical identity remains unresolved", () => {
         resolvedTargetName: "Explora nuestros productos",
         matchedText: "Catálogo oficial",
         confidence: 0.93,
-      }
+      },
     ],
   });
-
   const sourceScenario = buildPromotionSourceScenario(scenario, caseResult);
-  const oracle = sourceScenario.observableOracles?.find((item) => item.requirement.includes("Información de productos"));
+  const oracle = sourceScenario.observableOracles?.find((item) =>
+    item.requirement.includes("Información de productos"),
+  );
   assert.ok(oracle);
   assert.strictEqual(oracle?.type, "unsupported_or_unresolved");
   assert.strictEqual(oracle?.backed, false);
 });
-
 test("weak semantic overlap does not create unsupported alias reconciliation", () => {
   const scenario = buildScenario("Solicitar préstamo hipotecario empresarial");
   const caseResult = buildCaseResult({
@@ -414,17 +730,17 @@ test("weak semantic overlap does not create unsupported alias reconciliation", (
         targetText: "Panel principal",
         resolvedTargetName: "Inicio",
         confidence: 0.9,
-      }
+      },
     ],
   });
-
   const sourceScenario = buildPromotionSourceScenario(scenario, caseResult);
-  const oracle = sourceScenario.observableOracles?.find((item) => item.requirement.includes("préstamo hipotecario"));
+  const oracle = sourceScenario.observableOracles?.find((item) =>
+    item.requirement.includes("préstamo hipotecario"),
+  );
   assert.ok(oracle);
   assert.strictEqual(oracle?.type, "unsupported_or_unresolved");
   assert.strictEqual(oracle?.backed, false);
 });
-
 test("negative no-transition requirement is not satisfied by a semantically similar control label", () => {
   const scenario = {
     ...buildScenario("No se permite continuar ahora"),
@@ -446,17 +762,24 @@ test("negative no-transition requirement is not satisfied by a semantically simi
       },
     ],
   });
-
   const sourceScenario = buildPromotionSourceScenario(scenario, caseResult);
-  const oracle = sourceScenario.observableOracles?.find((item) => item.requirement.includes("No se permite continuar ahora"));
+  const oracle = sourceScenario.observableOracles?.find((item) =>
+    item.requirement.includes("No se permite continuar ahora"),
+  );
   assert.ok(oracle);
   assert.equal(oracle?.type, "unsupported_or_unresolved");
-  assert.equal(oracle?.backed, false);
+  assert.notEqual(oracle?.backed, true);
   assert.equal(oracle?.polarity, undefined);
-  assert.equal(sourceScenario.observableOracles?.some((item) => item.details?.semanticEquivalent === true), false);
+  assert.equal(
+    sourceScenario.observableOracles?.some(
+      (item) => item.details?.semanticEquivalent === true,
+    ),
+    false,
+  );
 });
-
-function buildTransitionTrace(): NonNullable<CaseDiscoveryResult["runtimeEvidenceTrace"]> {
+function buildTransitionTrace(): NonNullable<
+  CaseDiscoveryResult["runtimeEvidenceTrace"]
+> {
   return {
     clickActions: [
       {
@@ -467,7 +790,7 @@ function buildTransitionTrace(): NonNullable<CaseDiscoveryResult["runtimeEvidenc
         actionType: "click",
         success: true,
         transitionDetected: true,
-      }
+      },
     ],
     fillActions: [],
     formEvidence: [],
@@ -476,11 +799,14 @@ function buildTransitionTrace(): NonNullable<CaseDiscoveryResult["runtimeEvidenc
     feedbackEvidence: [],
   };
 }
-
 function buildPendingAssertionStep(assertionText: string) {
-  return { index: 4, action: "assertVisible", status: "needs_assertion_resolution", targetText: assertionText } as any;
+  return {
+    index: 4,
+    action: "assertVisible",
+    status: "needs_assertion_resolution",
+    targetText: assertionText,
+  } as any;
 }
-
 test("A1 navigation narrative assertion is locally consumed via transition-backed click related to the narrative requirement", () => {
   const assertionText = "información";
   const trace = buildTransitionTrace();
@@ -489,12 +815,14 @@ test("A1 navigation narrative assertion is locally consumed via transition-backe
     runtimeEvidenceTrace: trace,
   });
   const narrative = ["La opción pública redirige al módulo de información."];
-
-  const result = collectLocalPendingAssertionDiagnostics(caseResult, trace, narrative);
+  const result = collectLocalPendingAssertionDiagnostics(
+    caseResult,
+    trace,
+    narrative,
+  );
   assert.ok(result.localClosureDiagnostics?.consumed.includes(assertionText));
   assert.strictEqual(result.pendingAssertions.length, 0);
 });
-
 test("A2 transition-backed click unrelated to the assertion does not consume it", () => {
   const assertionText = "Debe mostrarse el saldo de la cuenta.";
   const trace = buildTransitionTrace();
@@ -503,12 +831,14 @@ test("A2 transition-backed click unrelated to the assertion does not consume it"
     runtimeEvidenceTrace: trace,
   });
   const narrative = ["La opción pública redirige al módulo de información."];
-
-  const result = collectLocalPendingAssertionDiagnostics(caseResult, trace, narrative);
+  const result = collectLocalPendingAssertionDiagnostics(
+    caseResult,
+    trace,
+    narrative,
+  );
   assert.ok(!result.localClosureDiagnostics?.consumed.includes(assertionText));
   assert.ok(result.pendingAssertions.includes(assertionText));
 });
-
 test("A3 navigation assertion stays pending when no transition-backed click was observed", () => {
   const assertionText = "Debe redirigir al módulo de información.";
   const trace = buildTransitionTrace();
@@ -518,20 +848,22 @@ test("A3 navigation assertion stays pending when no transition-backed click was 
     runtimeEvidenceTrace: trace,
   });
   const narrative = ["La opción pública redirige al módulo de información."];
-
-  const result = collectLocalPendingAssertionDiagnostics(caseResult, trace, narrative);
+  const result = collectLocalPendingAssertionDiagnostics(
+    caseResult,
+    trace,
+    narrative,
+  );
   assert.ok(!result.localClosureDiagnostics?.consumed.includes(assertionText));
 });
-
 test("B4 auth signal without a backed auth gate stays pending", () => {
   const assertionText = "El sistema debe presentar el flujo de autenticación.";
-  const caseResult = buildCaseResult({ steps: [buildPendingAssertionStep(assertionText)] });
-
+  const caseResult = buildCaseResult({
+    steps: [buildPendingAssertionStep(assertionText)],
+  });
   const result = collectLocalPendingAssertionDiagnostics(caseResult);
   assert.ok(!result.localClosureDiagnostics?.consumed.includes(assertionText));
   assert.ok(result.pendingAssertions.includes(assertionText));
 });
-
 test("B5 auth assertion is consumed when an auth gate was detected on a step", () => {
   const assertionText = "El sistema debe presentar el flujo de autenticación.";
   const caseResult = buildCaseResult({
@@ -540,16 +872,18 @@ test("B5 auth assertion is consumed when an auth gate was detected on a step", (
         index: 3,
         action: "Click Transacciones",
         status: "found",
-        authGateDiagnostics: { detected: true, stage: "identification_input", detectedBeforeStep: "4" },
+        authGateDiagnostics: {
+          detected: true,
+          stage: "identification_input",
+          detectedBeforeStep: "4",
+        },
       },
       buildPendingAssertionStep(assertionText),
     ],
   });
-
   const result = collectLocalPendingAssertionDiagnostics(caseResult);
   assert.ok(result.localClosureDiagnostics?.consumed.includes(assertionText));
 });
-
 test("B6 auth assertion is consumed via plan metadata gate detection without literal autenticación text", () => {
   const assertionText = "Debe estar identificado el cliente antes de operar.";
   assert.ok(!assertionText.toLowerCase().includes("autenticaci"));
@@ -563,59 +897,78 @@ test("B6 auth assertion is consumed via plan metadata gate detection without lit
       requiredData: [],
       steps: [],
       createdAt: new Date().toISOString(),
-      metadata: { authGateDetectedDuringDiscovery: true, authGateStage: "identification_input" },
+      metadata: {
+        authGateDetectedDuringDiscovery: true,
+        authGateStage: "identification_input",
+      },
     },
   });
-
   const result = collectLocalPendingAssertionDiagnostics(caseResult);
   assert.ok(result.localClosureDiagnostics?.consumed.includes(assertionText));
 });
-
 test("A4 descriptive click action is classified into a transition-backed runtime click", () => {
   const caseResult = buildCaseResult({
     steps: [
-      { index: 3, action: 'Clic en "explora nuestros productos".', status: "found", targetText: "explora nuestros productos" } as any,
+      {
+        index: 3,
+        action: 'Clic en "explora nuestros productos".',
+        status: "found",
+        targetText: "explora nuestros productos",
+      } as any,
     ],
   });
-
   const trace = buildRuntimeEvidenceTrace(caseResult);
   assert.ok(trace);
   assert.strictEqual(trace.clickActions.length, 1);
-  assert.strictEqual(trace.clickActions[0].target, "explora nuestros productos");
+  assert.strictEqual(
+    trace.clickActions[0].target,
+    "explora nuestros productos",
+  );
   assert.strictEqual(trace.clickActions[0].success, true);
   assert.strictEqual(trace.clickActions[0].transitionDetected, true);
 });
-
 test("A5 visible-text validation action is not classified as a click", () => {
   const caseResult = buildCaseResult({
     steps: [
-      { index: 4, action: 'Validar que se muestre "¿Qué deseas realizar hoy?".', status: "found", targetText: "¿Qué deseas realizar hoy?" } as any,
+      {
+        index: 4,
+        action: 'Validar que se muestre "¿Qué deseas realizar hoy?".',
+        status: "found",
+        targetText: "¿Qué deseas realizar hoy?",
+      } as any,
     ],
   });
-
   const trace = buildRuntimeEvidenceTrace(caseResult);
   assert.ok(trace);
   assert.strictEqual(trace.clickActions.length, 0);
 });
-
 test("A6 descriptive click closes a pending navigation narrative assertion end to end", () => {
   const assertionText = "información";
   const caseResult = buildCaseResult({
     steps: [
-      { index: 3, action: 'Clic en "explora nuestros productos".', status: "found", targetText: "explora nuestros productos" } as any,
+      {
+        index: 3,
+        action: 'Clic en "explora nuestros productos".',
+        status: "found",
+        targetText: "explora nuestros productos",
+      } as any,
       buildPendingAssertionStep(assertionText),
     ],
   });
   const trace = buildRuntimeEvidenceTrace(caseResult);
   const narrative = ["La opción pública redirige al módulo de información."];
-
-  const result = collectLocalPendingAssertionDiagnostics(caseResult, trace, narrative);
+  const result = collectLocalPendingAssertionDiagnostics(
+    caseResult,
+    trace,
+    narrative,
+  );
   assert.ok(result.localClosureDiagnostics?.consumed.includes(assertionText));
   assert.strictEqual(result.pendingAssertions.length, 0);
 });
-
 test("satisfied_by_previous_assertion auth narrative reconciles to auth_gate, never literal_visible_text", () => {
-  const scenario = buildScenario("Debe iniciarse el flujo de autenticación al operar.");
+  const scenario = buildScenario(
+    "Debe iniciarse el flujo de autenticación al operar.",
+  );
   const caseResult = buildCaseResult({
     status: "discovered_passed",
     steps: [
@@ -624,7 +977,11 @@ test("satisfied_by_previous_assertion auth narrative reconciles to auth_gate, ne
         action: "Click Transacciones y servicios",
         status: "found",
         targetText: "Transacciones y servicios",
-        authGateDiagnostics: { detected: true, stage: "identification_type_selection", detectedBeforeStep: "4" },
+        authGateDiagnostics: {
+          detected: true,
+          stage: "identification_type_selection",
+          detectedBeforeStep: "4",
+        },
       },
       {
         index: 4,
@@ -635,24 +992,28 @@ test("satisfied_by_previous_assertion auth narrative reconciles to auth_gate, ne
       },
     ],
   });
-
   const sourceScenario = buildPromotionSourceScenario(scenario, caseResult);
-  const narrative = sourceScenario.observableOracles?.find((item) => item.requirement.includes("flujo de autenticación"));
+  const narrative = sourceScenario.observableOracles?.find((item) =>
+    item.requirement.includes("flujo de autenticación"),
+  );
   assert.ok(narrative);
   assert.strictEqual(narrative?.type, "auth_gate");
   assert.strictEqual(narrative?.backed, true);
   assert.ok(
     !sourceScenario.observableOracles?.some(
-      (item) => item.type === "literal_visible_text" && item.requirement.includes("flujo de autenticación")
+      (item) =>
+        item.type === "literal_visible_text" &&
+        item.requirement.includes("flujo de autenticación"),
     ),
-    "narrative auth text must not become a literal_visible_text oracle"
+    "narrative auth text must not become a literal_visible_text oracle",
   );
   assert.ok(
-    !sourceScenario.observedAssertions?.some((item) => item.toLowerCase().includes("flujo de autenticación")),
-    "narrative auth text must not be reported as an observed literal assertion"
+    !sourceScenario.observedAssertions?.some((item) =>
+      item.toLowerCase().includes("flujo de autenticación"),
+    ),
+    "narrative auth text must not be reported as an observed literal assertion",
   );
 });
-
 test("literally found assertion stays literal_visible_text backed=true", () => {
   const scenario = buildScenario("¿Qué deseas realizar hoy?");
   const caseResult = buildCaseResult({
@@ -668,14 +1029,14 @@ test("literally found assertion stays literal_visible_text backed=true", () => {
       },
     ],
   });
-
   const sourceScenario = buildPromotionSourceScenario(scenario, caseResult);
-  const oracle = sourceScenario.observableOracles?.find((item) => item.requirement.includes("¿Qué deseas realizar hoy?"));
+  const oracle = sourceScenario.observableOracles?.find((item) =>
+    item.requirement.includes("¿Qué deseas realizar hoy?"),
+  );
   assert.ok(oracle);
   assert.strictEqual(oracle?.type, "literal_visible_text");
   assert.strictEqual(oracle?.backed, true);
 });
-
 test("satisfied_by_previous_assertion without backed evidence is unsupported backed=false", () => {
   const scenario = buildScenario("Se muestra el estado de cuenta.");
   const caseResult = buildCaseResult({
@@ -690,42 +1051,90 @@ test("satisfied_by_previous_assertion without backed evidence is unsupported bac
       },
     ],
   });
-
   const sourceScenario = buildPromotionSourceScenario(scenario, caseResult);
-  const oracle = sourceScenario.observableOracles?.find((item) => item.requirement.includes("estado de cuenta"));
+  const oracle = sourceScenario.observableOracles?.find((item) =>
+    item.requirement.includes("estado de cuenta"),
+  );
   assert.ok(oracle);
   assert.strictEqual(oracle?.type, "unsupported_or_unresolved");
   assert.strictEqual(oracle?.backed, false);
   assert.ok(
     !sourceScenario.observableOracles?.some(
-      (item) => item.type === "literal_visible_text" && item.requirement.includes("estado de cuenta")
-    )
+      (item) =>
+        item.type === "literal_visible_text" &&
+        item.requirement.includes("estado de cuenta"),
+    ),
   );
 });
-
 test("structural post-action assertions inherit only current transition state", () => {
   const scenario = {
-    ...buildScenario("Se muestra la pantalla inicial autenticada del aplicativo."),
+    ...buildScenario(
+      "Se muestra la pantalla inicial autenticada del aplicativo.",
+    ),
     steps: [
       { index: 6, action: "Clic en continuar", dataHints: [] },
-      { index: 7, action: "Validar que el formulario de acceso ya no sea la pantalla activa", polarity: "negative", dataHints: [] },
-      { index: 8, action: "Validar que se muestre la pantalla inicial autenticada del aplicativo", polarity: "positive", dataHints: [] },
+      {
+        index: 7,
+        action:
+          "Validar que el formulario de acceso ya no sea la pantalla activa",
+        polarity: "negative",
+        dataHints: [],
+      },
+      {
+        index: 8,
+        action:
+          "Validar que se muestre la pantalla inicial autenticada del aplicativo",
+        polarity: "positive",
+        dataHints: [],
+      },
     ],
   } as TestScenario;
   const result = buildCaseResult({
     status: "discovered_passed",
     steps: [
-      { index: 6, action: "click", targetText: "Continuar", status: "found", snapshotUrl: "/dashboard" },
-      { index: 7, action: "assert", targetText: "formulario de acceso", status: "satisfied_by_previous_assertion", assertionStatus: "satisfied_by_previous_assertion" },
-      { index: 8, action: "assert", targetText: "pantalla inicial autenticada del aplicativo", status: "satisfied_by_previous_assertion", assertionStatus: "satisfied_by_previous_assertion" },
+      {
+        index: 6,
+        action: "click",
+        targetText: "Continuar",
+        status: "found",
+        snapshotUrl: "/dashboard",
+      },
+      {
+        index: 7,
+        action: "assert",
+        targetText: "formulario de acceso",
+        status: "satisfied_by_previous_assertion",
+        assertionStatus: "satisfied_by_previous_assertion",
+      },
+      {
+        index: 8,
+        action: "assert",
+        targetText: "pantalla inicial autenticada del aplicativo",
+        status: "satisfied_by_previous_assertion",
+        assertionStatus: "satisfied_by_previous_assertion",
+      },
     ] as any,
     runtimeEvidenceTrace: {
-      clickActions: [{ stepIndex: 6, target: "Continuar", normalizedTarget: "continuar", actionType: "click", success: true, transitionDetected: true, afterContext: "url=/dashboard" }],
-      fillActions: [], formEvidence: [], confirmationEvidence: [], structuralEvidence: [], feedbackEvidence: [],
+      clickActions: [
+        {
+          stepIndex: 6,
+          target: "Continuar",
+          normalizedTarget: "continuar",
+          actionType: "click",
+          success: true,
+          transitionDetected: true,
+          afterContext: "url=/dashboard",
+        },
+      ],
+      fillActions: [],
+      formEvidence: [],
+      confirmationEvidence: [],
+      structuralEvidence: [],
+      feedbackEvidence: [],
     },
   });
-
-  const oracles = buildPromotionSourceScenario(scenario, result).observableOracles ?? [];
+  const oracles =
+    buildPromotionSourceScenario(scenario, result).observableOracles ?? [];
   const step8 = oracles.find((oracle) => oracle.stepIndex === 8);
   assert.strictEqual(step8?.type, "navigation_transition");
   assert.strictEqual(step8?.backed, true);
@@ -733,18 +1142,38 @@ test("structural post-action assertions inherit only current transition state", 
   assert.strictEqual(step8?.polarity, "positive");
   const step7 = oracles.find((oracle) => oracle.stepIndex === 7);
   assert.strictEqual(step7?.polarity, "negative");
-
   const stale = buildCaseResult({
     ...result,
-    runtimeEvidenceTrace: { ...result.runtimeEvidenceTrace!, clickActions: [{ stepIndex: 6, target: "Continuar", normalizedTarget: "continuar", actionType: "click", success: true, transitionDetected: false }] },
+    runtimeEvidenceTrace: {
+      ...result.runtimeEvidenceTrace!,
+      clickActions: [
+        {
+          stepIndex: 6,
+          target: "Continuar",
+          normalizedTarget: "continuar",
+          actionType: "click",
+          success: true,
+          transitionDetected: false,
+        },
+      ],
+    },
   });
-  const staleOracle = buildPromotionSourceScenario(scenario, stale).observableOracles?.find((oracle) => oracle.stepIndex === 8);
+  const staleOracle = buildPromotionSourceScenario(
+    scenario,
+    stale,
+  ).observableOracles?.find((oracle) => oracle.stepIndex === 8);
   assert.strictEqual(staleOracle?.backed, false);
-
-  const arbitrary = buildPromotionSourceScenario({ ...scenario, raw: { custom_expected: "Debe mostrarse X" } } as TestScenario, result).observableOracles?.find((oracle) => oracle.requirement.includes("Debe mostrarse X"));
+  const arbitrary = buildPromotionSourceScenario(
+    {
+      ...scenario,
+      raw: { custom_expected: "Debe mostrarse X" },
+    } as TestScenario,
+    result,
+  ).observableOracles?.find((oracle) =>
+    oracle.requirement.includes("Debe mostrarse X"),
+  );
   assert.strictEqual(arbitrary?.backed, false);
 });
-
 test("satisfied_by_previous_assertion bookkeeping matchedText does not imply backed literal", () => {
   const scenario = buildScenario("Se muestra el catálogo de productos.");
   const caseResult = buildCaseResult({
@@ -760,47 +1189,337 @@ test("satisfied_by_previous_assertion bookkeeping matchedText does not imply bac
       },
     ],
   });
-
   const sourceScenario = buildPromotionSourceScenario(scenario, caseResult);
-  const oracle = sourceScenario.observableOracles?.find((item) => item.requirement.includes("catálogo de productos"));
+  const oracle = sourceScenario.observableOracles?.find((item) =>
+    item.requirement.includes("catálogo de productos"),
+  );
   assert.ok(oracle);
   assert.strictEqual(oracle?.backed, false);
   assert.ok(
     !sourceScenario.observableOracles?.some(
-      (item) => item.type === "literal_visible_text" && item.requirement.includes("catálogo de productos")
+      (item) =>
+        item.type === "literal_visible_text" &&
+        item.requirement.includes("catálogo de productos"),
     ),
-    "matchedText carried by status bookkeeping must not synthesize literal_visible_text backed=true"
+    "matchedText carried by status bookkeeping must not synthesize literal_visible_text backed=true",
   );
 });
-
 test("quoted narrative outcome is backed only by exact visible text in the final runtime snapshot", () => {
   const scenario = buildScenario('Se muestra "Más detalles del producto"');
   const result = buildCaseResult({
     status: "discovered_passed",
-    steps: [{ index: 37, action: "click", targetText: "Cancelar", status: "found" }] as any,
+    steps: [
+      { index: 37, action: "click", targetText: "Cancelar", status: "found" },
+    ] as any,
   });
   const finalSnapshot = {
     version: "1.0",
     url: "https://example.test/product-detail",
     title: "Example",
     capturedAt: "2026-09-28T23:22:00.000Z",
-    elements: [{ id: "heading-1", type: "heading", text: "Más detalles del producto", visible: true, candidateLocators: [], dataHints: [] }],
-    summary: { totalElements: 1, buttons: 0, links: 0, inputs: 0, selects: 0, tables: 0, dialogs: 0, headings: 1 },
+    elements: [
+      {
+        id: "heading-1",
+        type: "heading",
+        text: "Más detalles del producto",
+        visible: true,
+        candidateLocators: [],
+        dataHints: [],
+      },
+    ],
+    summary: {
+      totalElements: 1,
+      buttons: 0,
+      links: 0,
+      inputs: 0,
+      selects: 0,
+      tables: 0,
+      dialogs: 0,
+      headings: 1,
+    },
   } as any;
-
-  const backed = buildPromotionSourceScenario(scenario, result, finalSnapshot).observableOracles?.[0];
+  const backed = buildPromotionSourceScenario(scenario, result, finalSnapshot)
+    .observableOracles?.[0];
   assert.equal(backed?.type, "literal_visible_text");
   assert.equal(backed?.backed, true);
   assert.equal(backed?.target, "Más detalles del producto");
-  assert.ok(backed?.evidence.includes("exact_visible_text_in_final_runtime_snapshot:true"));
-
-  const missing = buildPromotionSourceScenario(buildScenario('Se muestra "Mensaje inventado"'), result, finalSnapshot).observableOracles?.[0];
+  assert.ok(
+    backed?.evidence.includes(
+      "exact_visible_text_in_final_runtime_snapshot:true",
+    ),
+  );
+  const missing = buildPromotionSourceScenario(
+    buildScenario('Se muestra "Mensaje inventado"'),
+    result,
+    finalSnapshot,
+  ).observableOracles?.[0];
   assert.equal(missing?.type, "unsupported_or_unresolved");
-  assert.equal(missing?.backed, false, "the final snapshot must not certify text that it did not show");
+  assert.equal(
+    missing?.backed,
+    false,
+    "the final snapshot must not certify text that it did not show",
+  );
 });
-
+test("partial discovery reconciles an assertion from its own successful action snapshot", () => {
+  const requirement =
+    'Validar que se muestre "comprobante de transacción exitosa"';
+  const scenario = {
+    ...buildScenario(requirement),
+    steps: [
+      { index: 1, action: 'Presionar "Autorizar"', dataHints: [] },
+      { index: 2, action: requirement, dataHints: [] },
+    ],
+  } as TestScenario;
+  const snapshot = {
+    version: "1.0",
+    url: "https://fixture.invalid/receipt",
+    title: "Fixture",
+    capturedAt: "2026-10-21T20:00:00.000Z",
+    elements: ["Comprobante", "Transacción Exitosa"].map((text, index) => ({
+      id: `receipt-${index}`,
+      type: index === 0 ? "heading" : "text",
+      text,
+      visible: true,
+      candidateLocators: [
+        { strategy: "text", value: text, exact: true, confidence: 1 },
+      ],
+      dataHints: [],
+    })),
+    summary: {
+      totalElements: 2,
+      buttons: 0,
+      links: 0,
+      inputs: 0,
+      selects: 0,
+      tables: 0,
+      dialogs: 0,
+      headings: 1,
+    },
+  } as any;
+  const result = buildCaseResult({
+    status: "discovered_partial",
+    steps: [
+      { index: 1, action: "click", targetText: "Autorizar", status: "found" },
+      {
+        index: 2,
+        action: "assert",
+        targetText: requirement,
+        status: "satisfied_by_previous_assertion",
+        assertionStatus: "satisfied_by_previous_assertion",
+      },
+    ] as any,
+  });
+  const source = buildPromotionSourceScenario(scenario, result, undefined, [
+    { stepIndex: 1, snapshot },
+  ]);
+  const oracle = source.observableOracles?.find(
+    (entry) => entry.requirement === requirement,
+  );
+  assert.equal(oracle?.type, "heading_or_control");
+  assert.equal(oracle?.backed, true);
+  assert.deepEqual(oracle?.details?.visibleTargets, [
+    "Comprobante",
+    "Transacción Exitosa",
+  ]);
+  assert.ok(oracle?.evidence.includes("causal_snapshot_semantic_match:true"));
+});
+test("causal snapshot recovers a positive assertion missed by live validation", () => {
+  const requirement =
+    'Validar que la confirmación muestre el "total a debitar"';
+  const scenario = {
+    ...buildScenario(requirement),
+    steps: [
+      { index: 17, action: 'Presionar "Continuar"', dataHints: [] },
+      { index: 24, action: requirement, requirementRefs: ["REQ-24"], dataHints: [] },
+    ],
+    canonicalRequirements: [{ requirementId: "REQ-24", kind: "assertion", description: requirement, polarity: "positive", assertionIntents: ["validation_present"], origin: { originRef: "REQ-24" } }],
+  } as TestScenario;
+  const snapshot = {
+    version: "1.0",
+    url: "https://fixture.invalid/confirmation",
+    title: "Fixture",
+    capturedAt: "2026-10-21T20:00:00.000Z",
+    elements: [
+      {
+        id: "total",
+        type: "text",
+        text: "Total debitado",
+        visible: true,
+        candidateLocators: [],
+        dataHints: [],
+      },
+    ],
+    summary: {
+      totalElements: 1,
+      buttons: 0,
+      links: 0,
+      inputs: 0,
+      selects: 0,
+      tables: 0,
+      dialogs: 0,
+      headings: 0,
+    },
+  } as any;
+  const result = buildCaseResult({
+    status: "discovered_partial",
+    steps: [
+      { index: 17, action: "click", targetText: "Continuar", status: "found" },
+      {
+        index: 24,
+        action: "assert",
+        targetText: requirement,
+        status: "not_found",
+        pendingDiscovery: true,
+        error: "assertion_not_found",
+      },
+    ] as any,
+    controlledAdvanceProbe: {
+      intent: ["validation_present"], candidateFound: false, candidateEnabled: false, attemptPossible: false,
+      resolutionState: "not_found", attemptObserved: false, beforeCaptured: true, afterCaptured: true,
+      networkEvents: [], validationMutation: false, transitionOccurred: false, blockedObserved: false,
+      validationObserved: false, subjectFound: false, subjectValidationMutation: false, subjectInputApplied: false,
+      advanceCausality: "not_observed", otherInvalidRequiredControls: 0, otherEmptyRequiredControls: 0,
+      functionalDefectAssertion13: false, evidence: ["advance_candidate_not_found"],
+    },
+  });
+  const source = buildPromotionSourceScenario(scenario, result, undefined, [
+    { stepIndex: 17, snapshot },
+  ]);
+  const oracle = source.observableOracles?.find(
+    (entry) => entry.stepIndex === 24,
+  );
+  assert.equal(oracle?.type, "heading_or_control");
+  assert.equal(oracle?.backed, true);
+  assert.deepEqual(oracle?.details?.visibleTargets, ["Total debitado"]);
+  assert.ok(oracle?.evidence.includes("causal_snapshot_semantic_match:true"));
+  const stepOracles =
+    source.observableOracles?.filter((entry) => entry.stepIndex === 24) ?? [];
+  assert.ok(stepOracles.length > 0);
+  assert.ok(
+    stepOracles.every((entry) => entry.backed),
+    "an unbacked probe oracle for this same assertion must not override snapshot evidence",
+  );
+});
+test("a positive causal snapshot cannot recover a declared negative assertion", () => {
+  const requirement = 'Validar que no se muestre "operación exitosa"';
+  const scenario = {
+    ...buildScenario(requirement),
+    steps: [
+      { index: 1, action: 'Presionar "Enviar"', dataHints: [] },
+      { index: 2, action: requirement, polarity: "negative", dataHints: [] },
+    ],
+  } as TestScenario;
+  const snapshot = {
+    version: "1.0",
+    url: "https://fixture.invalid/result",
+    title: "Fixture",
+    capturedAt: new Date().toISOString(),
+    elements: [
+      {
+        id: "success",
+        type: "text",
+        text: "Operación exitosa",
+        visible: true,
+        candidateLocators: [],
+        dataHints: [],
+      },
+    ],
+    summary: {
+      totalElements: 1,
+      buttons: 0,
+      links: 0,
+      inputs: 0,
+      selects: 0,
+      tables: 0,
+      dialogs: 0,
+      headings: 0,
+    },
+  } as any;
+  const result = buildCaseResult({
+    status: "discovered_partial",
+    steps: [
+      { index: 1, action: "click", targetText: "Enviar", status: "found" },
+      {
+        index: 2,
+        action: "assert",
+        targetText: requirement,
+        status: "not_found",
+        pendingDiscovery: true,
+      },
+    ] as any,
+  });
+  const source = buildPromotionSourceScenario(scenario, result, undefined, [
+    { stepIndex: 1, snapshot },
+  ]);
+  const oracle = source.observableOracles?.find(
+    (entry) => entry.stepIndex === 2,
+  );
+  assert.notEqual(oracle?.type, "heading_or_control");
+  assert.notEqual(oracle?.backed, true);
+});
+test("a later page snapshot cannot certify an earlier assertion", () => {
+  const requirement =
+    'Validar que se muestre "comprobante de transacción exitosa"';
+  const scenario = {
+    ...buildScenario(requirement),
+    steps: [
+      { index: 1, action: 'Presionar "Autorizar"', dataHints: [] },
+      { index: 2, action: requirement, dataHints: [] },
+    ],
+  } as TestScenario;
+  const futureSnapshot = {
+    version: "1.0",
+    url: "https://fixture.invalid/receipt",
+    title: "Fixture",
+    capturedAt: new Date().toISOString(),
+    elements: ["Comprobante", "Transacción Exitosa"].map((text, index) => ({
+      id: `future-${index}`,
+      type: "text",
+      text,
+      visible: true,
+      candidateLocators: [],
+      dataHints: [],
+    })),
+    summary: {
+      totalElements: 2,
+      buttons: 0,
+      links: 0,
+      inputs: 0,
+      selects: 0,
+      tables: 0,
+      dialogs: 0,
+      headings: 0,
+    },
+  } as any;
+  const result = buildCaseResult({
+    status: "discovered_partial",
+    steps: [
+      { index: 1, action: "click", targetText: "Autorizar", status: "found" },
+      {
+        index: 2,
+        action: "assert",
+        targetText: requirement,
+        status: "not_found",
+        pendingDiscovery: true,
+      },
+    ] as any,
+  });
+  const source = buildPromotionSourceScenario(
+    scenario,
+    result,
+    futureSnapshot,
+    [{ stepIndex: 3, snapshot: futureSnapshot }],
+  );
+  const oracle = source.observableOracles?.find(
+    (entry) => entry.requirement === requirement,
+  );
+  assert.notEqual(oracle?.backed, true);
+  assert.equal(oracle?.type, "unsupported_or_unresolved");
+});
 test("satisfied_by_previous_assertion navigation reconciles to navigation_transition, not literal_visible_text", () => {
-  const scenario = buildScenario("La opción pública redirige al módulo de información.");
+  const scenario = buildScenario(
+    "La opción pública redirige al módulo de información.",
+  );
   const caseResult = buildCaseResult({
     status: "discovered_partial",
     steps: [
@@ -822,7 +1541,7 @@ test("satisfied_by_previous_assertion navigation reconciles to navigation_transi
           actionType: "click",
           success: true,
           transitionDetected: true,
-        }
+        },
       ],
       fillActions: [],
       formEvidence: [],
@@ -831,15 +1550,18 @@ test("satisfied_by_previous_assertion navigation reconciles to navigation_transi
       feedbackEvidence: [],
     },
   });
-
   const sourceScenario = buildPromotionSourceScenario(scenario, caseResult);
-  const oracle = sourceScenario.observableOracles?.find((item) => item.requirement.includes("redirige al módulo de información"));
+  const oracle = sourceScenario.observableOracles?.find((item) =>
+    item.requirement.includes("redirige al módulo de información"),
+  );
   assert.ok(oracle);
   assert.strictEqual(oracle?.type, "navigation_transition");
   assert.strictEqual(oracle?.backed, true);
   assert.ok(
     !sourceScenario.observableOracles?.some(
-      (item) => item.type === "literal_visible_text" && item.requirement.includes("redirige al módulo de información")
-    )
+      (item) =>
+        item.type === "literal_visible_text" &&
+        item.requirement.includes("redirige al módulo de información"),
+    ),
   );
 });

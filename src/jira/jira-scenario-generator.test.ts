@@ -1,18 +1,22 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { jiraScenarioQualityGaps, buildJiraScenarioMessages, generateJiraScenarios, normalizeJiraGeneratedSteps, jiraAcceptanceClauses, clauseCoverageGuidance, repairMissingDestinationAssertions, linkDistinctionCoverage, uncoveredAcceptanceClauses, auditGeneratedJiraSyntax, alignRepairedNegativeExpectedResult } from "./jira-scenario-generator";
+import { jiraScenarioQualityGaps, buildJiraScenarioMessages, generateJiraScenarios, normalizeJiraGeneratedSteps, bindLearnedChallengeControls, jiraAcceptanceClauses, clauseCoverageGuidance, repairMissingDestinationAssertions, linkDistinctionCoverage, uncoveredAcceptanceClauses, auditGeneratedJiraSyntax, alignRepairedNegativeExpectedResult } from "./jira-scenario-generator";
 import { deriveJiraInputRequirements } from "./jira-input-requirements";
 import { prepareJiraGenerationDrafts } from "./jira-generation-preparation";
 import { parseStepIntent } from "../discovery/step-intent-parser";
 import type { AiProvider } from "../ai/ai-provider.types";
 import type { JiraIssueSource } from "../scenarios/scenario-types";
 import {jiraRepairPreservesActions} from './jira-scenario-generator';
+import { JIRA_STEP_DELIVERY_INSTRUCTIONS } from './jira-step-delivery';
 
 test('syntax repair preserves ordered authentication and business actions when multiple checks fail',async()=>{
  const source={...issue,description:'El cliente ingresa Usuario y un Token no válido para comprobar el rechazo.'};
  const draft={sourceIssueKey:source.key,title:'Rechazo de token no válido',steps:['Abrir la aplicación configurada del proyecto','Ingresar usuario en "Usuario"','Completar todos los campos del token','Validar que se muestre "Rechazo"'],expectedResult:'Rechazo'};
  let calls=0; const provider=fakeProvider([]);
- provider.completeJson=async()=>({rawText:'',model:'fixture',providerName:'fixture',durationMs:0,parsedJson:{scenarios:++calls===1?[draft]:[{...draft,steps:['Abrir la aplicación configurada del proyecto','Ingresar un token no válido en "Token"','Validar que se muestre "Rechazo"']}]}});
+ provider.completeJson=async(request)=>{
+  assert.ok(request.messages[0].content.includes(JIRA_STEP_DELIVERY_INSTRUCTIONS),'initial generation and syntax repair share the delivery contract');
+  return {rawText:'',model:'fixture',providerName:'fixture',durationMs:0,parsedJson:{scenarios:++calls===1?[draft]:[{...draft,steps:['Abrir la aplicación configurada del proyecto','Ingresar un token no válido en "Token"','Validar que se muestre "Rechazo"']}]}};
+ };
  const result=await generateJiraScenarios([source],'fixture-profile',provider);
  assert.equal(calls,2);
  assert.ok(result.scenarios[0].steps.includes('Ingresar usuario en "Usuario"'));
@@ -32,11 +36,57 @@ test('repair action lineage retains repeated submits, input conditions and order
 test('generation syntax audit exercises source conditional review before presenting an executable draft',async()=>{
  const source={...issue,description:'AC1 — Resumen\nEl resumen muestra el monto, la comisión cuando aplique.'};
  const draft={sourceIssueKey:source.key,title:'Revisión',acceptanceCriteriaRefs:['AC1.1'],steps:['Abrir la aplicación configurada del proyecto','Validar que se muestre "Comisión" en otra pantalla.','Validar que se muestre "Done"'],expectedResult:'Done'};
- assert.ok((await auditGeneratedJiraSyntax([draft],[source])).some(failure=>failure.reason==='JIRA_CONDITION_STEP_UNSUPPORTED'));
+ const failures=await auditGeneratedJiraSyntax([draft],[source]);
+ assert.ok(failures.some(failure=>failure.reason==='JIRA_CONDITION_STEP_UNSUPPORTED' && failure.stepIndex===2 && failure.step===draft.steps[1]));
+ const generated=await generateJiraScenarios([source],'fixture-profile',fakeProvider([draft]));
+ assert.ok(generated.scenarios[0].validation.issues?.some(issue=>issue.code==='JIRA_CONDITION_STEP_UNSUPPORTED' && issue.stepIndex===2 && issue.step===draft.steps[1]));
  assert.deepEqual(await auditGeneratedJiraSyntax([{...draft,steps:[draft.steps[0],'Validar que se muestre "Comisión" en la confirmación.',draft.steps[2]]}],[source]),[]);
 });
 
 const issue: JiraIssueSource = {key:"HU-1",summary:"Acceso y operación",description:"El usuario inicia sesión y autoriza una operación con otro código.",acceptanceCriteria:"",labels:[],components:[],status:"Open",issueType:"Story"};
+
+test('generation audits, repairs and revalidates negative authentication before delivering the journey',async()=>{
+ for(const [user,password,login,area] of [['Usuario','Contraseña','Iniciar sesión','Transferencias'],['Username','Password','Sign in','Inventory']]) {
+  for(const repair of [true,false]) {
+   const source={...issue,summary:'Rechazo de acceso',description:`Ingresar credenciales en "${user}" y "${password}" y presionar "${login}". Si son inválidas se muestra "Rechazo" y no se muestra "Resultado exitoso".`};
+   const prefix=['Abrir la aplicación configurada del proyecto',`Ingresar usuario no válido en "${user}".`,`Ingresar contraseña en "${password}".`,`Presionar "${login}".`];
+   const outcome=['Validar que se muestre "Rechazo"','Validar que no se muestre "Resultado exitoso"'];
+   const bad={sourceIssueKey:source.key,title:'Rechazo de credenciales inválidas',steps:[...prefix,`Presionar "${area}"`,'Presionar "Otra operación"',...outcome],expectedResult:'No se muestra "Resultado exitoso".'};
+   const syntax=await auditGeneratedJiraSyntax([bad],[source]);
+   assert.deepEqual(syntax.map(failure=>failure.stepIndex),[5,6]);
+   assert.ok(syntax.every(failure=>failure.reason==='JIRA_ACTION_AFTER_REJECTED_AUTHENTICATION'));
+   let calls=0;
+   const provider:AiProvider={providerType:'fake',providerName:'fixture',model:'fixture',async completeJson(request){
+    calls++;
+    if(calls>1) {
+     const payload=JSON.parse(request.messages[1].content);
+     assert.ok(payload.syntaxFailures.some((failure:{reason:string})=>failure.reason==='JIRA_ACTION_AFTER_REJECTED_AUTHENTICATION'));
+     assert.ok('learnedNavigation' in payload,'repair retains shared project knowledge context');
+    }
+    return {rawText:'',parsedJson:{scenarios:[{...bad,steps:repair&&calls>1?[...prefix,...outcome]:bad.steps}]},model:'fixture',providerName:'fixture',durationMs:0};
+   }};
+   const result=await generateJiraScenarios([source],'fixture',provider,{loginMode:'password'});
+   assert.equal(calls,2);
+   assert.equal(result.scenarios.length,1);
+   assert.equal(result.scenarios[0].validation.valid,repair,JSON.stringify(result.scenarios[0].validation));
+   assert.deepEqual(result.scenarios[0].steps,repair?[...prefix,...outcome]:bad.steps);
+   if(!repair) assert.ok(result.scenarios[0].validation.errors.includes('JIRA_ACTION_AFTER_REJECTED_AUTHENTICATION'));
+  }
+ }
+});
+
+test('negative journey audit preserves explicit credential recovery and transaction failures after valid login',async()=>{
+ for(const [user,password,login,area] of [['Usuario','Contraseña','Iniciar sesión','Transferencias'],['Username','Password','Sign in','Inventory']]) {
+  const prefix=['Abrir la aplicación configurada del proyecto',`Ingresar usuario no válido en "${user}".`,`Ingresar contraseña en "${password}".`,`Presionar "${login}".`,'Validar que se muestre "Rechazo"'];
+  const corrected=[...prefix,`Ingresar usuario en "${user}".`,`Presionar "${login}".`,`Presionar "${area}"`,'Validar que se muestre "Done"'];
+  assert.deepEqual(await auditGeneratedJiraSyntax([{sourceIssueKey:issue.key,title:'Recuperación explícita',steps:corrected,expectedResult:''}]),[]);
+  const incomplete=[...prefix,`Ingresar usuario en "${user}".`,`Presionar "${area}"`,'Validar que se muestre "Done"'];
+  assert.ok((await auditGeneratedJiraSyntax([{sourceIssueKey:issue.key,title:'Recuperación incompleta',steps:incomplete,expectedResult:''}])).some(failure=>failure.reason==='JIRA_ACTION_AFTER_REJECTED_AUTHENTICATION'));
+  const transaction=[...prefix.slice(0,4).map(step=>step.replace('usuario no válido','usuario')),`Presionar "${area}"`,
+   'Ingresar token no válido en "Token"','Presionar "Autorizar"','Validar que se muestre "Rechazo"','Validar que no se muestre "Resultado exitoso"'];
+  assert.deepEqual(await auditGeneratedJiraSyntax([{sourceIssueKey:issue.key,title:'Rechazo de operación',steps:transaction,expectedResult:''}]),[]);
+ }
+});
 test("Jira output instructions require one structured response with inline context", () => {
   const systemPrompt = buildJiraScenarioMessages([issue], "fixture-profile")[0].content;
   assert.match(systemPrompt, /Return the complete result as one valid JSON response matching the provided schema/);
@@ -93,17 +143,11 @@ test('conditional wording is repaired before coverage while source applicability
    return {rawText:'',parsedJson:{scenarios:[corrected]},model:'fixture',providerName:'fixture',durationMs:0};
   };
   const result=await generateJiraScenarios([source],'fixture-profile',provider);
-  assert.ok(reported,'the undeclared condition must reach syntax repair');
+  assert.equal(reported,false,'source-backed bounded applicability is normalized without an AI syntax repair');
   const scenario=result.scenarios[0];
-  if(repair){
    assert.equal(scenario.validation.valid,true,JSON.stringify(scenario.validation.errors));
    assert.ok(scenario.conditionRequirements?.some(condition=>condition.sourceClause.includes('cuando aplique')&&condition.stepIndices.includes(3)));
    assert.deepEqual(uncoveredAcceptanceClauses(source,result.scenarios),[]);
-  }else{
-   assert.equal(scenario.validation.valid,false);
-   assert.ok(scenario.validation.errors.includes('JIRA_CONDITION_STEP_UNSUPPORTED'));
-   assert.ok(scenario.steps.includes(draft.steps[2]));
-  }
  }
 });
 
@@ -220,6 +264,38 @@ test("an unresolved conditional is retained for review instead of being certifie
 test("an unquoted positive visibility subject is preserved without changing negative requirements", () => {
   assert.deepEqual(normalizeJiraGeneratedSteps(['Validar que se muestre el resumen de productos.', 'Validar que no se permita continuar.', 'Revisar la información de la transferencia']),
     ['Validar que se muestre "el resumen de productos"','Validar que no se permita continuar.', 'Validar que se muestre "la información de la transferencia"']);
+});
+test("semantic security-channel pseudo-controls become supported request actions", () => {
+ assert.deepEqual(normalizeJiraGeneratedSteps([
+  'Presionar "el código por SMS"',
+  'Pulsar "el token por SMS"',
+  'Hacer clic en "the verification code by email"',
+ ]),[
+  'Solicitar el código por SMS',
+  'Solicitar el token por SMS',
+  'Solicitar el código por correo electrónico',
+ ]);
+ const explicitlyNamed={...issue,description:'El control se llama "el código por SMS".',acceptanceCriteria:null};
+ assert.deepEqual(normalizeJiraGeneratedSteps(['Presionar "el código por SMS"'],explicitlyNamed),['Presionar "el código por SMS"']);
+});
+test("a validated observed challenge control binds only to its same-issue code or token field across app profiles",()=>{
+ for(const profile of ['profile-alpha','profile-beta']){
+  const issueKey=`${profile.toUpperCase()}-17`;
+  const route={sourceIssueKey:issueKey,actions:[
+   {action:'click',field:profile==='profile-alpha'?'SMS':'Enviar código',targetKind:'observed_control'},
+   {action:'fill',field:'Código',targetKind:undefined},
+   {action:'click',field:'SMS',targetKind:'semantic_request'},
+   {action:'fill',field:'Token',targetKind:undefined},
+  ]};
+  const steps=['Solicitar el código por SMS','Ingresar el código de acceso en "Código"','Solicitar el token por SMS','Ingresar token de autorización en "Token"'];
+  assert.deepEqual(bindLearnedChallengeControls(steps,[route],issueKey),[
+   `Presionar "${profile==='profile-alpha'?'SMS':'Enviar código'}"`,
+   steps[1],
+   steps[2],
+   steps[3],
+  ]);
+  assert.deepEqual(bindLearnedChallengeControls(steps,[route],`${profile.toUpperCase()}-18`),steps,'another issue cannot donate a control');
+ }
 });
 test("Jira continuation rationale remains one explicit click through syntax audit", async()=>{
  const raw='Presionar "Continuar" para avanzar después de revisar la confirmación.';
@@ -530,7 +606,8 @@ test("post-coverage repair that stays invalid keeps the acceptance gate closed",
  const provider=journeyProvider(()=>[{sourceIssueKey:journeySource.key,title:"Actualizar perfil",steps:["Abrir la aplicación configurada del proyecto","Completar los datos del perfil: nombre completo y dirección",`Validar que se muestre "Perfil actualizado"`],expectedResult:"Se muestra el perfil actualizado.",acceptanceCriteriaRefs:["AC1.2"]}]);
  const result=await generateJiraScenarios([journeySource],"app-a",provider);
  assert.ok(result.rejected.some(item=>item.reason.startsWith("JIRA_ACCEPTANCE_COVERAGE_INCOMPLETE")&&item.reason.includes("AC1.2")));
- assert.ok(result.scenarios.every(scenario=>!scenario.validation.valid));
+ assert.ok(result.scenarios.some(scenario=>scenario.validation.valid));
+ assert.ok(result.scenarios.filter(scenario=>scenario.acceptanceCriteriaRefs?.includes("AC1.2")).every(scenario=>!scenario.validation.valid));
 });
 
 const negativeReceiptSteps=["Abrir la aplicación configurada del proyecto",`Ingresar un token de transferencia no válido en "token de seguridad".`,`Presionar "Autorizar transferencia".`,`Validar que se muestre un mensaje que informe el problema del "token de seguridad".`,`Validar que no se muestre "comprobante de transacción exitosa"`];
@@ -649,29 +726,52 @@ test("Jira coverage repair rejects disconnected scenarios with future-screen pre
  const result=await generateJiraScenarios([source],"app-a",provider);
  assert.equal(calls,2);
  assert.equal(result.scenarios.length,1);
- assert.equal(result.scenarios[0].validation.valid,false);
- assert.ok(result.scenarios[0].validation.errors.includes("JIRA_ACCEPTANCE_COVERAGE_INCOMPLETE:AC1.2"));
- assert.ok(!result.scenarios[0].validation.errors.includes("JIRA_PRECONDITION_NOT_OBSERVABLE"));
-});
-
-test("Jira scenarios cannot remain launchable when acceptance coverage repair leaves a gap",async()=>{
- const source={...issue,description:"",acceptanceCriteria:"AC1 — Movimientos\nEl cliente consulta sus movimientos. Puede filtrar por fecha."};
- const provider=fakeProvider([{sourceIssueKey:source.key,title:"Consultar movimientos",steps:["Abrir la aplicación configurada del proyecto","Validar que se muestre \"Movimientos\""],expectedResult:"Se muestran los movimientos.",acceptanceCriteriaRefs:["AC1.1"]}]);
- const result=await generateJiraScenarios([source],"app-a",provider);
- assert.equal(result.scenarios[0].validation.valid,false);
- assert.equal(result.scenarios[0].executionReadiness,"blocked_acceptance_coverage");
- assert.ok(result.scenarios[0].validation.errors.some(error=>error.includes("AC1.2")));
+ assert.equal(result.scenarios[0].validation.valid,true);
+ assert.deepEqual(result.scenarios[0].validation.errors,[]);
  assert.ok(result.rejected.some(item=>item.reason.includes("AC1.2")));
 });
 
-test("coverage-repair provider failure preserves generated scenarios and blocks their incomplete coverage",async()=>{
+test("valid scenarios remain available while a sibling acceptance gap is reported separately",async()=>{
+ const source={...issue,description:"",acceptanceCriteria:"AC1 — Movimientos\nEl cliente consulta sus movimientos. Puede filtrar por fecha."};
+ const provider=fakeProvider([{sourceIssueKey:source.key,title:"Consultar movimientos",steps:["Abrir la aplicación configurada del proyecto","Validar que se muestre \"Movimientos\""],expectedResult:"Se muestran los movimientos.",acceptanceCriteriaRefs:["AC1.1"]}]);
+ const result=await generateJiraScenarios([source],"app-a",provider);
+ assert.equal(result.scenarios[0].validation.valid,true);
+ assert.equal(result.scenarios[0].executionReadiness,"requires_discovery");
+ assert.deepEqual(result.scenarios[0].validation.errors,[]);
+ assert.ok(result.rejected.some(item=>item.reason.includes("AC1.2")));
+});
+
+test('coverage schema delivery failure recovers automatically and rechecks the missing obligations',async()=>{
+ for(const recover of [true,false]) {
+  const source={...issue,description:'',acceptanceCriteria:'AC1 — Movimientos\nEl cliente consulta sus movimientos. Puede filtrar por fecha.'};
+  const initial={sourceIssueKey:source.key,title:'Consultar movimientos',steps:['Abrir la aplicación configurada del proyecto','Validar que se muestre "Movimientos"'],expectedResult:'Se muestran los movimientos.',acceptanceCriteriaRefs:['AC1.1']};
+  let calls=0;
+  const provider=fakeProvider([]);
+  provider.completeJson=async request=>{
+   calls++;
+   if(calls===1) return {rawText:'',parsedJson:{scenarios:[initial]},model:'fixture',providerName:'fixture',durationMs:0};
+   const payload=JSON.parse(request.messages[1].content);
+   assert.deepEqual(payload.issues[0].missingClauses.map((clause:{id:string})=>clause.id),['AC1.2']);
+   if(calls===2||!recover) throw Object.assign(new Error('invalid scenario delivery'),{code:'ai_provider_schema_invalid'});
+   return {rawText:'',parsedJson:{scenarios:[{...initial,title:'Filtrar movimientos',steps:['Abrir la aplicación configurada del proyecto','Ingresar fecha en "Fecha"','Presionar "Filtrar"','Validar que se muestre "Movimientos filtrados"'],expectedResult:'Movimientos filtrados',acceptanceCriteriaRefs:['AC1.2']}]},model:'fixture',providerName:'fixture',durationMs:0};
+  };
+  const result=await generateJiraScenarios([source],'fixture',provider);
+  assert.equal(calls,3,'only one extra delivery attempt is allowed');
+  assert.ok(result.scenarios.every(scenario=>scenario.validation.valid));
+  assert.equal(result.scenarios.length,recover?2:1);
+  assert.equal(result.rejected.some(item=>item.reason.startsWith('JIRA_ACCEPTANCE_COVERAGE_INCOMPLETE')),!recover);
+ }
+});
+
+test("coverage provider failure preserves valid scenarios and records the suite gap",async()=>{
  const source={...issue,description:"",acceptanceCriteria:"AC1 — Movimientos\nEl cliente consulta sus movimientos. Puede filtrar por fecha."};
  let calls=0;const provider=fakeProvider([]);
  provider.completeJson=async()=>{calls++;if(calls>1)throw Object.assign(new Error("provider unavailable"),{code:"AI_PROVIDER_UNAVAILABLE"});return {rawText:"",parsedJson:{scenarios:[{sourceIssueKey:source.key,title:"Consultar movimientos",steps:["Abrir la aplicación configurada del proyecto","Validar que se muestre \"Movimientos\""] ,expectedResult:"Se muestran los movimientos.",acceptanceCriteriaRefs:["AC1.1"]}]},model:"fixture",providerName:"fixture",durationMs:0};};
  const result=await generateJiraScenarios([source],"app-a",provider);
  assert.equal(calls,2);assert.equal(result.scenarios.length,1);
- assert.equal(result.scenarios[0].validation.valid,false);
- assert.ok(result.scenarios[0].validation.errors.includes("JIRA_ACCEPTANCE_COVERAGE_INCOMPLETE:AC1.2"));
+ assert.equal(result.scenarios[0].validation.valid,true);
+ assert.deepEqual(result.scenarios[0].validation.errors,[]);
+ assert.ok(result.rejected.some(item=>item.reason.includes("AC1.2")));
 });
 
 test("file-output provider receives the failing draft and errors in its first user message", async () => {
@@ -742,7 +842,8 @@ test('an invalid candidate cannot be the only reference of a clause',async()=>{
   {sourceIssueKey:'HU-D',title:'Detalle',steps:['Navegar a detalle','Validar que se muestre "Detalle"'],expectedResult:'Detalle',acceptanceCriteriaRefs:['AC2.1']},
  ]));
  assert.ok(result.rejected.some(r=>r.reason.startsWith('JIRA_ACCEPTANCE_COVERAGE_INCOMPLETE')&&r.reason.includes('AC2.1')));
- assert.ok(result.scenarios.every(s=>!s.validation.valid));
+ assert.ok(result.scenarios.some(s=>s.validation.valid));
+ assert.ok(result.scenarios.filter(s=>s.acceptanceCriteriaRefs?.includes("AC2.1")).every(s=>!s.validation.valid));
 });
 test('clause guidance asks per-option scenarios for choices and same-scenario destination assertions',()=>{
  const choice=clauseCoverageGuidance({id:'AC2.1',text:'Rol de Laura M. permite elegir Operador, Aprobador o Administrador'});

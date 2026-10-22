@@ -1,6 +1,6 @@
 [
   {
-    "scenarioId": "REC-3CD40992-01",
+    "scenarioId": "REC-A85F11AF-01",
     "title": "Transferencias entre cuantas propias",
     "description": "Recorrido observado para completar \"Transferencias entre cuantas propias\". Se registraron 29 acciones funcionales.",
     "preconditions": [
@@ -496,7 +496,7 @@
           "event-28"
         ],
         "stepTemplate": "Seleccionar [account_from_select_input_seleccion] en \"account-from-select-input\"",
-        "renderedStep": "Seleccionar opción que contiene Cuenta Corrientes (coincidencia 1) en el campo \"account-from-select-input\"",
+        "renderedStep": "Seleccionar opción que contiene Cuenta Corriente (coincidencia 1) en el campo \"account-from-select-input\"",
         "valueKey": "account_from_select_input_seleccion",
         "interactionId": "interaction-28",
         "sensitive": false,
@@ -529,7 +529,7 @@
           "event-31"
         ],
         "stepTemplate": "Seleccionar [account_to_select_input_seleccion] en \"account-to-select-input\"",
-        "renderedStep": "Seleccionar opción que contiene Cuenta de Ahorro (coincidencia 1) en el campo \"account-to-select-input\"",
+        "renderedStep": "Seleccionar opción que contiene Cuenta de Ahorros (coincidencia 1) en el campo \"account-to-select-input\"",
         "valueKey": "account_to_select_input_seleccion",
         "interactionId": "interaction-31",
         "sensitive": false,
@@ -803,7 +803,7 @@
         "sourceEventRefs": [
           "event-7"
         ],
-        "exampleValue": "130598983",
+        "exampleValue": "130872392",
         "sensitive": false,
         "valueRole": "action_input",
         "source": "RECORDED_CONFIRMED",
@@ -825,7 +825,7 @@
         "sourceEventRefs": [
           "event-9"
         ],
-        "exampleValue": "olivam",
+        "exampleValue": "SAMOTA",
         "sensitive": false,
         "valueRole": "action_input",
         "source": "RECORDED_CONFIRMED",
@@ -886,10 +886,11 @@
         "sourceEventRefs": [
           "event-28"
         ],
-        "exampleValue": "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
+        "exampleValue": "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
         "allowedValues": [
-          "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
-          "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
+          "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
+          "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+          "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
         ],
         "sensitive": false,
         "valueRole": "action_input",
@@ -905,9 +906,10 @@
         "sourceEventRefs": [
           "event-31"
         ],
-        "exampleValue": "Cuenta de Ahorro / 21312020003368 / US$1,495.71",
+        "exampleValue": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
         "allowedValues": [
-          "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
+          "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+          "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
         ],
         "sensitive": false,
         "valueRole": "action_input",
@@ -1047,7 +1049,7 @@
         "value": "button|Continuar"
       }
     ],
-    "sourceRecordingId": "3cd40992-95ce-4482-8002-44182c32e7c7",
+    "sourceRecordingId": "a85f11af-b68a-4cc5-ab2a-bc5dd5b1cd64",
     "hasUncertainSteps": true,
     "primary": true,
     "sourceEventRefs": [
@@ -1119,6 +1121,35 @@
       "goalCoherent": true,
       "mutationIntentExpressed": true
     },
+    "selectorOptionInventories": [
+      {
+        "selectorRef": "60d370b39a8d|account-from-select-input|selection",
+        "semanticField": "account-from-select-input",
+        "surfaceRef": "60d370b39a8d|60d370b39a8d|account-from-select-input|selection|option-surface",
+        "options": [
+          "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
+          "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+          "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
+        ],
+        "observationRefs": [
+          "obs-28"
+        ],
+        "selectedOption": "Cuenta Corrientes / 11121000000739 / RD$753,259.23"
+      },
+      {
+        "selectorRef": "60d370b39a8d|account-to-select-input|selection",
+        "semanticField": "account-to-select-input",
+        "surfaceRef": "60d370b39a8d|60d370b39a8d|account-to-select-input|selection|option-surface",
+        "options": [
+          "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+          "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
+        ],
+        "observationRefs": [
+          "obs-31"
+        ],
+        "selectedOption": "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
+      }
+    ],
     "replayEligible": true,
     "canonicalInteractions": [
       {
@@ -1200,8 +1231,8 @@
         "semanticField": "RNC:",
         "action": "fill",
         "valueKey": "rnc",
-        "recordedValue": "130598983",
-        "rawTypedValue": "130598983",
+        "recordedValue": "130872392",
+        "rawTypedValue": "130872392",
         "sourceEventRefs": [
           "event-7"
         ],
@@ -1226,8 +1257,8 @@
         "semanticField": "Usuario:",
         "action": "fill",
         "valueKey": "usuario",
-        "recordedValue": "olivam",
-        "rawTypedValue": "olivam",
+        "recordedValue": "SAMOTA",
+        "rawTypedValue": "SAMOTA",
         "sourceEventRefs": [
           "event-9"
         ],
@@ -1570,7 +1601,7 @@
         "semanticField": "account-from-select-input",
         "action": "select",
         "valueKey": "account_from_select_input_seleccion",
-        "recordedValue": "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
+        "recordedValue": "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
         "sourceEventRefs": [
           "event-28"
         ],
@@ -1580,12 +1611,13 @@
         "selectorControlId": "selector:id:account-from-select-input",
         "optionSurfaceId": "60d370b39a8d|selector:id:account-from-select-input|option-surface",
         "observedOptions": [
-          "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
-          "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
+          "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
+          "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+          "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
         ],
         "playwrightRecorderEvidence": {
           "kind": "text",
-          "normalizedName": "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
+          "normalizedName": "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
           "scopeIdentity": {
             "strategy": "css",
             "value": "div:has(> select[id=\"account-from-select-input\"])"
@@ -1607,21 +1639,26 @@
                 "disabled": false
               },
               {
-                "value": "-192973383173",
-                "label": "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
+                "value": "-96230319813",
+                "label": "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
                 "disabled": false
               },
               {
-                "value": "-178671134322",
-                "label": "Cuenta de Ahorro / 21312020003368 / US$1,495.71",
+                "value": "-195112204072",
+                "label": "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+                "disabled": false
+              },
+              {
+                "value": "-128943207314",
+                "label": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
                 "disabled": false
               }
             ],
             "clickedOption": {
-              "value": "-192973383173",
-              "label": "Cuenta Corrientes / 11311000003156 / RD$162,312.94"
+              "value": "-96230319813",
+              "label": "Cuenta Corrientes / 11121000000739 / RD$753,259.23"
             },
-            "selectedValue": "-192973383173",
+            "selectedValue": "-96230319813",
             "selectionMode": "index",
             "selectedOptionIndex": 0
           },
@@ -1700,7 +1737,7 @@
         "semanticField": "account-to-select-input",
         "action": "select",
         "valueKey": "account_to_select_input_seleccion",
-        "recordedValue": "Cuenta de Ahorro / 21312020003368 / US$1,495.71",
+        "recordedValue": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
         "sourceEventRefs": [
           "event-31"
         ],
@@ -1710,11 +1747,12 @@
         "selectorControlId": "selector:id:account-to-select-input",
         "optionSurfaceId": "60d370b39a8d|selector:id:account-to-select-input|option-surface",
         "observedOptions": [
-          "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
+          "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+          "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
         ],
         "playwrightRecorderEvidence": {
           "kind": "text",
-          "normalizedName": "Cuenta de Ahorro / 21312020003368 / US$1,495.71",
+          "normalizedName": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
           "scopeIdentity": {
             "strategy": "css",
             "value": "div:has(> select[id=\"account-to-select-input\"])"
@@ -1736,18 +1774,23 @@
                 "disabled": false
               },
               {
-                "value": "-178671134322",
-                "label": "Cuenta de Ahorro / 21312020003368 / US$1,495.71",
+                "value": "-195112204072",
+                "label": "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+                "disabled": false
+              },
+              {
+                "value": "-128943207314",
+                "label": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
                 "disabled": false
               }
             ],
             "clickedOption": {
-              "value": "-178671134322",
-              "label": "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
+              "value": "-128943207314",
+              "label": "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
             },
-            "selectedValue": "-178671134322",
+            "selectedValue": "-195112204072",
             "selectionMode": "index",
-            "selectedOptionIndex": 0
+            "selectedOptionIndex": 1
           },
           "captureMatchCount": 1
         },
@@ -2145,7 +2188,7 @@
       "oracleReadiness": true,
       "reviewReadiness": true,
       "publicationContentReadiness": true,
-      "executionReadiness": false,
+      "executionReadiness": true,
       "publicationReadiness": true,
       "missingInputs": [],
       "datasetAuthorityMismatches": [],
@@ -2159,7 +2202,7 @@
         "valueRole": "action_input",
         "required": true,
         "value": "130872392",
-        "source": "CURRENT_QA_EDIT",
+        "source": "RECORDED_CONFIRMED",
         "resolved": true,
         "sensitive": false,
         "stepIndex": 2,
@@ -2168,7 +2211,7 @@
         "systemGenerated": false,
         "masked": false,
         "editable": true,
-        "authority": "explicit_qa_edit",
+        "authority": "canonical_logical",
         "authorityValue": "130872392",
         "datasetAuthorityMismatch": false
       },
@@ -2178,7 +2221,7 @@
         "valueRole": "action_input",
         "required": true,
         "value": "SAMOTA",
-        "source": "CURRENT_QA_EDIT",
+        "source": "RECORDED_CONFIRMED",
         "resolved": true,
         "sensitive": false,
         "stepIndex": 3,
@@ -2187,7 +2230,7 @@
         "systemGenerated": false,
         "masked": false,
         "editable": true,
-        "authority": "explicit_qa_edit",
+        "authority": "canonical_logical",
         "authorityValue": "SAMOTA",
         "datasetAuthorityMismatch": false
       },
@@ -2235,14 +2278,15 @@
         "semanticField": "account-from-select-input",
         "valueRole": "action_input",
         "required": true,
-        "value": "@selection-rule/v1:{\"terms\":[\"Cuenta Corrientes\"],\"matchIndex\":0}",
+        "value": "@selection-rule/v1:{\"terms\":[\"Cuenta Corriente\"],\"matchIndex\":0}",
         "source": "CURRENT_QA_EDIT",
         "resolved": true,
         "sensitive": false,
         "stepIndex": 9,
         "allowedValues": [
-          "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
-          "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
+          "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
+          "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+          "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
         ],
         "readOnly": false,
         "computed": false,
@@ -2250,7 +2294,7 @@
         "masked": false,
         "editable": true,
         "authority": "explicit_qa_edit",
-        "authorityValue": "@selection-rule/v1:{\"terms\":[\"Cuenta Corrientes\"],\"matchIndex\":0}",
+        "authorityValue": "@selection-rule/v1:{\"terms\":[\"Cuenta Corriente\"],\"matchIndex\":0}",
         "datasetAuthorityMismatch": false
       },
       {
@@ -2258,13 +2302,14 @@
         "semanticField": "account-to-select-input",
         "valueRole": "action_input",
         "required": true,
-        "value": "@selection-rule/v1:{\"terms\":[\"Cuenta de Ahorro\"],\"matchIndex\":0}",
+        "value": "@selection-rule/v1:{\"terms\":[\"Cuenta de Ahorros\"],\"matchIndex\":0}",
         "source": "CURRENT_QA_EDIT",
         "resolved": true,
         "sensitive": false,
         "stepIndex": 11,
         "allowedValues": [
-          "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
+          "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+          "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
         ],
         "readOnly": false,
         "computed": false,
@@ -2272,7 +2317,7 @@
         "masked": false,
         "editable": true,
         "authority": "explicit_qa_edit",
-        "authorityValue": "@selection-rule/v1:{\"terms\":[\"Cuenta de Ahorro\"],\"matchIndex\":0}",
+        "authorityValue": "@selection-rule/v1:{\"terms\":[\"Cuenta de Ahorros\"],\"matchIndex\":0}",
         "datasetAuthorityMismatch": false
       },
       {
@@ -2316,7 +2361,7 @@
       }
     ],
     "runtimeDataset": {
-      "scenarioId": "REC-3CD40992-01",
+      "scenarioId": "REC-A85F11AF-01",
       "requirements": [
         {
           "valueKey": "rnc",
@@ -2324,7 +2369,7 @@
           "valueRole": "action_input",
           "required": true,
           "value": "130872392",
-          "source": "CURRENT_QA_EDIT",
+          "source": "RECORDED_CONFIRMED",
           "resolved": true,
           "sensitive": false,
           "stepIndex": 2,
@@ -2333,7 +2378,7 @@
           "systemGenerated": false,
           "masked": false,
           "editable": true,
-          "authority": "explicit_qa_edit",
+          "authority": "canonical_logical",
           "authorityValue": "130872392",
           "datasetAuthorityMismatch": false
         },
@@ -2343,7 +2388,7 @@
           "valueRole": "action_input",
           "required": true,
           "value": "SAMOTA",
-          "source": "CURRENT_QA_EDIT",
+          "source": "RECORDED_CONFIRMED",
           "resolved": true,
           "sensitive": false,
           "stepIndex": 3,
@@ -2352,7 +2397,7 @@
           "systemGenerated": false,
           "masked": false,
           "editable": true,
-          "authority": "explicit_qa_edit",
+          "authority": "canonical_logical",
           "authorityValue": "SAMOTA",
           "datasetAuthorityMismatch": false
         },
@@ -2400,14 +2445,15 @@
           "semanticField": "account-from-select-input",
           "valueRole": "action_input",
           "required": true,
-          "value": "@selection-rule/v1:{\"terms\":[\"Cuenta Corrientes\"],\"matchIndex\":0}",
+          "value": "@selection-rule/v1:{\"terms\":[\"Cuenta Corriente\"],\"matchIndex\":0}",
           "source": "CURRENT_QA_EDIT",
           "resolved": true,
           "sensitive": false,
           "stepIndex": 9,
           "allowedValues": [
-            "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
-            "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
+            "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
+            "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+            "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
           ],
           "readOnly": false,
           "computed": false,
@@ -2415,7 +2461,7 @@
           "masked": false,
           "editable": true,
           "authority": "explicit_qa_edit",
-          "authorityValue": "@selection-rule/v1:{\"terms\":[\"Cuenta Corrientes\"],\"matchIndex\":0}",
+          "authorityValue": "@selection-rule/v1:{\"terms\":[\"Cuenta Corriente\"],\"matchIndex\":0}",
           "datasetAuthorityMismatch": false
         },
         {
@@ -2423,13 +2469,14 @@
           "semanticField": "account-to-select-input",
           "valueRole": "action_input",
           "required": true,
-          "value": "@selection-rule/v1:{\"terms\":[\"Cuenta de Ahorro\"],\"matchIndex\":0}",
+          "value": "@selection-rule/v1:{\"terms\":[\"Cuenta de Ahorros\"],\"matchIndex\":0}",
           "source": "CURRENT_QA_EDIT",
           "resolved": true,
           "sensitive": false,
           "stepIndex": 11,
           "allowedValues": [
-            "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
+            "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+            "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
           ],
           "readOnly": false,
           "computed": false,
@@ -2437,7 +2484,7 @@
           "masked": false,
           "editable": true,
           "authority": "explicit_qa_edit",
-          "authorityValue": "@selection-rule/v1:{\"terms\":[\"Cuenta de Ahorro\"],\"matchIndex\":0}",
+          "authorityValue": "@selection-rule/v1:{\"terms\":[\"Cuenta de Ahorros\"],\"matchIndex\":0}",
           "datasetAuthorityMismatch": false
         },
         {
@@ -2485,8 +2532,8 @@
         "usuario": "SAMOTA",
         "contrasena": "qwerty123123",
         "sms": "123456",
-        "account_from_select_input_seleccion": "@selection-rule/v1:{\"terms\":[\"Cuenta Corrientes\"],\"matchIndex\":0}",
-        "account_to_select_input_seleccion": "@selection-rule/v1:{\"terms\":[\"Cuenta de Ahorro\"],\"matchIndex\":0}",
+        "account_from_select_input_seleccion": "@selection-rule/v1:{\"terms\":[\"Cuenta Corriente\"],\"matchIndex\":0}",
+        "account_to_select_input_seleccion": "@selection-rule/v1:{\"terms\":[\"Cuenta de Ahorros\"],\"matchIndex\":0}",
         "us": "5.00",
         "reenviar_codigo_en_29_segundos": "123456"
       },
@@ -2494,10 +2541,10 @@
     },
     "mutationOpportunities": [
       {
-        "opportunityId": "REC-3CD40992-01:field_omission",
+        "opportunityId": "REC-A85F11AF-01:field_omission",
         "title": "Transferencias entre cuantas propias: comprobar la omisión de un dato",
         "mutationType": "FIELD_OMISSION",
-        "basePrimaryScenarioId": "REC-3CD40992-01",
+        "basePrimaryScenarioId": "REC-A85F11AF-01",
         "operations": [
           {
             "type": "remove_action",
@@ -2567,38 +2614,11 @@
     },
     "promotedSpec": {
       "appSlug": "fenix",
-      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-transferencias-entre-cuantas-propias\\case.spec.ts",
-      "specHash": "47fc2637704bb4a864c2acca8cbd7835a6be0ff45bc0892d7f3b004aa9e2ab14",
+      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\api-tests\\cases\\preview-001-transferencias-entre-cuantas-propias\\case.spec.ts",
+      "specHash": "8b94aea65b08ef11ba1cb4b67452d956c7d7e47bf49361eeaaa1466e10f89f3f",
       "automationId": "preview-001-transferencias-entre-cuantas-propias",
-      "sectionSlug": "default-section",
-      "generatedAt": "2026-10-19T14:59:05.885Z"
-    },
-    "selectorOptionInventories": [
-      {
-        "selectorRef": "60d370b39a8d|account-from-select-input|selection",
-        "semanticField": "account-from-select-input",
-        "surfaceRef": "60d370b39a8d|60d370b39a8d|account-from-select-input|selection|option-surface",
-        "options": [
-          "Cuenta Corrientes / 11311000003156 / RD$162,312.94",
-          "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
-        ],
-        "observationRefs": [
-          "obs-28"
-        ],
-        "selectedOption": "Cuenta Corrientes / 11311000003156 / RD$162,312.94"
-      },
-      {
-        "selectorRef": "60d370b39a8d|account-to-select-input|selection",
-        "semanticField": "account-to-select-input",
-        "surfaceRef": "60d370b39a8d|60d370b39a8d|account-to-select-input|selection|option-surface",
-        "options": [
-          "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
-        ],
-        "observationRefs": [
-          "obs-31"
-        ],
-        "selectedOption": "Cuenta de Ahorro / 21312020003368 / US$1,495.71"
-      }
-    ]
+      "sectionSlug": "api-tests",
+      "generatedAt": "2026-10-21T21:29:50.416Z"
+    }
   }
 ]

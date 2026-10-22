@@ -1,16 +1,19 @@
 import { isSelectionRuleValue, parseSelectionRule } from "../../recording/dynamic-selection-rule";
 import fs from "node:fs";
+import { isCredentialRejectionExpectation, resolveFeedbackMessageAssertion } from "../../discovery/feedback-message-resolver";
 import path from "node:path";
 import type { Page, Request, Locator } from "@playwright/test";
 import type { AssertionPolarity } from "../../scenarios/canonical-scenario";
 import type { AppRouteProfile } from "../../types/env.types";
 import { capturePageDiagnostics, waitForListReadiness } from "../../browser/promoted-spec-helpers";
 import { waitForStablePageState } from "../../discovery/page-stability-detector";
+import { resolveAssertionTargets } from "../../discovery/assertion-resolver";
 import { waitForStableInteractiveScreen } from "../../runner/execution-plan-executor";
 import { waitForPageReady } from "../../browser/page-readiness";
 import { EvidenceRecorder } from "../../evidence/evidence-recorder";
 import { loadEvidenceConfig } from "../../evidence/evidence-types";
 import { normalizeSemanticText } from "../semantic-text-normalization";
+import { resolveSelectionOption } from "../../discovery/selection-option-policy";
 import { evaluatePromotedScenarioOutcome, type ScenarioOutcomeCheck } from "./promoted-scenario-outcome";
 import { findSemanticTargetMatch, type SemanticMatchOptions } from "./semantic-target-matcher";
 import { attemptVirtualKeyboardPress, resolveActionTarget, resolveFillTarget, recordedLocatorFactory, resolveRecordedStructuralOwner, verificationDigitPosition } from "../../discovery/target-resolver";
@@ -125,26 +128,27 @@ function selectionRuntimeSnapshot(state: InteractiveState | undefined): string {
   ].join(" ");
 }
 
-async function applyPromotedNativeSelection(locator: any, selectionValue: string): Promise<boolean> {
-  const match = await locator.evaluate((element: Element, requestedValue: string) => {
+export async function applyPromotedNativeSelection(locator: any, selectionValue: string | string[]): Promise<boolean> {
+  const observed = await locator.evaluate((element: Element) => {
     if (element.tagName.toLowerCase() !== "select") return undefined;
-    const normalize = (value: string) => value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim();
-    const requested = normalize(requestedValue);
-    const matches = Array.from((element as HTMLSelectElement).options)
-      .filter((option) => normalize(option.value) === requested || normalize(option.label) === requested)
-      .map((option) => ({ value: option.value, label: option.label }));
-    return matches.length === 1 ? matches[0] : undefined;
-  }, selectionValue).catch(() => undefined);
-  if (!match) return false;
-  await locator.selectOption(match.value).catch(() => undefined);
-  return locator.evaluate((element: Element, expected: { value: string; label: string }) => {
+    const select = element as HTMLSelectElement;
+    return { multiple: select.multiple, options: Array.from(select.options).map(option => ({
+      value: option.value, label: option.label,
+      disabled: option.disabled || Boolean(option.closest("optgroup[disabled]")),
+    })) };
+  }).catch(() => undefined) as { multiple: boolean; options: Array<{ value: string; label: string; disabled: boolean }> } | undefined;
+  if (!observed) return false;
+  const requested = Array.isArray(selectionValue) ? selectionValue : [selectionValue];
+  if (!requested.length || (requested.length > 1 && !observed.multiple)) return false;
+  const choices = requested.map(value => resolveSelectionOption(value, observed.options, option => option).chosen);
+  if (choices.some(option => !option)) return false;
+  const values = [...new Set(choices.map(option => option!.value))];
+  await locator.selectOption(values).catch(() => undefined);
+  return locator.evaluate((element: Element, expected: string[]) => {
     if (element.tagName.toLowerCase() !== "select") return false;
-    const normalize = (value: string) => value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim();
-    const selected = Array.from((element as HTMLSelectElement).selectedOptions);
-    return selected.length === 1
-      && normalize(selected[0].value) === normalize(expected.value)
-      && normalize(selected[0].label) === normalize(expected.label);
-  }, match).catch(() => false);
+    const actual = Array.from((element as HTMLSelectElement).selectedOptions).map(option => option.value).sort();
+    return JSON.stringify(actual) === JSON.stringify([...expected].sort());
+  }, values).catch(() => false);
 }
 
 async function capturePromotedSelectionStateProbe(
@@ -775,6 +779,8 @@ export type PromotedAssertOptions = {
   polarity?: AssertionPolarity;
   expectedUrl?: string;
   requireCompletionSignal?: boolean;
+  negativeVisibilityTarget?: string;
+  credentialRejectionTarget?: string;
   assertion: () => Promise<void>;
   evidenceDir?: string;
 };
@@ -1794,6 +1800,44 @@ export async function resolvePromotedClickableLocator(
       // Try next strategy
       continue;
     }
+  }
+
+  // Disclosure-style controls (menus/accordions) are often plain divs: the strategies above skip
+  // them as "not clickable" and the POM callback then hits a strict-mode violation when the same
+  // label also appears in other elements. Accept an exact-text match only when exactly one visible
+  // match declares interactive semantics (aria-controls/expanded/haspopup); never pick by position.
+  try {
+    const exactMatches = (container ?? page).getByText(locatorTarget, { exact: true });
+    const total = await exactMatches.count();
+    if (total > 1 && total <= 12) {
+      const interactive: any[] = [];
+      for (let index = 0; index < total; index += 1) {
+        const candidate = exactMatches.nth(index);
+        // The text node's element is usually a child of the control that declares the ARIA
+        // relation (e.g. <div aria-controls><div>label</div></div>); look at most 3 levels up.
+        const declaresControl = await candidate.evaluate((el: Element) => {
+          let node: Element | null = el;
+          for (let depth = 0; node && depth < 3; depth += 1, node = node.parentElement) {
+            if (["aria-controls", "aria-expanded", "aria-haspopup"].some((name) => node!.hasAttribute(name))) return true;
+          }
+          return false;
+        }).catch(() => false);
+        if (!declaresControl) continue;
+        if (await candidate.isVisible({ timeout: timeoutMs }).catch(() => false)) interactive.push(candidate);
+      }
+      if (interactive.length === 1) {
+        return {
+          locator: interactive[0],
+          strategy: container ? "activeContainer:getByTextExact:aria-control" : "page:getByTextExact:aria-control",
+          scope: container ? "container" : "page",
+          visible: true,
+          enabled: true,
+          clickable: true,
+        };
+      }
+    }
+  } catch {
+    // fall through to the semantic fallback
   }
 
   // Semantic fallback for category/product/item selection
@@ -3331,7 +3375,10 @@ export class PromotedSpecRuntime {
         absoluteDeadlineMs: this.config.actionTimeoutMs,
         progressProbe: () => ({ active: this.pendingScenarioRequests.size > 0, pendingCount: this.pendingScenarioRequests.size }),
       });
-      if (!settled.stable) throw new Error("PROMOTED_FINAL_OUTCOME_UNVERIFIED");
+      // A rejected login keeps its own spinner/overlay alive indefinitely; once the declared
+      // credential-rejection feedback was verified that screen is the terminal outcome, so a
+      // never-quiet loading signal must not turn a proven rejection into "unverified".
+      if (!settled.stable && !check.terminalRejectionObserved) throw new Error("PROMOTED_FINAL_OUTCOME_UNVERIFIED");
       const signals = await readPromotedOutcomeSignals(this.page, true);
       const result = evaluatePromotedScenarioOutcome({ ...check, failureMessages: signals.failureMessages });
       if (result !== "verified") throw new Error(result);
@@ -4061,6 +4108,7 @@ export class PromotedSpecRuntime {
     // that contract the semantic field label is not itself a clickable target.
     nativeClickAttempted = true;
     const containerSelector = this.activeContainer?.selector;
+    let exactTextContainerSelector: string | undefined;
     let resolved:
       | Awaited<ReturnType<typeof resolvePromotedClickableLocator>>
       | undefined;
@@ -4172,11 +4220,33 @@ export class PromotedSpecRuntime {
       // (resolveActionTarget -> tryFieldScopedStructuralFallback) Discovery's own live walk
       // already used to pass this step, only attempted when the stronger authorities above
       // didn't resolve. Never certifies/upgrades resolutionState -- a plain retry hint.
-      const exactTextResolution = explicitTextIdentity
+      let exactTextResolution = explicitTextIdentity
         ? await resolvePromotedClickableLocator(this.page, options.target, {
           containerLocator: containerSelector, targetIdentity: explicitTextIdentity,
           timeoutMs: this.config.actionTimeoutMs,
         }) : undefined;
+      // The same label can repeat on the page (e.g. an option list and a submit button). When the
+      // active container does not make the exact text unique, the recorder's own scope for this
+      // action is the authority that disambiguated it at recording time; still fail closed unless
+      // the text is unique and actionable inside that scope.
+      if (explicitTextIdentity && !exactTextResolution) {
+        const recorderScope = options.playwrightRecorderEvidence?.scopeIdentity;
+        const scopeValue = recorderScope?.value?.replace(/"/g, "\\\"");
+        const scopeSelector = !recorderScope ? undefined
+          : recorderScope.strategy === "css" ? recorderScope.value
+          : recorderScope.strategy === "id" ? `[id="${scopeValue}"]`
+          : `[data-testid="${scopeValue}"]`;
+        if (scopeSelector && scopeSelector !== containerSelector) {
+          exactTextResolution = await resolvePromotedClickableLocator(this.page, options.target, {
+            containerLocator: scopeSelector, targetIdentity: explicitTextIdentity,
+            timeoutMs: this.config.actionTimeoutMs,
+          });
+          if (exactTextResolution) {
+            exactTextContainerSelector = scopeSelector;
+            console.log(`[runtime:recorded-text-scope] step=${options.stepIndex} resolvedWithinRecorderScope=true`);
+          }
+        }
+      }
       const associatedFieldResolution = !explicitTextIdentity && !recordedStructuralResolution?.locator
         && !structuredCheckboxResolution?.locator
         && (options.associatedField || options.selectionActivationField)
@@ -4307,7 +4377,7 @@ export class PromotedSpecRuntime {
         const clickResult = await clickPromotedLocatorWithBoundedReresolution(
           resolved,
           async () => resolvePromotedClickableLocator(this.page, options.target, {
-            containerLocator: containerSelector,
+            containerLocator: exactTextContainerSelector ?? containerSelector,
             targetIdentity: explicitTextIdentity ?? targetIdentity,
             timeoutMs: this.config.actionTimeoutMs,
             actionKind: options.actionIntent as "submit" | "link" | "button" | "action",
@@ -5266,10 +5336,21 @@ export class PromotedSpecRuntime {
     }
     const targetRefs = targetIdentity?.technicalTargetRefs ?? [];
     const parsedTargetRefs = parseTechnicalTargetRefs(targetRefs);
+    // A Discovery-authored select carries only the field label as its target (no recorded
+    // identity, no recorder evidence). That label is the field context the shared selection
+    // resolver needs; a failed structured resolution still falls through to the callback path.
+    const labelOnlySelectionField = !targetIdentity?.technicalTargetRefs?.length
+      && !options.playwrightRecorderEvidence
+      && !(options.technicalTargetRefs?.length)
+      && !options.selectionField?.trim()
+      && !options.associatedField?.trim()
+      ? options.target.trim()
+      : "";
     const selectionField = options.selectionField?.trim()
       || semanticNameFromRef(parsedTargetRefs.headerRef)
       || semanticNameFromRef(parsedTargetRefs.cellRef)
       || options.associatedField?.trim()
+      || labelOnlySelectionField
       || "";
     // Some compound selectors are physically hosted by a neighboring editable
     // cell (for example, Moneda inside the Ingresos grid cell). The compiler
@@ -5281,7 +5362,17 @@ export class PromotedSpecRuntime {
         && normalizeSemanticText(options.associatedField) !== normalizeSemanticText(selectionField)
         ? options.associatedField.trim()
         : undefined);
-    if (runtimeValue && selectionField && (options.associatedField || options.selectionField)) {
+    if (runtimeValue && selectionField && (options.associatedField || options.selectionField || labelOnlySelectionField)) {
+      if (labelOnlySelectionField) {
+        // Discovery settled the page (async loading) between the opening click and this
+        // selection; the options/editor are re-rendered by that load, so let it finish first.
+        await this.page.waitForLoadState("networkidle", { timeout: 8000 }).catch(() => undefined);
+        await this.waitForPromotedUiStable(options.stepIndex, options.target);
+        // The preceding click leaves focus on its (still mounted) control. The selection resolver
+        // reads "focus moved" as editor progress and re-activates, toggling the list shut; start
+        // from the neutral focus Discovery had after its own settle wait.
+        await this.page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur?.()).catch(() => undefined);
+      }
       const previousUrl = this.page.url();
       const structuredResolution = await resolveActionTarget(
         this.page,
@@ -5289,7 +5380,9 @@ export class PromotedSpecRuntime {
         options.target,
         {
           actionType: "action_select",
-          recordingActionType: "select",
+          // A Discovery-authored select was proven by Discovery's own (non-recording) selection
+          // path; recording semantics would make the resolver demand recorder evidence it lacks.
+          ...(labelOnlySelectionField ? {} : { recordingActionType: "select" as const }),
           selectionField,
           selectionValue: runtimeValue,
           playwrightRecorderEvidence: options.playwrightRecorderEvidence,
@@ -5307,14 +5400,13 @@ export class PromotedSpecRuntime {
       const nativeSelectionApplied = !structuredResolution?.selectionApplied && structuredResolution?.status === "resolved" && structuredResolution.locator
         ? await applyPromotedNativeSelection(structuredResolution.locator, runtimeValue)
         : false;
-      if (structuredResolution?.status === "resolved"
-        && (structuredResolution.selectionApplied || nativeSelectionApplied)) {
+      if ((structuredResolution?.status === "resolved" && structuredResolution.selectionApplied) || nativeSelectionApplied) {
         await this.postActionStability(previousUrl, "none");
         console.log(
           `[runtime:selection-resolution] step=${options.stepIndex} target="${options.target}" `
           + `valueKey="${targetIdentity?.valueKey ?? options.valueKey ?? "none"}" `
-          + `fieldContextPresent=true selectionApplied=${Boolean(structuredResolution.selectionApplied)} `
-          + `nativeSelectionApplied=${nativeSelectionApplied} optionStrategy="${structuredResolution.locatorStrategy ?? "shared_selection_field_resolver"}" `
+          + `fieldContextPresent=true selectionApplied=${Boolean(structuredResolution?.selectionApplied)} `
+          + `nativeSelectionApplied=${nativeSelectionApplied} optionStrategy="${structuredResolution?.locatorStrategy ?? "shared_selection_field_resolver"}" `
           + `callbackSuppressed=true`,
         );
         await this.captureClickStep(options.target, "passed", undefined, options.stepIndex);
@@ -5443,10 +5535,28 @@ export class PromotedSpecRuntime {
       if (options.polarity !== "positive" && options.polarity !== "negative") {
         throw new Error("PROMOTED_ASSERTION_POLARITY_UNRESOLVED");
       }
-      if (options.polarity === "negative" && !options.expectedUrl) {
+      if (options.polarity === "negative" && !options.expectedUrl && !options.negativeVisibilityTarget?.trim()) {
         throw new Error("PROMOTED_ASSERTION_DESCRIPTOR_UNRESOLVED");
       }
-      if (options.expectedUrl) {
+      if (options.credentialRejectionTarget !== undefined) {
+        const expected = options.credentialRejectionTarget.trim();
+        if (options.polarity !== "positive" || options.expectedUrl || options.negativeVisibilityTarget !== undefined
+          || !isCredentialRejectionExpectation(expected) || options.target !== `text:${expected}`) {
+          throw new Error("PROMOTED_ASSERTION_DESCRIPTOR_UNRESOLVED");
+        }
+        await waitForStablePageState(this.page,{timeoutMs:this.config.stabilityTimeoutMs,pollMs:500,stableForMs:700});
+        const result = resolveFeedbackMessageAssertion(await scanCurrentPage(this.page), expected);
+        if (!result.passed) throw new Error("PROMOTED_CREDENTIAL_REJECTION_NOT_OBSERVED");
+      } else if(options.negativeVisibilityTarget!==undefined) {
+        const forbidden=options.negativeVisibilityTarget.trim();
+        if(options.polarity!=="negative" || options.expectedUrl || !forbidden || options.target!==`text:${forbidden}`) {
+          throw new Error("PROMOTED_ASSERTION_DESCRIPTOR_UNRESOLVED");
+        }
+        const stability=await waitForStablePageState(this.page,{timeoutMs:this.config.stabilityTimeoutMs,pollMs:500,stableForMs:700});
+        const snapshot=await scanCurrentPage(this.page);
+        const [result]=resolveAssertionTargets(snapshot,[{index:options.stepIndex,action:`Validar que no se muestre ${JSON.stringify(forbidden)}`,target:forbidden,source:"action"}],{negativeVisibility:{snapshotStable:stability.finalStable===true}});
+        if(result?.status!=="passed") throw new Error(`PROMOTED_NEGATIVE_VISIBILITY_NOT_PROVEN:${result?.reason??"unresolved"}`);
+      } else if (options.expectedUrl) {
         const expectedUrl = options.expectedUrl;
         let stateMatches = evaluatePromotedAssertionState(this.page.url(), options);
         // A successful submit can return before the server finishes redirecting. Wait on
@@ -5869,6 +5979,7 @@ export function createPromotedSpecRuntime(page: Page, config?: Partial<PromotedR
   let lastStepIndex = 0;
   let executionFailed = false;
   let expectedVisibleTargets: string[] = [];
+  let terminalRejectionObserved = false;
   return new Proxy(runtime, {
     get(target, property, receiver) {
       const member = Reflect.get(target, property, receiver);
@@ -5878,7 +5989,7 @@ export function createPromotedSpecRuntime(page: Page, config?: Partial<PromotedR
         let outcomeError: unknown;
         if (!executionFailed && sequence > 0) {
           try {
-            await target.verifyScenarioOutcome({ hasFinalAssertion: lastAssertion > lastAction, expectedVisibleTargets }, lastStepIndex);
+            await target.verifyScenarioOutcome({ hasFinalAssertion: lastAssertion > lastAction, expectedVisibleTargets, terminalRejectionObserved }, lastStepIndex);
           } catch (error) { outcomeError = error; }
         }
         try { await target.finishEvidence(); }
@@ -5897,6 +6008,7 @@ export function createPromotedSpecRuntime(page: Page, config?: Partial<PromotedR
           if (name === "expectPromotedVisible") {
             lastAssertion = callSequence;
             const assertion = args[0] as PromotedAssertOptions;
+            if (assertion.credentialRejectionTarget !== undefined) terminalRejectionObserved = true;
             if (assertion.polarity === "positive" && !assertion.expectedUrl) {
               expectedVisibleTargets.push(semanticNameFromRef(assertion.target) ?? assertion.target);
             }

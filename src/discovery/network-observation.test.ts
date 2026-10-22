@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { fillAndObserveRuntimeInput, startNetworkObservation, findActionServerError } from "./case-discovery";
+import { fillAndObserveRuntimeInput, startNetworkObservation, findActionServerError, isTerminalAuthenticationClientError } from "./case-discovery";
 import { waitForStableInteractiveScreen } from "../runner/execution-plan-executor";
 
 class FakePage {
@@ -652,6 +652,37 @@ test("getProgressState: a genuine connection failure with no prior response is s
   page.emit("requestfailed", req);
 
   assert.equal(observation.getProgressState().requestFailed, true);
+});
+
+test("auth rejection response closes observation only on the auth surface with no later business actions", async () => {
+  const page = new (class extends FakePage { url(): string { return "https://bank.example/login"; } })();
+  const observation = startNetworkObservation(page as any, 24);
+  const req = request("https://bank.example/api/authenticate?token=PRIVATE", "POST", "fetch");
+  page.emit("request", req);
+  page.emit("response", response(req, 403));
+  const { terminalClientError } = observation.getProgressState();
+  assert.deepEqual(terminalClientError, {
+    sameOrigin: true, method: "POST", resourceType: "fetch", state: "completed", status: 403,
+  });
+  assert.equal(JSON.stringify(terminalClientError).includes("PRIVATE"), false);
+  assert.equal(isTerminalAuthenticationClientError({
+    beforeAuthDetected: true, afterAuthDetected: true, hasLaterExecutableActions: false,
+    events: terminalClientError ? [terminalClientError] : [],
+  }), true);
+  assert.equal(isTerminalAuthenticationClientError({
+    beforeAuthDetected: true, afterAuthDetected: true, hasLaterExecutableActions: true,
+    events: terminalClientError ? [terminalClientError] : [],
+  }), false);
+  assert.equal(isTerminalAuthenticationClientError({
+    beforeAuthDetected: true, afterAuthDetected: false, hasLaterExecutableActions: false,
+    events: terminalClientError ? [terminalClientError] : [],
+  }), false);
+  assert.equal(isTerminalAuthenticationClientError({
+    beforeAuthDetected: true, afterAuthDetected: true, hasLaterExecutableActions: false,
+    events: [{ ...terminalClientError!, sameOrigin: false }],
+  }), false);
+  const [event] = await observation.stop({ passiveTail: false });
+  assert.equal(event.path, "/api/authenticate");
 });
 
 test("getProgressState: one non-terminal subrequest failure never masks another still-pending relevant request", async () => {

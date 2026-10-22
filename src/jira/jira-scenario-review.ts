@@ -10,6 +10,8 @@ export type JiraReviewConfiguration = {
   uiTargets?: Record<string, string>;
 };
 
+export type JiraReviewIssue = { code: string; stepIndex: number; step: string };
+
 type ReviewScenario = {
   steps: string[];
   inputRequirements?: Array<{stepIndex:number;label:string}>;
@@ -21,12 +23,34 @@ type ReviewScenario = {
 /** A source-backed summary qualifier describes the current stage, not another operation. */
 export function canonicalJiraConditionalVisibilityStep(step:string,requirement:JiraConditionRequirement):string {
  if(typeof requirement.subject!=='string'||typeof requirement.sourceClause!=='string') return step;
+ const originalStep=step;
+ // Applicability belongs to the source condition metadata, including when the
+ // generator places it after the stage rather than inside the quoted target.
+ // Strip only the bounded qualifier backed by that source; predicates stay intact.
+ if(/\b(?:cuando (?:aplique|corresponda)|si aplica|when applicable|if applicable)\b/i.test(requirement.sourceClause)) {
+  step=step.replace(/\s+(?:cuando (?:aplique|corresponda)|si aplica|when applicable|if applicable)[.]?\s*$/i,'');
+ }
  const contextual=step.match(/^\s*(?:Validar|Verificar) que\s+(?:el\s+|la\s+)?(?:resumen(?:\s+de\s+confirmaci[oó]n)?|confirmaci[oó]n|(?:confirmation\s+)?summary|confirmation)\s+(?:muestre|muestra|presente|presenta|shows?|displays?)\s+(?:el\s+|la\s+|los\s+|las\s+|the\s+)?["“]([^"”]+)["”][.]?$/i);
  const trailing=step.match(/^\s*(?:Validar|Verificar) que se (?:muestre|muestren)\s+["“]([^"”]+)["”]\s+(?:en\s+(?:el|la)\s+(?:resumen(?:\s+de\s+confirmaci[oó]n)?|confirmaci[oó]n)|in\s+the\s+(?:confirmation\s+summary|summary|confirmation))[.]?$/i);
- const fold=(value:string)=>value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/^(?:el|la|the)\s+/,'').trim();
- const target=contextual?.[1]??trailing?.[1];
- if(!target||fold(target)!==fold(requirement.subject)||! /\b(?:resumen|confirmaci[oó]n|summary|confirmation)\b/i.test(requirement.sourceClause)) return step;
- return `Validar que se muestre "${target.replace(/^(?:el|la|los|las|the)\s+/i,'')}"`;
+ // Generators also phrase a summary assertion as “X appears/is included in
+ // the confirmation summary”. Treat that as the same visibility assertion,
+ // while keeping the quoted target and source-backed stage requirement.
+ const summaryContains=step.match(/^\s*(?:Validar|Verificar|Comprobar|Validate|Check)\s+(?:que|that)\s+(?:el\s+|la\s+|los\s+|las\s+|the\s+)?["“]([^"”]+)["”]\s+(?:aparezca(?:n)?|aparece(?:n)?|se\s+incluya(?:n)?|se\s+muestre(?:n)?|figure(?:s)?|appear(?:s)?|is\s+included|are\s+included|be\s+included|is\s+shown|are\s+shown|be\s+shown)\s+(?:en|dentro\s+de|in|within)\s+(?:el\s+|la\s+|the\s+)?(?:resumen(?:\s+de\s+confirmaci[oó]n)?|confirmaci[oó]n|confirmation\s+summary|summary|confirmation)[.]?$/i);
+ const fold=(value:string)=>value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/^(?:el|la|los|las|the)\s+/,'').trim();
+ const direct=step.match(/^\s*(?:Validar|Verificar) que se (?:muestre|muestren)\s+["“]([^"”]+)["”][.]?$/i);
+ const target=contextual?.[1]??trailing?.[1]??summaryContains?.[1]??direct?.[1];
+ if(!target) return originalStep;
+ if((contextual||trailing||summaryContains)&&! /\b(?:resumen|confirmaci[oó]n|summary|confirmation)\b/i.test(requirement.sourceClause)) return originalStep;
+ let observable=target;
+ if(fold(target)!==fold(requirement.subject)) {
+  // Only a bounded applicability qualifier can be metadata. Arbitrary business
+  // predicates, different subjects, negations and compound actions stay blocked.
+  const applicability=/\b(?:cuando (?:aplique|corresponda)|si aplica|when applicable|if applicable)\b/i;
+  if(!applicability.test(requirement.sourceClause)) return originalStep;
+  observable=target.replace(/\s+(?:cuando (?:aplique|corresponda)|si aplica|when applicable|if applicable|aplicable|applicable)\s*$/i,'');
+  if(fold(observable)!==fold(requirement.subject)) return originalStep;
+ }
+ return `Validar que se muestre "${observable.replace(/^(?:el|la|los|las|the)\s+/i,'')}"`;
 }
 
 /** Whether the shared semantic parser can hand this step to live Discovery. */
@@ -43,13 +67,15 @@ export function prepareJiraScenarioReview<T extends ReviewScenario>(scenario: T)
   scenario: T;
   skippedAssertionSteps: number[];
   errors: string[];
+  issues: JiraReviewIssue[];
 } {
   const steps = [...scenario.steps];
   const fields = scenario.inputRequirements?.map(field=>({...field}));
   const errors: string[] = [];
+  const issues: JiraReviewIssue[] = [];
   const skippedAssertionSteps: number[] = [];
   if (scenario.conditionRequirements?.some(requirement=>!requirement || typeof requirement.key!=='string' || !requirement.key.trim() || !Array.isArray(requirement.stepIndices))) {
-    return {scenario,skippedAssertionSteps,errors:['JIRA_CONDITION_REQUIREMENT_INVALID']};
+    return {scenario,skippedAssertionSteps,errors:['JIRA_CONDITION_REQUIREMENT_INVALID'],issues};
   }
   for(const requirement of scenario.conditionRequirements ?? []) {
     for(const index of requirement.stepIndices) {
@@ -92,12 +118,13 @@ export function prepareJiraScenarioReview<T extends ReviewScenario>(scenario: T)
       const step = steps[index - 1];
       if (!Number.isInteger(index) || !step || !/^\s*(?:Validar|Verificar)(?: que se (?:muestre|muestren))?\s+["“][^"”]+["”][.]?$/i.test(step)) {
         errors.push('JIRA_CONDITION_STEP_UNSUPPORTED');
+        issues.push({code:'JIRA_CONDITION_STEP_UNSUPPORTED',stepIndex:index,step:scenario.steps[index-1] ?? ''});
       } else if (decision === false) {
         skippedAssertionSteps.push(index);
       }
     }
   }
-  return {scenario: {...scenario, steps, ...(fields ? {inputRequirements:fields} : {})}, skippedAssertionSteps: [...new Set(skippedAssertionSteps)], errors: [...new Set(errors)]};
+  return {scenario: {...scenario, steps, ...(fields ? {inputRequirements:fields} : {})}, skippedAssertionSteps: [...new Set(skippedAssertionSteps)], errors: [...new Set(errors)],issues};
 }
 
 /** Adjacent repeated assertion groups are reviewable defects, never silently removed. */

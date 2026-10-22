@@ -129,7 +129,9 @@ export function recorderEvidenceFromSemanticRuntime(
 
 export function normalizeStructuralOwnerIdentity(input: StructuralOwnerIdentityInput): StructuralOwnerIdentity {
   const stableDirectAttributes = Object.fromEntries(Object.entries(input.stableDirectAttributes ?? {})
-    .filter(([name, value]) => !["class", "className"].includes(name) && Boolean(value?.trim()))
+    // data-codex-*/data-promoted-runtime-* are transient markers this framework stamps on live nodes
+    // during resolution; they never survive a new page load and must not become target identity.
+    .filter(([name, value]) => !["class", "className"].includes(name) && !/^data-(codex|promoted-runtime)-/.test(name) && Boolean(value?.trim()))
     .sort(([left], [right]) => left.localeCompare(right)));
   const stableDescendants = [...(input.stableDescendants ?? [])]
     .map((descendant) => ({
@@ -137,7 +139,7 @@ export function normalizeStructuralOwnerIdentity(input: StructuralOwnerIdentityI
       tag: descendant.tag.trim().toLowerCase(),
       ...(descendant.role?.trim() ? { role: descendant.role.trim().toLowerCase() } : {}),
       stableAttributes: Object.fromEntries(Object.entries(descendant.stableAttributes ?? {})
-        .filter(([, value]) => Boolean(value?.trim()))
+        .filter(([name, value]) => !/^data-(codex|promoted-runtime)-/.test(name) && Boolean(value?.trim()))
         .sort(([left], [right]) => left.localeCompare(right))),
     }))
     .filter((descendant) => descendant.tag && Object.keys(descendant.stableAttributes).length > 0)

@@ -54,7 +54,7 @@ export function compileJiraSpec(input: JiraSpecCompileInput): JiraSpecCompileRes
   );
   const lines = [
     `import { test, expect } from "@playwright/test";`,
-    `import { assertJiraSpecAbsentText, awaitJiraSpecPostLoginTransition, assertJiraSpecAuthGate, assertJiraSpecDownloadContent, assertJiraSpecFieldValidation, assertJiraSpecRowMatch, assertJiraSpecTableBoundDownload, assertJiraSpecVisibleText, clickJiraSpecTarget, completeJiraSpecAccessCodeGate, fillJiraSpecSegmentedCode, navigateJiraSpecRoute, performJiraSpecSelection, reportJiraSpecStepComplete, reportJiraSpecStepStart, resolveJiraSpecAuthTestData, resolveJiraSpecTarget, resolveJiraSpecValue } from ${quote(runtimePath)};`,
+    `import { settleJiraAction, assertJiraSpecAbsentText, awaitJiraSpecPostLoginTransition, assertJiraSpecAuthGate, assertJiraSpecDownloadContent, assertJiraSpecFieldValidation, assertJiraSpecRowMatch, assertJiraSpecTableBoundDownload, assertJiraSpecVisibleText, clickJiraSpecTarget, completeJiraSpecAccessCodeGate, fillJiraSpecSegmentedCode, navigateJiraSpecRoute, performJiraSpecSelection, reportJiraSpecStepComplete, reportJiraSpecStepStart, resolveJiraSpecAuthTestData, resolveJiraSpecTarget, resolveJiraSpecValue } from ${quote(runtimePath)};`,
     ...(authPath ? [`import { AuthFlow, setAuthFlowTestData } from ${quote(authPath)};`] : []),
     "",
     `test(${quote(input.plan.scenario.title)}, async ({ page }, testInfo) => {`,
@@ -102,9 +102,9 @@ export function compileJiraSpec(input: JiraSpecCompileInput): JiraSpecCompileRes
     const oracleAuthGate = authOracles.has(step.index);
     const fieldValidationOracle = (input.sourceScenario.observableOracles ?? []).find(oracle => oracle.type === "field_validation" && oracle.stepIndex === step.index);
     if (step.action === "navigate") {
-      if (step.target === "APP_BASE_URL") lines.push(`  await page.goto(baseUrl, { waitUntil: "domcontentloaded" });`);
+      if (step.target === "APP_BASE_URL") lines.push(`  await settleJiraAction(page, () => page.goto(baseUrl, { waitUntil: "domcontentloaded" }), baseUrl);`);
       else if (step.target && typeof step.target === "object" && step.target.strategy === "url" && step.target.value) {
-        lines.push(`  await navigateJiraSpecRoute(page, ${quote(step.target.value)}, baseUrl);`);
+        lines.push(`  await settleJiraAction(page, () => navigateJiraSpecRoute(page, ${quote(step.target.value)}, baseUrl), baseUrl);`);
       } else unsupported.push(`step_${step.index}:navigation_target_unsupported`);
     } else if (step.action === "assertVisible" && (input.sourceScenario.observableOracles ?? []).some(oracle => oracle.stepIndex === step.index && oracle.details?.kind === "download_content")) {
       // File-content requirement: never downgrade to page-text visibility.
@@ -148,7 +148,7 @@ export function compileJiraSpec(input: JiraSpecCompileInput): JiraSpecCompileRes
       if (segmentedCode) {
         if (!step.valueKey) { unsupported.push(`step_${step.index}:value_key_missing`); continue; }
         lines.push(`  const value${step.index} = await resolveJiraSpecValue(${quote(step.valueKey)}, appSlug, sectionSlug, automationId);`);
-        lines.push(`  await fillJiraSpecSegmentedCode(page, value${step.index}, ${targetJson});`);
+        lines.push(`  await settleJiraAction(page, () => fillJiraSpecSegmentedCode(page, value${step.index}, ${targetJson}));`);
         lines.push(`  await reportJiraSpecStepComplete(page, testInfo, ${step.index}, false, ${isFinalStep});`);
         lines.push("");
         emitAuthAfter(step.index);
@@ -166,17 +166,17 @@ export function compileJiraSpec(input: JiraSpecCompileInput): JiraSpecCompileRes
       if (step.action === "fill") {
         if (!step.valueKey) { unsupported.push(`step_${step.index}:value_key_missing`); continue; }
         lines.push(`  const value${step.index} = await resolveJiraSpecValue(${quote(step.valueKey)}, appSlug, sectionSlug, automationId);`);
-        lines.push(`  await ${targetVar}.fill(value${step.index});`);
+        lines.push(`  await settleJiraAction(page, () => ${targetVar}.fill(value${step.index}));`);
         lines.push(`  if (await ${targetVar}.inputValue() !== value${step.index}) throw new Error("JIRA_SPEC_FILL_NOT_CONFIRMED");`);
       } else if (step.action === "select") {
         if (!step.valueKey) { unsupported.push(`step_${step.index}:value_key_missing`); continue; }
         lines.push(`  const value${step.index} = await resolveJiraSpecValue(${quote(step.valueKey)}, appSlug, sectionSlug, automationId);`);
-        lines.push(`  await performJiraSpecSelection(${targetVar}, value${step.index});`);
+        lines.push(`  await settleJiraAction(page, () => performJiraSpecSelection(${targetVar}, value${step.index}));`);
       } else if (step.action === "press") {
         if (!step.value) { unsupported.push(`step_${step.index}:press_key_missing`); continue; }
-        lines.push(`  await ${targetVar}.press(${quote(step.value)});`);
-      } else if (step.action === "check") lines.push(`  await ${targetVar}.check();`);
-      else if (step.action === "uncheck") lines.push(`  await ${targetVar}.uncheck();`);
+        lines.push(`  await settleJiraAction(page, () => ${targetVar}.press(${quote(step.value)}));`);
+      } else if (step.action === "check") lines.push(`  await settleJiraAction(page, () => ${targetVar}.check());`);
+      else if (step.action === "uncheck") lines.push(`  await settleJiraAction(page, () => ${targetVar}.uncheck());`);
       else if (step.action === "waitFor") lines.push(`  await expect(${targetVar}).toBeVisible({ timeout: ${step.timeoutMs ?? 15000} });`);
     } else if (step.action === "assertUrl") {
       const expected = step.expected ?? (step.target && typeof step.target === "object" ? step.target.value : undefined);

@@ -29,6 +29,16 @@ import {prepareJiraScenarioReview} from "../../jira/jira-scenario-review";
 import { persistJiraCaseInputs, resolveJiraPublishedCaseId } from "../../jira/jira-case-input-persistence";
 import { linkJiraAutomationToTestRailCase } from "../../automations/automation-index";
 
+function jiraApplicationHttpErrorDiagnostic(error: unknown): { status: number; method: string; path: string } | undefined {
+  const message = error instanceof Error ? error.message : String(error);
+  const match = message.match(/^JIRA_APPLICATION_HTTP_SERVER_ERROR:(5\d\d)\s+([A-Z]+)\s+(\/[^\s?#]*)/);
+  if (!match) return undefined;
+  const path = match[3]
+    .replace(/\/[0-9a-f]{8}-[0-9a-f-]{27,}/gi, "/:id")
+    .replace(/\/\d{4,}(?=\/|$)/g, "/:id");
+  return { status: Number(match[1]), method: match[2], path };
+}
+
 export async function startJiraSemanticRun(jobId: string): Promise<void> {
   const job = jobStore.getInternal(jobId);
   if (!job) return;
@@ -262,6 +272,9 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
         // proves its navigation may be stale. A generated assertion or missing
         // business step must not erase a route that Discovery previously proved.
         const code = error instanceof Error ? error.message.match(/^([A-Z][A-Z_]+)(?::[a-z_]+)?/)?.[1] ?? "JIRA_EXECUTION_FAILED" : "JIRA_EXECUTION_FAILED";
+        const applicationHttpError = jiraApplicationHttpErrorDiagnostic(error);
+        if (applicationHttpError) emit({ type: "application_http_error", caseId, failedAtStep,
+          ...applicationHttpError, reason: "same_origin_application_response_5xx" });
         if (!discoveryCompleted && shouldInvalidateJiraLearnedRoute(code)) {
           try { await invalidateJiraRoute(appSlug, scenario.scenarioId); }
           catch { emit({ type: "knowledge_invalidation_failed", caseId, reason: "knowledge_storage_unavailable" }); }
@@ -278,6 +291,7 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
         }
         evidenceScreenshotPath = fsSync.existsSync(screenshotPath) ? screenshotPath : undefined;
         result = { caseId, scenarioId: caseId, status: "failed", failedAtStep, failedReason: code, automationReady: false, promotionAllowed: false,
+          ...(applicationHttpError ? { applicationHttpError } : {}),
           ...(error instanceof JiraSpecVerificationError ? { specVerificationCategory: error.category,
             specVerificationDiagnosticPath: error.diagnosticPath, specVerificationArtifactsDir: error.artifactsDir } : {}),
           ...(error instanceof JiraRequiredDataError ? {missingInputs:error.missingInputs} : {}),

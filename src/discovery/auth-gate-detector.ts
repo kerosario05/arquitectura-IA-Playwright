@@ -230,6 +230,54 @@ function extractVisibleTexts(snapshot: PageSnapshot): string[] {
   return texts;
 }
 
+/**
+ * Own text of editable controls only (placeholder/label/name/accessible name).
+ * A token gate needs an actual token field; the word "token" in page copy,
+ * help text or headings is not evidence of one.
+ */
+function extractEditableControlTexts(snapshot: PageSnapshot): string[] {
+  const texts: string[] = [];
+  for (const el of (snapshot as any).elements ?? []) {
+    const type = String(el.type ?? "").toLowerCase();
+    const tag = String(el.tagName ?? "").toLowerCase();
+    const role = String(el.role ?? "").toLowerCase();
+    const editable = ["input", "textarea"].includes(type) || ["input", "textarea"].includes(tag) || role === "textbox";
+    if (!editable) continue;
+    for (const value of [el.placeholder, el.label, el.name, el.ariaLabel, el.accessibleName, el.domId]) {
+      if (typeof value === "string" && value.trim()) texts.push(value);
+    }
+  }
+  return texts;
+}
+
+const STAGE_ACTION_VOCABULARY: Partial<Record<AuthGateStage, string[]>> = {
+  credentials: ["usuario", "username", "contrasena", "password", "correo", "email"],
+  identification_type_selection: ["identificacion", "cedula", "pasaporte", "documento"],
+  identification_input: ["identificacion", "cedula", "pasaporte", "documento"],
+  phone_confirmation: ["telefono", "celular", "phone", "sms"],
+  otp: ["otp", "codigo", "code", "sms", "verificacion", "verification"],
+  pin: ["pin", "clave"],
+  token: ["token"]
+};
+
+/**
+ * Whether the declared scenario action sequence owns an auth stage: at least one
+ * explicit action names a control or value that belongs to that stage. Generic
+ * advance actions ("Continuar") never establish ownership on their own, and a
+ * stage with no declared action stays with the (verified) AuthFlow path.
+ */
+export function declaredActionsOwnAuthStage(
+  stage: AuthGateStage,
+  actions: ReadonlyArray<{ action?: string; target?: string }>
+): boolean {
+  const vocabulary = STAGE_ACTION_VOCABULARY[stage];
+  if (!vocabulary) return false;
+  return actions.some((candidate) => {
+    const text = normalizeText(`${candidate.target ?? ""} ${candidate.action ?? ""}`);
+    return vocabulary.some((word) => new RegExp(`(^|[^a-z0-9])${word}([^a-z0-9]|$)`).test(text));
+  });
+}
+
 function extractClassNames(snapshot: PageSnapshot): string[] {
   const classes: string[] = [];
 
@@ -325,7 +373,7 @@ export function detectAuthGate(snapshot: PageSnapshot): AuthGateDetection {
   const phoneMatches = hasMatchingKeyword(texts, PHONE_CONFIRMATION_KEYWORDS);
   const otpMatches = hasMatchingKeyword(texts, OTP_KEYWORDS);
   const pinMatches = hasMatchingKeyword(texts, PIN_KEYWORDS);
-  const tokenMatches = hasMatchingKeyword(texts, TOKEN_KEYWORDS);
+  const tokenMatches = hasMatchingKeyword(extractEditableControlTexts(snapshot), TOKEN_KEYWORDS);
   const landingMatches = hasMatchingKeyword(texts, AUTHENTICATED_LANDING_KEYWORDS);
   const hasVirtualKeyboard = hasMatchingClass(classes, VIRTUAL_KEYBOARD_INDICATORS);
   const hasOtpInputs = hasMatchingClass(classes, OTP_INPUT_INDICATORS);

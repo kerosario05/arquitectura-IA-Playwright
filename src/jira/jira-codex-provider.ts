@@ -7,7 +7,7 @@ import {AiProviderError,type AiProvider,type AiProviderConfig} from '../ai/ai-pr
 const text={type:'string'};
 const strings={type:'array',items:text};
 const object=(properties:Record<string,unknown>)=>({type:'object',properties,required:Object.keys(properties),additionalProperties:false});
-export const jiraScenarioOutputSchema=object({scenarios:{type:'array',items:object({
+export const jiraScenarioOutputSchema=object({scenarios:{type:'array',minItems:1,items:object({
  sourceIssueKey:text,title:text,steps:strings,preconditions:strings,expectedResult:text,
  acceptanceCriteriaRefs:strings,
  unresolvedUiRequirements:{type:'array',items:object({stepIndex:{type:'integer',minimum:1},requirement:text})},

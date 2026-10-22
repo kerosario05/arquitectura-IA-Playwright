@@ -289,13 +289,17 @@ export function resolveCanonicalAssertionPolarity(
   if (assertion.intent === "transition_blocked") {
     return { polarity: "negative", reason: "structured_transition" };
   }
+  const state = assertion.expectedState?.trim();
+  if (state) {
+    // Preserve explicit absence language even when the higher-level intent is a
+    // validation/message assertion (e.g. "validar que no se muestre ...").
+    const classified = classifyAssertionPolarity(state);
+    if (classified.polarity) return classified;
+  }
   if (assertion.intent === "validation_present") {
     return { polarity: "positive", reason: "structured_presence" };
   }
-  const state = assertion.expectedState?.trim();
   if (!state) return { reason: "ambiguous" };
-  const classified = classifyAssertionPolarity(state);
-  if (classified.polarity) return classified;
   // A declared state such as disabled/invalid/enabled is a positive assertion
   // about that state, not a negative transition. Unknown state semantics stay
   // unresolved and therefore fail closed.

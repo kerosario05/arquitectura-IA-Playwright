@@ -16,6 +16,8 @@
     "test:all": "playwright test",
     "install:browsers": "playwright install",
     "typecheck": "tsc --noEmit",
+    "jira:evaluate": "node --import tsx --test --test-concurrency=1 src/jira/jira-engine-evaluation.test.ts src/jira/jira-generation-evaluation.test.ts src/discovery/product-condition-parser.test.ts src/discovery/target-resolver.snapshot-identity.test.ts src/jira/jira-action-settlement.test.ts",
+    "jira:generation:evaluate": "tsx src/cli/jira-generation-evaluate.ts",
     "data:inspect": "tsx src/cli/data-inspect.ts",
     "db:init": "tsx src/cli/db-init.ts",
     "db:inspect": "tsx src/cli/db-init.ts",

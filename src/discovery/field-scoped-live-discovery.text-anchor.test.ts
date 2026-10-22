@@ -50,6 +50,7 @@ class FakeElement implements FieldScopedDomElement {
     return Object.keys(this.attrs);
   }
 
+
   append(...children: FakeElement[]): this {
     for (const child of children) {
       child.parentElement = this;
@@ -90,6 +91,62 @@ test("1/realShapeTextAnchor. a bare <span> label with no for/aria-labelledby, si
   assert.equal(evidence!.candidates.length, 1);
   assert.equal(evidence!.candidates[0].tag, "input");
   assert.equal(evidence!.candidates[0].editable, true);
+});
+
+test("splitCaptionControl. exact caption in one wrapper binds the sole editable owner in its following sibling even inside a multi-field form", () => {
+  const caption = new FakeElement("span", {}, "Monto");
+  const captionWrapper = new FakeElement("div", {}).append(caption);
+  const amount = new FakeElement("input", { id: "amount" });
+  const amountWrapper = new FakeElement("div", {}).append(amount);
+  const otherCaption = new FakeElement("span", {}, "Comisión");
+  const otherCaptionWrapper = new FakeElement("div", {}).append(otherCaption);
+  const otherInputWrapper = new FakeElement("div", {}).append(new FakeElement("input", { id: "fee" }));
+  const form = new FakeElement("form", { id: "transfer-form" }).append(captionWrapper, amountWrapper, otherCaptionWrapper, otherInputWrapper);
+  const evidence = extractFieldScopedDomEvidence(fakeRoot(form), "Monto");
+  assert.equal(evidence?.diagnostics.containerAccepted, true);
+  assert.equal(evidence?.candidates.length, 1);
+  assert.equal(evidence?.candidates[0].stableDirectAttributes?.id, "amount");
+  assert.equal(evidence?.scopeContainer?.fromAcceptedFieldScope, true);
+});
+
+test("splitCaptionAmbiguous. following wrapper with multiple editable owners stays fail-closed", () => {
+  const caption = new FakeElement("span", {}, "Amount");
+  const captionWrapper = new FakeElement("div", {}).append(caption);
+  const inputA = new FakeElement("input", { id: "amount-a" });
+  const inputB = new FakeElement("input", { id: "amount-b" });
+  const controlWrapper = new FakeElement("div", {}).append(inputA, inputB);
+  const form = new FakeElement("form", { id: "form" }).append(captionWrapper, controlWrapper);
+  const evidence = extractFieldScopedDomEvidence(fakeRoot(form), "Amount");
+  assert.equal(evidence?.diagnostics.containerAccepted, false);
+  assert.equal(evidence?.candidates.length, 0);
+});
+
+test("duplicate captions resolve only when every established relation identifies the same owner", () => {
+  for (const field of ["Monto", "Delivery date"]) {
+    const heading = new FakeElement("div", {}).append(new FakeElement("span", {}, field));
+    const owner = new FakeElement("input", { id: "field-editor" });
+    const row = new FakeElement("div", {}).append(new FakeElement("span", {}, field), owner);
+    const other = new FakeElement("div", {}).append(new FakeElement("span", {}, "Other"), new FakeElement("input", { id: "other" }));
+    const form = new FakeElement("form", { id: "form" }).append(heading, row, other);
+    const evidence = extractFieldScopedDomEvidence(fakeRoot(form), field);
+    assert.equal(evidence?.diagnostics.leafAnchorMatchCount, 2);
+    assert.equal(evidence?.diagnostics.textRelationAccepted, true);
+    assert.equal(evidence?.candidates.length, 1);
+    assert.equal(evidence?.candidates[0].stableDirectAttributes?.id, "field-editor");
+  }
+});
+
+test("duplicate captions for different controls remain ambiguous regardless of document order", () => {
+  for (const reverse of [false, true]) {
+    const first = new FakeElement("div", {}).append(new FakeElement("span", {}, "Amount"), new FakeElement("input", { id: "first" }));
+    const second = new FakeElement("div", {}).append(new FakeElement("span", {}, "Amount"), new FakeElement("input", { id: "second" }));
+    const form = new FakeElement("form", { id: "form" }).append(...(reverse ? [second, first] : [first, second]));
+    const evidence = extractFieldScopedDomEvidence(fakeRoot(form), "Amount");
+    assert.equal(evidence?.diagnostics.containerAccepted, false);
+    assert.equal(evidence?.diagnostics.textRelationAccepted, false);
+    assert.equal(evidence?.diagnostics.rejectReason, "scope_ambiguous");
+    assert.equal(evidence?.candidates.length, 0);
+  }
 });
 
 test("2/disabledRelation. the same shape but the input is currently disabled: relation still found, candidate reported disabled -- never discarded", () => {

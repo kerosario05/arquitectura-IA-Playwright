@@ -114,3 +114,28 @@ test("bounded re-resolution retains exact recorded text after a detached opener"
   assert.equal(await page.getByText("Choose type", { exact: true }).getAttribute("data-clicked"), null);
  } finally { await browser.close(); }
 });
+
+test("recorded text repeated on the page resolves only inside the recorder scope and still fails closed when ambiguous there", async () => {
+ const browser = await chromium.launch({ headless: true });
+ try {
+  const page = await browser.newPage();
+  await page.setContent('<form id="scoped"><div onclick="this.dataset.open=\'yes\'">Pick</div></form><div>Pick</div>');
+  await page.evaluate("globalThis.__name = (value) => value");
+  const runtime = createPromotedSpecRuntime(page, { enabled: false, actionTimeoutMs: 500 });
+  await page.route("**/*", route => route.abort());
+  (runtime as any).ensureInitialEvidence = async () => undefined;
+  (runtime as any).recordActionEvidence = async () => undefined;
+  let callbackInvoked = false;
+  const options = {
+   stepIndex: 3, target: "text:Pick", technicalTargetRefs: ["text:Pick"], actionIntent: "click", expectedEffect: "none",
+   playwrightRecorderEvidence: { kind: "text", normalizedName: "Pick", targetTag: "div",
+    scopeIdentity: { strategy: "id", value: "scoped" }, captureMatchCount: 1, runtimeResolutionRequired: true },
+   action: async () => { callbackInvoked = true; },
+  } as any;
+  await runtime.clickPromotedTarget(options);
+  assert.equal(await page.locator("#scoped div").getAttribute("data-open"), "yes");
+  await page.setContent('<form id="scoped"><div>Pick</div><div>Pick</div></form>');
+  await assert.rejects(runtime.clickPromotedTarget(options), /promoted_recorded_text_click_failed/);
+  assert.equal(callbackInvoked, false);
+ } finally { await browser.close(); }
+});

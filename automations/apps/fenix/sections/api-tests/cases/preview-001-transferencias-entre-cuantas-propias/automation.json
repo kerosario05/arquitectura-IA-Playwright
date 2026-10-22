@@ -10,14 +10,14 @@
   "status": "active",
   "source": "discovery",
   "appProfile": "fenix",
-  "createdAt": "2026-10-07T21:34:40.854Z",
-  "updatedAt": "2026-10-07T21:34:40.854Z",
-  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T21-28-54-484Z\\discovered-plans.pending.json",
+  "createdAt": "2026-10-21T21:29:13.050Z",
+  "updatedAt": "2026-10-21T21:29:13.050Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-21T21-23-24-645Z\\discovered-plans.pending.json",
   "pomStatus": "promoted",
   "inlineDebugMode": false,
   "specVerificationStatus": "passed",
   "metadata": {
-    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-07T21-28-54-484Z",
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-21T21-23-24-645Z",
     "pomDiagnostics": {
       "status": "promoted",
       "inlineFallbackUsed": false,
@@ -41,7 +41,7 @@
       },
       "invocations": 0,
       "invocationsConsumed": 0,
-      "durationMs": 141654,
+      "durationMs": 166467,
       "usage": {
         "inputTokens": null,
         "cachedInputTokens": null,
@@ -76,9 +76,7 @@
         "navigation_transition"
       ],
       "errors": [],
-      "warnings": [
-        "step_index_not_explicit_in_spec:18"
-      ],
+      "warnings": [],
       "finalSpec": {
         "origin": "deterministic_compiler",
         "generatedBy": "core",
@@ -114,7 +112,7 @@
       "fallbackUsed": false,
       "requirePomRuntime": false,
       "specPath": "automations\\apps\\fenix\\sections\\api-tests\\cases\\preview-001-transferencias-entre-cuantas-propias\\case.spec.ts",
-      "specHash": "796ba2eeaadf123f7e99b54c17b9f3c7f84704f0744bc6230222f206fa86e8d8",
+      "specHash": "8b94aea65b08ef11ba1cb4b67452d956c7d7e47bf49361eeaaa1466e10f89f3f",
       "specSource": "generatedSpec"
     },
     "overwritten": true,
@@ -123,5 +121,5 @@
   },
   "promotionPersisted": true,
   "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\api-tests\\cases\\preview-001-transferencias-entre-cuantas-propias\\case.spec.ts",
-  "promotedSpecHash": "796ba2eeaadf123f7e99b54c17b9f3c7f84704f0744bc6230222f206fa86e8d8"
+  "promotedSpecHash": "8b94aea65b08ef11ba1cb4b67452d956c7d7e47bf49361eeaaa1466e10f89f3f"
 }

@@ -1,8 +1,24 @@
-import type { Page } from "@playwright/test";
+import type { Page, Locator } from "@playwright/test";
 import type { PlaywrightRecorderEvidence } from "../recording/structural-owner-identity";
+import { isVerificationCodeKey } from "../data/verification-code-role";
+
+/** Native form causally associated with an observed segmented group. */
+export async function resolveSegmentedInputForm(page: Page, evidence: PlaywrightRecorderEvidence): Promise<Locator | undefined> {
+  if (evidence.kind !== "segmented_input" || evidence.scopeIdentity?.strategy !== "css") return undefined;
+  const scope = page.locator(evidence.scopeIdentity.value);
+  if (await scope.count().catch(() => 0) !== 1) return undefined;
+  const form = scope.locator("xpath=ancestor-or-self::form");
+  return await form.count().catch(() => 0) === 1 && await form.isVisible().catch(() => false) ? form : undefined;
+}
 
 /** Admit a live code group only with a shared name, explicit slot order and a unique scope. */
-export async function observeSegmentedCodeEvidence(page: Page): Promise<PlaywrightRecorderEvidence | undefined> {
+export async function observeSegmentedCodeEvidence(page: Page, valueKey?: string): Promise<PlaywrightRecorderEvidence | undefined> {
+  // Widget eligibility is separate from credential/data roles. An explicit authorization
+  // token can use the same segmented control as a login code while retaining its own key
+  // and value. Match a complete token term, never a substring or an app-owned key spelling.
+  const tokenIdentity = valueKey?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .split(/[^a-z0-9]+/).includes("token") ?? false;
+  if (valueKey !== undefined && !isVerificationCodeKey(valueKey) && !tokenIdentity) return undefined;
   return page.evaluate(() => {
     const inputs = Array.from(document.querySelectorAll("input")).filter(input => !input.disabled && !input.readOnly
       && ["text", "tel", "number", "password"].includes(input.type)

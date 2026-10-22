@@ -70,7 +70,31 @@ export function runtimeInputKeyForField(field: string, entries: ReadonlyArray<{ 
   const normalized = normalizeField(field);
   if (!normalized) return undefined;
   const matches = entries.filter(entry => normalizeField(entry.key) === normalized);
-  return matches.length === 1 ? matches[0].key : undefined;
+  if (matches.length > 0) return matches.length === 1 ? matches[0].key : undefined;
+  // Authored labels include grammatical connectors omitted by generated data keys.
+  // Preserve every semantic token (including invalid/expired qualifiers) and require uniqueness.
+  const withoutConnectors = (value: string) => normalizeField(value).split("_")
+    .filter(token => !["de", "del", "el", "la", "los", "las", "of", "the"].includes(token)).join("_");
+  const fieldIdentity = withoutConnectors(field);
+  if (!fieldIdentity) return undefined;
+  const compatible = entries.filter(entry => withoutConnectors(entry.key) === fieldIdentity);
+  return compatible.length === 1 ? compatible[0].key : undefined;
+}
+
+/** Map an authored credential field to its canonical role only when the case
+ * supplies exactly one explicit runtime input for that role. Qualifiers such
+ * as "invalid" remain part of the runtime key and are resolved by role later;
+ * competing values stay ambiguous and cannot fall through to project secrets. */
+export function runtimeCredentialRoleKeyForField(field: string, entries: ReadonlyArray<{ key: string }>): string | undefined {
+  const role = detectCredentialRole(field);
+  if (!role) return undefined;
+  const roleEntries = entries.filter((entry) => detectCredentialRole(entry.key) === role);
+  return roleEntries.length === 1 ? CREDENTIAL_ROLE_SOURCES[role].testDataKey : undefined;
+}
+
+export function runtimeCredentialRoleInputCountForField(field: string, entries: ReadonlyArray<{ key: string }>): number {
+  const role = detectCredentialRole(field);
+  return role ? entries.filter((entry) => detectCredentialRole(entry.key) === role).length : 0;
 }
 
 /** Return the generic secure-data key for a semantic credential field label. */

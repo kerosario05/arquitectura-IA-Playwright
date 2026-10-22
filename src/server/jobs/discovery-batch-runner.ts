@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { reportCaseFailureSafely, runScheduledCaseSafely } from "./case-failure-reporting";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import { spawn } from "node:child_process";
@@ -2194,6 +2195,7 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
       errorMessage: input.errorMessage,
     });
 
+    await reportCaseFailureSafely(async () => {
     const checklist = defectChecklistStore.getOrCreate(checklistIdentity);
     const upsertResult = upsertChecklistDefect({
       list: checklist,
@@ -2277,13 +2279,19 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
       jobId,
       `[case-schedule] jobId=${jobId} caseId=${input.caseId} sourceGroup=${input.sourceGroup} groupIndex=${input.groupIndex} overallIndex=${input.overallIndex} action=failed`,
     );
-    updateProgressSummary(input.caseId);
+    }, (error) => {
+      const errorType = error instanceof Error ? error.name : "UnknownError";
+      log(jobId, `[case-reporting] caseId=${input.caseId} status=failed errorType=${errorType} nextCaseAllowed=true`);
+    }, () => { updateProgressSummary(input.caseId); });
   };
 
   for (const scheduledCase of scheduledCases) {
     const caseId = scheduledCase.caseId;
     const sourceGroup = scheduledCase.sourceGroup;
     const scenarioRef = publishedEntryByCaseId(caseId, params.publishedCases);
+    const caseLifecycleStartedAt = Date.now();
+    const countersBeforeCase = { completed, executed, failed, passed, skipped, nonExecutableFailed };
+    await runScheduledCaseSafely(async () => {
     if (activeGroup !== sourceGroup) {
       if (activeGroup) {
         markGroupEnd(activeGroup, "completed", "group_cases_processed");
@@ -2291,7 +2299,6 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
       markGroupStart(sourceGroup);
       activeGroup = sourceGroup;
     }
-    const caseLifecycleStartedAt = Date.now();
     log(
       jobId,
       `[case-schedule] jobId=${jobId} caseId=${caseId} sourceGroup=${sourceGroup} groupIndex=${scheduledCase.groupIndex} overallIndex=${scheduledCase.overallIndex} action=start`,
@@ -2728,7 +2735,7 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
         completed += 1;
         skipped += 1;
         updateProgressSummary(caseId);
-        continue;
+        return;
       }
       const blockedReason = route.reason;
       await recordPreFunctionalFailure({
@@ -2744,7 +2751,7 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
         groupIndex: scheduledCase.groupIndex,
         overallIndex: scheduledCase.overallIndex,
       });
-      continue;
+      return;
     }
 
     const caseSectionSlug = resolveSectionSlugFromSpecPath(route.specPath, effectiveAppSlug) ?? params.sectionSlug;
@@ -2775,7 +2782,7 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
         groupIndex: scheduledCase.groupIndex,
         overallIndex: scheduledCase.overallIndex,
       });
-      continue;
+      return;
     }
 
     const evidenceInit = parseEvidenceInitializationResult(testResult.lines);
@@ -2961,6 +2968,40 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
       `[case-schedule] jobId=${jobId} caseId=${caseId} sourceGroup=${sourceGroup} groupIndex=${scheduledCase.groupIndex} overallIndex=${scheduledCase.overallIndex} action=${discoveryStatus === "passed" ? "completed" : "failed"}`,
     );
     updateProgressSummary(caseId);
+    }, (error) => {
+      const existingResult = caseResults.some((result) => result.caseId === caseId);
+      if (!existingResult) {
+        completed = countersBeforeCase.completed + 1;
+        executed = countersBeforeCase.executed;
+        failed = countersBeforeCase.failed + 1;
+        passed = countersBeforeCase.passed;
+        skipped = countersBeforeCase.skipped;
+        nonExecutableFailed = countersBeforeCase.nonExecutableFailed + 1;
+        caseResults.push({
+          caseId,
+          status: "failed",
+          completedAt: new Date().toISOString(),
+          durationMs: Math.max(0, Date.now() - caseLifecycleStartedAt),
+          reason: "case_processing_exception",
+          scenarioId: scenarioRef?.executionScenarioId ?? scenarioRef?.scenarioId ?? `TR-CASE-${caseId}`,
+          scenarioTitle: nonEmptyString(scenarioRef?.title) ?? `C${caseId}`,
+          sourceType: sourceGroup,
+          appSlug: nonEmptyString(params.appSlug),
+          sectionSlug: nonEmptyString(params.sectionSlug),
+          launchId: nonEmptyString(params.launchId),
+          failureReason: "case_processing_exception",
+          errorMessage: "An unexpected error interrupted this case before completion.",
+        });
+      }
+      const errorType = error instanceof Error ? error.name : "UnknownError";
+      log(jobId, `[case-isolation] caseId=${caseId} status=failed errorType=${errorType} recorded=${existingResult ? "true" : "false"} nextCaseAllowed=true`);
+      try {
+        updateProgressSummary(caseId);
+      } catch (progressError) {
+        const progressErrorType = progressError instanceof Error ? progressError.name : "UnknownError";
+        log(jobId, `[case-isolation] caseId=${caseId} progressUpdate=failed errorType=${progressErrorType} nextCaseAllowed=true`);
+      }
+    });
   }
 
   if (activeGroup) {

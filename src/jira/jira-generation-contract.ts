@@ -99,7 +99,7 @@ export function repairMissingJiraConditionalAssertions<T extends Record<string, 
    const contextual=canonicalJiraConditionalVisibilityStep(step,requirement);
    if(contextual!==step) {changed=true;return contextual;}
    const match=step.match(/^\s*(?:Validar|Verificar)\s+que\s+(?:el\s+|la\s+)?(?:resumen(?:\s+de\s+confirmaci[oó]n)?|confirmaci[oó]n|(?:confirmation\s+)?summary|confirmation)\s+(?:muestre|muestra|presente|presenta)\s+([^"“”]+?)[.]?$/i);
-   const subject=match?.[1].replace(/\s+(?:cuando aplique|si aplica|when applicable|if applicable)$/i,'');
+   const subject=match?.[1].replace(/\s+(?:cuando aplique|si aplica|when applicable|if applicable|aplicable|applicable)$/i,'');
    if(!subject||normalized(subject)!==requirement.subject) return step;
    changed=true;
    return `Validar que se muestre "${requirement.subject}"`;
@@ -235,7 +235,10 @@ export function repairMissingJiraReviewTransition<T extends Record<string, unkno
  const steps=Array.isArray(candidate.steps)?candidate.steps.filter((step):step is string=>typeof step==='string'):[ ];
  const summarySource=normalized(source.slice(0,(review.index ?? 0)+review[0].length));
  const laterSource=normalized(authorizationText);
- const assertions=steps.map((step,index)=>({step,index,target:step.match(/^\s*(?:Validar|Verificar)\b[\s\S]*?["“]([^"”]+)["”]/i)?.[1]}));
+ // An absence oracle is not an observed destination. In particular, a rejected
+ // login must not gain a successful Continue before “no receipt is shown”.
+ const assertions=steps.map((step,index)=>({step,index,target:/^\s*(?:Validar|Verificar)\s+(?:que\s+)?no\b/i.test(step)
+  ? undefined : step.match(/^\s*(?:Validar|Verificar)\b[\s\S]*?["“]([^"”]+)["”]/i)?.[1]}));
  // Shared field words (amount/accounts) can occur again on the final receipt.
  // Only the summary before a source-distinct later stage can own this transition.
  const sourceDeclaresStage=(target:string)=>new RegExp(`(?:pantalla(?: de)?|screen|muestra|shows?)\\s+(?:(?:el|la|the)\\s+)?${normalized(target).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}(?:\\b|$)`,'i').test(laterSource);

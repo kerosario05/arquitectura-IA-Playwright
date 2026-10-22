@@ -6,6 +6,7 @@ import { buildRuntimeInputValues } from "./promote-plan";
 import { buildPlaywrightCommandEnv } from "./spec-generation-hybrid";
 import { materializePromotedRuntimeEnv } from "./runtime/promoted-spec-runtime";
 import type { DataContextEntry } from "../data/data-context";
+import { resolveDataKey } from "../data/data-key-resolver";
 
 /**
  * Proves the FIRST_LOSS fix: scenario-scoped runtimeEntries (which may carry
@@ -25,6 +26,25 @@ function entry(overrides: Partial<DataContextEntry> & Pick<DataContextEntry, "ke
     ...overrides,
   };
 }
+
+test("canonical plan bindings retain the exact Discovery value in the functional child environment", () => {
+  for (const [authored, canonical] of [["usuario_invalido", "auth.username"], ["password", "auth.password"]]) {
+    const runtimeEntries = [entry({key: authored, value: "synthetic-case-input", source: "manual_runtime"})];
+    const discovery = resolveDataKey(canonical, {runtimeEntries});
+    assert.equal(discovery.status, "resolved");
+    const values = buildRuntimeInputValues([entry({key: canonical, value: "configured-other-value"})], runtimeEntries, [canonical]);
+    assert.equal(values[canonical], discovery.value);
+    const env = buildPlaywrightCommandEnv({source: "test", headless: true, runtimeInputValues: values});
+    assert.equal(env![`PROMOTED_${canonical.replace(/[^A-Za-z0-9]+/g, "_").toUpperCase()}`], discovery.value);
+  }
+});
+
+test("ambiguous aliases do not manufacture a canonical value; ordinary exact bindings remain intact", () => {
+  const entries = [entry({key: "usuario_valido", value: "one"}), entry({key: "usuario_invalido", value: "two"}), entry({key: "amount", value: "10"})];
+  const values = buildRuntimeInputValues([], entries, ["auth.username", "amount"]);
+  assert.equal(values["auth.username"], undefined);
+  assert.equal(values.amount, "10");
+});
 
 test("1/workflow propagation: case-discovery-workflow's promoteExecutionPlan call site passes options.runtimeEntries through unchanged, unconditionally", async () => {
   const source = await fs.readFile(

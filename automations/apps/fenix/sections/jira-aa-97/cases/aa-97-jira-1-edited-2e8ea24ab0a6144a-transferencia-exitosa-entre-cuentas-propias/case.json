@@ -1,0 +1,9 @@
+{
+  "id": "aa-97-jira-1-edited-2e8ea24ab0a6144a-transferencia-exitosa-entre-cuentas-propias",
+  "externalId": "AA-97:jira:1:edited-2e8ea24ab0a6144a",
+  "title": "Transferencia exitosa entre cuentas propias",
+  "source": "discovery",
+  "appSlug": "fenix",
+  "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+  "createdAt": "2026-10-22T13:50:40.732Z"
+}

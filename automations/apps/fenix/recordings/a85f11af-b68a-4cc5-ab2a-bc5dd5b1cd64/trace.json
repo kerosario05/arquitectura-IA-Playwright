@@ -1,13 +1,13 @@
 {
-  "recordingId": "88a2b3ed-6c07-458e-b2d1-0358b5f40742",
+  "recordingId": "a85f11af-b68a-4cc5-ab2a-bc5dd5b1cd64",
   "projectSlug": "fenix",
   "appSlug": "fenix",
   "platform": "web",
   "baseUrl": "https://qa1.santacruz.do/onlinebanking",
-  "label": "Login Sastifactorio",
+  "label": "Transferencias entre cuantas propias",
   "recordingGoal": {
-    "declaredGoal": "Login Sastifactorio",
-    "normalizedGoal": "Login Sastifactorio",
+    "declaredGoal": "Transferencias entre cuantas propias",
+    "normalizedGoal": "Transferencias entre cuantas propias",
     "provenance": "USER_DECLARED",
     "needsReview": false
   },
@@ -17,11 +17,11 @@
     "includeQaCredentialsInTestRail": true
   },
   "captureAuthority": "v2",
-  "startedAt": "2026-10-05T20:59:55.283Z",
+  "startedAt": "2026-10-21T20:26:10.568Z",
   "status": "stopped",
   "events": [
     {
-      "t": 2114,
+      "t": 1761,
       "kind": "navigate",
       "screenKey": "inicio",
       "url": "https://qa1.santacruz.do/onlinebanking",
@@ -35,7 +35,7 @@
       "seq": 1
     },
     {
-      "t": 7941,
+      "t": 6064,
       "interactionId": "pointer-1",
       "kind": "note",
       "screenKey": "60d370b39a8d",
@@ -45,26 +45,14 @@
         "label": "Empresarial",
         "role": "link",
         "tag": "a",
-        "locators": [],
-        "playwrightRecorderEvidence": {
-          "kind": "role",
-          "role": "link",
-          "normalizedName": "Empresarial",
-          "targetTag": "a",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "login-box-parent"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true
-        }
+        "locators": []
       },
       "note": "Observación técnica (pointer) sobre \"Empresarial\"",
       "observationType": "pointer",
       "seq": 2
     },
     {
-      "t": 8034,
+      "t": 6568,
       "interactionId": "pointer-1",
       "kind": "tap",
       "screenKey": "60d370b39a8d",
@@ -119,24 +107,12 @@
             "confidence": 0.85,
             "validatedByInteraction": true
           }
-        ],
-        "playwrightRecorderEvidence": {
-          "kind": "role",
-          "role": "link",
-          "normalizedName": "Empresarial",
-          "targetTag": "a",
-          "scopeIdentity": {
-            "strategy": "id",
-            "value": "login-box-parent"
-          },
-          "captureMatchCount": 1,
-          "runtimeResolutionRequired": true
-        }
+        ]
       },
       "seq": 3
     },
     {
-      "t": 8660,
+      "t": 11422,
       "interactionId": "pointer-2",
       "kind": "note",
       "screenKey": "60d370b39a8d",
@@ -153,7 +129,7 @@
       "seq": 4
     },
     {
-      "t": 11940,
+      "t": 17321,
       "interactionId": "pointer-3",
       "kind": "note",
       "screenKey": "60d370b39a8d",
@@ -170,7 +146,7 @@
       "seq": 5
     },
     {
-      "t": 11974,
+      "t": 17351,
       "kind": "fill",
       "screenKey": "60d370b39a8d",
       "fingerprint": "88a6a9bc01d0060a6c3d2ea9c821fd9c246860f77e3760f338dce3d6ed2f943c",
@@ -197,15 +173,15 @@
             "confidence": 0.8
           }
         ],
-        "rawTypedValue": "130047596",
+        "rawTypedValue": "130872392",
         "sensitive": false
       },
-      "value": "130047596",
+      "value": "130872392",
       "valueSource": "user",
       "seq": 6
     },
     {
-      "t": 14911,
+      "t": 19858,
       "interactionId": "pointer-4",
       "kind": "note",
       "screenKey": "60d370b39a8d",
@@ -222,7 +198,7 @@
       "seq": 7
     },
     {
-      "t": 14917,
+      "t": 19887,
       "kind": "fill",
       "screenKey": "60d370b39a8d",
       "fingerprint": "88a6a9bc01d0060a6c3d2ea9c821fd9c246860f77e3760f338dce3d6ed2f943c",
@@ -249,15 +225,15 @@
             "confidence": 0.8
           }
         ],
-        "rawTypedValue": "jpmota",
+        "rawTypedValue": "SAMOTA",
         "sensitive": false
       },
-      "value": "jpmota",
+      "value": "SAMOTA",
       "valueSource": "user",
       "seq": 8
     },
     {
-      "t": 20326,
+      "t": 30876,
       "kind": "fill",
       "screenKey": "60d370b39a8d",
       "fingerprint": "88a6a9bc01d0060a6c3d2ea9c821fd9c246860f77e3760f338dce3d6ed2f943c",
@@ -291,7 +267,7 @@
       "seq": 9
     },
     {
-      "t": 20330,
+      "t": 30879,
       "kind": "press",
       "screenKey": "60d370b39a8d",
       "fingerprint": "88a6a9bc01d0060a6c3d2ea9c821fd9c246860f77e3760f338dce3d6ed2f943c",
@@ -322,14 +298,14 @@
       "seq": 10
     },
     {
-      "t": 26876,
+      "t": 34378,
       "kind": "navigate",
       "screenKey": "60d370b39a8d",
       "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
       "seq": 11
     },
     {
-      "t": 28199,
+      "t": 36498,
       "interactionId": "pointer-1",
       "kind": "tap",
       "screenKey": "60d370b39a8d",
@@ -359,7 +335,7 @@
       "seq": 12
     },
     {
-      "t": 54185,
+      "t": 60424,
       "interactionId": "pointer-2",
       "kind": "note",
       "screenKey": "60d370b39a8d",
@@ -388,7 +364,7 @@
       "seq": 13
     },
     {
-      "t": 55523,
+      "t": 61453,
       "kind": "fill",
       "screenKey": "60d370b39a8d",
       "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
@@ -423,7 +399,7 @@
       "seq": 14
     },
     {
-      "t": 55999,
+      "t": 61857,
       "kind": "fill",
       "screenKey": "60d370b39a8d",
       "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
@@ -458,7 +434,7 @@
       "seq": 15
     },
     {
-      "t": 56435,
+      "t": 62197,
       "kind": "fill",
       "screenKey": "60d370b39a8d",
       "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
@@ -493,7 +469,7 @@
       "seq": 16
     },
     {
-      "t": 56871,
+      "t": 62623,
       "kind": "fill",
       "screenKey": "60d370b39a8d",
       "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
@@ -528,7 +504,7 @@
       "seq": 17
     },
     {
-      "t": 57233,
+      "t": 62871,
       "kind": "fill",
       "screenKey": "60d370b39a8d",
       "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
@@ -563,7 +539,7 @@
       "seq": 18
     },
     {
-      "t": 59074,
+      "t": 65298,
       "interactionId": "pointer-3",
       "kind": "note",
       "screenKey": "60d370b39a8d",
@@ -592,7 +568,7 @@
       "seq": 19
     },
     {
-      "t": 59080,
+      "t": 65311,
       "kind": "fill",
       "screenKey": "60d370b39a8d",
       "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
@@ -627,7 +603,7 @@
       "seq": 20
     },
     {
-      "t": 59162,
+      "t": 65412,
       "interactionId": "pointer-3",
       "kind": "tap",
       "screenKey": "60d370b39a8d",
@@ -731,105 +707,85 @@
       "seq": 21
     },
     {
-      "t": 59749,
+      "t": 65806,
       "kind": "navigate",
       "screenKey": "60d370b39a8d",
       "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
       "seq": 22
     },
     {
-      "t": 71963,
+      "t": 68735,
       "interactionId": "pointer-1",
       "kind": "tap",
       "screenKey": "60d370b39a8d",
       "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
       "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
       "target": {
-        "label": "Lizardo Jhonatan Mata Burgos",
+        "label": "Transferencias",
         "tag": "div",
         "locators": [
           {
             "strategy": "id",
-            "value": "profile-name",
+            "value": "left-menu-accordion",
             "confidence": 0.55
           }
         ],
-        "semanticRuntimeEvidence": {
-          "source": "accessible_name",
-          "normalizedValue": "Lizardo Jhonatan Mata Burgos",
-          "targetTag": "div",
-          "scopeAlternatives": [
-            {
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "profile-name"
-              },
-              "captureMatchCount": 1
-            },
-            {
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "profile-dropdown"
-              },
-              "captureMatchCount": 1
-            },
-            {
-              "scopeIdentity": {
-                "strategy": "id",
-                "value": "profile-dd-menu-container"
-              },
-              "captureMatchCount": 1
-            }
-          ],
-          "captureUniqueTarget": true
-        },
         "playwrightRecorderEvidence": {
           "kind": "text",
-          "normalizedName": "Lizardo Jhonatan Mata Burgos",
+          "normalizedName": "Transferencias",
           "targetTag": "div",
           "scopeIdentity": {
             "strategy": "id",
-            "value": "profile-name"
+            "value": "left-menu-accordion"
           },
-          "captureMatchCount": 1,
           "runtimeResolutionRequired": true
         }
       },
       "seq": 23
     },
     {
-      "t": 73644,
+      "t": 70630,
       "interactionId": "pointer-2",
       "kind": "note",
       "screenKey": "60d370b39a8d",
-      "fingerprint": "237a5fe030783adf063c87193135b927e02e63ff32d334409f32866e7611db6e",
+      "fingerprint": "e136a0769c72bebf9b01a0804e9f0f5a2dba63f97dbcf0169cd2ddc5062e5a1a",
       "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
       "target": {
-        "label": "Cerrar Sesión",
+        "label": "- Cuentas Propias",
         "role": "link",
         "tag": "a",
         "locators": []
       },
-      "note": "Observación técnica (pointer) sobre \"Cerrar Sesión\"",
+      "note": "Observación técnica (pointer) sobre \"- Cuentas Propias\"",
       "observationType": "pointer",
       "seq": 24
     },
     {
-      "t": 73758,
+      "t": 70953,
       "interactionId": "pointer-2",
       "kind": "tap",
       "screenKey": "60d370b39a8d",
-      "fingerprint": "237a5fe030783adf063c87193135b927e02e63ff32d334409f32866e7611db6e",
+      "fingerprint": "e136a0769c72bebf9b01a0804e9f0f5a2dba63f97dbcf0169cd2ddc5062e5a1a",
       "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
       "target": {
-        "label": "Cerrar Sesión",
+        "label": "- Cuentas Propias",
         "role": "link",
         "tag": "a",
         "locators": [
           {
             "strategy": "role",
-            "value": "link|Cerrar Sesión",
+            "value": "link|- Cuentas Propias",
             "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#TRANSFERS_INDIVIDUAL",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "TRANSFERS_INDIVIDUAL",
+            "confidence": 0.8
           }
         ],
         "technicalTargetCandidates": [
@@ -837,9 +793,9 @@
             "targetType": "structural",
             "locatorCandidates": [
               {
-                "strategy": "role",
-                "value": "link|Cerrar Sesión",
-                "confidence": 0.85
+                "strategy": "css",
+                "value": "#TRANSFERS_INDIVIDUAL",
+                "confidence": 0.8
               }
             ],
             "structuralContext": {
@@ -847,21 +803,21 @@
                 "tag": "a"
               },
               "stableDirectAttributes": {
-                "href": "#"
+                "href": "/onlinebanking/Transfer/MyAccountsTransfer",
+                "id": "TRANSFERS_INDIVIDUAL"
               },
               "stableDescendants": [],
               "semanticShape": [
-                "i",
-                "span"
+                "div"
               ],
               "deterministicStructuralIdentity": true,
-              "topologySignature": "{\"childEntries\":[[\"i\",1],[\"span\",1]],\"descendantEntries\":[[\"i\",1],[\"span\",1]]}",
+              "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"div\",1]]}",
               "structuralIdentityMatchCount": 1,
               "scopeIdentity": {
                 "strategy": "id",
-                "value": "profile-dropdown-menu"
+                "value": "menuid12"
               },
-              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#\"},\"stableDescendants\":[],\"semanticShape\":[\"i\",\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"i\\\",1],[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"i\\\",1],[\\\"span\\\",1]]}\"}",
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"/onlinebanking/Transfer/MyAccountsTransfer\",\"id\":\"TRANSFERS_INDIVIDUAL\"},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",1]]}\"}",
               "captureScopeUnique": true,
               "captureTargetMatchCount": 1
             },
@@ -876,65 +832,436 @@
       "seq": 25
     },
     {
-      "t": 73767,
-      "kind": "navigate",
+      "t": 73532,
+      "interactionId": "pointer-3",
+      "kind": "tap",
       "screenKey": "60d370b39a8d",
-      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary#",
+      "fingerprint": "a2c4ffbbf58285d4c8e43624692fa16ec25eaa615b0cf3ba797e9e97323b99ae",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "Seleccione una Cuenta",
+        "tag": "span",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "TransferForm",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Seleccione una Cuenta",
+          "targetTag": "span",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "TransferForm"
+          },
+          "runtimeResolutionRequired": true,
+          "nativeSelection": {
+            "controlIdentity": {
+              "strategy": "id",
+              "value": "account-from-select-input"
+            },
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "div:has(> select[id=\"account-from-select-input\"])"
+            },
+            "options": [
+              {
+                "value": "",
+                "label": "Seleccione una Cuenta",
+                "disabled": false
+              },
+              {
+                "value": "-96230319813",
+                "label": "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
+                "disabled": false
+              },
+              {
+                "value": "-195112204072",
+                "label": "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+                "disabled": false
+              },
+              {
+                "value": "-128943207314",
+                "label": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
+                "disabled": false
+              }
+            ],
+            "selectedValue": "-96230319813"
+          }
+        }
+      },
       "seq": 26
     },
     {
-      "t": 73944,
-      "kind": "screen_change",
+      "t": 76400,
+      "kind": "fill",
       "screenKey": "60d370b39a8d",
-      "toScreenKey": "db24077246b8",
-      "fingerprint": "1339678419a1a44ee03738db53b32031a47b13e8279d56ec26cfd8b5ff001322",
-      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary#",
+      "fingerprint": "a2c4ffbbf58285d4c8e43624692fa16ec25eaa615b0cf3ba797e9e97323b99ae",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "account-from-select-input",
+        "role": "input",
+        "tag": "select",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "combobox|account-from-select-input",
+            "confidence": 0.85
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(> select[id=\"account-from-select-input\"])"
+          },
+          "runtimeResolutionRequired": true,
+          "nativeSelection": {
+            "controlIdentity": {
+              "strategy": "id",
+              "value": "account-from-select-input"
+            },
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "div:has(> select[id=\"account-from-select-input\"])"
+            },
+            "options": [
+              {
+                "value": "",
+                "label": "Seleccione una Cuenta",
+                "disabled": false
+              },
+              {
+                "value": "-96230319813",
+                "label": "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
+                "disabled": false
+              },
+              {
+                "value": "-195112204072",
+                "label": "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+                "disabled": false
+              },
+              {
+                "value": "-128943207314",
+                "label": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
+                "disabled": false
+              }
+            ],
+            "clickedOption": {
+              "value": "-96230319813",
+              "label": "Cuenta Corrientes / 11121000000739 / RD$753,259.23"
+            },
+            "selectedValue": "-96230319813",
+            "selectionMode": "index",
+            "selectedOptionIndex": 0
+          }
+        },
+        "sensitive": false
+      },
+      "value": "Cuenta Corrientes / 11121000000739 / RD$753,259.23",
+      "valueSource": "user",
       "seq": 27
     },
     {
-      "t": 75191,
-      "interactionId": "pointer-3",
+      "t": 77624,
+      "interactionId": "pointer-5",
       "kind": "note",
-      "screenKey": "db24077246b8",
-      "fingerprint": "1339678419a1a44ee03738db53b32031a47b13e8279d56ec26cfd8b5ff001322",
-      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary#",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "a2c4ffbbf58285d4c8e43624692fa16ec25eaa615b0cf3ba797e9e97323b99ae",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
       "target": {
-        "label": "Aceptar",
-        "role": "link",
-        "tag": "a",
+        "label": "Seleccione una Cuenta / undefined Balance Disponible",
+        "tag": "div",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Seleccione una Cuenta",
+          "targetTag": "span",
+          "runtimeResolutionRequired": true,
+          "nativeSelection": {
+            "controlIdentity": {
+              "strategy": "id",
+              "value": "account-to-select-input"
+            },
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "div:has(> select[id=\"account-to-select-input\"])"
+            },
+            "options": [
+              {
+                "value": "",
+                "label": "Seleccione una Cuenta",
+                "disabled": false
+              },
+              {
+                "value": "-195112204072",
+                "label": "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+                "disabled": false
+              },
+              {
+                "value": "-128943207314",
+                "label": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
+                "disabled": false
+              }
+            ],
+            "selectedValue": "-195112204072"
+          }
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Seleccione una Cuenta / undefined Balance Disponible\"",
+      "observationType": "pointer",
+      "seq": 28
+    },
+    {
+      "t": 78030,
+      "interactionId": "pointer-5",
+      "kind": "tap",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "a2c4ffbbf58285d4c8e43624692fa16ec25eaa615b0cf3ba797e9e97323b99ae",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "Seleccione una Cuenta / undefined Balance Disponible",
+        "tag": "div",
+        "locators": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "div"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "span",
+                  "stableAttributes": {
+                    "href": "#"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "div"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"b\",2],[\"div\",4],[\"i\",2],[\"span\",7]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "account-to-block"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"div\"},\"stableDirectAttributes\":{},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"span\",\"stableAttributes\":{\"href\":\"#\"}}],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"b\\\",2],[\\\"div\\\",4],[\\\"i\\\",2],[\\\"span\\\",7]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner",
+              "v2_framework_actionable_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Seleccione una Cuenta",
+          "targetTag": "span",
+          "runtimeResolutionRequired": true,
+          "nativeSelection": {
+            "controlIdentity": {
+              "strategy": "id",
+              "value": "account-to-select-input"
+            },
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "div:has(> select[id=\"account-to-select-input\"])"
+            },
+            "options": [
+              {
+                "value": "",
+                "label": "Seleccione una Cuenta",
+                "disabled": false
+              },
+              {
+                "value": "-195112204072",
+                "label": "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+                "disabled": false
+              },
+              {
+                "value": "-128943207314",
+                "label": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
+                "disabled": false
+              }
+            ],
+            "selectedValue": "-195112204072"
+          }
+        }
+      },
+      "seq": 29
+    },
+    {
+      "t": 83234,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "5543c2c427b4e8682ebd3b8f68603ec98ce4aea208dee4c80955785e899432f0",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "account-to-select-input",
+        "role": "input",
+        "tag": "select",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "combobox|account-to-select-input",
+            "confidence": 0.85
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(> select[id=\"account-to-select-input\"])"
+          },
+          "runtimeResolutionRequired": true,
+          "nativeSelection": {
+            "controlIdentity": {
+              "strategy": "id",
+              "value": "account-to-select-input"
+            },
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "div:has(> select[id=\"account-to-select-input\"])"
+            },
+            "options": [
+              {
+                "value": "",
+                "label": "Seleccione una Cuenta",
+                "disabled": false
+              },
+              {
+                "value": "-195112204072",
+                "label": "Cuenta Corrientes / 11311000002924 / RD$99,100.00",
+                "disabled": false
+              },
+              {
+                "value": "-128943207314",
+                "label": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
+                "disabled": false
+              }
+            ],
+            "clickedOption": {
+              "value": "-128943207314",
+              "label": "Cuenta de Ahorro / 21122020001253 / US$1,236.35"
+            },
+            "selectedValue": "-195112204072",
+            "selectionMode": "index",
+            "selectedOptionIndex": 1
+          }
+        },
+        "sensitive": false
+      },
+      "value": "Cuenta de Ahorro / 21122020001253 / US$1,236.35",
+      "valueSource": "user",
+      "seq": 30
+    },
+    {
+      "t": 85200,
+      "interactionId": "pointer-7",
+      "kind": "note",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "5543c2c427b4e8682ebd3b8f68603ec98ce4aea208dee4c80955785e899432f0",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "control",
+        "role": "textbox",
+        "tag": "input",
+        "associatedField": "US$",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"control\"",
+      "observationType": "pointer",
+      "seq": 31
+    },
+    {
+      "t": 89238,
+      "interactionId": "pointer-8",
+      "kind": "note",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "5543c2c427b4e8682ebd3b8f68603ec98ce4aea208dee4c80955785e899432f0",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "button",
         "locators": [],
         "playwrightRecorderEvidence": {
           "kind": "role",
-          "role": "link",
-          "normalizedName": "Aceptar",
-          "targetTag": "a",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "button",
           "scopeIdentity": {
             "strategy": "css",
-            "value": "div:has(a[href=\"/onlinebanking/Home/Logout\"])"
+            "value": "div:has(a[href=\"/onlinebanking/Transfer/MyAccountsTransfer/AbortTransaction?Length=0\"])"
           },
           "captureMatchCount": 1,
           "runtimeResolutionRequired": true
         }
       },
-      "note": "Observación técnica (pointer) sobre \"Aceptar\"",
+      "note": "Observación técnica (pointer) sobre \"Continuar\"",
       "observationType": "pointer",
-      "seq": 28
+      "seq": 32
     },
     {
-      "t": 75255,
-      "interactionId": "pointer-3",
-      "kind": "tap",
-      "screenKey": "db24077246b8",
-      "fingerprint": "1339678419a1a44ee03738db53b32031a47b13e8279d56ec26cfd8b5ff001322",
-      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary#",
+      "t": 89246,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "5543c2c427b4e8682ebd3b8f68603ec98ce4aea208dee4c80955785e899432f0",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
       "target": {
-        "label": "Aceptar",
-        "role": "link",
-        "tag": "a",
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "US$",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "#transactionDetails_0__AmountPayment",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "transactionDetails_0__AmountPayment",
+            "confidence": 0.8
+          }
+        ],
+        "rawTypedValue": "0.00",
+        "sensitive": false
+      },
+      "value": "5.00",
+      "valueSource": "user",
+      "seq": 33
+    },
+    {
+      "t": 89366,
+      "interactionId": "pointer-8",
+      "kind": "tap",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "5543c2c427b4e8682ebd3b8f68603ec98ce4aea208dee4c80955785e899432f0",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "button",
         "locators": [
           {
             "strategy": "role",
-            "value": "link|Aceptar",
+            "value": "button|Continuar",
             "confidence": 0.85
           }
         ],
@@ -944,16 +1271,159 @@
             "locatorCandidates": [
               {
                 "strategy": "role",
-                "value": "link|Aceptar",
+                "value": "button|Continuar",
                 "confidence": 0.85
               }
             ],
             "structuralContext": {
               "owner": {
-                "tag": "a"
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "TransferForm"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Continuar",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(a[href=\"/onlinebanking/Transfer/MyAccountsTransfer/AbortTransaction?Length=0\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "TransferForm"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "transfer_content"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "right-content-main"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(a[href=\"/onlinebanking/Transfer/MyAccountsTransfer/AbortTransaction?Length=0\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 34
+    },
+    {
+      "t": 91831,
+      "interactionId": "pointer-9",
+      "kind": "note",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "2d215d4e95bd1445cfc2500b464fb8c29e768e4b0a1fb1a01bb62707a308254d",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(a[href=\"/onlinebanking/Transfer/MyAccountsTransfer/AbortTransaction?Length=0\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Continuar\"",
+      "observationType": "pointer",
+      "seq": 35
+    },
+    {
+      "t": 91968,
+      "interactionId": "pointer-9",
+      "kind": "tap",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "2d215d4e95bd1445cfc2500b464fb8c29e768e4b0a1fb1a01bb62707a308254d",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Continuar",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#frmContinue",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "frmContinue",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#frmContinue",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
               },
               "stableDirectAttributes": {
-                "href": "/onlinebanking/Home/Logout"
+                "id": "frmContinue"
               },
               "stableDescendants": [],
               "semanticShape": [],
@@ -961,9 +1431,9 @@
               "structuralIdentityMatchCount": 1,
               "scopeIdentity": {
                 "strategy": "id",
-                "value": "exit-popup"
+                "value": "right-content-main"
               },
-              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"/onlinebanking/Home/Logout\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"frmContinue\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
               "captureScopeUnique": true,
               "captureTargetMatchCount": 1
             },
@@ -976,25 +1446,432 @@
         ],
         "playwrightRecorderEvidence": {
           "kind": "role",
-          "role": "link",
-          "normalizedName": "Aceptar",
-          "targetTag": "a",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "button",
           "scopeIdentity": {
             "strategy": "css",
-            "value": "div:has(a[href=\"/onlinebanking/Home/Logout\"])"
+            "value": "div:has(a[href=\"/onlinebanking/Transfer/MyAccountsTransfer/AbortTransaction?Length=0\"])"
           },
           "captureMatchCount": 1,
           "runtimeResolutionRequired": true
         }
       },
-      "seq": 29
+      "seq": 36
     },
     {
-      "t": 75519,
-      "kind": "navigate",
-      "screenKey": "db24077246b8",
-      "url": "https://qa1.santacruz.do/onlinebanking/",
-      "seq": 30
+      "t": 94263,
+      "interactionId": "pointer-10",
+      "kind": "tap",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "06218e84191f896f64bfc44aa508a3eda93693f9773b7345733c5bad8fbe8fde",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "SMS",
+        "tag": "div",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "div:has(a[id=\"token-resend-btn\"])",
+            "confidence": 0.55
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "SMS",
+          "targetTag": "div",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(a[id=\"token-resend-btn\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(input[name=\"__Media\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "requestchallengeform"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "right-content-main"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "SMS",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(a[id=\"token-resend-btn\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 37
+    },
+    {
+      "t": 97670,
+      "interactionId": "pointer-11",
+      "kind": "note",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "06218e84191f896f64bfc44aa508a3eda93693f9773b7345733c5bad8fbe8fde",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "control",
+        "role": "textbox",
+        "tag": "input",
+        "associatedField": "Reenviar código en  29 segundos...",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "requestchallengeform"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"control\"",
+      "observationType": "pointer",
+      "seq": 38
+    },
+    {
+      "t": 98683,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "06218e84191f896f64bfc44aa508a3eda93693f9773b7345733c5bad8fbe8fde",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Reenviar código en  29 segundos...",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "requestchallengeform",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "requestchallengeform"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "sensitive": false
+      },
+      "valueSource": "user",
+      "seq": 39
+    },
+    {
+      "t": 98968,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "06218e84191f896f64bfc44aa508a3eda93693f9773b7345733c5bad8fbe8fde",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Reenviar código en  27 segundos...",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "requestchallengeform",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "requestchallengeform"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "sensitive": false
+      },
+      "valueSource": "user",
+      "seq": 40
+    },
+    {
+      "t": 99312,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "06218e84191f896f64bfc44aa508a3eda93693f9773b7345733c5bad8fbe8fde",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Reenviar código en  27 segundos...",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "requestchallengeform",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "requestchallengeform"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "sensitive": false
+      },
+      "valueSource": "user",
+      "seq": 41
+    },
+    {
+      "t": 99714,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "06218e84191f896f64bfc44aa508a3eda93693f9773b7345733c5bad8fbe8fde",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Reenviar código en  27 segundos...",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "requestchallengeform",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "requestchallengeform"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "sensitive": false
+      },
+      "valueSource": "user",
+      "seq": 42
+    },
+    {
+      "t": 100169,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "06218e84191f896f64bfc44aa508a3eda93693f9773b7345733c5bad8fbe8fde",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Reenviar código en  26 segundos...",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "requestchallengeform",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "requestchallengeform"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "sensitive": false
+      },
+      "valueSource": "user",
+      "seq": 43
+    },
+    {
+      "t": 104161,
+      "interactionId": "pointer-12",
+      "kind": "note",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "06218e84191f896f64bfc44aa508a3eda93693f9773b7345733c5bad8fbe8fde",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "input",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(a[href=\"/onlinebanking/Transfer/MyAccountsTransfer/ConfirmTransaction\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Continuar\"",
+      "observationType": "pointer",
+      "seq": 44
+    },
+    {
+      "t": 104169,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "06218e84191f896f64bfc44aa508a3eda93693f9773b7345733c5bad8fbe8fde",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "associatedField": "Reenviar código en  26 segundos...",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "requestchallengeform",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "requestchallengeform"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "sensitive": false
+      },
+      "valueSource": "user",
+      "seq": 45
+    },
+    {
+      "t": 104269,
+      "interactionId": "pointer-12",
+      "kind": "tap",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "06218e84191f896f64bfc44aa508a3eda93693f9773b7345733c5bad8fbe8fde",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "input",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Continuar",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#validate_submit_token",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "validate_submit_token",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#validate_submit_token",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "input"
+              },
+              "stableDirectAttributes": {
+                "id": "validate_submit_token"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "requestchallengeform"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"input\"},\"stableDirectAttributes\":{\"id\":\"validate_submit_token\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(a[href=\"/onlinebanking/Transfer/MyAccountsTransfer/ConfirmTransaction\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 46
     }
   ],
   "screens": [
@@ -1003,7 +1880,7 @@
       "title": "60d370b39a8d",
       "fingerprint": "88a6a9bc01d0060a6c3d2ea9c821fd9c246860f77e3760f338dce3d6ed2f943c",
       "url": "https://qa1.santacruz.do/onlinebanking",
-      "firstSeenAt": 3190,
+      "firstSeenAt": 3106,
       "controls": [
         {
           "label": "\n             Personal\n        ",
@@ -1278,7 +2155,7 @@
       "title": "6e9c348d2f25",
       "fingerprint": "5d9de707d5bf9e367ee9a39a039f7aac31e0c75ad2ea62adf9c5eca383e1e826",
       "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
-      "firstSeenAt": 28320,
+      "firstSeenAt": 36587,
       "controls": [
         {
           "label": "Cancelar",
@@ -1410,11 +2287,11 @@
       "headerRelationships": []
     },
     {
-      "screenKey": "ccb38a8db01c",
+      "screenKey": "2f3e1044a78b",
       "title": "Resumen",
-      "fingerprint": "237a5fe030783adf063c87193135b927e02e63ff32d334409f32866e7611db6e",
+      "fingerprint": "e136a0769c72bebf9b01a0804e9f0f5a2dba63f97dbcf0169cd2ddc5062e5a1a",
       "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
-      "firstSeenAt": 72105,
+      "firstSeenAt": 68849,
       "controls": [
         {
           "label": "\n             \n        ",
@@ -1458,314 +2335,121 @@
           ]
         },
         {
-          "label": "\n                                 \n                                 Cuenta Mi Bolsillo\n                            ",
+          "label": "\n                                         - Cuentas Propias\n                                    ",
           "role": "a",
           "tag": "a",
           "attributes": {
-            "id": "MYPOCKET_PARENT"
+            "id": "TRANSFERS_INDIVIDUAL"
           },
           "locators": [
             {
               "strategy": "aria-label",
-              "value": "MYPOCKET_PARENT",
+              "value": "TRANSFERS_INDIVIDUAL",
               "confidence": 0.9
             }
           ]
         },
         {
-          "label": "\n                                 \n                                 Pendientes\n                            ",
+          "label": "\n                                         - Terceros\n                                    ",
           "role": "a",
           "tag": "a",
           "attributes": {
-            "id": "PENDING_TRANSACTIONS"
+            "id": "TRANSFERS_THIRDPARTY"
           },
           "locators": [
             {
               "strategy": "aria-label",
-              "value": "PENDING_TRANSACTIONS",
+              "value": "TRANSFERS_THIRDPARTY",
               "confidence": 0.9
             }
           ]
         },
         {
-          "label": "\n                                 \n                                 Solicitudes Digitales\n                            ",
+          "label": "\n                                         - Expresas\n                                    ",
           "role": "a",
           "tag": "a",
           "attributes": {
-            "id": "DIGITAL_REQUEST"
+            "id": "EXPRESS_TRANSFER"
           },
           "locators": [
             {
               "strategy": "aria-label",
-              "value": "DIGITAL_REQUEST",
+              "value": "EXPRESS_TRANSFER",
               "confidence": 0.9
             }
           ]
         },
         {
-          "label": "\n             \n             Cerrar Sesión\n        ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {},
-          "locators": [
-            {
-              "strategy": "text",
-              "value": "\n             \n             Cerrar Sesión\n        ",
-              "confidence": 0.7
-            }
-          ]
-        },
-        {
-          "label": "\n                         \n                         \n                    ",
+          "label": "\n                                         - Otros Bancos\n                                    ",
           "role": "a",
           "tag": "a",
           "attributes": {
-            "id": "LinkPendingMessage"
+            "id": "TRANSFERS_INTERBANKING_LOCAL"
           },
           "locators": [
             {
               "strategy": "aria-label",
-              "value": "LinkPendingMessage",
+              "value": "TRANSFERS_INTERBANKING_LOCAL",
               "confidence": 0.9
             }
           ]
         },
         {
-          "label": "\n                         \n                    ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {},
-          "locators": [
-            {
-              "strategy": "text",
-              "value": "\n                         \n                    ",
-              "confidence": 0.7
-            }
-          ]
-        },
-        {
-          "label": "\n                     \n                ",
+          "label": "\n                                         - Internacionales\n                                    ",
           "role": "a",
           "tag": "a",
           "attributes": {
-            "id": "ib-header-detail-btn"
+            "id": "TRANSFERS_WIRELESS"
           },
           "locators": [
             {
               "strategy": "aria-label",
-              "value": "ib-header-detail-btn",
+              "value": "TRANSFERS_WIRELESS",
               "confidence": 0.9
             }
           ]
         },
         {
-          "label": "Mi Perfil",
+          "label": "\n                                         - Múltiples\n                                    ",
           "role": "a",
           "tag": "a",
           "attributes": {
-            "id": "ib-header-detail-btn2"
+            "id": "TRANSFERS_MULTIPLE"
           },
           "locators": [
             {
               "strategy": "aria-label",
-              "value": "ib-header-detail-btn2",
+              "value": "TRANSFERS_MULTIPLE",
               "confidence": 0.9
             }
           ]
         },
         {
-          "label": "Ayuda",
-          "role": "a",
-          "tag": "a",
-          "attributes": {},
-          "locators": [
-            {
-              "strategy": "text",
-              "value": "\n                Ayuda\n            ",
-              "confidence": 0.7
-            }
-          ]
-        },
-        {
-          "label": "\n                         \n                         Español DO\n                    ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {},
-          "locators": [
-            {
-              "strategy": "text",
-              "value": "\n                         \n                         Español DO\n                    ",
-              "confidence": 0.7
-            }
-          ]
-        },
-        {
-          "label": "\n                         \n                         English US\n                    ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {},
-          "locators": [
-            {
-              "strategy": "text",
-              "value": "\n                         \n                         English US\n                    ",
-              "confidence": 0.7
-            }
-          ]
-        },
-        {
-          "label": "\n                 \n                 Cerrar Sesión\n            ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {},
-          "locators": [
-            {
-              "strategy": "text",
-              "value": "\n                 \n                 Cerrar Sesión\n            ",
-              "confidence": 0.7
-            }
-          ]
-        },
-        {
-          "label": "Todos",
+          "label": "\n                                         - Histórico de Transferencias\n                                    ",
           "role": "a",
           "tag": "a",
           "attributes": {
-            "id": "all-t0"
+            "id": "TRANSFER_HISTORY"
           },
           "locators": [
             {
               "strategy": "aria-label",
-              "value": "all-t0",
+              "value": "TRANSFER_HISTORY",
               "confidence": 0.9
             }
           ]
         },
         {
-          "label": "Cuentas",
+          "label": "\n                                         - Mercado de Valores\n                                    ",
           "role": "a",
           "tag": "a",
           "attributes": {
-            "id": "account-tab-t1"
+            "id": "STOCKS_MARKET"
           },
           "locators": [
             {
               "strategy": "aria-label",
-              "value": "account-tab-t1",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "Tarjetas",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "creditcard-tab-t2"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "creditcard-tab-t2",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "Préstamos",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "loan-tab-t3"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "loan-tab-t3",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "Certificados de Depósito",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "moneymarket-tab-t4"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "moneymarket-tab-t4",
-              "confidence": 0.9
-            }
-          ]
-        }
-      ],
-      "texts": [
-        "Resumen"
-      ],
-      "gridMetadata": {
-        "detected": true,
-        "grids": 3,
-        "rows": 42,
-        "cells": 258,
-        "headers": [
-          "Alias",
-          "Número",
-          "Tipo",
-          "Moneda",
-          "Balance Actual",
-          "Balance Disponible",
-          "Estatus"
-        ],
-        "headerRelationships": []
-      },
-      "headerRelationships": []
-    },
-    {
-      "screenKey": "80a02ad2b033",
-      "title": "Resumen",
-      "fingerprint": "ce07017d5dd2a012330792c969f1c61c5c76870957d3eee081f815d7f76cd8fb",
-      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary#",
-      "firstSeenAt": 73893,
-      "controls": [
-        {
-          "label": "\n             \n        ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {},
-          "locators": [
-            {
-              "strategy": "text",
-              "value": "\n             \n        ",
-              "confidence": 0.7
-            }
-          ]
-        },
-        {
-          "label": "\n             \n             Resumen\n        ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {},
-          "locators": [
-            {
-              "strategy": "text",
-              "value": "\n             \n             Resumen\n        ",
-              "confidence": 0.7
-            }
-          ]
-        },
-        {
-          "label": "\n                                 \n                                 Dashboard\n                            ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "CASHMAN_DASHBOARD"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "CASHMAN_DASHBOARD",
+              "value": "STOCKS_MARKET",
               "confidence": 0.9
             }
           ]
@@ -1900,118 +2584,6 @@
               "confidence": 0.9
             }
           ]
-        },
-        {
-          "label": "Tarjetas",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "creditcard-tab-t2"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "creditcard-tab-t2",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "Préstamos",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "loan-tab-t3"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "loan-tab-t3",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "Certificados de Depósito",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "moneymarket-tab-t4"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "moneymarket-tab-t4",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "Cuenta de Ahorro",
-          "role": "a",
-          "tag": "a",
-          "attributes": {},
-          "locators": [
-            {
-              "strategy": "text",
-              "value": "\n                                                Cuenta de Ahorro\n                                            ",
-              "confidence": 0.7
-            }
-          ]
-        },
-        {
-          "label": "21082020000619",
-          "role": "a",
-          "tag": "a",
-          "attributes": {},
-          "locators": [
-            {
-              "strategy": "text",
-              "value": "\n                                                21082020000619\n                                            ",
-              "confidence": 0.7
-            }
-          ]
-        },
-        {
-          "label": "\n                                                     \n                                                ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "editar"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "editar",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "Cuenta Corriente",
-          "role": "a",
-          "tag": "a",
-          "attributes": {},
-          "locators": [
-            {
-              "strategy": "text",
-              "value": "\n                                                Cuenta Corriente\n                                            ",
-              "confidence": 0.7
-            }
-          ]
-        },
-        {
-          "label": "11081020001299",
-          "role": "a",
-          "tag": "a",
-          "attributes": {},
-          "locators": [
-            {
-              "strategy": "text",
-              "value": "\n                                                11081020001299\n                                            ",
-              "confidence": 0.7
-            }
-          ]
         }
       ],
       "texts": [
@@ -2020,8 +2592,8 @@
       "gridMetadata": {
         "detected": true,
         "grids": 3,
-        "rows": 42,
-        "cells": 258,
+        "rows": 26,
+        "cells": 146,
         "headers": [
           "Alias",
           "Número",
@@ -2036,32 +2608,601 @@
       "headerRelationships": []
     },
     {
-      "screenKey": "db24077246b8",
-      "title": "Cerrar sesión",
-      "fingerprint": "1339678419a1a44ee03738db53b32031a47b13e8279d56ec26cfd8b5ff001322",
-      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary#",
-      "firstSeenAt": 73940,
+      "screenKey": "91de29fc82e6",
+      "title": "Transferencias a Mis Cuentas",
+      "fingerprint": "2d215d4e95bd1445cfc2500b464fb8c29e768e4b0a1fb1a01bb62707a308254d",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "firstSeenAt": 71083,
       "controls": [
         {
-          "label": "Aceptar",
+          "label": "\n             \n        ",
           "role": "a",
           "tag": "a",
           "attributes": {},
           "locators": [
             {
               "strategy": "text",
-              "value": "Aceptar",
+              "value": "\n             \n        ",
               "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n             \n             Resumen\n        ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n             \n             Resumen\n        ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n                                 \n                                 Dashboard\n                            ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "CASHMAN_DASHBOARD"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "CASHMAN_DASHBOARD",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                         - Cuentas Propias\n                                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "TRANSFERS_INDIVIDUAL"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "TRANSFERS_INDIVIDUAL",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                         - Terceros\n                                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "TRANSFERS_THIRDPARTY"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "TRANSFERS_THIRDPARTY",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                         - Expresas\n                                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "EXPRESS_TRANSFER"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "EXPRESS_TRANSFER",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                         - Otros Bancos\n                                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "TRANSFERS_INTERBANKING_LOCAL"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "TRANSFERS_INTERBANKING_LOCAL",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                         - Internacionales\n                                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "TRANSFERS_WIRELESS"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "TRANSFERS_WIRELESS",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                         - Múltiples\n                                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "TRANSFERS_MULTIPLE"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "TRANSFERS_MULTIPLE",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                         - Histórico de Transferencias\n                                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "TRANSFER_HISTORY"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "TRANSFER_HISTORY",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                         - Mercado de Valores\n                                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "STOCKS_MARKET"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "STOCKS_MARKET",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                 \n                                 Cuenta Mi Bolsillo\n                            ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "MYPOCKET_PARENT"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "MYPOCKET_PARENT",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                 \n                                 Pendientes\n                            ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "PENDING_TRANSACTIONS"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "PENDING_TRANSACTIONS",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                 \n                                 Solicitudes Digitales\n                            ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "DIGITAL_REQUEST"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "DIGITAL_REQUEST",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n             \n             Cerrar Sesión\n        ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n             \n             Cerrar Sesión\n        ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n                         \n                         \n                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "LinkPendingMessage"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "LinkPendingMessage",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                         \n                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n                         \n                    ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n                     \n                ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "ib-header-detail-btn"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "ib-header-detail-btn",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Agregar un comentario...",
+          "role": "textarea",
+          "tag": "textarea",
+          "placeholder": "Agregar un comentario...",
+          "attributes": {
+            "id": "trx-comment",
+            "name": "transactionDetails[0].Description",
+            "placeholder": "Agregar un comentario..."
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "trx-comment",
+              "confidence": 0.9
             }
           ]
         },
         {
           "label": "Cancelar",
-          "role": "button",
-          "tag": "button",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cancelar",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Transferencias a Mis Cuentas"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 2,
+        "rows": 6,
+        "cells": 42,
+        "headers": [
+          "Do",
+          "Lu",
+          "Ma",
+          "Mi",
+          "Ju",
+          "Vi",
+          "Sá"
+        ],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "2d24eece7e18",
+      "title": "Token de Seguridad",
+      "fingerprint": "06218e84191f896f64bfc44aa508a3eda93693f9773b7345733c5bad8fbe8fde",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "firstSeenAt": 92085,
+      "controls": [
+        {
+          "label": "\n             \n        ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n             \n        ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n             \n             Resumen\n        ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n             \n             Resumen\n        ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n                                 \n                                 Dashboard\n                            ",
+          "role": "a",
+          "tag": "a",
           "attributes": {
-            "type": "button"
+            "id": "CASHMAN_DASHBOARD"
           },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "CASHMAN_DASHBOARD",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                         - Cuentas Propias\n                                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "TRANSFERS_INDIVIDUAL"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "TRANSFERS_INDIVIDUAL",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                         - Terceros\n                                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "TRANSFERS_THIRDPARTY"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "TRANSFERS_THIRDPARTY",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                         - Expresas\n                                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "EXPRESS_TRANSFER"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "EXPRESS_TRANSFER",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                         - Otros Bancos\n                                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "TRANSFERS_INTERBANKING_LOCAL"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "TRANSFERS_INTERBANKING_LOCAL",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                         - Internacionales\n                                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "TRANSFERS_WIRELESS"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "TRANSFERS_WIRELESS",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                         - Múltiples\n                                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "TRANSFERS_MULTIPLE"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "TRANSFERS_MULTIPLE",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                         - Histórico de Transferencias\n                                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "TRANSFER_HISTORY"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "TRANSFER_HISTORY",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                         - Mercado de Valores\n                                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "STOCKS_MARKET"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "STOCKS_MARKET",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                 \n                                 Cuenta Mi Bolsillo\n                            ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "MYPOCKET_PARENT"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "MYPOCKET_PARENT",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                 \n                                 Pendientes\n                            ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "PENDING_TRANSACTIONS"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "PENDING_TRANSACTIONS",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                                 \n                                 Solicitudes Digitales\n                            ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "DIGITAL_REQUEST"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "DIGITAL_REQUEST",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n             \n             Cerrar Sesión\n        ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n             \n             Cerrar Sesión\n        ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n                         \n                         \n                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "LinkPendingMessage"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "LinkPendingMessage",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "\n                         \n                    ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n                         \n                    ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n                     \n                ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "ib-header-detail-btn"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "ib-header-detail-btn",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Cancelar",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
           "locators": [
             {
               "strategy": "text",
@@ -2071,287 +3212,41 @@
           ]
         },
         {
-          "label": "\n             \n        ",
+          "label": "Inicio -",
           "role": "a",
           "tag": "a",
           "attributes": {},
           "locators": [
             {
               "strategy": "text",
-              "value": "\n             \n        ",
+              "value": "Inicio - ",
               "confidence": 0.7
-            }
-          ]
-        },
-        {
-          "label": "\n             \n             Resumen\n        ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {},
-          "locators": [
-            {
-              "strategy": "text",
-              "value": "\n             \n             Resumen\n        ",
-              "confidence": 0.7
-            }
-          ]
-        },
-        {
-          "label": "\n                                 \n                                 Dashboard\n                            ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "CASHMAN_DASHBOARD"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "CASHMAN_DASHBOARD",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "\n                                 \n                                 Cuenta Mi Bolsillo\n                            ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "MYPOCKET_PARENT"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "MYPOCKET_PARENT",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "\n                                 \n                                 Pendientes\n                            ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "PENDING_TRANSACTIONS"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "PENDING_TRANSACTIONS",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "\n                                 \n                                 Solicitudes Digitales\n                            ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "DIGITAL_REQUEST"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "DIGITAL_REQUEST",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "\n             \n             Cerrar Sesión\n        ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {},
-          "locators": [
-            {
-              "strategy": "text",
-              "value": "\n             \n             Cerrar Sesión\n        ",
-              "confidence": 0.7
-            }
-          ]
-        },
-        {
-          "label": "\n                         \n                         \n                    ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "LinkPendingMessage"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "LinkPendingMessage",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "\n                         \n                    ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {},
-          "locators": [
-            {
-              "strategy": "text",
-              "value": "\n                         \n                    ",
-              "confidence": 0.7
-            }
-          ]
-        },
-        {
-          "label": "\n                     \n                ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "ib-header-detail-btn"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "ib-header-detail-btn",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "Todos",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "all-t0"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "all-t0",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "Cuentas",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "account-tab-t1"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "account-tab-t1",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "Tarjetas",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "creditcard-tab-t2"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "creditcard-tab-t2",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "Préstamos",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "loan-tab-t3"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "loan-tab-t3",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "Certificados de Depósito",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "moneymarket-tab-t4"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "moneymarket-tab-t4",
-              "confidence": 0.9
-            }
-          ]
-        },
-        {
-          "label": "Cuenta de Ahorro",
-          "role": "a",
-          "tag": "a",
-          "attributes": {},
-          "locators": [
-            {
-              "strategy": "text",
-              "value": "\n                                                Cuenta de Ahorro\n                                            ",
-              "confidence": 0.7
-            }
-          ]
-        },
-        {
-          "label": "21082020000619",
-          "role": "a",
-          "tag": "a",
-          "attributes": {},
-          "locators": [
-            {
-              "strategy": "text",
-              "value": "\n                                                21082020000619\n                                            ",
-              "confidence": 0.7
-            }
-          ]
-        },
-        {
-          "label": "\n                                                     \n                                                ",
-          "role": "a",
-          "tag": "a",
-          "attributes": {
-            "id": "editar"
-          },
-          "locators": [
-            {
-              "strategy": "aria-label",
-              "value": "editar",
-              "confidence": 0.9
             }
           ]
         }
       ],
       "texts": [
-        "Cerrar sesión",
-        "Resumen"
+        "Token de Seguridad"
       ],
       "gridMetadata": {
         "detected": true,
-        "grids": 3,
-        "rows": 42,
-        "cells": 258,
+        "grids": 2,
+        "rows": 6,
+        "cells": 42,
         "headers": [
-          "Alias",
-          "Número",
-          "Tipo",
-          "Moneda",
-          "Balance Actual",
-          "Balance Disponible",
-          "Estatus"
+          "Do",
+          "Lu",
+          "Ma",
+          "Mi",
+          "Ju",
+          "Vi",
+          "Sá"
         ],
         "headerRelationships": []
       },
       "headerRelationships": []
     }
   ],
-  "endedAt": "2026-10-05T21:01:17.130Z",
-  "durationMs": 81847
+  "endedAt": "2026-10-21T20:28:12.613Z",
+  "durationMs": 122045
 }

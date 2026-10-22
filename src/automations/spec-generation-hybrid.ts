@@ -282,6 +282,8 @@ export type SpecGenerationSourceScenarioAuth = {
 
 export type SpecGenerationObservableOracleType =
   | "literal_visible_text"
+  | "negative_visibility"
+  | "credential_rejection"
   | "navigation_transition"
   | "url_state"
   | "heading_or_control"
@@ -1609,6 +1611,8 @@ function dedupeRequirements(values: string[]): string[] {
 function normalizeObservableOracleType(value: string | undefined): SpecGenerationObservableOracleType {
   switch ((value ?? "").trim()) {
     case "literal_visible_text":
+    case "credential_rejection":
+    case "negative_visibility":
     case "navigation_transition":
     case "url_state":
     case "heading_or_control":
@@ -3522,14 +3526,11 @@ export function structuralValidation(input: {
     );
 
   const requiresExplicitExpectAssertions = input.requiredAssertions.some((requirement) => !authAssertionCoveredByFlow(requirement));
-  if (requiresExplicitExpectAssertions) {
-    const expectImportRegex = /import\s*\{\s*[^}]*\bexpect\b[^}]*\}\s*from\s*['"]@playwright\/test['"]/m;
-    if (!expectImportRegex.test(content)) {
-      errors.push("missing_expect_import_for_assertions");
-    }
-  }
   const expectUsed = /\bexpect\s*(?:\(|\.\s*(?:poll|soft|configure|extend)\s*\()/.test(contentWithoutImports);
   const expectImported = /import\s*\{\s*[^}]*\bexpect\b[^}]*\}\s*from\s*['"]@playwright\/test['"]/m.test(content);
+  // Import validity follows actual symbol use. Runtime-owned oracles do not
+  // reference Playwright's expect in the spec; coverage is checked separately.
+  if (expectUsed && !expectImported) errors.push("missing_expect_import_for_assertions");
   if (expectImported && !expectUsed) {
     errors.push("unused_import:expect");
   }

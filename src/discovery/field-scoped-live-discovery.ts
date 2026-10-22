@@ -52,6 +52,7 @@ export type FieldScopedDiagnostics = {
   ancestorsInspected: number;
   ancestorTrace: FieldScopeAncestorTrace[];
   containerAccepted: boolean;
+  textRelationAccepted?: boolean;
   rejectReason?: "no_anchor_found" | "climb_exhausted" | "scope_ambiguous";
 };
 
@@ -140,6 +141,16 @@ export function extractFieldScopedDomEvidence(
       if (value && value.trim()) attrs[name] = value.trim();
     }
     return Object.keys(attrs).length > 0 ? attrs : undefined;
+  }
+
+  // data-codex-*/data-promoted-runtime-* are this framework's own transient markers (the accepted-scope
+  // marker is stamped on the live node during resolution). They may help scope a live climb but must
+  // never be persisted as stable target identity.
+  function persistableStableAttributes(el: FieldScopedDomElement): Record<string, string> | undefined {
+    const attrs = collectStableAttributes(el);
+    if (!attrs) return undefined;
+    const kept = Object.fromEntries(Object.entries(attrs).filter(([name]) => !/^data-(codex|promoted-runtime)-/.test(name)));
+    return Object.keys(kept).length > 0 ? kept : undefined;
   }
 
   function walkAll(
@@ -378,6 +389,7 @@ export function extractFieldScopedDomEvidence(
   let anchorFound = false;
   let anchorTag: string | undefined;
   let scopeAmbiguous = false;
+  let textRelationAccepted = false;
   const ancestorTrace: FieldScopeAncestorTrace[] = [];
   // `displayAnchor` is the element that actually MATCHED (the label/legend/aria-owner/leaf text
   // node itself) -- reported in diagnostics as `anchorTag`. `climbStart` is where the ancestor
@@ -497,10 +509,56 @@ export function extractFieldScopedDomEvidence(
   // target purely because its only text-bearing descendant is the real label leaf must never be
   // picked as the anchor itself -- climbing must always start from the actual leaf text node,
   // exactly like the label/legend text-node case above.
+  // Repeated captions can be a heading and a field label. Inspect every established DOM
+  // relation rather than choosing the first caption: accept only when all related controls
+  // converge on the same owner. A heading with no control relation adds no authority.
   if (!scope) {
+    const textRelations: Array<{ anchor: FieldScopedDomElement; owner: FieldScopedDomElement; scope: FieldScopedDomElement }> = [];
     for (const anchor of leafTextAnchors) {
-      scope = climbFromFirstAnchor(anchor, anchor.parentElement ?? anchor);
-      if (scope) break;
+      const relatedScope = climbFromFirstAnchor(anchor, anchor.parentElement ?? anchor);
+      if (relatedScope) {
+        const owners = collectOwnerCandidatesIncludingSelf(relatedScope)
+          .filter((candidate) => isCompatibleForIntent(candidate, deriveOwnerRole(candidate)));
+        if (owners.length === 1) textRelations.push({ anchor, owner: owners[0], scope: relatedScope });
+        continue;
+      }
+      // Some forms render a caption in one wrapper and its input in the immediately following
+      // wrapper, while all fields share a broad <form>. In that shape the caption wrapper has
+      // zero owners and the form has many. Preserve the explicit label-to-control adjacency:
+      // inspect only the following sibling branch and accept it only when it contains exactly
+      // one owner compatible with this action. This uses a DOM relationship, not a child index,
+      // and remains fail-closed when the branch is missing or contains multiple controls.
+      const labelWrapper = anchor.parentElement;
+      // A semantic <label>/<legend> already owns a stronger browser-defined relationship. Do
+      // not reinterpret one of its siblings as its control when that relationship is ambiguous.
+      if (["label", "legend"].includes(labelWrapper?.tagName.toLowerCase() ?? "")) continue;
+      const siblingParent = labelWrapper?.parentElement;
+      let nextSibling: FieldScopedDomElement | undefined;
+      let foundLabelWrapper = false;
+      if (labelWrapper && siblingParent) {
+        for (const sibling of Array.from(siblingParent.children)) {
+          if (foundLabelWrapper) {
+            nextSibling = sibling;
+            break;
+          }
+          if (sibling === labelWrapper) foundLabelWrapper = true;
+        }
+      }
+      if (nextSibling) {
+        const compatible = collectOwnerCandidatesIncludingSelf(nextSibling)
+          .filter((candidate) => isCompatibleForIntent(candidate, deriveOwnerRole(candidate)));
+        if (compatible.length === 1) textRelations.push({ anchor, owner: compatible[0], scope: compatible[0] });
+      }
+    }
+    const uniqueRelatedOwners = textRelations.map((relation) => relation.owner)
+      .filter((candidate, index, all) => all.indexOf(candidate) === index);
+    if (uniqueRelatedOwners.length === 1) {
+      anchorFound = true;
+      anchorTag = textRelations.find((relation) => relation.owner === uniqueRelatedOwners[0])?.anchor.tagName.toLowerCase();
+      scope = textRelations.find((relation) => relation.owner === uniqueRelatedOwners[0])!.scope;
+      textRelationAccepted = true;
+    } else if (uniqueRelatedOwners.length > 1) {
+      scopeAmbiguous = true;
     }
   }
 
@@ -518,6 +576,7 @@ export function extractFieldScopedDomEvidence(
         ancestorsInspected,
         ancestorTrace,
         containerAccepted: false,
+        textRelationAccepted,
         rejectReason: scopeAmbiguous ? "scope_ambiguous" : anchorFound ? "climb_exhausted" : "no_anchor_found",
       },
     };
@@ -558,7 +617,7 @@ export function extractFieldScopedDomEvidence(
     ? {
         tag: certificationAncestor.tagName.toLowerCase(),
         ...(role ? { role } : {}),
-        stableDirectAttributes: collectStableAttributes(certificationAncestor),
+        stableDirectAttributes: persistableStableAttributes(certificationAncestor),
         ...(certificationAncestor !== scope ? { textAnchor: associatedField.trim() } : {}),
       }
     // No stable ancestor exists anywhere within the climb -- fall back to the SCOPE itself, which
@@ -588,7 +647,7 @@ export function extractFieldScopedDomEvidence(
 
   const candidates: FieldScopedOwnerCandidate[] = collectOwnerCandidatesIncludingSelf(scope).map((el) => {
     const ownerRole = deriveOwnerRole(el);
-    const stableDirectAttributes = collectStableAttributes(el);
+    const stableDirectAttributes = persistableStableAttributes(el);
     return {
       tag: el.tagName.toLowerCase(),
       ...(ownerRole ? { role: ownerRole } : {}),
@@ -614,6 +673,7 @@ export function extractFieldScopedDomEvidence(
       ancestorsInspected,
       ancestorTrace,
       containerAccepted: true,
+      textRelationAccepted,
     },
   };
 }

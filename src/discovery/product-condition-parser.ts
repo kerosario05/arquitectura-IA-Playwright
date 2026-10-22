@@ -231,9 +231,18 @@ export function resolveProductConditionAgainstSnapshot(
   }
 
   const clickableMatches = matches.filter(m => m.isClickable);
-  const selectedMatches = clickableMatches.length > 0 ? clickableMatches : matches;
+  const actionableMatches = clickableMatches.length > 0 ? clickableMatches : matches;
+  const exactMatches = actionableMatches.filter(match => normalizeText(match.text) === normalizeText(target));
+  const selectedMatches = exactMatches.length > 0 ? exactMatches : actionableMatches;
   selectedMatches.sort((a, b) => b.score - a.score || a.elementIndex - b.elementIndex);
 
+  if (selectedMatches.length > 1) {
+    return {
+      status: "multiple", matches: selectedMatches, selectedIndex: -1,
+      diagnostics: { target, parsedCondition: { type: condition.type, status: condition.status },
+        matchedCount: selectedMatches.length, selectedIndex: -1, resolutionStrategy: "ambiguous_product_identity" },
+    };
+  }
   const selected = selectedMatches[0];
   const selectedTextMasked = selected.text
     .replace(/\*{3,}\d{2,}/g, "****XXX")
@@ -249,7 +258,7 @@ export function resolveProductConditionAgainstSnapshot(
       parsedCondition: { type: condition.type, status: condition.status },
       matchedCount: selectedMatches.length,
       selectedIndex: 0,
-      resolutionStrategy: "first_visible_matching_product_card",
+      resolutionStrategy: exactMatches.length === 1 ? "exact_product_identity" : "unique_matching_product",
       selectedTextMasked: finalText
     }
   };

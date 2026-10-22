@@ -1,0 +1,5 @@
+{
+  "issues": [{ "key": "EVAL-1", "summary": "Resultado observable", "description": "AC1: Al presionar Procesar se muestra Confirmado.", "acceptanceCriteria": null, "labels": [], "components": [] }],
+  "scenarios": [{ "sourceIssueKey": "EVAL-1", "acceptanceCriteriaRefs": ["AC1.1"], "title": "Resultado observable", "steps": ["Abrir la aplicación configurada del proyecto", "Presionar \"Procesar\"", "Validar que se muestre \"Confirmado\""], "expectedResult": "Confirmado" }],
+  "expectations": [{ "issueKey": "EVAL-1", "criterionId": "AC1.1", "allStepPatterns": ["^Presionar .*Procesar", "^Validar .*Confirmado"] }]
+}

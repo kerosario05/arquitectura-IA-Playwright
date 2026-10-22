@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { normalizeAuthoredJiraStep } from "../jira/jira-authored-step-format";
 import { deriveJiraInputRequirements } from "../jira/jira-input-requirements";
 import type {
   TestDesignPriority,
@@ -72,11 +73,11 @@ function normalizeData(raw: unknown, path: string): TestDesignDatum[] {
 }
 
 function normalizeStep(raw: unknown, path: string): TestDesignStep {
-  if (typeof raw === "string") return { action: text(raw, `${path}.action`), expected: "" };
+  if (typeof raw === "string") return { action: normalizeAuthoredJiraStep(text(raw, `${path}.action`)), expected: "" };
   if (!raw || typeof raw !== "object") throw new TestDesignValidationError(`${path} debe ser un objeto`);
   const step = raw as Record<string, unknown>;
   return {
-    action: text(step.action, `${path}.action`),
+    action: normalizeAuthoredJiraStep(text(step.action, `${path}.action`)),
     expected: text(step.expected, `${path}.expected`),
   };
 }

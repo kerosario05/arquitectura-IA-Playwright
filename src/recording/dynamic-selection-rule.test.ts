@@ -125,3 +125,13 @@ test("compiler transports dataset binding and native owner even with technical t
   assert.match(result.source, /Recorded indexed selection requires runtime resolution/);
   assert.doesNotMatch(result.source, /getByRole\('option'/);
 });
+
+test("matchingSelectionOptions tolerates plural/accent drift only when strict match is empty", () => {
+  const options = [
+    { label: "Seleccione una Cuenta", value: "" },
+    { label: "Cuenta Corriente / 1131 / RD$99", value: "a" },
+    { label: "Cuenta de Ahorro / 2112 / US$1", value: "b" },
+  ];
+  assert.deepEqual(matchingSelectionOptions(options, { terms: ["Cuenta de Ahorros"], matchIndex: 0 }).map(o => o.value), ["b"]);
+  assert.deepEqual(matchingSelectionOptions(options, { terms: ["Cuenta"], matchIndex: 0 }).map(o => o.value), ["a", "b"]);
+});

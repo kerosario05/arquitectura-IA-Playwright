@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import path from "node:path";
-import { chromium } from "@playwright/test";
+import { chromium, type Page } from "@playwright/test";
+import { EventEmitter } from "node:events";
 import { scanCurrentPage } from "../explorer/page-scanner";
 import {compileJiraSpec} from './jira-spec-compiler';
 import {JiraRequiredDataError, jiraTargetFailure, jiraTargetDiagnosticField, jiraAuthorsVerification, createJiraPlaywrightPort, jiraSelectionDisplayConfirms, selectJiraObservedOption, resolveJiraNativeOption, resolveJiraStepTarget, resolveJiraStepTargetAfterClick, snapshotJiraRows, markJiraAddedRow, relocateJiraAddedRow,jiraRefersToAddedRow} from './jira-semantic-executor';
@@ -639,7 +640,8 @@ test("observed otp stage is handed to authenticate so the flow does not restart 
 });
 test("createJiraPlaywrightPort forwards the observed stage to the auth flow", async () => {
   const seen: Array<string | undefined> = [];
-  const port = createJiraPlaywrightPort({} as any, "http://127.0.0.1:4173/", async stage => { seen.push(stage); return { success: true }; });
+  const page = new EventEmitter() as unknown as Page;
+  const port = createJiraPlaywrightPort(page, "http://127.0.0.1:4173/", async stage => { seen.push(stage); return { success: true }; });
   await port.authenticate!("otp");
   await port.authenticate!();
   assert.deepEqual(seen, ["otp", undefined]);

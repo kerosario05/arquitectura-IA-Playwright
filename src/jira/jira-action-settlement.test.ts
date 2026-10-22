@@ -4,6 +4,7 @@ import { EventEmitter } from "node:events";
 import { chromium, type Page, type Route } from "@playwright/test";
 import { settleJiraAction } from "./jira-action-settlement";
 import { assertJiraSpecVisibleText, clickJiraSpecTarget } from "./jira-spec-runtime";
+import { createJiraPlaywrightPort } from "./jira-semantic-executor";
 
 test("Jira waits for the action response before its assertion across two profiles, without another click", async () => {
   const browser = await chromium.launch({ headless: true });
@@ -48,4 +49,55 @@ test("scenario teardown cancels the pending wait and removes listeners without a
     assert.equal(events.listenerCount("request"), 0);
     assert.equal(events.listenerCount("close"), 0);
     assert.equal(events.listenerCount("crash"), 0);
+    assert.equal(events.listenerCount("response"), 0);
+    assert.equal(events.listenerCount("requestfinished"), 0);
+    assert.equal(events.listenerCount("requestfailed"), 0);
+});
+
+test("HTTP policy preserves 4xx assertions, ignores foreign/static failures and strips query values", async () => {
+  for (const entry of [
+    { url: "https://fixture.test/validation", resource: "fetch", status: 400, reject: false },
+    { url: "https://foreign.test/service", resource: "fetch", status: 500, reject: false },
+    { url: "https://fixture.test/image", resource: "image", status: 500, reject: false },
+    { url: "https://fixture.test/submit?token=synthetic-private", resource: "fetch", status: 503, reject: true },
+  ]) {
+    const events = new EventEmitter();
+    const page = Object.assign(events, { url: () => "https://fixture.test" }) as unknown as Page;
+    const request = { url: () => entry.url, resourceType: () => entry.resource, method: () => "POST" };
+    const action = settleJiraAction(page, async () => {
+      events.emit("request", request);
+      events.emit("response", { request: () => request, status: () => entry.status });
+      events.emit("requestfinished", request);
+      return "retained";
+    });
+    if (entry.reject) await assert.rejects(action, (error: Error) => {
+      assert.equal(error.message, "JIRA_APPLICATION_HTTP_SERVER_ERROR:503 POST /submit");
+      return true;
+    });
+    else assert.equal(await action, "retained");
+    for (const event of ["request", "response", "requestfinished", "requestfailed", "close", "crash"]) {
+      assert.equal(events.listenerCount(event), 0);
+    }
+  }
+});
+
+test("Jira Discovery and promoted click reject the same application 500 without another dispatch", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    for (const origin of ["https://fixture-fenix.test", "https://fixture-inventory.test"]) {
+      for (const mode of ["discovery", "spec"] as const) {
+        const page = await browser.newPage();
+        await page.route(`${origin}/**`, route => route.fulfill(route.request().url().endsWith("/next")
+          ? { status: 500, body: "Server failure" }
+          : { contentType: "text/html", body: `<button onclick="window.clicks=(window.clicks||0)+1;fetch('/next')">Continue</button>` }));
+        await page.goto(origin);
+        const action = mode === "spec"
+          ? clickJiraSpecTarget(page, { strategy: "role", role: "button", name: "Continue", exact: true }, 500)
+          : createJiraPlaywrightPort(page, origin).act({ index: 1, action: "click", description: 'Presionar "Continue"' }, "Continue");
+        await assert.rejects(action, /JIRA_APPLICATION_HTTP_SERVER_ERROR:500 GET \/next/);
+        assert.equal(await page.evaluate(() => Reflect.get(window, "clicks")), 1);
+        await page.close();
+      }
+    }
+  } finally { await browser.close(); }
 });

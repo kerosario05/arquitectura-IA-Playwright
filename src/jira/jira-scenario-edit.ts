@@ -4,6 +4,7 @@ import {deriveJiraInputRequirements, type JiraInputRequirement} from './jira-inp
 import {auditGeneratedJiraSyntax,jiraScenarioQualityGaps,uncoveredAcceptanceClauses,jiraNavigationMissing} from './jira-scenario-generator';
 import {jiraGenerationContractErrors,jiraSourceConditions} from './jira-generation-contract';
 import {isJiraStepAutoResolvable} from './jira-scenario-review';
+import {normalizeAuthoredJiraStep} from './jira-authored-step-format';
 
 export interface EditableJiraScenario {
  scenarioId:string;sourceIssueKey:string;title:string;steps:string[];expectedResult:string;
@@ -25,7 +26,7 @@ export async function reviewEditedJiraScenarios(issue:JiraIssueSource,scenarios:
  const reviewed=[];
  for(const original of scenarios){
   const changed=original.scenarioId===scenarioId&&JSON.stringify([original.title,original.steps,original.expectedResult])!==JSON.stringify([patch.title,patch.steps,patch.expectedResult]);
-  const draft:EditableJiraScenario=changed?{...original,title:patch.title.trim(),steps:patch.steps.map(s=>s.trim()),expectedResult:patch.expectedResult.trim()}:original;
+  const draft:EditableJiraScenario=changed?{...original,title:patch.title.trim(),steps:patch.steps.map(normalizeAuthoredJiraStep),expectedResult:patch.expectedResult.trim()}:original;
   if(!Array.isArray(draft.steps)||draft.steps.some(s=>typeof s!=='string'))throw new Error('JIRA_EDIT_CONTENT_INVALID');
   const revision=digest([draft.title,draft.steps,draft.expectedResult,draft.preconditions]);
   // Preserve values only for uniquely unchanged authored inputs, never by their old numeric position.
@@ -41,12 +42,13 @@ export async function reviewEditedJiraScenarios(issue:JiraIssueSource,scenarios:
   const conditionRequirements=jiraSourceConditions({...draft,inputRequirements},issue);
   const unresolvedUiRequirements=draft.steps.flatMap((step,i)=>isJiraStepAutoResolvable(step)?[]:[{stepIndex:i+1,requirement:step}]);
   const candidate={...draft,inputRequirements,conditionRequirements,reviewConfiguration,unresolvedUiRequirements};
-  const errors=[...(await auditGeneratedJiraSyntax([candidate],[issue])).map(f=>f.reason),...jiraGenerationContractErrors(candidate,issue),...jiraScenarioQualityGaps(candidate,draft.steps)];
+  const syntaxIssues=await auditGeneratedJiraSyntax([candidate],[issue]);
+  const errors=[...syntaxIssues.map(f=>f.reason),...jiraGenerationContractErrors(candidate,issue),...jiraScenarioQualityGaps(candidate,draft.steps)];
   if(jiraNavigationMissing(candidate,draft.steps,loginMode,[issue.summary,issue.description,issue.acceptanceCriteria].join(' ')))errors.push('JIRA_NAVIGATION_TO_TARGET_SCREEN_MISSING');
   reviewed.push({...candidate,
    scenarioId:changed?`${original.scenarioId.replace(/:edited-[a-f0-9]+$/,'')}:edited-${revision}`:original.scenarioId,
    unresolvedUiRequirements,
-   validation:{valid:errors.length===0,errors:[...new Set(errors)],warnings:['Los pasos editados requieren Discovery para verificar controles y resultados.']},
+   validation:{valid:errors.length===0,errors:[...new Set(errors)],issues:syntaxIssues.filter(issue=>issue.stepIndex>0).map(issue=>({code:issue.reason,stepIndex:issue.stepIndex,step:issue.step})),warnings:['Los pasos editados requieren Discovery para verificar controles y resultados.']},
    executionReadiness:errors.length?'blocked_syntax':'requires_discovery',mcpExecutable:false});
  }
  const missing=uncoveredAcceptanceClauses(issue,reviewed.filter(s=>s.validation.valid));

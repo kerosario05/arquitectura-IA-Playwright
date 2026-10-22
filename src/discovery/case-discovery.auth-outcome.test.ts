@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { classifyAuthenticationOutcome, isActionSurfaceStableForStateProbe, shouldClassifyAuthenticationBoundary, type SafeNetworkEvent } from "./case-discovery";
+import { classifyAuthenticationOutcome, withObservedAuthenticationOutcome, isActionSurfaceStableForStateProbe, shouldClassifyAuthenticationBoundary, shouldEvaluateExpectedAuthenticationRejection, parseScenarioStepsForDiscovery, type SafeNetworkEvent } from "./case-discovery";
 
 function event(overrides: Partial<SafeNetworkEvent>): SafeNetworkEvent {
   return {
@@ -11,6 +11,48 @@ function event(overrides: Partial<SafeNetworkEvent>): SafeNetworkEvent {
     ...overrides,
   };
 }
+
+test("terminal declared rejection reaches its assertions instead of failing at the auth boundary", () => {
+  const outcome = classifyAuthenticationOutcome({ beforeAuthDetected: true, afterAuthDetected: true,
+    events: [event({ status: 403, statusCategory: "4xx" })], afterPath: "/login",
+    loadingObserved: false, errorSurfaceObserved: true });
+  for (const message of ["problema de credenciales", "invalid credentials"]) {
+    const parsed = parseScenarioStepsForDiscovery({ source: "testrail", externalId: "synthetic", caseId: 1, title: "fixture",
+      steps: [
+        { index: 1, action: 'Presionar "Sign in".', dataHints: [] },
+        { index: 2, action: `Validar que se muestre "${message}".`, dataHints: [] },
+        { index: 3, action: 'Validar que no se muestre "success".', dataHints: [] },
+      ] });
+    const input = { outcome, currentStepIndex: 1, ...parsed };
+    const persisted=JSON.parse(JSON.stringify(withObservedAuthenticationOutcome({index:1,action:'Presionar "Sign in"',status:'found'},outcome)));
+    assert.equal(persisted.status,'found');
+    assert.equal(persisted.authenticationOutcome.authHttpStatus,403);
+    assert.equal(shouldEvaluateExpectedAuthenticationRejection({...input,currentStepIndex:2,assertionTargets:[parsed.assertionTargets[0]],outcome:persisted.authenticationOutcome}),true,
+      'an expected rejection must survive successful action persistence and reach its assertion');
+    const ordinary={index:1,action:'Presionar "Continue"',status:'found' as const};
+    assert.deepEqual(withObservedAuthenticationOutcome(ordinary),ordinary);
+    assert.equal(shouldEvaluateExpectedAuthenticationRejection({...input,currentStepIndex:2,assertionTargets:[parsed.assertionTargets[0]]}),true,
+      'the executing declared rejection assertion must consume the observed terminal response');
+    assert.equal(shouldEvaluateExpectedAuthenticationRejection({...input,currentStepIndex:3,assertionTargets:[parsed.assertionTargets[1]]}),false,
+      'a separate absence assertion must not inherit the positive rejection verdict');
+    assert.equal(shouldEvaluateExpectedAuthenticationRejection(input), true);
+    assert.equal(shouldEvaluateExpectedAuthenticationRejection({ ...input, actionTargets: [{ index: 4 }] }), false);
+    assert.equal(shouldEvaluateExpectedAuthenticationRejection({ ...input, assertionTargets: parsed.assertionTargets.slice(1) }), false,
+      "absence of success alone cannot approve a rejection");
+    assert.equal(shouldEvaluateExpectedAuthenticationRejection({ ...input,
+      outcome: { ...outcome, classification: "AUTH_INFRASTRUCTURE_FAILURE", authHttpStatus: 503 } }), false);
+    assert.equal(shouldEvaluateExpectedAuthenticationRejection({ ...input,
+      outcome: { ...outcome, businessSurfaceReached: true } }), false);
+    assert.equal(shouldEvaluateExpectedAuthenticationRejection({ ...input,
+      outcome: { ...outcome, errorSurfaceObserved: false } }), false);
+    assert.equal(shouldEvaluateExpectedAuthenticationRejection({ ...input,
+      assertionTargets: [{ ...parsed.assertionTargets[0], action: 'Validar que aparezca "mensaje general".' }] }), false,
+      "a generic positive assertion cannot be inferred from a rejected credential exchange");
+    assert.equal(shouldEvaluateExpectedAuthenticationRejection({ ...input,
+      outcome: { ...outcome, authResponseObserved: false } }), false,
+      "a request without a completed response is not a terminal rejection");
+  }
+});
 
 test("state probe remains eligible when the action keeps the same observed surface", () => {
   assert.equal(

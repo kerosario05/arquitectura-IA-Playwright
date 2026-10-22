@@ -378,10 +378,50 @@ test("11b/click step with a snapshot-backed literal oracle emits an exact visibl
   assert.equal(result.unsupportedCapabilities.length, 0);
   assert.match(result.source, /^import \{ test, expect \} from '@playwright\/test';/m);
   assert.equal((result.source.match(/pageObject\.click\(/g) ?? []).length, 1);
-  assert.match(result.source, /getByText\('Más detalles del producto', \{ exact: true \}\)\)\.toBeVisible\(\)/);
+  assert.match(result.source, /getByText\('Más detalles del producto', \{ exact: true \}\)\.filter\(\{ visible: true \}\)\.first\(\)\)\.toBeVisible\(\)/);
   assert.equal((result.source.match(/promotedRuntime\.expectPromotedVisible\(/g) ?? []).length, 1);
   assert.equal(result.bindings.filter((binding) => binding.runtimeMethod === "expectPromotedVisible").length, 1);
   assert.ok(result.source.indexOf("pageObject.click(") < result.source.indexOf("expectPromotedVisible"));
+});
+
+test("11b.1/composite snapshot oracle compiles every observed label into the promoted assertion", () => {
+  const compositeStep = step({
+    scenarioStepIndex: 38,
+    operation: "assertVisible",
+    oracle: {
+      type: "heading_or_control",
+      backed: true,
+      implementationKind: "heading_or_control",
+      requirement: 'Se muestran las "cuentas involucradas"',
+      target: "Cuenta Origen",
+      targets: ["Cuenta Origen", "Cuenta Destino"],
+    },
+  });
+  const result = compileDeterministicSpec(contract([compositeStep]));
+
+  assert.equal(result.unsupportedCapabilities.length, 0);
+  assert.match(result.source, /Promise\.all\(\["Cuenta Origen","Cuenta Destino"\]\.map/);
+  assert.match(result.source, /getByText\(text, \{ exact: true \}\)\.filter\(\{ visible: true \}\)\.first\(\)\)\.toBeVisible\(\)/);
+});
+
+test("11b.2/redacted visible date-time oracle compiles to a value-free date-time pattern assertion", () => {
+  const dateTimeStep = step({
+    scenarioStepIndex: 39,
+    operation: "assertVisible",
+    oracle: {
+      type: "heading_or_control",
+      backed: true,
+      implementationKind: "heading_or_control",
+      requirement: 'Validar que se muestre la "fecha y hora"',
+      target: "__visible_date_time__",
+      targets: ["__visible_date_time__"],
+    },
+  });
+  const result = compileDeterministicSpec(contract([dateTimeStep]));
+
+  assert.equal(result.unsupportedCapabilities.length, 0);
+  assert.match(result.source, /new RegExp\("\\\\b\(\?:\\\\d/);
+  assert.doesNotMatch(result.source, /getByText\('__visible_date_time__'/);
 });
 
 test("11c/assertion-only step with a backed literal oracle compiles without an action binding", () => {
@@ -402,8 +442,33 @@ test("11c/assertion-only step with a backed literal oracle compiles without an a
   assert.equal(result.unsupportedCapabilities.length, 0);
   assert.equal(result.bindings.length, 1);
   assert.equal(result.bindings[0].runtimeMethod, "expectPromotedVisible");
-  assert.match(result.source, /getByText\('¡Hola!', \{ exact: true \}\)\)\.toBeVisible\(\)/);
+  assert.match(result.source, /getByText\('¡Hola!', \{ exact: true \}\)\.filter\(\{ visible: true \}\)\.first\(\)\)\.toBeVisible\(\)/);
   assert.equal((result.source.match(/promotedRuntime\.expectPromotedVisible\(/g) ?? []).length, 1);
+});
+
+test("11d/backed page_object_state assertion compiles visibly while an unbacked state fails closed", () => {
+  const assertion = step({
+    scenarioStepIndex: 41,
+    operation: "assertState",
+    oracle: {
+      type: "page_object_state",
+      backed: true,
+      implementationKind: "heading_or_control",
+      requirement: "The receipt is displayed",
+      target: "Transfer receipt",
+    },
+  });
+  const compiled = compileDeterministicSpec(contract([assertion]));
+  assert.deepEqual(compiled.unsupportedCapabilities, []);
+  assert.equal(compiled.bindings[0]?.runtimeMethod, "expectPromotedVisible");
+  assert.match(compiled.source, /getByText\('Transfer receipt', \{ exact: true \}\)\.filter\(\{ visible: true \}\)\.first\(\)\)\.toBeVisible\(\)/);
+
+  const unbacked = compileDeterministicSpec(contract([{
+    ...assertion,
+    oracle: { ...assertion.oracle!, backed: false },
+  }]));
+  assert.ok(unbacked.unsupportedCapabilities.some((reason) => reason.includes("oracle_unsupported:page_object_state")));
+  assert.doesNotMatch(unbacked.source, /getByText\('Transfer receipt'/);
 });
 
 test("10/binding manifest relates each action identity to operation + runtimeMethod + targetRef/dataRef", () => {

@@ -1,8 +1,59 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { jiraGenerationKnowledge, resolveJiraGenerationKnowledge } from './jira-generation-knowledge';
-import { buildJiraScenarioMessages, executableCoverageCandidates, journeyContext, jiraNavigationMissing, materializeJiraNavigation } from './jira-scenario-generator';
+import { auditGeneratedJiraSyntax, buildJiraScenarioMessages, executableCoverageCandidates, journeyContext, jiraNavigationMissing, materializeJiraNavigation } from './jira-scenario-generator';
 import type { JiraIssueSource } from '../scenarios/scenario-types';
+
+test('negative access verification retains the complete model journey through learned navigation and final audit',async()=>{
+ for(const [area,code,stage] of [['Transferencias','Código','verificación de usuario'],['Inventory','Access code','user verification']]) {
+  const source: JiraIssueSource={key:'OTP-1',summary:area,description:`Iniciar sesión y mostrar ${stage}. Solicitar el código por SMS e ingresar el código de acceso en "${code}". Si es inválido mostrar "Rechazo" sin "Resultado exitoso".`,acceptanceCriteria:null,labels:[],components:[],status:'Open',issueType:'Story'};
+  const prefix=['Abrir la aplicación configurada del proyecto','Presionar "perfil empresarial"','Ingresar usuario en "Usuario"','Ingresar contraseña en "Contraseña"','Presionar "Iniciar sesión"',`Validar que se muestre "${stage}"`,'Solicitar el código por SMS.'];
+  const steps=[...prefix,`Ingresar un código de acceso no válido en "${code}".`,'Presionar "Continuar"','Validar que se muestre "Rechazo"','Validar que no se muestre "Resultado exitoso"'];
+  const draft={sourceIssueKey:source.key,title:'Rechazo del código de acceso',steps,expectedResult:''};
+  const story=`${source.summary} ${source.description}`;
+  const routes=[{actions:[{action:'click',field:'perfil empresarial'},{action:'click',field:'Iniciar sesión'},{action:'click',field:area},{action:'click',field:'Autorizar transferencia'}]}];
+  assert.equal(jiraNavigationMissing(draft,steps,'password',story),false);
+  assert.deepEqual(materializeJiraNavigation(steps,routes,story,draft),steps);
+  const eligible=await executableCoverageCandidates([draft],[source],'password',[{sourceIssueKey:source.key,routes}]);
+  assert.equal(eligible.length,1);
+  assert.deepEqual((eligible[0] as typeof draft).steps,steps);
+  assert.deepEqual(await auditGeneratedJiraSyntax(eligible,[source]),[]);
+  const valid=[...prefix,`Ingresar el código de acceso en "${code}".`,'Presionar "Continuar"',`Validar que se muestre "${area}"`];
+  const materialized=materializeJiraNavigation(valid,routes,story);
+  assert.equal(materialized.indexOf(`Presionar "${area}"`),valid.indexOf('Presionar "Continuar"')+1,'positive navigation follows OTP submission, never precedes it');
+  assert.deepEqual(materialized.slice(0,valid.indexOf('Presionar "Continuar"')+1),valid.slice(0,valid.indexOf('Presionar "Continuar"')+1));
+  const transaction=[...valid.slice(0,-1),`Presionar "${area}"`,'Ingresar token de transferencia no válido en "Token"','Presionar "Autorizar transferencia"','Validar que se muestre "Rechazo"','Validar que no se muestre "Resultado exitoso"'];
+  assert.equal(jiraNavigationMissing({},transaction,'password',story),false);
+ }
+});
+
+test('invalid credentials stop learned successful navigation at the authentication submit across profiles',async()=>{
+ for(const [user,password,submit,area] of [['Usuario','Contraseña','Iniciar sesión','Transferencias'],['Username','Password','Sign in','Inventory']]) {
+  const steps=['Abrir la aplicación configurada del proyecto',`Ingresar usuario no válido en "${user}".`,
+   `Ingresar contraseña en "${password}".`,`Presionar "${submit}".`,
+   'Validar que se muestre "Rechazo"','Validar que no se muestre "Resultado exitoso"'];
+  const routes=[{actions:[{action:'click',field:area},{action:'click',field:'Otra operación'}]}];
+  assert.equal(jiraNavigationMissing({},steps,'password',area),false);
+  assert.deepEqual(materializeJiraNavigation(steps,routes,area),steps);
+  const absenceOnly=[...steps.slice(0,-2),steps.at(-1)!];
+  assert.equal(jiraNavigationMissing({},absenceOnly,'password',area),false,'editing out rejection must not invent a protected destination');
+  assert.deepEqual(materializeJiraNavigation(absenceOnly,routes,area),absenceOnly);
+  const invalidSyntax=await auditGeneratedJiraSyntax([{sourceIssueKey:'REJECT',title:'Rechazo',steps:absenceOnly,expectedResult:''}]);
+  assert.ok(invalidSyntax.some(item=>item.reason==='JIRA_ABSENCE_REQUIRES_OBSERVED_CONTEXT'),'editing away rejection evidence must remain blocked');
+  assert.deepEqual(await auditGeneratedJiraSyntax([{sourceIssueKey:'REJECT',title:'Rechazo',steps,expectedResult:''}]),[]);
+  const valid=steps.map(step=>step.replace('usuario no válido','usuario'));
+  assert.equal(jiraNavigationMissing({},valid,'password',area),true,'successful-authentication neighbor still requires business navigation');
+  assert.ok(materializeJiraNavigation(valid,routes,area).includes(`Presionar "${area}"`));
+  const positive=[...steps.slice(0,-2),`Validar que se muestre "${area}"`];
+  assert.equal(jiraNavigationMissing({},positive,'password',area),true,'invalid data cannot exempt an asserted protected destination');
+  const metadataOnly=steps.map(step=>step.replace('usuario no válido','usuario'));
+  const declared={inputRequirements:[{key:'user',label:user,stepIndex:2,operation:'fill',required:true,editable:true,sensitive:true,controlType:'text',source:'jira_step',dataCondition:'invalid'}]};
+  assert.equal(jiraNavigationMissing(declared,metadataOnly,'password',area),false);
+  assert.deepEqual(materializeJiraNavigation(metadataOnly,routes,area,declared),metadataOnly);
+  const corrected=[...steps.slice(0,3),`Ingresar usuario en "${user}".`,...steps.slice(3)];
+  assert.equal(jiraNavigationMissing({},corrected,'password',area),true,'corrected credentials cannot keep the earlier invalid branch classification');
+ }
+});
 
 test('a new project has no historical navigation; other engines/projects/revisions are excluded', () => {
   const issue: JiraIssueSource = {key:'HU-1',summary:'Transferencias',description:'Gestionar Transferencias',acceptanceCriteria:null,

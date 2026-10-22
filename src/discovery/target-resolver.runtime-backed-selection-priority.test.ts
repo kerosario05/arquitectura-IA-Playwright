@@ -24,8 +24,11 @@ test("runtime-backed recorded selection resolves its field before generic owner 
     });
 
     assert.equal(result.status, "resolved");
-    assert.equal(result.locatorStrategy, "grid_cell_selection_control");
+    assert.equal(result.locatorStrategy, "grid_native_select_option");
     assert.equal(await result.locator!.getAttribute("id"), "currency");
+    assert.equal(result.selectionApplied, true);
+    assert.equal(result.selectionDiagnostics?.stateVerified, true);
+    assert.equal(await page.locator('#currency').inputValue(), "DOP");
   } finally {
     await browser.close();
   }

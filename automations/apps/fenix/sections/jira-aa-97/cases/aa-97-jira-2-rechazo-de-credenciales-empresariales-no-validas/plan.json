@@ -2,7 +2,7 @@
   "version": "1.0",
   "source": "discovery_generated",
   "status": "validated",
-  "createdAt": "2026-10-16T15:40:41.489Z",
+  "createdAt": "2026-10-22T13:42:40.545Z",
   "scenario": {
     "source": "jira",
     "externalId": "AA-97:jira:2",
@@ -55,8 +55,8 @@
     {
       "index": 6,
       "action": "fill",
-      "description": "fill [contrasena_invalida]",
-      "valueKey": "contrasena_invalida",
+      "description": "fill [contrasena]",
+      "valueKey": "contrasena",
       "target": {
         "strategy": "css",
         "value": "[id=\"PasswordE\"]"
@@ -65,7 +65,7 @@
     {
       "index": 7,
       "action": "click",
-      "description": "Presionar \"continuar inicio de sesión\"",
+      "description": "Presionar \"Iniciar sesión\"",
       "target": {
         "strategy": "role",
         "role": "button",
@@ -76,19 +76,19 @@
     {
       "index": 8,
       "action": "assertVisible",
-      "description": "Validar que se muestre \"problema de credenciales\"",
+      "description": "Validar que se informe el rechazo de las credenciales",
       "target": {
         "strategy": "text",
-        "value": "problema de credenciales"
+        "value": "que se informe el rechazo de las credenciales"
       }
     },
     {
       "index": 9,
       "action": "assertVisible",
-      "description": "Validar que se muestre \"operación no presentada como exitosa\"",
+      "description": "Validar que no se muestre \"comprobante de transacción exitosa\"",
       "target": {
         "strategy": "text",
-        "value": "operación no presentada como exitosa"
+        "value": "comprobante de transacción exitosa"
       }
     }
   ],
@@ -106,7 +106,7 @@
       "sensitive": true
     },
     {
-      "key": "contrasena_invalida",
+      "key": "contrasena",
       "required": true,
       "resolved": true,
       "sensitive": true
@@ -151,7 +151,7 @@
       {
         "index": 6,
         "action": "fill",
-        "valueKey": "contrasena_invalida",
+        "valueKey": "contrasena",
         "technicalTargetRefs": [
           "css:[id=\"PasswordE\"]"
         ]
@@ -166,24 +166,24 @@
       {
         "index": 8,
         "action": "assertVisible",
-        "description": "Validar que se muestre \"problema de credenciales\"",
+        "description": "Validar que se informe el rechazo de las credenciales",
         "technicalTargetRefs": [
-          "text:problema de credenciales"
+          "text:que se informe el rechazo de las credenciales"
         ]
       },
       {
         "index": 9,
         "action": "assertVisible",
-        "description": "Validar que se muestre \"operación no presentada como exitosa\"",
+        "description": "Validar que no se muestre \"comprobante de transacción exitosa\"",
         "technicalTargetRefs": [
-          "text:operación no presentada como exitosa"
+          "text:comprobante de transacción exitosa"
         ]
       }
     ],
     "observableOracles": [
       {
         "id": "jira-oracle-8",
-        "requirement": "Validar que se muestre \"problema de credenciales\"",
+        "requirement": "Validar que se informe el rechazo de las credenciales",
         "type": "literal_visible_text",
         "backed": true,
         "source": "discovery",
@@ -198,17 +198,18 @@
       },
       {
         "id": "jira-oracle-9",
-        "requirement": "Validar que se muestre \"operación no presentada como exitosa\"",
+        "requirement": "Validar que no se muestre \"comprobante de transacción exitosa\"",
         "type": "literal_visible_text",
+        "polarity": "negative",
         "backed": true,
         "source": "discovery",
         "stepIndex": 9,
-        "target": "Visible heading and nearby content: Usuario o Contraseña inválidos. (Code:[numero])",
+        "target": "comprobante de transacción exitosa",
         "evidence": [
           "live-step-9"
         ],
         "details": {
-          "observedText": "Visible heading and nearby content: Usuario o Contraseña inválidos. (Code:[numero])"
+          "absent": true
         }
       }
     ],
@@ -216,6 +217,6 @@
       "required": false,
       "gateDetected": false
     },
-    "expectedResult": "Fenix informa el \"problema de credenciales\" y no presenta la operación como exitosa."
+    "expectedResult": "No se muestra \"comprobante de transacción exitosa\" después del rechazo de las credenciales."
   }
 }
