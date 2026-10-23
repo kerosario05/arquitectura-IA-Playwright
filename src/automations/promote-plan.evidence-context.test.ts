@@ -19,6 +19,7 @@ test("1. evidenceContext present -> child exec env carries exactly the reuse job
       scenarioTitle: "Tarjeta",
       appSlug: "kiosko",
       sectionSlug: "pagos",
+      analystName: "Ana QA",
     },
   });
   assert.equal(env.EVIDENCE_RUN_ID, "reuse-job-123");
@@ -26,6 +27,7 @@ test("1. evidenceContext present -> child exec env carries exactly the reuse job
   assert.equal(env.SCENARIO_TITLE, "Tarjeta");
   assert.equal(env.EVIDENCE_APP_SLUG, "kiosko");
   assert.equal(env.EVIDENCE_SECTION_SLUG, "pagos");
+  assert.equal(env.EVIDENCE_ANALYST_NAME, "Ana QA");
 });
 
 test("2. no evidenceContext -> previous behavior preserved (process.env itself returned unchanged, no evidence keys injected)", () => {

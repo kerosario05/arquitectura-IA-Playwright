@@ -1,4 +1,5 @@
 import { spawn } from "child_process";
+import { evidenceActorEnvironment } from "../../auth/report-attribution";
 import path from "path";
 import { jobStore } from "./job-store";
 
@@ -38,7 +39,7 @@ export function startSprintRun(jobId: string): void {
   const child = spawn("npx", ["tsx", ...cliArgs], {
     shell: true,
     cwd: ROOT,
-    env: process.env as NodeJS.ProcessEnv,
+    env: { ...process.env, ...evidenceActorEnvironment(job.params) },
     stdio: ["ignore", "pipe", "pipe"]
   });
 

@@ -63,8 +63,8 @@ export async function reportJiraSpecStepComplete(
   const screenIdentity = settled ? await readJiraScreenIdentity(page) : undefined;
   const observedScreenChanged = Boolean(screenIdentity && screenIdentity.id !== state.lastObservedScreenId);
   // Settled final step always recaptures: same screen id may hold mutated form data.
-  const shouldCapture = settled && (isFinalStep || Boolean(screenIdentity && screenIdentity.id !== state.lastCapturedScreenId
-      && (observedScreenChanged || state.pendingCaptureStepIndex !== undefined || !state.lastCapturedScreenId))
+  const shouldCapture = settled && (isFinalStep || Boolean(screenIdentity && state.pendingCaptureStepIndex !== undefined
+      && (observedScreenChanged || captureScreen || !state.lastCapturedScreenId))
     || (captureScreen && !screenIdentity));
   const captureStepIndex = isFinalStep ? stepIndex : state.pendingCaptureStepIndex ?? stepIndex;
   if (screenIdentity) state.lastObservedScreenId = screenIdentity.id;

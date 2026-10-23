@@ -5,7 +5,7 @@ import { waitForVisualSettle, readScreenSignature } from "./screen-settle";
 import type { Page } from "@playwright/test";
 import { loadEvidenceConfig, type EvidenceConfig, type EvidenceScenarioContext, type EvidenceStepRecord, type EvidenceScenarioRecord, type DetailEvidenceMetadata, type InitialScreenEvidence, deriveScenarioStatus, type EvidenceCaptureStatus, type EvidenceFunctionalStatus } from "./evidence-types";
 import { buildEvidencePaths, buildScreenshotFilename } from "./evidence-paths";
-import { generateEvidenceDocx } from "./evidence-docx-generator";
+import { generateEvidencePdf } from "./evidence-pdf-generator";
 
 export function screenIdentityFromSignature(signature: string): { id: string; title: string } {
   const stableSignature = signature.split("|completeForms=")[0]?.split("|completeRows=")[0] || "unknown-screen";
@@ -838,9 +838,11 @@ export class EvidenceRecorder {
       try {
         const templatePath = this.context.templatePath ?? this.config.templatePath;
         const resolvedTemplate = path.resolve(templatePath);
-        const result = await generateEvidenceDocx(record, resolvedTemplate, this.paths.docxPath);
+        const result = await generateEvidencePdf(record, resolvedTemplate, this.paths.pdfPath);
         if (result.success) {
-          console.log(`[evidence:scenario] generated per-scenario evidencia.docx path=${result.outputPath}`);
+          record.pdfPath = result.outputPath;
+          await fs.promises.writeFile(this.paths.evidenceJsonPath, JSON.stringify(record, null, 2), "utf8");
+          console.log(`[evidence:scenario] generated per-scenario evidencia.pdf path=${result.outputPath}`);
         } else {
           console.log(`[evidence:scenario] per-scenario docx generation skipped: ${result.error}`);
         }
@@ -875,9 +877,16 @@ function buildRecord(
   return {
     scenarioId: context.scenarioId,
     scenarioTitle: context.scenarioTitle,
-    requirement: context.sectionName
+    expectedResult: context.expectedResult,
+    acceptanceCriteria: context.acceptanceCriteria,
+    testType: context.testType,
+    testApproach: context.testApproach,
+    preconditions: context.preconditions,
+    issueKey: context.issueKey,
+    requirement: context.requirement?.trim() || (context.sectionName
       ? `Automatización - ${context.sectionName}`
-      : `Automatización - ${context.sectionSlug}`,
+      : `Automatización - ${context.sectionSlug}`),
+    dataLabels: context.dataLabels,
     analyst: context.analystName ?? "",
     date: date ?? new Date().toLocaleDateString("es-ES", {
       year: "numeric", month: "long", day: "numeric",
@@ -890,7 +899,7 @@ function buildRecord(
     initialScreenEvidence,
     steps,
     finalScreenEvidence,
-    docxPath,
+    docxPath: undefined,
     evidenceJsonPath,
     detailEvidence,
     evidenceKind,

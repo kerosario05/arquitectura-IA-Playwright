@@ -72,15 +72,15 @@ export async function readJiraScreenIdentity(
         return normalize(element.getAttribute("aria-label") || labelledBy || label || element.getAttribute("placeholder") || element.textContent || "");
       };
       const landmarks = Array.from(document.querySelectorAll(
-        'h1,h2,h3,[role="heading"],legend,[role="dialog"],[role="alertdialog"],dialog,main,[role="main"]',
+        'h1,h2,h3,[role="heading"],legend,[role="dialog"],[role="alertdialog"],dialog',
       )).filter(visible).map(element => element.tagName.toLowerCase() + ":" + normalize(element.textContent ?? ""));
       const controls = Array.from(document.querySelectorAll(
         'button,a[href],input:not([type="hidden"]),textarea,select,[role="button"],[role="tab"],[role="checkbox"],[role="radio"],[role="switch"],[role="combobox"],[role="textbox"]',
       )).filter(visible).map(element => {
-        const state = ["aria-selected", "aria-pressed", "aria-checked", "aria-expanded", "aria-current", "data-state"]
-          .map(name => name + "=" + (element.getAttribute(name) ?? "")).join(";");
         const type = element.getAttribute("type") ?? "";
-        return [element.tagName.toLowerCase(), element.getAttribute("role") ?? "", type, accessibleName(element), state].join("|");
+        // The screenshot identity represents the screen structure, not interaction state.
+        // A selected tab/value or expanded control must not create a new document screen.
+        return [element.tagName.toLowerCase(), element.getAttribute("role") ?? "", type, accessibleName(element)].join("|");
       });
       return { signature: JSON.stringify({ route: location.pathname, landmarks, controls }), routePart: location.pathname };
     })()`);

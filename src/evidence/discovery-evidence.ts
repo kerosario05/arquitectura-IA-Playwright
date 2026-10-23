@@ -4,6 +4,9 @@ import { loadEvidenceConfig } from "./evidence-types";
 import type { CaseDiscoveryResult } from "../types/discovery.types";
 
 export interface DiscoveryEvidenceOptions {
+  expectedResult?: string;
+  preconditions?: string[];
+  issueKey?: string;
   appSlug: string;
   sectionSlug?: string;
   sectionName?: string;
@@ -34,6 +37,9 @@ export function initDiscoveryEvidence(
       sectionName: options.sectionName,
       scenarioId: options.scenarioId,
       scenarioTitle: options.scenarioTitle,
+      expectedResult: options.expectedResult,
+      preconditions: options.preconditions,
+      issueKey: options.issueKey,
       caseId: options.caseId,
       runId: options.runId,
       analystName: cfg.analystName || process.env.EVIDENCE_ANALYST_NAME,

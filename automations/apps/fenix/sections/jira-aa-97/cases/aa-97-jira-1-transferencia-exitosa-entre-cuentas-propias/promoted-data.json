@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generatedAt": "2026-10-22T01:21:25.766Z",
+  "generatedAt": "2026-10-23T17:12:27.968Z",
   "entries": [
     {
       "key": "rnc",
@@ -36,10 +36,10 @@
       "maskedValue": ""
     },
     {
-      "key": "codigo_acceso_sms",
+      "key": "codigo_acceso",
       "source": "unknown",
       "fieldName": "segmented_code",
-      "stepIndex": 10,
+      "stepIndex": 9,
       "valueType": "unknown",
       "sensitive": true,
       "demoSafe": false,
@@ -50,7 +50,7 @@
       "key": "cuenta_origen",
       "source": "unknown",
       "fieldName": "(//*[normalize-space(.)='Cuenta Origen' and not(*[normalize-space(.)='Cuenta Origen'])]/following::span[normalize-space(.)='Seleccione una Cuenta'][1])[1]",
-      "stepIndex": 15,
+      "stepIndex": 13,
       "valueType": "unknown",
       "sensitive": true,
       "demoSafe": false,
@@ -61,7 +61,7 @@
       "key": "cuenta_destino",
       "source": "unknown",
       "fieldName": "(//*[normalize-space(.)='Cuenta Destino' and not(*[normalize-space(.)='Cuenta Destino'])]/following::span[normalize-space(.)='Seleccione una Cuenta'][1])[1]",
-      "stepIndex": 16,
+      "stepIndex": 14,
       "valueType": "unknown",
       "sensitive": true,
       "demoSafe": false,
@@ -72,7 +72,7 @@
       "key": "monto",
       "source": "unknown",
       "fieldName": "[id=\"transactionDetails_0__AmountPayment\"]",
-      "stepIndex": 17,
+      "stepIndex": 15,
       "valueType": "unknown",
       "sensitive": true,
       "demoSafe": false,
@@ -80,10 +80,10 @@
       "maskedValue": ""
     },
     {
-      "key": "token_transferencia",
+      "key": "token_autorizacion",
       "source": "unknown",
       "fieldName": "segmented_code",
-      "stepIndex": 28,
+      "stepIndex": 20,
       "valueType": "unknown",
       "sensitive": true,
       "demoSafe": false,

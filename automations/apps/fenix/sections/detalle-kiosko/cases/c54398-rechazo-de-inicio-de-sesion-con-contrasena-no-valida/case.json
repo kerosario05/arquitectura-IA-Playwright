@@ -1,0 +1,10 @@
+{
+  "id": "c54398-rechazo-de-inicio-de-sesion-con-contrasena-no-valida",
+  "externalId": "C54398",
+  "caseId": 54398,
+  "title": "Rechazo de inicio de sesión con contraseña no válida",
+  "source": "discovery",
+  "appSlug": "fenix",
+  "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+  "createdAt": "2026-10-23T14:24:27.921Z"
+}

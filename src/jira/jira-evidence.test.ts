@@ -61,6 +61,8 @@ test("evidence document retains the initial screen, each step screenshot, and th
       scenarioId: "PREVIEW-001",
       status: "passed",
       initialScreenshotPath: initial,
+      initialScreenIdentity: { id: "menu", title: "Menú" },
+      stepScreenIdentities: { "1": { id: "menu", title: "Menú" }, "2": { id: "authentication", title: "Autenticación" } },
       stepScreenshotPaths: { "1": first, "2": second },
       evidenceScreenshotPath: second,
     }], { appSlug: "kiosko", sectionSlug: "jira-aa-88" });

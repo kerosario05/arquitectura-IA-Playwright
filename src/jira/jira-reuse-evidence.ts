@@ -9,6 +9,14 @@ export type JiraReuseEvidenceContext = {
   runId: string;
   caseId: number;
   specPath: string;
+  issueKey?: string;
+  requirement?: string;
+  expectedResult?: string;
+  acceptanceCriteria?: string[];
+  preconditions?: string[];
+  testType?: string;
+  testApproach?: string;
+  dataLabels?: Record<string, string>;
 };
 
 /** Only exact Jira specs launched inside a QA Lab job opt into this reporter. */
@@ -62,7 +70,7 @@ export function instrumentPromotedJiraSpecForEvidence(
     if (commentedStep !== undefined && stepByIndex.has(commentedStep)) {
       if (activeStep !== undefined) {
         const previous = stepByIndex.get(activeStep)!;
-        const captureScreen = ["navigate", "click", "select", "check", "uncheck", "screenshot"].includes(previous.action);
+        const captureScreen = ["navigate", "click", "fill", "select", "check", "uncheck", "screenshot"].includes(previous.action);
         const isFinalStep = previous.index === finalRequiredStepIndex;
         instrumented.push(`  await reportJiraSpecStepComplete(page, testInfo, ${activeStep}, ${captureScreen}, ${isFinalStep});`);
       }
@@ -75,7 +83,7 @@ export function instrumentPromotedJiraSpecForEvidence(
 
     if (activeStep !== undefined && line.trim() === "});" && lastCommentedStep === activeStep) {
       const current = stepByIndex.get(activeStep)!;
-      const captureScreen = ["navigate", "click", "select", "check", "uncheck", "screenshot"].includes(current.action);
+      const captureScreen = ["navigate", "click", "fill", "select", "check", "uncheck", "screenshot"].includes(current.action);
       const isFinalStep = current.index === finalRequiredStepIndex;
       instrumented.push(`  await reportJiraSpecStepComplete(page, testInfo, ${activeStep}, ${captureScreen}, ${isFinalStep});`);
       activeStep = undefined;

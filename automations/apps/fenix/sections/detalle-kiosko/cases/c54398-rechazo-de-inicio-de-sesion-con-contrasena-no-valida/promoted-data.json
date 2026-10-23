@@ -1,0 +1,39 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-10-23T14:22:25.829Z",
+  "entries": [
+    {
+      "key": "rnc",
+      "source": "unknown",
+      "fieldName": "RNC",
+      "stepIndex": 3,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "usuario",
+      "source": "unknown",
+      "fieldName": "Usuario",
+      "stepIndex": 4,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "auth.password",
+      "source": "unknown",
+      "fieldName": "Contraseña",
+      "stepIndex": 5,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

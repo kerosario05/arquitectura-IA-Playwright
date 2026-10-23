@@ -1200,7 +1200,7 @@ export async function auditGeneratedJiraSyntax(candidates: unknown[], issues: Ji
     let stepIndex = 0;
     try {
       await discoverJiraScenario({scenarioId:"syntax-only",sourceIssueKey:String(c.sourceIssueKey ?? ""),title:String(c.title ?? ""),steps,
-        expectedResult:String(c.expectedResult ?? ""),preconditions:Array.isArray(c.preconditions) ? c.preconditions.filter((p): p is string => typeof p === "string") : [], inputRequirements:fields,
+        expectedResult:String(c.expectedResult ?? ""),expectedResultMode:c.expectedResultMode === "documentation" ? "documentation" : "assertion",preconditions:Array.isArray(c.preconditions) ? c.preconditions.filter((p): p is string => typeof p === "string") : [], inputRequirements:fields,
         authIntent:c.authIntent === "full_authentication" || c.authIntent === "gate_observation" ? c.authIntent : undefined,
         unresolvedUiRequirements:jiraUiObservations({...c,steps}),
         conditionRequirements },

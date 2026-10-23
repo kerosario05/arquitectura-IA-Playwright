@@ -116,8 +116,15 @@ export default class JiraReuseEvidenceReporter implements Reporter {
     });
     const record: EvidenceScenarioRecord = {
       scenarioId: `C${context.caseId}`, scenarioTitle: test.title,
-      requirement: plan.scenario.externalId?.split(":")[0] ?? "",
-      analyst: "QA Lab", date: timestamp, status: passed ? "Exitoso" : "Fallido",
+      requirement: context.requirement?.trim() || plan.scenario.externalId?.split(":")[0] || "",
+      issueKey: context.issueKey ?? plan.scenario.externalId?.split(":")[0],
+      expectedResult: context.expectedResult,
+      acceptanceCriteria: context.acceptanceCriteria,
+      preconditions: context.preconditions,
+      testType: context.testType,
+      testApproach: context.testApproach,
+      dataLabels: context.dataLabels,
+      analyst: process.env.EVIDENCE_ANALYST_NAME?.trim() || "Automatización", date: timestamp, status: passed ? "Exitoso" : "Fallido",
       captureStatus: screenshotPath ? "success" : "failed", functionalStatus: passed ? "passed" : "failed",
       evidenceKind: "jira_semantic", appSlug: context.appSlug, sectionSlug: context.sectionSlug, sectionName: context.sectionName,
       steps,

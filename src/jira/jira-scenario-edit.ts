@@ -8,12 +8,28 @@ import {normalizeAuthoredJiraStep} from './jira-authored-step-format';
 
 export interface EditableJiraScenario {
  scenarioId:string;sourceIssueKey:string;title:string;steps:string[];expectedResult:string;
+ expectedResultMode?:'assertion'|'documentation';
  preconditions?:string[];acceptanceCriteriaRefs?:string[];inputRequirements?:JiraInputRequirement[];
  authIntent?:'full_authentication'|'gate_observation';
  reviewConfiguration?:{conditions?:Record<string,boolean>;uiTargets?:Record<string,string>};
 }
 export type JiraScenarioEditPatch=Pick<EditableJiraScenario,'title'|'steps'|'expectedResult'>;
 const digest=(value:unknown)=>createHash('sha256').update(JSON.stringify(value)).digest('hex').slice(0,16);
+const normalizeOracleTarget=(value:string)=>value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
+function removedExpectedResultAssertion(original:EditableJiraScenario,editedSteps:string[],expectedResult:string):boolean{
+ if(expectedResult.trim()!==original.expectedResult.trim())return false;
+ const expected=normalizeOracleTarget(original.expectedResult);
+ if(!/\bno\s+(?:se\s+)?(?:muestra|muestre|presenta|presente|aparece|aparezca)\b/i.test(original.expectedResult))return false;
+ const negativeAssertion=/^\s*(?:Validar|Verificar) que no se (?:muestre|muestren|presente|presenten|vea|vean)\s+["“]([^"”]+)["”]/i;
+ return original.steps.some(step=>{
+  const match=step.match(negativeAssertion);
+  if(!match||!expected.includes(normalizeOracleTarget(match[1])))return false;
+  return !editedSteps.some(candidate=>{
+   const remaining=candidate.match(negativeAssertion);
+   return Boolean(remaining&&normalizeOracleTarget(remaining[1])===normalizeOracleTarget(match[1]));
+  });
+ });
+}
 
 /** Validate human-authored steps without AI rewrites or DOM certification. */
 export async function reviewEditedJiraScenarios(issue:JiraIssueSource,scenarios:EditableJiraScenario[],scenarioId:string,patch:JiraScenarioEditPatch,loginMode?:string){
@@ -26,7 +42,8 @@ export async function reviewEditedJiraScenarios(issue:JiraIssueSource,scenarios:
  const reviewed=[];
  for(const original of scenarios){
   const changed=original.scenarioId===scenarioId&&JSON.stringify([original.title,original.steps,original.expectedResult])!==JSON.stringify([patch.title,patch.steps,patch.expectedResult]);
-  const draft:EditableJiraScenario=changed?{...original,title:patch.title.trim(),steps:patch.steps.map(normalizeAuthoredJiraStep),expectedResult:patch.expectedResult.trim()}:original;
+  const editedSteps=patch.steps.map(normalizeAuthoredJiraStep);
+  const draft:EditableJiraScenario=changed?{...original,title:patch.title.trim(),steps:editedSteps,expectedResult:patch.expectedResult.trim(),expectedResultMode:removedExpectedResultAssertion(original,editedSteps,patch.expectedResult)?'documentation':original.expectedResultMode}:original;
   if(!Array.isArray(draft.steps)||draft.steps.some(s=>typeof s!=='string'))throw new Error('JIRA_EDIT_CONTENT_INVALID');
   const revision=digest([draft.title,draft.steps,draft.expectedResult,draft.preconditions]);
   // Preserve values only for uniquely unchanged authored inputs, never by their old numeric position.
@@ -53,7 +70,11 @@ export async function reviewEditedJiraScenarios(issue:JiraIssueSource,scenarios:
  }
  const missing=uncoveredAcceptanceClauses(issue,reviewed.filter(s=>s.validation.valid));
  if(missing.length)for(const scenario of reviewed){
-  scenario.validation.errors.push(`JIRA_ACCEPTANCE_COVERAGE_INCOMPLETE:${missing.map(c=>c.id).join(',')}`);
+  // Coverage is a suite-level property. A missing clause in a sibling scenario
+  // must not make an unrelated scenario edit impossible to apply.
+  const scenarioMissing=missing.filter(clause=>scenario.acceptanceCriteriaRefs?.includes(clause.id));
+  if(!scenarioMissing.length)continue;
+  scenario.validation.errors.push(`JIRA_ACCEPTANCE_COVERAGE_INCOMPLETE:${scenarioMissing.map(c=>c.id).join(',')}`);
   scenario.validation.valid=false;scenario.executionReadiness='blocked_acceptance_coverage';
  }
  return reviewed;

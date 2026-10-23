@@ -1,0 +1,650 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C54398",
+    "caseId": 54398,
+    "title": "Rechazo de inicio de sesión con contraseña no válida"
+  },
+  "requiredData": [
+    {
+      "key": "rnc",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "usuario",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "auth.password",
+      "required": true,
+      "resolved": true
+    }
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://qa1.santacruz.do/onlinebanking",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "description": "Presionar \"perfil empresarial\"",
+      "target": {
+        "strategy": "role:link",
+        "value": "Empresarial",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "perfil empresarial",
+          "resolvedTargetName": "Empresarial",
+          "resolvedCandidateId": "el-79",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "role:link",
+      "controlIdentity": {
+        "fingerprint": "9f5c1af4e7e9dc976487a670972e64863e52586d273ae282b5405a1810e3319c",
+        "source": "runtime",
+        "signals": {
+          "tagName": "a",
+          "candidateLocator": {
+            "strategy": "text",
+            "exact": false
+          }
+        }
+      },
+      "requirementRefs": []
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "Ingresar RNC en \"RNC\"",
+      "target": {
+        "strategy": "text",
+        "value": "RNC",
+        "exact": false
+      },
+      "valueKey": "rnc",
+      "requirementRefs": []
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "Ingresar usuario en \"Usuario\"",
+      "target": {
+        "strategy": "text",
+        "value": "Usuario",
+        "exact": false
+      },
+      "valueKey": "usuario",
+      "requirementRefs": []
+    },
+    {
+      "index": 5,
+      "action": "fill",
+      "description": "Ingresar una contraseña no válida en \"Contraseña\"",
+      "target": {
+        "strategy": "text",
+        "value": "Contraseña",
+        "exact": false
+      },
+      "valueKey": "auth.password",
+      "requirementRefs": []
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Presionar \"continuar inicio de sesión\"",
+      "target": {
+        "strategy": "snapshot:exact_text",
+        "value": "continuar inicio de sesión",
+        "exact": false
+      },
+      "locatorStrategy": "snapshot:exact_text",
+      "controlIdentity": {
+        "fingerprint": "17e31690f1742d01d244385a684af2e742cc6628e29a265f87d3d982eac90307",
+        "source": "runtime",
+        "signals": {
+          "tagName": "button",
+          "inputType": "submit",
+          "candidateLocator": {
+            "strategy": "text",
+            "exact": false
+          }
+        }
+      },
+      "requirementRefs": []
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-10-23T14:22:23.750Z",
+  "metadata": {
+    "authFlowRequired": false,
+    "authFlowAlias": "defaultClient",
+    "authFlowLanding": "transactions_menu",
+    "authGateDetectedDuringDiscovery": true,
+    "authGateStage": "credentials"
+  },
+  "sourceScenario": {
+    "title": "Rechazo de inicio de sesión con contraseña no válida",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Abrir la aplicación configurada del proyecto",
+        "description": "Abrir la aplicación configurada del proyecto"
+      },
+      {
+        "index": 2,
+        "action": "Presionar \"perfil empresarial\"",
+        "description": "Presionar \"perfil empresarial\""
+      },
+      {
+        "index": 3,
+        "action": "Ingresar RNC en \"RNC\"",
+        "description": "Ingresar RNC en \"RNC\""
+      },
+      {
+        "index": 4,
+        "action": "Ingresar usuario en \"Usuario\"",
+        "description": "Ingresar usuario en \"Usuario\""
+      },
+      {
+        "index": 5,
+        "action": "Ingresar una contraseña no válida en \"Contraseña\"",
+        "description": "Ingresar una contraseña no válida en \"Contraseña\""
+      },
+      {
+        "index": 6,
+        "action": "Presionar \"continuar inicio de sesión\"",
+        "description": "Presionar \"continuar inicio de sesión\""
+      },
+      {
+        "index": 7,
+        "action": "Validar que se muestre \"problema de credenciales\"",
+        "description": "Validar que se muestre \"problema de credenciales\"",
+        "polarity": "positive",
+        "requirementRefs": [
+          "requirement:testrail:case:54398:step:7:assertion"
+        ],
+        "canonicalAssertion": {
+          "intent": "validation_present",
+          "subject": "problema de credenciales",
+          "expectedState": "se muestre \"problema de credenciales\"",
+          "polarity": "positive",
+          "polaritySource": "canonical",
+          "polarityResolvedAt": "canonical_adapter"
+        },
+        "assertionImportance": "contextual"
+      },
+      {
+        "index": 8,
+        "action": "Validar que no se muestre \"resumen de productos\"",
+        "description": "Validar que no se muestre \"resumen de productos\"",
+        "polarity": "negative",
+        "requirementRefs": [
+          "requirement:testrail:case:54398:step:8:assertion"
+        ],
+        "canonicalAssertion": {
+          "intent": "validation_present",
+          "subject": "resumen de productos",
+          "expectedState": "no se muestre \"resumen de productos\"",
+          "polarity": "negative",
+          "polaritySource": "canonical",
+          "polarityResolvedAt": "canonical_adapter"
+        },
+        "assertionImportance": "contextual"
+      }
+    ],
+    "expectedResult": "Fenix informa el problema de credenciales y no permite acceder al \"resumen de productos\".",
+    "preconditions": [
+      "Precondiciones:",
+      "- Aplicación disponible.",
+      "- Usuario o datos de prueba configurados.",
+      "[automationScenarioId: 1560299f-002]"
+    ],
+    "observedAssertions": [
+      "Credenciales inválidas"
+    ],
+    "observableOracles": [
+      {
+        "id": "negative-visibility-8",
+        "requirement": "Validar que no se muestre \"resumen de productos\"",
+        "stepIndex": 8,
+        "type": "negative_visibility",
+        "polarity": "negative",
+        "backed": true,
+        "source": "discovery",
+        "target": "resumen de productos",
+        "evidence": [
+          "declared_negative_visibility_checked_during_discovery"
+        ],
+        "requirementRefs": [
+          "requirement:testrail:case:54398:step:8:assertion"
+        ]
+      },
+      {
+        "id": "feedback-7",
+        "requirement": "Validar que se muestre \"problema de credenciales\"",
+        "stepIndex": 7,
+        "type": "credential_rejection",
+        "backed": true,
+        "source": "discovery",
+        "target": "Credenciales inválidas",
+        "evidence": [
+          "visible_feedback_observed_during_discovery"
+        ],
+        "requirementRefs": [
+          "requirement:testrail:case:54398:step:7:assertion"
+        ],
+        "polarity": "positive"
+      },
+      {
+        "id": "observed-01",
+        "requirement": "Credenciales inválidas",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "target": "Credenciales inválidas",
+        "evidence": [
+          "assertion_resolved_during_discovery"
+        ]
+      },
+      {
+        "id": "expected-01",
+        "requirement": "Fenix informa el problema de credenciales y no permite acceder al \"resumen de productos\".",
+        "type": "runtime_state",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 8,
+        "evidence": [
+          "auth_rejection_observed:true",
+          "clause_positive_bound:true",
+          "clause_negative_bound:true"
+        ],
+        "details": {
+          "compound": true,
+          "clauses": [
+            {
+              "clause": "fenix informa el problema de credenciales",
+              "polarity": "positive",
+              "boundStepIndex": 7
+            },
+            {
+              "clause": "no permite acceder al \"resumen de productos\".",
+              "polarity": "negative",
+              "boundStepIndex": 8
+            }
+          ]
+        },
+        "requirementRefs": [
+          "requirement:testrail:case:54398:step:8:assertion"
+        ],
+        "polarity": "negative"
+      }
+    ],
+    "requirements": [
+      {
+        "requirementId": "requirement:testrail:case:54398:step:7:assertion",
+        "kind": "expected_result",
+        "description": "Validar que se muestre \"problema de credenciales\"",
+        "origin": {
+          "originRef": "testrail:case:54398:step:7:assertion"
+        },
+        "assertionIntents": [
+          "validation_present"
+        ],
+        "polarity": "positive",
+        "polaritySource": "canonical",
+        "polarityResolvedAt": "canonical_adapter"
+      },
+      {
+        "requirementId": "requirement:testrail:case:54398:step:8:assertion",
+        "kind": "expected_result",
+        "description": "Validar que no se muestre \"resumen de productos\"",
+        "origin": {
+          "originRef": "testrail:case:54398:step:8:assertion"
+        },
+        "assertionIntents": [
+          "validation_present"
+        ],
+        "polarity": "negative",
+        "polaritySource": "canonical",
+        "polarityResolvedAt": "canonical_adapter"
+      }
+    ],
+    "expectedResultRequirementRefs": [],
+    "stepRequirementRefs": [
+      {
+        "stepIndex": 7,
+        "requirementId": "requirement:testrail:case:54398:step:7:assertion"
+      },
+      {
+        "stepIndex": 8,
+        "requirementId": "requirement:testrail:case:54398:step:8:assertion"
+      }
+    ],
+    "stepClaims": [
+      {
+        "stepIndex": 7,
+        "claimId": "requirement:testrail:case:54398:step:7:assertion:claim",
+        "requirementId": "requirement:testrail:case:54398:step:7:assertion"
+      },
+      {
+        "stepIndex": 8,
+        "claimId": "requirement:testrail:case:54398:step:8:assertion:claim",
+        "requirementId": "requirement:testrail:case:54398:step:8:assertion"
+      }
+    ],
+    "stepStatuses": [
+      {
+        "index": 2,
+        "status": "found"
+      },
+      {
+        "index": 3,
+        "status": "found"
+      },
+      {
+        "index": 4,
+        "status": "found"
+      },
+      {
+        "index": 5,
+        "status": "found"
+      },
+      {
+        "index": 6,
+        "status": "found"
+      },
+      {
+        "index": 7,
+        "status": "found"
+      },
+      {
+        "index": 8,
+        "status": "found"
+      }
+    ],
+    "auth": {
+      "gateDetected": true,
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    }
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "C54398",
+    "title": "Rechazo de inicio de sesión con contraseña no válida",
+    "appSlug": "fenix",
+    "sectionSlug": "detalle-kiosko",
+    "auth": {
+      "gateDetected": true,
+      "required": false,
+      "stage": "credentials",
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    },
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Abrir la aplicación configurada del proyecto",
+        "operation": "navigate",
+        "target": {
+          "strategy": "url",
+          "value": "APP_BASE_URL"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Presionar \"perfil empresarial\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Empresarial"
+        },
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Empresarial",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Ingresar RNC en \"RNC\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "RNC"
+        },
+        "valueKey": "rnc",
+        "authGateExpected": true,
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "RNC",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Ingresar usuario en \"Usuario\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Usuario"
+        },
+        "valueKey": "usuario",
+        "authGateExpected": true,
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Usuario",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 4,
+        "scenarioStepIndex": 5,
+        "originalText": "Ingresar una contraseña no válida en \"Contraseña\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Contraseña"
+        },
+        "valueKey": "auth.password",
+        "authGateExpected": true,
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Contraseña",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 5,
+        "scenarioStepIndex": 6,
+        "originalText": "Presionar \"continuar inicio de sesión\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "continuar inicio de sesión"
+        },
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "continuar inicio de sesión",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 6,
+        "scenarioStepIndex": 7,
+        "originalText": "Validar que se muestre \"problema de credenciales\"",
+        "operation": "assertState",
+        "target": {
+          "strategy": "text",
+          "value": "se muestre \"problema de credenciales\""
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "credential_rejection",
+          "backed": true,
+          "polarity": "positive",
+          "requirement": "Validar que se muestre \"problema de credenciales\"",
+          "target": "Credenciales inválidas",
+          "requirementRefs": [
+            "requirement:testrail:case:54398:step:7:assertion"
+          ]
+        },
+        "assertionIntent": "validation_present",
+        "polarity": "positive",
+        "subject": "problema de credenciales",
+        "expectedState": "se muestre \"problema de credenciales\"",
+        "requirementRefs": [
+          "requirement:testrail:case:54398:step:7:assertion"
+        ],
+        "evidenceRefs": [
+          "oracle:feedback-7"
+        ]
+      },
+      {
+        "contractStepIndex": 7,
+        "scenarioStepIndex": 8,
+        "originalText": "Validar que no se muestre \"resumen de productos\"",
+        "operation": "assertState",
+        "target": {
+          "strategy": "text",
+          "value": "no se muestre \"resumen de productos\""
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "negative_visibility",
+          "backed": true,
+          "polarity": "negative",
+          "requirement": "Validar que no se muestre \"resumen de productos\"",
+          "target": "resumen de productos",
+          "requirementRefs": [
+            "requirement:testrail:case:54398:step:8:assertion"
+          ]
+        },
+        "assertionIntent": "validation_present",
+        "polarity": "negative",
+        "subject": "resumen de productos",
+        "expectedState": "no se muestre \"resumen de productos\"",
+        "requirementRefs": [
+          "requirement:testrail:case:54398:step:8:assertion"
+        ],
+        "evidenceRefs": [
+          "oracle:negative-visibility-8"
+        ]
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 8,
+      "representedScenarioSteps": 8,
+      "missingScenarioSteps": []
+    }
+  }
+}

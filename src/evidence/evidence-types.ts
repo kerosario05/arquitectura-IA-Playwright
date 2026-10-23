@@ -1,3 +1,5 @@
+import type { EvidenceTestApproach } from "./evidence-test-classification";
+
 export type EvidenceStepStatus = "passed" | "failed" | "skipped";
 
 export type EvidenceScenarioStatus = "Exitoso" | "Fallido" | "No ejecutado" | "Parcial / Con observaciones";
@@ -26,6 +28,13 @@ export interface EvidenceConfig {
 }
 
 export interface EvidenceScenarioContext {
+  requirement?: string;
+  expectedResult?: string;
+  acceptanceCriteria?: string[];
+  testType?: string;
+  testApproach?: EvidenceTestApproach | string;
+  preconditions?: string[];
+  issueKey?: string;
   appSlug: string;
   sectionSlug: string;
   sectionName?: string;
@@ -36,6 +45,7 @@ export interface EvidenceScenarioContext {
   outputRoot?: string;
   analystName?: string;
   templatePath?: string;
+  dataLabels?: Record<string, string>;
 }
 
 export interface EvidenceStepRecord {
@@ -86,6 +96,17 @@ export interface DetailEvidenceMetadata {
 }
 
 export interface EvidenceScenarioRecord {
+  issueKey?: string;
+  dataLabels?: Record<string, string>;
+  objective?: string;
+  changeDescription?: string;
+  preconditions?: string[];
+  expectedResult?: string;
+  acceptanceCriteria?: string[];
+  testType?: string;
+  testApproach?: EvidenceTestApproach | string;
+  actualResult?: string;
+  environment?: string;
   scenarioId: string;
   scenarioTitle: string;
   requirement: string;
@@ -107,6 +128,7 @@ export interface EvidenceScenarioRecord {
     capturedAt: string;
   };
   docxPath?: string;
+  pdfPath?: string;
   evidenceJsonPath?: string;
   detailEvidence?: DetailEvidenceMetadata;
   evidenceKind?: string;
@@ -118,7 +140,7 @@ export const DEFAULT_EVIDENCE_CONFIG: EvidenceConfig = {
   enabled: true,
   docxEnabled: true,
   perScenarioDocx: false,
-  templatePath: "templates/evidence/execution-evidence-template.docx",
+  templatePath: "templates/evidence/qa-certification-template.docx",
   outputRoot: ".artifacts/evidence",
   screenshotMode: "after_step",
   fullPage: true,

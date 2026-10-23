@@ -212,10 +212,7 @@ async function main(): Promise<void> {
       );
       assert.strictEqual(result.success, true, result.error);
       assert.strictEqual(fs.readFileSync(output).subarray(0, 5).toString(), "%PDF-");
-      // Cover plus one page for each screen group retained by the document model.
-      const expectedModel = await dropRepeatedScreenshots(buildEvidenceDocumentModel([firstScenario, secondScenario]));
-      const screenPages = expectedModel.scenarios.reduce((count, item) => count + item.screens.length, 0);
-      assert.strictEqual(countPdfPages(output), 1 + screenPages);
+      assert.strictEqual(countPdfPages(output), 5, "template cover, summary, two cases, and conclusion");
       assert.deepStrictEqual(fs.readdirSync(dir).filter(name => name.startsWith(".evidence-pdf")), []);
     });
 
@@ -237,7 +234,7 @@ async function main(): Promise<void> {
         console.log = originalLog;
       }
       assert.ok(logs.some(line => /generated .*scenarios=1 images=1/.test(line)), logs.join("\n"));
-      assert.equal(countPdfPages(output), 2, "keep both logical screen groups without creating a separate image-free page");
+      assert.equal(countPdfPages(output), 4, "template cover, summary, case and conclusion");
       const pdfModel = await dropRepeatedScreenshots(buildEvidenceDocumentModel([input]));
       const screens = pdfModel.scenarios[0].screens;
       assert.equal(pdfModel.scenarios[0].images.length, 1);
@@ -270,14 +267,14 @@ async function main(): Promise<void> {
 
       const result = await generateConsolidatedEvidencePdf([input], TEMPLATE, output);
       assert.equal(result.success, true, result.error);
-      assert.equal(countPdfPages(output), 2, "cover and one screen page");
+      assert.equal(countPdfPages(output), 4, "cover, summary, case and conclusion");
       const pdfModel = await dropRepeatedScreenshots(buildEvidenceDocumentModel([input]));
       assert.equal(pdfModel.scenarios[0].images.length, 1);
       assert.equal(pdfModel.scenarios[0].screens[0].images.length, 1);
       assert.equal(pdfModel.scenarios[0].screens[0].steps.length, 2);
     });
 
-    await test("Jira and Recording shrink tall screen captures to keep grouped steps on the same page", async () => {
+    await test("Jira and Recording retain portrait captures with identical certification sections", async () => {
       const makeLongScreen = (id: string, evidenceKind?: string) => {
         const input = scenario(id, id, Array.from({ length: 12 }, () => portrait));
         input.evidenceKind = evidenceKind;
@@ -292,12 +289,12 @@ async function main(): Promise<void> {
       const jiraOutput = path.join(dir, "jira-tall-screen.pdf");
       const jira = await generateConsolidatedEvidencePdf([makeLongScreen("jira-tall", "jira_semantic")], TEMPLATE, jiraOutput);
       assert.equal(jira.success, true, jira.error);
-      assert.equal(countPdfPages(jiraOutput), 2, "cover plus one page with all steps and the screen image");
+      assert.equal(countPdfPages(jiraOutput), 4, "cover, summary, case details with the tiny fixture image, and conclusion");
 
       const recordingOutput = path.join(dir, "recording-tall-screen.pdf");
       const recording = await generateConsolidatedEvidencePdf([makeLongScreen("recording-tall")], TEMPLATE, recordingOutput);
       assert.equal(recording.success, true, recording.error);
-      assert.equal(countPdfPages(recordingOutput), 2, "Recording keeps its grouped steps and screenshot together");
+      assert.equal(countPdfPages(recordingOutput), 4, "Recording uses the same template pagination as Jira");
     });
 
     await test("deduplicates Recording screenshots without moving its steps between screen blocks", async () => {
@@ -336,8 +333,8 @@ async function main(): Promise<void> {
 
     await test("EVIDENCE_FORMAT selects the documents to generate", () => {
       assert.deepStrictEqual(resolveEvidenceFormats({ EVIDENCE_FORMAT: "pdf" }), ["pdf"]);
-      assert.deepStrictEqual(resolveEvidenceFormats({ EVIDENCE_FORMAT: "docx" }), ["docx"]);
-      assert.deepStrictEqual(resolveEvidenceFormats({ EVIDENCE_FORMAT: "both" }), ["pdf", "docx"]);
+      assert.deepStrictEqual(resolveEvidenceFormats({ EVIDENCE_FORMAT: "docx" }), ["pdf"]);
+      assert.deepStrictEqual(resolveEvidenceFormats({ EVIDENCE_FORMAT: "both" }), ["pdf"]);
       assert.strictEqual(resolveEvidenceFormats({})[0], "pdf");
     });
   } finally {

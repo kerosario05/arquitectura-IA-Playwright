@@ -80,7 +80,7 @@ export class RunEvidenceRecorder {
     const normalized: EvidenceScenarioRecord = {
       ...scenarioRecord,
       requirement: this.context.requirement?.trim() || scenarioRecord.requirement?.trim() || `Automatización - ${this.context.sectionName || this.context.sectionSlug}`,
-      analyst: scenarioRecord.analyst?.trim() || this.context.analystName || this.config.analystName || "Automatización",
+      analyst: this.context.analystName?.trim() || this.config.analystName?.trim() || scenarioRecord.analyst?.trim() || "Automatización",
     };
 
     const genericDetailTargets = new Set([
@@ -195,6 +195,8 @@ export class RunEvidenceRecorder {
         });
 
         if (results.pdf?.success) {
+          record.pdfPath = this.paths.pdfPath;
+          await fs.promises.writeFile(this.paths.evidenceJsonPath, JSON.stringify(record, null, 2), "utf8");
           console.log(
             `[evidence:run] generated evidencia.pdf path=${results.pdf.outputPath} scenarios=${this.scenarios.length}`,
           );
@@ -249,8 +251,8 @@ export class RunEvidenceRecorder {
       passedScenarios,
       failedScenarios,
       partialScenarios,
-      docxPath: this.config.docxEnabled ? this.paths.docxPath : undefined,
-      pdfPath: this.config.docxEnabled ? this.paths.pdfPath : undefined,
+      docxPath: undefined,
+      pdfPath: this.config.docxEnabled && fs.existsSync(this.paths.pdfPath) ? this.paths.pdfPath : undefined,
       evidenceJsonPath: this.paths.evidenceJsonPath,
     };
   }

@@ -404,6 +404,7 @@ export function normalizeTestRailCase(rawCase: RawTestRailCase): TestScenario {
     caseId: rawCase.id,
     title,
     preconditions,
+    expectedResult: cleanExpectedResult(rawCase.custom_expected),
     references,
     steps,
     raw: rawCase,

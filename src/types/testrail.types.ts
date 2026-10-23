@@ -101,6 +101,8 @@ export type TestScenario = {
   caseId: number;
   title: string;
   preconditions?: string;
+  /** Scenario-level expected result supplied by Jira/TestRail, retained for evidence reports. */
+  expectedResult?: string;
   references?: string;
   steps: TestScenarioStep[];
   authIntent?: "gate_observation" | "full_authentication";

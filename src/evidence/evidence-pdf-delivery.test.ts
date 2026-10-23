@@ -29,7 +29,7 @@ test("PDF embeds valid images on Windows paths exceeding 260 characters and keep
     assert.equal(result.success, true, result.error);
     const bytes = fs.readFileSync(output);
     assert.equal(bytes.subarray(0, 5).toString(), "%PDF-");
-    assert.equal((bytes.toString("latin1").match(/\/Type\s*\/Page[^s]/g) ?? []).length, 2, "cover plus one content page; no text-only page break");
+    assert.equal((bytes.toString("latin1").match(/\/Type\s*\/Page[^s]/g) ?? []).length, 4, "template cover, summary, case evidence, and conclusion");
     const browser = await chromium.launch({ headless: true });
     try {
       const page = await browser.newPage();

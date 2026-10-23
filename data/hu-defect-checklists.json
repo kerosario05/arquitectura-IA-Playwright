@@ -23947,5 +23947,253 @@
     ],
     "createdAt": "2026-10-23T00:37:36.026Z",
     "updatedAt": "2026-10-23T00:40:28.419Z"
+  },
+  {
+    "id": "1792763890810-83ezw4s",
+    "issueKey": "launch:d1452b18-a808-4fa6-904c-1f22f8294b9c",
+    "urlSlug": "launch:d1452b18-a808-4fa6-904c-1f22f8294b9c",
+    "defects": [
+      {
+        "id": "1792764025678-hiz2lzv",
+        "description": "Qué pasó:\nLa ejecución falló con código: functional_execution_failed\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "f4a122b3-6a23-4752-aceb-eeae0d030aa6",
+        "status": "pending_review",
+        "scenarioId": "aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-verificacion-por-sms",
+        "scenarioTitle": "Transferencia exitosa entre cuentas propias con verificación por SMS",
+        "title": "[Media] La ejecución falló con código: functional_execution_failed — Transferencia exitosa entre cuentas propias con verificación por SMS",
+        "technicalContext": {
+          "dedupeKey": "f4a122b3-6a23-4752-aceb-eeae0d030aa6::55213::aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-verificacion-por-sms",
+          "reasonCode": "functional_execution_failed",
+          "discoveryStatus": "failed",
+          "rawError": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m",
+          "testRailCaseId": 55213,
+          "testRailRunId": 4947,
+          "caseId": 55213,
+          "scenarioId": "aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-verificacion-por-sms",
+          "sourceType": "testrail_case",
+          "appSlug": "fenix",
+          "sectionSlug": "demoblaze",
+          "status": "failed",
+          "failureReason": "functional_execution_failed",
+          "errorMessage": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m",
+          "launchId": "d1452b18-a808-4fa6-904c-1f22f8294b9c"
+        },
+        "createdAt": "2026-10-23T14:00:25.678Z",
+        "updatedAt": "2026-10-23T14:00:25.678Z"
+      }
+    ],
+    "createdAt": "2026-10-23T13:58:10.810Z",
+    "updatedAt": "2026-10-23T14:00:25.678Z"
+  },
+  {
+    "id": "1792764428719-n7q069s",
+    "issueKey": "launch:ffe859bf-d3db-412b-9f83-6afac41c3e49",
+    "urlSlug": "launch:ffe859bf-d3db-412b-9f83-6afac41c3e49",
+    "defects": [],
+    "createdAt": "2026-10-23T14:07:08.719Z",
+    "updatedAt": "2026-10-23T14:07:08.719Z"
+  },
+  {
+    "id": "1792764878257-o2jdqec",
+    "issueKey": "launch:330e1f32-43d2-4435-baa5-22485795360c",
+    "urlSlug": "launch:330e1f32-43d2-4435-baa5-22485795360c",
+    "defects": [
+      {
+        "id": "1792764976380-pp5uohy",
+        "description": "Qué pasó:\nLa ejecución falló con código: functional_execution_failed\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "5f123d57-2991-4502-b65e-74e4d52d95c4",
+        "status": "pending_review",
+        "scenarioId": "aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-verificacion-por-sms",
+        "scenarioTitle": "Transferencia exitosa entre cuentas propias con verificación por SMS",
+        "title": "[Media] La ejecución falló con código: functional_execution_failed — Transferencia exitosa entre cuentas propias con verificación por SMS",
+        "technicalContext": {
+          "dedupeKey": "5f123d57-2991-4502-b65e-74e4d52d95c4::55213::aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-verificacion-por-sms",
+          "reasonCode": "functional_execution_failed",
+          "discoveryStatus": "failed",
+          "rawError": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m",
+          "testRailCaseId": 55213,
+          "testRailRunId": 4949,
+          "caseId": 55213,
+          "scenarioId": "aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-verificacion-por-sms",
+          "sourceType": "testrail_case",
+          "appSlug": "fenix",
+          "sectionSlug": "demoblaze",
+          "status": "failed",
+          "failureReason": "functional_execution_failed",
+          "errorMessage": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m",
+          "launchId": "330e1f32-43d2-4435-baa5-22485795360c"
+        },
+        "createdAt": "2026-10-23T14:16:16.380Z",
+        "updatedAt": "2026-10-23T14:16:16.380Z"
+      },
+      {
+        "id": "1792765033453-k6lp0cp",
+        "description": "Qué pasó:\nLa ejecución falló con código: functional_execution_failed\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "431832c9-6808-418a-bf06-5e778ca84099",
+        "status": "pending_review",
+        "scenarioId": "aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-verificacion-por-sms",
+        "scenarioTitle": "Transferencia exitosa entre cuentas propias con verificación por SMS",
+        "title": "[Media] La ejecución falló con código: functional_execution_failed — Transferencia exitosa entre cuentas propias con verificación por SMS",
+        "technicalContext": {
+          "dedupeKey": "431832c9-6808-418a-bf06-5e778ca84099::55213::aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-verificacion-por-sms",
+          "reasonCode": "functional_execution_failed",
+          "discoveryStatus": "failed",
+          "rawError": "[promoted-step] stepIndex=33 phase=failed",
+          "testRailCaseId": 55213,
+          "testRailRunId": 4949,
+          "caseId": 55213,
+          "scenarioId": "aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-verificacion-por-sms",
+          "sourceType": "testrail_case",
+          "appSlug": "fenix",
+          "sectionSlug": "demoblaze",
+          "status": "failed",
+          "failureReason": "functional_execution_failed",
+          "errorMessage": "[promoted-step] stepIndex=33 phase=failed",
+          "launchId": "330e1f32-43d2-4435-baa5-22485795360c"
+        },
+        "createdAt": "2026-10-23T14:17:13.453Z",
+        "updatedAt": "2026-10-23T14:17:13.453Z"
+      }
+    ],
+    "createdAt": "2026-10-23T14:14:38.257Z",
+    "updatedAt": "2026-10-23T14:17:13.453Z"
+  },
+  {
+    "id": "1792765313143-s5sav9s",
+    "issueKey": "launch:0e780fa8-ddb0-41a1-82f8-ce5ee5306354",
+    "urlSlug": "launch:0e780fa8-ddb0-41a1-82f8-ce5ee5306354",
+    "defects": [
+      {
+        "id": "1792765469099-3wc5t37",
+        "description": "Qué pasó:\nLa ejecución falló con código: full_discovery_child_status_discovered_passed\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "391db0f9-7892-4872-855e-0ec15d9a71cd",
+        "status": "pending_review",
+        "scenarioId": "TR-CASE-54398",
+        "scenarioTitle": "TestRail Case 54398",
+        "title": "[Media] La ejecución falló con código: full_discovery_child_status_discovered_passed — TestRail Case 54398",
+        "technicalContext": {
+          "dedupeKey": "391db0f9-7892-4872-855e-0ec15d9a71cd::54398::TR-CASE-54398",
+          "reasonCode": "full_discovery_child_status_discovered_passed",
+          "discoveryStatus": "failed",
+          "rawError": "Case cannot continue before functional execution: full_discovery_child_status_discovered_passed",
+          "testRailCaseId": 54398,
+          "testRailRunId": 4950,
+          "caseId": 54398,
+          "scenarioId": "TR-CASE-54398",
+          "sourceType": "testrail_case",
+          "appSlug": "fenix",
+          "sectionSlug": "detalle-kiosko",
+          "status": "failed",
+          "failureReason": "full_discovery_child_status_discovered_passed",
+          "errorMessage": "Case cannot continue before functional execution: full_discovery_child_status_discovered_passed",
+          "launchId": "0e780fa8-ddb0-41a1-82f8-ce5ee5306354"
+        },
+        "createdAt": "2026-10-23T14:24:29.099Z",
+        "updatedAt": "2026-10-23T14:24:29.099Z"
+      },
+      {
+        "id": "1792765469524-pz34q67",
+        "description": "Qué pasó:\nLa ejecución falló con código: full_discovery_child_status_discovered_passed\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "ab63ad51-d8f1-4849-866b-1f9f02577461",
+        "status": "pending_review",
+        "scenarioId": "TR-CASE-54398",
+        "scenarioTitle": "TestRail Case 54398",
+        "title": "[Media] La ejecución falló con código: full_discovery_child_status_discovered_passed — TestRail Case 54398",
+        "technicalContext": {
+          "dedupeKey": "ab63ad51-d8f1-4849-866b-1f9f02577461::54398::TR-CASE-54398",
+          "reasonCode": "full_discovery_child_status_discovered_passed",
+          "discoveryStatus": "failed",
+          "rawError": "Case cannot continue before functional execution: full_discovery_child_status_discovered_passed",
+          "testRailCaseId": 54398,
+          "testRailRunId": 4950,
+          "caseId": 54398,
+          "scenarioId": "TR-CASE-54398",
+          "sourceType": "testrail_case",
+          "appSlug": "fenix",
+          "sectionSlug": "detalle-kiosko",
+          "status": "failed",
+          "failureReason": "full_discovery_child_status_discovered_passed",
+          "errorMessage": "Case cannot continue before functional execution: full_discovery_child_status_discovered_passed",
+          "launchId": "0e780fa8-ddb0-41a1-82f8-ce5ee5306354"
+        },
+        "createdAt": "2026-10-23T14:24:29.524Z",
+        "updatedAt": "2026-10-23T14:24:29.524Z"
+      }
+    ],
+    "createdAt": "2026-10-23T14:21:53.143Z",
+    "updatedAt": "2026-10-23T14:24:29.524Z"
+  },
+  {
+    "id": "1792767963776-1cowdpb",
+    "issueKey": "launch:45cbbc6a-bace-4730-9996-e8e0097a2ebe",
+    "urlSlug": "launch:45cbbc6a-bace-4730-9996-e8e0097a2ebe",
+    "defects": [
+      {
+        "id": "1792768104400-jubk3wr",
+        "description": "Qué pasó:\nLa ejecución falló con código: full_discovery_failed\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "3cc9130b-40fd-43a4-a489-1f43efe0e3fc",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Transferencia exitosa entre cuentas propias",
+        "title": "[Media] La ejecución falló con código: full_discovery_failed — Transferencia exitosa entre cuentas propias",
+        "technicalContext": {
+          "dedupeKey": "3cc9130b-40fd-43a4-a489-1f43efe0e3fc::55283::PREVIEW-001",
+          "reasonCode": "full_discovery_failed",
+          "discoveryStatus": "failed",
+          "rawError": "Case cannot continue before functional execution: full_discovery_failed",
+          "testRailCaseId": 55283,
+          "testRailRunId": 4955,
+          "caseId": 55283,
+          "scenarioId": "PREVIEW-001",
+          "sourceType": "jira_preview",
+          "appSlug": "fenix",
+          "sectionSlug": "demoblaze",
+          "status": "failed",
+          "failureReason": "full_discovery_failed",
+          "errorMessage": "Case cannot continue before functional execution: full_discovery_failed",
+          "launchId": "45cbbc6a-bace-4730-9996-e8e0097a2ebe"
+        },
+        "createdAt": "2026-10-23T15:08:24.400Z",
+        "updatedAt": "2026-10-23T15:08:24.400Z"
+      }
+    ],
+    "createdAt": "2026-10-23T15:06:03.776Z",
+    "updatedAt": "2026-10-23T15:08:24.400Z"
+  },
+  {
+    "id": "1792769491724-1834ts3",
+    "issueKey": "launch:104be1b3-7a10-4fea-9743-f1a0ffedba40",
+    "urlSlug": "launch:104be1b3-7a10-4fea-9743-f1a0ffedba40",
+    "defects": [],
+    "createdAt": "2026-10-23T15:31:31.724Z",
+    "updatedAt": "2026-10-23T15:31:31.724Z"
+  },
+  {
+    "id": "1792774766363-bvtpizb",
+    "issueKey": "launch:10807f10-c52f-4de8-b92e-5960912f1a60",
+    "urlSlug": "launch:10807f10-c52f-4de8-b92e-5960912f1a60",
+    "defects": [],
+    "createdAt": "2026-10-23T16:59:26.363Z",
+    "updatedAt": "2026-10-23T16:59:26.363Z"
+  },
+  {
+    "id": "1792775244477-snr7b4v",
+    "issueKey": "launch:51a52cd4-31f9-4122-ba7e-57d9d0e3aaa5",
+    "urlSlug": "launch:51a52cd4-31f9-4122-ba7e-57d9d0e3aaa5",
+    "defects": [],
+    "createdAt": "2026-10-23T17:07:24.476Z",
+    "updatedAt": "2026-10-23T17:07:24.476Z"
   }
 ]

@@ -1,24 +1,17 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { pathToFileURL } from "node:url";
-import { createHash } from "node:crypto";
 import { chromium } from "@playwright/test";
 import JSZip from "jszip";
+import { buildCertificationHtml, resolveCertificationTemplate } from "./qa-certification-template";
 import type { EvidenceScenarioRecord } from "./evidence-types";
 import { buildEvidenceDocumentModel, type EvidenceDocumentModel } from "./evidence-document-model";
 import { formatEvidenceCoverPeriod } from "./evidence-cover-period";
 
 /**
- * Evidence document as PDF, rendered by the Chromium that Playwright already ships — no Office
- * on the server. The page reproduces the corporate Word template
- * (templates/evidence/execution-evidence-template.docx) and the layout Word COM produces from
- * it: cover page, then per scenario the "Caso de prueba / Fecha / Estado" table followed by the
- * screenshots, one scenario per page run.
- *
- * Every measure below comes from the template XML (twips/EMU → CSS px at 96 dpi) and was checked
- * against Word's own PDF export of a generated evidencia.docx. The logo is read from the .docx so
- * the template stays the single source for it; the fonts are the template's (Aptos, Aptos
- * Display, Calibri) shipped in templates/evidence/fonts so the server needs none installed.
+ * Unified Jira/Recording PDF delivery from the retained QA certification Word template.
+ * Chromium provides printing without an Office dependency. The legacy HTML helpers below
+ * remain for compatibility; the production entry points use buildCertificationHtml.
  */
 
 type PdfResult = { success: boolean; error?: string; outputPath?: string };
@@ -35,6 +28,7 @@ export async function generateConsolidatedEvidencePdf(
   templatePath: string,
   outputPath: string,
 ): Promise<PdfResult> {
+  templatePath = resolveCertificationTemplate(templatePath);
   if (scenarios.length === 0) {
     return { success: false, error: "evidence_scenarios_empty" };
   }
@@ -43,9 +37,37 @@ export async function generateConsolidatedEvidencePdf(
   }
   try {
     const model = await dropRepeatedScreenshots(buildEvidenceDocumentModel(scenarios));
-    return await renderEvidencePdf(model, templatePath, outputPath);
+    return await renderCertificationPdf(model, scenarios, templatePath, outputPath);
   } catch (err: any) {
     return { success: false, error: `evidence_pdf_error: ${err?.message ?? err}` };
+  }
+}
+
+async function renderCertificationPdf(model: EvidenceDocumentModel, records: EvidenceScenarioRecord[], templatePath: string, outputPath: string): Promise<PdfResult> {
+  await fs.promises.mkdir(path.dirname(outputPath), { recursive: true });
+  const browser = await chromium.launch({ headless: true });
+  const temporary = `${outputPath}.${process.pid}-${Date.now()}.tmp`;
+  try {
+    const page = await browser.newPage();
+    const html = await buildCertificationHtml(page, model, records, templatePath);
+    await page.setContent(html, { waitUntil: "load" });
+    await page.evaluate(() => document.fonts.ready);
+    const ready = await page.evaluate(() => ({
+      broken: Array.from(document.images).some(i => !i.complete || !i.naturalWidth),
+      placeholders: /\[(?:Completar|NOMBRE DEL|PEGAR AQUÍ|Paso \d|Nombre del escenario)/i.test(document.body.innerText),
+    }));
+    if (ready.broken || ready.placeholders) throw new Error("qa_certification_content_incomplete");
+    const furniture = await page.evaluate(() => ({header: document.querySelector(".print-header")?.textContent || "", footer: document.querySelector(".print-footer")?.textContent || ""}));
+    await page.pdf({ path: temporary, preferCSSPageSize: true, printBackground: true, displayHeaderFooter: true,
+      headerTemplate: `<div style="width:100%;text-align:right;padding:20pt 52pt 0;font:8pt Arial;color:#2F75B5">${escapeHtml(furniture.header)}</div>`,
+      footerTemplate: `<div style="width:100%;text-align:center;padding-bottom:20pt;font:8pt Arial;color:#666">${escapeHtml(furniture.footer)} · <span class="pageNumber"></span>/<span class="totalPages"></span></div>`,
+    });
+    await fs.promises.rename(temporary, outputPath);
+    console.log(`[evidence:pdf] generated path=${outputPath} scenarios=${model.scenarios.length} images=${model.scenarios.reduce((sum, s) => sum + s.images.length, 0)} template=qa_certification`);
+    return { success: true, outputPath };
+  } finally {
+    await browser.close();
+    await fs.promises.unlink(temporary).catch(() => undefined);
   }
 }
 
@@ -121,56 +143,19 @@ async function renderEvidencePdf(
 }
 
 /**
- * Word stores identical pictures once, and normalizeWordComDocxOutput then removes the repeated
- * embeds within a scenario — so in the DOCX a screenshot whose bytes repeat an earlier one of the
- * same scenario never shows. The PDF shows the same set.
+ * Keep one representative image per screen visit. Do not deduplicate image bytes
+ * across different screens: a stalled transition can produce identical pixels on
+ * two distinct steps, but dropping the later image leaves that screen without evidence.
  */
 export async function dropRepeatedScreenshots(model: EvidenceDocumentModel): Promise<EvidenceDocumentModel> {
-  const scenarios = [];
-  for (const scenario of model.scenarios) {
-    const seen = new Set<string>();
-    const images = [];
-    for (const image of scenario.images) {
-      const hash = createHash("sha1").update(await fs.promises.readFile(image.path)).digest("hex");
-      if (seen.has(hash)) {
-        console.log(`[evidence:pdf] skippedRepeatedScreenshot scenario=${scenario.scenarioId} path=${image.path}`);
-        continue;
-      }
-      seen.add(hash);
-      images.push(image);
-    }
-    const retainedPaths = new Set(images.map(image => path.resolve(image.path)));
-    if (scenario.evidenceKind !== "jira_semantic") {
-      // Keep the established Recording/legacy PDF layout: deduplicate the image
-      // bytes, but leave each screen's own step block where it was.
-      const screens = scenario.screens.map(screen => ({
-        ...screen,
-        images: screen.images.filter(image => retainedPaths.has(path.resolve(image.path))),
-      }));
-      scenarios.push({ ...scenario, images, screens });
-      continue;
-    }
-
-    // Remove duplicate image bytes without moving actions between logical screens.
-    // A second screen may have the same pixels (for example during a stalled transition);
-    // its steps still belong under that screen's title even if its repeated image is omitted.
+  const scenarios = model.scenarios.map(scenario => {
     const screens = scenario.screens.map(screen => ({
       ...screen,
       steps: [...screen.steps],
-      images: screen.images.filter(image => retainedPaths.has(path.resolve(image.path))),
+      images: screen.images.length > 1 ? [screen.images[screen.images.length - 1]] : [...screen.images],
     }));
-    // Jira evidence is screen-oriented: keep every action, but only the latest
-    // representative capture for each screen visit. This avoids showing the
-    // initial frame plus several nearly identical frames for the same screen.
-    // Recording intentionally keeps its existing image placement/layout above.
-    const retainedScreens = screens
-      .filter(screen => screen.images.length > 0 || screen.steps.length > 0)
-      .map(screen => screen.images.length > 1
-        ? { ...screen, images: [screen.images[screen.images.length - 1]] }
-        : screen);
-    const jiraImages = retainedScreens.flatMap(screen => screen.images);
-    scenarios.push({ ...scenario, images: jiraImages, screens: retainedScreens });
-  }
+    return { ...scenario, images: screens.flatMap(screen => screen.images), screens };
+  });
   return { ...model, scenarios };
 }
 

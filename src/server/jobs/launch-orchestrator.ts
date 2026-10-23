@@ -30,6 +30,7 @@ export type LaunchScenario = {
   title: string;
   steps: string[];
   expectedResult: string;
+  expectedResultMode?: "assertion" | "documentation";
   preconditions: string[];
   routeProfile?: McpRouteProfile;
   sourceIssueKey?: string;
@@ -54,6 +55,7 @@ export type LaunchScenario = {
 };
 
 export type LaunchExecutionInput = {
+  analystName?: string;
   executionEngine?: ExecutionEngine;
   scenarioOrigin?: ExecutionOrigin;
   appSlug: string;
@@ -111,6 +113,7 @@ export function buildDiscoveryBatchParamsFromLaunch(input: {
     appSlug: input.launch.appSlug,
     sectionSlug: input.launch.sectionSlug,
     sectionName: input.launch.sectionName,
+    analystName: input.launch.analystName,
     executePromotedSpecs: true,
     ...(input.launch.projectId !== undefined ? { testRailProjectId: input.launch.projectId } : {}),
     ...(input.launch.suiteId !== undefined ? { testRailSuiteId: input.launch.suiteId } : {}),
@@ -122,6 +125,7 @@ export function buildDiscoveryBatchParamsFromLaunch(input: {
     launchId: input.launchId,
     testRunId: input.testRunId,
     jiraKey: input.launch.jiraKey,
+    jiraTitle: input.launch.jiraTitle,
     publishedCases: input.publishedCases,
     ...(input.launch.executionEngine === "jira_semantic" && input.launch.scenarioOrigin
       ? {
@@ -245,10 +249,13 @@ export function partitionLaunchScenarios(scenarios: LaunchScenario[], engine:Exe
   const standard: LaunchScenario[] = [];
   const adaptiveFunctional: LaunchScenario[] = [];
   const nonAutomatable: LaunchScenario[] = [];
+  const jiraReviewOnlyErrors = (errors: string[] | undefined) => Boolean(errors?.length)
+    && errors.every(error => error === "JIRA_CONDITION_ASSERTION_MISSING" || error.startsWith("JIRA_ACCEPTANCE_COVERAGE_INCOMPLETE:"));
   for (const scenario of scenarios) {
     if(engine==='jira_semantic') {
-      if(scenario.validation?.valid!==true || scenario.nonAutomatable===true || scenario.launchClassification==='nonAutomatable') nonAutomatable.push(scenario);
-      else standard.push(scenario); // Publication admission, not runtime/spec certification.
+      const reviewableValidationGap = scenario.validation?.valid === false && jiraReviewOnlyErrors(scenario.validation.errors);
+      if((scenario.validation?.valid!==true && !reviewableValidationGap) || scenario.nonAutomatable===true || scenario.launchClassification==='nonAutomatable') nonAutomatable.push(scenario);
+      else standard.push(scenario); // Review gaps do not certify coverage, but need not prevent an execution attempt.
     }
     else if (classifyRouteDiscoveryEligibility(scenario).allowed) routeDiscovery.push(scenario);
     else if (classifyLaunchScenarioAuthority(scenario) === "nonAutomatable") nonAutomatable.push(scenario);

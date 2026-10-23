@@ -28,12 +28,40 @@ export function jiraEvidenceScreenIdentityFields(
 }
 
 export type JiraEvidenceContext = {
+  requirementTitle?: string;
   appSlug: string;
   sectionSlug: string;
   sectionName?: string;
   analyst?: string;
   date?: string;
 };
+
+/** Turns the scenario's visible test-data requirements into safe report preconditions.
+ * Runtime values are deliberately omitted; only field, condition, and step are shown.
+ */
+export function jiraEvidencePreconditions(source: {
+  preconditions?: unknown;
+  inputRequirements?: unknown;
+}): string[] {
+  const explicit = Array.isArray(source.preconditions)
+    ? source.preconditions.filter((value): value is string => typeof value === "string" && value.trim().length > 0).map(value => value.trim())
+    : [];
+  const conditionLabel = { valid: "válido", invalid: "no válido", expired: "expirado" } as const;
+  const inputRequirements = Array.isArray(source.inputRequirements) ? source.inputRequirements : [];
+  const dataRequirements = inputRequirements.flatMap(value => {
+    if (!value || typeof value !== "object") return [];
+    const requirement = value as Record<string, unknown>;
+    const label = typeof requirement.label === "string" ? requirement.label.trim() : "";
+    if (!label || requirement.required === false) return [];
+    const condition = typeof requirement.dataCondition === "string" && requirement.dataCondition in conditionLabel
+      ? conditionLabel[requirement.dataCondition as keyof typeof conditionLabel]
+      : "requerido";
+    const step = Number.isInteger(requirement.stepIndex) && Number(requirement.stepIndex) > 0
+      ? ` · paso ${requirement.stepIndex}` : "";
+    return [`${label} · ${condition}${step}`];
+  });
+  return [...new Set([...explicit, ...dataRequirements])];
+}
 
 function evidenceStepStatus(
   outcome: JiraScenarioOutcome,
@@ -125,7 +153,12 @@ export function buildJiraEvidenceScenarioRecords(
     return {
       scenarioId: source.scenarioId,
       scenarioTitle: source.title,
-      requirement: source.sourceIssueKey,
+      issueKey: source.sourceIssueKey,
+      expectedResult: source.expectedResult,
+      testType: source.testType,
+      testApproach: source.testApproach,
+      preconditions: jiraEvidencePreconditions(source),
+      requirement: [source.sourceIssueKey, context.requirementTitle?.trim()].filter(Boolean).join(" "),
       analyst: context.analyst || "QA Lab",
       date: formatEvidenceDate(timestamp),
       status,

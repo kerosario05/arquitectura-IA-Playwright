@@ -12,6 +12,7 @@ export type Principal = {
   kind: "user" | "service";
   userId: string | null;
   username: string;
+  fullName?: string;
   sessionId: string | null;
   scope: SessionScope;
   permissions: ReadonlySet<PermissionKey>;

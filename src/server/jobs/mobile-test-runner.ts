@@ -1291,7 +1291,7 @@ export async function consolidateMobileRunEvidence(
   }
 
   try {
-    const runRecorder = new RunEvidenceRecorder({ appSlug: "mobile", sectionSlug, runId });
+    const runRecorder = new RunEvidenceRecorder({ appSlug: "mobile", sectionSlug, runId, analystName: String(jobStore.get(runId)?.params.analystName || "") || undefined });
     await runRecorder.start();
 
     const scenariosDir = path.join(evidenceConfig.outputRoot, "mobile", sectionSlug, "runs", runId, "scenarios");

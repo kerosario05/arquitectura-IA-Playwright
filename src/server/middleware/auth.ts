@@ -9,6 +9,7 @@ import { resolveAuthConfig } from "../../auth/config";
 import { hasPermission, type Principal } from "../../auth/principal";
 import type { PermissionKey } from "../../auth/permissions";
 import type { Session } from "../../db/session-repository";
+import { withReportAttribution } from "../../auth/report-attribution";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -70,7 +71,7 @@ export function attachPrincipal(): RequestHandler {
         req.principal = resolved.principal;
         req.authSession = resolved.session;
         req.bearerToken = token;
-        next();
+        withReportAttribution(resolved.principal, next);
         return;
       } catch (err) {
         if (err instanceof AuthError) {

@@ -2981,6 +2981,12 @@ export async function runCaseDiscoveryWorkflow(
           sectionName: scenario.sectionName,
           scenarioId,
           scenarioTitle: scenario.title,
+          // The selected scenario's top-level expected result is the report authority.
+          // Per-step expected values are only a fallback for older sources without one.
+          expectedResult: scenario.expectedResult?.trim()
+            || scenario.steps.map(step => step.expected?.trim()).filter(Boolean).join("\n"),
+          preconditions: scenario.preconditions ? [scenario.preconditions] : undefined,
+          issueKey: scenario.references?.match(/\b[A-Z][A-Z0-9]+-\d+\b/)?.[0],
           caseId: scenario.caseId,
           runId: options.runId,
         });

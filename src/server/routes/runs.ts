@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { currentReportAnalyst } from "../../auth/report-attribution";
 import { filterByProjectAccess } from "../middleware/route-policy";
 import fs from "fs";
 import path from "path";
@@ -20,7 +21,8 @@ import { launchExecution, type LaunchScenario, type LaunchExecutionInput } from 
 import { defectChecklistStore } from "../services/defect-checklist-store";
 import type { McpRouteProfile, McpScenario } from "../../scenarios/scenario-types";
 import { buildDataContext, type DataContextEntry } from "../../data/data-context";
-import { config } from "../../config/env";
+import { config, requireJiraConfig } from "../../config/env";
+import { JiraClient } from "../../clients/jira.client";
 import { loadAppConfig } from "../../automations/app-auto-resolver";
 import { resolveJiraConfiguredInputValues, jiraScenarioRuntimeValues } from "../../jira/jira-runtime-values";
 import { collectMissingJiraRequiredInputs } from "../../jira/jira-required-input-validation";
@@ -32,6 +34,19 @@ export const runsRouter = Router();
 
 export function resolveJobStoreSourceJobId(params: Record<string, unknown>): string {
   return typeof params.sourceJobId === "string" && params.sourceJobId.length > 0 ? params.sourceJobId : "none";
+}
+
+async function resolveJiraSummary(issueKey: string, preferredTitle: unknown): Promise<string | undefined> {
+  const preferred = typeof preferredTitle === "string" ? preferredTitle.trim() : "";
+  if (preferred && preferred !== issueKey) return preferred;
+  if (!issueKey) return preferred || undefined;
+  try {
+    const issue = await new JiraClient(requireJiraConfig(config)).getIssue(issueKey, ["summary"]);
+    return issue.fields?.summary?.trim() || preferred || undefined;
+  } catch {
+    console.warn(`[jira-evidence] summary unavailable key=${issueKey}`);
+    return preferred || undefined;
+  }
 }
 
 const SENSITIVE_PATTERNS = [
@@ -215,6 +230,7 @@ function normalizeLaunchScenario(value: unknown, _fallbackPrefix: string, index:
     steps: normalizeStringArray(record.steps),
     ...(Array.isArray(record.inputRequirements) ? { inputRequirements: deriveJiraInputRequirements(normalizeStringArray(record.steps), record.inputRequirements) } : {}),
     expectedResult: typeof record.expectedResult === "string" ? record.expectedResult : "",
+    ...(record.expectedResultMode === "documentation" || record.expectedResultMode === "assertion" ? { expectedResultMode: record.expectedResultMode } : {}),
     preconditions: normalizeStringArray(record.preconditions),
     routeProfile: record.routeProfile as McpRouteProfile | undefined,
     sourceIssueKey: typeof record.sourceIssueKey === "string" ? record.sourceIssueKey : undefined,
@@ -363,6 +379,9 @@ runsRouter.post("/scenario-preview", async (req, res, next) => {
     targetAppSlug?: string;
     targetAppName?: string;
     jiraKey?: string;
+    jiraTitle?: string;
+    storyTitle?: string;
+    huTitle?: string;
     sectionName?: string;
     sectionSlug?: string;
     sectionId?: string | number;
@@ -454,6 +473,9 @@ runsRouter.post("/scenario-preview", async (req, res, next) => {
   }
 
   const issueKey = ((validScenarios[0] as any)?.sourceIssueKey || body.source?.projectKey || body.jiraKey || "").trim();
+  const jiraTitle = selectedEngine === "jira_semantic"
+    ? await resolveJiraSummary(issueKey, body.jiraTitle ?? body.storyTitle ?? body.huTitle)
+    : undefined;
 
   let checklistUrl: string | undefined;
   if (issueKey) {
@@ -463,6 +485,7 @@ runsRouter.post("/scenario-preview", async (req, res, next) => {
 
   const jobPayload = {
     ...body,
+    ...(jiraTitle ? { jiraTitle } : {}),
     executionEngine: selectedEngine === "jira_semantic" ? selectedEngine : undefined,
     issueKey,
     checklistUrl,
@@ -924,6 +947,7 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
         sourceIssueKey: scenario.sourceIssueKey,
         steps: scenario.steps,
         expectedResult: scenario.expectedResult,
+        expectedResultMode: (scenario as unknown as JiraScenarioInput).expectedResultMode,
         preconditions: scenario.preconditions,
         authIntent: scenario.authIntent,
         inputRequirements: scenario.inputRequirements,
@@ -1238,7 +1262,12 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
         return;
       }
     }
+    const jiraKey = (typeof body.jiraKey === "string" ? body.jiraKey.trim() : "") || selectedScenarios[0]?.sourceIssueKey || "";
+    const jiraTitle = body.executionEngine === "jira_semantic"
+      ? await resolveJiraSummary(jiraKey, body.jiraTitle ?? body.storyTitle ?? body.huTitle)
+      : body.jiraTitle ?? body.storyTitle ?? body.huTitle;
     const launchInput = {
+      analystName: currentReportAnalyst(),
       appSlug: String(body.appSlug ?? ""),
       sectionSlug: body.sectionSlug as string | undefined,
       sectionName: body.sectionName as string | undefined,
@@ -1246,10 +1275,10 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
       projectId: body.projectId ? Number(body.projectId) : undefined,
       suiteId: body.suiteId ? Number(body.suiteId) : undefined,
       testrailSectionId: body.testrailSectionId ? Number(body.testrailSectionId) : undefined,
-      jiraKey: body.jiraKey as string | undefined,
+      jiraKey: jiraKey || undefined,
       executionEngine: body.executionEngine as LaunchExecutionInput['executionEngine'],
       scenarioOrigin: body.scenarioOrigin as LaunchExecutionInput['scenarioOrigin'],
-      jiraTitle: (body.jiraTitle ?? body.storyTitle ?? body.huTitle) as string | undefined,
+      jiraTitle: typeof jiraTitle === "string" ? jiraTitle : undefined,
       sprintName: body.sprintName as string | undefined,
       selectedScenarios,
        existingTestRailCaseIds,
@@ -1926,8 +1955,8 @@ runsRouter.get("/:jobId/evidence-docx/status", (req, res) => {
 runsRouter.get("/:jobId/evidence-docx", (req, res) => {
   const jobId = req.params.jobId;
   const requested = typeof req.query.format === "string" ? req.query.format.toLowerCase() : "";
-  if (requested && requested !== "pdf" && requested !== "docx") {
-    res.status(400).json({ error: "Invalid format", jobId, message: "format debe ser pdf o docx." });
+  if (requested && requested !== "pdf") {
+    res.status(400).json({ error: "Invalid format", jobId, message: "El documento se entrega en PDF. Usa format=pdf." });
     return;
   }
   const resolution = resolveEvidenceDocxForJob(
@@ -1966,7 +1995,31 @@ runsRouter.get("/:jobId/evidence-docx", (req, res) => {
   }
 
   const format = resolution.documentFormat ?? "docx";
-  const filename = `evidencia-${jobId}.${format}`;
+  const job = jobStore.get(jobId) ?? jobStore.getPersisted(jobId);
+  const params = (job?.params ?? {}) as Record<string, unknown>;
+  const scenarioOrigin = params.scenarioOrigin && typeof params.scenarioOrigin === "object"
+    ? params.scenarioOrigin as Record<string, unknown>
+    : {};
+  const jiraKey = toNonEmptyString(params.jiraKey)
+    ?? toNonEmptyString(params.huKey)
+    ?? toNonEmptyString(scenarioOrigin.jiraKey)
+    ?? toNonEmptyString(job?.issueKey);
+  const jiraTitle = toNonEmptyString(params.jiraTitle) ?? toNonEmptyString(params.huTitle);
+  const caseTitle = toNonEmptyString(params.scenarioTitle)
+    ?? toNonEmptyString(params.title)
+    ?? toNonEmptyString(job?.currentCaseTitle);
+  const documentTitle = jiraTitle ?? caseTitle;
+  const descriptiveName = [jiraKey, documentTitle && documentTitle !== jiraKey ? documentTitle : undefined]
+    .filter((part): part is string => Boolean(part))
+    .join(" ")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9 _.-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/[. ]+$/g, "")
+    .slice(0, 140);
+  const filename = `${descriptiveName || `evidencia-${jobId}`}.${format}`;
   res.setHeader("Content-Type", EVIDENCE_DOCUMENT_FILES[format].contentType);
   res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
 

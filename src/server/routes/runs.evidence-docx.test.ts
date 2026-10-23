@@ -108,7 +108,7 @@ async function main(): Promise<void> {
     });
   });
 
-  await test("Word is explicit and never silently replaces an unavailable PDF", async () => {
+  await test("Word cannot replace the required PDF delivery", async () => {
     const wordPath = path.join(path.dirname(readyDocPath), "evidencia.docx");
     fs.writeFileSync(wordPath, "WORD EXPLICIT");
     fs.renameSync(readyDocPath, `${readyDocPath}.held`);
@@ -117,8 +117,8 @@ async function main(): Promise<void> {
       assert.strictEqual(resolveEvidenceDocxForJob(readyJobId, ["docx"]).documentPath, wordPath);
       await withServer(async baseUrl => {
         const word = await fetch(`${baseUrl}/api/runs/${readyJobId}/evidence-docx?format=docx`);
-        assert.strictEqual(word.status, 200);
-        assert.strictEqual(await word.text(), "WORD EXPLICIT");
+        assert.strictEqual(word.status, 400);
+        assert.match(await word.text(), /PDF/);
       });
     } finally {
       fs.renameSync(`${readyDocPath}.held`, readyDocPath);

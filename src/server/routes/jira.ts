@@ -4,7 +4,8 @@ import { JiraClient } from "../../clients/jira.client";
 import { defectChecklistStore } from "../services/defect-checklist-store";
 import * as path from "path";
 import * as fs from "fs";
-import { generateEvidenceDocx } from "../../evidence/evidence-docx-generator";
+import { generateEvidencePdf } from "../../evidence/evidence-pdf-generator";
+import { QA_CERTIFICATION_TEMPLATE } from "../../evidence/qa-certification-template";
 
 export const jiraRouter = Router();
 
@@ -284,7 +285,7 @@ async function resolveAndAttachEvidence(params: {
   attachmentDiagnosticCode?: string;
 }> {
   const { jira, defectId, scenarioId, jiraIssueKey, evidenceRoot, templatePath, sourceIssueKey } = params;
-  const attachmentName = `evidencia-${scenarioId.replace(/[^a-zA-Z0-9_-]/g, "")}.docx`;
+  const attachmentName = `evidencia-${scenarioId.replace(/[^a-zA-Z0-9_-]/g, "")}.pdf`;
   const stored = defectChecklistStore.findDefect(sourceIssueKey, defectId);
   const jobId = stored?.jobId;
   const legacyEvidenceDir = stored?.technicalContext?.evidenceDir;
@@ -320,7 +321,7 @@ async function resolveAndAttachEvidence(params: {
   // 2. Fallback: legacy evidenceDir from technicalContext
   if (!docxPath && legacyEvidenceDir) {
     legacyDirPresent = true;
-    const candidate = path.resolve(legacyEvidenceDir, "evidencia.docx");
+    const candidate = path.resolve(legacyEvidenceDir, "evidencia.pdf");
     if (fs.existsSync(candidate) && fs.statSync(candidate).isFile() && fs.statSync(candidate).size > 0) {
       docxPath = candidate;
       sourceLog = "legacy_evidence_dir";
@@ -444,7 +445,7 @@ async function tryGenerateScenarioDocx(
         if (!fs.existsSync(scenarioDir)) continue;
 
         // Check for existing DOCX first
-        const existingDocx = path.join(scenarioDir, "evidencia.docx");
+        const existingDocx = path.join(scenarioDir, "evidencia.pdf");
         if (fs.existsSync(existingDocx) && fs.statSync(existingDocx).isFile() && fs.statSync(existingDocx).size > 0) {
           console.log(`[jira-evidence-resolve] defectId=${defectId} scenarioId=${scenarioId} documentExists=true screenshots=n/a source=existing_docx`);
           return { docxPath: existingDocx, screenshots: -1, source: "existing_docx" };
@@ -499,7 +500,7 @@ async function tryGenerateScenarioDocx(
           }
 
           // Template resolution: try multiple locations
-          let resolvedTemplate = "";
+          let resolvedTemplate = QA_CERTIFICATION_TEMPLATE;
           if (templatePath) {
             const candidates = [
               path.resolve(templatePath),                                              // absolute or relative to cwd
@@ -533,9 +534,9 @@ async function tryGenerateScenarioDocx(
           }
 
           // Generate DOCX
-          const docxOut = path.join(scenarioDir, "evidencia.docx");
+          const docxOut = path.join(scenarioDir, "evidencia.pdf");
           try {
-            const result = await generateEvidenceDocx(normalizedRecord, resolvedTemplate, docxOut);
+            const result = await generateEvidencePdf(normalizedRecord, resolvedTemplate, docxOut);
             const outputExists = fs.existsSync(docxOut);
             const outputSize = outputExists ? fs.statSync(docxOut).size : 0;
 

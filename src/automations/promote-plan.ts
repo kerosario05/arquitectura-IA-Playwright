@@ -419,6 +419,7 @@ export type VerifyPromotedSpecOptions = {
    * under an unaddressable `runId=undefined` path that no consolidation pass can ever find it under.
    */
   evidenceContext?: {
+    analystName?: string;
     runId: string;
     scenarioId: string;
     scenarioTitle: string;
@@ -599,7 +600,8 @@ export function buildVerifyPromotedSpecExecEnv(options: VerifyPromotedSpecOption
     execEnv.HEADLESS = String(options.headless);
   }
   if (options.evidenceContext) {
-    const { runId, scenarioId, scenarioTitle, appSlug, sectionSlug } = options.evidenceContext;
+    const { runId, scenarioId, scenarioTitle, appSlug, sectionSlug, analystName } = options.evidenceContext;
+    if (analystName?.trim()) execEnv.EVIDENCE_ANALYST_NAME = analystName.trim();
     execEnv.EVIDENCE_RUN_ID = runId;
     // Generated specs set SCENARIO_ID/SCENARIO_TITLE to their compile-time identity inside
     // the test body. Keep the selected rerun's evidence identity on dedicated keys so multiple

@@ -1,0 +1,72 @@
+{
+  "mode": "deterministic",
+  "provider": null,
+  "model": null,
+  "skill": {
+    "name": null,
+    "version": null,
+    "hash": null,
+    "loaded": false
+  },
+  "invocations": 0,
+  "invocationsConsumed": 0,
+  "durationMs": 123427,
+  "usage": {
+    "inputTokens": null,
+    "cachedInputTokens": null,
+    "cacheWriteInputTokens": null,
+    "nonCachedInputTokens": null,
+    "outputTokens": null,
+    "reasoningOutputTokens": null,
+    "totalPhysicalTokens": null,
+    "durationMs": null,
+    "credits": null
+  },
+  "validation": {
+    "schema": "skipped",
+    "structure": "passed",
+    "traceFidelity": "skipped",
+    "typescript": "passed",
+    "playwrightDiscovery": "passed",
+    "semanticCoverage": "passed",
+    "functionalExecution": "failed"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "specGenerationAttempts": 0,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [
+    "functionalExecution"
+  ],
+  "regressedGates": [],
+  "missingRequirements": [],
+  "oracleTypes": [
+    "negative_visibility",
+    "credential_rejection",
+    "literal_visible_text",
+    "runtime_state"
+  ],
+  "errors": [
+    "functional_execution_failed:exitCode=1",
+    "functional_execution_error:Error: Promoted click failed at step 6 target=\"continuar inicio de sesión\". failureClass=ACTION_CALLBACK_TIMEOUT exactRuntimeError=\"Retry failed: click retry timed out after 15000ms\" currentUrl=https://qa1.santacruz.do/onlinebanking clickPath=failed nativeClickAttempted=true nativeClickSucceeded=false callbackAttempted=true callbackSucceeded=false retryAttempted=true diagnostics={\"currentUrl\":\"https://qa1.santacruz.do/onlinebanking\",\"actionIntent\":\"click\",\"target\":\"continuar inicio de sesión\",\"stepIndex\":6,\"timeoutMs\":15000,\"activeContainer\":\"form#LoginFormE\",\"stability\":{\"currentUrl\":\"https://qa1.santacruz.do/onlinebanking\",\"title\":\"Banco Santa Cruz - Banca en Linea\",\"visibleHeadings\":[],\"visibleButtons\":[\"Iniciar sesión\"],\"visibleTexts\":[\"Personal\",\"Empresarial\",\"RNC:\",\"Usuario:\",\"Contraseña:\",\"¿Olvidó su contraseña?\",\"Iniciar sesión\",\"¿Necesitas acceso?\",\"Regístrate\",\"Derechos y Deberes como usuarios financieros\",\"Inicio -\",\"Quiénes Somos -\",\"Productos -\",\"Contactos -\",\"Tarifas de Servicio -\",\"Pasos Reclamación\",\"© 2026 Banco Santa Cruz, República Dominicana\",\"Powered by Sistemas Integrados de Informática\",\"Version: 2026.11.1.0 Built: 22/10/2026 02:41:12 PM\"],\"loadingDetected\":false,\"skeletonDetected\":false,\"listReadiness\":{\"cardsVisible\":0,\"listItemsVisible\":0,\"loadingDetected\":false,\"zeroProductsDetected\":false,\"hasEntityContainers\":true,\"visibleHeadings\":[],\"visibleButtons\":[\"Personal\",\"Empresarial\",\"¿Olvidó su contraseña?\",\"Iniciar sesión\",\"Regístrate\",\"Derechos y Deberes como usuarios financieros\",\"Inicio -\",\"Quiénes Somos -\",\"Productos -\",\"Contactos -\"],\"ready\":true},\"diagnosticStatus\":\"completed\"},\"retryAttempted\":true,\"clickPath\":\"failed\",\"nativeClickAttempted\":true,\"nativeClickSucceeded\":false,\"callbackAttempted\":true,\"callbackSucceeded\":false,\"callbackError\":\"Retry failed: click retry timed out after 15000ms\",\"expectedEffect\":\"ui_change\",\"effectDetected\":false,\"fallbackUsed\":\"none\",\"matchedLocatorStrategy\":\"unknown\",\"screenshotPath\":\"[REDACTED]\"}"
+  ],
+  "warnings": [
+    "step_index_not_explicit_in_spec:1",
+    "functional_execution_screenshots=5",
+    "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 6)."
+  ],
+  "finalSpec": {
+    "origin": "deterministic_compiler",
+    "generatedBy": "core",
+    "strategy": "deterministic_compiler",
+    "fallback": null
+  },
+  "runtimeGate": {
+    "decision": "block",
+    "promotionStatus": "blocked",
+    "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 6)."
+  }
+}

@@ -579,10 +579,18 @@ async function main(): Promise<void> {
   if (options.caseId && testPath) {
     let specSource = await fs.readFile(path.resolve(process.cwd(), testPath), "utf8");
     const originalSpecPath = path.resolve(testPath);
+    let jiraSourceEvidence: Record<string, unknown> = {};
+    try {
+      const parsed = JSON.parse(process.env.JIRA_EVIDENCE_CONTEXT ?? "{}");
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) jiraSourceEvidence = parsed;
+    } catch {
+      console.log("[evidence] Jira scenario metadata ignored reason=invalid_context_json");
+    }
     const evidenceContext = resolvedAppSlug && resolvedSectionSlug && process.env.EVIDENCE_RUN_ID ? {
       appSlug: resolvedAppSlug, sectionSlug: resolvedSectionSlug,
       sectionName: process.env.SECTION_NAME, runId: process.env.EVIDENCE_RUN_ID,
       caseId: Number(options.caseId), specPath: originalSpecPath,
+      ...jiraSourceEvidence,
     } : undefined;
     let jiraEvidence = jiraReuseEvidenceOptions(specSource, evidenceContext);
     if (jiraEvidence) {

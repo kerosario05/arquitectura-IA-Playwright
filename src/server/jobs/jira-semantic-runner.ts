@@ -358,13 +358,15 @@ async function generateJiraEvidence(
   const sectionSlug = String(params.sectionSlug ?? "default-section");
   const sectionName = typeof params.sectionName === "string" ? params.sectionName : undefined;
   const analyst = typeof params.analystName === "string" ? params.analystName : undefined;
+  const requirementTitle = typeof params.jiraTitle === "string" ? params.jiraTitle : typeof params.huTitle === "string" ? params.huTitle : undefined;
+  const requirementKey = typeof params.issueKey === "string" ? params.issueKey : typeof params.jiraKey === "string" ? params.jiraKey : undefined;
   try {
     const recorder = new RunEvidenceRecorder({ appSlug, sectionSlug, sectionName,
-      requirement: typeof params.issueKey === "string" ? params.issueKey : typeof params.jiraKey === "string" ? params.jiraKey : undefined,
+      requirement: requirementKey ? [requirementKey, requirementTitle].filter(Boolean).join(" ") : undefined,
       runId: jobId, outputRoot: config.outputRoot, analystName: analyst });
     await recorder.start();
     const records = buildJiraEvidenceScenarioRecords(scenarios, outcomes as Parameters<typeof buildJiraEvidenceScenarioRecords>[1], {
-      appSlug, sectionSlug, sectionName, analyst });
+      appSlug, sectionSlug, sectionName, analyst, requirementTitle });
     for (const record of records) recorder.addScenario(record);
     const runRecord = await recorder.finish();
     const paths = buildEvidenceRunPaths({ appSlug, sectionSlug, sectionName, runId: jobId, outputRoot: config.outputRoot });

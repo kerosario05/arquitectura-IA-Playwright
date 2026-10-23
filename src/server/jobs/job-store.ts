@@ -1,4 +1,5 @@
 import { randomUUID } from "crypto";
+import { currentReportAnalyst } from "../../auth/report-attribution";
 import { EventEmitter } from "events";
 import type { ChildProcess } from "child_process";
 import * as fs from "node:fs";
@@ -95,6 +96,7 @@ const TERMINAL_STATUSES = new Set<JobStatus>([
   "done", "failed", "cancelled", "completed_with_failures", "completed_with_sync_errors",
 ]);
 const PERSISTED_PARAM_KEYS = [
+  "analystName",
   "executionEngine",
   "appSlug", "projectSlug", "targetAppSlug", "launchId", "huKey", "huTitle", "jiraKey", "jiraTitle", "scenarioTitle", "title",
   "testrailProjectId", "testrailProjectName", "testrailSuiteId", "testrailSuiteName", "testrailSectionId", "sectionId", "sectionName", "sectionSlug", "testRunId",
@@ -169,6 +171,8 @@ class JobStore {
     params: Record<string, unknown>,
     options?: { parentJobId?: string },
   ): Job {
+    const analystName = currentReportAnalyst();
+    if (analystName) params = { ...params, analystName };
     const id = randomUUID();
     const job: JobInternal = {
       id,

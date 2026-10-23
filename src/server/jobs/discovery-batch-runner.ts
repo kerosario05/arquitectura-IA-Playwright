@@ -3,6 +3,7 @@ import { reportCaseFailureSafely, runScheduledCaseSafely } from "./case-failure-
 import path from "node:path";
 import { createHash } from "node:crypto";
 import { spawn } from "node:child_process";
+import { evidenceActorEnvironment } from "../../auth/report-attribution";
 import { RunEvidenceRecorder } from "../../evidence/run-evidence-recorder";
 import { buildEvidencePaths, buildEvidenceRunPaths } from "../../evidence/evidence-paths";
 import { linkJiraAutomationToTestRailCase, loadAutomationIndex } from "../../automations/automation-index";
@@ -27,6 +28,7 @@ import type { McpRouteProfile } from "../../scenarios/scenario-types";
 import type { PublishedCaseEntry } from "./launch-orchestrator";
 import { jobStore } from "./job-store";
 import { startJiraSemanticRun } from "./jira-semantic-runner";
+import { jiraEvidencePreconditions } from "../../jira/jira-evidence";
 import {
   finalizeLaunchManifest,
   syncDiscoveryResultToTestRail,
@@ -71,6 +73,7 @@ type DiscoveryBatchParams = {
   launchId?: string;
   testRunId?: number;
   jiraKey?: string;
+  jiraTitle?: string;
   contextOnly?: boolean;
   contextMaterialized?: boolean;
   publishedCases?: PublishedCaseEntry[];
@@ -1075,6 +1078,7 @@ function buildContractPreviewEnv(params: DiscoveryBatchParams, jobId: string): N
   return {
     ...(process.env as NodeJS.ProcessEnv),
     EVIDENCE_RUN_ID: jobId,
+    ...evidenceActorEnvironment(params),
     ...(resolvedAppSlug ? { APP_SLUG: resolvedAppSlug } : {}),
     ...(resolvedSectionSlug ? { SECTION_SLUG: resolvedSectionSlug } : {}),
     ...(resolvedSectionName ? { SECTION_NAME: resolvedSectionName } : {}),
@@ -1118,26 +1122,69 @@ export function buildPromotedExecutionEnv(
   jobId: string,
   baseEnv: NodeJS.ProcessEnv = process.env as NodeJS.ProcessEnv,
   runtimeContextPath?: string,
+  caseId?: number,
 ): NodeJS.ProcessEnv {
   const resolvedAppSlug = nonEmptyString(params.appSlug);
   const resolvedSectionSlug = nonEmptyString(params.sectionSlug);
   const resolvedSectionName = nonEmptyString(params.sectionName);
   const forceHeadlessForAutomation = params.headed !== true;
+  const jiraEntry = (params.publishedCases ?? []).find(entry => entry.sourceType === "jira_preview" && entry.caseId === caseId);
+  const jiraScenario = selectJiraSemanticScenario(params, jiraEntry);
+  const jiraEvidenceContext = jiraScenario ? buildJiraEvidenceContext(params, jiraScenario) : undefined;
   return {
     ...(baseEnv as NodeJS.ProcessEnv),
     EVIDENCE_RUN_ID: jobId,
+    ...evidenceActorEnvironment(params),
     ...(resolvedAppSlug ? { APP_SLUG: resolvedAppSlug } : {}),
     ...(resolvedSectionSlug ? { SECTION_SLUG: resolvedSectionSlug } : {}),
     ...(resolvedSectionName ? { SECTION_NAME: resolvedSectionName } : {}),
     ...(resolvedAppSlug ? { EVIDENCE_APP_SLUG: resolvedAppSlug } : {}),
     ...(resolvedSectionSlug ? { EVIDENCE_SECTION_SLUG: resolvedSectionSlug } : {}),
     ...(runtimeContextPath ? { DISCOVERY_RUNTIME_CONTEXT: runtimeContextPath } : {}),
+    ...(jiraEvidenceContext ? { JIRA_EVIDENCE_CONTEXT: JSON.stringify(jiraEvidenceContext) } : {}),
     ...(forceHeadlessForAutomation
       ? {
           AUTOMATION_HEADLESS: "true",
           AUTOMATION_SOURCE: "qa_lab_automatic",
         }
       : {}),
+  };
+}
+
+function buildJiraEvidenceContext(
+  params: DiscoveryBatchParams,
+  scenario: Record<string, unknown>,
+): Record<string, unknown> {
+  const nonEmptyText = (value: unknown): string | undefined => typeof value === "string" && value.trim() ? value.trim() : undefined;
+  const issueKey = nonEmptyText(scenario.sourceIssueKey) ?? nonEmptyString(params.jiraKey);
+  const title = nonEmptyText(params.jiraTitle);
+  const requirement = issueKey && title
+    ? (title.toLocaleLowerCase("es").startsWith(issueKey.toLocaleLowerCase("es")) ? title : `${issueKey} ${title}`)
+    : issueKey ?? title;
+  const requirements = Array.isArray(scenario.inputRequirements) ? scenario.inputRequirements : [];
+  const dataLabels = Object.fromEntries(requirements.flatMap(value => {
+    if (!value || typeof value !== "object") return [];
+    const field = value as Record<string, unknown>;
+    const key = nonEmptyText(field.key);
+    const label = nonEmptyText(field.label);
+    return key && label ? [[key, label]] : [];
+  }));
+  const expectedResult = nonEmptyText(scenario.expectedResult);
+  const explicitCriteria = Array.isArray(scenario.acceptanceCriteria)
+    ? scenario.acceptanceCriteria.filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+    : typeof scenario.acceptanceCriteria === "string" && scenario.acceptanceCriteria.trim()
+      ? [scenario.acceptanceCriteria.trim()]
+      : [];
+  const preconditions = jiraEvidencePreconditions(scenario);
+  return {
+    ...(issueKey ? { issueKey } : {}),
+    ...(requirement ? { requirement } : {}),
+    ...(expectedResult ? { expectedResult } : {}),
+    acceptanceCriteria: explicitCriteria.length ? explicitCriteria : (expectedResult ? [expectedResult] : []),
+    preconditions,
+    ...(nonEmptyText(scenario.testType) ? { testType: nonEmptyText(scenario.testType) } : {}),
+    ...(nonEmptyText(scenario.testApproach) ? { testApproach: nonEmptyText(scenario.testApproach) } : {}),
+    dataLabels,
   };
 }
 
@@ -1845,6 +1892,7 @@ export async function consolidateRunEvidenceForExecution(
   try {
     const recorder = new RunEvidenceRecorder({
       appSlug: safeAppSlug,
+      analystName: String(jobStore.get(runId)?.params.analystName || "") || undefined,
       sectionSlug: safeSectionSlug,
       sectionName,
       runId,
@@ -2759,7 +2807,7 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
     const testArgs = buildTestPromotedArgs(caseParams, caseId);
     log(jobId, `[run:functional-execution] caseId=${caseId} command=${cmd} ${testArgs.join(" ")}`);
     const functionalStartedAt = Date.now();
-    const promotedExecutionEnv = buildPromotedExecutionEnv(caseParams, jobId, process.env as NodeJS.ProcessEnv, runtimeContextPath);
+    const promotedExecutionEnv = buildPromotedExecutionEnv(caseParams, jobId, process.env as NodeJS.ProcessEnv, runtimeContextPath, caseId);
     const testResult = await runCommand(jobId, cmd, testArgs, promotedExecutionEnv);
     const caseCompletedAt = new Date().toISOString();
     const functionalDurationMs = Math.max(0, Date.now() - functionalStartedAt);

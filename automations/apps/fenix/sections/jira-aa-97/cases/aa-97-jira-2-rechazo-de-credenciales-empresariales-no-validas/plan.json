@@ -2,7 +2,7 @@
   "version": "1.0",
   "source": "discovery_generated",
   "status": "validated",
-  "createdAt": "2026-10-22T13:42:40.545Z",
+  "createdAt": "2026-10-23T15:39:43.585Z",
   "scenario": {
     "source": "jira",
     "externalId": "AA-97:jira:2",
@@ -76,10 +76,10 @@
     {
       "index": 8,
       "action": "assertVisible",
-      "description": "Validar que se informe el rechazo de las credenciales",
+      "description": "Validar que se informe el problema con las credenciales",
       "target": {
         "strategy": "text",
-        "value": "que se informe el rechazo de las credenciales"
+        "value": "que se informe el problema con las credenciales"
       }
     },
     {
@@ -166,9 +166,9 @@
       {
         "index": 8,
         "action": "assertVisible",
-        "description": "Validar que se informe el rechazo de las credenciales",
+        "description": "Validar que se informe el problema con las credenciales",
         "technicalTargetRefs": [
-          "text:que se informe el rechazo de las credenciales"
+          "text:que se informe el problema con las credenciales"
         ]
       },
       {
@@ -183,7 +183,7 @@
     "observableOracles": [
       {
         "id": "jira-oracle-8",
-        "requirement": "Validar que se informe el rechazo de las credenciales",
+        "requirement": "Validar que se informe el problema con las credenciales",
         "type": "literal_visible_text",
         "backed": true,
         "source": "discovery",
@@ -217,6 +217,6 @@
       "required": false,
       "gateDetected": false
     },
-    "expectedResult": "No se muestra \"comprobante de transacción exitosa\" después del rechazo de las credenciales."
+    "expectedResult": "No se muestra \"comprobante de transacción exitosa\"."
   }
 }

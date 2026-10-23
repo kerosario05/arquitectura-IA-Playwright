@@ -1,0 +1,10 @@
+{
+  "appSlug": "fenix",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sectionId": 4903,
+  "sourceScenarioId": "C54398",
+  "testRailCaseId": 54398,
+  "generatedAt": "2026-10-23T14:22:25.821Z",
+  "title": "Rechazo de inicio de sesión con contraseña no válida"
+}

@@ -63,7 +63,7 @@ export async function observeAuthStageSettled(deps: { scan: () => Promise<any>; 
   return undefined;
 }
 
-export type JiraScenarioInput = { scenarioId: string; title: string; sourceIssueKey: string; steps: string[]; expectedResult: string; preconditions?: string[]; authIntent?: "gate_observation" | "full_authentication"; appSlug?: string; inputRequirements?: JiraInputRequirement[];
+export type JiraScenarioInput = { scenarioId: string; title: string; sourceIssueKey: string; steps: string[]; expectedResult: string; expectedResultMode?: "assertion" | "documentation"; testType?: string; testApproach?: string; preconditions?: string[]; authIntent?: "gate_observation" | "full_authentication"; appSlug?: string; inputRequirements?: JiraInputRequirement[];
   unresolvedUiRequirements?: Array<{stepIndex:number;requirement:string}>; conditionRequirements?: JiraConditionRequirement[]; reviewConfiguration?: JiraReviewConfiguration };
 export type JiraDiscoveredExecutionContract = { plan: ExecutionPlan; sourceScenario: SpecGenerationSourceScenario; runtimeEntries: DataContextEntry[] };
 export class JiraRequiredDataError extends Error {
@@ -2172,7 +2172,7 @@ export async function discoverJiraScenario(input: JiraScenarioInput, browser: Ji
     const match=text.trim().match(/^(?:Validar|Verificar) que (no )?se muestre ["“]([^"”]+)["”][.]?$/i);
     return match && Boolean(match[1])===negative && subjectWords(match[2])===subjectWords(rejectionSummary[negative?2:1]);
   })));
-  if (input.expectedResult?.trim() && !expectedResultAlreadyCoveredByGate && !expectedResultAlreadyCoveredByExplicitAssertion && !expectedResultAlreadyCoveredByRowOracle && !rejectionSummaryCovered
+  if (input.expectedResultMode !== "documentation" && input.expectedResult?.trim() && !expectedResultAlreadyCoveredByGate && !expectedResultAlreadyCoveredByExplicitAssertion && !expectedResultAlreadyCoveredByRowOracle && !rejectionSummaryCovered
     && !texts.some(s => s.text.replace(/^Validar\s+/i, "") === input.expectedResult)) {
     texts.push({ text: `Validar ${input.expectedResult}`, sourceIndex: input.steps.length + 1, authGate: false, screenDescriptor: false });
   }

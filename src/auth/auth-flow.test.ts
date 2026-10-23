@@ -49,6 +49,7 @@ async function main(): Promise<void> {
   const users = await import("../db/user-repository");
   const { hashPassword } = await import("./password");
   const { hashSessionToken } = await import("./auth-service");
+  const { currentReportAnalyst } = await import("./report-attribution");
 
   const conn = await sqlConnection.getConnection();
 
@@ -70,7 +71,7 @@ async function main(): Promise<void> {
   app.use("/api/auth", authRouter);
   // Stand-in for a protected business route (phase 5 wires the real ones).
   app.get("/api/protegido", (req, res) => {
-    res.json({ ok: true, seenAs: req.principal?.username });
+    res.json({ ok: true, seenAs: req.principal?.username, analystName: currentReportAnalyst() });
   });
   app.get("/api/solo-admin", requirePermission("admin.users"), (_req, res) => {
     res.json({ ok: true });
@@ -108,7 +109,7 @@ async function main(): Promise<void> {
 
   console.log(`\n[test] servidor en ${base}`);
 
-  await bootstrapIdentity({ username: "admin", password: ADMIN_PASSWORD });
+  await bootstrapIdentity({ username: "admin", password: ADMIN_PASSWORD, fullName: "Analista de prueba QA" });
   const lockUser = await users.createUser({
     username: "bloqueo",
     fullName: "Usuario Bloqueo",
@@ -286,6 +287,7 @@ async function main(): Promise<void> {
     const protectedRoute = await call("GET", "/api/protegido", { token: fullToken });
     assert.strictEqual(protectedRoute.status, 200);
     assert.strictEqual(protectedRoute.body.seenAs, "admin");
+    assert.strictEqual(protectedRoute.body.analystName, "Analista de prueba QA");
 
     const adminRoute = await call("GET", "/api/solo-admin", { token: fullToken });
     assert.strictEqual(adminRoute.status, 200);

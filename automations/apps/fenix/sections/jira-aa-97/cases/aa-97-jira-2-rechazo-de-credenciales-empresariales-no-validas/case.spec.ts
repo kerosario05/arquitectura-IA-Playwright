@@ -53,9 +53,9 @@ test("Rechazo de credenciales empresariales no válidas", async ({ page }, testI
   await clickJiraSpecTarget(page, {"strategy":"role","role":"button","name":"Iniciar sesión","exact":true}, 2500, "Presionar \"Iniciar sesión\"");
   await reportJiraSpecStepComplete(page, testInfo, 7, true, false);
 
-  // 8. Validar que se informe el rechazo de las credenciales
+  // 8. Validar que se informe el problema con las credenciales
   await reportJiraSpecStepStart(testInfo, 8);
-  await assertJiraSpecVisibleText(page, "que se informe el rechazo de las credenciales", 15000, "Validar que se informe el rechazo de las credenciales");
+  await assertJiraSpecVisibleText(page, "que se informe el problema con las credenciales", 15000, "Validar que se informe el problema con las credenciales");
   await reportJiraSpecStepComplete(page, testInfo, 8, false, false);
 
   // 9. Validar que no se muestre "comprobante de transacción exitosa"

@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-10-23T00:43:11.558Z",
+  "updatedAt": "2026-10-23T17:12:28.058Z",
   "automations": [
     {
       "id": "preview-001-login",
@@ -1856,7 +1856,7 @@
       "appProfile": "fenix",
       "baseUrlHash": "2a7bf6928b41",
       "createdAt": "2026-10-14T19:34:17.756Z",
-      "updatedAt": "2026-10-22T13:43:18.415Z",
+      "updatedAt": "2026-10-23T15:40:13.382Z",
       "specVerificationStatus": "passed",
       "tags": [
         "jira_semantic",
@@ -1898,10 +1898,10 @@
           "warnings": []
         }
       },
-      "caseId": 55095,
+      "caseId": 55286,
       "promotionPersisted": true,
       "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-2-rechazo-de-credenciales-empresariales-no-validas\\case.spec.ts",
-      "promotedSpecHash": "1ae4bca9ac24026cbce177be811ebd7e6bd7bd9f3c4d6ed9b559349dfa6770d7"
+      "promotedSpecHash": "83ba1c311c6c112fcfd663d94572348c8ecc2e0764a72874f07e14b547600bcd"
     },
     {
       "id": "aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-verificacion-de-acceso-y-token-sms",
@@ -2400,7 +2400,7 @@
       "appProfile": "fenix",
       "baseUrlHash": "2a7bf6928b41",
       "createdAt": "2026-10-22T01:21:25.771Z",
-      "updatedAt": "2026-10-22T01:21:25.779Z",
+      "updatedAt": "2026-10-23T17:12:27.980Z",
       "specVerificationStatus": "passed",
       "tags": [
         "jira_semantic",
@@ -2442,10 +2442,10 @@
           "warnings": []
         }
       },
-      "caseId": 55093,
+      "caseId": 55289,
       "promotionPersisted": true,
       "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias\\case.spec.ts",
-      "promotedSpecHash": "b12b720d3175391720bb1abbf82b860aaa232d0e0e54104d24adaaa5f02e841a"
+      "promotedSpecHash": "40a7b5596e84550c11f59604e1d5996981a8d0e5d4506730f087e823e308ecb5"
     },
     {
       "id": "c55033-rechazo-de-credenciales-empresariales-no-validas",
@@ -2877,6 +2877,200 @@
       "promotionPersisted": true,
       "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-verificacion-por-sms\\case.spec.ts",
       "promotedSpecHash": "c7c2c67f206abb84bb43e8298b75dd35c70da3479c72d2abde5893bc6085cd68"
+    },
+    {
+      "id": "c54398-rechazo-de-inicio-de-sesion-con-contrasena-no-valida",
+      "externalId": "C54398",
+      "caseId": 54398,
+      "title": "Rechazo de inicio de sesión con contraseña no válida",
+      "planPath": "automations\\apps\\fenix\\sections\\detalle-kiosko\\cases\\c54398-rechazo-de-inicio-de-sesion-con-contrasena-no-valida\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\detalle-kiosko\\cases\\c54398-rechazo-de-inicio-de-sesion-con-contrasena-no-valida\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "spec_failed",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "1423ba294517",
+      "createdAt": "2026-10-23T14:24:27.858Z",
+      "updatedAt": "2026-10-23T14:24:27.987Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-10-23T14-21-58-229Z\\cases\\case-54398\\discovered-plans.pending.json",
+      "pomStatus": "needs_manual_review",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "failed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-10-23T14-21-58-229Z\\cases\\case-54398",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 123427,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "failed"
+          },
+          "promotionAllowed": false,
+          "specsRequested": 1,
+          "specsValidated": 0,
+          "specsRejected": 1,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": false,
+          "failedGatesAttempt1": [
+            "functionalExecution"
+          ],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "negative_visibility",
+            "credential_rejection",
+            "literal_visible_text",
+            "runtime_state"
+          ],
+          "errors": [
+            "functional_execution_failed:exitCode=1",
+            "functional_execution_error:Error: Promoted click failed at step 6 target=\"continuar inicio de sesión\". failureClass=ACTION_CALLBACK_TIMEOUT exactRuntimeError=\"Retry failed: click retry timed out after 15000ms\" currentUrl=https://qa1.santacruz.do/onlinebanking clickPath=failed nativeClickAttempted=true nativeClickSucceeded=false callbackAttempted=true callbackSucceeded=false retryAttempted=true diagnostics={\"currentUrl\":\"https://qa1.santacruz.do/onlinebanking\",\"actionIntent\":\"click\",\"target\":\"continuar inicio de sesión\",\"stepIndex\":6,\"timeoutMs\":15000,\"activeContainer\":\"form#LoginFormE\",\"stability\":{\"currentUrl\":\"https://qa1.santacruz.do/onlinebanking\",\"title\":\"Banco Santa Cruz - Banca en Linea\",\"visibleHeadings\":[],\"visibleButtons\":[\"Iniciar sesión\"],\"visibleTexts\":[\"Personal\",\"Empresarial\",\"RNC:\",\"Usuario:\",\"Contraseña:\",\"¿Olvidó su contraseña?\",\"Iniciar sesión\",\"¿Necesitas acceso?\",\"Regístrate\",\"Derechos y Deberes como usuarios financieros\",\"Inicio -\",\"Quiénes Somos -\",\"Productos -\",\"Contactos -\",\"Tarifas de Servicio -\",\"Pasos Reclamación\",\"© 2026 Banco Santa Cruz, República Dominicana\",\"Powered by Sistemas Integrados de Informática\",\"Version: 2026.11.1.0 Built: 22/10/2026 02:41:12 PM\"],\"loadingDetected\":false,\"skeletonDetected\":false,\"listReadiness\":{\"cardsVisible\":0,\"listItemsVisible\":0,\"loadingDetected\":false,\"zeroProductsDetected\":false,\"hasEntityContainers\":true,\"visibleHeadings\":[],\"visibleButtons\":[\"Personal\",\"Empresarial\",\"¿Olvidó su contraseña?\",\"Iniciar sesión\",\"Regístrate\",\"Derechos y Deberes como usuarios financieros\",\"Inicio -\",\"Quiénes Somos -\",\"Productos -\",\"Contactos -\"],\"ready\":true},\"diagnosticStatus\":\"completed\"},\"retryAttempted\":true,\"clickPath\":\"failed\",\"nativeClickAttempted\":true,\"nativeClickSucceeded\":false,\"callbackAttempted\":true,\"callbackSucceeded\":false,\"callbackError\":\"Retry failed: click retry timed out after 15000ms\",\"expectedEffect\":\"ui_change\",\"effectDetected\":false,\"fallbackUsed\":\"none\",\"matchedLocatorStrategy\":\"unknown\",\"screenshotPath\":\"C:\\\\MisProyectos\\\\arquitectura-IA-Playwright-feature-auth-gate\\\\.artifacts\\\\promoted-runtime\\\\step-006.png\"}"
+          ],
+          "warnings": [
+            "step_index_not_explicit_in_spec:1",
+            "functional_execution_screenshots=5",
+            "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 6)."
+          ],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "block",
+            "promotionStatus": "blocked",
+            "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 6)."
+          },
+          "specWritten": false,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "spec_generation_validation_failed",
+          "blockers": [
+            "spec_generation_validation_failed"
+          ],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\fenix\\sections\\detalle-kiosko\\cases\\c54398-rechazo-de-inicio-de-sesion-con-contrasena-no-valida\\case.spec.ts",
+          "specHash": "464274ce63207aa835b9cd786c6f9df2ce338772a55c6e230b5209b5a24cb926",
+          "specSource": "ai_candidate"
+        }
+      }
+    },
+    {
+      "id": "aa-97-jira-1-edited-6718c9ee9dfadb49-transferencia-exitosa-entre-cuentas-propias",
+      "externalId": "AA-97:jira:1:edited-6718c9ee9dfadb49",
+      "title": "Transferencia exitosa entre cuentas propias",
+      "planPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-edited-6718c9ee9dfadb49-transferencia-exitosa-entre-cuentas-propias\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-edited-6718c9ee9dfadb49-transferencia-exitosa-entre-cuentas-propias\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "2a7bf6928b41",
+      "createdAt": "2026-10-23T15:37:03.690Z",
+      "updatedAt": "2026-10-23T15:37:07.916Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      },
+      "caseId": 55285,
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-edited-6718c9ee9dfadb49-transferencia-exitosa-entre-cuentas-propias\\case.spec.ts",
+      "promotedSpecHash": "ebdb1b449ba85a48645cebeb75b3ad0dc65548c770ef2e901fc6c921d9cb5717"
     }
   ]
 }

@@ -1,4 +1,5 @@
 import { spawn } from "child_process";
+import { evidenceActorEnvironment } from "../../auth/report-attribution";
 import path from "path";
 import fs from "fs";
 import { randomUUID, createHash } from "crypto";
@@ -110,6 +111,7 @@ export async function consolidateRunEvidence(
       sectionSlug: sectionSlug || "default-section",
       sectionName,
       requirement: evidenceRequirement,
+      analystName: String(jobStore.get(jobId)?.params.analystName || "") || undefined,
       runId: jobId,
       outputRoot: evidenceRoot,
     });
@@ -487,6 +489,7 @@ export async function startReuseExistingPromotedSpecRun(
       // from title text or array position — so this run's evidence lands under a path THIS
       // consolidation pass can actually find, instead of an unaddressable runId=undefined.
       evidenceContext: {
+        analystName: typeof job.params.analystName === "string" ? job.params.analystName : undefined,
         runId: evidenceRunId,
         scenarioId: scenario.scenarioId,
         scenarioTitle: scenario.title,
@@ -2321,6 +2324,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
     env: {
       ...process.env,
       EVIDENCE_RUN_ID: evidenceRunId,
+      ...evidenceActorEnvironment(job.params),
       AUTOMATION_SOURCE: "qalab",
       AUTOMATION_HEADLESS: headed ? "false" : "true",
       HEADLESS: headed ? "false" : "true",

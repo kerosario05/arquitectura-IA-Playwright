@@ -1,6 +1,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import type { EvidenceScenarioRecord, EvidenceStepRecord } from "./evidence-types";
+import { inferEvidenceTestApproach, normalizeEvidenceTestType, type EvidenceTestApproach } from "./evidence-test-classification";
 
 /**
  * Format-independent content of an evidence document: the global header fields and, per
@@ -20,6 +21,8 @@ export type EvidenceDocumentScenario = {
   scenarioId: string;
   title: string;
   status: string;
+  testType: string;
+  testApproach: EvidenceTestApproach;
   evidenceKind?: string;
   screens: EvidenceDocumentScreen[];
   images: EvidenceDocumentImage[];
@@ -29,7 +32,16 @@ export type EvidenceDocumentScenario = {
   validateFinalImage: boolean;
 };
 
-function describeEvidenceStep(step: EvidenceStepRecord): string {
+function describeEvidenceStep(step: EvidenceStepRecord, dataLabels: Record<string, string> = {}): string {
+  if (/^\s*project entry\s*$/i.test(step.stepText)) return "Abrir la aplicación configurada del proyecto";
+  const inputAction = step.stepText.match(/^\s*(fill|select)\s+\[([^\]]+)\]\s*$/i);
+  if (inputAction) {
+    const key = inputAction[2].trim();
+    const normalizeKey = (value: string) => value.toLocaleLowerCase("es").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+    const label = Object.entries(dataLabels).find(([candidate]) => normalizeKey(candidate) === normalizeKey(key))?.[1]
+      || key.replace(/[_-]+/g, " ").replace(/\b\w/g, letter => letter.toLocaleUpperCase("es"));
+    return `${inputAction[1].toLowerCase() === "fill" ? "Ingresar" : "Seleccionar"} ${label}`;
+  }
   const validation = step.stepText.match(/^\s*Validar que se muestre\s+["“]?(.+?)["”]?\.?\s*$/i);
   const target = (step.target || validation?.[1] || "").toLocaleLowerCase("es").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const screen = (step.screenTitle || "").toLocaleLowerCase("es").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -56,7 +68,11 @@ type CandidateImage = { path: string; stepText: string; stepIndex?: number; scre
 
 export function buildEvidenceDocumentModel(scenarios: EvidenceScenarioRecord[]): EvidenceDocumentModel {
   const firstScenario = scenarios[0];
-  const fecha = firstScenario?.date || new Date().toLocaleDateString("es-ES");
+  const rawDate = firstScenario?.date || new Date().toISOString();
+  const parsedDate = new Date(rawDate);
+  const fecha = Number.isNaN(parsedDate.getTime()) ? rawDate : new Intl.DateTimeFormat("es-DO", {
+    day: "numeric", month: "long", year: "numeric", timeZone: "America/Santo_Domingo",
+  }).format(parsedDate);
 
   // Requerimiento priority: explicit requirement, sectionName, sectionSlug, appSlug, fallback.
   let requerimiento = firstScenario?.requirement?.trim() || "";
@@ -101,6 +117,8 @@ function buildEvidenceDocumentScenario(sc: EvidenceScenarioRecord): EvidenceDocu
       if (!step.screenshotPath || !isImageFile(step.screenshotPath)) return false;
       if (!fs.existsSync(step.screenshotPath)) return false;
       if (sc.evidenceKind !== "jira_semantic" && /^\s*validar\b/i.test(step.stepText)) return false;
+      if (sc.evidenceKind === "jira_semantic" && /^\s*project entry\s*$/i.test(step.stepText)
+        && sc.steps.some(later => later.index > step.index && later.screenshotPath && later.screenTitle === step.screenTitle)) return false;
       const resolvedPath = path.resolve(step.screenshotPath);
       if (seenFuncPaths.has(resolvedPath)) {
         console.log(`[evidence-docx] skippedDuplicateImage scenario=${sc.scenarioId} step=${step.stepIndex ?? "?"} reason=same_step_screenshot`);
@@ -154,7 +172,10 @@ function buildEvidenceDocumentScenario(sc: EvidenceScenarioRecord): EvidenceDocu
     : null;
   if (finalScreenPath && isImageFile(finalScreenPath) && fs.existsSync(finalScreenPath)) {
     images = images.filter(image => path.resolve(image.path) !== finalScreenPath);
-    const finalStep = sc.steps.at(-1);
+    // A failed run can end with unexecuted authored steps. The closing capture
+    // belongs to its observed owner, never to that unexecuted tail.
+    const finalStep = sc.steps.filter(step => step.status !== "skipped" && step.screenshotPath && path.resolve(step.screenshotPath) === finalScreenPath).at(-1)
+      ?? sc.steps.filter(step => step.status !== "skipped").at(-1);
     images.push({ path: finalScreenPath, stepText: "Pantalla final después del último paso", screenId: finalStep?.screenId, screenTitle: finalStep?.screenTitle });
   }
 
@@ -265,21 +286,53 @@ function buildEvidenceDocumentScenario(sc: EvidenceScenarioRecord): EvidenceDocu
   }
 
   const prepared = finalizeScenarioImages(sc, images);
+  const screens = buildEvidenceDocumentScreens(sc, prepared.images);
+  // A single screen visit can have several checkpoints (for example, an empty OTP
+  // form, the same form after typing, and a post-submit frame). Use the last
+  // settled checkpoint from that visit so reports show supplied data once rather
+  // than repeating the same screen at every action. Distinct visits/screens remain
+  // separate, and final checkpoints are already ordered last by finalizeScenarioImages.
+  let consolidatedCaptureCount = 0;
+  for (const screen of screens) {
+    if (screen.images.length <= 1) continue;
+    const representative = screen.images.at(-1)!;
+    consolidatedCaptureCount += screen.images.length - 1;
+    screen.images = [representative];
+  }
+  const finalPrepared = finalizeScenarioImages(sc, screens.flatMap(screen => screen.images));
+  // Keep screen image metadata aligned with the final ordered image list, including
+  // the mandatory final checkpoint.
+  const finalByPath = new Map(finalPrepared.images.map(image => [path.resolve(image.path), image]));
+  for (const screen of screens) {
+    screen.images = screen.images
+      .map(image => finalByPath.get(path.resolve(image.path)))
+      .filter((image): image is EvidenceDocumentImage => Boolean(image));
+  }
+  if (consolidatedCaptureCount > 0) {
+    console.log(`[evidence-document] screenCaptureConsolidation scenario=${sc.scenarioId} removed=${consolidatedCaptureCount} kept=${finalPrepared.images.length}`);
+  }
   console.log(
-    `[evidence-docx] imagesForDocx scenario=${sc.scenarioId} count=${prepared.images.length} finalIncluded=${prepared.finalIncluded} finalIsLast=${prepared.finalIsLast} finalImagePath=${prepared.finalImagePath ?? "none"}`,
+    `[evidence-docx] imagesForDocx scenario=${sc.scenarioId} count=${finalPrepared.images.length} finalIncluded=${finalPrepared.finalIncluded} finalIsLast=${finalPrepared.finalIsLast} finalImagePath=${finalPrepared.finalImagePath ?? "none"}`,
   );
 
   return {
     scenarioId: sc.scenarioId,
     title: scenarioTitle,
     status: scenarioStatus,
+    testType: normalizeEvidenceTestType(sc.testType),
+    testApproach: inferEvidenceTestApproach({
+      explicit: sc.testApproach,
+      title: sc.scenarioTitle,
+      expectedResult: sc.expectedResult,
+      steps: sc.steps.map(step => step.stepText),
+    }),
     evidenceKind: sc.evidenceKind,
-    images: prepared.images,
-    screens: buildEvidenceDocumentScreens(sc, prepared.images),
-    finalImagePath: prepared.finalImagePath,
-    finalIncluded: prepared.finalIncluded,
-    finalIsLast: prepared.finalIsLast,
-    validateFinalImage: Boolean(sc.detailEvidence?.captured && prepared.finalImagePath),
+    images: finalPrepared.images,
+    screens,
+    finalImagePath: finalPrepared.finalImagePath,
+    finalIncluded: finalPrepared.finalIncluded,
+    finalIsLast: finalPrepared.finalIsLast,
+    validateFinalImage: Boolean(sc.detailEvidence?.captured && finalPrepared.finalImagePath),
   };
 }
 
@@ -415,7 +468,7 @@ export function buildEvidenceDocumentScreens(
       screens.push(screen);
     }
     const authoredNumber = step.stepIndex && step.stepIndex > 0 ? step.stepIndex : step.index > 0 ? step.index : screen.steps.length + 1;
-    screen.steps.push({ number: screen.steps.some(existing => existing.number === authoredNumber) ? 0 : authoredNumber, text: describeEvidenceStep(step).trim(), status: step.status });
+    screen.steps.push({ number: screen.steps.some(existing => existing.number === authoredNumber) ? 0 : authoredNumber, text: describeEvidenceStep(step, scenario.dataLabels).trim(), status: step.status });
     stepScreenIndexes.set(step, screens.length - 1);
   }
 
