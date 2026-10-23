@@ -6,7 +6,7 @@ import {deriveJiraInputRequirements} from './jira-input-requirements';
 import {discoverJiraScenario,type JiraBrowserPort} from './jira-semantic-executor';
 import {compileJiraSpec} from './jira-spec-compiler';
 import path from 'node:path';
-import {jiraGenerationContractErrors,jiraSourceConditions} from './jira-generation-contract';
+import {jiraGenerationContractErrors,jiraSourceConditions,repairMissingJiraConditionalAssertions} from './jira-generation-contract';
 import {JiraGenerationCache,jiraGenerationCacheKey} from './jira-generation-cache';
 import type {JiraIssueSource} from '../scenarios/scenario-types';
 import type {AiProvider} from '../ai/ai-provider.types';
@@ -268,7 +268,7 @@ test('conditional assertions stay with the source business stage when an earlier
   const transferIndex=prepared.steps.indexOf('Presionar "Transferencias"');
   assert.ok(!prepared.steps.slice(0,transferIndex).some(step=>/tasa de cambio/i.test(step)));
   const rateIndex=prepared.steps.indexOf('Validar que se muestre "tasa de cambio aplicable"');
-  assert.ok(rateIndex>prepared.steps.indexOf('Validar que se muestre "impuestos"'));
+  assert.ok(rateIndex>prepared.steps.indexOf('Validar que se muestre "impuestos"'),JSON.stringify(prepared.steps));
   assert.ok(rateIndex<prepared.steps.indexOf('Validar que se muestre "total a debitar"'));
   assert.deepEqual(jiraSourceConditions(prepared,source)[0].stepIndices,[rateIndex+1]);
   assert.equal(prepared.inputRequirements?.find(field=>field.label==='Monto')?.stepIndex,17);
@@ -289,6 +289,44 @@ test('conditional assertions stay with the source business stage when an earlier
 test('source failure grammar recognizes negated valid inputs without treating valid data as a failure',()=>{
  for(const clause of ['El Token no es válido.','Los códigos no son válidos.','Un Token no válido.']) assert.equal(sourceHasControlledInputFailure({...issue,description:clause}),true);
  assert.equal(sourceHasControlledInputFailure({...issue,description:'El Token es válido.'}),false);
+});
+
+test('conditional business summary follows its source-named input submit when the summary uses observed product names',async()=>{
+ for(const [field,subject] of [['Monto','tasa de cambio'],['Cantidad','descuento']]) {
+  const source={...issue,description:`AC5 — Confirmación\nAntes de autorizar la operación, la aplicación presenta un resumen con ${field.toLowerCase()}, ${subject} cuando aplique.`};
+  const draft={sourceIssueKey:issue.key,title:'Operación',acceptanceCriteriaRefs:['AC5'],steps:[
+   'Validar que se muestre "el resumen de sus productos"',`Validar que se muestre "${subject}"`,
+   'Presionar "Operaciones"',`Ingresar un valor en "${field}"`,'Presionar "Continuar"',
+   'Validar que se muestre "Producto A · Producto B"','Presionar "Continuar"','Validar que se muestre "Autorización"',
+  ],inputRequirements:[{key:'amount',label:field,operation:'fill',stepIndex:4}],unresolvedUiRequirements:[{stepIndex:6,requirement:'Observe the reviewed products.'}]};
+  const repaired=repairMissingJiraConditionalAssertions(draft,source);
+  const conditionIndex=repaired.steps.indexOf(`Validar que se muestre "${subject}"`);
+  assert.equal(conditionIndex,repaired.steps.indexOf('Validar que se muestre "Producto A · Producto B"')+1);
+  assert.equal(repaired.steps.filter(step=>step===`Validar que se muestre "${subject}"`).length,1);
+  assert.equal(repaired.inputRequirements[0].key,'amount');
+  assert.equal(repaired.inputRequirements[0].stepIndex,3);
+  assert.equal(repaired.unresolvedUiRequirements[0].stepIndex,5);
+  assert.deepEqual(jiraSourceConditions(JSON.parse(JSON.stringify(repaired)),source)[0].stepIndices,[conditionIndex+1]);
+  let submitted=false;
+  const browser:JiraBrowserPort={async navigate(){},async act(_step,target){
+   if(target==='Continuar')submitted=true;
+   return {strategy:'css',value:'#fixture-control'};
+  },async assert(target){
+   if(target===subject)assert.equal(submitted,true,'conditional oracle must follow the source-named data submit');
+   return {observedText:target};
+  }};
+  const execution={...JSON.parse(JSON.stringify(repaired)),scenarioId:`${issue.key}:jira:stage`,expectedResult:'Autorización',
+   conditionRequirements:jiraSourceConditions(repaired,source),inputRequirements:deriveJiraInputRequirements(repaired.steps,repaired.inputRequirements)};
+  const contract=await discoverJiraScenario(execution,browser,{amount:'synthetic-value'});
+  const plannedCondition=contract.plan.steps.find(step=>step.description===repaired.steps[conditionIndex]);
+  assert.ok(plannedCondition);
+  assert.equal(contract.sourceScenario.observableOracles?.find(oracle=>oracle.target===subject)?.stepIndex,plannedCondition.index);
+  const compiled=compileJiraSpec({plan:contract.plan,sourceScenario:contract.sourceScenario,appSlug:'fixture-summary',sectionSlug:'jira',automationId:'fixture',specPath:path.resolve('.artifacts/tmp/jira-conditional-stage/case.spec.ts')});
+  assert.deepEqual(compiled.unsupported,[]);
+  const missingReview={...draft,steps:draft.steps.slice(0,5)};
+  const blocked=repairMissingJiraConditionalAssertions(missingReview,source);
+  assert.ok(jiraGenerationContractErrors(blocked,source).includes('JIRA_CONDITION_ASSERTION_MISSING'));
+ }
 });
 
 test('source-backed quoted conditional text is normalized while literal UI labels remain unchanged',()=>{

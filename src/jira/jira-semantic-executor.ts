@@ -15,7 +15,7 @@ import { assertJiraSpecAbsentText, observeJiraNamedRowMatch, uniqueVisibleAction
 import { assertJiraDownloadContent, ensureJiraDownloadObserver, observeJiraVisibleTableRows, parseJiraDownloadExpectation, type JiraDownloadExpectation } from "./jira-download-assertion";
 import { resolveJiraDomAssertion } from "./jira-dom-assertion-ai";
 import { normalizeJiraAssertionSyntax } from "./jira-assertion-syntax";
-import { jiraCredentialRejectionMatches, jiraAlertErrorEquivalenceMatches, readVisibleJiraAlertTexts, stripJiraNotificationChannelWord } from "./jira-assertion-matching";
+import { jiraCredentialRejectionMatches, jiraAlertErrorEquivalenceMatches, observeJiraCredentialRejection, readVisibleJiraAlertTexts, stripJiraNotificationChannelWord } from "./jira-assertion-matching";
 import { classifyAssertionPolarity } from "../scenarios/canonical-scenario";
 import type { JiraInputRequirement } from "./jira-input-requirements";
 import {prepareJiraScenarioReview, jiraRepeatedAssertionBlocks, type JiraConditionRequirement, type JiraReviewConfiguration} from "./jira-scenario-review";
@@ -711,6 +711,13 @@ export async function selectJiraObservedOption(page: Page, field: Locator, value
     buttonType: element.tagName.toLowerCase() === "button" ? (element as HTMLButtonElement).type : "none",
     selectionPrompt: /select|seleccion|seleccione|choose|pick/.test(`${element.getAttribute("aria-label") ?? ""} ${(element as HTMLElement).innerText.trim()}`.toLocaleLowerCase()) }));
   console.log(`[jira-selection] opening observed field tag=${fieldKind.tag} role=${fieldKind.role} hasPopup=${fieldKind.hasPopup} expanded=${fieldKind.expanded} buttonType=${fieldKind.buttonType} selectionPrompt=${fieldKind.selectionPrompt} idPresent=${fieldKind.hasId} testIdPresent=${fieldKind.hasTestId}`);
+  const explicitPopup = Boolean(`${await field.getAttribute("aria-controls") ?? ""} ${await field.getAttribute("aria-owns") ?? ""}`.trim());
+  const visibleBeforeOpen = await page.evaluateHandle(() => new Set(Array.from(document.querySelectorAll("body *")).filter(element => {
+    const style = window.getComputedStyle(element);
+    const rect = element.getBoundingClientRect();
+    return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
+  })));
+  try {
   try { await field.click(); } catch { throw new Error("JIRA_SELECTION_FIELD_OPEN_FAILED"); }
   const optionRoot = await jiraOptionSearchRoot(page, field);
   const popupCounts = { listboxes: await page.getByRole("listbox").count(), options: await page.getByRole("option").count(), menus: await page.getByRole("menu").count() };
@@ -718,7 +725,7 @@ export async function selectJiraObservedOption(page: Page, field: Locator, value
   const deadline = Date.now() + 30000;
   let aiOptionAttempted = false;
   while (Date.now() < deadline) {
-    const candidates = await optionRoot.locator("*").evaluateAll((elements, expected) => {
+    const candidates = await optionRoot.locator("*").evaluateAll((elements, { expected, visibleBeforeOpen, explicitPopup }) => {
       const found: Array<{ id?: string; testId?: string; role?: string; label?: string; tag: string; text: string; key: string }> = [];
       const expectedTokenVariants = expected.split(" ").filter(Boolean).map(token => {
         const variants = [token];
@@ -769,6 +776,10 @@ export async function selectJiraObservedOption(page: Page, field: Locator, value
           if (!actionable) continue;
           if (owner.closest('nav,aside,[role="navigation"],[role="complementary"]')) break;
           if (owner.closest('[aria-disabled="true"],[hidden]') || owner.matches(':disabled')) break;
+          // Without a declared popup relation, only options revealed by opening
+          // this field are eligible. A neighboring field's selected caption is
+          // already visible and must never become an option for this field.
+          if (!explicitPopup && visibleBeforeOpen.has(owner)) break;
           const ownerText = owner.innerText.trim();
           const id = owner.id || undefined;
           const testId = owner.getAttribute("data-testid") || undefined;
@@ -779,7 +790,7 @@ export async function selectJiraObservedOption(page: Page, field: Locator, value
         }
       }
       return found.filter((candidate, index, all) => all.findIndex(other => other.key === candidate.key) === index);
-      }, query);
+      }, { expected: query, visibleBeforeOpen, explicitPopup });
     const candidate = chooseJiraMatchingOption(candidates, item => item.key, query);
     if (candidate) {
       console.log(`[jira-selection] policy=any_matching matchingOptions=${candidates.length}`);
@@ -801,7 +812,8 @@ export async function selectJiraObservedOption(page: Page, field: Locator, value
       const selected = await chooseJiraDomTarget(page, value, optionSnapshot);
       const option = selected && locatorForJiraDomCandidate(page, selected);
       if (selected && option && await option.count() === 1 && await option.isVisible() && await option.isEnabled()
-        && await jiraOptionBelongsToRoot(optionRoot, option)) {
+        && await jiraOptionBelongsToRoot(optionRoot, option)
+        && (explicitPopup || !await option.evaluate((element, before) => before.has(element), visibleBeforeOpen))) {
         const before = normalizeJiraOptionText(await readJiraSelectionDisplay(field));
         try { await option.click(); } catch { throw new Error("JIRA_SELECTION_OPTION_CLICK_FAILED"); }
         const afterDisplay = await readJiraSelectionDisplay(field);
@@ -814,6 +826,7 @@ export async function selectJiraObservedOption(page: Page, field: Locator, value
     await page.waitForTimeout(300);
   }
   throw new Error("JIRA_SELECTION_OPTION_NOT_FOUND");
+  } finally { await visibleBeforeOpen.dispose(); }
 }
 
 /** Bounded, label-free summary of a failed target resolution. Whitelist only: never copy candidate text/labels/values/URLs/selectors. */
@@ -2067,7 +2080,10 @@ export function createJiraPlaywrightPort(page: Page, baseUrl: string, authFlow?:
         if (!semantic.supported) return false;
         semanticEvidence = semantic.evidenceTexts.join(" · ");
         return true;
-      }, { timeout: previousActionWasClick ? 90000 : 15000 }).toBe(true).catch(() => {
+      }, { timeout: previousActionWasClick ? 90000 : 15000 }).toBe(true).catch(async () => {
+        // Preserve the failed oracle; report a directly observed login rejection
+        // instead of attributing every blocked destination to text matching.
+        if (await observeJiraCredentialRejection(page).catch(() => false)) throw new Error("JIRA_AUTHENTICATION_REJECTED");
         throw new Error("JIRA_ASSERTION_NOT_SATISFIED");
       });
       previousActionWasClick = false;

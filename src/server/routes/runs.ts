@@ -25,6 +25,7 @@ import { loadAppConfig } from "../../automations/app-auto-resolver";
 import { resolveJiraConfiguredInputValues, jiraScenarioRuntimeValues } from "../../jira/jira-runtime-values";
 import { collectMissingJiraRequiredInputs } from "../../jira/jira-required-input-validation";
 import type { JiraScenarioInput } from "../../jira/jira-semantic-executor";
+import { deriveJiraInputRequirements } from "../../jira/jira-input-requirements";
 import { buildExistingJiraCaseScenarios, resolveExistingJiraCaseValues } from "../../jira/jira-existing-case-requirements";
 
 export const runsRouter = Router();
@@ -212,6 +213,7 @@ function normalizeLaunchScenario(value: unknown, _fallbackPrefix: string, index:
     scenarioId,
     title,
     steps: normalizeStringArray(record.steps),
+    ...(Array.isArray(record.inputRequirements) ? { inputRequirements: deriveJiraInputRequirements(normalizeStringArray(record.steps), record.inputRequirements) } : {}),
     expectedResult: typeof record.expectedResult === "string" ? record.expectedResult : "",
     preconditions: normalizeStringArray(record.preconditions),
     routeProfile: record.routeProfile as McpRouteProfile | undefined,
@@ -1191,19 +1193,8 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
       ? body.dataOverrides as Record<string, Record<string, string>>
       : undefined;
     if (body.executionEngine === "jira_semantic") {
-      // normalizeLaunchScenario drops inputRequirements; recover them from the raw payload by scenarioId.
-      const rawById = new Map<string, Record<string, unknown>>();
-      for (const key of ["selectedScenarios", "selectedJiraScenarios"]) {
-        for (const raw of Array.isArray(body[key]) ? body[key] as unknown[] : []) {
-          const rec = raw as Record<string, unknown> | null;
-          if (rec && typeof rec.scenarioId === "string" && !rawById.has(rec.scenarioId)) rawById.set(rec.scenarioId, rec);
-        }
-      }
-      const jiraScenarios = selectedScenarios.map((scenario) => ({
-        ...scenario,
-        inputRequirements: rawById.get(scenario.scenarioId)?.inputRequirements,
-      })) as unknown as JiraScenarioInput[];
-      const missing = await findMissingJiraInputsForExecution(appSlug, jiraScenarios, dataOverrides);
+      // Preflight and execution must consume the same normalized field keys.
+      const missing = await findMissingJiraInputsForExecution(appSlug, selectedScenarios as unknown as JiraScenarioInput[], dataOverrides);
       if (missing.length > 0) {
         const missingLabels = Array.from(new Set(missing.map((input) => input.label)));
         res.status(400).json({

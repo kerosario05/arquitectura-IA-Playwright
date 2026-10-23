@@ -10,14 +10,14 @@
   "status": "active",
   "source": "discovery",
   "appProfile": "portal-empresarial",
-  "createdAt": "2026-10-09T22:55:10.212Z",
-  "updatedAt": "2026-10-09T22:55:10.212Z",
-  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-09T22-48-26-029Z\\discovered-plans.pending.json",
+  "createdAt": "2026-10-22T19:51:08.825Z",
+  "updatedAt": "2026-10-22T19:51:08.825Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T19-44-29-693Z\\discovered-plans.pending.json",
   "pomStatus": "promoted",
   "inlineDebugMode": false,
   "specVerificationStatus": "passed",
   "metadata": {
-    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-09T22-48-26-029Z",
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T19-44-29-693Z",
     "pomDiagnostics": {
       "status": "promoted",
       "inlineFallbackUsed": false,
@@ -41,7 +41,7 @@
       },
       "invocations": 0,
       "invocationsConsumed": 0,
-      "durationMs": 193836,
+      "durationMs": 125577,
       "usage": {
         "inputTokens": null,
         "cachedInputTokens": null,
@@ -90,7 +90,7 @@
       "previousSpec": {
         "existed": true,
         "hash": "962fcda5b9da877baf20550f93c9728b131329bed08a9118eca76e189828aade",
-        "lastModifiedAt": "2026-10-07T11:17:44.614Z"
+        "lastModifiedAt": "2026-10-09T22:55:10.184Z"
       }
     },
     "promotionStrategyDiagnostics": {
@@ -115,7 +115,7 @@
     },
     "overwritten": true,
     "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\plan.json",
-    "previousStatus": "active"
+    "previousStatus": "spec_failed"
   },
   "promotionPersisted": true,
   "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",

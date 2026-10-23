@@ -10,7 +10,7 @@
   },
   "invocations": 0,
   "invocationsConsumed": 0,
-  "durationMs": 97808,
+  "durationMs": 88326,
   "usage": {
     "inputTokens": null,
     "cachedInputTokens": null,
@@ -29,21 +29,29 @@
     "typescript": "passed",
     "playwrightDiscovery": "passed",
     "semanticCoverage": "passed",
-    "functionalExecution": "passed"
+    "functionalExecution": "failed"
   },
-  "promotionAllowed": true,
+  "promotionAllowed": false,
   "specsRequested": 1,
-  "specsValidated": 1,
-  "specsRejected": 0,
+  "specsValidated": 0,
+  "specsRejected": 1,
   "specGenerationAttempts": 0,
   "specRepairAttempts": 0,
-  "firstPassPromotion": true,
-  "failedGatesAttempt1": [],
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [
+    "functionalExecution"
+  ],
   "regressedGates": [],
   "missingRequirements": [],
   "oracleTypes": [],
-  "errors": [],
-  "warnings": [],
+  "errors": [
+    "functional_execution_failed:exitCode=1",
+    "functional_execution_error:Error: PROMOTED_FINAL_OUTCOME_UNVERIFIED"
+  ],
+  "warnings": [
+    "functional_execution_screenshots=19",
+    "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 2)."
+  ],
   "finalSpec": {
     "origin": "deterministic_compiler",
     "generatedBy": "core",
@@ -51,8 +59,8 @@
     "fallback": null
   },
   "runtimeGate": {
-    "decision": "promote",
-    "promotionStatus": "promoted",
-    "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+    "decision": "block",
+    "promotionStatus": "blocked",
+    "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 2)."
   }
 }

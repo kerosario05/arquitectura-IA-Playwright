@@ -2614,11 +2614,11 @@
     },
     "promotedSpec": {
       "appSlug": "fenix",
-      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\api-tests\\cases\\preview-001-transferencias-entre-cuantas-propias\\case.spec.ts",
-      "specHash": "8b94aea65b08ef11ba1cb4b67452d956c7d7e47bf49361eeaaa1466e10f89f3f",
+      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-transferencias-entre-cuantas-propias\\case.spec.ts",
+      "specHash": "8da3594695cd78c22472b848698496a445bce0959df813120e09a19b04f7fd9e",
       "automationId": "preview-001-transferencias-entre-cuantas-propias",
-      "sectionSlug": "api-tests",
-      "generatedAt": "2026-10-21T21:29:50.416Z"
+      "sectionSlug": "default-section",
+      "generatedAt": "2026-10-22T15:09:45.341Z"
     }
   }
 ]

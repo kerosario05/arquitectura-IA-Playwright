@@ -69,6 +69,35 @@ CREATE TABLE IF NOT EXISTS ProjectCaseRuntimeValue (
   FOREIGN KEY (projectId) REFERENCES Projects(id)
 );
 
+CREATE TABLE IF NOT EXISTS ProjectDataCatalog (
+  id TEXT PRIMARY KEY COLLATE NOCASE DEFAULT (${UUID_DEFAULT_EXPR}),
+  projectId TEXT NOT NULL COLLATE NOCASE REFERENCES Projects(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  fieldName TEXT NOT NULL,
+  aliasesJson TEXT NOT NULL DEFAULT '[]',
+  active INTEGER NOT NULL DEFAULT 1,
+  revision INTEGER NOT NULL DEFAULT 1,
+  createdAt TEXT NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  updatedAt TEXT NOT NULL DEFAULT (${UTC_NOW_EXPR})
+);
+
+CREATE INDEX IF NOT EXISTS IX_ProjectDataCatalog_project_active
+  ON ProjectDataCatalog(projectId, active, name);
+
+CREATE TABLE IF NOT EXISTS ProjectDataCatalogOption (
+  id TEXT PRIMARY KEY COLLATE NOCASE DEFAULT (${UUID_DEFAULT_EXPR}),
+  catalogId TEXT NOT NULL COLLATE NOCASE REFERENCES ProjectDataCatalog(id) ON DELETE CASCADE,
+  label TEXT NOT NULL,
+  [value] TEXT NOT NULL,
+  active INTEGER NOT NULL DEFAULT 1,
+  position INTEGER NOT NULL DEFAULT 0,
+  createdAt TEXT NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  updatedAt TEXT NOT NULL DEFAULT (${UTC_NOW_EXPR})
+);
+
+CREATE INDEX IF NOT EXISTS IX_ProjectDataCatalogOption_catalog_position
+  ON ProjectDataCatalogOption(catalogId, active, position, id);
+
 CREATE TABLE IF NOT EXISTS SharedConnection (
   id                  TEXT    PRIMARY KEY COLLATE NOCASE DEFAULT (${UUID_DEFAULT_EXPR}),
   connectionType      INTEGER NOT NULL,           -- 1 = Jira, 2 = TestRail

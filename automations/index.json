@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-10-22T14:24:01.853Z",
+  "updatedAt": "2026-10-23T00:43:11.525Z",
   "automations": [
     {
       "id": "c10002-test-automation-plan",
@@ -48143,13 +48143,13 @@
       "source": "discovery",
       "appProfile": "portal-empresarial",
       "createdAt": "2026-10-03T22:42:39.350Z",
-      "updatedAt": "2026-10-15T14:26:13.981Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-15T14-25-08-350Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-22T16:48:55.557Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T16-46-39-428Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-15T14-25-08-350Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T16-46-39-428Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -48173,7 +48173,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 32195,
+          "durationMs": 59875,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -48224,9 +48224,9 @@
           },
           "specWritten": true,
           "previousSpec": {
-            "existed": false,
-            "hash": null,
-            "lastModifiedAt": null
+            "existed": true,
+            "hash": "da5aae187897b97ee62c1b07a65bc8db97fd6329a4b3e13024cae28fdca341a4",
+            "lastModifiedAt": "2026-10-15T14:26:13.932Z"
           }
         },
         "promotionStrategyDiagnostics": {
@@ -48248,7 +48248,10 @@
           "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-descargar-plantilla-para-carga-de-nomina\\case.spec.ts",
           "specHash": "da5aae187897b97ee62c1b07a65bc8db97fd6329a4b3e13024cae28fdca341a4",
           "specSource": "generatedSpec"
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-descargar-plantilla-para-carga-de-nomina\\plan.json",
+        "previousStatus": "active"
       },
       "promotionPersisted": true,
       "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-descargar-plantilla-para-carga-de-nomina\\case.spec.ts",
@@ -48508,21 +48511,21 @@
       "externalId": "PREVIEW-001",
       "caseId": 0,
       "title": "Transferencias entre cuantas propias",
-      "planPath": "automations\\apps\\fenix\\sections\\api-tests\\cases\\preview-001-transferencias-entre-cuantas-propias\\plan.json",
-      "specPath": "automations\\apps\\fenix\\sections\\api-tests\\cases\\preview-001-transferencias-entre-cuantas-propias\\case.spec.ts",
+      "planPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-transferencias-entre-cuantas-propias\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-transferencias-entre-cuantas-propias\\case.spec.ts",
       "appSlug": "fenix",
       "appConfigPath": "automations\\apps\\fenix\\app.config.json",
       "status": "active",
       "source": "discovery",
       "appProfile": "fenix",
       "createdAt": "2026-10-05T12:08:45.731Z",
-      "updatedAt": "2026-10-21T21:29:13.075Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-21T21-23-24-645Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-22T15:09:16.800Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T15-04-00-163Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-21T21-23-24-645Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T15-04-00-163Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -48546,7 +48549,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 166467,
+          "durationMs": 141757,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -48595,9 +48598,9 @@
           },
           "specWritten": true,
           "previousSpec": {
-            "existed": false,
-            "hash": null,
-            "lastModifiedAt": null
+            "existed": true,
+            "hash": "8da3594695cd78c22472b848698496a445bce0959df813120e09a19b04f7fd9e",
+            "lastModifiedAt": "2026-10-22T14:56:29.096Z"
           }
         },
         "promotionStrategyDiagnostics": {
@@ -48616,17 +48619,17 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false,
-          "specPath": "automations\\apps\\fenix\\sections\\api-tests\\cases\\preview-001-transferencias-entre-cuantas-propias\\case.spec.ts",
-          "specHash": "8b94aea65b08ef11ba1cb4b67452d956c7d7e47bf49361eeaaa1466e10f89f3f",
+          "specPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-transferencias-entre-cuantas-propias\\case.spec.ts",
+          "specHash": "8da3594695cd78c22472b848698496a445bce0959df813120e09a19b04f7fd9e",
           "specSource": "generatedSpec"
         },
         "overwritten": true,
-        "previousAutomationPath": "automations\\apps\\fenix\\sections\\api-tests\\cases\\preview-001-transferencias-entre-cuantas-propias\\plan.json",
-        "previousStatus": "spec_failed"
+        "previousAutomationPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-transferencias-entre-cuantas-propias\\plan.json",
+        "previousStatus": "active"
       },
       "promotionPersisted": true,
-      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\api-tests\\cases\\preview-001-transferencias-entre-cuantas-propias\\case.spec.ts",
-      "promotedSpecHash": "8b94aea65b08ef11ba1cb4b67452d956c7d7e47bf49361eeaaa1466e10f89f3f"
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-transferencias-entre-cuantas-propias\\case.spec.ts",
+      "promotedSpecHash": "8da3594695cd78c22472b848698496a445bce0959df813120e09a19b04f7fd9e"
     },
     {
       "id": "preview-001-login-sastifactorio",
@@ -49134,21 +49137,21 @@
       "externalId": "PREVIEW-001",
       "caseId": 0,
       "title": "Agregar varios empleados manualmente con cédula",
-      "planPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\plan.json",
-      "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",
+      "planPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\plan.json",
+      "specPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",
       "appSlug": "portal-empresarial",
       "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
       "status": "active",
       "source": "discovery",
       "appProfile": "portal-empresarial",
       "createdAt": "2026-10-06T16:03:06.707Z",
-      "updatedAt": "2026-10-15T13:48:01.265Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-15T13-42-10-049Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-22T19:51:08.859Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T19-44-29-693Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-15T13-42-10-049Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T19-44-29-693Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -49172,7 +49175,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 144874,
+          "durationMs": 125577,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -49220,8 +49223,8 @@
           "specWritten": true,
           "previousSpec": {
             "existed": true,
-            "hash": "390b6eeb65e73b55b9178d5ce770364b00ab4e16d6db19423211ca36cd6717b2",
-            "lastModifiedAt": "2026-10-15T12:33:05.222Z"
+            "hash": "962fcda5b9da877baf20550f93c9728b131329bed08a9118eca76e189828aade",
+            "lastModifiedAt": "2026-10-09T22:55:10.184Z"
           }
         },
         "promotionStrategyDiagnostics": {
@@ -49240,17 +49243,17 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false,
-          "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",
-          "specHash": "390b6eeb65e73b55b9178d5ce770364b00ab4e16d6db19423211ca36cd6717b2",
+          "specPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",
+          "specHash": "962fcda5b9da877baf20550f93c9728b131329bed08a9118eca76e189828aade",
           "specSource": "generatedSpec"
         },
         "overwritten": true,
-        "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\plan.json",
-        "previousStatus": "active"
+        "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\plan.json",
+        "previousStatus": "spec_failed"
       },
       "promotionPersisted": true,
-      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",
-      "promotedSpecHash": "390b6eeb65e73b55b9178d5ce770364b00ab4e16d6db19423211ca36cd6717b2"
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",
+      "promotedSpecHash": "962fcda5b9da877baf20550f93c9728b131329bed08a9118eca76e189828aade"
     },
     {
       "id": "preview-001-consultar-tarjeta-visa-oro",
@@ -49760,13 +49763,13 @@
       "source": "discovery",
       "appProfile": "portal-empresarial",
       "createdAt": "2026-10-07T03:48:26.524Z",
-      "updatedAt": "2026-10-15T13:58:05.079Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-15T13-56-03-265Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-22T16:33:31.134Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T16-31-53-806Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-15T13-56-03-265Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T16-31-53-806Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -49790,7 +49793,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 88650,
+          "durationMs": 41850,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -49841,9 +49844,9 @@
           },
           "specWritten": true,
           "previousSpec": {
-            "existed": false,
-            "hash": null,
-            "lastModifiedAt": null
+            "existed": true,
+            "hash": "4ee0ea7766f09da68977d7ffc5bf22cdca9bae990dbd898de4fa1cd23bb9db3c",
+            "lastModifiedAt": "2026-10-22T15:38:35.711Z"
           }
         },
         "promotionStrategyDiagnostics": {
@@ -49865,7 +49868,10 @@
           "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-login-satisfactorio\\case.spec.ts",
           "specHash": "4ee0ea7766f09da68977d7ffc5bf22cdca9bae990dbd898de4fa1cd23bb9db3c",
           "specSource": "generatedSpec"
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-login-satisfactorio\\plan.json",
+        "previousStatus": "active"
       },
       "promotionPersisted": true,
       "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-login-satisfactorio\\case.spec.ts",
@@ -49884,13 +49890,13 @@
       "source": "discovery",
       "appProfile": "portal-empresarial",
       "createdAt": "2026-10-07T03:53:47.186Z",
-      "updatedAt": "2026-10-15T14:03:48.886Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-15T14-01-11-355Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-22T16:37:51.895Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T16-34-21-951Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-15T14-01-11-355Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T16-34-21-951Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -49914,7 +49920,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 78346,
+          "durationMs": 62023,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -49963,9 +49969,9 @@
           },
           "specWritten": true,
           "previousSpec": {
-            "existed": false,
-            "hash": null,
-            "lastModifiedAt": null
+            "existed": true,
+            "hash": "ec6e2f7f49de1f01753548edb1af844a190b289f079bd839d43d173ce592960b",
+            "lastModifiedAt": "2026-10-22T15:43:52.800Z"
           }
         },
         "promotionStrategyDiagnostics": {
@@ -49987,7 +49993,10 @@
           "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente\\case.spec.ts",
           "specHash": "ec6e2f7f49de1f01753548edb1af844a190b289f079bd839d43d173ce592960b",
           "specSource": "generatedSpec"
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente\\plan.json",
+        "previousStatus": "active"
       },
       "promotionPersisted": true,
       "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente\\case.spec.ts",
@@ -50002,17 +50011,17 @@
       "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-un-empleado-manualmente-con-cedula\\case.spec.ts",
       "appSlug": "portal-empresarial",
       "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
-      "status": "active",
+      "status": "spec_failed",
       "source": "discovery",
       "appProfile": "portal-empresarial",
       "createdAt": "2026-10-07T04:05:34.322Z",
-      "updatedAt": "2026-10-15T14:15:55.590Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-15T14-12-31-754Z\\discovered-plans.pending.json",
-      "pomStatus": "promoted",
+      "updatedAt": "2026-10-22T16:44:06.111Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T16-39-45-825Z\\discovered-plans.pending.json",
+      "pomStatus": "needs_manual_review",
       "inlineDebugMode": false,
-      "specVerificationStatus": "passed",
+      "specVerificationStatus": "failed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-15T14-12-31-754Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T16-39-45-825Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -50036,7 +50045,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 97808,
+          "durationMs": 88326,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -50055,21 +50064,29 @@
             "typescript": "passed",
             "playwrightDiscovery": "passed",
             "semanticCoverage": "passed",
-            "functionalExecution": "passed"
+            "functionalExecution": "failed"
           },
-          "promotionAllowed": true,
+          "promotionAllowed": false,
           "specsRequested": 1,
-          "specsValidated": 1,
-          "specsRejected": 0,
+          "specsValidated": 0,
+          "specsRejected": 1,
           "specGenerationAttempts": 0,
           "specRepairAttempts": 0,
-          "firstPassPromotion": true,
-          "failedGatesAttempt1": [],
+          "firstPassPromotion": false,
+          "failedGatesAttempt1": [
+            "functionalExecution"
+          ],
           "regressedGates": [],
           "missingRequirements": [],
           "oracleTypes": [],
-          "errors": [],
-          "warnings": [],
+          "errors": [
+            "functional_execution_failed:exitCode=1",
+            "functional_execution_error:Error: PROMOTED_FINAL_OUTCOME_UNVERIFIED"
+          ],
+          "warnings": [
+            "functional_execution_screenshots=19",
+            "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 2)."
+          ],
           "finalSpec": {
             "origin": "deterministic_compiler",
             "generatedBy": "core",
@@ -50077,23 +50094,25 @@
             "fallback": null
           },
           "runtimeGate": {
-            "decision": "promote",
-            "promotionStatus": "promoted",
-            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+            "decision": "block",
+            "promotionStatus": "blocked",
+            "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 2)."
           },
-          "specWritten": true,
+          "specWritten": false,
           "previousSpec": {
-            "existed": false,
-            "hash": null,
-            "lastModifiedAt": null
+            "existed": true,
+            "hash": "4b4dd2b8fec2072fba46e920e497857633cb58ffc63f66fb961a0d4bb68f06b5",
+            "lastModifiedAt": "2026-10-15T14:15:55.535Z"
           }
         },
         "promotionStrategyDiagnostics": {
           "requestedStrategy": "auto",
           "autoPomEnabled": true,
           "selectedStrategy": "pom",
-          "reason": "promoted",
-          "blockers": [],
+          "reason": "spec_generation_validation_failed",
+          "blockers": [
+            "spec_generation_validation_failed"
+          ],
           "availablePageObjects": [
             "ProductListPage",
             "OperationsMenuPage"
@@ -50106,12 +50125,12 @@
           "requirePomRuntime": false,
           "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-un-empleado-manualmente-con-cedula\\case.spec.ts",
           "specHash": "4b4dd2b8fec2072fba46e920e497857633cb58ffc63f66fb961a0d4bb68f06b5",
-          "specSource": "generatedSpec"
-        }
-      },
-      "promotionPersisted": true,
-      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-un-empleado-manualmente-con-cedula\\case.spec.ts",
-      "promotedSpecHash": "4b4dd2b8fec2072fba46e920e497857633cb58ffc63f66fb961a0d4bb68f06b5"
+          "specSource": "ai_candidate"
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-un-empleado-manualmente-con-cedula\\plan.json",
+        "previousStatus": "active"
+      }
     },
     {
       "id": "jira-a-gate-a",
@@ -53109,21 +53128,21 @@
       "externalId": "PREVIEW-001",
       "caseId": 0,
       "title": "Crear cuenta",
-      "planPath": "automations\\apps\\portal-ventas-digital\\sections\\detalle-kiosko\\cases\\preview-001-crear-cuenta\\plan.json",
-      "specPath": "automations\\apps\\portal-ventas-digital\\sections\\detalle-kiosko\\cases\\preview-001-crear-cuenta\\case.spec.ts",
+      "planPath": "automations\\apps\\portal-ventas-digital\\sections\\default-section\\cases\\preview-001-crear-cuenta\\plan.json",
+      "specPath": "automations\\apps\\portal-ventas-digital\\sections\\default-section\\cases\\preview-001-crear-cuenta\\case.spec.ts",
       "appSlug": "portal-ventas-digital",
       "appConfigPath": "automations\\apps\\portal-ventas-digital\\app.config.json",
       "status": "spec_failed",
       "source": "discovery",
       "appProfile": "portal-ventas-digital",
       "createdAt": "2026-10-20T16:16:58.251Z",
-      "updatedAt": "2026-10-20T19:21:23.159Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-20T19-18-41-440Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-22T16:53:12.126Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T16-50-38-349Z\\discovered-plans.pending.json",
       "pomStatus": "needs_manual_review",
       "inlineDebugMode": false,
       "specVerificationStatus": "failed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-20T19-18-41-440Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T16-50-38-349Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -53147,7 +53166,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 84721,
+          "durationMs": 75588,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -53227,12 +53246,12 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false,
-          "specPath": "automations\\apps\\portal-ventas-digital\\sections\\detalle-kiosko\\cases\\preview-001-crear-cuenta\\case.spec.ts",
-          "specHash": "0fd1cf7c3ac1d76dc072948a1d64e05123e19da3243fcd29d4c915298d4944e9",
+          "specPath": "automations\\apps\\portal-ventas-digital\\sections\\default-section\\cases\\preview-001-crear-cuenta\\case.spec.ts",
+          "specHash": "c5ae81bc81bbe64e1561b398668795700b8ac5327d59771a494f954bd8e93608",
           "specSource": "ai_candidate"
         },
         "overwritten": true,
-        "previousAutomationPath": "automations\\apps\\portal-ventas-digital\\sections\\detalle-kiosko\\cases\\preview-001-crear-cuenta\\plan.json",
+        "previousAutomationPath": "automations\\apps\\portal-ventas-digital\\sections\\default-section\\cases\\preview-001-crear-cuenta\\plan.json",
         "previousStatus": "spec_failed"
       }
     },
@@ -53677,6 +53696,174 @@
       "baseUrlHash": "2a7bf6928b41",
       "createdAt": "2026-10-22T14:24:01.811Z",
       "updatedAt": "2026-10-22T14:24:01.853Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-97-jira-1-edited-ea9cb2d11a0aaa52-transferencia-exitosa-entre-cuentas-propias",
+      "externalId": "AA-97:jira:1:edited-ea9cb2d11a0aaa52",
+      "title": "Transferencia exitosa entre cuentas propias",
+      "planPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-edited-ea9cb2d11a0aaa52-transferencia-exitosa-entre-cuentas-propias\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-edited-ea9cb2d11a0aaa52-transferencia-exitosa-entre-cuentas-propias\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "2a7bf6928b41",
+      "createdAt": "2026-10-22T19:27:06.023Z",
+      "updatedAt": "2026-10-22T19:27:06.062Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-97-jira-1-edited-23cae49875ba7003-transferencia-exitosa-entre-cuentas-propias",
+      "externalId": "AA-97:jira:1:edited-23cae49875ba7003",
+      "title": "Transferencia exitosa entre cuentas propias",
+      "planPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-edited-23cae49875ba7003-transferencia-exitosa-entre-cuentas-propias\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-edited-23cae49875ba7003-transferencia-exitosa-entre-cuentas-propias\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "2a7bf6928b41",
+      "createdAt": "2026-10-22T21:22:49.558Z",
+      "updatedAt": "2026-10-22T21:22:49.589Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-verificacion-por-sms",
+      "externalId": "AA-97:jira:1",
+      "title": "Transferencia exitosa entre cuentas propias con verificación por SMS",
+      "planPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-verificacion-por-sms\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-transferencia-exitosa-entre-cuentas-propias-con-verificacion-por-sms\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "2a7bf6928b41",
+      "createdAt": "2026-10-23T00:43:11.490Z",
+      "updatedAt": "2026-10-23T00:43:11.525Z",
       "specVerificationStatus": "passed",
       "tags": [
         "jira_semantic",

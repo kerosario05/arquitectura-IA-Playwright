@@ -29,8 +29,37 @@ import multer from "multer";
 import fs from "fs";
 import path from "path";
 import { getProjectGenerationConfig, upsertProjectGenerationConfig } from "../../db/project-generation-config-service";
+import { createProjectDataCatalog, listProjectDataCatalogs, ProjectDataCatalogError, setProjectDataCatalogOptionActive, updateProjectDataCatalog } from "../../db/project-data-catalog-service";
 
 export const projectsRouter = Router();
+
+projectsRouter.get("/:projectSlug/data-catalogs", async (req, res, next) => {
+  try { res.json({ catalogs: await listProjectDataCatalogs(req.params.projectSlug, req.query.includeInactive === "true") }); }
+  catch (error) { next(error); }
+});
+projectsRouter.post("/:projectSlug/data-catalogs", async (req, res, next) => {
+  try { res.status(201).json({ catalog: await createProjectDataCatalog(req.params.projectSlug, req.body) }); }
+  catch (error) {
+    if (error instanceof ProjectDataCatalogError) return res.status(error.status).json({ ok: false, error: error.code, message: error.message });
+    next(error);
+  }
+});
+projectsRouter.put("/:projectSlug/data-catalogs/:catalogId", async (req, res, next) => {
+  try { res.json({ catalog: await updateProjectDataCatalog(req.params.projectSlug, req.params.catalogId, req.body) }); }
+  catch (error) {
+    if (error instanceof ProjectDataCatalogError) return res.status(error.status).json({ ok: false, error: error.code, message: error.message });
+    next(error);
+  }
+});
+projectsRouter.patch("/:projectSlug/data-catalogs/:catalogId/options/:optionId", async (req, res, next) => {
+  try {
+    if (typeof req.body?.active !== "boolean") return res.status(400).json({ ok: false, error: "active_required", message: "Indica si la opción debe estar activa." });
+    res.json({ catalog: await setProjectDataCatalogOptionActive(req.params.projectSlug, req.params.catalogId, req.params.optionId, req.body.active) });
+  } catch (error) {
+    if (error instanceof ProjectDataCatalogError) return res.status(error.status).json({ ok: false, error: error.code, message: error.message });
+    next(error);
+  }
+});
 
 const managedApkDir = path.resolve(process.cwd(), ".artifacts", "apks");
 const apkUpload = multer({

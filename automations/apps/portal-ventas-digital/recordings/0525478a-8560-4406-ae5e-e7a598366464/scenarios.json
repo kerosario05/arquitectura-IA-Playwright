@@ -1531,11 +1531,11 @@
     "readiness": {
       "functionalReadiness": true,
       "dataReadiness": true,
-      "technicalReadiness": true,
+      "technicalReadiness": false,
       "oracleReadiness": true,
       "reviewReadiness": true,
       "publicationContentReadiness": true,
-      "executionReadiness": true,
+      "executionReadiness": false,
       "publicationReadiness": true,
       "missingInputs": [],
       "datasetAuthorityMismatches": [],

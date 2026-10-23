@@ -1,8 +1,26 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { classifyLaunchScenarioAuthority, classifyRouteDiscoveryEligibility, partitionLaunchScenarios } from "./launch-orchestrator";
+import { buildDiscoveryBatchParamsFromLaunch, classifyLaunchScenarioAuthority, classifyRouteDiscoveryEligibility, partitionLaunchScenarios } from "./launch-orchestrator";
 import { extractLaunchScenariosFromPayload } from "../routes/runs";
 import {resolveExecutionEngine} from '../../jira/execution-origin';
+import {deriveJiraInputRequirements} from '../../jira/jira-input-requirements';
+import type {JiraScenarioInput} from '../../jira/jira-semantic-executor';
+
+test('edited Jira input keys survive route normalization and the execution job handoff',()=>{
+ const scenarioId='HU-7:jira:1:edited-abcdef';
+ const steps=['Ingresar un dato válido en "Referencia"','Seleccionar una opción en "Producto"'];
+ const inputRequirements=deriveJiraInputRequirements(steps).map((field,index)=>({...field,key:`jira_edit_revision_${index+1}`}));
+ for(const appSlug of ['fixture-shop','fixture-service']) {
+  const scenarios=extractLaunchScenariosFromPayload({selectedScenarios:[{scenarioId,sourceIssueKey:'HU-7',title:'Edición',steps,preconditions:[],expectedResult:'Resultado',inputRequirements,validation:{valid:true}}]});
+  assert.deepEqual((scenarios[0] as unknown as JiraScenarioInput).inputRequirements,inputRequirements);
+  const dataOverrides={[scenarioId]:{jira_edit_revision_1:'synthetic-reference',jira_edit_revision_2:'synthetic-product'}};
+  const handoff=buildDiscoveryBatchParamsFromLaunch({launch:{appSlug,selectedScenarios:scenarios,dataOverrides,executionEngine:'jira_semantic',scenarioOrigin:{kind:'jira_generated',jiraKey:'HU-7'}},executionCaseIds:[],publishedCases:[],launchId:'fixture-launch'});
+  const [execution]=JSON.parse(JSON.stringify(handoff.jiraSemanticScenarios)) as JiraScenarioInput[];
+  const derived=deriveJiraInputRequirements(execution.steps,execution.inputRequirements);
+  assert.deepEqual(derived.map(field=>field.key),inputRequirements.map(field=>field.key));
+  assert.ok(derived.every(field=>Boolean((handoff.dataOverrides as typeof dataOverrides)[scenarioId][field.key as keyof typeof dataOverrides[typeof scenarioId]])));
+ }
+});
 
 test('explicit Jira provenance admits valid pending scenarios for publication without adaptive or runtime certification',()=>{
  for(const appSlug of ['fixture-shop','fixture-service']) {

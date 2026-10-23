@@ -10,14 +10,14 @@
   "status": "active",
   "source": "discovery",
   "appProfile": "fenix",
-  "createdAt": "2026-10-19T14:58:25.475Z",
-  "updatedAt": "2026-10-19T14:58:25.475Z",
-  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-19T14-51-45-409Z\\discovered-plans.pending.json",
+  "createdAt": "2026-10-22T15:09:16.780Z",
+  "updatedAt": "2026-10-22T15:09:16.780Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T15-04-00-163Z\\discovered-plans.pending.json",
   "pomStatus": "promoted",
   "inlineDebugMode": false,
   "specVerificationStatus": "passed",
   "metadata": {
-    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-19T14-51-45-409Z",
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T15-04-00-163Z",
     "pomDiagnostics": {
       "status": "promoted",
       "inlineFallbackUsed": false,
@@ -41,7 +41,7 @@
       },
       "invocations": 0,
       "invocationsConsumed": 0,
-      "durationMs": 148393,
+      "durationMs": 141757,
       "usage": {
         "inputTokens": null,
         "cachedInputTokens": null,
@@ -76,9 +76,7 @@
         "navigation_transition"
       ],
       "errors": [],
-      "warnings": [
-        "step_index_not_explicit_in_spec:18"
-      ],
+      "warnings": [],
       "finalSpec": {
         "origin": "deterministic_compiler",
         "generatedBy": "core",
@@ -93,8 +91,8 @@
       "specWritten": true,
       "previousSpec": {
         "existed": true,
-        "hash": "47fc2637704bb4a864c2acca8cbd7835a6be0ff45bc0892d7f3b004aa9e2ab14",
-        "lastModifiedAt": "2026-10-15T12:12:29.196Z"
+        "hash": "8da3594695cd78c22472b848698496a445bce0959df813120e09a19b04f7fd9e",
+        "lastModifiedAt": "2026-10-22T14:56:29.096Z"
       }
     },
     "promotionStrategyDiagnostics": {
@@ -114,7 +112,7 @@
       "fallbackUsed": false,
       "requirePomRuntime": false,
       "specPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-transferencias-entre-cuantas-propias\\case.spec.ts",
-      "specHash": "47fc2637704bb4a864c2acca8cbd7835a6be0ff45bc0892d7f3b004aa9e2ab14",
+      "specHash": "8da3594695cd78c22472b848698496a445bce0959df813120e09a19b04f7fd9e",
       "specSource": "generatedSpec"
     },
     "overwritten": true,
@@ -123,5 +121,5 @@
   },
   "promotionPersisted": true,
   "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-transferencias-entre-cuantas-propias\\case.spec.ts",
-  "promotedSpecHash": "47fc2637704bb4a864c2acca8cbd7835a6be0ff45bc0892d7f3b004aa9e2ab14"
+  "promotedSpecHash": "8da3594695cd78c22472b848698496a445bce0959df813120e09a19b04f7fd9e"
 }

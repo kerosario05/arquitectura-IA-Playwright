@@ -2,7 +2,7 @@
   "version": 1,
   "appSlug": "fenix",
   "createdAt": "2026-09-23T13:48:01.218Z",
-  "updatedAt": "2026-10-22T14:20:52.388Z",
+  "updatedAt": "2026-10-23T00:40:33.737Z",
   "items": [],
   "jiraRoutes": [
     {
@@ -687,9 +687,9 @@
       "id": "9366c2269a2eded3fc9935a4a8a37d645d72f25b2b979dd1af3f5501a026c582",
       "profileRevision": "854d1a28d006225af70656f58f8801b66c7a12dbb7f540424b4ef83491a12a0f",
       "sourceIssueKey": "AA-97",
-      "scenarioId": "AA-97:jira:1:edited-7b205e93f8ef1483",
-      "jobId": "c59666bf-0315-4289-9d5e-b2b5e6ceff4d",
-      "validatedAt": "2026-10-22T14:20:52.378Z",
+      "scenarioId": "AA-97:jira:1",
+      "jobId": "325e7cd1-c8e9-41cd-b424-b630b3a2c33a",
+      "validatedAt": "2026-10-23T00:40:33.728Z",
       "startsFrom": "project_entry",
       "actions": [
         {
@@ -761,7 +761,7 @@
         {
           "action": "fill",
           "field": "Monto",
-          "dataRef": "monto"
+          "dataRef": "monto_transferencia"
         },
         {
           "action": "click",
@@ -770,7 +770,7 @@
         },
         {
           "action": "click",
-          "field": "Continuar",
+          "field": "continuar",
           "targetKind": "observed_control"
         },
         {
@@ -781,7 +781,7 @@
         {
           "action": "fill",
           "field": "Token",
-          "dataRef": "token_autorizacion"
+          "dataRef": "token_autorizacion_sms"
         },
         {
           "action": "click",
@@ -820,15 +820,17 @@
         "scenario-1-step-28.png",
         "scenario-1-step-29.png",
         "scenario-1-step-30.png",
-        "scenario-1-step-31.png"
+        "scenario-1-step-31.png",
+        "scenario-1-step-32.png",
+        "scenario-1-step-33.png"
       ],
       "observables": [
         {
-          "requirement": "Validar que se muestre \"las cuentas de forma que puedan reconocerse la cuenta que debitará y la que recibirá los fondos\"",
-          "target": "Cuenta Corriente"
+          "requirement": "Validar que se muestre \"resumen de sus productos\"",
+          "target": "Visible heading and nearby content: Resumen Todos Cuentas Tarjetas Préstamos Certificados de Depósito"
         },
         {
-          "requirement": "Validar que se muestre \"el resumen con las cuentas seleccionadas\"",
+          "requirement": "Validar que se muestre \"resumen con las cuentas seleccionadas\"",
           "target": "Cuenta Corriente · Cuenta de Ahorro"
         }
       ]

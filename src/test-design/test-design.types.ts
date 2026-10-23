@@ -18,6 +18,8 @@ export type TestDesignDatum = {
   /** Short hint shown under the field, e.g. what kind of value is expected. */
   description: string;
   condition?: "valid" | "invalid" | "expired";
+  /** User-selected project catalog binding; optional for legacy drafts. */
+  catalogBinding?: { catalogId: string; optionId?: string; revision: number; mode: "manual" | "automatic" };
 };
 
 export type TestDesignStep = {

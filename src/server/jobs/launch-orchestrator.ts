@@ -17,6 +17,7 @@ import { buildMcpScenarioContractFromTestRailCase, evaluateCaseContractSufficien
 import { normalizeTestRailCase } from "../../testrail/testrail-normalizer";
 import type { RawTestRailCase } from "../../types/testrail.types";
 import {resolveExecutionEngine,type ExecutionOrigin,type ExecutionEngine} from '../../jira/execution-origin';
+import type {JiraInputRequirement} from '../../jira/jira-input-requirements';
 
 const ROOT = path.resolve(__dirname, "..", "..", "..");
 const LAUNCH_ARTIFACTS_DIR = path.join(ROOT, ".artifacts", "scenario-launch-runs");
@@ -24,6 +25,7 @@ const LAUNCH_ARTIFACTS_DIR = path.join(ROOT, ".artifacts", "scenario-launch-runs
 export type LaunchScenario = {
   recordingId?: string;
   recordingExecutionContract?: unknown;
+  inputRequirements?: JiraInputRequirement[];
   scenarioId: string;
   title: string;
   steps: string[];

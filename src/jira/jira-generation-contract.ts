@@ -25,6 +25,14 @@ function conditionalAssertionIndices(steps:string[],subject:string):number[] {
  });
 }
 type ConditionalStage={stepIndices:number[];insertionIndex:number};
+/** Source-named data producers distinguish a business review from an earlier landing summary. */
+function sourceNamedSummaryInputs(steps:string[],sourceClause:string,subject:string):number[] {
+ if(!/\b(?:resumen|confirmaci[oó]n|summary|confirmation)\b/i.test(sourceClause)) return [];
+ const excluded=new Set([...conditionalStageStopWords,...normalized(subject).split(/[^a-z0-9]+/)]);
+ const terms=new Set(normalized(sourceClause).split(/[^a-z0-9]+/).filter(term=>term.length>=3&&!excluded.has(term)));
+ return deriveJiraInputRequirements(steps).filter(field=>normalized(field.label).split(/[^a-z0-9]+/).some(term=>terms.has(term)))
+  .map(field=>field.stepIndex-1);
+}
 /**
  * Pick the assertion block that best matches the other subjects named beside a
  * conditional field in a source-backed summary/confirmation clause. This avoids
@@ -36,6 +44,7 @@ function conditionalSummaryStage(steps:string[],sourceClause:string,subject:stri
  const evidenceTerms=new Set(normalized(sourceClause).split(/[^a-z0-9]+/)
   .filter(term=>term.length>=3&&!subjectTokens.has(term)&&!conditionalStageStopWords.has(term)));
  if(evidenceTerms.size<2) return undefined;
+ const producers=sourceNamedSummaryInputs(steps,sourceClause,subject);
  const groups:number[][]=[];
  for(let index=0;index<steps.length;index++) {
   if(!assertionTarget(steps[index])) continue;
@@ -43,7 +52,7 @@ function conditionalSummaryStage(steps:string[],sourceClause:string,subject:stri
   if(previous?.at(-1)===index-1) previous.push(index);
   else groups.push([index]);
  }
- const scored=groups.map(stepIndices=>{
+ const scored=groups.filter(indices=>!producers.some(index=>index>indices.at(-1)!)).map(stepIndices=>{
   const targets=stepIndices.map(index=>normalized(assertionTarget(steps[index])??''));
   const matchedTerms=[...evidenceTerms].filter(term=>targets.some(target=>target.split(/[^a-z0-9]+/).includes(term)));
   const insertionAnchor=[...stepIndices].reverse().find(index=>targets[stepIndices.indexOf(index)]
@@ -51,8 +60,22 @@ function conditionalSummaryStage(steps:string[],sourceClause:string,subject:stri
   return {stepIndices,score:matchedTerms.length,insertionIndex:(insertionAnchor??stepIndices.at(-1)!)+1};
  }).sort((left,right)=>right.score-left.score);
  const best=scored[0];
- if(!best||best.score<2||(scored[1]&&scored[1].score===best.score)) return undefined;
- return best;
+ if(best&&best.score>=2&&(!scored[1]||scored[1].score!==best.score)) return best;
+ // A live summary may show selected product names rather than repeat the HU's
+ // word "summary". Its preceding input-group submit is an independent source
+ // anchor; accept it only when exactly one assertion block has that provenance.
+ const produced=scored.filter(group=>{
+  const submit=group.stepIndices[0]-1;
+  const intents=parseStepIntent(steps[submit]??'');
+  if(intents.length!==1||!['action_click','action_submit','action_press'].includes(intents[0].type)) return false;
+  for(let index=submit-1;index>=0;index--){
+   const input=parseStepIntent(steps[index]);
+   if(input.length!==1||!['action_fill','action_select'].includes(input[0].type)) break;
+   if(producers.includes(index)) return true;
+  }
+  return false;
+ });
+ return produced.length===1?{...produced[0],insertionIndex:produced[0].stepIndices.at(-1)!+1}:undefined;
 }
 
 export function jiraSourceConditions(candidate: Record<string, unknown>, issue?: JiraIssueSource): JiraConditionRequirement[] {
@@ -66,7 +89,8 @@ export function jiraSourceConditions(candidate: Record<string, unknown>, issue?:
   const refs=Array.isArray(candidate.acceptanceCriteriaRefs)?candidate.acceptanceCriteriaRefs:[];
   const claimed=criterion && refs.some(ref=>typeof ref==='string' && (ref===criterion || ref.startsWith(criterion+'.')));
    const stage=conditionalSummaryStage(steps,match[0].trim(),subject);
-   const matchingIndices=conditionalAssertionIndices(steps,subject);
+   const producers=sourceNamedSummaryInputs(steps,match[0].trim(),subject);
+   const matchingIndices=conditionalAssertionIndices(steps,subject).filter(index=>!producers.some(producer=>producer>index));
    const stepIndices=(stage?matchingIndices.filter(index=>stage.stepIndices.includes(index)):matchingIndices).map(index=>index+1);
   if(claimed || stepIndices.length) {
    const key=`${criterion ?? 'source'}:${subject}`;
@@ -96,6 +120,11 @@ export function repairMissingJiraConditionalAssertions<T extends Record<string, 
  for(const requirement of jiraSourceConditions({...candidate,steps},issue)) {
   if(!/\b(?:resumen|confirmaci[oó]n|summary|confirmation)\b/i.test(requirement.sourceClause)) continue;
   steps=steps.map(step=>{
+   // Already atomic targets keep their authored wording; stage relocation must
+   // not rename a later, correctly placed observable while removing an early one.
+   const direct=step.match(/^\s*(?:Validar|Verificar) que se (?:muestre|muestren) ["“]([^"”]+)["”][.]?$/i);
+   if(direct&&conditionalTargetMatches(direct[1],requirement.subject)
+    &&! /\b(?:cuando aplique|si aplica|when applicable|if applicable)\b/i.test(direct[1])) return step;
    const contextual=canonicalJiraConditionalVisibilityStep(step,requirement);
    if(contextual!==step) {changed=true;return contextual;}
    const match=step.match(/^\s*(?:Validar|Verificar)\s+que\s+(?:el\s+|la\s+)?(?:resumen(?:\s+de\s+confirmaci[oó]n)?|confirmaci[oó]n|(?:confirmation\s+)?summary|confirmation)\s+(?:muestre|muestra|presente|presenta)\s+([^"“”]+?)[.]?$/i);
@@ -163,7 +192,8 @@ export function repairMissingJiraConditionalAssertions<T extends Record<string, 
   const sourceDescribesSummary=/\b(?:resumen|confirmaci[oó]n|summary|confirmation)\b/i.test(requirement.sourceClause);
   const summaryAnchors=sourceDescribesSummary ? steps.flatMap((step,index)=>{
    const target=step.match(/^\s*(?:Validar|Verificar)\b[\s\S]*?["“]([^"”]+)["”]/i)?.[1] ?? '';
-    return /\b(?:resumen|confirmaci[oó]n|summary|confirmation)\b/i.test(target)?[index]:[];
+    return /\b(?:resumen|confirmaci[oó]n|summary|confirmation)\b/i.test(target)
+      &&!sourceNamedSummaryInputs(steps,requirement.sourceClause,requirement.subject).some(producer=>producer>index)?[index]:[];
    }) : [];
   const summaryAnchor=summaryAnchors.length===1?summaryAnchors[0]:-1;
   if(summaryAnchor>=0) {

@@ -15,6 +15,6 @@
   "fallbackUsed": false,
   "requirePomRuntime": false,
   "specPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-transferencias-entre-cuantas-propias\\case.spec.ts",
-  "specHash": "47fc2637704bb4a864c2acca8cbd7835a6be0ff45bc0892d7f3b004aa9e2ab14",
+  "specHash": "8da3594695cd78c22472b848698496a445bce0959df813120e09a19b04f7fd9e",
   "specSource": "generatedSpec"
 }

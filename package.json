@@ -46,6 +46,7 @@
     "discovery:catalog": "tsx src/cli/discovery-catalog.ts",
     "discovery:preview": "tsx src/cli/discovery-preview.ts",
     "recording:regression": "tsx src/cli/recording-engine-regression.ts",
+    "jira:regression": "tsx src/cli/jira-engine-regression.ts",
     "promoted:inspect": "tsx src/cli/promoted-inspect.ts",
     "promoted:validate-runtime": "tsx src/cli/promoted-validate-runtime.ts",
     "ai:validate": "tsx scripts/validate-ai-repair.ts",

@@ -1347,9 +1347,11 @@
   "promptChars": null,
   "specGenerationAttempts": 0,
   "specRepairAttempts": 0,
-  "firstPassPromotion": true,
-  "promotionAllowed": true,
-  "failedGatesAttempt1": [],
+  "firstPassPromotion": false,
+  "promotionAllowed": false,
+  "failedGatesAttempt1": [
+    "functionalExecution"
+  ],
   "finalSpec": {
     "origin": "deterministic_compiler",
     "generatedBy": "core",

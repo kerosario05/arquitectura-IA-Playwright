@@ -2763,7 +2763,9 @@ export class PromotedSpecRuntime {
     previousUrl: string;
     currentUrl: string;
     actionOutcomeObserved: boolean;
+    downloadObserved?: boolean;
   };
+  private finalDownloadCompletionObserved = false;
   private activeContainer?: { selector: string; descriptor: string };
   private activeContainerDiscardReason?: string;
   private lastSelectionStep?: { selectedTarget: string; stepIndex: number; timestamp: number };
@@ -3368,19 +3370,31 @@ export class PromotedSpecRuntime {
    * cannot be emitted from here: those happen inside the generated candidate file and Playwright
    * itself, outside this class.
    */
-  async verifyScenarioOutcome(check: Omit<ScenarioOutcomeCheck, "failureMessages">, stepIndex: number): Promise<void> {
+  async verifyScenarioOutcome(check: Omit<ScenarioOutcomeCheck, "failureMessages" | "finalActionNavigated"> & { urlBeforeFinalAction?: string }, stepIndex: number): Promise<void> {
     try {
-      const settled = await waitForStableInteractiveScreen(this.page, {
-        waitForPendingTransport: true,
-        absoluteDeadlineMs: this.config.actionTimeoutMs,
-        progressProbe: () => ({ active: this.pendingScenarioRequests.size > 0, pendingCount: this.pendingScenarioRequests.size }),
-      });
+      const settled = this.finalDownloadCompletionObserved
+        ? { stable: true }
+        : await waitForStableInteractiveScreen(this.page, {
+          waitForPendingTransport: true,
+          absoluteDeadlineMs: this.config.actionTimeoutMs,
+          progressProbe: () => ({ active: this.pendingScenarioRequests.size > 0, pendingCount: this.pendingScenarioRequests.size }),
+        });
+      if (this.finalDownloadCompletionObserved) {
+        console.log(`[promoted-outcome] completion=browser_download stepIndex=${stepIndex} interactiveStabilityWait=skipped`);
+      }
       // A rejected login keeps its own spinner/overlay alive indefinitely; once the declared
       // credential-rejection feedback was verified that screen is the terminal outcome, so a
       // never-quiet loading signal must not turn a proven rejection into "unverified".
-      if (!settled.stable && !check.terminalRejectionObserved) throw new Error("PROMOTED_FINAL_OUTCOME_UNVERIFIED");
+      if (!settled.stable && !check.terminalRejectionObserved && !this.finalDownloadCompletionObserved) {
+        throw new Error("PROMOTED_FINAL_OUTCOME_UNVERIFIED");
+      }
       const signals = await readPromotedOutcomeSignals(this.page, true);
-      const result = evaluatePromotedScenarioOutcome({ ...check, failureMessages: signals.failureMessages });
+      const routeOf = (url: string) => { try { const parsed = new URL(url); return parsed.origin + parsed.pathname; } catch { return url; } };
+      const finalActionNavigated = !check.hasFinalAssertion
+        && Boolean(check.urlBeforeFinalAction)
+        && routeOf(this.page.url()) !== routeOf(check.urlBeforeFinalAction!);
+      if (finalActionNavigated) console.log(`[promoted-outcome] completion=final_action_route_change stepIndex=${stepIndex} from=${routeOf(check.urlBeforeFinalAction!)} to=${routeOf(this.page.url())}`);
+      const result = evaluatePromotedScenarioOutcome({ ...check, finalActionNavigated, failureMessages: signals.failureMessages });
       if (result !== "verified") throw new Error(result);
       await this.captureEvidenceStep("Validar resultado final del escenario", "passed", undefined, { sourceStepIndex: stepIndex });
     } catch (error) {
@@ -3748,6 +3762,7 @@ export class PromotedSpecRuntime {
       previousUrl,
       currentUrl: this.page.url(),
       actionOutcomeObserved: this.config.enabled && resolvedExpectedEffect !== "none",
+      downloadObserved: downloadObservationBaseline !== undefined && this.observedDownloadSequence > downloadObservationBaseline,
     };
     await this.captureClickStep(options.target, "passed", undefined, options.stepIndex);
     console.log(`[promoted-click-structural] stepIndex=${options.stepIndex} phase=complete currentUrl=${this.page.url()}`);
@@ -4032,6 +4047,7 @@ export class PromotedSpecRuntime {
     let clickPath: PromotedRuntimeDiagnostics["clickPath"] = "failed";
     let nativeClickAttempted = false;
     let nativeClickSucceeded = false;
+    let downloadObservedForAction = false;
     let nativeClickError: string | undefined;
     let callbackAttempted = false;
     let callbackSucceeded = false;
@@ -4393,6 +4409,7 @@ export class PromotedSpecRuntime {
         
         // Handle expected effects
         await this.postActionStabilityWithRecordedOptionRetry(previousUrl, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe, options.selectionActivationField, downloadObservationBaseline);
+        downloadObservedForAction = this.observedDownloadSequence > downloadObservationBaseline;
         
         // Refresh active container if modal/form/dialog expected
         if (expectedEffect === "modal_or_form_or_navigation" || expectedEffect === "ui_change") {
@@ -4652,6 +4669,7 @@ export class PromotedSpecRuntime {
       previousUrl,
       currentUrl: this.page.url(),
       actionOutcomeObserved: this.config.enabled && resolvedExpectedEffect !== "none",
+      downloadObserved: downloadObservedForAction,
     };
     await this.captureClickStep(options.target, "passed", undefined, options.stepIndex);
     console.log(`[promoted-step] stepIndex=${options.stepIndex} phase=passed currentUrl=${this.page.url()}`);
@@ -5527,6 +5545,7 @@ export class PromotedSpecRuntime {
   }
 
   async expectPromotedVisible(options: PromotedAssertOptions): Promise<void> {
+    this.finalDownloadCompletionObserved = false;
     console.log(`[promoted-step] stepIndex=${options.stepIndex} phase=start currentUrl=${this.page.url()}`);
     this.authBoundary.oracleEvaluationStarted = true;
     await this.ensureInitialEvidence();
@@ -5591,6 +5610,7 @@ export class PromotedSpecRuntime {
               successMessages: signals.successMessages,
             });
             if (!completionObserved) throw new Error("PROMOTED_COMPLETION_SIGNAL_NOT_OBSERVED");
+            this.finalDownloadCompletionObserved = actionIsAdjacent && this.lastActionOutcome?.downloadObserved === true;
           }
         }
       } else {
@@ -5980,6 +6000,7 @@ export function createPromotedSpecRuntime(page: Page, config?: Partial<PromotedR
   let executionFailed = false;
   let expectedVisibleTargets: string[] = [];
   let terminalRejectionObserved = false;
+  let urlBeforeLastAction: string | undefined;
   return new Proxy(runtime, {
     get(target, property, receiver) {
       const member = Reflect.get(target, property, receiver);
@@ -5989,7 +6010,7 @@ export function createPromotedSpecRuntime(page: Page, config?: Partial<PromotedR
         let outcomeError: unknown;
         if (!executionFailed && sequence > 0) {
           try {
-            await target.verifyScenarioOutcome({ hasFinalAssertion: lastAssertion > lastAction, expectedVisibleTargets, terminalRejectionObserved }, lastStepIndex);
+            await target.verifyScenarioOutcome({ hasFinalAssertion: lastAssertion > lastAction, expectedVisibleTargets, terminalRejectionObserved, urlBeforeFinalAction: urlBeforeLastAction }, lastStepIndex);
           } catch (error) { outcomeError = error; }
         }
         try { await target.finishEvidence(); }
@@ -6001,6 +6022,7 @@ export function createPromotedSpecRuntime(page: Page, config?: Partial<PromotedR
         lastStepIndex = args[0]?.stepIndex ?? lastStepIndex;
         if (actions.has(name)) {
           lastAction = callSequence;
+          urlBeforeLastAction = page.url();
           expectedVisibleTargets = [];
         }
         try {

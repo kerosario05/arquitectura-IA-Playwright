@@ -25,6 +25,30 @@ export function jiraCredentialRejectionMatches(observed: string, expected: strin
   return credential.test(intended) && expectedRejection && credential.test(actual) && rejected.test(actual);
 }
 
+/** Classify a failed assertion without returning page text or credential values. */
+export async function observeJiraCredentialRejection(page: import("@playwright/test").Page): Promise<boolean> {
+  // Credential-like wording elsewhere (help, historical activity, etc.) is not
+  // evidence of a rejected login unless the password form is still visible.
+  const passwordVisible = await page.locator('input[type="password"]').evaluateAll(elements => elements.some(element => {
+    const style = window.getComputedStyle(element);
+    const rect = element.getBoundingClientRect();
+    return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
+  }));
+  if (!passwordVisible) return false;
+  const texts = await page.locator("body *").evaluateAll(elements => elements
+    .filter((element): element is HTMLElement => {
+      if (!(element instanceof HTMLElement)) return false;
+      const style = window.getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0
+        && !element.closest('nav,aside,header,button,a,[role="navigation"],[role="button"],[role="link"]')
+        && !element.querySelector('input,textarea,select,button');
+    })
+    .map(element => element.innerText.trim())
+    .filter(text => text.length > 0 && text.length <= 240));
+  return texts.some(text => jiraCredentialRejectionMatches(text, "credenciales inválidas"));
+}
+
 const NEGATIVE_STATE = /\b(?:error|errores|invalid[oa]s?|incorrect[oa]s?|errone[oa]s?|rechazad[oa]s?|rechazo|fallo|falla|fallid[oa]s?)\b|\bno\s+(?:es|son|esta|estan)?\s*(?:valid[oa]s?|correct[oa]s?)\b/;
 const SUCCESS_STATE = /\b(?:exito|exitos[oa]s?|satisfactori[oa]s?|correctamente)\b/;
 const SUBJECT_STOPWORDS = new Set(["de", "del", "la", "el", "los", "las", "un", "una", "que", "y", "en", "se", "mensaje", "aparece", "muestra", "mostrar", "visible", "no", "es", "son", "esta", "estan",

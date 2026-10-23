@@ -81,3 +81,63 @@ test("existing runtime API rejects click-only success, preserves negative tests,
     await assert.rejects(stale.finishEvidence(), /PROMOTED_FINAL_OUTCOME_UNVERIFIED/);
   } finally { await browser.close(); }
 });
+
+test("a verified browser download is terminal completion when the app keeps a loading indicator mounted", async t => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    t.mock.method(PromotedSpecRuntime.prototype as any, "ensureInitialEvidence", async () => {});
+    t.mock.method(PromotedSpecRuntime.prototype, "finishEvidence", async () => {});
+    t.mock.method(PromotedSpecRuntime.prototype as any, "captureEvidenceStep", async () => {});
+    const context = await browser.newContext({ acceptDownloads: true });
+    await context.route("https://fixture.invalid/**", async route => {
+      if (route.request().url().endsWith("/template.csv")) {
+        await route.fulfill({ status: 200, headers: { "content-type": "text/csv", "content-disposition": "attachment; filename=template.csv" }, body: "name\nfixture\n" });
+        return;
+      }
+      await route.fulfill({ status: 200, contentType: "text/html", body: "<a href='/template.csv'>Download template</a><div role='progressbar'>Loading</div>" });
+    });
+    const page = await context.newPage();
+    await page.goto("https://fixture.invalid/");
+    await page.evaluate("globalThis.__name = (value) => value");
+    const runtime = createPromotedSpecRuntime(page, { actionTimeoutMs: 200 });
+    await runtime.clickPromotedTarget({ stepIndex: 1, target: "Download template", actionIntent: "click", expectedEffect: "ui_change", action: async () => {} });
+    await runtime.expectPromotedVisible({
+      stepIndex: 2,
+      target: "https://fixture.invalid/",
+      polarity: "positive",
+      expectedUrl: "https://fixture.invalid/",
+      requireCompletionSignal: true,
+      assertion: async () => expect(page).toHaveURL("https://fixture.invalid/"),
+    });
+    await runtime.finishEvidence();
+    await context.close();
+  } finally { await browser.close(); }
+});
+
+test("a final action that changes route is an observed outcome; a click that stays put is still unverified", async t => {
+  assert.equal(evaluatePromotedScenarioOutcome({ hasFinalAssertion: false, finalActionNavigated: true, failureMessages: [], expectedVisibleTargets: [] }), "verified");
+  assert.equal(evaluatePromotedScenarioOutcome({ hasFinalAssertion: false, finalActionNavigated: true, failureMessages: ["Service failure"], expectedVisibleTargets: [] }), "PROMOTED_UNEXPECTED_BUSINESS_ERROR");
+  assert.equal(evaluatePromotedScenarioOutcome({ hasFinalAssertion: false, finalActionNavigated: false, failureMessages: [], expectedVisibleTargets: [] }), "PROMOTED_FINAL_OUTCOME_UNVERIFIED");
+
+  const browser = await chromium.launch({ headless: true });
+  t.mock.method(PromotedSpecRuntime.prototype, "clickPromotedTarget", async function (this: any, options: any) { await options.action(); });
+  t.mock.method(PromotedSpecRuntime.prototype as any, "ensureInitialEvidence", async () => {});
+  t.mock.method(PromotedSpecRuntime.prototype, "finishEvidence", async () => {});
+  t.mock.method(PromotedSpecRuntime.prototype as any, "captureEvidenceStep", async () => {});
+  try {
+    const page = await browser.newPage();
+    await page.addInitScript("globalThis.__name = (value) => value");
+    await page.setContent("<button>Validar</button>");
+    await page.evaluate("globalThis.__name = (value) => value");
+    const navigates = createPromotedSpecRuntime(page);
+    await navigates.clickPromotedTarget({ stepIndex: 1, target: "Validar", actionIntent: "click", action: async () => { await page.goto("data:text/html,<p>Siguiente</p>"); } });
+    await navigates.finishEvidence();
+
+    await page.setContent("<button>Validar</button>");
+    const staysPut = createPromotedSpecRuntime(page);
+    await staysPut.clickPromotedTarget({ stepIndex: 1, target: "Validar", actionIntent: "click", action: async () => {} });
+    await assert.rejects(staysPut.finishEvidence(), /PROMOTED_FINAL_OUTCOME_UNVERIFIED/);
+  } finally {
+    await browser.close();
+  }
+});

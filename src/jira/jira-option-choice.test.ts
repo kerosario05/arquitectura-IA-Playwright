@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { chromium } from "@playwright/test";
 import { chooseJiraMatchingOption } from "./jira-option-choice";
-import { resolveJiraNativeOption, selectJiraObservedOption } from "./jira-semantic-executor";
+import { createJiraPlaywrightPort, resolveJiraNativeOption, selectJiraObservedOption } from "./jira-semantic-executor";
 import { performJiraSpecSelection } from "./jira-spec-runtime";
 
 test("any matching option is stable across reordering and preserves explicit criteria", () => {
@@ -80,4 +80,22 @@ test("native specs choose by observed value even when option labels repeat", asy
     await performJiraSpecSelection(page.locator("#field"),"Same product");
     assert.equal(await page.locator("#field").inputValue(),expected?.value);
   } finally {await browser.close();}
+});
+
+test("Jira destination selection never clicks a previously selected neighboring field while its own popup loads", {timeout:60000}, async () => {
+ const browser=await chromium.launch({headless:true});
+ try {
+  for(const label of ['Cuenta Corriente','Producto estándar']) {
+   const page=await browser.newPage();
+   await page.setContent(`<main><section><h2>Origen</h2><button type="button" id="origin" onclick="window.wrongField=true">${label} / 700000001</button></section>
+    <section><h2>Destino</h2><button type="button" id="destination" onclick="setTimeout(()=>document.getElementById('choices').hidden=false,500)">Seleccione una opción</button></section>
+    <div id="choices" hidden><span tabindex="0" id="destination-option" onclick="document.getElementById('destination').innerText=this.innerText;this.parentElement.hidden=true">${label} / 700000002</span></div></main>`);
+   const port=createJiraPlaywrightPort(page,'https://fixture.invalid');
+   await port.act({index:1,action:'select',description:'Seleccionar un producto en "Destino"'},'Destino',label);
+   assert.match(await page.locator('#destination').innerText(),/700000002/);
+   assert.equal(await page.evaluate(()=>Reflect.get(window,'wrongField')),undefined);
+   assert.match(await page.locator('#origin').innerText(),/700000001/);
+   await page.close();
+  }
+ } finally {await browser.close();}
 });

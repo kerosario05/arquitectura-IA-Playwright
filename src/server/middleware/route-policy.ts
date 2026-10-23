@@ -75,6 +75,10 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   R("POST", "/api/projects/:slug/materialize", ["projects.materialize"], "required"),
   R("DELETE", "/api/projects/:slug", ["projects.delete"], "required"),
   R("GET", "/api/projects/:projectSlug/cases/:caseId/input-requirements", ["projects.view"], "required"),
+  R("GET", "/api/projects/:projectSlug/data-catalogs", ["projects.view"], "required"),
+  R("POST", "/api/projects/:projectSlug/data-catalogs", ["projects.edit"], "required"),
+  R("PUT", "/api/projects/:projectSlug/data-catalogs/:catalogId", ["projects.edit"], "required"),
+  R("PATCH", "/api/projects/:projectSlug/data-catalogs/:catalogId/options/:optionId", ["projects.edit"], "required"),
   R("PUT", "/api/projects/:projectSlug/cases/:caseId/input-requirements", ["projects.edit"], "required"),
   R("POST", "/api/projects/:projectSlug/cases/:caseId/input-requirements/sync", ["projects.edit"], "required"),
   // Keyed by project id, which PROJECT_FIELDS cannot resolve -- permission-only, like shared-connections.

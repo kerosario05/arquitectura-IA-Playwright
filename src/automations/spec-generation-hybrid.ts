@@ -52,6 +52,23 @@ export function rewritePromotedRuntimeImport(specContent: string, specFilePath: 
   );
 }
 
+/** Replace a candidate through a same-directory temporary file to avoid truncating a valid artifact. */
+export async function writeCandidateSpecAtomically(filePath: string, content: string): Promise<void> {
+  const directory = path.dirname(filePath);
+  await fs.mkdir(directory, { recursive: true });
+  const temporaryPath = path.join(
+    directory,
+    `.${path.basename(filePath)}.${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}.tmp`,
+  );
+  try {
+    await fs.writeFile(temporaryPath, content, { encoding: "utf-8", flag: "wx" });
+    await fs.rename(temporaryPath, filePath);
+  } catch (error) {
+    await fs.rm(temporaryPath, { force: true }).catch(() => undefined);
+    throw error;
+  }
+}
+
 /** Keep the validated candidate artifact without reopening an unchanged file after Playwright. */
 export async function persistCandidateSpecIfChanged(filePath: string, content: string): Promise<boolean> {
   let existing: string | undefined;
@@ -61,7 +78,7 @@ export async function persistCandidateSpecIfChanged(filePath: string, content: s
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
   }
   if (existing === content) return false;
-  await fs.writeFile(filePath, content, "utf-8");
+  await writeCandidateSpecAtomically(filePath, content);
   return true;
 }
 
@@ -5072,7 +5089,7 @@ async function runHybridSpecGenerationInternal(
     ...candidate,
     declaredIdentifiers: candidate.declaredIdentifiers.filter((identifier) => declaredIdentifiersInSpec.has(identifier)),
   };
-  await fs.writeFile(candidateSpecPath, executableSpecContent, "utf-8");
+  await writeCandidateSpecAtomically(candidateSpecPath, executableSpecContent);
 
   let lastSemanticCoverageDiag: ReturnType<typeof buildSemanticCoverageDiagnostics> | undefined;
 

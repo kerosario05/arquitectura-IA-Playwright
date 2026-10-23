@@ -17,6 +17,8 @@ const TABLES = [
   "ProjectJiraConfiguration",
   "ProjectTestRailConfiguration",
   "ProjectKnowledge",
+  "ProjectDataCatalog",
+  "ProjectDataCatalogOption",
   "ProjectConfigurationHistory",
 ];
 

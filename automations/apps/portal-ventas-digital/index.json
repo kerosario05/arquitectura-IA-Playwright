@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-10-20T19:21:23.132Z",
+  "updatedAt": "2026-10-22T16:53:12.091Z",
   "automations": [
     {
       "id": "preview-001-crear-cuenta-cliente",
@@ -132,21 +132,21 @@
       "externalId": "PREVIEW-001",
       "caseId": 0,
       "title": "Crear cuenta",
-      "planPath": "automations\\apps\\portal-ventas-digital\\sections\\detalle-kiosko\\cases\\preview-001-crear-cuenta\\plan.json",
-      "specPath": "automations\\apps\\portal-ventas-digital\\sections\\detalle-kiosko\\cases\\preview-001-crear-cuenta\\case.spec.ts",
+      "planPath": "automations\\apps\\portal-ventas-digital\\sections\\default-section\\cases\\preview-001-crear-cuenta\\plan.json",
+      "specPath": "automations\\apps\\portal-ventas-digital\\sections\\default-section\\cases\\preview-001-crear-cuenta\\case.spec.ts",
       "appSlug": "portal-ventas-digital",
       "appConfigPath": "automations\\apps\\portal-ventas-digital\\app.config.json",
       "status": "spec_failed",
       "source": "discovery",
       "appProfile": "portal-ventas-digital",
       "createdAt": "2026-10-20T16:16:58.251Z",
-      "updatedAt": "2026-10-20T19:21:23.132Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-20T19-18-41-440Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-22T16:53:12.091Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T16-50-38-349Z\\discovered-plans.pending.json",
       "pomStatus": "needs_manual_review",
       "inlineDebugMode": false,
       "specVerificationStatus": "failed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-20T19-18-41-440Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T16-50-38-349Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -170,7 +170,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 84721,
+          "durationMs": 75588,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -250,12 +250,12 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false,
-          "specPath": "automations\\apps\\portal-ventas-digital\\sections\\detalle-kiosko\\cases\\preview-001-crear-cuenta\\case.spec.ts",
-          "specHash": "0fd1cf7c3ac1d76dc072948a1d64e05123e19da3243fcd29d4c915298d4944e9",
+          "specPath": "automations\\apps\\portal-ventas-digital\\sections\\default-section\\cases\\preview-001-crear-cuenta\\case.spec.ts",
+          "specHash": "c5ae81bc81bbe64e1561b398668795700b8ac5327d59771a494f954bd8e93608",
           "specSource": "ai_candidate"
         },
         "overwritten": true,
-        "previousAutomationPath": "automations\\apps\\portal-ventas-digital\\sections\\detalle-kiosko\\cases\\preview-001-crear-cuenta\\plan.json",
+        "previousAutomationPath": "automations\\apps\\portal-ventas-digital\\sections\\default-section\\cases\\preview-001-crear-cuenta\\plan.json",
         "previousStatus": "spec_failed"
       }
     }

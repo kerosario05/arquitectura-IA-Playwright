@@ -23557,5 +23557,395 @@
     ],
     "createdAt": "2026-10-22T14:17:46.614Z",
     "updatedAt": "2026-10-22T14:18:23.370Z"
+  },
+  {
+    "id": "1792696975402-p786utt",
+    "issueKey": "launch:93c08fa8-d24a-413b-8ade-92310e8fec27",
+    "urlSlug": "launch:93c08fa8-d24a-413b-8ade-92310e8fec27",
+    "defects": [
+      {
+        "id": "1792697009184-el4m513",
+        "description": "Qué pasó:\nLa ejecución falló con código: full_discovery_failed\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "30c31d10-f018-4f43-b175-573c072fc8ae",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Transferencia exitosa entre cuentas propias",
+        "title": "[Media] La ejecución falló con código: full_discovery_failed — Transferencia exitosa entre cuentas propias",
+        "technicalContext": {
+          "dedupeKey": "30c31d10-f018-4f43-b175-573c072fc8ae::55199::PREVIEW-001",
+          "reasonCode": "full_discovery_failed",
+          "discoveryStatus": "failed",
+          "rawError": "Case cannot continue before functional execution: full_discovery_failed",
+          "testRailCaseId": 55199,
+          "testRailRunId": 4925,
+          "caseId": 55199,
+          "scenarioId": "PREVIEW-001",
+          "sourceType": "jira_preview",
+          "appSlug": "fenix",
+          "sectionSlug": "demoblaze",
+          "status": "failed",
+          "failureReason": "full_discovery_failed",
+          "errorMessage": "Case cannot continue before functional execution: full_discovery_failed",
+          "launchId": "93c08fa8-d24a-413b-8ade-92310e8fec27"
+        },
+        "createdAt": "2026-10-22T19:23:29.184Z",
+        "updatedAt": "2026-10-22T19:23:29.184Z"
+      }
+    ],
+    "createdAt": "2026-10-22T19:22:55.402Z",
+    "updatedAt": "2026-10-22T19:23:29.184Z"
+  },
+  {
+    "id": "1792702173358-vefezkr",
+    "issueKey": "launch:631835f1-5e4a-4690-84e9-d0da26aef6c3",
+    "urlSlug": "launch:631835f1-5e4a-4690-84e9-d0da26aef6c3",
+    "defects": [
+      {
+        "id": "1792702207590-z09d0a7",
+        "description": "Qué pasó:\nLa ejecución falló con código: full_discovery_failed\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "74d9608b-7b7e-425c-be26-7db690b852e3",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Transferencia exitosa entre cuentas propias",
+        "title": "[Media] La ejecución falló con código: full_discovery_failed — Transferencia exitosa entre cuentas propias",
+        "technicalContext": {
+          "dedupeKey": "74d9608b-7b7e-425c-be26-7db690b852e3::55203::PREVIEW-001",
+          "reasonCode": "full_discovery_failed",
+          "discoveryStatus": "failed",
+          "rawError": "Case cannot continue before functional execution: full_discovery_failed",
+          "testRailCaseId": 55203,
+          "testRailRunId": 4931,
+          "caseId": 55203,
+          "scenarioId": "PREVIEW-001",
+          "sourceType": "jira_preview",
+          "appSlug": "fenix",
+          "sectionSlug": "demoblaze",
+          "status": "failed",
+          "failureReason": "full_discovery_failed",
+          "errorMessage": "Case cannot continue before functional execution: full_discovery_failed",
+          "launchId": "631835f1-5e4a-4690-84e9-d0da26aef6c3"
+        },
+        "createdAt": "2026-10-22T20:50:07.590Z",
+        "updatedAt": "2026-10-22T20:50:07.590Z"
+      }
+    ],
+    "createdAt": "2026-10-22T20:49:33.358Z",
+    "updatedAt": "2026-10-22T20:50:07.590Z"
+  },
+  {
+    "id": "1792702394090-q3h5kzo",
+    "issueKey": "launch:541cf59e-e15f-4a76-bc46-81daabcd6263",
+    "urlSlug": "launch:541cf59e-e15f-4a76-bc46-81daabcd6263",
+    "defects": [
+      {
+        "id": "1792702433707-wp90ybt",
+        "description": "Qué pasó:\nLa ejecución falló con código: full_discovery_failed\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "7672ea13-b96d-4994-92fb-22e590c91a92",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Transferencia exitosa entre cuentas propias",
+        "title": "[Media] La ejecución falló con código: full_discovery_failed — Transferencia exitosa entre cuentas propias",
+        "technicalContext": {
+          "dedupeKey": "7672ea13-b96d-4994-92fb-22e590c91a92::55204::PREVIEW-001",
+          "reasonCode": "full_discovery_failed",
+          "discoveryStatus": "failed",
+          "rawError": "Case cannot continue before functional execution: full_discovery_failed",
+          "testRailCaseId": 55204,
+          "testRailRunId": 4932,
+          "caseId": 55204,
+          "scenarioId": "PREVIEW-001",
+          "sourceType": "jira_preview",
+          "appSlug": "fenix",
+          "sectionSlug": "demoblaze",
+          "status": "failed",
+          "failureReason": "full_discovery_failed",
+          "errorMessage": "Case cannot continue before functional execution: full_discovery_failed",
+          "launchId": "541cf59e-e15f-4a76-bc46-81daabcd6263"
+        },
+        "createdAt": "2026-10-22T20:53:53.707Z",
+        "updatedAt": "2026-10-22T20:53:53.707Z"
+      }
+    ],
+    "createdAt": "2026-10-22T20:53:14.090Z",
+    "updatedAt": "2026-10-22T20:53:53.707Z"
+  },
+  {
+    "id": "1792702804312-iul4oeg",
+    "issueKey": "launch:4c909240-4566-498c-85d0-d4bb21e44b4b",
+    "urlSlug": "launch:4c909240-4566-498c-85d0-d4bb21e44b4b",
+    "defects": [
+      {
+        "id": "1792702832760-t28g1ak",
+        "description": "Qué pasó:\nLa ejecución falló con código: full_discovery_failed\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "c4aab531-57d3-4ca8-bb5a-75263fb6d616",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Transferencia exitosa entre cuentas propias",
+        "title": "[Media] La ejecución falló con código: full_discovery_failed — Transferencia exitosa entre cuentas propias",
+        "technicalContext": {
+          "dedupeKey": "c4aab531-57d3-4ca8-bb5a-75263fb6d616::55205::PREVIEW-001",
+          "reasonCode": "full_discovery_failed",
+          "discoveryStatus": "failed",
+          "rawError": "Case cannot continue before functional execution: full_discovery_failed",
+          "testRailCaseId": 55205,
+          "testRailRunId": 4933,
+          "caseId": 55205,
+          "scenarioId": "PREVIEW-001",
+          "sourceType": "jira_preview",
+          "appSlug": "fenix",
+          "sectionSlug": "demoblaze",
+          "status": "failed",
+          "failureReason": "full_discovery_failed",
+          "errorMessage": "Case cannot continue before functional execution: full_discovery_failed",
+          "launchId": "4c909240-4566-498c-85d0-d4bb21e44b4b"
+        },
+        "createdAt": "2026-10-22T21:00:32.760Z",
+        "updatedAt": "2026-10-22T21:00:32.760Z"
+      }
+    ],
+    "createdAt": "2026-10-22T21:00:04.312Z",
+    "updatedAt": "2026-10-22T21:00:32.760Z"
+  },
+  {
+    "id": "1792702998291-e1gd9rr",
+    "issueKey": "launch:781413dd-42ee-4785-ac04-60621b08da47",
+    "urlSlug": "launch:781413dd-42ee-4785-ac04-60621b08da47",
+    "defects": [
+      {
+        "id": "1792703029648-v6w0uig",
+        "description": "Qué pasó:\nLa ejecución falló con código: full_discovery_failed\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "795b0173-084e-48be-ba27-6459eb62b988",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Transferencia exitosa entre cuentas propias",
+        "title": "[Media] La ejecución falló con código: full_discovery_failed — Transferencia exitosa entre cuentas propias",
+        "technicalContext": {
+          "dedupeKey": "795b0173-084e-48be-ba27-6459eb62b988::55206::PREVIEW-001",
+          "reasonCode": "full_discovery_failed",
+          "discoveryStatus": "failed",
+          "rawError": "Case cannot continue before functional execution: full_discovery_failed",
+          "testRailCaseId": 55206,
+          "testRailRunId": 4934,
+          "caseId": 55206,
+          "scenarioId": "PREVIEW-001",
+          "sourceType": "jira_preview",
+          "appSlug": "fenix",
+          "sectionSlug": "demoblaze",
+          "status": "failed",
+          "failureReason": "full_discovery_failed",
+          "errorMessage": "Case cannot continue before functional execution: full_discovery_failed",
+          "launchId": "781413dd-42ee-4785-ac04-60621b08da47"
+        },
+        "createdAt": "2026-10-22T21:03:49.648Z",
+        "updatedAt": "2026-10-22T21:03:49.648Z"
+      }
+    ],
+    "createdAt": "2026-10-22T21:03:18.291Z",
+    "updatedAt": "2026-10-22T21:03:49.648Z"
+  },
+  {
+    "id": "1792703267027-lc9nfjt",
+    "issueKey": "launch:affe9de1-b8f9-4b1c-9529-4b8f02fa9559",
+    "urlSlug": "launch:affe9de1-b8f9-4b1c-9529-4b8f02fa9559",
+    "defects": [
+      {
+        "id": "1792703300678-mdrze6q",
+        "description": "Qué pasó:\nLa ejecución falló con código: full_discovery_failed\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "1c2dc7e2-cdfe-403f-842d-1b3c49669ee6",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Transferencia exitosa entre cuentas propias",
+        "title": "[Media] La ejecución falló con código: full_discovery_failed — Transferencia exitosa entre cuentas propias",
+        "technicalContext": {
+          "dedupeKey": "1c2dc7e2-cdfe-403f-842d-1b3c49669ee6::55207::PREVIEW-001",
+          "reasonCode": "full_discovery_failed",
+          "discoveryStatus": "failed",
+          "rawError": "Case cannot continue before functional execution: full_discovery_failed",
+          "testRailCaseId": 55207,
+          "testRailRunId": 4936,
+          "caseId": 55207,
+          "scenarioId": "PREVIEW-001",
+          "sourceType": "jira_preview",
+          "appSlug": "fenix",
+          "sectionSlug": "demoblaze",
+          "status": "failed",
+          "failureReason": "full_discovery_failed",
+          "errorMessage": "Case cannot continue before functional execution: full_discovery_failed",
+          "launchId": "affe9de1-b8f9-4b1c-9529-4b8f02fa9559"
+        },
+        "createdAt": "2026-10-22T21:08:20.678Z",
+        "updatedAt": "2026-10-22T21:08:20.678Z"
+      }
+    ],
+    "createdAt": "2026-10-22T21:07:47.027Z",
+    "updatedAt": "2026-10-22T21:08:20.678Z"
+  },
+  {
+    "id": "1792703855279-6o521u4",
+    "issueKey": "launch:01695dbd-21bc-48b0-921c-0132e16809a9",
+    "urlSlug": "launch:01695dbd-21bc-48b0-921c-0132e16809a9",
+    "defects": [
+      {
+        "id": "1792703889353-coa5qrx",
+        "description": "Qué pasó:\nLa ejecución falló con código: full_discovery_failed\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "e1da2935-8a47-4192-94d0-899a56451fa9",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Transferencia exitosa entre cuentas propias",
+        "title": "[Media] La ejecución falló con código: full_discovery_failed — Transferencia exitosa entre cuentas propias",
+        "technicalContext": {
+          "dedupeKey": "e1da2935-8a47-4192-94d0-899a56451fa9::55210::PREVIEW-001",
+          "reasonCode": "full_discovery_failed",
+          "discoveryStatus": "failed",
+          "rawError": "Case cannot continue before functional execution: full_discovery_failed",
+          "testRailCaseId": 55210,
+          "testRailRunId": 4937,
+          "caseId": 55210,
+          "scenarioId": "PREVIEW-001",
+          "sourceType": "jira_preview",
+          "appSlug": "fenix",
+          "sectionSlug": "demoblaze",
+          "status": "failed",
+          "failureReason": "full_discovery_failed",
+          "errorMessage": "Case cannot continue before functional execution: full_discovery_failed",
+          "launchId": "01695dbd-21bc-48b0-921c-0132e16809a9"
+        },
+        "createdAt": "2026-10-22T21:18:09.353Z",
+        "updatedAt": "2026-10-22T21:18:09.353Z"
+      }
+    ],
+    "createdAt": "2026-10-22T21:17:35.279Z",
+    "updatedAt": "2026-10-22T21:18:09.353Z"
+  },
+  {
+    "id": "1792704527499-nih3lh6",
+    "issueKey": "launch:8001b122-7f01-45a3-93ff-6e1973e4d561",
+    "urlSlug": "launch:8001b122-7f01-45a3-93ff-6e1973e4d561",
+    "defects": [
+      {
+        "id": "1792704647935-dv28si1",
+        "description": "Qué pasó:\nLa ejecución falló con código: full_discovery_failed\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "28ec2d19-f05a-4bc4-b41a-4582210164f2",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Transferencia exitosa entre cuentas propias",
+        "title": "[Media] La ejecución falló con código: full_discovery_failed — Transferencia exitosa entre cuentas propias",
+        "technicalContext": {
+          "dedupeKey": "28ec2d19-f05a-4bc4-b41a-4582210164f2::55211::PREVIEW-001",
+          "reasonCode": "full_discovery_failed",
+          "discoveryStatus": "failed",
+          "rawError": "Case cannot continue before functional execution: full_discovery_failed",
+          "testRailCaseId": 55211,
+          "testRailRunId": 4940,
+          "caseId": 55211,
+          "scenarioId": "PREVIEW-001",
+          "sourceType": "jira_preview",
+          "appSlug": "fenix",
+          "sectionSlug": "demoblaze",
+          "status": "failed",
+          "failureReason": "full_discovery_failed",
+          "errorMessage": "Case cannot continue before functional execution: full_discovery_failed",
+          "launchId": "8001b122-7f01-45a3-93ff-6e1973e4d561"
+        },
+        "createdAt": "2026-10-22T21:30:47.935Z",
+        "updatedAt": "2026-10-22T21:30:47.935Z"
+      }
+    ],
+    "createdAt": "2026-10-22T21:28:47.499Z",
+    "updatedAt": "2026-10-22T21:30:47.935Z"
+  },
+  {
+    "id": "1792715708377-8may0a7",
+    "issueKey": "launch:6ba587c1-269a-41ef-8de3-445234ad2920",
+    "urlSlug": "launch:6ba587c1-269a-41ef-8de3-445234ad2920",
+    "defects": [
+      {
+        "id": "1792715886366-q6rw1m5",
+        "description": "Qué pasó:\nLa ejecución falló con código: full_discovery_failed\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "dbcd5664-fe56-453e-a348-d7c76df14301",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Transferencia exitosa entre cuentas propias con verificación por SMS",
+        "title": "[Media] La ejecución falló con código: full_discovery_failed — Transferencia exitosa entre cuentas propias con verificación por SMS",
+        "technicalContext": {
+          "dedupeKey": "dbcd5664-fe56-453e-a348-d7c76df14301::55212::PREVIEW-001",
+          "reasonCode": "full_discovery_failed",
+          "discoveryStatus": "failed",
+          "rawError": "Case cannot continue before functional execution: full_discovery_failed",
+          "testRailCaseId": 55212,
+          "testRailRunId": 4941,
+          "caseId": 55212,
+          "scenarioId": "PREVIEW-001",
+          "sourceType": "jira_preview",
+          "appSlug": "fenix",
+          "sectionSlug": "demoblaze",
+          "status": "failed",
+          "failureReason": "full_discovery_failed",
+          "errorMessage": "Case cannot continue before functional execution: full_discovery_failed",
+          "launchId": "6ba587c1-269a-41ef-8de3-445234ad2920"
+        },
+        "createdAt": "2026-10-23T00:38:06.366Z",
+        "updatedAt": "2026-10-23T00:38:06.366Z"
+      }
+    ],
+    "createdAt": "2026-10-23T00:35:08.377Z",
+    "updatedAt": "2026-10-23T00:38:06.366Z"
+  },
+  {
+    "id": "1792715856026-bzdxh6z",
+    "issueKey": "launch:8c4f6622-9b63-4cd7-b375-78d788a32321",
+    "urlSlug": "launch:8c4f6622-9b63-4cd7-b375-78d788a32321",
+    "defects": [
+      {
+        "id": "1792716028419-4iqr1q9",
+        "description": "Qué pasó:\nLa ejecución falló con código: full_discovery_failed\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "0b2ae1da-196e-4081-9665-aa8be43e86cc",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Transferencia exitosa entre cuentas propias con verificación por SMS",
+        "title": "[Media] La ejecución falló con código: full_discovery_failed — Transferencia exitosa entre cuentas propias con verificación por SMS",
+        "technicalContext": {
+          "dedupeKey": "0b2ae1da-196e-4081-9665-aa8be43e86cc::55213::PREVIEW-001",
+          "reasonCode": "full_discovery_failed",
+          "discoveryStatus": "failed",
+          "rawError": "Case cannot continue before functional execution: full_discovery_failed",
+          "testRailCaseId": 55213,
+          "testRailRunId": 4942,
+          "caseId": 55213,
+          "scenarioId": "PREVIEW-001",
+          "sourceType": "jira_preview",
+          "appSlug": "fenix",
+          "sectionSlug": "demoblaze",
+          "status": "failed",
+          "failureReason": "full_discovery_failed",
+          "errorMessage": "Case cannot continue before functional execution: full_discovery_failed",
+          "launchId": "8c4f6622-9b63-4cd7-b375-78d788a32321"
+        },
+        "createdAt": "2026-10-23T00:40:28.419Z",
+        "updatedAt": "2026-10-23T00:40:28.419Z"
+      }
+    ],
+    "createdAt": "2026-10-23T00:37:36.026Z",
+    "updatedAt": "2026-10-23T00:40:28.419Z"
   }
 ]

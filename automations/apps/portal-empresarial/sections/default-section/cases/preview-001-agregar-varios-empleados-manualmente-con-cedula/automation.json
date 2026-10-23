@@ -7,17 +7,17 @@
   "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",
   "appSlug": "portal-empresarial",
   "appConfigPath": "automations\\apps\\portal-empresarial\\app.config.json",
-  "status": "active",
+  "status": "spec_failed",
   "source": "discovery",
   "appProfile": "portal-empresarial",
-  "createdAt": "2026-10-15T13:48:01.226Z",
-  "updatedAt": "2026-10-15T13:48:01.226Z",
-  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-15T13-42-10-049Z\\discovered-plans.pending.json",
-  "pomStatus": "promoted",
+  "createdAt": "2026-10-22T16:27:53.615Z",
+  "updatedAt": "2026-10-22T16:27:53.615Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T16-20-30-831Z\\discovered-plans.pending.json",
+  "pomStatus": "needs_manual_review",
   "inlineDebugMode": false,
-  "specVerificationStatus": "passed",
+  "specVerificationStatus": "failed",
   "metadata": {
-    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-15T13-42-10-049Z",
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T16-20-30-831Z",
     "pomDiagnostics": {
       "status": "promoted",
       "inlineFallbackUsed": false,
@@ -41,7 +41,7 @@
       },
       "invocations": 0,
       "invocationsConsumed": 0,
-      "durationMs": 144874,
+      "durationMs": 155440,
       "usage": {
         "inputTokens": null,
         "cachedInputTokens": null,
@@ -60,21 +60,29 @@
         "typescript": "passed",
         "playwrightDiscovery": "passed",
         "semanticCoverage": "passed",
-        "functionalExecution": "passed"
+        "functionalExecution": "failed"
       },
-      "promotionAllowed": true,
+      "promotionAllowed": false,
       "specsRequested": 1,
-      "specsValidated": 1,
-      "specsRejected": 0,
+      "specsValidated": 0,
+      "specsRejected": 1,
       "specGenerationAttempts": 0,
       "specRepairAttempts": 0,
-      "firstPassPromotion": true,
-      "failedGatesAttempt1": [],
+      "firstPassPromotion": false,
+      "failedGatesAttempt1": [
+        "functionalExecution"
+      ],
       "regressedGates": [],
       "missingRequirements": [],
       "oracleTypes": [],
-      "errors": [],
-      "warnings": [],
+      "errors": [
+        "functional_execution_failed:exitCode=1",
+        "functional_execution_error:Error: Promoted click failed at step 32 target=\"role:button|Validar\". failureClass=ACTION_EFFECT_OBSERVED_CALLBACK_UNRESOLVED exactRuntimeError=\"Retry failed: click retry timed out after 15000ms\" currentUrl=https://172.27.4.31/payroll/payrollInProcess clickPath=pom_callback nativeClickAttempted=true nativeClickSucceeded=false callbackAttempted=true callbackSucceeded=false retryAttempted=true diagnostics={\"currentUrl\":\"https://172.27.4.31/payroll/payrollInProcess\",\"actionIntent\":\"click\",\"target\":\"role:button|Validar\",\"stepIndex\":32,\"timeoutMs\":15000,\"stability\":{\"currentUrl\":\"https://172.27.4.31/payroll/payrollInProcess\",\"title\":\"\",\"visibleHeadings\":[],\"visibleButtons\":[\"Descargar lista\",\"SASULE CONFESOR  ALCANTARA MENENDEZ\",\"Marcar para registro digital\",\"Anterior\",\"Siguiente\",\"Descargar lista\",\"ROQUE ADAME  BURGOS MEDINA\",\"Solicitar Cuenta\",\"Anterior\",\"Siguiente\"],\"visibleTexts\":[\"Empresa:\",\"Oliva Medina\",\"Gestión de la nómina en proceso\",\"Todavía está en curso la creación de la nómina.\",\"Colaboradores\",\"Etapas del proceso\",\"En validación\",\"50.0\",\"Listo, pendiente de información regulatoria\",\"50.0\",\"Clientes\",\"Excluidos\",\"Colaboradores\",\"Vista general\",\"Marcados para registro digital\",\"colaboradores completos\",\"En validación\",\"Estamos revisando la información proporcionada para asegurar que todo esté en orden.\",\"No hay resultados\",\"Listo, pendiente de información regulatoria\"],\"loadingDetected\":false,\"skeletonDetected\":false,\"listReadiness\":{\"cardsVisible\":0,\"listItemsVisible\":0,\"loadingDetected\":false,\"zeroProductsDetected\":true,\"hasEntityContainers\":true,\"visibleHeadings\":[],\"visibleButtons\":[\"Descargar lista\",\"SASULE CONFESOR  ALCANTARA MENENDEZ\",\"Marcar para registro digital\",\"Anterior\",\"Siguiente\",\"Descargar lista\",\"ROQUE ADAME  BURGOS MEDINA\",\"Solicitar Cuenta\",\"Anterior\",\"Siguiente\"],\"ready\":false},\"diagnosticStatus\":\"completed\"},\"retryAttempted\":true,\"clickPath\":\"pom_callback\",\"nativeClickAttempted\":true,\"nativeClickSucceeded\":false,\"callbackAttempted\":true,\"callbackSucceeded\":false,\"callbackError\":\"Retry failed: click retry timed out after 15000ms\",\"expectedEffect\":\"ui_change\",\"effectDetected\":false,\"fallbackUsed\":\"callback\",\"matchedLocatorStrategy\":\"callback\",\"screenshotPath\":\"C:\\\\MisProyectos\\\\arquitectura-IA-Playwright-feature-auth-gate\\\\.artifacts\\\\promoted-runtime\\\\step-032.png\"}"
+      ],
+      "warnings": [
+        "functional_execution_screenshots=31",
+        "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 32)."
+      ],
       "finalSpec": {
         "origin": "deterministic_compiler",
         "generatedBy": "core",
@@ -82,23 +90,25 @@
         "fallback": null
       },
       "runtimeGate": {
-        "decision": "promote",
-        "promotionStatus": "promoted",
-        "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+        "decision": "block",
+        "promotionStatus": "blocked",
+        "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 32)."
       },
-      "specWritten": true,
+      "specWritten": false,
       "previousSpec": {
         "existed": true,
         "hash": "390b6eeb65e73b55b9178d5ce770364b00ab4e16d6db19423211ca36cd6717b2",
-        "lastModifiedAt": "2026-10-15T12:33:05.222Z"
+        "lastModifiedAt": "2026-10-15T13:48:01.200Z"
       }
     },
     "promotionStrategyDiagnostics": {
       "requestedStrategy": "auto",
       "autoPomEnabled": true,
       "selectedStrategy": "pom",
-      "reason": "promoted",
-      "blockers": [],
+      "reason": "spec_generation_validation_failed",
+      "blockers": [
+        "spec_generation_validation_failed"
+      ],
       "availablePageObjects": [
         "ProductListPage",
         "OperationsMenuPage"
@@ -111,13 +121,10 @@
       "requirePomRuntime": false,
       "specPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",
       "specHash": "390b6eeb65e73b55b9178d5ce770364b00ab4e16d6db19423211ca36cd6717b2",
-      "specSource": "generatedSpec"
+      "specSource": "ai_candidate"
     },
     "overwritten": true,
     "previousAutomationPath": "automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\plan.json",
-    "previousStatus": "active"
-  },
-  "promotionPersisted": true,
-  "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",
-  "promotedSpecHash": "390b6eeb65e73b55b9178d5ce770364b00ab4e16d6db19423211ca36cd6717b2"
+    "previousStatus": "spec_failed"
+  }
 }
