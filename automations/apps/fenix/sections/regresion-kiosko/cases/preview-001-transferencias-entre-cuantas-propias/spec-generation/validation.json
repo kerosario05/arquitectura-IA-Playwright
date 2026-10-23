@@ -1,0 +1,68 @@
+{
+  "mode": "deterministic",
+  "provider": null,
+  "model": null,
+  "skill": {
+    "name": null,
+    "version": null,
+    "hash": null,
+    "loaded": false
+  },
+  "invocations": 0,
+  "invocationsConsumed": 0,
+  "durationMs": 399815,
+  "usage": {
+    "inputTokens": null,
+    "cachedInputTokens": null,
+    "cacheWriteInputTokens": null,
+    "nonCachedInputTokens": null,
+    "outputTokens": null,
+    "reasoningOutputTokens": null,
+    "totalPhysicalTokens": null,
+    "durationMs": null,
+    "credits": null
+  },
+  "validation": {
+    "schema": "skipped",
+    "structure": "passed",
+    "traceFidelity": "skipped",
+    "typescript": "passed",
+    "playwrightDiscovery": "passed",
+    "semanticCoverage": "passed",
+    "functionalExecution": "failed"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "specGenerationAttempts": 0,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [
+    "functionalExecution"
+  ],
+  "regressedGates": [],
+  "missingRequirements": [],
+  "oracleTypes": [
+    "navigation_transition"
+  ],
+  "errors": [
+    "functional_execution_failed:exitCode=1",
+    "functional_execution_error:Error: Promoted assertion failed at step 30 target=\"Continuar\". diagnostics={\"currentUrl\":\"https://qa1.santacruz.do/onlinebanking/QueryBank/Summary\",\"actionIntent\":\"assertVisible\",\"target\":\"Continuar\",\"stepIndex\":30,\"timeoutMs\":15000,\"activeContainer\":\"form#requestchallengeform\",\"retryAttempted\":false,\"screenshotPath\":\"[REDACTED]\"} cause=PROMOTED_FAILURE_DIALOG_VISIBLE: Cerrar Sesión a punto de Expirar Su sesión esta a punto de expirar, presione el botón cerrar para ocultar este mensaje y actualizar su sesión para prevenir que expire. Cerrar Su sesión alcanzó el límite máximo Por seguridad, su sesión llegó al tiempo máximo permitido y será cerrada en 15 segundos. Cerrar sesión ¿Está seguro de que desea cerrar la sesión de usuario?. Aceptar Cancelar Estamos preparando su reporte, por favor espere... Centro de Mensajes × Responder Enviar Cancelar Cerrar Empresas Asociadas × Cerrar Información de contacto × Cerrar Detalle Ampliado Movimiento × Agregar Nuevo Movimiento × Servicio encriptación para carga de archivos × Adjunto Consulta Tasa de Cambio × × Cancelar Pago × ¿ Esta seguro que desea cancelar este pago ? Cancelar Cancelar Pago $(document).ready(function () { let closeIcon = $(`<div class=\"d-flex justify-content-end\"> <span class=\"btn-close-custom-modal align-self-end\" data-dismiss=\"modal\"> <i class=\"bv-close\"></i> </span> </div>`); $(\".custom-modal .modal-header .header-buttons\").append(closeIcon); }); En este momento no podemos procesar la transacción. Intente más tarde. Por favor contáctenos a 809.726.1000 o escríbanos a info@bsc.com.do (Code:8050) Cerrar Resumen Dashboard Consultas - Comprobantes Fiscales - Tasa de Cambio - Transacciones Recurrentes Pagos - Préstamos - Servicios - Impuestos - Pagos Servicios Prepago - Múltiples - Histórico de Pagos Transferencias - Cuentas Propias - Terceros - Expresas - Otros Bancos - Internacionales - Múltiples - Histórico de Transferencias - Mercado de Valores Cuenta Mi Bolsillo Pendientes Cambios Pendientes de Autorizar Beneficiarios - Del Banco - Servicios y Comercios - Interbancarios Locales - Internacionales Nómina - Resumen - Empleados - Pagar desde Archivo - Configuraciones Cuentas por Pagar - Resumen de Pagos - Pago a Suplidores - Suplidores Vinculados - Pagar desde Archivo Solicitudes Digitales Autorizaciones a Terceros Money Market - Nueva Partida - Partidas Realizadas Cerrar Sesión Mi Oficial CRISTIAN MAYOVANEX MATOS MONTERO SUCURSAL LOPE DE VEGA CMMATOS@bsc.com.do $(document).ready(function () { var phone = document.getElementById('officerPhone'); var mobile = document.getElementById('OfficerMobile'); phone.innerText = SII.MaskPhoneNumber(\" \"); mobile.innerText = SII.MaskPhoneNumber(\" \"); }) $(document).ready(function () { $('#DotPendingMessage').hide(); $(\"#FeedbackLink\").on(\"click\", function () { SII.Get({ url: \"/onlinebanking/Feedback/GotFeedback\" , targetId: '#feedbackModal-Body' , jscallback: function () { $(\"#feedbackModal\").modal({ keyboard: false }); } }); }); }) Saury Antonio Mota Ramirez 130872392@SAMOTA Mi Perfil Ayuda Último Acceso: 22/10/2026 11:39:37 AM Español DO English US Cerrar Sesión $(document).ready(function () { $(\"#ib-header-detail-btn2\").on(\"click\", function () { $.get(\"/onlinebanking/UserProfile/MyProfile\", function (data) { $(\"#right-content-main\").html(data); $('#profile-dd-menu-container').dropdown('hide'); }); }); }); function openHelp(url) { url=url+'&SessionID=0769bf59-1a35-4185-80b4-bde814b7c287'; window.open(url, \"_blank\", \"toolbar=no,scrollbars=yes,location=no,resizable=yes, top=100, left=300, width=950, height=700\"); } Token de Seguridad Datos Confirmación Validación Comprobante Validación Validar Identidad Elige el medio para recibir un Token y colócalo debajo para confirmar la transacción. E-MAIL SMS Reenviar Reenviar código en 0 segundos... var isSendAvailable = true; $(document).ready(function () { $(\"#token-resend-btn\").on(\"click\", AskToken); document.querySelectorAll('.token-caracter').forEach(item => { item.addEventListener('paste', TryPaste) }); $(\".token-media\").on(\"click\", function () { if (isSendAvailable) { let mediaSeletedFromServer = $(\"#__Media\").val(); let selected = $(this); let selectedType = selected.data(\"type\"); if (mediaSeletedFromServer !== selectedType) { $(\".token-media\").removeClass(\"active\"); selected.addClass(\"active\"); $(\"[name=__Media]\").val(selectedType); AskToken(); validateContinue(); } } }); $('.token-caracter').on('keypress', function (e) { var charTyped = String.fromCharCode(e.which); var letterRegex = /[^0-9]/; if (charTyped.match(letterRegex)) { e.preventDefault(); e.stopPropagation(); } }).on('keyup', function (e) { let element = $(this); let elementValue = element.val(); let values; if (e.which == 8 || e.which == 46) { RemoveInputValue(element); MoveToPrevInput(this.tabIndex); } else if (e.which == 39 || elementValue) { MoveToNextInput(this.tabIndex); } else if (e.which == 37) { MoveToPrevInput(this.tabIndex); } values = $(\"input[name='ctoken[]']\") .map(function () { return $(this).val(); }).get().join(''); $(\"[name=__SIICHKAnswer]\").val(values); }); CheckMediaSelected(); }); function MoveToNextInput(tabIndex) { var $next = $('.token-caracter[tabIndex=' + (+tabIndex + 1) + ']'); if (!$next.length) { $next = $('.token-caracter[tabIndex=1]'); } if (tabIndex !== 6) { $next.focus(); } } function MoveToPrevInput(tabIndex) { var $prev = $('.token-caracter[tabIndex=' + (+ tabIndex - 1) + ']'); if (!$prev.length) { $prev = $('.token-caracter[tabIndex=1]'); } if (tabIndex !== 1) { $prev.focus(); } } function RemoveInputValue(element) { element.val(''); } function resendTimerHandler() { $(\".token-resent\").show(); let sec = 30; let intervalTimer = setInterval(function () { if (sec === 1) { $(\"#token-resend-btn\").show(); $(\".token-resent\").hide(); isSendAvailable = true; clearInterval(intervalTimer); } sec--; $(\"#token-resend-timer\").html(sec); }, 1000) } function TryPaste(e) { var clipboardData, pastedData; e.stopPropagation(); e.preventDefault(); clipboardData = e.clipboardData || window.clipboardData; pastedData = clipboardData.getData('Text'); var reg = new RegExp('^[0-9]{6}$'); if (reg.test(pastedData)) { $(\".token-caracter\").each(function (index, item) { $(item).val(pastedData.charAt(index)); }) $(\"[name=__SIICHKAnswer]\").val(pastedData); } } function validateContinue () { let continueBtn = $(\"#validate_submit_token\"); if (continueBtn.is(\"[disabled]\")) { continueBtn.prop(\"disabled\", false); continueBtn.removeClass(\"new-btn-outline-secondary\"); continueBtn.addClass(\"new-btn-outline-primary\"); } } function AskToken() { isSendAvailable = false; $(\"#token-resend-btn\").hide(); let medía = $(\"[name=__Media]\").val(); if (medía) { $.ajax({ url: '/onlinebanking/SecurityChallenge/AskToken', dataType: \"JSON\", type: \"POST\", data: { media: medía }, }).done(function (data) { resendTimerHandler(); }); } } function CheckMediaSelected() { let tokenMediaToSelect; let PreviusMediaSelected; if ($(\".token-media.active\").length == 0) { PreviusMediaSelected = $(\"[name='Previous__Media']\"); if (PreviusMediaSelected.length > 0) { tokenMediaToSelect = $(\".token-media[data-type='\" + PreviusMediaSelected.val() + \"']\"); if (tokenMediaToSelect.length > 0) { tokenMediaToSelect.addClass(\"active\"); $(\"#__Media\").val(PreviusMediaSelected.val()); } } } } Cancelar $(document).ready(function () { SII.AnimateScrollTop(); var AnswerInput = $(\"input[name='__SIICHKAnswer']\"); if (AnswerInput != undefined && AnswerInput != null && AnswerInput.length > 0) { AnswerInput.focus(); } $(\"#requestchallengeform\").submit(function () { SII.ShowProcessing(); return true; }); }); Inicio - Quiénes Somos - Productos - Contactos -Tarifas de Servicio - Pasos Reclamación © 2026 Banco Santa Cruz, República Dominicana Pasos para una correcta reclamación × Registra tu reclamación a través de BSC en línea, Centro de Contacto o sucursal. La solicitud será registrada y recibirás un correo con el número de caso y el formulario correspondiente. Adjunta los documentos requeridos según el tipo de reclamación dentro de un plazo de 7 días calendario. (Ej.: comprobantes de compra, constancias del comercio, evidencias del caso, etc.) En caso de realizar tu reclamación por el Centro de Contacto, debes enviar los documentos de soporte para tu caso al correo electrónico: serviciobancanet@bsc.com.do El banco realizará la evaluación del caso y emitirá respuesta en un plazo de hasta 30 días calendario. Este plazo puede extenderse a 45 días en casos complejos o hasta 180 días si intervienen marcas internacionales. Puedes dar seguimiento a tu reclamación en cualquier momento a través de nuestros canales de atención. Una vez finalizado el proceso, recibirás la respuesta por correo electrónico con el resultado de tu caso. En caso de no estar de acuerdo con la respuesta de tu reclamación o no recibir respuesta dentro de los plazos anteriormente indicados, dispones de un plazo de sesenta (60) días calendario, para presentar tu reclamación ante la Oficina de Servicios y Protección al Usuario de la Superintendencia de Bancos. Cerrar Powered by Sistemas Integrados de Informática Version: 2026.11.1.0 Built: 21/10/2026 10:18:22 AM × × ¡Muchas gracias por su colaboración! $(\"#GotFeedbackLink\").on(\"click\", function () { SII.Get({ url: \"/onlinebanking/Feedback/GotFeedback\" , targetId: '#feedbackModal-Body' , jscallback: function () { $(\"#feedbackModal\").modal({ keyboard: false }); } }); }); $.datepicker.setDefaults({ changeMonth: true, changeYear: true, showButtonPanel: true, onChangeMonthYear: function (y, m, i) { var d = i.selectedDay; $(this).datepicker('setDate', new Date(y, m - 1, d)).trigger(\"change\"); } }); let _page = window.location.pathname; let _n = _page.indexOf(\"?\"); if (_n != -1) { _page = _page.substr(0, _n); } _page = _page.replace(/\\-?[0-9]*/g, \"\"); gtag('event', 'page_view', { 'page_path': _page, }); $(document).ready(function () { }); JQ_PRINT_CSS = [ '/onlinebanking/Content/jquery-ui-1.14.1/jquery-ui.min.css', '/onlinebanking/Content/css/all.css', '/onlinebanking/Content/font-awesome/css/font-awesome.min.css', '/onlinebanking/Content/css/left-menu.css', '/onlinebanking/Content/css/BSC/client.css', {href:'/onlinebanking/Content/css/print.css', media:'print'} ]; SII.IsValidSession(\"/onlinebanking/Home/IsValidSession\", \"/onlinebanking/Home/Logout\"); SII.Timeout(3, \"/onlinebanking/Home/Logout\"); SII.$JqGridPageSize = 20 ; SII.$ajaxTimeout = 45 * 1000 ; SII.$ajaxTimeoutMessage = \"El tiempo de espera se ha agotado. Aun as&#237;, es probable que su solicitud se haya registrado con &#233;xito. Le exhortamos que revise su historial de transacciones antes de intentar nuevamente.\"; SII.$ajaxConnectionLostMessage = \"Estimado(a) cliente, No fue posible establecer una conexi&#243;n a internet, Por favor validar su conexi&#243;n a internet.\"; if (SII.GA4 && typeof SII.GA4.GetResources === \"function\") { SII.GA4.GetResources('/onlinebanking/Home/GetGA4Resource'); } &#x3c;AntSig&#x3e;OctNovDic20262027202820292030203120322033203420352036DoLuMaMiJuViSá 12345678910111213141516171819202122232425262728293031Cerrar | En este momento no podemos procesar la transacción. Intente más tarde. Por favor contáctenos a 809.726.1000 o escríbanos a info@bsc.com.do (Code:8050) Cerrar | En este momento no podemos procesar la transacción. Intente más tarde. Por favor contáctenos a 809.726.1000 o escríbanos a info@bsc.com.do (Code:8050)"
+  ],
+  "warnings": [
+    "functional_execution_screenshots=29",
+    "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 30)."
+  ],
+  "finalSpec": {
+    "origin": "deterministic_compiler",
+    "generatedBy": "core",
+    "strategy": "deterministic_compiler",
+    "fallback": null
+  },
+  "runtimeGate": {
+    "decision": "block",
+    "promotionStatus": "blocked",
+    "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 30)."
+  }
+}

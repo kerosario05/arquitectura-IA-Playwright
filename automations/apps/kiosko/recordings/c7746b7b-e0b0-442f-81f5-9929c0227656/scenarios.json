@@ -1,0 +1,2389 @@
+[
+  {
+    "scenarioId": "REC-C7746B7B-01",
+    "title": "yes",
+    "description": "Recorrido observado para completar \"yes\". Se registraron 10 acciones funcionales.",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://172.27.4.50/",
+        "description": "Navegar a https://172.27.4.50/"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Estados de cuenta"
+        },
+        "description": "Presionar \"Estados de cuenta\"",
+        "interactionId": "interaction-5"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|4"
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 1,
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 7
+        },
+        "description": "Presionar [numero_de_identificacion] en \"Número de identificación\"",
+        "interactionId": "interaction-8"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|4"
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 2,
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 7
+        },
+        "description": "Presionar [numero_de_identificacion] en \"Número de identificación\"",
+        "interactionId": "interaction-10"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|4"
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 3,
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 7
+        },
+        "description": "Presionar [numero_de_identificacion] en \"Número de identificación\"",
+        "interactionId": "interaction-12"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|4"
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 4,
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 7
+        },
+        "description": "Presionar [numero_de_identificacion] en \"Número de identificación\"",
+        "interactionId": "interaction-14"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|4"
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 5,
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 7
+        },
+        "description": "Presionar [numero_de_identificacion] en \"Número de identificación\"",
+        "interactionId": "interaction-16"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|4"
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 6,
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 7
+        },
+        "description": "Presionar [numero_de_identificacion] en \"Número de identificación\"",
+        "interactionId": "interaction-18"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|4"
+        },
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 7,
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 7
+        },
+        "description": "Presionar [numero_de_identificacion] en \"Número de identificación\"",
+        "interactionId": "interaction-20"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Continuar"
+        },
+        "description": "Presionar \"Continuar\"",
+        "interactionId": "interaction-22"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Salir"
+        },
+        "description": "Presionar \"Salir\"",
+        "interactionId": "interaction-24"
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Presionar \"Estados de cuenta\"",
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "renderedStep": "Presionar \"Estados de cuenta\"",
+        "interactionId": "interaction-5",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "dc2446075abc",
+        "screenAfterRef": "dc2446075abc",
+        "routeBefore": "https://172.27.4.50/",
+        "routeAfter": "https://172.27.4.50/client-identification",
+        "stateScope": "dc2446075abc",
+        "stepNumber": 2
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 1,
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "interactionId": "interaction-8",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "resolutionState": "runtime_resolution_required",
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 7
+        },
+        "screenBeforeRef": "dc2446075abc",
+        "screenAfterRef": "dc2446075abc",
+        "routeBefore": "https://172.27.4.50/client-identification",
+        "stateScope": "dc2446075abc",
+        "stepNumber": 3
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 2,
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "interactionId": "interaction-10",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "resolutionState": "runtime_resolution_required",
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 7
+        },
+        "screenBeforeRef": "dc2446075abc",
+        "screenAfterRef": "dc2446075abc",
+        "routeBefore": "https://172.27.4.50/client-identification",
+        "stateScope": "dc2446075abc",
+        "stepNumber": 4
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 3,
+        "sourceEventRefs": [
+          "event-12"
+        ],
+        "interactionId": "interaction-12",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "resolutionState": "runtime_resolution_required",
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 7
+        },
+        "screenBeforeRef": "dc2446075abc",
+        "screenAfterRef": "dc2446075abc",
+        "routeBefore": "https://172.27.4.50/client-identification",
+        "stateScope": "dc2446075abc",
+        "stepNumber": 5
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 4,
+        "sourceEventRefs": [
+          "event-14"
+        ],
+        "interactionId": "interaction-14",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "resolutionState": "runtime_resolution_required",
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 7
+        },
+        "screenBeforeRef": "dc2446075abc",
+        "screenAfterRef": "dc2446075abc",
+        "routeBefore": "https://172.27.4.50/client-identification",
+        "stateScope": "dc2446075abc",
+        "stepNumber": 6
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 5,
+        "sourceEventRefs": [
+          "event-16"
+        ],
+        "interactionId": "interaction-16",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "resolutionState": "runtime_resolution_required",
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 7
+        },
+        "screenBeforeRef": "dc2446075abc",
+        "screenAfterRef": "dc2446075abc",
+        "routeBefore": "https://172.27.4.50/client-identification",
+        "stateScope": "dc2446075abc",
+        "stepNumber": 7
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 6,
+        "sourceEventRefs": [
+          "event-18"
+        ],
+        "interactionId": "interaction-18",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "resolutionState": "runtime_resolution_required",
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 7
+        },
+        "screenBeforeRef": "dc2446075abc",
+        "screenAfterRef": "dc2446075abc",
+        "routeBefore": "https://172.27.4.50/client-identification",
+        "stateScope": "dc2446075abc",
+        "stepNumber": 8
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"••••••\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "segmentPosition": 7,
+        "sourceEventRefs": [
+          "event-20"
+        ],
+        "interactionId": "interaction-20",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "resolutionState": "runtime_resolution_required",
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación",
+          "segmentCount": 7
+        },
+        "screenBeforeRef": "dc2446075abc",
+        "screenAfterRef": "dc2446075abc",
+        "routeBefore": "https://172.27.4.50/client-identification",
+        "stateScope": "dc2446075abc",
+        "stepNumber": 9
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "sourceEventRefs": [
+          "event-22"
+        ],
+        "renderedStep": "Presionar \"Continuar\"",
+        "interactionId": "interaction-22",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "dc2446075abc",
+        "screenAfterRef": "dc2446075abc",
+        "routeBefore": "https://172.27.4.50/client-identification",
+        "stateScope": "dc2446075abc",
+        "stepNumber": 10
+      },
+      {
+        "content": "Presionar \"Salir\"",
+        "sourceEventRefs": [
+          "event-24"
+        ],
+        "renderedStep": "Presionar \"Salir\"",
+        "interactionId": "interaction-24",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "dc2446075abc",
+        "screenAfterRef": "dc2446075abc",
+        "routeBefore": "https://172.27.4.50/client-identification",
+        "stateScope": "dc2446075abc",
+        "stepNumber": 11
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "numero_de_identificacion",
+        "label": "Número de identificación",
+        "stepIndex": 2,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-8",
+          "event-10",
+          "event-12",
+          "event-14",
+          "event-16",
+          "event-18",
+          "event-20"
+        ],
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "secure",
+        "confidence": 0.95,
+        "needsReview": false,
+        "formatHint": "virtual_keyboard_7",
+        "semanticField": "Número de identificación"
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"Estados de cuenta\"",
+        "strategy": "role",
+        "value": "button|Estados de cuenta"
+      },
+      {
+        "stepIndex": 9,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "role",
+        "value": "button|Continuar"
+      },
+      {
+        "stepIndex": 10,
+        "description": "Presionar \"Salir\"",
+        "strategy": "role",
+        "value": "button|Salir"
+      }
+    ],
+    "sourceRecordingId": "c7746b7b-e0b0-442f-81f5-9929c0227656",
+    "hasUncertainSteps": true,
+    "primary": true,
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7",
+      "event-8",
+      "event-9",
+      "event-10",
+      "event-11",
+      "event-12",
+      "event-13",
+      "event-14",
+      "event-15",
+      "event-16",
+      "event-17",
+      "event-18",
+      "event-19",
+      "event-20",
+      "event-21",
+      "event-22",
+      "event-23",
+      "event-24"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": false,
+    "functionalReadiness": true,
+    "technicalReadiness": false,
+    "expectedResultCandidate": "La aplicación carga su pantalla inicial",
+    "oracleAuthority": "observed_only",
+    "confidence": 0.95,
+    "scenarioStepCount": 11,
+    "functionalActionCount": 10,
+    "nonUserSetupSteps": 1,
+    "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
+    "scenarioGoal": "yes",
+    "stateSequenceValid": true,
+    "stateSequenceIssues": [],
+    "postGoalObservations": [],
+    "goalContract": {
+      "nonGeneric": true,
+      "goalCoherent": true,
+      "mutationIntentExpressed": true
+    },
+    "replayEligible": true,
+    "canonicalInteractions": [
+      {
+        "id": "interaction-1",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-1"
+        ],
+        "technicalTargetRefs": [],
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9,
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://172.27.4.50/"
+      },
+      {
+        "id": "interaction-2",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-2"
+        ],
+        "technicalTargetRefs": [],
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9,
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://172.27.4.50/"
+      },
+      {
+        "id": "interaction-5",
+        "controlIdentity": "dc2446075abc|Estados de cuenta|role|button|Estados de cuenta",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Estados de cuenta"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Estados de cuenta",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Estados de cuenta"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",5],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",5],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "stateScope": "dc2446075abc",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "dc2446075abc",
+        "screenAfterRef": "dc2446075abc",
+        "routeBefore": "https://172.27.4.50/",
+        "routeAfter": "https://172.27.4.50/client-identification",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-8",
+        "controlIdentity": "dc2446075abc|4|role|button|4",
+        "semanticField": "Número de identificación",
+        "action": "click",
+        "valueKey": "numero_de_identificacion",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "technicalTargetRefs": [
+          "role:button|4"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "4",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "description": "Ingresar en \"Número de identificación\"",
+        "stateScope": "dc2446075abc",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "dc2446075abc",
+        "screenAfterRef": "dc2446075abc",
+        "routeBefore": "https://172.27.4.50/client-identification"
+      },
+      {
+        "id": "interaction-10",
+        "controlIdentity": "dc2446075abc|4|role|button|4",
+        "semanticField": "Número de identificación",
+        "action": "click",
+        "valueKey": "numero_de_identificacion",
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "technicalTargetRefs": [
+          "role:button|4"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "4",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "description": "Ingresar en \"Número de identificación\"",
+        "stateScope": "dc2446075abc",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "dc2446075abc",
+        "screenAfterRef": "dc2446075abc",
+        "routeBefore": "https://172.27.4.50/client-identification"
+      },
+      {
+        "id": "interaction-12",
+        "controlIdentity": "dc2446075abc|4|role|button|4",
+        "semanticField": "Número de identificación",
+        "action": "click",
+        "valueKey": "numero_de_identificacion",
+        "sourceEventRefs": [
+          "event-12"
+        ],
+        "technicalTargetRefs": [
+          "role:button|4"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "4",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "description": "Ingresar en \"Número de identificación\"",
+        "stateScope": "dc2446075abc",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "dc2446075abc",
+        "screenAfterRef": "dc2446075abc",
+        "routeBefore": "https://172.27.4.50/client-identification"
+      },
+      {
+        "id": "interaction-14",
+        "controlIdentity": "dc2446075abc|4|role|button|4",
+        "semanticField": "Número de identificación",
+        "action": "click",
+        "valueKey": "numero_de_identificacion",
+        "sourceEventRefs": [
+          "event-14"
+        ],
+        "technicalTargetRefs": [
+          "role:button|4"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "4",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "description": "Ingresar en \"Número de identificación\"",
+        "stateScope": "dc2446075abc",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "dc2446075abc",
+        "screenAfterRef": "dc2446075abc",
+        "routeBefore": "https://172.27.4.50/client-identification"
+      },
+      {
+        "id": "interaction-16",
+        "controlIdentity": "dc2446075abc|4|role|button|4",
+        "semanticField": "Número de identificación",
+        "action": "click",
+        "valueKey": "numero_de_identificacion",
+        "sourceEventRefs": [
+          "event-16"
+        ],
+        "technicalTargetRefs": [
+          "role:button|4"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "4",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "description": "Ingresar en \"Número de identificación\"",
+        "stateScope": "dc2446075abc",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "dc2446075abc",
+        "screenAfterRef": "dc2446075abc",
+        "routeBefore": "https://172.27.4.50/client-identification"
+      },
+      {
+        "id": "interaction-18",
+        "controlIdentity": "dc2446075abc|4|role|button|4",
+        "semanticField": "Número de identificación",
+        "action": "click",
+        "valueKey": "numero_de_identificacion",
+        "sourceEventRefs": [
+          "event-18"
+        ],
+        "technicalTargetRefs": [
+          "role:button|4"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "4",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "description": "Ingresar en \"Número de identificación\"",
+        "stateScope": "dc2446075abc",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "dc2446075abc",
+        "screenAfterRef": "dc2446075abc",
+        "routeBefore": "https://172.27.4.50/client-identification"
+      },
+      {
+        "id": "interaction-20",
+        "controlIdentity": "dc2446075abc|4|role|button|4",
+        "semanticField": "Número de identificación",
+        "action": "click",
+        "valueKey": "numero_de_identificacion",
+        "sourceEventRefs": [
+          "event-20"
+        ],
+        "technicalTargetRefs": [
+          "role:button|4"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "4",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        },
+        "description": "Ingresar en \"Número de identificación\"",
+        "stateScope": "dc2446075abc",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "dc2446075abc",
+        "screenAfterRef": "dc2446075abc",
+        "routeBefore": "https://172.27.4.50/client-identification"
+      },
+      {
+        "id": "interaction-22",
+        "controlIdentity": "dc2446075abc|Continuar|role|button|Continuar",
+        "semanticField": "Continuar",
+        "action": "click",
+        "valueKey": "continuar",
+        "sourceEventRefs": [
+          "event-22"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Continuar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 2,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 2
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Continuar",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Continuar\"",
+        "stateScope": "dc2446075abc",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "dc2446075abc",
+        "screenAfterRef": "dc2446075abc",
+        "routeBefore": "https://172.27.4.50/client-identification"
+      },
+      {
+        "id": "interaction-24",
+        "controlIdentity": "dc2446075abc|Salir|role|button|Salir",
+        "semanticField": "Salir",
+        "action": "click",
+        "valueKey": "salir",
+        "sourceEventRefs": [
+          "event-24"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Salir"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Salir",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "radix-:r3:"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Salir",
+          "targetTag": "span",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "radix-:r3:"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Salir",
+          "targetTag": "span",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "radix-:r3:"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Salir\"",
+        "stateScope": "dc2446075abc",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "dc2446075abc",
+        "screenAfterRef": "dc2446075abc",
+        "routeBefore": "https://172.27.4.50/client-identification"
+      }
+    ],
+    "entityActionBlocks": [],
+    "readiness": {
+      "functionalReadiness": true,
+      "dataReadiness": true,
+      "technicalReadiness": false,
+      "oracleReadiness": true,
+      "reviewReadiness": true,
+      "publicationContentReadiness": true,
+      "executionReadiness": false,
+      "publicationReadiness": true,
+      "missingInputs": [],
+      "datasetAuthorityMismatches": [],
+      "dataReadinessReasons": []
+    },
+    "technicalKnowledgeRefs": [],
+    "runtimeInputRequirements": [
+      {
+        "valueKey": "numero_de_identificacion",
+        "semanticField": "Número de identificación",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": "4444444",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": true,
+        "stepIndex": 2,
+        "controlType": "virtual_keyboard_7",
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "4444444",
+        "datasetAuthorityMismatch": false
+      }
+    ],
+    "runtimeDataset": {
+      "scenarioId": "REC-C7746B7B-01",
+      "requirements": [
+        {
+          "valueKey": "numero_de_identificacion",
+          "semanticField": "Número de identificación",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": "4444444",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": true,
+          "stepIndex": 2,
+          "controlType": "virtual_keyboard_7",
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "4444444",
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "resolvedValues": {
+        "numero_de_identificacion": "4444444"
+      },
+      "missingValues": []
+    },
+    "mutationOpportunities": []
+  }
+]

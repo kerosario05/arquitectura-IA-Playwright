@@ -15,10 +15,11 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { config } from "../../config/env";
 import { defectChecklistStore } from "./defect-checklist-store";
+import { INTERRUPTED_REASON_CODE, resolveRunHistoryDir } from "../jobs/job-store";
 
 const LAUNCH_ARTIFACTS_DIR = path.join(process.cwd(), ".artifacts", "scenario-launch-runs");
 const PREVIEW_RUN_ARTIFACTS_DIR = path.join(process.cwd(), ".artifacts", "scenario-preview-runs");
-const RUN_HISTORY_DIR = path.join(process.cwd(), ".artifacts", "qa-lab-run-history");
+const RUN_HISTORY_DIR = resolveRunHistoryDir();
 const EVIDENCE_ROOT = path.join(process.cwd(), ".artifacts", "evidence");
 const EXECUTION_LIST_CACHE_MS = 25_000;
 let executionListCache: { createdAt: number; items: ExecutionSummaryListItem[] } | null = null;
@@ -49,6 +50,8 @@ export type ExecutionSummary = {
   createdAt?: string;
   completedAt?: string;
   status?: string;
+  /** The run was cut short by a server restart (deploy); status is "failed". */
+  interrupted?: boolean;
   hu: { key?: string; title?: string };
   project: { appSlug?: string };
   testRail: {
@@ -80,6 +83,8 @@ export type ExecutionSummaryListItem = {
   scenarioCount: number;
   passed: number;
   failed: number;
+  /** The run was cut short by a server restart (deploy); status is "failed". */
+  interrupted?: boolean;
 };
 
 type ManifestShape = {
@@ -168,6 +173,23 @@ function readJsonFile<T>(filePath: string): T | null {
 
 function readPreviewRun(jobId: string): PreviewRunShape | null {
   return readJsonFile<PreviewRunShape>(path.join(PREVIEW_RUN_ARTIFACTS_DIR, jobId, "job.json"));
+}
+
+function isInterruptedJob(jobId?: string): boolean {
+  return Boolean(jobId) && readPersistedJobHistory(jobId!)?.summary?.reasonCode === INTERRUPTED_REASON_CODE;
+}
+
+/**
+ * A launch whose job was cut short by a server restart never got its final manifest status
+ * (it stays at e.g. "test_run_created"): report it as failed, like its persisted job record.
+ */
+function isInterruptedManifest(manifest: { status?: string; jobId?: string }): boolean {
+  if (manifest.status === "completed" || manifest.status === "completed_with_failures") return false;
+  return isInterruptedJob(manifest.jobId);
+}
+
+function effectiveManifestStatus(manifest: { status?: string; jobId?: string }): string | undefined {
+  return isInterruptedManifest(manifest) ? "failed" : manifest.status;
 }
 
 function readPersistedJobHistory(jobId: string): PersistedJobHistoryShape | null {
@@ -406,6 +428,7 @@ export function buildExecutionSummary(launchId: string): ExecutionSummary | null
         status: persistedJob.status === "done"
           ? (failed > 0 ? "completed_with_failures" : "completed")
           : persistedJob.status,
+        ...(isInterruptedJob(launchId) ? { interrupted: true } : {}),
         hu: {
           key: typeof params.jiraKey === "string" ? params.jiraKey : typeof params.huKey === "string" ? params.huKey : undefined,
           title: typeof params.jiraTitle === "string" ? params.jiraTitle : typeof params.huTitle === "string" ? params.huTitle : previewTitle,
@@ -511,7 +534,8 @@ export function buildExecutionSummary(launchId: string): ExecutionSummary | null
     jobId: manifest.jobId,
     createdAt: manifest.createdAt,
     completedAt: manifest.completedAt,
-    status: manifest.status,
+    status: effectiveManifestStatus(manifest),
+    ...(isInterruptedManifest(manifest) ? { interrupted: true } : {}),
     hu: { key: huKey, title: manifest.jira?.title },
     project: { appSlug: manifest.appSlug },
     testRail: {
@@ -564,7 +588,8 @@ export function listExecutionSummaries(): ExecutionSummaryListItem[] {
       launchId,
       createdAt: m.createdAt,
       completedAt: m.completedAt,
-      status: m.status,
+      status: effectiveManifestStatus(m),
+      ...(isInterruptedManifest(m) ? { interrupted: true } : {}),
       huKey: m.jira?.key,
       huTitle: m.jira?.title,
       appSlug: m.appSlug,
@@ -626,6 +651,8 @@ export function listExecutionSummaries(): ExecutionSummaryListItem[] {
         continue;
       }
       if (typeof job.id !== "string" || !job.id || manifestJobIds.has(job.id) || items.some((item) => item.launchId === job.id)) continue;
+      // Child jobs (e.g. a mixed rerun subset) belong to their parent row.
+      if (job.parentJobId) continue;
       if (!isTerminalPreviewStatus(job.status)) continue;
       const params = job.params && typeof job.params === "object" ? job.params : {};
       const summary = job.summary && typeof job.summary === "object" ? job.summary : {};
@@ -644,6 +671,7 @@ export function listExecutionSummaries(): ExecutionSummaryListItem[] {
         createdAt: job.createdAt,
         completedAt: job.completedAt,
         status,
+        ...(summary.reasonCode === INTERRUPTED_REASON_CODE ? { interrupted: true } : {}),
         huTitle: title,
         appSlug,
         scenarioCount,

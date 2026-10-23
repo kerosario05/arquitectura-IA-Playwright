@@ -34,29 +34,55 @@ export async function loadJiraIssues(
   const jira = new JiraClient(jiraConfig);
   const jql = buildJql(projectKey, sprintId, status);
   const rawIssues = await jira.searchIssues(jql, undefined, maxResults);
+  return rawIssues.map((issue: RawJiraIssue) => toIssueSource(issue, jiraConfig));
+}
 
-  return rawIssues.map((issue: RawJiraIssue) => {
-    const description = issue.fields.description
-      ? extractFieldText(issue.fields.description)
-      : "";
+const ISSUE_KEY = /^[A-Z][A-Z0-9_]*-\d+$/i;
 
-    const labels: string[] = Array.isArray(issue.fields.labels)
-      ? issue.fields.labels
-      : [];
+/**
+ * The stories the user picked in the panel, looked up by key inside the project — no sprint
+ * and no status filter. Keys that are malformed or not in the project are simply not returned.
+ */
+export async function loadJiraIssuesByKeys(
+  jiraConfig: RequiredJiraRuntimeConfig,
+  projectKey: string,
+  issueKeys: string[],
+): Promise<JiraIssueSource[]> {
+  const query = buildIssueKeysJql(projectKey, issueKeys);
+  if (!query) return [];
+  const jira = new JiraClient(jiraConfig);
+  const rawIssues = await jira.searchIssues(query.jql, undefined, query.keys.length);
+  return rawIssues.map((issue: RawJiraIssue) => toIssueSource(issue, jiraConfig));
+}
 
-    const components: string[] = Array.isArray(issue.fields.components)
-      ? issue.fields.components.map((c: any) => c.name).filter(Boolean)
-      : [];
+/** JQL for picked keys inside one project; null when no key is well formed (nothing to load). */
+export function buildIssueKeysJql(projectKey: string, issueKeys: string[]): { jql: string; keys: string[] } | null {
+  const keys = Array.from(new Set(issueKeys.map((key) => key.trim().toUpperCase()).filter((key) => ISSUE_KEY.test(key))));
+  if (keys.length === 0) return null;
+  return { jql: `project = "${projectKey}" AND key in (${keys.join(", ")}) ORDER BY created DESC`, keys };
+}
 
-    return {
-      key: issue.key,
-      summary: issue.fields.summary?.trim() || issue.key,
-      description,
-      acceptanceCriteria: extractAcceptanceCriteria(issue, jiraConfig.acceptanceCriteriaField),
-      labels,
-      components,
-      status: issue.fields.status?.name || "",
-      issueType: issue.fields.issuetype?.name || "",
-    };
-  });
+function toIssueSource(issue: RawJiraIssue, jiraConfig: RequiredJiraRuntimeConfig): JiraIssueSource {
+  const description = issue.fields.description
+    ? extractFieldText(issue.fields.description)
+    : "";
+
+  const labels: string[] = Array.isArray(issue.fields.labels)
+    ? issue.fields.labels
+    : [];
+
+  const components: string[] = Array.isArray(issue.fields.components)
+    ? issue.fields.components.map((c: any) => c.name).filter(Boolean)
+    : [];
+
+  return {
+    key: issue.key,
+    summary: issue.fields.summary?.trim() || issue.key,
+    description,
+    acceptanceCriteria: extractAcceptanceCriteria(issue, jiraConfig.acceptanceCriteriaField),
+    labels,
+    components,
+    status: issue.fields.status?.name || "",
+    issueType: issue.fields.issuetype?.name || "",
+  };
 }

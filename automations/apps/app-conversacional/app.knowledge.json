@@ -2,7 +2,7 @@
   "version": 1,
   "appSlug": "app-conversacional",
   "createdAt": "2026-09-02T14:15:42.015Z",
-  "updatedAt": "2026-09-09T19:14:01.634Z",
+  "updatedAt": "2026-09-10T15:17:34.765Z",
   "items": [
     {
       "id": "hd_action_94ebdea1517e",
@@ -4895,11 +4895,11 @@
       "validationStatus": "validated",
       "trustedForReuse": true,
       "failureCount": 0,
-      "successCount": 7,
-      "runCount": 7,
+      "successCount": 10,
+      "runCount": 10,
       "createdAt": "2026-09-04T19:59:14.268Z",
-      "lastSeenAt": "2026-09-09T18:46:53.538Z",
-      "lastValidatedAt": "2026-09-09T18:46:53.538Z"
+      "lastSeenAt": "2026-09-10T15:17:34.744Z",
+      "lastValidatedAt": "2026-09-10T15:17:34.744Z"
     },
     {
       "id": "hd_action_c6031635e08d",

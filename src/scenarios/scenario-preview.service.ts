@@ -1,7 +1,7 @@
 import { config, requireJiraConfig } from "../config/env";
 import type { LoginMode } from "../types/env.types";
 import { JiraClient } from "../clients/jira.client";
-import { loadJiraIssues } from "./jira-scenario-source";
+import { loadJiraIssues, loadJiraIssuesByKeys } from "./jira-scenario-source";
 import { generateScenariosWithAi, evaluateProviderClaimCompliance } from "./codex-scenario-generator";
 import { generateJiraScenarios } from "../jira/jira-scenario-generator";
 import { validateScenario } from "./scenario-validator";
@@ -2233,6 +2233,10 @@ function buildRouteProfileForPrompt(
   return { routeProfile: null, source: "default", entrySteps: [], loginMode: appConfig?.loginMode as string | undefined };
 }
 
+function hasSelectedIssueKeys(req: ScenarioPreviewRequest): boolean {
+  return Array.isArray(req.selectedIssueKeys) && req.selectedIssueKeys.some((key) => typeof key === "string" && key.trim().length > 0);
+}
+
 /**
  * Public entry point. The underlying generator (generateScenarioPreviewForIssue) is
  * architecturally single-issue: intent detection, route resolution and the
@@ -2247,8 +2251,8 @@ export async function generateScenarioPreview(
   if (!req.projectKey) {
     return { ok: false, error: "invalid_request", message: "projectKey is required" };
   }
-  if (!req.activeSprint && !req.sprintId) {
-    return { ok: false, error: "invalid_request", message: "activeSprint: true or sprintId is required" };
+  if (!req.activeSprint && !req.sprintId && !hasSelectedIssueKeys(req)) {
+    return { ok: false, error: "invalid_request", message: "activeSprint: true, sprintId or selectedIssueKeys is required" };
   }
   (globalThis as any).__coverageReqs = undefined;
 
@@ -2352,8 +2356,8 @@ async function generateScenarioPreviewForIssue(
   if (!req.projectKey) {
     return { ok: false, error: "invalid_request", message: "projectKey is required" };
   }
-  if (!req.activeSprint && !req.sprintId) {
-    return { ok: false, error: "invalid_request", message: "activeSprint: true or sprintId is required" };
+  if (!req.activeSprint && !req.sprintId && !hasSelectedIssueKeys(req)) {
+    return { ok: false, error: "invalid_request", message: "activeSprint: true, sprintId or selectedIssueKeys is required" };
   }
 
   // Resolve the app only from request or environment authority.
@@ -2411,10 +2415,15 @@ async function generateScenarioPreviewForIssue(
   const jiraConfig = requireJiraConfig(config);
   const jira = new JiraClient(jiraConfig);
 
-  let sprintId: number;
+  let sprintId: number | null;
   let sprintName: string;
 
-  if (req.activeSprint) {
+  // Stories picked by key in the panel, with no sprint: look them up inside the project.
+  const byIssueKeys = !req.activeSprint && !req.sprintId && hasSelectedIssueKeys(req);
+  if (byIssueKeys) {
+    sprintId = null;
+    sprintName = "HU seleccionadas";
+  } else if (req.activeSprint) {
     const active = await jira.getActiveSprint(req.projectKey);
     if (!active) {
       return {
@@ -2430,13 +2439,15 @@ async function generateScenarioPreviewForIssue(
     sprintName = `Sprint ${sprintId}`;
   }
 
-  const issues = await loadJiraIssues(
-    jiraConfig,
-    req.projectKey,
-    sprintId,
-    req.status,
-    req.maxResults ?? 50,
-  );
+  const issues = sprintId === null
+    ? await loadJiraIssuesByKeys(jiraConfig, req.projectKey, req.selectedIssueKeys ?? [])
+    : await loadJiraIssues(
+      jiraConfig,
+      req.projectKey,
+      sprintId,
+      req.status,
+      req.maxResults ?? 50,
+    );
 
   console.log(`[scenarios:preview] loaded ${issues.length} jira issues`);
 

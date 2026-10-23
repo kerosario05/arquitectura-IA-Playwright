@@ -1,4 +1,7 @@
 import { attachLiveViewEndpoint } from "./live-view-endpoint";
+import { attachLocalAgentEndpoint } from "./local-agent/agent-endpoint";
+import { localAgentRegistry } from "./local-agent/agent-registry";
+import { agentPackage } from "./local-agent/agent-package";
 import "../config/env"; // Load .env before anything else
 import express from "express";
 import cors from "cors";
@@ -15,6 +18,7 @@ import { internalOtpRouter } from "./routes/internal-otp";
 import { projectsRouter } from "./routes/projects";
 import { recordingsRouter } from "./routes/recordings";
 import { testDesignRouter } from "./routes/test-design";
+import { downloadsRouter, localAgentRouter, DOWNLOADS_URL_PREFIX } from "./routes/local-agent";
 import { sweepOrphanFrames } from "../recording/recording-store";
 import { resolveServerPort } from "./config";
 import { captureRawJsonBody, mobileUtf8JsonReconciler } from "./middleware/mobile-utf8-json";
@@ -36,6 +40,9 @@ const app = express();
 const JSON_LIMIT = process.env.RECORDING_JSON_LIMIT ?? "2mb";
 
 app.use(cors({ origin: CORS_ORIGIN }));
+// Descargas para los agentes locales y el instalador de TI: públicas (software
+// sin secretos) y antes del Content-Type JSON global.
+app.use(DOWNLOADS_URL_PREFIX, downloadsRouter);
 app.use(express.json({
   limit: JSON_LIMIT,
   verify: (req, res, buf) => {
@@ -84,6 +91,7 @@ app.use("/api/internal/otp", internalOtpRouter);
 app.use("/api/projects", projectsRouter);
 app.use("/api/recordings", recordingsRouter);
 app.use("/api/test-design", testDesignRouter);
+app.use("/api/local-agent", localAgentRouter);
 app.use(checklistRouter);
 app.use(executionsRouter);
 app.use(runtimeInputsRouter);
@@ -163,6 +171,19 @@ const server = app.listen(PORT, HOST, () => {
 });
 
 attachLiveViewEndpoint(server);
+attachLocalAgentEndpoint(server);
+
+// El zip de Chromium para los PCs se arma una vez (~1 min): mejor en segundo
+// plano al arrancar que con el primer usuario esperando.
+setTimeout(() => {
+  agentPackage.ensure().catch((err) =>
+    console.warn(`[agente-local] no se pudo preparar el paquete del agente: ${err instanceof Error ? err.message : String(err)}`),
+  );
+  if (!localAgentRegistry.chromiumPackage.requiredRevision()) return;
+  localAgentRegistry.chromiumPackage.ensure().catch((err) =>
+    console.warn(`[agente-local] no se pudo preparar Chromium para los agentes: ${err instanceof Error ? err.message : String(err)}`),
+  );
+}, 30_000).unref();
 
 server.on("error", (err: NodeJS.ErrnoException) => {
   if (err.code === "EADDRINUSE") {

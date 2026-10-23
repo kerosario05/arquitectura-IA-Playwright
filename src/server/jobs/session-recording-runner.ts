@@ -10,6 +10,7 @@ import { resolveAndroidSdk } from "../../mobile/android-sdk";
 import { getProjectConfigurationBySlug } from "../../db/project-reader";
 import { AndroidSessionRecorder } from "../../recording/mobile/android-session-recorder";
 import { WebSessionRecorder } from "../../recording/web/web-session-recorder";
+import { openAgentBrowser, type AgentBrowser } from "../local-agent/agent-browser";
 import { RecordingControlError, type RecordingControlAction } from "../../recording/recording-control";
 import {
   discardFrames,
@@ -92,6 +93,12 @@ export type StartRecordingParams = {
    * effect on Android recordings, which have no V2 concept.
    */
   captureAuthority?: CaptureAuthority;
+  /**
+   * WEB only: record in the Chromium on the user's own PC, through that PC's local agent
+   * (already paired and checked by the caller), instead of a browser on the server. There is
+   * no live view in this mode: the user is looking at the real window.
+   */
+  localAgentId?: string;
 };
 
 /**
@@ -121,6 +128,9 @@ type ActiveRecording = {
   liveProjection?: LiveSemanticProjection;
   liveView?: LiveViewSession;
   startedBy?: string;
+  agentBrowser?: AgentBrowser;
+  /** Set by the first stop; a second one (button + closed window at once) waits for it. */
+  stopping?: Promise<RecordingSummary>;
 };
 
 const active = new Map<string, ActiveRecording>();
@@ -301,6 +311,7 @@ export async function startRecording(params: StartRecordingParams): Promise<{
   onLog(`[recording:goal-lineage] backendRequestGoal=${JSON.stringify(params.recordingGoal)} jobGoal=${JSON.stringify(trace.recordingGoal?.declaredGoal)} traceGoal=${JSON.stringify(trace.recordingGoal?.normalizedGoal)}`);
 
   const framesDir = ensureFramesDir(recordingId);
+  let agentBrowser: AgentBrowser | undefined;
 
   try {
     let recorder: AndroidSessionRecorder | WebSessionRecorder;
@@ -349,6 +360,13 @@ export async function startRecording(params: StartRecordingParams): Promise<{
         // ingestion path and do not contribute to the captured action sequence.
         captureScreenshots: false,
         captureAuthority,
+        connectBrowser: params.localAgentId
+          ? async () => {
+              agentBrowser = await openAgentBrowser(params.localAgentId!);
+              onLog(`[recording] navegador abierto en el equipo del usuario (agente ${agentBrowser.agentId})`);
+              return agentBrowser.browser;
+            }
+          : undefined,
         persistQaCredentials: true,
         sensitiveLabels: params.sensitiveLabels,
         onEvent: (event) => {
@@ -378,7 +396,7 @@ export async function startRecording(params: StartRecordingParams): Promise<{
     trace.status = "recording";
     saveTrace(trace);
     onLog(`[recording:goal-lineage] persistedGoal=${JSON.stringify(loadTrace(trace.appSlug, trace.recordingId)?.recordingGoal?.declaredGoal)}`);
-    const liveTarget = recorder instanceof WebSessionRecorder ? recorder.liveViewTarget() : undefined;
+    const liveTarget = recorder instanceof WebSessionRecorder && !agentBrowser ? recorder.liveViewTarget() : undefined;
     const liveView = liveTarget ? new LiveViewSession({
       cdp: liveTarget.createCdp,
       page: liveTarget.page,
@@ -386,7 +404,10 @@ export async function startRecording(params: StartRecordingParams): Promise<{
       ready: false,
       log: onLog,
     }) : undefined;
-    active.set(recordingId, { recordingId, jobId: job.id, trace, recorder, liveView, startedBy: params.startedBy });
+    active.set(recordingId, { recordingId, jobId: job.id, trace, recorder, liveView, startedBy: params.startedBy, agentBrowser });
+    agentBrowser?.onLost((reason) => {
+      void stopAfterAgentBrowserLost(recordingId, reason);
+    });
     onLog(`[recording] grabación ${recordingId} iniciada sobre ${target.appSlug} (${platform})`);
 
     if (recorder instanceof WebSessionRecorder) {
@@ -408,6 +429,7 @@ export async function startRecording(params: StartRecordingParams): Promise<{
         onLog(`[recording] fallo al cargar la aplicación inicial: ${message}`);
         await liveView?.fail("initial_navigation_failed");
         await recorder.stop().catch(() => undefined);
+        await agentBrowser?.close().catch(() => undefined);
       });
     }
 
@@ -419,6 +441,7 @@ export async function startRecording(params: StartRecordingParams): Promise<{
     saveTrace(trace);
     jobStore.update(job.id, { status: "failed", errorMessage: message, completedAt: new Date().toISOString() });
     onLog(`[recording] fallo al iniciar: ${message}`);
+    await agentBrowser?.close().catch(() => undefined);
     throw err;
   }
 }
@@ -502,12 +525,18 @@ export async function stopRecording(recordingId: string): Promise<RecordingSumma
   if (!entry) {
     throw new RecordingError("RECORDING_NOT_ACTIVE", `No hay una grabación activa con id ${recordingId}`);
   }
+  entry.stopping ??= stopActiveRecording(recordingId, entry);
+  return entry.stopping;
+}
+
+async function stopActiveRecording(recordingId: string, entry: ActiveRecording): Promise<RecordingSummary> {
   const onLog = (line: string) => jobStore.appendLog(entry.jobId, line);
 
   entry.trace.status = "stopping";
   // Drain already accepted remote input before the existing recorder flushes capture.
   await entry.liveView?.close();
   const { events, screens } = await entry.recorder.stop();
+  await entry.agentBrowser?.close().catch(() => undefined);
   const endedAt = new Date();
 
   entry.trace.events = events;
@@ -541,6 +570,24 @@ export async function stopRecording(recordingId: string): Promise<RecordingSumma
   jobStore.update(entry.jobId, { status: "done", completedAt: endedAt.toISOString() });
 
   return toSummary(entry.trace, observedPrimary ? 1 : 0);
+}
+
+/**
+ * The Chromium on the user's PC went away while recording (window closed, PC lost the network,
+ * agent stopped). Keep what was captured: stop exactly as if the user had pressed Detener.
+ */
+async function stopAfterAgentBrowserLost(recordingId: string, reason: string): Promise<void> {
+  const entry = active.get(recordingId);
+  if (!entry || entry.trace.status !== "recording") return;
+  const onLog = (line: string) => jobStore.appendLog(entry.jobId, line);
+  onLog(reason === "user_closed"
+    ? "[recording] el usuario cerró la ventana del navegador: se detiene la grabación y se guarda lo capturado"
+    : `[recording] se perdió el navegador del equipo del usuario (${reason}): se detiene la grabación y se guarda lo capturado`);
+  try {
+    await stopRecording(recordingId);
+  } catch (err) {
+    onLog(`[recording] no se pudo detener tras perder el navegador: ${err instanceof Error ? err.message : String(err)}`);
+  }
 }
 
 export type DeriveResult = {

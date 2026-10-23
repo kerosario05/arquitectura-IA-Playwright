@@ -47,6 +47,8 @@ import { buildTestRailRunName } from "../services/testrail-run-reporter";
 import { resolveReplayAdmission } from "../services/replay-admission";
 import { resolveScenarioAutomationPlans, partitionScenariosForExecution, computeTestRailPublishCandidates, type ScenarioAutomationPlan, type TestRailCaseLookup, type TestRailDestination } from "../../automations/recording-automation-resolution";
 import { startMixedRerun } from "../jobs/mixed-rerun-orchestrator";
+import { clientIpOf } from "../local-agent/agent-endpoint";
+import { localAgentRegistry, LocalAgentError } from "../local-agent/agent-registry";
 import type { SessionTrace } from "../../recording/session-trace.types";
 
 export const recordingsRouter = Router();
@@ -450,6 +452,10 @@ function handle(res: any, err: unknown): void {
     sendError(res, status, err.code, err.message);
     return;
   }
+  if (err instanceof LocalAgentError) {
+    sendError(res, 409, err.code, err.message);
+    return;
+  }
   const message = err instanceof Error ? err.message : String(err);
   console.error(`[recordings] error=${message}`);
   sendError(res, 500, "RECORDING_FAILED", message);
@@ -627,9 +633,34 @@ recordingsRouter.post("/start", async (req, res) => {
       return;
     }
     const browserMode = body.browserMode;
-    if (browserMode !== undefined && browserMode !== "integrated" && browserMode !== "desktop") {
-      sendError(res, 400, "INVALID_BROWSER_MODE", 'browserMode debe ser "integrated" o "desktop"');
+    if (browserMode !== undefined && browserMode !== "integrated" && browserMode !== "desktop" && browserMode !== "agent") {
+      sendError(res, 400, "INVALID_BROWSER_MODE", 'browserMode debe ser "integrated", "desktop" o "agent"');
       return;
+    }
+    // "agent": the Chromium on the caller's own PC. Paired by the IP the panel request came
+    // from (the agent connects from the same PC), never by a client-supplied agent id alone.
+    let localAgentId: string | undefined;
+    if (browserMode === "agent") {
+      const pairing = localAgentRegistry.findForUser(
+        { userId: req.principal?.userId ?? null, username: req.principal?.username ?? "" },
+        clientIpOf(req),
+      );
+      if (pairing.status !== "found") {
+        sendError(
+          res,
+          409,
+          pairing.status === "none" ? "LOCAL_AGENT_NOT_FOUND" : "LOCAL_AGENT_AMBIGUOUS",
+          pairing.status === "none"
+            ? "No hay un agente de QA Lab conectado desde tu equipo"
+            : "Hay varios equipos de QA Lab en tu red: elige el tuyo antes de grabar",
+        );
+        return;
+      }
+      if (!localAgentRegistry.hasChromium(pairing.agent)) {
+        sendError(res, 409, "LOCAL_AGENT_CHROMIUM_MISSING", "Tu equipo aún no tiene instalado el Chromium de grabación");
+        return;
+      }
+      localAgentId = pairing.agent.agentId;
     }
     console.log(`[recordings:goal-lineage] proxyGoal=${JSON.stringify(typeof body.recordingGoal === "string" ? body.recordingGoal : undefined)} label=${JSON.stringify(typeof body.label === "string" ? body.label : undefined)}`);
     // captureAuthority is deliberately NOT read from the request body: CaptureEngine V2 is the
@@ -654,6 +685,7 @@ recordingsRouter.post("/start", async (req, res) => {
       // Browser presentation is independent from capture authority. The integrated view keeps
       // the existing headless Chromium + live stream; desktop opens that same recorder-owned
       // Page in a visible Chromium window. Omitted mode preserves legacy headless compatibility.
+      localAgentId,
       headless: browserMode === "integrated"
         ? true
         : browserMode === "desktop"

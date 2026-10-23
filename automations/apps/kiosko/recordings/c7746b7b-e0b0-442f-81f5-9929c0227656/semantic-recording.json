@@ -1,0 +1,2756 @@
+{
+  "version": "1.0",
+  "recordingId": "c7746b7b-e0b0-442f-81f5-9929c0227656",
+  "projectSlug": "kiosko",
+  "appSlug": "kiosko",
+  "platform": "web",
+  "recordingGoal": {
+    "declaredGoal": "yes",
+    "normalizedGoal": "yes",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "selectorOptionInventories": [],
+  "semanticScreens": [
+    {
+      "screenIdentity": "dc2446075abc",
+      "title": "¡Hola!",
+      "url": "https://172.27.4.50/",
+      "classification": "SAME_SCREEN_MUTATION",
+      "sourceScreenKey": "dc2446075abc"
+    },
+    {
+      "screenIdentity": "ae28dd88a0da",
+      "title": "Identificación del cliente",
+      "url": "https://172.27.4.50/client-identification",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "ae28dd88a0da"
+    },
+    {
+      "screenIdentity": "7b334984c4ad",
+      "title": "Identificación del cliente",
+      "url": "https://172.27.4.50/client-identification",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "7b334984c4ad"
+    }
+  ],
+  "semanticComponents": [
+    {
+      "componentId": "dc2446075abc:control:dc2446075abc|Estados de cuenta|button",
+      "componentType": "button",
+      "screenIdentity": "dc2446075abc",
+      "label": "Estados de cuenta",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-5"
+      ]
+    },
+    {
+      "componentId": "dc2446075abc:control:dc2446075abc|4|button",
+      "componentType": "button",
+      "screenIdentity": "dc2446075abc",
+      "label": "4",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-8",
+        "obs-10",
+        "obs-12",
+        "obs-14",
+        "obs-16",
+        "obs-18",
+        "obs-20"
+      ]
+    },
+    {
+      "componentId": "dc2446075abc:control:dc2446075abc|Continuar|button",
+      "componentType": "button",
+      "screenIdentity": "dc2446075abc",
+      "label": "Continuar",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-22"
+      ]
+    },
+    {
+      "componentId": "dc2446075abc:control:dc2446075abc|Salir|button",
+      "componentType": "button",
+      "screenIdentity": "dc2446075abc",
+      "label": "Salir",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-24"
+      ]
+    }
+  ],
+  "semanticEvents": [
+    {
+      "eventRef": "event-1",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-2",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-3",
+      "action": "observe",
+      "screenIdentity": "dc2446075abc",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-4",
+      "action": "observe",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "dc2446075abc:control:dc2446075abc|Estados de cuenta|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-5",
+      "action": "click",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "dc2446075abc:control:role:button|Estados de cuenta",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-6",
+      "action": "navigate",
+      "screenIdentity": "dc2446075abc",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-7",
+      "action": "observe",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "dc2446075abc:control:dc2446075abc|4|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-8",
+      "action": "click",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "dc2446075abc:control:role:button|4",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-9",
+      "action": "observe",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "dc2446075abc:control:dc2446075abc|4|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-10",
+      "action": "click",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "dc2446075abc:control:role:button|4",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-11",
+      "action": "observe",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "dc2446075abc:control:dc2446075abc|4|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-12",
+      "action": "click",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "dc2446075abc:control:role:button|4",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-13",
+      "action": "observe",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "dc2446075abc:control:dc2446075abc|4|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-14",
+      "action": "click",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "dc2446075abc:control:role:button|4",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-15",
+      "action": "observe",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "dc2446075abc:control:dc2446075abc|4|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-16",
+      "action": "click",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "dc2446075abc:control:role:button|4",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-17",
+      "action": "observe",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "dc2446075abc:control:dc2446075abc|4|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-18",
+      "action": "click",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "dc2446075abc:control:role:button|4",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-19",
+      "action": "observe",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "dc2446075abc:control:dc2446075abc|4|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-20",
+      "action": "click",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "dc2446075abc:control:role:button|4",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-21",
+      "action": "observe",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "dc2446075abc:control:dc2446075abc|Continuar|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-22",
+      "action": "click",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "dc2446075abc:control:role:button|Continuar",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-23",
+      "action": "observe",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "dc2446075abc:control:dc2446075abc|Salir|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-24",
+      "action": "click",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "dc2446075abc:control:role:button|Salir",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    }
+  ],
+  "datasets": [],
+  "technicalObservations": [
+    {
+      "observationId": "obs-4",
+      "status": "OBSERVED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "Estados de cuenta",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "dc2446075abc:control:dc2446075abc|Estados de cuenta|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-5",
+      "status": "VALIDATED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "Estados de cuenta",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Estados de cuenta",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Estados de cuenta",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Estados de cuenta"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "div"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",5],[\"svg\",1]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",5],[\\\"svg\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "dc2446075abc:control:role:button|Estados de cuenta",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-7",
+      "status": "OBSERVED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "4",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "dc2446075abc:control:dc2446075abc|4|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-8",
+      "status": "VALIDATED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "4",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|4",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|4",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "dc2446075abc:control:role:button|4",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-9",
+      "status": "OBSERVED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "4",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "dc2446075abc:control:dc2446075abc|4|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-10",
+      "status": "VALIDATED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "4",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|4",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|4",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "dc2446075abc:control:role:button|4",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-11",
+      "status": "OBSERVED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "4",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "dc2446075abc:control:dc2446075abc|4|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-12",
+      "status": "VALIDATED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "4",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|4",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|4",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "dc2446075abc:control:role:button|4",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-13",
+      "status": "OBSERVED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "4",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "dc2446075abc:control:dc2446075abc|4|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-14",
+      "status": "VALIDATED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "4",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|4",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|4",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "dc2446075abc:control:role:button|4",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-15",
+      "status": "OBSERVED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "4",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "dc2446075abc:control:dc2446075abc|4|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-16",
+      "status": "VALIDATED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "4",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|4",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|4",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "dc2446075abc:control:role:button|4",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-17",
+      "status": "OBSERVED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "4",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "dc2446075abc:control:dc2446075abc|4|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-18",
+      "status": "VALIDATED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "4",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|4",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|4",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "dc2446075abc:control:role:button|4",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-19",
+      "status": "OBSERVED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "4",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "dc2446075abc:control:dc2446075abc|4|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-20",
+      "status": "VALIDATED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "4",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|4",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|4",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "dc2446075abc:control:role:button|4",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-21",
+      "status": "OBSERVED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "Continuar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "dc2446075abc:control:dc2446075abc|Continuar|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-22",
+      "status": "VALIDATED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "Continuar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Continuar",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Continuar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 2,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 2
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "dc2446075abc:control:role:button|Continuar",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-23",
+      "status": "OBSERVED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "Salir",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "dc2446075abc:control:dc2446075abc|Salir|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-24",
+      "status": "VALIDATED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "Salir",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Salir",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Salir",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": false,
+            "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "radix-:r3:"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "dc2446075abc:control:role:button|Salir",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-dc2446075abc-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "Estados de cuenta",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Estados de cuenta"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Estados de cuenta",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "dc2446075abc:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-dc2446075abc-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "Consulta de balance",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Consulta de balance"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Consulta de balance",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "dc2446075abc:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-dc2446075abc-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "Cartas y certificaciones",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Cartas y certificaciones"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Cartas y certificaciones",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "dc2446075abc:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-dc2446075abc-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "Canje de Puntos",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Canje de Puntos"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Canje de Puntos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "dc2446075abc:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-dc2446075abc-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "Cambio de Fecha de Corte",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Cambio de Fecha de Corte"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Cambio de Fecha de Corte",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "dc2446075abc:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-dc2446075abc-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "Desactivar seguro",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Desactivar seguro"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Desactivar seguro",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "dc2446075abc:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-dc2446075abc-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "Desbloqueo de usuario de canales",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Desbloqueo de usuario de canales"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Desbloqueo de usuario de canales",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "dc2446075abc:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-dc2446075abc-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "dc2446075abc",
+      "componentType": "button",
+      "label": "Explora nuestros productos",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Explora nuestros productos"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Explora nuestros productos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "dc2446075abc:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-ae28dd88a0da-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "ae28dd88a0da",
+      "componentType": "button",
+      "label": "← Borrar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "← Borrar",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "ae28dd88a0da:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-ae28dd88a0da-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "ae28dd88a0da",
+      "componentType": "button",
+      "label": "Espacio",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Espacio",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "ae28dd88a0da:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-ae28dd88a0da-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "ae28dd88a0da",
+      "componentType": "button",
+      "label": "Limpiar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Limpiar",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "ae28dd88a0da:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-ae28dd88a0da-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "ae28dd88a0da",
+      "componentType": "button",
+      "label": "Cancelar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Cancelar ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "ae28dd88a0da:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-ae28dd88a0da-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "ae28dd88a0da",
+      "componentType": "button",
+      "label": "Continuar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Continuar ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "ae28dd88a0da:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-7b334984c4ad-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "7b334984c4ad",
+      "componentType": "button",
+      "label": "← Borrar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "← Borrar",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "7b334984c4ad:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-7b334984c4ad-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "7b334984c4ad",
+      "componentType": "button",
+      "label": "Espacio",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Espacio",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "7b334984c4ad:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-7b334984c4ad-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "7b334984c4ad",
+      "componentType": "button",
+      "label": "Limpiar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Limpiar",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "7b334984c4ad:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-7b334984c4ad-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "7b334984c4ad",
+      "componentType": "button",
+      "label": "Cancelar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Cancelar",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "7b334984c4ad:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-7b334984c4ad-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "7b334984c4ad",
+      "componentType": "button",
+      "label": "Continuar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Continuar",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "7b334984c4ad:control:5",
+      "selectable": false,
+      "editable": false
+    }
+  ],
+  "editingSessions": [],
+  "scenarioSuggestions": [],
+  "canonicalInteractions": [
+    {
+      "id": "interaction-1",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-1"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "https://172.27.4.50/",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-2",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-2"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "https://172.27.4.50/",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-5",
+      "controlIdentity": "dc2446075abc|Estados de cuenta|role|button|Estados de cuenta",
+      "action": "click",
+      "sourceEventRefs": [
+        "event-5"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Estados de cuenta"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Estados de cuenta",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Estados de cuenta"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "div"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",5],[\"svg\",1]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",5],[\\\"svg\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "screenBeforeRef": "dc2446075abc",
+      "screenAfterRef": "dc2446075abc",
+      "routeBefore": "https://172.27.4.50/",
+      "routeAfter": "https://172.27.4.50/client-identification",
+      "stateScope": "dc2446075abc",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-8",
+      "controlIdentity": "dc2446075abc|4|role|button|4",
+      "semanticField": "Número de identificación",
+      "action": "click",
+      "valueKey": "numero_de_identificacion",
+      "sourceEventRefs": [
+        "event-8"
+      ],
+      "technicalTargetRefs": [
+        "role:button|4"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|4",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "semanticRuntimeEvidence": {
+        "source": "accessible_name",
+        "normalizedValue": "4",
+        "role": "button",
+        "targetTag": "button",
+        "scopeAlternatives": [
+          {
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+            },
+            "captureMatchCount": 1
+          },
+          {
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "captureMatchCount": 1
+          }
+        ],
+        "captureUniqueTarget": true
+      },
+      "playwrightRecorderEvidence": {
+        "kind": "virtual_keyboard",
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true,
+        "keyLabels": [
+          "-",
+          ".",
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "@",
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z",
+          "Ñ"
+        ],
+        "buttonCount": 43,
+        "fieldLabel": "Número de identificación"
+      },
+      "description": "Ingresar en \"Número de identificación\"",
+      "screenBeforeRef": "dc2446075abc",
+      "screenAfterRef": "dc2446075abc",
+      "routeBefore": "https://172.27.4.50/client-identification",
+      "stateScope": "dc2446075abc",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-10",
+      "controlIdentity": "dc2446075abc|4|role|button|4",
+      "semanticField": "Número de identificación",
+      "action": "click",
+      "valueKey": "numero_de_identificacion",
+      "sourceEventRefs": [
+        "event-10"
+      ],
+      "technicalTargetRefs": [
+        "role:button|4"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|4",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "semanticRuntimeEvidence": {
+        "source": "accessible_name",
+        "normalizedValue": "4",
+        "role": "button",
+        "targetTag": "button",
+        "scopeAlternatives": [
+          {
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+            },
+            "captureMatchCount": 1
+          },
+          {
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "captureMatchCount": 1
+          }
+        ],
+        "captureUniqueTarget": true
+      },
+      "playwrightRecorderEvidence": {
+        "kind": "virtual_keyboard",
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true,
+        "keyLabels": [
+          "-",
+          ".",
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "@",
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z",
+          "Ñ"
+        ],
+        "buttonCount": 43,
+        "fieldLabel": "Número de identificación"
+      },
+      "description": "Ingresar en \"Número de identificación\"",
+      "screenBeforeRef": "dc2446075abc",
+      "screenAfterRef": "dc2446075abc",
+      "routeBefore": "https://172.27.4.50/client-identification",
+      "stateScope": "dc2446075abc",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-12",
+      "controlIdentity": "dc2446075abc|4|role|button|4",
+      "semanticField": "Número de identificación",
+      "action": "click",
+      "valueKey": "numero_de_identificacion",
+      "sourceEventRefs": [
+        "event-12"
+      ],
+      "technicalTargetRefs": [
+        "role:button|4"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|4",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "semanticRuntimeEvidence": {
+        "source": "accessible_name",
+        "normalizedValue": "4",
+        "role": "button",
+        "targetTag": "button",
+        "scopeAlternatives": [
+          {
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+            },
+            "captureMatchCount": 1
+          },
+          {
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "captureMatchCount": 1
+          }
+        ],
+        "captureUniqueTarget": true
+      },
+      "playwrightRecorderEvidence": {
+        "kind": "virtual_keyboard",
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true,
+        "keyLabels": [
+          "-",
+          ".",
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "@",
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z",
+          "Ñ"
+        ],
+        "buttonCount": 43,
+        "fieldLabel": "Número de identificación"
+      },
+      "description": "Ingresar en \"Número de identificación\"",
+      "screenBeforeRef": "dc2446075abc",
+      "screenAfterRef": "dc2446075abc",
+      "routeBefore": "https://172.27.4.50/client-identification",
+      "stateScope": "dc2446075abc",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-14",
+      "controlIdentity": "dc2446075abc|4|role|button|4",
+      "semanticField": "Número de identificación",
+      "action": "click",
+      "valueKey": "numero_de_identificacion",
+      "sourceEventRefs": [
+        "event-14"
+      ],
+      "technicalTargetRefs": [
+        "role:button|4"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|4",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "semanticRuntimeEvidence": {
+        "source": "accessible_name",
+        "normalizedValue": "4",
+        "role": "button",
+        "targetTag": "button",
+        "scopeAlternatives": [
+          {
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+            },
+            "captureMatchCount": 1
+          },
+          {
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "captureMatchCount": 1
+          }
+        ],
+        "captureUniqueTarget": true
+      },
+      "playwrightRecorderEvidence": {
+        "kind": "virtual_keyboard",
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true,
+        "keyLabels": [
+          "-",
+          ".",
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "@",
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z",
+          "Ñ"
+        ],
+        "buttonCount": 43,
+        "fieldLabel": "Número de identificación"
+      },
+      "description": "Ingresar en \"Número de identificación\"",
+      "screenBeforeRef": "dc2446075abc",
+      "screenAfterRef": "dc2446075abc",
+      "routeBefore": "https://172.27.4.50/client-identification",
+      "stateScope": "dc2446075abc",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-16",
+      "controlIdentity": "dc2446075abc|4|role|button|4",
+      "semanticField": "Número de identificación",
+      "action": "click",
+      "valueKey": "numero_de_identificacion",
+      "sourceEventRefs": [
+        "event-16"
+      ],
+      "technicalTargetRefs": [
+        "role:button|4"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|4",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "semanticRuntimeEvidence": {
+        "source": "accessible_name",
+        "normalizedValue": "4",
+        "role": "button",
+        "targetTag": "button",
+        "scopeAlternatives": [
+          {
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+            },
+            "captureMatchCount": 1
+          },
+          {
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "captureMatchCount": 1
+          }
+        ],
+        "captureUniqueTarget": true
+      },
+      "playwrightRecorderEvidence": {
+        "kind": "virtual_keyboard",
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true,
+        "keyLabels": [
+          "-",
+          ".",
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "@",
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z",
+          "Ñ"
+        ],
+        "buttonCount": 43,
+        "fieldLabel": "Número de identificación"
+      },
+      "description": "Ingresar en \"Número de identificación\"",
+      "screenBeforeRef": "dc2446075abc",
+      "screenAfterRef": "dc2446075abc",
+      "routeBefore": "https://172.27.4.50/client-identification",
+      "stateScope": "dc2446075abc",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-18",
+      "controlIdentity": "dc2446075abc|4|role|button|4",
+      "semanticField": "Número de identificación",
+      "action": "click",
+      "valueKey": "numero_de_identificacion",
+      "sourceEventRefs": [
+        "event-18"
+      ],
+      "technicalTargetRefs": [
+        "role:button|4"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|4",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "semanticRuntimeEvidence": {
+        "source": "accessible_name",
+        "normalizedValue": "4",
+        "role": "button",
+        "targetTag": "button",
+        "scopeAlternatives": [
+          {
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+            },
+            "captureMatchCount": 1
+          },
+          {
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "captureMatchCount": 1
+          }
+        ],
+        "captureUniqueTarget": true
+      },
+      "playwrightRecorderEvidence": {
+        "kind": "virtual_keyboard",
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true,
+        "keyLabels": [
+          "-",
+          ".",
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "@",
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z",
+          "Ñ"
+        ],
+        "buttonCount": 43,
+        "fieldLabel": "Número de identificación"
+      },
+      "description": "Ingresar en \"Número de identificación\"",
+      "screenBeforeRef": "dc2446075abc",
+      "screenAfterRef": "dc2446075abc",
+      "routeBefore": "https://172.27.4.50/client-identification",
+      "stateScope": "dc2446075abc",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-20",
+      "controlIdentity": "dc2446075abc|4|role|button|4",
+      "semanticField": "Número de identificación",
+      "action": "click",
+      "valueKey": "numero_de_identificacion",
+      "sourceEventRefs": [
+        "event-20"
+      ],
+      "technicalTargetRefs": [
+        "role:button|4"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|4",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "semanticRuntimeEvidence": {
+        "source": "accessible_name",
+        "normalizedValue": "4",
+        "role": "button",
+        "targetTag": "button",
+        "scopeAlternatives": [
+          {
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+            },
+            "captureMatchCount": 1
+          },
+          {
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "captureMatchCount": 1
+          }
+        ],
+        "captureUniqueTarget": true
+      },
+      "playwrightRecorderEvidence": {
+        "kind": "virtual_keyboard",
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true,
+        "keyLabels": [
+          "-",
+          ".",
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "@",
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z",
+          "Ñ"
+        ],
+        "buttonCount": 43,
+        "fieldLabel": "Número de identificación"
+      },
+      "description": "Ingresar en \"Número de identificación\"",
+      "screenBeforeRef": "dc2446075abc",
+      "screenAfterRef": "dc2446075abc",
+      "routeBefore": "https://172.27.4.50/client-identification",
+      "stateScope": "dc2446075abc",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-22",
+      "controlIdentity": "dc2446075abc|Continuar|role|button|Continuar",
+      "semanticField": "Continuar",
+      "action": "click",
+      "valueKey": "continuar",
+      "sourceEventRefs": [
+        "event-22"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Continuar"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Continuar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 2,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 2
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "semanticRuntimeEvidence": {
+        "source": "accessible_name",
+        "normalizedValue": "Continuar",
+        "role": "button",
+        "targetTag": "button",
+        "scopeAlternatives": [
+          {
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+            },
+            "captureMatchCount": 1
+          },
+          {
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "root"
+            },
+            "captureMatchCount": 1
+          }
+        ],
+        "captureUniqueTarget": true
+      },
+      "playwrightRecorderEvidence": {
+        "kind": "role",
+        "role": "button",
+        "normalizedName": "Continuar",
+        "targetTag": "button",
+        "scopeIdentity": {
+          "strategy": "css",
+          "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+        },
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true
+      },
+      "description": "Ingresar en \"Continuar\"",
+      "screenBeforeRef": "dc2446075abc",
+      "screenAfterRef": "dc2446075abc",
+      "routeBefore": "https://172.27.4.50/client-identification",
+      "stateScope": "dc2446075abc",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-24",
+      "controlIdentity": "dc2446075abc|Salir|role|button|Salir",
+      "semanticField": "Salir",
+      "action": "click",
+      "valueKey": "salir",
+      "sourceEventRefs": [
+        "event-24"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Salir"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Salir",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": false,
+            "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "radix-:r3:"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "semanticRuntimeEvidence": {
+        "source": "accessible_name",
+        "normalizedValue": "Salir",
+        "targetTag": "span",
+        "scopeAlternatives": [
+          {
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "radix-:r3:"
+            },
+            "captureMatchCount": 1
+          }
+        ],
+        "captureUniqueTarget": true
+      },
+      "playwrightRecorderEvidence": {
+        "kind": "text",
+        "normalizedName": "Salir",
+        "targetTag": "span",
+        "scopeIdentity": {
+          "strategy": "id",
+          "value": "radix-:r3:"
+        },
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true
+      },
+      "description": "Ingresar en \"Salir\"",
+      "screenBeforeRef": "dc2446075abc",
+      "screenAfterRef": "dc2446075abc",
+      "routeBefore": "https://172.27.4.50/client-identification",
+      "stateScope": "dc2446075abc",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    }
+  ],
+  "gridMetadata": {
+    "detected": false,
+    "grids": 0,
+    "rows": 0,
+    "cells": 0,
+    "headers": [],
+    "headerRelationships": []
+  },
+  "source": "SessionTrace"
+}

@@ -3,6 +3,7 @@ import { currentReportAnalyst } from "../../auth/report-attribution";
 import { EventEmitter } from "events";
 import type { ChildProcess } from "child_process";
 import * as fs from "node:fs";
+import * as os from "node:os";
 import * as path from "node:path";
 import { redactJiraScenarioInputs } from "../../jira/jira-rerun-manifest";
 import type { JiraScenarioInput } from "../../jira/jira-semantic-executor";
@@ -91,7 +92,22 @@ export type JobInternal = Job & {
   emitter: EventEmitter;
 };
 
-const RUN_HISTORY_DIR = path.resolve(process.cwd(), ".artifacts", "qa-lab-run-history");
+/**
+ * Where every job is persisted (and read back after a restart). QA_RUN_HISTORY_DIR overrides it.
+ * A test process gets its own temporary folder, so fixture jobs never land in the real history
+ * the panel lists (tests run either through `tsx --test` or as plain `tsx x.test.ts`).
+ */
+export function resolveRunHistoryDir(): string {
+  if (process.env.QA_RUN_HISTORY_DIR) return path.resolve(process.env.QA_RUN_HISTORY_DIR);
+  if (process.env.NODE_TEST_CONTEXT || /\.test\.[cm]?[jt]s$/.test(process.argv[1] ?? "")) {
+    const dir = path.join(os.tmpdir(), `qa-lab-run-history-test-${process.pid}`);
+    process.once("exit", () => fs.rmSync(dir, { recursive: true, force: true }));
+    return dir;
+  }
+  return path.resolve(process.cwd(), ".artifacts", "qa-lab-run-history");
+}
+
+const RUN_HISTORY_DIR = resolveRunHistoryDir();
 const TERMINAL_STATUSES = new Set<JobStatus>([
   "done", "failed", "cancelled", "completed_with_failures", "completed_with_sync_errors",
 ]);
@@ -107,8 +123,27 @@ const PERSISTED_SUMMARY_KEYS = [
   "notExecutableCases", "testRailRunId", "testRailRunUrl", "reasonCode", "errorMessage",
 ] as const;
 
+/** summary.reasonCode of a job that was still running when the server process stopped. */
+export const INTERRUPTED_REASON_CODE = "interrupted_by_restart";
+const INTERRUPTED_MESSAGE = "Interrumpida: el servidor se reinició (despliegue) mientras la ejecución corría. Puedes volver a ejecutarla.";
+/** Non-terminal snapshots are rewritten at most this often (status changes always persist). */
+const PROGRESS_PERSIST_INTERVAL_MS = 2_000;
+
 function isTerminalStatus(status: string): status is JobStatus {
   return TERMINAL_STATUSES.has(status as JobStatus);
+}
+
+function logFilePath(id: string): string {
+  return path.join(RUN_HISTORY_DIR, `${id}.log`);
+}
+
+function readPersistedLogs(id: string): string[] {
+  try {
+    const text = fs.readFileSync(logFilePath(id), "utf-8");
+    return text.length ? text.replace(/\n$/, "").split("\n") : [];
+  } catch {
+    return [];
+  }
 }
 
 function persistedSnapshot(job: JobInternal): Job {
@@ -144,16 +179,20 @@ function persistedSnapshot(job: JobInternal): Job {
     currentCaseId: job.currentCaseId,
     currentCaseTitle: job.currentCaseTitle,
     errorMessage: job.errorMessage,
+    ...(job.parentJobId ? { parentJobId: job.parentJobId } : {}),
   };
 }
 
+/**
+ * Any well-formed snapshot, terminal or not: a job is persisted from its creation on, so one
+ * still `queued`/`running` on disk at startup is a run the previous process never finished.
+ */
 function isPersistedJob(value: unknown): value is Job {
   if (!value || typeof value !== "object") return false;
   const job = value as Partial<Job>;
   return typeof job.id === "string"
     && typeof job.type === "string"
     && typeof job.status === "string"
-    && isTerminalStatus(job.status)
     && typeof job.createdAt === "string"
     && Boolean(job.params && typeof job.params === "object");
 }
@@ -161,6 +200,8 @@ function isPersistedJob(value: unknown): value is Job {
 class JobStore {
   private readonly jobs = new Map<string, JobInternal>();
   private readonly persistedJobs = new Map<string, Job>();
+  /** Last snapshot write per job, to throttle progress-only updates. */
+  private readonly lastPersistAt = new Map<string, { at: number; status: JobStatus }>();
 
   constructor() {
     this.loadPersistedJobs();
@@ -186,6 +227,7 @@ class JobStore {
     };
     job.emitter.setMaxListeners(100);
     this.jobs.set(id, job);
+    this.persistJob(job);
     return this.serialize(job);
   }
 
@@ -194,8 +236,15 @@ class JobStore {
     return job ? this.serialize(job) : undefined;
   }
 
+  /** A job from a previous server process, with the logs it wrote to disk. */
   getPersisted(id: string): Job | undefined {
-    return this.persistedJobs.get(id);
+    const job = this.persistedJobs.get(id);
+    return job ? { ...job, logs: readPersistedLogs(id) } : undefined;
+  }
+
+  /** The live job when this process runs it, otherwise the persisted record. */
+  getAny(id: string): Job | undefined {
+    return this.get(id) ?? this.getPersisted(id);
   }
 
   getInternal(id: string): JobInternal | undefined {
@@ -210,7 +259,9 @@ class JobStore {
   list(options?: { includeInternal?: boolean }): Job[] {
     const jobsById = new Map<string, Job>();
     if (!options?.includeInternal) {
-      for (const job of this.persistedJobs.values()) jobsById.set(job.id, job);
+      for (const job of this.persistedJobs.values()) {
+        if (!job.parentJobId) jobsById.set(job.id, job);
+      }
     }
     const runtimeJobs = options?.includeInternal
       ? Array.from(this.jobs.values())
@@ -227,7 +278,15 @@ class JobStore {
     if (patch.completedAt && job.startedAt && !patch.durationMs && !job.durationMs) {
       job.durationMs = new Date(patch.completedAt).getTime() - new Date(job.startedAt).getTime();
     }
-    if (!job.parentJobId && isTerminalStatus(job.status)) this.persistJob(job);
+    const last = this.lastPersistAt.get(id);
+    if (
+      isTerminalStatus(job.status)
+      || !last
+      || last.status !== job.status
+      || Date.now() - last.at >= PROGRESS_PERSIST_INTERVAL_MS
+    ) {
+      this.persistJob(job);
+    }
     job.emitter.emit("update", this.serialize(job));
   }
 
@@ -241,24 +300,54 @@ class JobStore {
     for (const name of files) {
       try {
         const parsed: unknown = JSON.parse(fs.readFileSync(path.join(RUN_HISTORY_DIR, name), "utf-8"));
-        if (isPersistedJob(parsed)) this.persistedJobs.set(parsed.id, parsed);
+        if (!isPersistedJob(parsed)) continue;
+        // Nothing in this new process runs it: the previous process stopped (a deploy restarts
+        // the services) mid-run. Close it as failed so it shows up and can be rerun.
+        this.persistedJobs.set(parsed.id, isTerminalStatus(parsed.status) ? parsed : this.markInterrupted(parsed));
       } catch {
         // Ignore incomplete/corrupt records so historical data cannot block startup.
       }
     }
   }
 
+  private markInterrupted(job: Job): Job {
+    const completedAt = new Date().toISOString();
+    const interrupted: Job = {
+      ...job,
+      status: "failed",
+      completedAt,
+      durationMs: job.startedAt ? Date.parse(completedAt) - Date.parse(job.startedAt) : job.durationMs,
+      errorMessage: INTERRUPTED_MESSAGE,
+      summary: { passed: 0, failed: 0, ...job.summary, reasonCode: INTERRUPTED_REASON_CODE, errorMessage: INTERRUPTED_MESSAGE },
+      logs: [],
+    };
+    this.writeSnapshot(interrupted);
+    try {
+      fs.appendFileSync(logFilePath(job.id), `[server] ${INTERRUPTED_MESSAGE}\n`, "utf-8");
+    } catch {
+      // The record itself already says it was interrupted.
+    }
+    return interrupted;
+  }
+
   private persistJob(job: JobInternal): void {
+    const snapshot = persistedSnapshot(job);
+    if (!this.writeSnapshot(snapshot)) return;
+    this.lastPersistAt.set(job.id, { at: Date.now(), status: job.status });
+    this.persistedJobs.set(job.id, snapshot);
+  }
+
+  private writeSnapshot(snapshot: Job): boolean {
     try {
       fs.mkdirSync(RUN_HISTORY_DIR, { recursive: true });
-      const snapshot = persistedSnapshot(job);
-      const target = path.join(RUN_HISTORY_DIR, `${job.id}.json`);
+      const target = path.join(RUN_HISTORY_DIR, `${snapshot.id}.json`);
       const temporary = `${target}.${process.pid}.tmp`;
       fs.writeFileSync(temporary, JSON.stringify(snapshot), "utf-8");
       fs.renameSync(temporary, target);
-      this.persistedJobs.set(job.id, snapshot);
+      return true;
     } catch {
       // Best effort: history persistence must not alter the run's final status.
+      return false;
     }
   }
 
@@ -277,6 +366,11 @@ class JobStore {
     const job = this.jobs.get(id);
     if (!job) return;
     job.logs.push(line);
+    try {
+      fs.appendFileSync(logFilePath(id), `${line.replace(/\r?\n/g, " ")}\n`, "utf-8");
+    } catch {
+      // Best effort: the in-memory log still serves this process.
+    }
     job.emitter.emit("log", line);
   }
 

@@ -1,0 +1,2059 @@
+{
+  "recordingId": "c7746b7b-e0b0-442f-81f5-9929c0227656",
+  "projectSlug": "kiosko",
+  "appSlug": "kiosko",
+  "platform": "web",
+  "baseUrl": "https://172.27.4.50/",
+  "label": "yes",
+  "recordingGoal": {
+    "declaredGoal": "yes",
+    "normalizedGoal": "yes",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-10-22T16:52:40.300Z",
+  "status": "stopped",
+  "events": [
+    {
+      "t": 22527,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://172.27.4.50/",
+      "seq": 0
+    },
+    {
+      "t": 23484,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://172.27.4.50/",
+      "seq": 1
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "dc2446075abc",
+      "url": "https://172.27.4.50/",
+      "seq": 2
+    },
+    {
+      "t": 26500,
+      "interactionId": "pointer-1",
+      "kind": "note",
+      "screenKey": "dc2446075abc",
+      "fingerprint": "8d614ab9cdba519d46ff88c50a65f8eac7b8ef79f97220a4bf05adc5fc32c518",
+      "url": "https://172.27.4.50/",
+      "target": {
+        "label": "Estados de cuenta",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Estados de cuenta\"",
+      "observationType": "pointer",
+      "seq": 3
+    },
+    {
+      "t": 27037,
+      "interactionId": "pointer-1",
+      "kind": "tap",
+      "screenKey": "dc2446075abc",
+      "fingerprint": "8d614ab9cdba519d46ff88c50a65f8eac7b8ef79f97220a4bf05adc5fc32c518",
+      "url": "https://172.27.4.50/",
+      "target": {
+        "label": "Estados de cuenta",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Estados de cuenta",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Estados de cuenta",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Estados de cuenta"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",5],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",5],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 4
+    },
+    {
+      "t": 27057,
+      "kind": "navigate",
+      "screenKey": "dc2446075abc",
+      "url": "https://172.27.4.50/client-identification",
+      "seq": 5
+    },
+    {
+      "t": 28206,
+      "interactionId": "pointer-2",
+      "kind": "note",
+      "screenKey": "dc2446075abc",
+      "fingerprint": "8d614ab9cdba519d46ff88c50a65f8eac7b8ef79f97220a4bf05adc5fc32c518",
+      "url": "https://172.27.4.50/client-identification",
+      "target": {
+        "label": "4",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"4\"",
+      "observationType": "pointer",
+      "seq": 6
+    },
+    {
+      "t": 28475,
+      "interactionId": "pointer-2",
+      "kind": "tap",
+      "screenKey": "dc2446075abc",
+      "fingerprint": "8d614ab9cdba519d46ff88c50a65f8eac7b8ef79f97220a4bf05adc5fc32c518",
+      "url": "https://172.27.4.50/client-identification",
+      "target": {
+        "label": "4",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|4",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "4",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        }
+      },
+      "seq": 7
+    },
+    {
+      "t": 29999,
+      "interactionId": "pointer-3",
+      "kind": "note",
+      "screenKey": "dc2446075abc",
+      "fingerprint": "8d614ab9cdba519d46ff88c50a65f8eac7b8ef79f97220a4bf05adc5fc32c518",
+      "url": "https://172.27.4.50/client-identification",
+      "target": {
+        "label": "4",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"4\"",
+      "observationType": "pointer",
+      "seq": 8
+    },
+    {
+      "t": 30253,
+      "interactionId": "pointer-3",
+      "kind": "tap",
+      "screenKey": "dc2446075abc",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/client-identification",
+      "target": {
+        "label": "4",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|4",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "4",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        }
+      },
+      "seq": 9
+    },
+    {
+      "t": 30784,
+      "interactionId": "pointer-4",
+      "kind": "note",
+      "screenKey": "dc2446075abc",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/client-identification",
+      "target": {
+        "label": "4",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"4\"",
+      "observationType": "pointer",
+      "seq": 10
+    },
+    {
+      "t": 31236,
+      "interactionId": "pointer-4",
+      "kind": "tap",
+      "screenKey": "dc2446075abc",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/client-identification",
+      "target": {
+        "label": "4",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|4",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "4",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        }
+      },
+      "seq": 11
+    },
+    {
+      "t": 31444,
+      "interactionId": "pointer-5",
+      "kind": "note",
+      "screenKey": "dc2446075abc",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/client-identification",
+      "target": {
+        "label": "4",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"4\"",
+      "observationType": "pointer",
+      "seq": 12
+    },
+    {
+      "t": 31660,
+      "interactionId": "pointer-5",
+      "kind": "tap",
+      "screenKey": "dc2446075abc",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/client-identification",
+      "target": {
+        "label": "4",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|4",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "4",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        }
+      },
+      "seq": 13
+    },
+    {
+      "t": 32861,
+      "interactionId": "pointer-6",
+      "kind": "note",
+      "screenKey": "dc2446075abc",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/client-identification",
+      "target": {
+        "label": "4",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"4\"",
+      "observationType": "pointer",
+      "seq": 14
+    },
+    {
+      "t": 33812,
+      "interactionId": "pointer-6",
+      "kind": "tap",
+      "screenKey": "dc2446075abc",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/client-identification",
+      "target": {
+        "label": "4",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|4",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "4",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        }
+      },
+      "seq": 15
+    },
+    {
+      "t": 34044,
+      "interactionId": "pointer-7",
+      "kind": "note",
+      "screenKey": "dc2446075abc",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/client-identification",
+      "target": {
+        "label": "4",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"4\"",
+      "observationType": "pointer",
+      "seq": 16
+    },
+    {
+      "t": 34437,
+      "interactionId": "pointer-7",
+      "kind": "tap",
+      "screenKey": "dc2446075abc",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/client-identification",
+      "target": {
+        "label": "4",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|4",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "4",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        }
+      },
+      "seq": 17
+    },
+    {
+      "t": 34805,
+      "interactionId": "pointer-8",
+      "kind": "note",
+      "screenKey": "dc2446075abc",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/client-identification",
+      "target": {
+        "label": "4",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"4\"",
+      "observationType": "pointer",
+      "seq": 18
+    },
+    {
+      "t": 35192,
+      "interactionId": "pointer-8",
+      "kind": "tap",
+      "screenKey": "dc2446075abc",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/client-identification",
+      "target": {
+        "label": "4",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|4",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|4",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 43,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 43
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "4",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "virtual_keyboard",
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "keyLabels": [
+            "-",
+            ".",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "@",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "Ñ"
+          ],
+          "buttonCount": 43,
+          "fieldLabel": "Número de identificación"
+        }
+      },
+      "seq": 19
+    },
+    {
+      "t": 36501,
+      "interactionId": "pointer-9",
+      "kind": "note",
+      "screenKey": "dc2446075abc",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/client-identification",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Continuar\"",
+      "observationType": "pointer",
+      "seq": 20
+    },
+    {
+      "t": 36581,
+      "interactionId": "pointer-9",
+      "kind": "tap",
+      "screenKey": "dc2446075abc",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/client-identification",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Continuar",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Continuar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 2,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 2
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Continuar",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 21
+    },
+    {
+      "t": 36871,
+      "interactionId": "pointer-10",
+      "kind": "note",
+      "screenKey": "dc2446075abc",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/client-identification",
+      "target": {
+        "label": "Salir",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Salir\"",
+      "observationType": "pointer",
+      "seq": 22
+    },
+    {
+      "t": 36924,
+      "interactionId": "pointer-10",
+      "kind": "tap",
+      "screenKey": "dc2446075abc",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/client-identification",
+      "target": {
+        "label": "Salir",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Salir",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Salir",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "radix-:r3:"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Salir",
+          "targetTag": "span",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "radix-:r3:"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Salir",
+          "targetTag": "span",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "radix-:r3:"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 23
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "dc2446075abc",
+      "title": "¡Hola!",
+      "fingerprint": "8d614ab9cdba519d46ff88c50a65f8eac7b8ef79f97220a4bf05adc5fc32c518",
+      "url": "https://172.27.4.50/",
+      "firstSeenAt": 23639,
+      "controls": [
+        {
+          "label": "Estados de cuenta",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Estados de cuenta"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Estados de cuenta",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Consulta de balance",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Consulta de balance"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Consulta de balance",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cartas y certificaciones",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Cartas y certificaciones"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cartas y certificaciones",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Canje de Puntos",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Canje de Puntos"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Canje de Puntos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cambio de Fecha de Corte",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Cambio de Fecha de Corte"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cambio de Fecha de Corte",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Desactivar seguro",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Desactivar seguro"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Desactivar seguro",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Desbloqueo de usuario de canales",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Desbloqueo de usuario de canales"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Desbloqueo de usuario de canales",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Explora nuestros productos",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Explora nuestros productos"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Explora nuestros productos",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "¡Hola!",
+        "Estados de cuenta",
+        "Consulta de balance"
+      ],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "ae28dd88a0da",
+      "title": "Identificación del cliente",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/client-identification",
+      "firstSeenAt": 30008,
+      "controls": [
+        {
+          "label": "← Borrar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "← Borrar",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Espacio",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Espacio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Limpiar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Limpiar",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cancelar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cancelar ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Continuar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Continuar ",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Identificación del cliente",
+        "Número de identificación"
+      ],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "7b334984c4ad",
+      "title": "Identificación del cliente",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/client-identification",
+      "firstSeenAt": 36589,
+      "controls": [
+        {
+          "label": "← Borrar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "← Borrar",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Espacio",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Espacio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Limpiar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Limpiar",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cancelar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cancelar",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Continuar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Continuar",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Identificación del cliente",
+        "Número de identificación"
+      ],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    }
+  ],
+  "endedAt": "2026-10-22T16:53:18.923Z",
+  "durationMs": 38623
+}

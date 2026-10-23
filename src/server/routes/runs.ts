@@ -690,7 +690,8 @@ runsRouter.get("/:jobId", (req, res) => {
 
 runsRouter.get("/:jobId/logs", (req, res) => {
   const jobId = req.params.jobId;
-  const current = jobStore.get(jobId);
+  // A run from before a restart still replays its persisted log and closes as finished.
+  const current = jobStore.getAny(jobId);
 
   if (!current) {
     res.status(404).json({ error: "Job not found" });
@@ -1508,7 +1509,7 @@ export function resolveEvidenceDocxForJob(
   jobId: string,
   formats: EvidenceDocumentFormat[] = ["pdf"],
 ): EvidenceDocxResolution {
-  const job = jobStore.get(jobId);
+  const job = jobStore.getAny(jobId);
   const params = (job?.params ?? {}) as Record<string, unknown>;
   const summary = (job?.summary ?? {}) as Record<string, unknown>;
   const diskMeta = readPreviewJobMetadata(jobId);
