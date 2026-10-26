@@ -46,7 +46,7 @@ export type LaunchScenario = {
   targetScreen?: string;
   actualChain?: unknown;
   requiredChain?: unknown;
-  validation?: { valid?: boolean };
+  validation?: { valid?: boolean; errors?: string[] };
   functionalBranch?: { branchId?: string; actionIntent?: string; expectedDestination?: string; destination?: { semanticDeclaration?: string } };
   branchAssociation?: { branchId?: string };
   branchId?: string;
@@ -249,7 +249,7 @@ export function partitionLaunchScenarios(scenarios: LaunchScenario[], engine:Exe
   const standard: LaunchScenario[] = [];
   const adaptiveFunctional: LaunchScenario[] = [];
   const nonAutomatable: LaunchScenario[] = [];
-  const jiraReviewOnlyErrors = (errors: string[] | undefined) => Boolean(errors?.length)
+  const jiraReviewOnlyErrors = (errors: string[] | undefined) => !!errors?.length
     && errors.every(error => error === "JIRA_CONDITION_ASSERTION_MISSING" || error.startsWith("JIRA_ACCEPTANCE_COVERAGE_INCOMPLETE:"));
   for (const scenario of scenarios) {
     if(engine==='jira_semantic') {
