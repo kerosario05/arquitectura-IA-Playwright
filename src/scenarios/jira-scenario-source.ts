@@ -39,6 +39,7 @@ export async function loadJiraIssues(
 
 const ISSUE_KEY = /^[A-Z][A-Z0-9_]*-\d+$/i;
 const PROJECT_KEY = /^[A-Z][A-Z0-9_]*$/i;
+const PROJECT_ID = /^[1-9]\d*$/;
 
 /**
  * The stories the user picked in the panel, looked up by key inside the project — no sprint
@@ -58,8 +59,13 @@ export async function loadJiraIssuesByKeys(
 
 /** JQL for picked keys inside one project; null when no key is well formed (nothing to load). */
 export function buildIssueKeysJql(projectKey: string, issueKeys: string[]): { jql: string; keys: string[] } | null {
-  const normalizedProjectKey = projectKey.trim().toUpperCase();
-  if (!PROJECT_KEY.test(normalizedProjectKey)) return null;
+  const projectIdentifier = projectKey.trim();
+  const normalizedProjectKey = PROJECT_KEY.test(projectIdentifier)
+    ? projectIdentifier.toUpperCase()
+    : PROJECT_ID.test(projectIdentifier)
+      ? projectIdentifier
+      : null;
+  if (!normalizedProjectKey) return null;
   const keys = Array.from(new Set(issueKeys.map((key) => key.trim().toUpperCase()).filter((key) => ISSUE_KEY.test(key))));
   if (keys.length === 0) return null;
   return { jql: `project = "${normalizedProjectKey}" AND key in (${keys.join(", ")}) ORDER BY created DESC`, keys };
