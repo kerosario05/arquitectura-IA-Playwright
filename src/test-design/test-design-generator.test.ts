@@ -2,11 +2,14 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { AiCompletionRequest, AiProvider } from "../ai/ai-provider.types";
 import type { TestDesignJiraIssue } from "./test-design.types";
+import { JIRA_STEP_DELIVERY_INSTRUCTIONS } from "../jira/jira-step-delivery";
 import {
   generateTestDesignScenarios,
+  generateTestDesignScenariosWithCoverage,
   mapJiraScenariosToTestDesign,
   mergeRegenerated,
   parseGeneratedScenarios,
+  testDesignReviewWarning,
 } from "./test-design-generator";
 import { buildTestDesignMessages } from "./test-design-prompt";
 import { normalizeScenario } from "./test-design.validation";
@@ -123,27 +126,38 @@ test("drops unusable scenarios and keeps the rest", () => {
 
 test("Test Design calls the Jira scenario engine and projects its journey into the editable case format", async () => {
   const provider = fakeProvider([good]);
-  const scenarios = await generateTestDesignScenarios(issue, {
+  const generated = await generateTestDesignScenariosWithCoverage(issue, {
     provider,
     appSlug: "design-fixture-app",
     instructions: "Prioriza el acceso empresarial",
     existingTitles: ["Caso que se conserva"],
   });
+  const scenarios = generated.scenarios;
   assert.equal(scenarios.length, 1);
-  assert.equal(provider.requests.length, 1);
+  assert.equal(provider.requests.length, 2,'uncovered numbered acceptance criteria receive a complementary generation attempt');
+  const coverageRequest=JSON.parse(provider.requests[1].messages[1].content);
+  assert.deepEqual(coverageRequest.issues[0].missingClauses.map((clause:{id:string})=>clause.id),['AC2.1']);
+  assert.ok(provider.requests[1].messages[0].content.includes(JIRA_STEP_DELIVERY_INSTRUCTIONS),
+    "coverage repair uses the same exact action/assertion syntax contract as initial generation and launch");
+  assert.equal(scenarios[0].generationWarnings, undefined, "story coverage is not repeated as a case-level warning");
+  assert.match(testDesignReviewWarning(scenarios, generated.coverage) ?? '', /AC2\.1/, "the story summary still reports genuinely missing criteria once");
+  assert.equal(scenarios[0].selectedForTestRail, true, "a story coverage gap does not disable a valid individual case");
   assert.equal(provider.requests[0].purpose, "scenario_generation");
   assert.match(provider.requests[0].messages[0].content, /You generate web QA scenarios from user stories/);
   const context = JSON.parse(provider.requests[0].messages[1].content);
   assert.equal(context.appSlug, "design-fixture-app");
   assert.ok(Array.isArray(context.learnedNavigation));
   assert.equal(context.testDesign.additionalInstructions, "Prioriza el acceso empresarial");
-  assert.deepEqual(context.testDesign.excludedScenarioTitlesByIssueKey, {});
+  assert.deepEqual(context.testDesign.excludedScenarioTitlesByIssueKey, {},
+    "retained draft titles must not change the shared Jira generation prompt");
   assert.deepEqual(scenarios[0].steps.map((step) => step.action), good.scenarios[0].steps);
   assert.deepEqual(scenarios[0].steps[2], {
     action: 'Validar que se muestre "Comprobante"',
-    expected: '',
+    expected: 'Se muestra "Comprobante".',
   });
-  assert.equal(scenarios[0].preconditions, "");
+  assert.equal(scenarios[0].preconditions, "Datos de prueba requeridos:\n• Número de tarjeta · válido · paso 2",
+    "Design shows the same required-data summary the launcher builds");
+  assert.deepEqual(scenarios[0].jiraSourceScenario?.preconditions, [], "document defaults must not alter the Jira runtime scenario");
   assert.deepEqual(scenarios[0].acceptanceCriteriaRefs, ["AC1"]);
   assert.equal(scenarios[0].type, "functional");
   assert.equal(scenarios[0].origin, "ai");
@@ -199,7 +213,31 @@ test("Design retains incomplete coverage as an explicitly flagged draft", () => 
     ...good.scenarios[0],
     validation: { valid: false, errors: ["JIRA_ACCEPTANCE_COVERAGE_INCOMPLETE:AC2.1,AC3.1"], warnings: [] },
   } as never]);
-  assert.match(draft.generationWarnings?.join(' ') ?? '', /AC2\.1, AC3\.1/);
+  assert.equal(draft.generationWarnings, undefined);
+  assert.match(testDesignReviewWarning([draft]) ?? '', /AC2\.1, AC3\.1/);
+  assert.equal(draft.selectedForTestRail, true, "a historical story-level coverage marker does not disable this case");
+  assert.equal(draft.selectedForJira, true);
+});
+
+test("coverage warning extracts AC identifiers without treating ACTIONS as a criterion", () => {
+  const message = testDesignReviewWarning([{
+    ...good.scenarios[0],
+    generationWarnings: ["La generación quedó incompleta: faltan criterios AC1.1, ACTIONS."],
+  } as never]) ?? "";
+  assert.match(message, /AC1\.1/);
+  assert.doesNotMatch(message, /ACTIONS/);
+  assert.equal(testDesignReviewWarning([{
+    ...good.scenarios[0],
+    generationWarnings: ["La generación quedó incompleta: faltan criterios ACTIONS."],
+  } as never]), null, "a legacy pseudo-criterion alone does not produce an incomplete-coverage warning");
+});
+
+test("Design retains the Jira source scenario and stable scenario id", () => {
+  const original = { ...good.scenarios[0], scenarioId: "PAY-7:jira:4", validation: { valid: true, errors: [], warnings: [] } } as never;
+  const [design] = mapJiraScenariosToTestDesign([original]);
+  assert.equal(design.jiraSourceScenarioId, "PAY-7:jira:4");
+  assert.equal(design.jiraSourceScenario?.sourceIssueKey, issue.key);
+  assert.deepEqual(design.jiraSourceScenario?.acceptanceCriteriaRefs, ["AC1"]);
 });
 
 test("different profiles preserve code/select wording, negative setup and separate runtime fields", () => {

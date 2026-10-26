@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "8436c327-4632-4242-b888-739c6a9e3d0e",
+  "title": "Verificar los estados y las solicitudes recientes del inicio",
+  "generatedAt": "2026-10-26T07:22:27.991Z",
+  "executionEngine": "jira_semantic"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "9e37648d-ab3d-4d63-aaee-5b264ef75573-revision-legal-aprueba-un-caso-en-revision-legal",
+  "externalId": "9e37648d-ab3d-4d63-aaee-5b264ef75573",
+  "title": "Revisión Legal aprueba un caso En Revisión Legal",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T06:49:22.100Z"
+}

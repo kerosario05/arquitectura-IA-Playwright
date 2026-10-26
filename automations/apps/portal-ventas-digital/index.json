@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-10-22T16:53:12.091Z",
+  "updatedAt": "2026-10-24T00:46:59.248Z",
   "automations": [
     {
       "id": "preview-001-crear-cuenta-cliente",
@@ -140,13 +140,13 @@
       "source": "discovery",
       "appProfile": "portal-ventas-digital",
       "createdAt": "2026-10-20T16:16:58.251Z",
-      "updatedAt": "2026-10-22T16:53:12.091Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T16-50-38-349Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-24T00:46:59.248Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-24T00-43-49-355Z\\discovered-plans.pending.json",
       "pomStatus": "needs_manual_review",
       "inlineDebugMode": false,
       "specVerificationStatus": "failed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T16-50-38-349Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-24T00-43-49-355Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -170,7 +170,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 75588,
+          "durationMs": 97567,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -208,7 +208,7 @@
           ],
           "errors": [
             "functional_execution_failed:exitCode=1",
-            "functional_execution_error:[evidence:settle] probe failed reason=page.waitForFunction: EvalError: Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://*.qualtrics.com https://*.siteintercept.qualtrics.com https://cdn.evgnet.com https://*.evgnet.com https://connect.facebook.net\"."
+            "functional_execution_error:Error: PROMOTED_FINAL_OUTCOME_UNVERIFIED"
           ],
           "warnings": [
             "functional_execution_screenshots=19",

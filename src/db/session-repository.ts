@@ -177,9 +177,12 @@ export async function revokeAllUserSessions(
   return Number(before[0]?.n ?? 0);
 }
 
-export async function touchSession(id: string, conn?: Connection): Promise<void> {
+export async function touchSession(id: string, conn?: Connection, expiresAt?: Date): Promise<void> {
   const c = await resolve(conn);
-  await c.query("UPDATE dbo.UserSessions SET lastSeenAt = SYSUTCDATETIME() WHERE id = ?", [id]);
+  await c.query("UPDATE dbo.UserSessions SET lastSeenAt = SYSUTCDATETIME(), expiresAt = COALESCE(?, expiresAt) WHERE id = ?", [
+    expiresAt?.toISOString() ?? null,
+    id,
+  ]);
 }
 
 /** Housekeeping: drops rows that expired more than `retentionDays` ago. */

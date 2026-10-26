@@ -18,6 +18,7 @@ import { inferLegacyJiraRerunOrigin, isScenarioEligibleForEngine, resolveExecuti
 import { startMobileLaunchExecutionJob } from "../jobs/mobile-launch-execution-runner";
 import { prepareRerun } from "../jobs/rerun-runner";
 import { launchExecution, type LaunchScenario, type LaunchExecutionInput } from "../jobs/launch-orchestrator";
+import { coordinateLaunchRequest } from "../jobs/launch-request-coordinator";
 import { defectChecklistStore } from "../services/defect-checklist-store";
 import type { McpRouteProfile, McpScenario } from "../../scenarios/scenario-types";
 import { buildDataContext, type DataContextEntry } from "../../data/data-context";
@@ -29,6 +30,16 @@ import { collectMissingJiraRequiredInputs } from "../../jira/jira-required-input
 import type { JiraScenarioInput } from "../../jira/jira-semantic-executor";
 import { deriveJiraInputRequirements } from "../../jira/jira-input-requirements";
 import { buildExistingJiraCaseScenarios, resolveExistingJiraCaseValues } from "../../jira/jira-existing-case-requirements";
+import { resolveJiraPublishedCaseId } from "../../jira/jira-case-input-persistence";
+import { getConfirmedRuntimeValues } from "../../db/project-case-runtime-value-service";
+import { getProjectBySlug } from "../../db/project-repository";
+import * as testDesignRepo from "../../db/test-design-repository";
+import { requireTestRailConfig } from "../../config/env";
+import { TestRailClient } from "../../clients/testrail.client";
+import { resolveTestDesignLaunchLinks, type TestDesignCaseResolution } from "../../test-design/test-design-launch-link";
+import { toJiraSemanticDesignScenario } from "../../test-design/test-design-lineage";
+import { refreshEditedJiraSource } from "../../test-design/test-design-edited-source";
+import { extractTextFromAdf } from "../../jira/adf-extractor";
 
 export const runsRouter = Router();
 
@@ -113,6 +124,54 @@ async function findMissingJiraInputsForExecution(
     valuesByScenario[scenario.scenarioId] = jiraScenarioRuntimeValues(resolved, configuredValues, requirements);
   }
   return collectMissingJiraRequiredInputs(scenarios, valuesByScenario);
+}
+
+function loadJiraRerunPublishedCases(launchId: unknown, params: Record<string, unknown>): unknown[] {
+  if (Array.isArray(params.publishedCases) && params.publishedCases.length > 0) return params.publishedCases;
+  if (typeof launchId !== "string" || !launchId.trim()) return [];
+  const manifestPath = path.resolve(".artifacts", "scenario-launch-runs", launchId, "launch-manifest.json");
+  try {
+    if (!fs.existsSync(manifestPath)) return [];
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8")) as { publishedCases?: unknown };
+    return Array.isArray(manifest.publishedCases) ? manifest.publishedCases : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Restore only confirmed project/case inputs for a Jira rerun; explicit request values win. */
+async function hydrateJiraRerunOverrides(
+  appSlug: string,
+  scenarios: JiraScenarioInput[],
+  explicitOverrides: unknown,
+  publishedCases: unknown,
+): Promise<Record<string, Record<string, string>>> {
+  const hydrated: Record<string, Record<string, string>> = {};
+  if (explicitOverrides && typeof explicitOverrides === "object" && !Array.isArray(explicitOverrides)) {
+    for (const [scenarioId, values] of Object.entries(explicitOverrides as Record<string, unknown>)) {
+      if (!values || typeof values !== "object" || Array.isArray(values)) continue;
+      hydrated[scenarioId] = Object.fromEntries(Object.entries(values as Record<string, unknown>)
+        .filter((entry): entry is [string, string] => typeof entry[1] === "string" && entry[1].trim().length > 0));
+    }
+  }
+  let projectId: string | undefined;
+  try { projectId = (await getProjectBySlug(appSlug))?.id; } catch { /* use explicit/configured values if the project store is unavailable */ }
+  if (!projectId) return hydrated;
+
+  for (const scenario of scenarios) {
+    const caseId = resolveJiraPublishedCaseId(publishedCases, scenario.scenarioId);
+    if (caseId === undefined) continue;
+    try {
+      const confirmed = await getConfirmedRuntimeValues(projectId, caseId);
+      const stored = Object.fromEntries(confirmed
+        .filter((entry) => entry.value !== null && entry.value !== undefined && String(entry.value).trim().length > 0)
+        .map((entry) => [entry.key, String(entry.value)]));
+      hydrated[scenario.scenarioId] = { ...stored, ...(hydrated[scenario.scenarioId] ?? {}) };
+    } catch {
+      // Missing/temporarily unavailable persisted values stay visible as preflight missingInputs.
+    }
+  }
+  return hydrated;
 }
 
 const TECHNICAL_SLUGS = new Set(["tests", "test", "api-tests", "api tests", "qa-tests", "qa tests", "default", "unknown", "undefined", "null"]);
@@ -246,7 +305,12 @@ function normalizeLaunchScenario(value: unknown, _fallbackPrefix: string, index:
     publicationClassification: typeof record.publicationClassification === "string" ? record.publicationClassification : undefined,
     nonAutomatable: typeof record.nonAutomatable === "boolean" ? record.nonAutomatable : undefined,
     validation: record.validation && typeof record.validation==='object' && typeof (record.validation as {valid?:unknown}).valid==='boolean'
-      ? {valid:(record.validation as {valid:boolean}).valid} : undefined,
+      ? {
+        valid:(record.validation as {valid:boolean}).valid,
+        ...(Array.isArray((record.validation as {errors?:unknown}).errors)
+          ? {errors:(record.validation as {errors:unknown[]}).errors.filter((error):error is string=>typeof error==='string')}
+          : {}),
+      } : undefined,
     targetScreen: typeof record.targetScreen === "string" ? record.targetScreen : typeof metadata?.targetScreen === "string" ? metadata.targetScreen : undefined,
     actualChain: record.actualChain ?? metadata?.actualChain,
     requiredChain: record.requiredChain ?? metadata?.requiredChain,
@@ -831,9 +895,12 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
     const outcomes = fs.existsSync(resultsPath) ? JSON.parse(fs.readFileSync(resultsPath, "utf8")).results as Array<{ scenarioId: string; status: string }> : [];
     const selected = mode === "all" ? all : all.filter(s => outcomes.some(r => r.scenarioId === s.scenarioId && r.status === "failed"));
     if (!selected.length) { res.status(409).json({ ok: false, error: "NO_JIRA_SCENARIOS_TO_RERUN" }); return; }
-    const dataOverrides = req.body?.dataOverrides ?? previous.params.dataOverrides;
+    const requestedDataOverrides = req.body?.dataOverrides ?? previous.params.dataOverrides;
+    const appSlug = String(previous.params.appSlug ?? previous.params.targetAppSlug ?? "");
+    const publishedCases = loadJiraRerunPublishedCases(previous.params.launchId, previous.params);
+    let dataOverrides: Record<string, Record<string, string>>;
     try {
-      const appSlug = String(previous.params.appSlug ?? previous.params.targetAppSlug ?? "");
+      dataOverrides = await hydrateJiraRerunOverrides(appSlug, selected as JiraScenarioInput[], requestedDataOverrides, publishedCases);
       const missing = await findMissingJiraInputsForExecution(appSlug, selected as JiraScenarioInput[], dataOverrides);
       if (missing.length > 0) {
         const missingLabels = Array.from(new Set(missing.map((input) => input.label)));
@@ -952,9 +1019,16 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
         authIntent: scenario.authIntent,
         inputRequirements: scenario.inputRequirements,
       }));
-      const dataOverrides = req.body?.dataOverrides ?? previous?.params.dataOverrides;
+      const requestedDataOverrides = req.body?.dataOverrides ?? previous?.params.dataOverrides;
+      const appSlug = String(prepared.appSlug ?? previous?.params.appSlug ?? previous?.params.targetAppSlug ?? "");
+      const launchContext = resolveLaunchContextForRerun(jobId, prepared);
+      const publishedCases = loadJiraRerunPublishedCases(
+        launchContext?.launchId ?? previous?.params.launchId,
+        { ...(previous?.params ?? {}), ...(launchContext?.publishedCases ? { publishedCases: launchContext.publishedCases } : {}) },
+      );
+      let dataOverrides: Record<string, Record<string, string>>;
       try {
-        const appSlug = String(prepared.appSlug ?? previous?.params.appSlug ?? previous?.params.targetAppSlug ?? "");
+        dataOverrides = await hydrateJiraRerunOverrides(appSlug, jiraScenarios as JiraScenarioInput[], requestedDataOverrides, publishedCases);
         const missing = await findMissingJiraInputsForExecution(appSlug, jiraScenarios as JiraScenarioInput[], dataOverrides);
         if (missing.length > 0) {
           const missingLabels = Array.from(new Set(missing.map((input) => input.label)));
@@ -1036,6 +1110,7 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
         recordingSelections: prepared.recordingSelections,
         sectionName: prepared.sectionName,
         sectionSlug: prepared.sectionSlug,
+        environment: prepared.environment,
       });
       jobStore.appendLog(
         parentJob.id,
@@ -1087,6 +1162,7 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
         scenarios: reuseJobScenarios,
         executionMode: "reuse_existing_promoted_spec",
         recordingSelections: prepared.recordingSelections,
+        environment: prepared.environment,
       });
       jobStore.appendLog(reuseJob.id, `[runs:rerun] sourceJobId=${jobId} mode=${mode} selected=${prepared.selectedCount} total=${prepared.totalCount} dispatch=reuse_existing_promoted_spec`);
       for (const s of reuseJobScenarios) {
@@ -1155,6 +1231,7 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
       publishedCases: launchMeta?.publishedCases,
       sectionName: prepared.sectionName,
       sectionSlug: prepared.sectionSlug,
+      environment: prepared.environment,
       publishToTestRail: false,
       createTestRun: false,
       reportResults: false,
@@ -1216,6 +1293,102 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
     const dataOverrides = body.dataOverrides && typeof body.dataOverrides === "object" && !Array.isArray(body.dataOverrides)
       ? body.dataOverrides as Record<string, Record<string, string>>
       : undefined;
+    const requestedResolutions = body.testDesignCaseResolutions && typeof body.testDesignCaseResolutions === "object"
+      && !Array.isArray(body.testDesignCaseResolutions)
+      ? body.testDesignCaseResolutions as Record<string, unknown>
+      : {};
+    const testDesignCaseResolutions: Record<string, TestDesignCaseResolution> = {};
+    for (const [caseId, resolution] of Object.entries(requestedResolutions)) {
+      if (resolution === "sync_and_run" || resolution === "run_as_testrail") testDesignCaseResolutions[caseId] = resolution;
+    }
+    const testDesignLinks = existingTestRailCaseIds.length
+      // Resolve by exact TestRail case ID first, then compare the project in the link.
+      // Filtering here would hide a wrong-project selection and silently fall back to generic Discovery.
+      ? await testDesignRepo.getPublishedCaseLinks(existingTestRailCaseIds)
+      : [];
+    let testDesignLinkedCases: Awaited<ReturnType<typeof resolveTestDesignLaunchLinks>>["linked"] = [];
+    if (testDesignLinks.length) {
+      const linkResolution = await resolveTestDesignLaunchLinks({
+        caseIds: existingTestRailCaseIds,
+        projectId: Number(body.projectId),
+        appSlug,
+        links: testDesignLinks,
+        resolutions: testDesignCaseResolutions,
+        client: new TestRailClient(requireTestRailConfig(config)),
+      });
+      if (linkResolution.conflicts.length) {
+        res.status(409).json({
+          ok: false,
+          error: "TEST_DESIGN_CASE_CONTENT_DIVERGED",
+          message: "Algunos casos TestRail vinculados a Diseño cambiaron desde su publicación. Elige sincronizarlos con Diseño o ejecutarlos como casos TestRail normales.",
+          conflicts: linkResolution.conflicts,
+        });
+        return;
+      }
+      const appConfig = await loadAppConfig(appSlug);
+      const authFlowAvailable = await fs.promises.access(path.resolve("automations/apps", appSlug, "flows", "auth.flow.ts")).then(() => true, () => false);
+      const issueCache = new Map<string, Promise<Awaited<ReturnType<JiraClient["getIssue"]>>>>();
+      const jira = new JiraClient(requireJiraConfig(config));
+      testDesignLinkedCases = await Promise.all(linkResolution.linked.map(link => refreshEditedJiraSource(link, {
+        loginMode: typeof appConfig?.loginMode === "string" ? appConfig.loginMode : undefined,
+        authFlowAvailable,
+        loadIssue: async (issueKey) => {
+          if (!issueCache.has(issueKey)) issueCache.set(issueKey, jira.getIssue(issueKey));
+          const raw = await issueCache.get(issueKey)!;
+          const jiraConfig = requireJiraConfig(config);
+          return {
+            key: raw.key,
+            summary: raw.fields.summary ?? raw.key,
+            description: extractTextFromAdf(raw.fields.description),
+            acceptanceCriteria: extractTextFromAdf(raw.fields[jiraConfig.acceptanceCriteriaField] as any) || null,
+            labels: [], components: [], status: "", issueType: "Story",
+          };
+        },
+      })));
+    }
+    const semanticDesignScenarios = testDesignLinkedCases.flatMap(link => {
+      const scenario = toJiraSemanticDesignScenario(link.scenario, link.issueKey);
+      return scenario ? [scenario as JiraScenarioInput] : [];
+    });
+    const dataOverridesWithDesign = { ...(dataOverrides ?? {}) };
+    const runtimeEntriesByCase = body.runtimeEntriesByCase && typeof body.runtimeEntriesByCase === "object" && !Array.isArray(body.runtimeEntriesByCase)
+      ? body.runtimeEntriesByCase as Record<string, DataContextEntry[]>
+      : {};
+    for (const link of testDesignLinkedCases) {
+      // The launch wizard keys values by step position (jira_step_N); the scenario refreshed from edited Design
+      // steps names them by field. Alias each positional value to the requirement of that step so both resolve.
+      const entries = runtimeEntriesByCase[String(link.testRailCaseId)];
+      const requirements = link.scenario.jiraSourceScenario?.inputRequirements ?? [];
+      if (Array.isArray(entries) && requirements.length) {
+        const norm = (value: unknown) => String(value ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+        for (const requirement of requirements) {
+          if (entries.some(entry => entry.key === requirement.key)) continue;
+          const label = norm(requirement.label);
+          const source = entries.find(entry => entry.key === `jira_step_${requirement.stepIndex}`)
+            ?? entries.find(entry => label && (norm(entry.key) === label || norm(entry.key).startsWith(`${label}_`)))
+            ?? entries.find(entry => label && `_${norm(entry.key)}_`.includes(`_${label}_`));
+          if (source) entries.push({ ...source, key: requirement.key });
+          console.log(`[launch-execution] value-binding case=${link.testRailCaseId} requirement=${requirement.label}@${requirement.stepIndex} source=${source ? source.key : "none"} candidates=${entries.filter(e => e.key !== requirement.key).map(e => e.key).join(",")}${source && !/contras|pass|clave|secret/i.test(`${requirement.label}${source.key}`) ? ` value=${source.value}` : ""}`);
+        }
+      }
+      const values = Object.fromEntries((runtimeEntriesByCase[String(link.testRailCaseId)] ?? [])
+        .filter(entry => typeof entry?.key === "string" && typeof entry.value === "string")
+        .map(entry => [entry.key, entry.value]));
+      if (Object.keys(values).length) dataOverridesWithDesign[link.designScenarioId] = {
+        ...(dataOverridesWithDesign[link.designScenarioId] ?? {}), ...values,
+      };
+    }
+    if (semanticDesignScenarios.length) {
+      // These cases already exist in TestRail (they were published from Design), so their values come
+      // from the launch runtime entries. A Jira-style pre-check must never block the launch for them.
+      const missing = await findMissingJiraInputsForExecution(appSlug, semanticDesignScenarios, dataOverridesWithDesign);
+      if (missing.length) {
+        console.warn(`[launch-execution] ignoring ${missing.length} unresolved Jira input(s) for ${semanticDesignScenarios.length} TestRail-published Design case(s): ${Array.from(new Set(missing.map(input => input.label))).join(", ")}`);
+        const probe = missing[0];
+        const probeLink = testDesignLinkedCases.find(link => link.designScenarioId === probe.scenarioId);
+        console.warn(`[launch-execution] unresolved sample scenario=${probe.scenarioId} requirementKeys=${(probeLink?.scenario.jiraSourceScenario?.inputRequirements ?? []).map(r => `${r.key}@${r.stepIndex}`).join(",")} overrideKeys=${Object.keys(dataOverridesWithDesign[probe.scenarioId] ?? {}).join(",")} entryKeys=${(runtimeEntriesByCase[String(probeLink?.testRailCaseId)] ?? []).map(e => e.key).join(",")}`);
+      }
+    }
     if (body.executionEngine === "jira_semantic") {
       // Preflight and execution must consume the same normalized field keys.
       const missing = await findMissingJiraInputsForExecution(appSlug, selectedScenarios as unknown as JiraScenarioInput[], dataOverrides);
@@ -1295,8 +1468,31 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
        ...(dataOverrides ? { dataOverrides } : {}),
        adaptiveScenarios: Array.isArray(body.adaptiveScenarios) ? body.adaptiveScenarios : undefined,
        publishStrategy: body.publishStrategy === "use_existing" ? "use_existing" as const : "always_create" as const,
+      ...(testDesignLinkedCases.length ? { testDesignLinkedCases } : {}),
+      ...(Object.keys(dataOverridesWithDesign).length ? { dataOverrides: dataOverridesWithDesign } : {}),
     };
-    const result = await launchExecution(launchInput);
+    const headerKey = req.get("Idempotency-Key")?.trim();
+    const bodyKey = typeof body.idempotencyKey === "string" ? body.idempotencyKey.trim()
+      : typeof body.requestId === "string" ? body.requestId.trim()
+        : undefined;
+    let result: Awaited<ReturnType<typeof launchExecution>>;
+    let replayed = false;
+    try {
+      const coordinated = await coordinateLaunchRequest(
+        launchInput,
+        headerKey || bodyKey,
+        () => launchExecution(launchInput),
+      );
+      result = coordinated.result;
+      replayed = coordinated.replayed;
+    } catch (error) {
+      if (error instanceof Error && error.message === "IDEMPOTENCY_KEY_REUSED_WITH_DIFFERENT_LAUNCH") {
+        res.status(409).json({ ok: false, error: error.message, message: "La clave de idempotencia ya se usó con otro contenido. Genera una nueva clave para este lanzamiento." });
+        return;
+      }
+      throw error;
+    }
+    if (replayed) res.setHeader("Idempotent-Replay", "true");
 
     if (!result.ok) {
       console.log(`[launch-execution] failed error=${result.error} message=${result.message}`);

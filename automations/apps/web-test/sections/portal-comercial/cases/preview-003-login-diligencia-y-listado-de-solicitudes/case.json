@@ -1,0 +1,10 @@
+{
+  "id": "preview-003-login-diligencia-y-listado-de-solicitudes",
+  "externalId": "PREVIEW-003",
+  "caseId": 0,
+  "title": "Login Diligencia y listado de solicitudes",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T13:20:17.155Z"
+}

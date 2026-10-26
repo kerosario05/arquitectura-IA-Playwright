@@ -1,0 +1,9 @@
+{
+  "id": "25a9086b-95fe-4a2f-9bdd-eceea821af5e-consultar-rnc-invalido",
+  "externalId": "25a9086b-95fe-4a2f-9bdd-eceea821af5e",
+  "title": "Consultar RNC inválido",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T06:27:37.758Z"
+}

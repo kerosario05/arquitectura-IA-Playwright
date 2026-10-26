@@ -1,0 +1,2760 @@
+{
+  "recordingId": "8fdebdcc-08ff-4c94-8c03-3a1522ff79f9",
+  "projectSlug": "web-test",
+  "appSlug": "web-test",
+  "platform": "web",
+  "baseUrl": "http://localhost:4310/#/login",
+  "label": "Regresion Negocios alta parcial y navegacion",
+  "recordingGoal": {
+    "declaredGoal": "Regresion Negocios alta parcial y navegacion",
+    "normalizedGoal": "Regresion Negocios alta parcial y navegacion",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-10-26T17:05:50.433Z",
+  "status": "stopped",
+  "events": [
+    {
+      "t": 7296,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "http://localhost:4310/#/login",
+      "seq": 0
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "9db5430202df",
+      "url": "http://localhost:4310/#/login",
+      "seq": 1
+    },
+    {
+      "t": 11871,
+      "interactionId": "pointer-1",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Usuario",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Usuario\"",
+      "observationType": "pointer",
+      "seq": 2
+    },
+    {
+      "t": 13425,
+      "interactionId": "pointer-2",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Contraseña",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Contraseña\"",
+      "observationType": "pointer",
+      "seq": 3
+    },
+    {
+      "t": 13430,
+      "kind": "fill",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Usuario",
+        "role": "input",
+        "tag": "input",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Usuario",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#usuario",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "usuario",
+            "confidence": 0.8
+          }
+        ],
+        "rawTypedValue": "negocios",
+        "sensitive": false
+      },
+      "value": "negocios",
+      "valueSource": "user",
+      "seq": 4
+    },
+    {
+      "t": 15251,
+      "interactionId": "pointer-3",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Iniciar sesión",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Iniciar sesión",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "login-form"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Iniciar sesión\"",
+      "observationType": "pointer",
+      "seq": 5
+    },
+    {
+      "t": 15260,
+      "kind": "fill",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Contraseña",
+        "role": "input",
+        "tag": "input",
+        "inputType": "password",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Contraseña",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#clave",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "clave",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": true
+      },
+      "redactedKey": "contrasena",
+      "valueSource": "user",
+      "seq": 6
+    },
+    {
+      "t": 15389,
+      "interactionId": "pointer-3",
+      "kind": "tap",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Iniciar sesión",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Iniciar sesión",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#btn-login",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "btn-login",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#btn-login",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "btn-login"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "login-form"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-login\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Iniciar sesión",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "login-form"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 7
+    },
+    {
+      "t": 16423,
+      "kind": "navigate",
+      "screenKey": "9db5430202df",
+      "url": "http://localhost:4310/#/",
+      "seq": 8
+    },
+    {
+      "t": 22057,
+      "interactionId": "pointer-4",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "9319d077558fafb5aa590ee21b1ff22346288a25c3af5544508e14ce55b23aa3",
+      "url": "http://localhost:4310/#/",
+      "target": {
+        "label": "Solicitudes",
+        "role": "link",
+        "tag": "a",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Solicitudes",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Solicitudes\"",
+      "observationType": "pointer",
+      "seq": 9
+    },
+    {
+      "t": 22127,
+      "interactionId": "pointer-4",
+      "kind": "tap",
+      "screenKey": "9db5430202df",
+      "fingerprint": "9319d077558fafb5aa590ee21b1ff22346288a25c3af5544508e14ce55b23aa3",
+      "url": "http://localhost:4310/#/",
+      "target": {
+        "label": "Solicitudes",
+        "role": "link",
+        "tag": "a",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "link|Solicitudes",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Solicitudes",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#/solicitudes"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "nav"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/solicitudes\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Solicitudes",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 10
+    },
+    {
+      "t": 22132,
+      "kind": "navigate",
+      "screenKey": "9db5430202df",
+      "url": "http://localhost:4310/#/solicitudes",
+      "seq": 11
+    },
+    {
+      "t": 26394,
+      "interactionId": "pointer-5",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "86ddc0cf4aacf8139b176bc23b1180df19e64e58fdbd0131c20c3ef2c18fd086",
+      "url": "http://localhost:4310/#/solicitudes",
+      "target": {
+        "label": "Buscar solicitudes",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Buscar solicitudes\"",
+      "observationType": "pointer",
+      "seq": 12
+    },
+    {
+      "t": 31066,
+      "interactionId": "pointer-6",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "86ddc0cf4aacf8139b176bc23b1180df19e64e58fdbd0131c20c3ef2c18fd086",
+      "url": "http://localhost:4310/#/solicitudes",
+      "target": {
+        "label": "Nueva solicitud",
+        "role": "link",
+        "tag": "a",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Nueva solicitud",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Nueva solicitud\"",
+      "observationType": "pointer",
+      "seq": 13
+    },
+    {
+      "t": 31069,
+      "kind": "fill",
+      "screenKey": "9db5430202df",
+      "fingerprint": "86ddc0cf4aacf8139b176bc23b1180df19e64e58fdbd0131c20c3ef2c18fd086",
+      "url": "http://localhost:4310/#/solicitudes",
+      "target": {
+        "label": "Buscar solicitudes",
+        "role": "input",
+        "tag": "input",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Buscar solicitudes",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#sol-search",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "sol-search",
+            "confidence": 0.8
+          }
+        ],
+        "rawTypedValue": "SA",
+        "sensitive": false
+      },
+      "value": "SA",
+      "valueSource": "user",
+      "seq": 14
+    },
+    {
+      "t": 31123,
+      "interactionId": "pointer-6",
+      "kind": "tap",
+      "screenKey": "9db5430202df",
+      "fingerprint": "86ddc0cf4aacf8139b176bc23b1180df19e64e58fdbd0131c20c3ef2c18fd086",
+      "url": "http://localhost:4310/#/solicitudes",
+      "target": {
+        "label": "Nueva solicitud",
+        "role": "link",
+        "tag": "a",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "link|Nueva solicitud",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Nueva solicitud",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#/solicitud/nueva"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "nav"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/solicitud/nueva\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Nueva solicitud",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 15
+    },
+    {
+      "t": 31127,
+      "kind": "navigate",
+      "screenKey": "9db5430202df",
+      "url": "http://localhost:4310/#/solicitud/nueva",
+      "seq": 16
+    },
+    {
+      "t": 35468,
+      "interactionId": "pointer-7",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "739da5b3daced75ca989bad4d57c569c53f1f23d849386f25cc3846ed4287378",
+      "url": "http://localhost:4310/#/solicitud/nueva",
+      "target": {
+        "label": "Número de Identificación*",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Número de Identificación*\"",
+      "observationType": "pointer",
+      "seq": 17
+    },
+    {
+      "t": 37098,
+      "interactionId": "pointer-8",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "739da5b3daced75ca989bad4d57c569c53f1f23d849386f25cc3846ed4287378",
+      "url": "http://localhost:4310/#/solicitud/nueva",
+      "target": {
+        "label": "No. Registro Mercantil",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"No. Registro Mercantil\"",
+      "observationType": "pointer",
+      "seq": 18
+    },
+    {
+      "t": 37116,
+      "kind": "fill",
+      "screenKey": "9db5430202df",
+      "fingerprint": "739da5b3daced75ca989bad4d57c569c53f1f23d849386f25cc3846ed4287378",
+      "url": "http://localhost:4310/#/solicitud/nueva",
+      "target": {
+        "label": "Número de Identificación*",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Número de Identificación*",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#idNumero",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "idNumero",
+            "confidence": 0.8
+          }
+        ],
+        "rawTypedValue": "401500123",
+        "sensitive": false
+      },
+      "value": "401500123",
+      "valueSource": "user",
+      "seq": 19
+    },
+    {
+      "t": 38967,
+      "interactionId": "pointer-9",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "739da5b3daced75ca989bad4d57c569c53f1f23d849386f25cc3846ed4287378",
+      "url": "http://localhost:4310/#/solicitud/nueva",
+      "target": {
+        "label": "Denominación Social*",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Denominación Social*\"",
+      "observationType": "pointer",
+      "seq": 20
+    },
+    {
+      "t": 38973,
+      "kind": "fill",
+      "screenKey": "9db5430202df",
+      "fingerprint": "739da5b3daced75ca989bad4d57c569c53f1f23d849386f25cc3846ed4287378",
+      "url": "http://localhost:4310/#/solicitud/nueva",
+      "target": {
+        "label": "No. Registro Mercantil",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|No. Registro Mercantil",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#registroMercantil",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "registroMercantil",
+            "confidence": 0.8
+          }
+        ],
+        "rawTypedValue": "RM-2026-1001",
+        "sensitive": false
+      },
+      "value": "RM-2026-1001",
+      "valueSource": "user",
+      "seq": 21
+    },
+    {
+      "t": 44964,
+      "interactionId": "pointer-10",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "739da5b3daced75ca989bad4d57c569c53f1f23d849386f25cc3846ed4287378",
+      "url": "http://localhost:4310/#/solicitud/nueva",
+      "target": {
+        "label": "Inicio",
+        "role": "link",
+        "tag": "a",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Inicio",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Inicio\"",
+      "observationType": "pointer",
+      "seq": 22
+    },
+    {
+      "t": 44983,
+      "kind": "fill",
+      "screenKey": "9db5430202df",
+      "fingerprint": "739da5b3daced75ca989bad4d57c569c53f1f23d849386f25cc3846ed4287378",
+      "url": "http://localhost:4310/#/solicitud/nueva",
+      "target": {
+        "label": "Denominación Social*",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Denominación Social*",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#denominacion",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "denominacion",
+            "confidence": 0.8
+          }
+        ],
+        "rawTypedValue": "EMPRESA REGRESION SRL",
+        "sensitive": false
+      },
+      "value": "EMPRESA REGRESION SRL",
+      "valueSource": "user",
+      "seq": 23
+    },
+    {
+      "t": 45073,
+      "interactionId": "pointer-10",
+      "kind": "tap",
+      "screenKey": "9db5430202df",
+      "fingerprint": "739da5b3daced75ca989bad4d57c569c53f1f23d849386f25cc3846ed4287378",
+      "url": "http://localhost:4310/#/solicitud/nueva",
+      "target": {
+        "label": "Inicio",
+        "role": "link",
+        "tag": "a",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "link|Inicio",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Inicio",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#/"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "nav"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Inicio",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 24
+    },
+    {
+      "t": 45078,
+      "kind": "navigate",
+      "screenKey": "9db5430202df",
+      "url": "http://localhost:4310/#/",
+      "seq": 25
+    },
+    {
+      "t": 49321,
+      "interactionId": "pointer-11",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3ed1e620bad7127f2d791655af7dba959887f85805d4555537dca4be6795916",
+      "url": "http://localhost:4310/#/",
+      "target": {
+        "label": "Solicitudes",
+        "role": "link",
+        "tag": "a",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Solicitudes",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Solicitudes\"",
+      "observationType": "pointer",
+      "seq": 26
+    },
+    {
+      "t": 49428,
+      "interactionId": "pointer-11",
+      "kind": "tap",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3ed1e620bad7127f2d791655af7dba959887f85805d4555537dca4be6795916",
+      "url": "http://localhost:4310/#/",
+      "target": {
+        "label": "Solicitudes",
+        "role": "link",
+        "tag": "a",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "link|Solicitudes",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Solicitudes",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#/solicitudes"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "nav"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/solicitudes\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Solicitudes",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 27
+    },
+    {
+      "t": 49434,
+      "kind": "navigate",
+      "screenKey": "9db5430202df",
+      "url": "http://localhost:4310/#/solicitudes",
+      "seq": 28
+    },
+    {
+      "t": 53771,
+      "interactionId": "pointer-12",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "86ddc0cf4aacf8139b176bc23b1180df19e64e58fdbd0131c20c3ef2c18fd086",
+      "url": "http://localhost:4310/#/solicitudes",
+      "target": {
+        "label": "Inicio",
+        "role": "link",
+        "tag": "a",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Inicio",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Inicio\"",
+      "observationType": "pointer",
+      "seq": 29
+    },
+    {
+      "t": 53862,
+      "interactionId": "pointer-12",
+      "kind": "tap",
+      "screenKey": "9db5430202df",
+      "fingerprint": "86ddc0cf4aacf8139b176bc23b1180df19e64e58fdbd0131c20c3ef2c18fd086",
+      "url": "http://localhost:4310/#/solicitudes",
+      "target": {
+        "label": "Inicio",
+        "role": "link",
+        "tag": "a",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "link|Inicio",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Inicio",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#/"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "nav"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Inicio",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 30
+    },
+    {
+      "t": 53869,
+      "kind": "navigate",
+      "screenKey": "9db5430202df",
+      "url": "http://localhost:4310/#/",
+      "seq": 31
+    },
+    {
+      "t": 58127,
+      "interactionId": "pointer-13",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "024dabcd81c8e18ae23185375cafa0db3bb52f74961be4ccda0e326ddc2542f1",
+      "url": "http://localhost:4310/#/",
+      "target": {
+        "label": "Salir",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Salir",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(button[aria-label=\"Notificaciones\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Salir\"",
+      "observationType": "pointer",
+      "seq": 32
+    },
+    {
+      "t": 58232,
+      "interactionId": "pointer-13",
+      "kind": "tap",
+      "screenKey": "9db5430202df",
+      "fingerprint": "024dabcd81c8e18ae23185375cafa0db3bb52f74961be4ccda0e326ddc2542f1",
+      "url": "http://localhost:4310/#/",
+      "target": {
+        "label": "Salir",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Salir",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Salir",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "svg"
+              ],
+              "landmarkAncestor": {
+                "tag": "header"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"svg\",1]],\"descendantEntries\":[[\"path\",3],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"svg\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"svg\\\",1]],\\\"descendantEntries\\\":[[\\\"path\\\",3],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Salir",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(button[aria-label=\"Notificaciones\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(a[href=\"#/\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "header:has(a[href=\"#/\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Salir",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(button[aria-label=\"Notificaciones\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 33
+    },
+    {
+      "t": 58238,
+      "kind": "navigate",
+      "screenKey": "9db5430202df",
+      "url": "http://localhost:4310/#/login",
+      "seq": 34
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "9db5430202df",
+      "title": "Portal Comercial",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "firstSeenAt": 7364,
+      "controls": [],
+      "texts": [
+        "Portal Comercial"
+      ],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "8ab7a2ae3bf4",
+      "title": "8ab7a2ae3bf4",
+      "fingerprint": "9319d077558fafb5aa590ee21b1ff22346288a25c3af5544508e14ce55b23aa3",
+      "url": "http://localhost:4310/#/login",
+      "firstSeenAt": 15481,
+      "controls": [
+        {
+          "label": "Usuario",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingrese su usuario",
+          "attributes": {
+            "id": "usuario",
+            "name": "usuario",
+            "placeholder": "Ingrese su usuario"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "usuario",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Contraseña",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingrese su contraseña",
+          "attributes": {
+            "id": "clave",
+            "name": "clave",
+            "type": "password",
+            "placeholder": "Ingrese su contraseña"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "clave",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Iniciar sesión",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "btn-login",
+            "type": "submit"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "btn-login",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Datos de demostración",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Datos de demostración",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "156a4be2e9ab",
+      "title": "Bienvenida, María",
+      "fingerprint": "86ddc0cf4aacf8139b176bc23b1180df19e64e58fdbd0131c20c3ef2c18fd086",
+      "url": "http://localhost:4310/#/solicitudes",
+      "firstSeenAt": 22239,
+      "controls": [
+        {
+          "label": "PCPortal Comercial",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "PCPortal Comercial  PJ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Solicitudes",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Solicitudes",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Nueva solicitud",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Nueva solicitud",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Notificaciones",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Notificaciones"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Notificaciones",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Salir",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Salir",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "0",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "0 Borrador",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "1",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "1 Verificación PLAFT",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "1",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "1 En Revisión Legal",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "1",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "1 Devuelta",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "1",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "1 Escalado",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "1",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "1 Aprobada",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "1",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "1 Cliente Creado",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Crear solicitud",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Crear solicitud",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "SOL-2026-0001",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "headerContext": "Solicitud",
+          "rowIdentity": "SOL-2026-0001",
+          "associatedField": "Solicitud",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "SOL-2026-0001",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "SOL-2026-0005",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "headerContext": "Solicitud",
+          "rowIdentity": "SOL-2026-0005",
+          "associatedField": "Solicitud",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "SOL-2026-0005",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "SOL-2026-0006",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "headerContext": "Solicitud",
+          "rowIdentity": "SOL-2026-0006",
+          "associatedField": "Solicitud",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "SOL-2026-0006",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "SOL-2026-0002",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "headerContext": "Solicitud",
+          "rowIdentity": "SOL-2026-0002",
+          "associatedField": "Solicitud",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "SOL-2026-0002",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "SOL-2026-0003",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "headerContext": "Solicitud",
+          "rowIdentity": "SOL-2026-0003",
+          "associatedField": "Solicitud",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "SOL-2026-0003",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Bienvenida, María",
+        "Solicitudes recientes"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 1,
+        "rows": 6,
+        "cells": 30,
+        "headers": [
+          "Solicitud",
+          "RNC",
+          "Denominación Social",
+          "Estado",
+          "Actualizada"
+        ],
+        "headerRelationships": [
+          {
+            "header": "Solicitud",
+            "field": "Solicitud"
+          },
+          {
+            "header": "Solicitud",
+            "field": "Solicitud"
+          },
+          {
+            "header": "Solicitud",
+            "field": "Solicitud"
+          },
+          {
+            "header": "Solicitud",
+            "field": "Solicitud"
+          },
+          {
+            "header": "Solicitud",
+            "field": "Solicitud"
+          }
+        ]
+      },
+      "headerRelationships": [
+        {
+          "header": "Solicitud",
+          "field": "Solicitud"
+        },
+        {
+          "header": "Solicitud",
+          "field": "Solicitud"
+        },
+        {
+          "header": "Solicitud",
+          "field": "Solicitud"
+        },
+        {
+          "header": "Solicitud",
+          "field": "Solicitud"
+        },
+        {
+          "header": "Solicitud",
+          "field": "Solicitud"
+        }
+      ]
+    },
+    {
+      "screenKey": "74eeb77e54a7",
+      "title": "Solicitudes de prospectos PJ",
+      "fingerprint": "739da5b3daced75ca989bad4d57c569c53f1f23d849386f25cc3846ed4287378",
+      "url": "http://localhost:4310/#/solicitud/nueva",
+      "firstSeenAt": 31204,
+      "controls": [
+        {
+          "label": "PCPortal Comercial",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "PCPortal Comercial  PJ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Solicitudes",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Solicitudes",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Nueva solicitud",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Nueva solicitud",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Notificaciones",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Notificaciones"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Notificaciones",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Salir",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Salir",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Crear solicitud",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Crear solicitud",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Buscar solicitudes",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Buscar por RNC o denominación…",
+          "attributes": {
+            "id": "sol-search",
+            "aria-label": "Buscar solicitudes",
+            "placeholder": "Buscar por RNC o denominación…"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "sol-search",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Filtrar por estado",
+          "role": "select",
+          "tag": "select",
+          "attributes": {
+            "id": "sol-estado",
+            "aria-label": "Filtrar por estado"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "sol-estado",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Exportar CSV",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Exportar CSV",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Eliminar seleccionadas",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Eliminar seleccionadas",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Seleccionar todas",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "id": "sel-all",
+            "type": "checkbox",
+            "aria-label": "Seleccionar todas"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "sel-all",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Ordenar por Solicitud",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Ordenar por Solicitud"
+          },
+          "headerContext": "Solicitud",
+          "associatedField": "Solicitud",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Ordenar por Solicitud",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Ordenar por RNC",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Ordenar por RNC"
+          },
+          "headerContext": "RNC",
+          "associatedField": "RNC",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Ordenar por RNC",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Ordenar por Denominación Social",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Ordenar por Denominación Social"
+          },
+          "headerContext": "Denominación Social",
+          "associatedField": "Denominación Social",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Ordenar por Denominación Social",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Ordenar por Estado",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Ordenar por Estado"
+          },
+          "headerContext": "Estado",
+          "associatedField": "Estado",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Ordenar por Estado",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Ordenar por Actualizada",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Ordenar por Actualizada"
+          },
+          "headerContext": "Actualizada",
+          "associatedField": "Actualizada",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Ordenar por Actualizada",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "SOL-2026-0002",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "headerContext": "Solicitud",
+          "rowIdentity": "SOL-2026-0002",
+          "associatedField": "Solicitud",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "SOL-2026-0002",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "SOL-2026-0003",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "headerContext": "Solicitud",
+          "rowIdentity": "SOL-2026-0003",
+          "associatedField": "Solicitud",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "SOL-2026-0003",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Filas por página",
+          "role": "select",
+          "tag": "select",
+          "attributes": {
+            "id": "page-size"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "page-size",
+              "confidence": 0.9
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Solicitudes de prospectos PJ"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 1,
+        "rows": 3,
+        "cells": 21,
+        "headers": [
+          "Solicitud",
+          "RNC",
+          "Denominación Social",
+          "Estado",
+          "Actualizada",
+          "Acciones"
+        ],
+        "headerRelationships": [
+          {
+            "header": "Solicitud",
+            "field": "Solicitud"
+          },
+          {
+            "header": "RNC",
+            "field": "RNC"
+          },
+          {
+            "header": "Denominación Social",
+            "field": "Denominación Social"
+          },
+          {
+            "header": "Estado",
+            "field": "Estado"
+          },
+          {
+            "header": "Actualizada",
+            "field": "Actualizada"
+          },
+          {
+            "header": "Solicitud",
+            "field": "Solicitud"
+          },
+          {
+            "header": "Solicitud",
+            "field": "Solicitud"
+          }
+        ]
+      },
+      "headerRelationships": [
+        {
+          "header": "Solicitud",
+          "field": "Solicitud"
+        },
+        {
+          "header": "RNC",
+          "field": "RNC"
+        },
+        {
+          "header": "Denominación Social",
+          "field": "Denominación Social"
+        },
+        {
+          "header": "Estado",
+          "field": "Estado"
+        },
+        {
+          "header": "Actualizada",
+          "field": "Actualizada"
+        },
+        {
+          "header": "Solicitud",
+          "field": "Solicitud"
+        },
+        {
+          "header": "Solicitud",
+          "field": "Solicitud"
+        }
+      ]
+    },
+    {
+      "screenKey": "9be93d6760b6",
+      "title": "Nueva solicitud",
+      "fingerprint": "e3ed1e620bad7127f2d791655af7dba959887f85805d4555537dca4be6795916",
+      "url": "http://localhost:4310/#/",
+      "firstSeenAt": 45229,
+      "controls": [
+        {
+          "label": "PCPortal Comercial",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "PCPortal Comercial  PJ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Solicitudes",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Solicitudes",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Nueva solicitud",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Nueva solicitud",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Notificaciones",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Notificaciones"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Notificaciones",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Salir",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Salir",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Volver",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Volver",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Flujo de Solicitud",
+          "role": "tab",
+          "tag": "button",
+          "attributes": {
+            "role": "tab"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Flujo de Solicitud",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Registro de Datos",
+          "role": "tab",
+          "tag": "button",
+          "attributes": {
+            "role": "tab"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Registro de Datos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Tipo de Identificación*",
+          "role": "select",
+          "tag": "select",
+          "attributes": {
+            "id": "idTipo",
+            "name": "idTipo"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "idTipo",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Número de Identificación*",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingrese número de identificación",
+          "attributes": {
+            "id": "idNumero",
+            "name": "idNumero",
+            "type": "text",
+            "placeholder": "Ingrese número de identificación"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "idNumero",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Consultar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Consultar",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Limpiar consulta",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Limpiar consulta"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Limpiar consulta",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "No. Registro Mercantil",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingrese no. registro mercantil",
+          "attributes": {
+            "id": "registroMercantil",
+            "name": "registroMercantil",
+            "type": "text",
+            "placeholder": "Ingrese no. registro mercantil"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "registroMercantil",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Denominación Social*",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingrese denominación social",
+          "attributes": {
+            "id": "denominacion",
+            "name": "denominacion",
+            "type": "text",
+            "placeholder": "Ingrese denominación social"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "denominacion",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Tipo Sociedad*",
+          "role": "select",
+          "tag": "select",
+          "attributes": {
+            "id": "tipoSociedad",
+            "name": "tipoSociedad"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "tipoSociedad",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Fecha de Emisión",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "id": "fechaEmision",
+            "name": "fechaEmision",
+            "type": "date"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "fechaEmision",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Fecha de Vencimiento",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "id": "fechaVencimiento",
+            "name": "fechaVencimiento",
+            "type": "date"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "fechaVencimiento",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Siglas",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingrese siglas",
+          "attributes": {
+            "id": "siglas",
+            "name": "siglas",
+            "type": "text",
+            "placeholder": "Ingrese siglas"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "siglas",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Nacionalidad",
+          "role": "select",
+          "tag": "select",
+          "attributes": {
+            "id": "nacionalidad",
+            "name": "nacionalidad"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "nacionalidad",
+              "confidence": 0.9
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Nueva solicitud",
+        "Información del Registro"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 9,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "ee4ca2bb9285",
+      "title": "Solicitudes de prospectos PJ",
+      "fingerprint": "024dabcd81c8e18ae23185375cafa0db3bb52f74961be4ccda0e326ddc2542f1",
+      "url": "http://localhost:4310/#/",
+      "firstSeenAt": 53988,
+      "controls": [
+        {
+          "label": "PCPortal Comercial",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "PCPortal Comercial  PJ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Solicitudes",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Solicitudes",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Nueva solicitud",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Nueva solicitud",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Notificaciones",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Notificaciones"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Notificaciones",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Salir",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Salir",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Crear solicitud",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Crear solicitud",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Buscar solicitudes",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Buscar por RNC o denominación…",
+          "attributes": {
+            "id": "sol-search",
+            "aria-label": "Buscar solicitudes",
+            "placeholder": "Buscar por RNC o denominación…"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "sol-search",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Filtrar por estado",
+          "role": "select",
+          "tag": "select",
+          "attributes": {
+            "id": "sol-estado",
+            "aria-label": "Filtrar por estado"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "sol-estado",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Exportar CSV",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Exportar CSV",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Eliminar seleccionadas",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Eliminar seleccionadas",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Seleccionar todas",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "id": "sel-all",
+            "type": "checkbox",
+            "aria-label": "Seleccionar todas"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "sel-all",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Ordenar por Solicitud",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Ordenar por Solicitud"
+          },
+          "headerContext": "Solicitud",
+          "associatedField": "Solicitud",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Ordenar por Solicitud",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Ordenar por RNC",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Ordenar por RNC"
+          },
+          "headerContext": "RNC",
+          "associatedField": "RNC",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Ordenar por RNC",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Ordenar por Denominación Social",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Ordenar por Denominación Social"
+          },
+          "headerContext": "Denominación Social",
+          "associatedField": "Denominación Social",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Ordenar por Denominación Social",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Ordenar por Estado",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Ordenar por Estado"
+          },
+          "headerContext": "Estado",
+          "associatedField": "Estado",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Ordenar por Estado",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Ordenar por Actualizada",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Ordenar por Actualizada"
+          },
+          "headerContext": "Actualizada",
+          "associatedField": "Actualizada",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Ordenar por Actualizada",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "SOL-2026-0001",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "headerContext": "Solicitud",
+          "rowIdentity": "SOL-2026-0001",
+          "associatedField": "Solicitud",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "SOL-2026-0001",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "SOL-2026-0005",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "headerContext": "Solicitud",
+          "rowIdentity": "SOL-2026-0005",
+          "associatedField": "Solicitud",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "SOL-2026-0005",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "SOL-2026-0006",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "headerContext": "Solicitud",
+          "rowIdentity": "SOL-2026-0006",
+          "associatedField": "Solicitud",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "SOL-2026-0006",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Solicitudes de prospectos PJ"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 1,
+        "rows": 6,
+        "cells": 42,
+        "headers": [
+          "Solicitud",
+          "RNC",
+          "Denominación Social",
+          "Estado",
+          "Actualizada",
+          "Acciones"
+        ],
+        "headerRelationships": [
+          {
+            "header": "Solicitud",
+            "field": "Solicitud"
+          },
+          {
+            "header": "RNC",
+            "field": "RNC"
+          },
+          {
+            "header": "Denominación Social",
+            "field": "Denominación Social"
+          },
+          {
+            "header": "Estado",
+            "field": "Estado"
+          },
+          {
+            "header": "Actualizada",
+            "field": "Actualizada"
+          },
+          {
+            "header": "Solicitud",
+            "field": "Solicitud"
+          },
+          {
+            "header": "Solicitud",
+            "field": "Solicitud"
+          },
+          {
+            "header": "Solicitud",
+            "field": "Solicitud"
+          },
+          {
+            "header": "Solicitud",
+            "field": "Solicitud"
+          },
+          {
+            "header": "Solicitud",
+            "field": "Solicitud"
+          }
+        ]
+      },
+      "headerRelationships": [
+        {
+          "header": "Solicitud",
+          "field": "Solicitud"
+        },
+        {
+          "header": "RNC",
+          "field": "RNC"
+        },
+        {
+          "header": "Denominación Social",
+          "field": "Denominación Social"
+        },
+        {
+          "header": "Estado",
+          "field": "Estado"
+        },
+        {
+          "header": "Actualizada",
+          "field": "Actualizada"
+        },
+        {
+          "header": "Solicitud",
+          "field": "Solicitud"
+        },
+        {
+          "header": "Solicitud",
+          "field": "Solicitud"
+        },
+        {
+          "header": "Solicitud",
+          "field": "Solicitud"
+        },
+        {
+          "header": "Solicitud",
+          "field": "Solicitud"
+        },
+        {
+          "header": "Solicitud",
+          "field": "Solicitud"
+        }
+      ]
+    }
+  ],
+  "endedAt": "2026-10-26T17:06:53.899Z",
+  "durationMs": 63466
+}

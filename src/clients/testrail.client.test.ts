@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { TestRailClient } from "./testrail.client";
+import { TestRailApiError, TestRailClient } from "./testrail.client";
 
 function createClient(): TestRailClient {
   return new TestRailClient({
@@ -43,6 +43,16 @@ describe("TestRail case field metadata", () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify({ error: "forbidden" }), { status: 403 }));
 
     await expect(createClient().getCaseFields()).rejects.toThrow("TestRail API error (HTTP 403) at get_case_fields: forbidden");
+  });
+});
+
+describe("TestRail write error classification", () => {
+  it("preserves a gateway status when add_case returns a non-JSON body", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("<html>bad gateway</html>", { status: 502 }));
+
+    const error = await createClient().addCase("4755", { title: "Ambiguous create" } as any).catch((caught) => caught);
+    expect(error).toBeInstanceOf(TestRailApiError);
+    expect(error).toMatchObject({ status: 502, message: expect.stringContaining("HTTP 502") });
   });
 });
 

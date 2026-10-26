@@ -86,7 +86,9 @@ export async function buildCertificationHtml(page: Page, model: EvidenceDocument
     replaceAfter("Objetivo general", first.objective || `Documentar la ejecución de ${model.scenarios.length} caso(s) de prueba para ${model.requerimiento}.`);
     replaceAfter("Descripción del cambio", first.changeDescription || "No se proporcionó una descripción del cambio.");
     replaceAfter("Alcance", records.map(r => `${r.scenarioId}: ${r.scenarioTitle}`).join("\n"));
-    replaceAfter("Precondiciones", [...new Set(records.flatMap(r => r.preconditions || []))].join("\n") || "No especificadas en el origen.");
+    const formatPreconditions = (items: string[]) => items.map(item => item.trim()).filter(Boolean)
+      .map(item => `• ${item.replace(/^[•*-]\s*/, "")}`).join("\n");
+    replaceAfter("Precondiciones", formatPreconditions([...new Set(records.flatMap(r => r.preconditions || []))]) || "No especificadas en el origen.");
     replaceAfter("Criterios de aceptación", [...new Set(records.flatMap(r => r.acceptanceCriteria?.length ? r.acceptanceCriteria : (r.expectedResult ? [r.expectedResult] : [])).map(value => value.trim()).filter(Boolean))].join("\n") || "No especificados en el origen.");
     const summaryRow = children(tables[1], "tr")[1].cloneNode(true) as Element;
     children(tables[1], "tr").slice(1).forEach(r => r.remove());
@@ -116,7 +118,16 @@ export async function buildCertificationHtml(page: Page, model: EvidenceDocument
           || inputAction[2].replace(/[_-]+/g, " ").replace(/\b\w/g, letter => letter.toLocaleUpperCase("es"));
         return `${inputAction[1].toLowerCase() === "fill" ? "Ingresar" : "Seleccionar"} ${label}`;
       };
-      const values = [record.objective || sc.title, record.preconditions?.join("\n") || "No especificadas en el origen.", "Datos utilizados durante la ejecución. Los valores sensibles se mantienen protegidos.", record.steps.map((s, i) => `${i + 1}. ${describeStep(s)} [${s.status === "passed" ? "Correcto" : s.status === "failed" ? "Fallido" : "No ejecutado"}]`).join("\n"), expected(sc.scenarioId), obtained(sc.scenarioId), state(sc.status)];
+      const testData = record.testData?.length
+        ? record.testData.map(item => `${item.label}: ${item.value}`).join("\n")
+        : "No se registraron datos de prueba para este escenario.";
+      const values = [
+        record.objective || sc.title,
+        formatPreconditions(record.preconditions || []) || "No especificadas en el origen.",
+        testData,
+        record.steps.map((s, i) => `${i + 1}. ${describeStep(s)} [${s.status === "passed" ? "Correcto" : s.status === "failed" ? "Fallido" : "No ejecutado"}]`).join("\n"),
+        expected(sc.scenarioId), obtained(sc.scenarioId), state(sc.status),
+      ];
       values.forEach((v, i) => setCell(table, i, 1, v));
       const evidenceBox = block.filter(n => n.localName === "tbl")[1];
       const caption = block.find(n => n.localName === "p" && /^Figura X/.test(txt(n)));
@@ -126,12 +137,32 @@ export async function buildCertificationHtml(page: Page, model: EvidenceDocument
       if (!sc.images.length) {
         const p = doc.createElement("p"); p.textContent = "No se capturaron imágenes durante esta ejecución."; p.setAttribute("data-native", "true"); body.insertBefore(p, anchor);
       }
-      sc.screens.forEach(screen => screen.images.forEach(image => {
-        const figure = doc.createElement("figure"); figure.setAttribute("data-native", "true");
-        const img = doc.createElement("img"); img.setAttribute("src", images[image.path]); img.setAttribute("alt", screen.title || "Evidencia");
-        const label = doc.createElement("figcaption"); label.textContent = `Figura. ${screen.title || image.stepText}${image.path === sc.finalImagePath ? " — Estado final" : ""}`;
-        figure.appendChild(img); figure.appendChild(label); body.insertBefore(figure, anchor);
-      }));
+      sc.screens.forEach(screen => {
+        const section = doc.createElement("section"); section.setAttribute("class", "screen-evidence"); section.setAttribute("data-native", "true");
+        const heading = doc.createElement("h3"); heading.textContent = `Pantalla: ${screen.title || "Pantalla sin título"}`; section.appendChild(heading);
+        if (screen.steps.length) {
+          const steps = doc.createElement("ol"); steps.setAttribute("class", "screen-steps");
+          for (const step of screen.steps) {
+            const item = doc.createElement("li");
+            item.appendChild(doc.createTextNode(`${step.number > 0 ? `${step.number}. ` : ""}${step.text} `));
+            const status = doc.createElement("span");
+            status.setAttribute("class", `step-status ${step.status === "passed" ? "passed" : step.status === "failed" ? "failed" : "skipped"}`);
+            status.textContent = `[${step.status === "passed" ? "Correcto" : step.status === "failed" ? "Fallido" : "No ejecutado"}]`;
+            item.appendChild(status); steps.appendChild(item);
+          }
+          section.appendChild(steps);
+        }
+        if (!screen.images.length) {
+          const missing = doc.createElement("p"); missing.textContent = "No se guardó una captura de esta pantalla durante la ejecución."; section.appendChild(missing);
+        }
+        for (const image of screen.images) {
+          const figure = doc.createElement("figure");
+          const img = doc.createElement("img"); img.setAttribute("src", images[image.path]); img.setAttribute("alt", screen.title || "Evidencia");
+          const label = doc.createElement("figcaption"); label.textContent = `Figura. ${screen.title || image.stepText}${image.path === sc.finalImagePath ? " — Estado final" : ""}`;
+          figure.appendChild(img); figure.appendChild(label); section.appendChild(figure);
+        }
+        body.insertBefore(section, anchor);
+      });
       for (const n of breaks) body.insertBefore(n, anchor);
     });
     replaceAfter("6. Validación de regresión / impacto", "Solo se documentan los casos ejecutados en este informe. No se certifican procesos adicionales.");
@@ -203,7 +234,7 @@ export async function buildCertificationHtml(page: Page, model: EvidenceDocument
       p{margin:0 0 10pt;white-space:normal;overflow-wrap:anywhere}p.Heading1{font-size:16pt;font-weight:bold;color:#17365D;margin-top:24pt;margin-bottom:0;break-after:avoid}
       p.Heading2{font-size:12pt;font-weight:bold;color:#2F75B5;margin-top:10pt;margin-bottom:0;break-after:avoid}
       table{width:100%;border-collapse:collapse;table-layout:fixed;margin:6pt 0}td{border:.5pt solid black;padding:4pt 6pt;vertical-align:top;overflow-wrap:anywhere}td p{margin:0;font-size:10pt}thead{display:table-header-group}thead td{color:white}thead p{font-size:8pt;font-weight:bold}
-      figure{margin:12pt 0;break-inside:avoid}figure img{display:block;max-width:100%;max-height:570pt;object-fit:contain;margin:auto}figcaption{text-align:center;font-size:9pt;color:#666;margin-top:4pt}
+      .screen-evidence{margin:12pt 0;break-inside:avoid}.screen-evidence h3{font-size:11pt;color:#17365D;margin:10pt 0 5pt;break-after:avoid}.screen-steps{margin:0 0 8pt;padding-left:22pt}.screen-steps li{margin:2pt 0;break-inside:avoid}.screen-evidence figure{margin:8pt 0 14pt;break-inside:avoid}.screen-evidence figure img{display:block;max-width:100%;max-height:570pt;object-fit:contain;margin:auto}.screen-evidence figcaption{text-align:center;font-size:9pt;color:#666;margin-top:4pt}
       .value-line{display:block;break-inside:avoid}.step-status{font-weight:700}.step-status.passed{color:#188038}.step-status.failed{color:#c5221f}.step-status.skipped{color:#6b7280}.page-break{display:block;break-before:page} .print-header,.print-footer{display:none}
       </style></head><body><div class="print-header">${escape(headerText)}</div>${Array.from(body.children).map(convert).join("")}<div class="print-footer">${escape(footerText)}</div></body></html>`;
   }, { xml: await read("word/document.xml"), header: await read("word/header1.xml"), footer: await read("word/footer1.xml"), model, records, images });

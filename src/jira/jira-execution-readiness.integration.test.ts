@@ -28,20 +28,18 @@ test('authored rejection wording survives generation audit, saved Jira execution
 
 test('Jira generation, automatic conditions, negative assertions and dedicated compiler work across profiles',async()=>{
  for(const appSlug of ['fixture-shop','fixture-service']) {
-  const draft={sourceIssueKey:issue.key,title:'Operación no completada',preconditions:[],steps:['Ingresar token en "Token"','Validar "Cargo".','Validar "Error".','Validar "Resultado" no está presente.'],expectedResult:'No se muestra Resultado',acceptanceCriteriaRefs:['AC1','AC2']};
+  const operationIssue={...issue,description:'AC1 — Confirmation\nMostrar Cargo cuando aplique.\nAC2 — Rejection\nAl presionar Autorizar con un token no válido se muestra Error y no se muestra Resultado.'};
+  const draft={sourceIssueKey:issue.key,title:'Operación no completada',preconditions:[],steps:['Ingresar token no válido en "Token"','Presionar "Autorizar"','Validar "Cargo".','Validar "Error".','Validar "Resultado" no está presente.'],expectedResult:'No se muestra Resultado',acceptanceCriteriaRefs:['AC1','AC2']};
   let calls=0;
-  const provider:AiProvider={providerType:'fake',providerName:'fixture',model:'fixture',async completeJson(request){
+  const provider:AiProvider={providerType:'fake',providerName:'fixture',model:'fixture',async completeJson(){
    calls++;
-   if(calls===1) return {rawText:'',parsedJson:{scenarios:[draft]},model:'fixture',providerName:'fixture',durationMs:0};
-   const payload=JSON.parse(request.messages[1].content);
-   assert.ok(payload.syntaxFailures.some((failure:{reason:string})=>failure.reason==='JIRA_FAILURE_SETUP_UNSPECIFIED'));
-   const candidate=payload.scenarios[0];
-   return {rawText:'',parsedJson:{scenarios:[{...candidate,steps:['Ingresar token no válido en "Token"',...candidate.steps.slice(1)]}]},model:'fixture',providerName:'fixture',durationMs:0};
+   return {rawText:'',parsedJson:{scenarios:[draft]},model:'fixture',providerName:'fixture',durationMs:0};
   }};
-  const result=await generateJiraScenarios([issue],appSlug,provider);
+  const result=await generateJiraScenarios([operationIssue],appSlug,provider);
   const scenario=result.scenarios[0];
-  assert.equal(calls,2);
-  assert.equal(scenario.validation.valid,true);
+  assert.equal(calls,1);
+  assert.equal(result.coverage?.[0].status,'complete');
+  assert.equal(scenario.validation.valid,true,JSON.stringify(scenario.validation));
   assert.equal(scenario.executionReadiness,'requires_discovery');
   assert.equal(scenario.mcpExecutable,false);
   assert.equal(scenario.inputRequirements?.[0].dataCondition,'invalid');

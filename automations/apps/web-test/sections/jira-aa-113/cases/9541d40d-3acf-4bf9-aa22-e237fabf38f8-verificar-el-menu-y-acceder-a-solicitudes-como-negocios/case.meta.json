@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "9541d40d-3acf-4bf9-aa22-e237fabf38f8",
+  "title": "Verificar el menú y acceder a Solicitudes como Negocios",
+  "generatedAt": "2026-10-26T07:26:04.188Z",
+  "executionEngine": "jira_semantic"
+}

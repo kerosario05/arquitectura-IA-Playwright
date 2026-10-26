@@ -1,0 +1,72 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-10-26T17:11:09.609Z",
+  "entries": [
+    {
+      "key": "usuario",
+      "source": "unknown",
+      "fieldName": "Usuario",
+      "stepIndex": 2,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "contrasena",
+      "source": "unknown",
+      "fieldName": "Contraseña",
+      "stepIndex": 3,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "buscar_solicitudes",
+      "source": "unknown",
+      "fieldName": "Buscar solicitudes",
+      "stepIndex": 6,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "numero_de_identificacion",
+      "source": "unknown",
+      "fieldName": "Número de Identificación*",
+      "stepIndex": 8,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "no_registro_mercantil",
+      "source": "unknown",
+      "fieldName": "No. Registro Mercantil",
+      "stepIndex": 9,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "denominacion_social",
+      "source": "unknown",
+      "fieldName": "Denominación Social*",
+      "stepIndex": 10,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

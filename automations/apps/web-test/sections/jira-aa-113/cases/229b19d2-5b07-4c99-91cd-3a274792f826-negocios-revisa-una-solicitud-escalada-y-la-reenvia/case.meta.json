@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "229b19d2-5b07-4c99-91cd-3a274792f826",
+  "title": "Negocios revisa una solicitud escalada y la reenvía",
+  "generatedAt": "2026-10-26T06:56:39.530Z",
+  "executionEngine": "jira_semantic"
+}

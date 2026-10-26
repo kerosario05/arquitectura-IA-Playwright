@@ -1,0 +1,9 @@
+{
+  "id": "6cad616a-514d-4a94-804b-4bd32c0705f2-abrir-el-listado-filtrado-desde-el-contador-borrador",
+  "externalId": "6cad616a-514d-4a94-804b-4bd32c0705f2",
+  "title": "Abrir el listado filtrado desde el contador Borrador",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T07:04:47.050Z"
+}

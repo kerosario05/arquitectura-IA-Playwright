@@ -1,5 +1,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { loadAppConfig } from "../automations/app-auto-resolver";
 import {
   loadEvidenceConfig,
   type EvidenceConfig,
@@ -15,6 +16,7 @@ export class RunEvidenceRecorder {
   private context: EvidenceRunContext;
   private paths: ReturnType<typeof buildEvidenceRunPaths>;
   private scenarios: EvidenceScenarioRecord[] = [];
+  private configuredEnvironment?: string;
 
   constructor(context: EvidenceRunContext, config?: Partial<EvidenceConfig>) {
     this.config = { ...loadEvidenceConfig(), ...config };
@@ -36,6 +38,24 @@ export class RunEvidenceRecorder {
 
   async start(): Promise<void> {
     if (!this.config.enabled) return;
+
+    const profile = this.context.appSlug ? await loadAppConfig(this.context.appSlug) : null;
+    const nestedProfile = profile?.appProfile && typeof profile.appProfile === "object" && !Array.isArray(profile.appProfile)
+      ? profile.appProfile as Record<string, unknown>
+      : null;
+    const configuredUrl = [profile?.baseUrl, nestedProfile?.baseUrl]
+      .find((value): value is string => typeof value === "string" && value.trim().length > 0)
+      ?.trim() ?? "";
+    if (configuredUrl) {
+      try {
+        const url = new URL(configuredUrl);
+        url.username = "";
+        url.password = "";
+        this.configuredEnvironment = url.toString();
+      } catch {
+        // Ignore malformed profile URLs and retain an existing context/evidence value.
+      }
+    }
 
     // Ensure run directories exist
     await fs.promises.mkdir(this.paths.runDir, { recursive: true });
@@ -81,6 +101,7 @@ export class RunEvidenceRecorder {
       ...scenarioRecord,
       requirement: this.context.requirement?.trim() || scenarioRecord.requirement?.trim() || `Automatización - ${this.context.sectionName || this.context.sectionSlug}`,
       analyst: this.context.analystName?.trim() || this.config.analystName?.trim() || scenarioRecord.analyst?.trim() || "Automatización",
+      environment: this.configuredEnvironment || this.context.environment?.trim() || scenarioRecord.environment?.trim() || undefined,
     };
 
     const genericDetailTargets = new Set([

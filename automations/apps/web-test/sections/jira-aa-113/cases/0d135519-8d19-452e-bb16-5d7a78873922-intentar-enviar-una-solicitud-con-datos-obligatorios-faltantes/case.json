@@ -1,0 +1,9 @@
+{
+  "id": "0d135519-8d19-452e-bb16-5d7a78873922-intentar-enviar-una-solicitud-con-datos-obligatorios-faltantes",
+  "externalId": "0d135519-8d19-452e-bb16-5d7a78873922",
+  "title": "Intentar enviar una solicitud con datos obligatorios faltantes",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T07:38:09.002Z"
+}

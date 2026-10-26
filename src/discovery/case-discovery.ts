@@ -130,7 +130,7 @@ import {
 import type { AssertionPolarity } from "../scenarios/canonical-scenario";
 import { extractTestRailInputRequirements } from "../testrail/testrail-input-requirements-adapter";
 import { isPendingOracleAuthority } from "./oracle-authority";
-import { resolvePostActionSynchronization } from "./post-action-synchronization";
+import { canToleratePostActionLoadingTimeout, resolvePostActionSynchronization } from "./post-action-synchronization";
 import { deduplicateActionTargetsBySource } from "./action-target-equivalence";
 import { verifySelectionState, hasCausalSelectionTransition, booleanState, shouldPromoteStatefulControlToClickableAncestor, type InteractiveState } from "./selection-state-verification";
 import { resolveClickRetryPolicy } from "./click-retry-policy";
@@ -424,6 +424,20 @@ export const safePathname = (rawUrl: string, baseUrl?: string): string => {
     return new URL(rawUrl, baseUrl).pathname || "/";
   } catch {
     return "/";
+  }
+};
+
+/**
+ * Route identity for applications whose client-side router stores its route in
+ * the URL hash. Plain fragment anchors are intentionally ignored.
+ */
+export const safeRouteIdentity = (rawUrl: string): string => {
+  try {
+    const url = new URL(rawUrl);
+    const hashRoute = url.hash.match(/^#!?(\/[^#]*)/)?.[1];
+    return `${url.pathname || "/"}${hashRoute ?? ""}`;
+  } catch {
+    return safePathname(rawUrl);
   }
 };
 
@@ -6062,7 +6076,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       return false;
     }
 
-    await clickResolvedTarget(recoveryResolution.locator, false).catch(() => undefined);
+    // Re-perform the SAME kind of action that owned the transition: a keyboard submit (e.g. Enter in the
+    // password field) must be pressed again; clicking the field would never re-submit the form.
+    if (previousAction.actionType === "action_press" && previousAction.key?.trim()) {
+      await executePressActionTarget(previousAction.key, recoveryResolution as PressTargetResolution).catch(() => undefined);
+    } else {
+      await clickResolvedTarget(recoveryResolution.locator, false).catch(() => undefined);
+    }
     // Reauthentication can be slower than the initial route transition (the portal may keep the
     // login form in its submitting state while its authentication request completes). Continue
     // probing the expected route and completing its stability probes before declaring recovery
@@ -6082,6 +6102,14 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       await page.waitForTimeout(250).catch(() => undefined);
     }
     console.log(`[recorded-surface-recovery] status=failed stableProbes=${stableProbes} url=${safePathname(page.url())}`);
+    // The recorded surface is unreachable. When the live page is still the login form and the application
+    // shows an alert, the credentials supplied for this run were most likely rejected: say so (class only,
+    // never the typed values) because the generic precondition message hides a data problem.
+    const rejectionAlert = await page.locator('[role="alert"]:visible').first().innerText({ timeout: 1000 }).catch(() => "");
+    const stillAuthGate = await scanCurrentPage(page).then(snapshot => detectAuthGate(snapshot)).catch(() => undefined);
+    if (rejectionAlert.trim() && stillAuthGate?.detected) {
+      console.log(`[recorded-surface-recovery] credential_rejection_suspected=true alert="${rejectionAlert.trim().replace(/\s+/g, " ").slice(0, 120)}"`);
+    }
     return false;
   };
   const reapplyResolvedRuntimeAuthFields = async (forceActiveClassicLogin = false): Promise<void> => {
@@ -12757,16 +12785,24 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     const noNetworkActivityAtAll = relevantNetworkEvents.length === 0
       && !relevantNetworkEvents.some((event) => event.state === "pending");
     const inPlaceCausalEffectConfirmed = clickCausalEffectDetected === true && noNetworkActivityAtAll;
-    // FIRST_LOSS fix (jobId f310a999-.../preview-2026-09-28T20-27-23): a click that triggers a
-    // hard/full navigation (e.g. a kiosk-style session reset back to the app's home screen) can
-    // outrun the network/DOM observers entirely -- the frame navigation itself can detach the
-    // listeners/observer before they register a signal, yet `page.url()` after the wait is
-    // already conclusive, definitive proof a real transition happened. Reuses the SAME
-    // `finalPath`/`preClickPathname` comparison `currentSurfaceRouteAuthority` above already
-    // computes -- never a new/weaker observer, never app/route-specific.
-    const routeActuallyChanged = finalPath !== preClickPathname;
-    if (!stability.stable && stability.reason === "loading_timeout" && !recordedPostActionPending
-      && (cleanNetworkTransition || inPlaceCausalEffectConfirmed || routeActuallyChanged)) {
+    // A click that triggers a hard/full navigation can outrun the network/DOM observers entirely;
+    // the final URL still proves a route transition. Compare route identity here (including
+    // hash-router paths) without changing the pathname-only route authority used above.
+    // `safePathname` intentionally omits URL fragments, but hash-router SPAs
+    // (for example, `#/` -> `#/solicitudes`) can complete a real route change
+    // while the pathname remains `/`. Include only route-shaped hashes here;
+    // ordinary in-page anchors do not authorize tolerating a stale loader.
+    const routeActuallyChanged = safeRouteIdentity(page.url()) !== safeRouteIdentity(preClickUrl);
+    if (canToleratePostActionLoadingTimeout({
+      stable: stability.stable,
+      reason: stability.reason,
+      recordedPostActionPending,
+      pendingRequests: relevantNetworkEvents.some((event) => event.state === "pending"),
+      cleanNetworkTransition,
+      inPlaceCausalEffectConfirmed,
+      routeActuallyChanged,
+      terminalDownloadObserved: watchTerminalDownload && actionDownloadObserved,
+    })) {
       // Some applications keep a decorative loading class mounted after all
       // navigation/data requests have completed. Static assets are not part of
       // the readiness boundary, and a browser-reported 2xx on the final route

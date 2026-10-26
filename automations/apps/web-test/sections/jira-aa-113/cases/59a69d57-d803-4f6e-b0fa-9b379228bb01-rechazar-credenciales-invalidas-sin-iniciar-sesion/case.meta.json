@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "59a69d57-d803-4f6e-b0fa-9b379228bb01",
+  "title": "Rechazar credenciales inválidas sin iniciar sesión",
+  "generatedAt": "2026-10-26T06:59:21.154Z",
+  "executionEngine": "jira_semantic"
+}

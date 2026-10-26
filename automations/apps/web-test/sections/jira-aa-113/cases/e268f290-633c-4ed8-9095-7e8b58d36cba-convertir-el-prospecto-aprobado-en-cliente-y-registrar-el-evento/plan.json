@@ -1,0 +1,229 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-26T07:35:45.858Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "e268f290-633c-4ed8-9095-7e8b58d36cba",
+    "title": "Convertir el prospecto aprobado en cliente y registrar el evento"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "fill [jira_edit_93ea23c9c2ec5f25_2]",
+      "valueKey": "jira_edit_93ea23c9c2ec5f25_2",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"usuario\"]"
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [jira_edit_93ea23c9c2ec5f25_3]",
+      "valueKey": "jira_edit_93ea23c9c2ec5f25_3",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"clave\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Presionar \"iniciar sesión\"",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"btn-login\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Presionar \"Solicitudes\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Solicitudes",
+        "exact": true
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"SOL-2026-0003\"",
+      "target": {
+        "strategy": "css",
+        "value": ":is(main,[role=\"main\"]) a[href=\"#/solicitud/SOL-2026-0003\"]"
+      }
+    },
+    {
+      "index": 8,
+      "action": "click",
+      "description": "Presionar \"Convertir prospecto a cliente\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Convertir prospecto a cliente",
+        "exact": true
+      }
+    },
+    {
+      "index": 9,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Flujo de Solicitud\"",
+      "target": {
+        "strategy": "text",
+        "value": "Flujo de Solicitud"
+      }
+    },
+    {
+      "index": 10,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Personas relacionadas\"",
+      "target": {
+        "strategy": "text",
+        "value": "Personas relacionadas"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "jira_edit_93ea23c9c2ec5f25_2",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "jira_edit_93ea23c9c2ec5f25_3",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Convertir el prospecto aprobado en cliente y registrar el evento",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "fill",
+        "valueKey": "jira_edit_93ea23c9c2ec5f25_2",
+        "technicalTargetRefs": [
+          "css:[id=\"usuario\"]"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "jira_edit_93ea23c9c2ec5f25_3",
+        "technicalTargetRefs": [
+          "css:[id=\"clave\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:[id=\"btn-login\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Solicitudes"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css::is(main,[role=\"main\"]) a[href=\"#/solicitud/SOL-2026-0003\"]"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Convertir prospecto a cliente"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Flujo de Solicitud\"",
+        "technicalTargetRefs": [
+          "text:Flujo de Solicitud"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Personas relacionadas\"",
+        "technicalTargetRefs": [
+          "text:Personas relacionadas"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-9",
+        "requirement": "Validar que se muestre \"Flujo de Solicitud\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 9,
+        "target": "Flujo de Solicitud\nRegistro de Datos",
+        "evidence": [
+          "live-step-9"
+        ],
+        "details": {
+          "observedText": "Flujo de Solicitud\nRegistro de Datos"
+        }
+      },
+      {
+        "id": "jira-oracle-10",
+        "requirement": "Validar que se muestre \"Personas relacionadas\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 10,
+        "target": "Estado del flujo\n\nSeguimiento de la solicitud entre Negocios, Debida Diligencia y Revisión Legal.\n\nRegistro de datos del prospecto\nNegocios · Consulta de RNC y datos de la empresa\nDepuración en listas (Bizagi)\nDebida Diligencia · Listas restrictivas y no restrictivas\nVerificación PLAFT\nDebida Diligencia · Coincidencias\nRevisión legal inicial\nRevisión Legal · Aprobar, escalar, devolver o rechazar\nConversión de prospecto a cliente\nNegocios · Código de cliente\n6\nConozca su cliente\nNegocios · Información KYC\n7\nApertura de producto\nNegocios · Cuenta y productos\nConozca su cliente\nPersonas relacionadas",
+        "evidence": [
+          "live-step-10"
+        ],
+        "details": {
+          "observedText": "Estado del flujo\n\nSeguimiento de la solicitud entre Negocios, Debida Diligencia y Revisión Legal.\n\nRegistro de datos del prospecto\nNegocios · Consulta de RNC y datos de la empresa\nDepuración en listas (Bizagi)\nDebida Diligencia · Listas restrictivas y no restrictivas\nVerificación PLAFT\nDebida Diligencia · Coincidencias\nRevisión legal inicial\nRevisión Legal · Aprobar, escalar, devolver o rechazar\nConversión de prospecto a cliente\nNegocios · Código de cliente\n6\nConozca su cliente\nNegocios · Información KYC\n7\nApertura de producto\nNegocios · Cuenta y productos\nConozca su cliente\nPersonas relacionadas"
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "que se muestre \"Personas relacionadas\""
+  }
+}

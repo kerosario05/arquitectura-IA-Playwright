@@ -1,0 +1,195 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-26T07:25:34.912Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "9541d40d-3acf-4bf9-aa22-e237fabf38f8",
+    "title": "Verificar el menú y acceder a Solicitudes como Negocios"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "fill [jira_edit_c0c7b455d335ae0e_2]",
+      "valueKey": "jira_edit_c0c7b455d335ae0e_2",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"usuario\"]"
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [jira_edit_c0c7b455d335ae0e_3]",
+      "valueKey": "jira_edit_c0c7b455d335ae0e_3",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"clave\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Presionar \"iniciar sesión\"",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"btn-login\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Presionar \"Solicitudes\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Solicitudes",
+        "exact": true
+      }
+    },
+    {
+      "index": 7,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Solicitudes de prospectos PJ\"",
+      "target": {
+        "strategy": "text",
+        "value": "Solicitudes de prospectos PJ"
+      }
+    },
+    {
+      "index": 8,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Exportar CSV\"",
+      "target": {
+        "strategy": "text",
+        "value": "Exportar CSV"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "jira_edit_c0c7b455d335ae0e_2",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "jira_edit_c0c7b455d335ae0e_3",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Verificar el menú y acceder a Solicitudes como Negocios",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "fill",
+        "valueKey": "jira_edit_c0c7b455d335ae0e_2",
+        "technicalTargetRefs": [
+          "css:[id=\"usuario\"]"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "jira_edit_c0c7b455d335ae0e_3",
+        "technicalTargetRefs": [
+          "css:[id=\"clave\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:[id=\"btn-login\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Solicitudes"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Solicitudes de prospectos PJ\"",
+        "technicalTargetRefs": [
+          "text:Solicitudes de prospectos PJ"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Exportar CSV\"",
+        "technicalTargetRefs": [
+          "text:Exportar CSV"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-7",
+        "requirement": "Validar que se muestre \"Solicitudes de prospectos PJ\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 7,
+        "target": "Solicitudes de prospectos PJ",
+        "evidence": [
+          "live-step-7"
+        ],
+        "details": {
+          "observedText": "Solicitudes de prospectos PJ"
+        }
+      },
+      {
+        "id": "jira-oracle-8",
+        "requirement": "Validar que se muestre \"Exportar CSV\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 8,
+        "target": "6 solicitud(es) · 0 seleccionada(s)\nExportar CSV\nEliminar seleccionadas",
+        "evidence": [
+          "live-step-8"
+        ],
+        "details": {
+          "observedText": "6 solicitud(es) · 0 seleccionada(s)\nExportar CSV\nEliminar seleccionadas"
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "que se muestre \"Exportar CSV\""
+  }
+}

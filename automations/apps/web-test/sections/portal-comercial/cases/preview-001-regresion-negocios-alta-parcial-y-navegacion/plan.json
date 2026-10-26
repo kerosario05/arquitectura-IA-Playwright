@@ -1,0 +1,1591 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-001",
+    "caseId": 0,
+    "title": "Regresion Negocios alta parcial y navegacion"
+  },
+  "requiredData": [
+    {
+      "key": "usuario",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "contrasena",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "buscar_solicitudes",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "numero_de_identificacion",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "no_registro_mercantil",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "denominacion_social",
+      "required": true,
+      "resolved": true
+    }
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to http://localhost:4310/#/login",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "fill",
+      "description": "Ingresar \"negocios\" en \"Usuario\"",
+      "target": {
+        "strategy": "text",
+        "value": "Usuario",
+        "exact": false
+      },
+      "valueKey": "usuario",
+      "requirementRefs": []
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "Ingresar \"••••••\" en \"Contraseña\"",
+      "target": {
+        "strategy": "text",
+        "value": "Contraseña",
+        "exact": false
+      },
+      "valueKey": "contrasena",
+      "requirementRefs": []
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Presionar \"Iniciar sesión\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Iniciar sesión",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner",
+      "requirementRefs": []
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Presionar \"Solicitudes\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Solicitudes",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner",
+      "requirementRefs": []
+    },
+    {
+      "index": 6,
+      "action": "fill",
+      "description": "Ingresar \"SA\" en \"Buscar solicitudes\"",
+      "target": {
+        "strategy": "text",
+        "value": "Buscar solicitudes",
+        "exact": false
+      },
+      "valueKey": "buscar_solicitudes",
+      "requirementRefs": []
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"Nueva solicitud\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Nueva solicitud",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner",
+      "requirementRefs": []
+    },
+    {
+      "index": 8,
+      "action": "fill",
+      "description": "Ingresar \"401500123\" en \"Número de Identificación*\"",
+      "target": {
+        "strategy": "text",
+        "value": "Número de Identificación*",
+        "exact": false
+      },
+      "valueKey": "numero_de_identificacion",
+      "requirementRefs": []
+    },
+    {
+      "index": 9,
+      "action": "fill",
+      "description": "Ingresar \"RM-2026-1001\" en \"No. Registro Mercantil\"",
+      "target": {
+        "strategy": "text",
+        "value": "No. Registro Mercantil",
+        "exact": false
+      },
+      "valueKey": "no_registro_mercantil",
+      "requirementRefs": []
+    },
+    {
+      "index": 10,
+      "action": "fill",
+      "description": "Ingresar \"EMPRESA REGRESION SRL\" en \"Denominación Social*\"",
+      "target": {
+        "strategy": "text",
+        "value": "Denominación Social*",
+        "exact": false
+      },
+      "valueKey": "denominacion_social",
+      "requirementRefs": []
+    },
+    {
+      "index": 11,
+      "action": "click",
+      "description": "Presionar \"Inicio\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Inicio",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner",
+      "requirementRefs": []
+    },
+    {
+      "index": 12,
+      "action": "click",
+      "description": "Presionar \"Solicitudes\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Solicitudes",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner",
+      "requirementRefs": []
+    },
+    {
+      "index": 13,
+      "action": "click",
+      "description": "Presionar \"Inicio\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Inicio",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner",
+      "requirementRefs": []
+    },
+    {
+      "index": 14,
+      "action": "click",
+      "description": "Presionar \"Salir\"",
+      "target": {
+        "strategy": "recorded:role",
+        "value": "Salir",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:role",
+      "requirementRefs": []
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-10-26T17:11:09.097Z",
+  "metadata": {
+    "authFlowRequired": false,
+    "authFlowAlias": "defaultClient",
+    "authFlowLanding": "transactions_menu",
+    "authGateDetectedDuringDiscovery": true,
+    "authGateStage": "identification_input"
+  },
+  "sourceScenario": {
+    "title": "Regresion Negocios alta parcial y navegacion",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Abrir la aplicación configurada del proyecto",
+        "description": "Abrir la aplicación configurada del proyecto"
+      },
+      {
+        "index": 2,
+        "action": "Ingresar \"negocios\" en \"Usuario\"",
+        "description": "Ingresar \"negocios\" en \"Usuario\"",
+        "valueKey": "usuario",
+        "technicalTargetRef": "role:textbox|Usuario",
+        "technicalTargetRefs": [
+          "role:textbox|Usuario",
+          "css:#usuario",
+          "id:usuario"
+        ],
+        "associatedField": "Usuario",
+        "controlIdentity": "9db5430202df|Usuario|role|textbox|Usuario",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 3,
+        "action": "Ingresar \"••••••\" en \"Contraseña\"",
+        "description": "Ingresar \"••••••\" en \"Contraseña\"",
+        "valueKey": "contrasena",
+        "technicalTargetRef": "role:textbox|Contraseña",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#clave",
+          "id:clave"
+        ],
+        "associatedField": "Contraseña",
+        "controlIdentity": "9db5430202df|Contraseña|role|textbox|Contraseña",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 4,
+        "action": "Presionar \"Iniciar sesión\"",
+        "description": "Presionar \"Iniciar sesión\"",
+        "technicalTargetRef": "role:button|Iniciar sesión",
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión",
+          "css:#btn-login",
+          "id:btn-login"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Iniciar sesión",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "login-form"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#btn-login",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "btn-login"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "login-form"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-login\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "controlIdentity": "9db5430202df|Iniciar sesión|role|button|Iniciar sesión",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 5,
+        "action": "Presionar \"Solicitudes\"",
+        "description": "Presionar \"Solicitudes\"",
+        "technicalTargetRef": "role:link|Solicitudes",
+        "technicalTargetRefs": [
+          "role:link|Solicitudes"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Solicitudes",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Solicitudes",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#/solicitudes"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "nav"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/solicitudes\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "controlIdentity": "9db5430202df|Solicitudes|role|link|Solicitudes",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 6,
+        "action": "Ingresar \"SA\" en \"Buscar solicitudes\"",
+        "description": "Ingresar \"SA\" en \"Buscar solicitudes\"",
+        "valueKey": "buscar_solicitudes",
+        "technicalTargetRef": "role:textbox|Buscar solicitudes",
+        "technicalTargetRefs": [
+          "role:textbox|Buscar solicitudes",
+          "css:#sol-search",
+          "id:sol-search"
+        ],
+        "associatedField": "Buscar solicitudes",
+        "controlIdentity": "9db5430202df|Buscar solicitudes|role|textbox|Buscar solicitudes",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 7,
+        "action": "Presionar \"Nueva solicitud\"",
+        "description": "Presionar \"Nueva solicitud\"",
+        "technicalTargetRef": "role:link|Nueva solicitud",
+        "technicalTargetRefs": [
+          "role:link|Nueva solicitud"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Nueva solicitud",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Nueva solicitud",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#/solicitud/nueva"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "nav"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/solicitud/nueva\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "controlIdentity": "9db5430202df|Nueva solicitud|role|link|Nueva solicitud",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 8,
+        "action": "Ingresar \"401500123\" en \"Número de Identificación*\"",
+        "description": "Ingresar \"401500123\" en \"Número de Identificación*\"",
+        "valueKey": "numero_de_identificacion",
+        "technicalTargetRef": "role:textbox|Número de Identificación*",
+        "technicalTargetRefs": [
+          "role:textbox|Número de Identificación*",
+          "css:#idNumero",
+          "id:idNumero"
+        ],
+        "associatedField": "Número de Identificación*",
+        "controlIdentity": "9db5430202df|Número de Identificación*|role|textbox|Número de Identificación*",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 9,
+        "action": "Ingresar \"RM-2026-1001\" en \"No. Registro Mercantil\"",
+        "description": "Ingresar \"RM-2026-1001\" en \"No. Registro Mercantil\"",
+        "valueKey": "no_registro_mercantil",
+        "technicalTargetRef": "role:textbox|No. Registro Mercantil",
+        "technicalTargetRefs": [
+          "role:textbox|No. Registro Mercantil",
+          "css:#registroMercantil",
+          "id:registroMercantil"
+        ],
+        "associatedField": "No. Registro Mercantil",
+        "controlIdentity": "9db5430202df|No. Registro Mercantil|role|textbox|No. Registro Mercantil",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 10,
+        "action": "Ingresar \"EMPRESA REGRESION SRL\" en \"Denominación Social*\"",
+        "description": "Ingresar \"EMPRESA REGRESION SRL\" en \"Denominación Social*\"",
+        "valueKey": "denominacion_social",
+        "technicalTargetRef": "role:textbox|Denominación Social*",
+        "technicalTargetRefs": [
+          "role:textbox|Denominación Social*",
+          "css:#denominacion",
+          "id:denominacion"
+        ],
+        "associatedField": "Denominación Social*",
+        "controlIdentity": "9db5430202df|Denominación Social*|role|textbox|Denominación Social*",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 11,
+        "action": "Presionar \"Inicio\"",
+        "description": "Presionar \"Inicio\"",
+        "technicalTargetRef": "role:link|Inicio",
+        "technicalTargetRefs": [
+          "role:link|Inicio"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Inicio",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Inicio",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#/"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "nav"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "controlIdentity": "9db5430202df|Inicio|role|link|Inicio",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 12,
+        "action": "Presionar \"Solicitudes\"",
+        "description": "Presionar \"Solicitudes\"",
+        "technicalTargetRef": "role:link|Solicitudes",
+        "technicalTargetRefs": [
+          "role:link|Solicitudes"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Solicitudes",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Solicitudes",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#/solicitudes"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "nav"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/solicitudes\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "controlIdentity": "9db5430202df|Solicitudes|role|link|Solicitudes",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 13,
+        "action": "Presionar \"Inicio\"",
+        "description": "Presionar \"Inicio\"",
+        "technicalTargetRef": "role:link|Inicio",
+        "technicalTargetRefs": [
+          "role:link|Inicio"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Inicio",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Inicio",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#/"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "nav"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "controlIdentity": "9db5430202df|Inicio|role|link|Inicio",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 14,
+        "action": "Presionar \"Salir\"",
+        "description": "Presionar \"Salir\"",
+        "valueKey": "salir",
+        "technicalTargetRef": "role:button|Salir",
+        "technicalTargetRefs": [
+          "role:button|Salir"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Salir",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(button[aria-label=\"Notificaciones\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Salir",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "svg"
+              ],
+              "landmarkAncestor": {
+                "tag": "header"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"svg\",1]],\"descendantEntries\":[[\"path\",3],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"svg\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"svg\\\",1]],\\\"descendantEntries\\\":[[\\\"path\\\",3],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Salir",
+        "controlIdentity": "9db5430202df|Salir|role|button|Salir",
+        "recordingActionType": "click"
+      }
+    ],
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "observedAssertions": [],
+    "observableOracles": [],
+    "stepStatuses": [
+      {
+        "index": 2,
+        "status": "found"
+      },
+      {
+        "index": 3,
+        "status": "found"
+      },
+      {
+        "index": 4,
+        "status": "found"
+      },
+      {
+        "index": 5,
+        "status": "found"
+      },
+      {
+        "index": 6,
+        "status": "found"
+      },
+      {
+        "index": 7,
+        "status": "found"
+      },
+      {
+        "index": 8,
+        "status": "found"
+      },
+      {
+        "index": 9,
+        "status": "found"
+      },
+      {
+        "index": 10,
+        "status": "found"
+      },
+      {
+        "index": 11,
+        "status": "found"
+      },
+      {
+        "index": 12,
+        "status": "found"
+      },
+      {
+        "index": 13,
+        "status": "found"
+      },
+      {
+        "index": 14,
+        "status": "found"
+      }
+    ],
+    "auth": {
+      "gateDetected": true,
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    }
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "PREVIEW-001",
+    "title": "Regresion Negocios alta parcial y navegacion",
+    "appSlug": "web-test",
+    "sectionSlug": "portal-comercial",
+    "auth": {
+      "gateDetected": true,
+      "required": false,
+      "stage": "identification_input",
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    },
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Abrir la aplicación configurada del proyecto",
+        "operation": "navigate",
+        "target": {
+          "strategy": "url",
+          "value": "APP_BASE_URL"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Ingresar \"negocios\" en \"Usuario\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Usuario"
+        },
+        "valueKey": "usuario",
+        "associatedField": "Usuario",
+        "technicalTargetRef": "role:textbox|Usuario",
+        "technicalTargetRefs": [
+          "role:textbox|Usuario",
+          "css:#usuario",
+          "id:usuario"
+        ],
+        "controlIdentity": "9db5430202df|Usuario|role|textbox|Usuario",
+        "recordingActionType": "fill",
+        "authGateExpected": true,
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Usuario",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Ingresar \"••••••\" en \"Contraseña\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Contraseña"
+        },
+        "valueKey": "contrasena",
+        "associatedField": "Contraseña",
+        "technicalTargetRef": "role:textbox|Contraseña",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#clave",
+          "id:clave"
+        ],
+        "controlIdentity": "9db5430202df|Contraseña|role|textbox|Contraseña",
+        "recordingActionType": "fill",
+        "authGateExpected": true,
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Contraseña",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Presionar \"Iniciar sesión\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Iniciar sesión"
+        },
+        "technicalTargetRef": "role:button|Iniciar sesión",
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión",
+          "css:#btn-login",
+          "id:btn-login"
+        ],
+        "controlIdentity": "9db5430202df|Iniciar sesión|role|button|Iniciar sesión",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[id=\"btn-login\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "id": "btn-login"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "login-form"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-login\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Iniciar sesión",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "login-form"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 4,
+        "scenarioStepIndex": 5,
+        "originalText": "Presionar \"Solicitudes\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Solicitudes"
+        },
+        "technicalTargetRef": "role:link|Solicitudes",
+        "technicalTargetRefs": [
+          "role:link|Solicitudes"
+        ],
+        "controlIdentity": "9db5430202df|Solicitudes|role|link|Solicitudes",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[href=\"#/solicitudes\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a"
+            },
+            "stableDirectAttributes": {
+              "href": "#/solicitudes"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "nav"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "app"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/solicitudes\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Solicitudes",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 5,
+        "scenarioStepIndex": 6,
+        "originalText": "Ingresar \"SA\" en \"Buscar solicitudes\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Buscar solicitudes"
+        },
+        "valueKey": "buscar_solicitudes",
+        "associatedField": "Buscar solicitudes",
+        "technicalTargetRef": "role:textbox|Buscar solicitudes",
+        "technicalTargetRefs": [
+          "role:textbox|Buscar solicitudes",
+          "css:#sol-search",
+          "id:sol-search"
+        ],
+        "controlIdentity": "9db5430202df|Buscar solicitudes|role|textbox|Buscar solicitudes",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Buscar solicitudes",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 6,
+        "scenarioStepIndex": 7,
+        "originalText": "Presionar \"Nueva solicitud\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Nueva solicitud"
+        },
+        "technicalTargetRef": "role:link|Nueva solicitud",
+        "technicalTargetRefs": [
+          "role:link|Nueva solicitud"
+        ],
+        "controlIdentity": "9db5430202df|Nueva solicitud|role|link|Nueva solicitud",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[href=\"#/solicitud/nueva\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a"
+            },
+            "stableDirectAttributes": {
+              "href": "#/solicitud/nueva"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "nav"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "app"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/solicitud/nueva\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Nueva solicitud",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 7,
+        "scenarioStepIndex": 8,
+        "originalText": "Ingresar \"401500123\" en \"Número de Identificación*\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Número de Identificación*"
+        },
+        "valueKey": "numero_de_identificacion",
+        "associatedField": "Número de Identificación*",
+        "technicalTargetRef": "role:textbox|Número de Identificación*",
+        "technicalTargetRefs": [
+          "role:textbox|Número de Identificación*",
+          "css:#idNumero",
+          "id:idNumero"
+        ],
+        "controlIdentity": "9db5430202df|Número de Identificación*|role|textbox|Número de Identificación*",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Número de Identificación*",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 8,
+        "scenarioStepIndex": 9,
+        "originalText": "Ingresar \"RM-2026-1001\" en \"No. Registro Mercantil\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "No. Registro Mercantil"
+        },
+        "valueKey": "no_registro_mercantil",
+        "associatedField": "No. Registro Mercantil",
+        "technicalTargetRef": "role:textbox|No. Registro Mercantil",
+        "technicalTargetRefs": [
+          "role:textbox|No. Registro Mercantil",
+          "css:#registroMercantil",
+          "id:registroMercantil"
+        ],
+        "controlIdentity": "9db5430202df|No. Registro Mercantil|role|textbox|No. Registro Mercantil",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "No. Registro Mercantil",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 9,
+        "scenarioStepIndex": 10,
+        "originalText": "Ingresar \"EMPRESA REGRESION SRL\" en \"Denominación Social*\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Denominación Social*"
+        },
+        "valueKey": "denominacion_social",
+        "associatedField": "Denominación Social*",
+        "technicalTargetRef": "role:textbox|Denominación Social*",
+        "technicalTargetRefs": [
+          "role:textbox|Denominación Social*",
+          "css:#denominacion",
+          "id:denominacion"
+        ],
+        "controlIdentity": "9db5430202df|Denominación Social*|role|textbox|Denominación Social*",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Denominación Social*",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 10,
+        "scenarioStepIndex": 11,
+        "originalText": "Presionar \"Inicio\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Inicio"
+        },
+        "technicalTargetRef": "role:link|Inicio",
+        "technicalTargetRefs": [
+          "role:link|Inicio"
+        ],
+        "controlIdentity": "9db5430202df|Inicio|role|link|Inicio",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[href=\"#/\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a"
+            },
+            "stableDirectAttributes": {
+              "href": "#/"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "nav"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "app"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Inicio",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 11,
+        "scenarioStepIndex": 12,
+        "originalText": "Presionar \"Solicitudes\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Solicitudes"
+        },
+        "technicalTargetRef": "role:link|Solicitudes",
+        "technicalTargetRefs": [
+          "role:link|Solicitudes"
+        ],
+        "controlIdentity": "9db5430202df|Solicitudes|role|link|Solicitudes",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[href=\"#/solicitudes\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a"
+            },
+            "stableDirectAttributes": {
+              "href": "#/solicitudes"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "nav"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "app"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/solicitudes\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Solicitudes",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 12,
+        "scenarioStepIndex": 13,
+        "originalText": "Presionar \"Inicio\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Inicio"
+        },
+        "technicalTargetRef": "role:link|Inicio",
+        "technicalTargetRefs": [
+          "role:link|Inicio"
+        ],
+        "controlIdentity": "9db5430202df|Inicio|role|link|Inicio",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[href=\"#/\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a"
+            },
+            "stableDirectAttributes": {
+              "href": "#/"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "nav"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "app"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Inicio",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 13,
+        "scenarioStepIndex": 14,
+        "originalText": "Presionar \"Salir\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Salir"
+        },
+        "valueKey": "salir",
+        "associatedField": "Salir",
+        "technicalTargetRef": "role:button|Salir",
+        "technicalTargetRefs": [
+          "role:button|Salir"
+        ],
+        "controlIdentity": "9db5430202df|Salir|role|button|Salir",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Salir",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Salir",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(button[aria-label=\"Notificaciones\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 14,
+      "representedScenarioSteps": 14,
+      "missingScenarioSteps": []
+    }
+  }
+}

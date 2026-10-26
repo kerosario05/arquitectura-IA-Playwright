@@ -22,6 +22,11 @@ export type JiraSpecCompileResult = { source: string; unsupported: string[] };
 
 function quote(value: string): string { return JSON.stringify(value); }
 
+function normalizeExactAssertionText(value: string): string {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("es")
+    .replace(/[^\p{L}\p{N}]+/gu, " ").trim().replace(/\s+/g, " ");
+}
+
 function portableImport(fromFile: string, targetFile: string): string {
   let relative = path.relative(path.dirname(fromFile), targetFile).replace(/\\/g, "/").replace(/\.ts$/, "");
   if (!relative.startsWith(".")) relative = `./${relative}`;
@@ -54,7 +59,7 @@ export function compileJiraSpec(input: JiraSpecCompileInput): JiraSpecCompileRes
   );
   const lines = [
     `import { test, expect } from "@playwright/test";`,
-    `import { settleJiraAction, assertJiraSpecAbsentText, awaitJiraSpecPostLoginTransition, assertJiraSpecAuthGate, assertJiraSpecDownloadContent, assertJiraSpecFieldValidation, assertJiraSpecRowMatch, assertJiraSpecTableBoundDownload, assertJiraSpecVisibleText, clickJiraSpecTarget, completeJiraSpecAccessCodeGate, fillJiraSpecSegmentedCode, navigateJiraSpecRoute, performJiraSpecSelection, reportJiraSpecStepComplete, reportJiraSpecStepStart, resolveJiraSpecAuthTestData, resolveJiraSpecTarget, resolveJiraSpecValue } from ${quote(runtimePath)};`,
+    `import { settleJiraAction, assertJiraSpecAbsentText, assertJiraSpecHeaderText, awaitJiraSpecPostLoginTransition, assertJiraSpecAuthGate, assertJiraSpecDownloadContent, assertJiraSpecFieldValidation, assertJiraSpecFieldEnabled, assertJiraSpecFieldEmpty, assertJiraSpecRowMatch, assertJiraSpecTableBoundDownload, assertJiraSpecVisibleText, clickJiraSpecTarget, completeJiraSpecAccessCodeGate, fillJiraSpecSegmentedCode, navigateJiraSpecRoute, performJiraSpecSelection, reportJiraSpecStepComplete, reportJiraSpecStepStart, resolveJiraSpecAuthTestData, resolveJiraSpecTarget, resolveJiraSpecValue } from ${quote(runtimePath)};`,
     ...(authPath ? [`import { AuthFlow, setAuthFlowTestData } from ${quote(authPath)};`] : []),
     "",
     `test(${quote(input.plan.scenario.title)}, async ({ page }, testInfo) => {`,
@@ -101,6 +106,7 @@ export function compileJiraSpec(input: JiraSpecCompileInput): JiraSpecCompileRes
     const targetVar = `target${step.index}`;
     const oracleAuthGate = authOracles.has(step.index);
     const fieldValidationOracle = (input.sourceScenario.observableOracles ?? []).find(oracle => oracle.type === "field_validation" && oracle.stepIndex === step.index);
+    const fieldStateOracle = (input.sourceScenario.observableOracles ?? []).find(oracle => oracle.type === "field_state" && oracle.stepIndex === step.index);
     if (step.action === "navigate") {
       if (step.target === "APP_BASE_URL") lines.push(`  await settleJiraAction(page, () => page.goto(baseUrl, { waitUntil: "domcontentloaded" }), baseUrl);`);
       else if (step.target && typeof step.target === "object" && step.target.strategy === "url" && step.target.value) {
@@ -129,12 +135,24 @@ export function compileJiraSpec(input: JiraSpecCompileInput): JiraSpecCompileRes
       const expectedTarget = step.target && typeof step.target === "object" && step.target.strategy === "text" ? step.target.value : undefined;
       if (!fieldValidationOracle.backed || !fieldValidationOracle.target || fieldValidationOracle.target !== expectedTarget) unsupported.push(`step_${step.index}:field_validation_oracle_unbacked`);
       else lines.push(`  await assertJiraSpecFieldValidation(page, ${quote(fieldValidationOracle.target)}, ${step.timeoutMs ?? 15000});`);
+    } else if (step.action === "assertVisible" && fieldStateOracle) {
+      const expectedTarget = step.target && typeof step.target === "object" && step.target.strategy === "text" ? step.target.value : undefined;
+      const kind = fieldStateOracle.details?.kind;
+      if (!fieldStateOracle.backed || !fieldStateOracle.target || fieldStateOracle.target !== expectedTarget
+        || (kind !== "field_enabled" && kind !== "field_empty")) unsupported.push(`step_${step.index}:field_state_oracle_unbacked`);
+      else lines.push(`  await ${kind === "field_enabled" ? "assertJiraSpecFieldEnabled" : "assertJiraSpecFieldEmpty"}(page, ${quote(fieldStateOracle.target)}, ${step.timeoutMs ?? 15000});`);
     } else if (step.action === "assertVisible" && (input.sourceScenario.observableOracles ?? []).some(oracle => oracle.stepIndex === step.index && oracle.polarity === "negative")) {
       const oracle = input.sourceScenario.observableOracles!.find(item=>item.stepIndex === step.index && item.polarity === "negative")!;
       if (!oracle.backed || !oracle.target || !step.target || typeof step.target !== "object" || step.target.strategy !== "text" || step.target.value !== oracle.target) unsupported.push(`step_${step.index}:absence_oracle_unbacked`);
       else lines.push(`  await assertJiraSpecAbsentText(page, ${quote(oracle.target)});`);
     } else if (step.action === "assertVisible" && oracleAuthGate) {
       lines.push(`  await assertJiraSpecAuthGate(page);`);
+    } else if (step.action === "assertVisible" && step.target && typeof step.target === "object" && step.target.assertionScope === "header") {
+      const expectedTarget = step.target.strategy === "text" ? step.target.value : undefined;
+      const oracle = (input.sourceScenario.observableOracles ?? []).find(item => item.stepIndex === step.index);
+      if (!expectedTarget || !oracle?.backed || oracle.details?.assertionScope !== "header"
+        || (oracle.target && normalizeExactAssertionText(oracle.target) !== normalizeExactAssertionText(expectedTarget))) unsupported.push(`step_${step.index}:header_assertion_oracle_unbacked`);
+      else lines.push(`  await assertJiraSpecHeaderText(page, ${quote(expectedTarget)}, ${step.timeoutMs ?? 15000});`);
     } else if (step.action === "assertVisible" || step.action === "assertText") {
       const expected = step.action === "assertText"
         ? step.expected ?? step.value

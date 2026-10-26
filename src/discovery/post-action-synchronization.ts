@@ -106,6 +106,32 @@ export type PostActionSynchronizationInput = {
   ownerSubtreeMutation?: boolean;
 };
 
+/**
+ * A stalled loader can be ignored only after an independent observer proves that the
+ * action completed. Keep this separate from the readiness probe so downloads and other
+ * terminal actions cannot be mistaken for a loaded destination while pending requests or
+ * an unmet recorded postcondition still block progression.
+ */
+export function canToleratePostActionLoadingTimeout(input: {
+  stable: boolean;
+  reason?: string;
+  recordedPostActionPending: boolean;
+  pendingRequests: boolean;
+  cleanNetworkTransition: boolean;
+  inPlaceCausalEffectConfirmed: boolean;
+  routeActuallyChanged: boolean;
+  terminalDownloadObserved: boolean;
+}): boolean {
+  return !input.stable
+    && input.reason === "loading_timeout"
+    && !input.recordedPostActionPending
+    && !input.pendingRequests
+    && (input.cleanNetworkTransition
+      || input.inPlaceCausalEffectConfirmed
+      || input.routeActuallyChanged
+      || input.terminalDownloadObserved);
+}
+
 export type PostActionSynchronizationResult = {
   completed: boolean;
   signal?: "application_error" | "network_response" | "auth_gate_changed" | "next_target_visible" | "next_target_resolver_ready" | "dom_navigation_mutation" | "dom_validation_mutation" | "target_selection_state_changed" | "structured_state_mutation" | "click_effect_next_target_visible" | "owner_subtree_mutation" | "terminal_feedback" | "download" | "recorded_same_surface";

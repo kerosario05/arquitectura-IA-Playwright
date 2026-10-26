@@ -1,0 +1,9 @@
+{
+  "id": "4af69114-c2d9-4781-bf8f-092adda830cb-guardar-como-borrador-gestionar-documentos-y-extraer-datos-del-registro-mercantil",
+  "externalId": "4af69114-c2d9-4781-bf8f-092adda830cb",
+  "title": "Guardar como borrador, gestionar documentos y extraer datos del Registro Mercantil",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T07:24:30.338Z"
+}

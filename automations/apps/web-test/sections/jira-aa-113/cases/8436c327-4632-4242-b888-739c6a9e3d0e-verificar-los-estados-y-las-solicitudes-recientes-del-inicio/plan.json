@@ -1,0 +1,177 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-26T07:21:51.627Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "8436c327-4632-4242-b888-739c6a9e3d0e",
+    "title": "Verificar los estados y las solicitudes recientes del inicio"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "fill [jira_edit_c68fb14cc0e8f30d_2]",
+      "valueKey": "jira_edit_c68fb14cc0e8f30d_2",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"usuario\"]"
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [jira_edit_c68fb14cc0e8f30d_3]",
+      "valueKey": "jira_edit_c68fb14cc0e8f30d_3",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"clave\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Presionar \"iniciar sesión\"",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"btn-login\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Solicitudes recientes\"",
+      "target": {
+        "strategy": "text",
+        "value": "Solicitudes recientes"
+      }
+    },
+    {
+      "index": 7,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Denominación Social\"",
+      "target": {
+        "strategy": "text",
+        "value": "Denominación Social"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "jira_edit_c68fb14cc0e8f30d_2",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "jira_edit_c68fb14cc0e8f30d_3",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Verificar los estados y las solicitudes recientes del inicio",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "fill",
+        "valueKey": "jira_edit_c68fb14cc0e8f30d_2",
+        "technicalTargetRefs": [
+          "css:[id=\"usuario\"]"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "jira_edit_c68fb14cc0e8f30d_3",
+        "technicalTargetRefs": [
+          "css:[id=\"clave\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:[id=\"btn-login\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Solicitudes recientes\"",
+        "technicalTargetRefs": [
+          "text:Solicitudes recientes"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Denominación Social\"",
+        "technicalTargetRefs": [
+          "text:Denominación Social"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-6",
+        "requirement": "Validar que se muestre \"Solicitudes recientes\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 6,
+        "target": "Solicitudes recientes",
+        "evidence": [
+          "live-step-6"
+        ],
+        "details": {
+          "observedText": "Solicitudes recientes"
+        }
+      },
+      {
+        "id": "jira-oracle-7",
+        "requirement": "Validar que se muestre \"Denominación Social\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 7,
+        "target": "Solicitud\tRNC\tDenominación Social\tEstado\tActualizada",
+        "evidence": [
+          "live-step-7"
+        ],
+        "details": {
+          "observedText": "Solicitud\tRNC\tDenominación Social\tEstado\tActualizada"
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "que se muestre \"Denominación Social\""
+  }
+}

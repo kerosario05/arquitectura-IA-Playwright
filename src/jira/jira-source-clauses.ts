@@ -7,6 +7,17 @@ export function jiraAcceptanceClauses(issue: JiraIssueSource): Array<{ id: strin
   const sources=[issue.description,issue.acceptanceCriteria].map(value=>(value ?? "").trim()).filter((value,index,all)=>!!value && all.indexOf(value)===index);
   const text = sources.join("\n");
   const markers = [...text.matchAll(/(?:^|\n|\.\s+)(AC\d+)(?:\s*[—–:-]\s*|\s+)/gi)];
+  // Many projects keep acceptance criteria as numbered lists, bullets or plain
+  // prose rather than AC headings. Use that explicit field as the source; do
+  // not turn the entire story/development notes into invented obligations.
+  if (!markers.length && issue.acceptanceCriteria?.trim()) {
+    const criteria = issue.acceptanceCriteria.trim().replace(/\r\n/g,'\n');
+    const numbered = [...criteria.matchAll(/(?:^|\n)\s*(\d+)[.)]\s+([^]+?)(?=\n\s*\d+[.)]\s+|$)/g)];
+    if (numbered.length) return numbered.map(match => ({ id:`AC${match[1]}.1`, text:match[2].trim() }));
+    const bullets = criteria.split(/\n\s*[-*•]\s+/).map(line=>line.replace(/^[-*•]\s+/,'').trim()).filter(Boolean);
+    if (bullets.length > 1) return bullets.map((body,index)=>({id:`AC${index+1}.1`,text:body}));
+    return criteria.split(/\n+|\.\s+/).map(body=>body.trim()).filter(Boolean).map((body,index)=>({id:`AC1.${index+1}`,text:body}));
+  }
   const clauses: Array<{id:string;text:string}> = [];
   for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
     const marker = markers[markerIndex];

@@ -1,0 +1,1271 @@
+{
+  "recordingId": "e0d293a0-0f8f-4eca-82fd-2423d7bd427a",
+  "projectSlug": "web-test",
+  "appSlug": "web-test",
+  "platform": "web",
+  "baseUrl": "http://localhost:4310/#/login",
+  "label": "Inicio seccion",
+  "recordingGoal": {
+    "declaredGoal": "Inicio seccion",
+    "normalizedGoal": "Inicio seccion",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-10-26T12:32:01.333Z",
+  "status": "stopped",
+  "events": [
+    {
+      "t": 6951,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "http://localhost:4310/#/login",
+      "seq": 0
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "9db5430202df",
+      "url": "http://localhost:4310/#/login",
+      "seq": 1
+    },
+    {
+      "t": 24161,
+      "interactionId": "pointer-1",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Usuario",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Usuario\"",
+      "observationType": "pointer",
+      "seq": 2
+    },
+    {
+      "t": 42371,
+      "interactionId": "pointer-2",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Contraseña",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Contraseña\"",
+      "observationType": "pointer",
+      "seq": 3
+    },
+    {
+      "t": 42413,
+      "kind": "fill",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Usuario",
+        "role": "input",
+        "tag": "input",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Usuario",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#usuario",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "usuario",
+            "confidence": 0.8
+          }
+        ],
+        "rawTypedValue": "negocios",
+        "sensitive": false
+      },
+      "value": "negocios",
+      "valueSource": "user",
+      "seq": 4
+    },
+    {
+      "t": 42608,
+      "kind": "fill",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Contraseña",
+        "role": "input",
+        "tag": "input",
+        "inputType": "password",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Contraseña",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#clave",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "clave",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": true
+      },
+      "redactedKey": "contrasena",
+      "valueSource": "user",
+      "seq": 5
+    },
+    {
+      "t": 42611,
+      "kind": "press",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Contraseña",
+        "role": "textbox",
+        "tag": "input",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Contraseña",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#clave",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "clave",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "note": "Enter",
+      "seq": 6
+    },
+    {
+      "t": 42657,
+      "kind": "navigate",
+      "screenKey": "9db5430202df",
+      "url": "http://localhost:4310/#/",
+      "seq": 7
+    },
+    {
+      "t": 46418,
+      "interactionId": "pointer-3",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/",
+      "target": {
+        "label": "Crear solicitud",
+        "role": "link",
+        "tag": "a",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Crear solicitud",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "main:has(a[href=\"#/solicitud/nueva\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Crear solicitud\"",
+      "observationType": "pointer",
+      "seq": 8
+    },
+    {
+      "t": 46568,
+      "interactionId": "pointer-3",
+      "kind": "tap",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/",
+      "target": {
+        "label": "Crear solicitud",
+        "role": "link",
+        "tag": "a",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "link|Crear solicitud",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Crear solicitud",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#/solicitud/nueva"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "svg"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"svg\",1]],\"descendantEntries\":[[\"path\",2],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/solicitud/nueva\"},\"stableDescendants\":[],\"semanticShape\":[\"svg\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"svg\\\",1]],\\\"descendantEntries\\\":[[\\\"path\\\",2],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Crear solicitud",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "main:has(a[href=\"#/solicitud/nueva\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 9
+    },
+    {
+      "t": 46590,
+      "kind": "navigate",
+      "screenKey": "9db5430202df",
+      "url": "http://localhost:4310/#/solicitud/nueva",
+      "seq": 10
+    },
+    {
+      "t": 57418,
+      "interactionId": "pointer-4",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "86ddc0cf4aacf8139b176bc23b1180df19e64e58fdbd0131c20c3ef2c18fd086",
+      "url": "http://localhost:4310/#/solicitud/nueva",
+      "target": {
+        "label": "Número de Identificación*",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Número de Identificación*\"",
+      "observationType": "pointer",
+      "seq": 11
+    },
+    {
+      "t": 58998,
+      "interactionId": "pointer-5",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "86ddc0cf4aacf8139b176bc23b1180df19e64e58fdbd0131c20c3ef2c18fd086",
+      "url": "http://localhost:4310/#/solicitud/nueva",
+      "target": {
+        "label": "Consultar",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Consultar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(button[aria-label=\"Limpiar consulta\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Consultar\"",
+      "observationType": "pointer",
+      "seq": 12
+    },
+    {
+      "t": 59019,
+      "kind": "fill",
+      "screenKey": "9db5430202df",
+      "fingerprint": "86ddc0cf4aacf8139b176bc23b1180df19e64e58fdbd0131c20c3ef2c18fd086",
+      "url": "http://localhost:4310/#/solicitud/nueva",
+      "target": {
+        "label": "Número de Identificación*",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Número de Identificación*",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#idNumero",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "idNumero",
+            "confidence": 0.8
+          }
+        ],
+        "rawTypedValue": "101000013",
+        "sensitive": false
+      },
+      "value": "101000013",
+      "valueSource": "user",
+      "seq": 13
+    },
+    {
+      "t": 59134,
+      "interactionId": "pointer-5",
+      "kind": "tap",
+      "screenKey": "9db5430202df",
+      "fingerprint": "86ddc0cf4aacf8139b176bc23b1180df19e64e58fdbd0131c20c3ef2c18fd086",
+      "url": "http://localhost:4310/#/solicitud/nueva",
+      "target": {
+        "label": "Consultar",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Consultar",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Consultar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "svg"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"svg\",1]],\"descendantEntries\":[[\"circle\",1],[\"path\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "registro-form"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"svg\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"svg\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Consultar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(button[aria-label=\"Limpiar consulta\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 14
+    },
+    {
+      "t": 67683,
+      "interactionId": "pointer-6",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3ed1e620bad7127f2d791655af7dba959887f85805d4555537dca4be6795916",
+      "url": "http://localhost:4310/#/solicitud/nueva",
+      "target": {
+        "label": "Enviar a Debida Diligencia",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Enviar a Debida Diligencia",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "registro-form"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Enviar a Debida Diligencia\"",
+      "observationType": "pointer",
+      "seq": 15
+    },
+    {
+      "t": 67804,
+      "interactionId": "pointer-6",
+      "kind": "tap",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3ed1e620bad7127f2d791655af7dba959887f85805d4555537dca4be6795916",
+      "url": "http://localhost:4310/#/solicitud/nueva",
+      "target": {
+        "label": "Enviar a Debida Diligencia",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Enviar a Debida Diligencia",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Enviar a Debida Diligencia",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 2,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "registro-form"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 2
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Enviar a Debida Diligencia",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "registro-form"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "main:has(a[href=\"#/solicitud/SOL-2026-0001\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Enviar a Debida Diligencia",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "registro-form"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 16
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "9db5430202df",
+      "title": "Portal Comercial",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "firstSeenAt": 7309,
+      "controls": [],
+      "texts": [
+        "Portal Comercial"
+      ],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "4152b253c578",
+      "title": "Bienvenida, María",
+      "fingerprint": "86ddc0cf4aacf8139b176bc23b1180df19e64e58fdbd0131c20c3ef2c18fd086",
+      "url": "http://localhost:4310/#/solicitud/nueva",
+      "firstSeenAt": 46676,
+      "controls": [
+        {
+          "label": "PCPortal Comercial",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "PCPortal Comercial  PJ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Solicitudes",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Solicitudes",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Nueva solicitud",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Nueva solicitud",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Notificaciones",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Notificaciones"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Notificaciones",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Salir",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Salir",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "0",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "0 Borrador",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "1",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "1 Verificación PLAFT",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "1",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "1 En Revisión Legal",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "1",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "1 Devuelta",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "1",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "1 Escalado",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "1",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "1 Aprobada",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "1",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "1 Cliente Creado",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Crear solicitud",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Crear solicitud",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "SOL-2026-0001",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "headerContext": "Solicitud",
+          "rowIdentity": "SOL-2026-0001",
+          "associatedField": "Solicitud",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "SOL-2026-0001",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "SOL-2026-0005",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "headerContext": "Solicitud",
+          "rowIdentity": "SOL-2026-0005",
+          "associatedField": "Solicitud",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "SOL-2026-0005",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "SOL-2026-0006",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "headerContext": "Solicitud",
+          "rowIdentity": "SOL-2026-0006",
+          "associatedField": "Solicitud",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "SOL-2026-0006",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "SOL-2026-0002",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "headerContext": "Solicitud",
+          "rowIdentity": "SOL-2026-0002",
+          "associatedField": "Solicitud",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "SOL-2026-0002",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "SOL-2026-0003",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "headerContext": "Solicitud",
+          "rowIdentity": "SOL-2026-0003",
+          "associatedField": "Solicitud",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "SOL-2026-0003",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Bienvenida, María",
+        "Solicitudes recientes"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 1,
+        "rows": 6,
+        "cells": 30,
+        "headers": [
+          "Solicitud",
+          "RNC",
+          "Denominación Social",
+          "Estado",
+          "Actualizada"
+        ],
+        "headerRelationships": [
+          {
+            "header": "Solicitud",
+            "field": "Solicitud"
+          },
+          {
+            "header": "Solicitud",
+            "field": "Solicitud"
+          },
+          {
+            "header": "Solicitud",
+            "field": "Solicitud"
+          },
+          {
+            "header": "Solicitud",
+            "field": "Solicitud"
+          },
+          {
+            "header": "Solicitud",
+            "field": "Solicitud"
+          }
+        ]
+      },
+      "headerRelationships": [
+        {
+          "header": "Solicitud",
+          "field": "Solicitud"
+        },
+        {
+          "header": "Solicitud",
+          "field": "Solicitud"
+        },
+        {
+          "header": "Solicitud",
+          "field": "Solicitud"
+        },
+        {
+          "header": "Solicitud",
+          "field": "Solicitud"
+        },
+        {
+          "header": "Solicitud",
+          "field": "Solicitud"
+        }
+      ]
+    },
+    {
+      "screenKey": "9db155ad39b3",
+      "title": "Nueva solicitud",
+      "fingerprint": "b636cc49bc54e6f0fc8211ba29623e2b671ed4a1196bb6149c0b55b5024d27d3",
+      "url": "http://localhost:4310/#/solicitud/nueva",
+      "firstSeenAt": 59270,
+      "controls": [
+        {
+          "label": "PCPortal Comercial",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "PCPortal Comercial  PJ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Solicitudes",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Solicitudes",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Nueva solicitud",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Nueva solicitud",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Notificaciones",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Notificaciones"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Notificaciones",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Salir",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Salir",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Volver",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Volver",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Flujo de Solicitud",
+          "role": "tab",
+          "tag": "button",
+          "attributes": {
+            "role": "tab"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Flujo de Solicitud",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Registro de Datos",
+          "role": "tab",
+          "tag": "button",
+          "attributes": {
+            "role": "tab"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Registro de Datos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Tipo de Identificación*",
+          "role": "select",
+          "tag": "select",
+          "attributes": {
+            "id": "idTipo",
+            "name": "idTipo"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "idTipo",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Número de Identificación*",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingrese número de identificación",
+          "attributes": {
+            "id": "idNumero",
+            "name": "idNumero",
+            "type": "text",
+            "placeholder": "Ingrese número de identificación"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "idNumero",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Consultar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Consultar",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Limpiar consulta",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Limpiar consulta"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Limpiar consulta",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Abrir solicitud",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Abrir solicitud",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "No. Registro Mercantil",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingrese no. registro mercantil",
+          "attributes": {
+            "id": "registroMercantil",
+            "name": "registroMercantil",
+            "type": "text",
+            "placeholder": "Ingrese no. registro mercantil"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "registroMercantil",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Denominación Social*",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingrese denominación social",
+          "attributes": {
+            "id": "denominacion",
+            "name": "denominacion",
+            "type": "text",
+            "placeholder": "Ingrese denominación social"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "denominacion",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Tipo Sociedad*",
+          "role": "select",
+          "tag": "select",
+          "attributes": {
+            "id": "tipoSociedad",
+            "name": "tipoSociedad"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "tipoSociedad",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Fecha de Emisión",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "id": "fechaEmision",
+            "name": "fechaEmision",
+            "type": "date"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "fechaEmision",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Fecha de Vencimiento",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "id": "fechaVencimiento",
+            "name": "fechaVencimiento",
+            "type": "date"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "fechaVencimiento",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Siglas",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingrese siglas",
+          "attributes": {
+            "id": "siglas",
+            "name": "siglas",
+            "type": "text",
+            "placeholder": "Ingrese siglas"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "siglas",
+              "confidence": 0.9
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Nueva solicitud",
+        "Información del Registro"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 9,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    }
+  ],
+  "endedAt": "2026-10-26T12:33:24.929Z",
+  "durationMs": 83596
+}

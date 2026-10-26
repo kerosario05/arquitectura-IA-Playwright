@@ -1,0 +1,20 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\web-test\\sections\\portal-comercial\\cases\\preview-008-listado-de-solicitudes-negocios\\case.spec.ts",
+  "specHash": "1cd77a263feb6c9d0a7244043fc3914694e5b79977d912e71832c8b9c783e529",
+  "specSource": "generatedSpec"
+}

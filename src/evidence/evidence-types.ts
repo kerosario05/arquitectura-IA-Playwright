@@ -46,6 +46,7 @@ export interface EvidenceScenarioContext {
   analystName?: string;
   templatePath?: string;
   dataLabels?: Record<string, string>;
+  testData?: Array<{ label: string; value: string }>;
 }
 
 export interface EvidenceStepRecord {
@@ -98,6 +99,7 @@ export interface DetailEvidenceMetadata {
 export interface EvidenceScenarioRecord {
   issueKey?: string;
   dataLabels?: Record<string, string>;
+  testData?: Array<{ label: string; value: string }>;
   objective?: string;
   changeDescription?: string;
   preconditions?: string[];
@@ -216,6 +218,7 @@ export interface EvidenceRunContext {
   runId: string;
   outputRoot?: string;
   analystName?: string;
+  environment?: string;
   templatePath?: string;
 }
 

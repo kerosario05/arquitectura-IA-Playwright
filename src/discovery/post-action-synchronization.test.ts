@@ -1,6 +1,26 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { resolvePostActionSynchronization } from "./post-action-synchronization";
+import { canToleratePostActionLoadingTimeout, resolvePostActionSynchronization } from "./post-action-synchronization";
+
+test("loading timeout is tolerated after an observed terminal download only when no request or postcondition remains", () => {
+  const base = {
+    stable: false,
+    reason: "loading_timeout",
+    recordedPostActionPending: false,
+    pendingRequests: false,
+    cleanNetworkTransition: false,
+    inPlaceCausalEffectConfirmed: false,
+    routeActuallyChanged: false,
+    terminalDownloadObserved: true,
+  };
+
+  assert.equal(canToleratePostActionLoadingTimeout(base), true);
+  assert.equal(canToleratePostActionLoadingTimeout({ ...base, pendingRequests: true }), false);
+  assert.equal(canToleratePostActionLoadingTimeout({ ...base, recordedPostActionPending: true }), false);
+  assert.equal(canToleratePostActionLoadingTimeout({ ...base, terminalDownloadObserved: false }), false);
+  assert.equal(canToleratePostActionLoadingTimeout({ ...base, reason: "target_not_found" }), false);
+  assert.equal(canToleratePostActionLoadingTimeout({ ...base, stable: true }), false);
+});
 
 test("an unchanged auth surface permits a technically resolved recorded next action without display text", () => {
   assert.deepEqual(resolvePostActionSynchronization({

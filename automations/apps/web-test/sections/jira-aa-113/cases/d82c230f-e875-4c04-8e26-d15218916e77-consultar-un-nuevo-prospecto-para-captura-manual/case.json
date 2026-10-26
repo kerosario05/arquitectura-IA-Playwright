@@ -1,0 +1,9 @@
+{
+  "id": "d82c230f-e875-4c04-8e26-d15218916e77-consultar-un-nuevo-prospecto-para-captura-manual",
+  "externalId": "d82c230f-e875-4c04-8e26-d15218916e77",
+  "title": "Consultar un nuevo prospecto para captura manual",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T06:35:37.956Z"
+}

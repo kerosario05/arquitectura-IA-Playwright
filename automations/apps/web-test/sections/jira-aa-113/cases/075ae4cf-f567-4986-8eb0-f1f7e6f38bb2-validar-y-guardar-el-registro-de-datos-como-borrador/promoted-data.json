@@ -1,0 +1,127 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-10-26T06:43:34.820Z",
+  "entries": [
+    {
+      "key": "usuario",
+      "source": "unknown",
+      "fieldName": "[id=\"usuario\"]",
+      "stepIndex": 3,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "contrasena",
+      "source": "unknown",
+      "fieldName": "[id=\"clave\"]",
+      "stepIndex": 4,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "jira_edit_c5710b11404d5ec2_7",
+      "source": "unknown",
+      "fieldName": "[id=\"idNumero\"]",
+      "stepIndex": 8,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "jira_edit_c5710b11404d5ec2_9",
+      "source": "unknown",
+      "fieldName": "[id=\"denominacion\"]",
+      "stepIndex": 10,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "jira_edit_c5710b11404d5ec2_10",
+      "source": "unknown",
+      "fieldName": "[id=\"tipoSociedad\"]",
+      "stepIndex": 11,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "jira_edit_c5710b11404d5ec2_11",
+      "source": "unknown",
+      "fieldName": "[id=\"fechaConstitucion\"]",
+      "stepIndex": 12,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "jira_edit_c5710b11404d5ec2_12",
+      "source": "unknown",
+      "fieldName": "[id=\"calle\"]",
+      "stepIndex": 13,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "jira_edit_c5710b11404d5ec2_13",
+      "source": "unknown",
+      "fieldName": "[id=\"municipio\"]",
+      "stepIndex": 14,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "jira_edit_c5710b11404d5ec2_14",
+      "source": "unknown",
+      "fieldName": "[id=\"telefono1\"]",
+      "stepIndex": 15,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "jira_edit_c5710b11404d5ec2_15",
+      "source": "unknown",
+      "fieldName": "[id=\"email\"]",
+      "stepIndex": 16,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "jira_edit_c5710b11404d5ec2_16",
+      "source": "unknown",
+      "fieldName": "[id=\"actividad\"]",
+      "stepIndex": 17,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

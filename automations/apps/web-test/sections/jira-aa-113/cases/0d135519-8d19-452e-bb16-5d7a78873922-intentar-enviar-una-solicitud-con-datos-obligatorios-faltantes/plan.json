@@ -1,0 +1,231 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-26T07:37:39.887Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "0d135519-8d19-452e-bb16-5d7a78873922",
+    "title": "Intentar enviar una solicitud con datos obligatorios faltantes"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "fill [jira_edit_d522839872a4ebda_2]",
+      "valueKey": "jira_edit_d522839872a4ebda_2",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"usuario\"]"
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [jira_edit_d522839872a4ebda_3]",
+      "valueKey": "jira_edit_d522839872a4ebda_3",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"clave\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Presionar \"iniciar sesión\"",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"btn-login\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Presionar \"Solicitudes\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Solicitudes",
+        "exact": true
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"Nueva solicitud\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Nueva solicitud",
+        "exact": true
+      }
+    },
+    {
+      "index": 8,
+      "action": "click",
+      "description": "Presionar \"Enviar a Debida Diligencia\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Enviar a Debida Diligencia",
+        "exact": true
+      }
+    },
+    {
+      "index": 9,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Registro de Datos\"",
+      "target": {
+        "strategy": "text",
+        "value": "Registro de Datos"
+      }
+    },
+    {
+      "index": 10,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Denominación Social\"",
+      "target": {
+        "strategy": "text",
+        "value": "Denominación Social"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "jira_edit_d522839872a4ebda_2",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "jira_edit_d522839872a4ebda_3",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Intentar enviar una solicitud con datos obligatorios faltantes",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "fill",
+        "valueKey": "jira_edit_d522839872a4ebda_2",
+        "technicalTargetRefs": [
+          "css:[id=\"usuario\"]"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "jira_edit_d522839872a4ebda_3",
+        "technicalTargetRefs": [
+          "css:[id=\"clave\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:[id=\"btn-login\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Solicitudes"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Nueva solicitud"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Enviar a Debida Diligencia"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Registro de Datos\"",
+        "technicalTargetRefs": [
+          "text:Registro de Datos"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Denominación Social\"",
+        "technicalTargetRefs": [
+          "text:Denominación Social"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-9",
+        "requirement": "Validar que se muestre \"Registro de Datos\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 9,
+        "target": "Flujo de Solicitud\nRegistro de Datos",
+        "evidence": [
+          "live-step-9"
+        ],
+        "details": {
+          "observedText": "Flujo de Solicitud\nRegistro de Datos"
+        }
+      },
+      {
+        "id": "jira-oracle-10",
+        "requirement": "Validar que se muestre \"Denominación Social\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 10,
+        "target": "No. Registro Mercantil\nDenominación Social*\nCampo requerido\nTipo Sociedad*\nSeleccione…\nSociedad de Responsabilidad Limitada (SRL)\nSociedad Anónima (SA)\nSociedad Anónima Simplificada (SAS)\nEmpresa Individual de Responsabilidad Limitada (EIRL)\nSociedad Anónima Cerrada (SAC)\nCooperativa\nCampo requerido\nFecha de Emisión\nFecha de Vencimiento\nSiglas\nNacionalidad\nSeleccione nacionalidad\nDominicana\nEstadounidense\nEspañola\nPanameña\nColombiana\nMexicana",
+        "evidence": [
+          "live-step-10"
+        ],
+        "details": {
+          "observedText": "No. Registro Mercantil\nDenominación Social*\nCampo requerido\nTipo Sociedad*\nSeleccione…\nSociedad de Responsabilidad Limitada (SRL)\nSociedad Anónima (SA)\nSociedad Anónima Simplificada (SAS)\nEmpresa Individual de Responsabilidad Limitada (EIRL)\nSociedad Anónima Cerrada (SAC)\nCooperativa\nCampo requerido\nFecha de Emisión\nFecha de Vencimiento\nSiglas\nNacionalidad\nSeleccione nacionalidad\nDominicana\nEstadounidense\nEspañola\nPanameña\nColombiana\nMexicana"
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "que se muestre \"Denominación Social\""
+  }
+}

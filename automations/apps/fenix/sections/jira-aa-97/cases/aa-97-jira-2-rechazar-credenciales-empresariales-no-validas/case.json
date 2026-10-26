@@ -1,0 +1,9 @@
+{
+  "id": "aa-97-jira-2-rechazar-credenciales-empresariales-no-validas",
+  "externalId": "AA-97:jira:2",
+  "title": "Rechazar credenciales empresariales no válidas",
+  "source": "discovery",
+  "appSlug": "fenix",
+  "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+  "createdAt": "2026-10-23T18:56:24.645Z"
+}

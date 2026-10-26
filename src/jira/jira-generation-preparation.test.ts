@@ -550,7 +550,8 @@ test('independence clause is certified only by a scenario supplying a distinct s
  assert.ok(!withToken.scenarios[0].validation.errors.some(error=>error.startsWith('JIRA_ACCEPTANCE_COVERAGE_INCOMPLETE')));
  // A non-secret stimulus keeps the scenario navigable, so only the independence clause stays uncovered.
  const withoutToken=await run(['Abrir la aplicación configurada del proyecto','Presionar "Transferencias"','Presionar "Autorizar"','Validar que se muestre "Comprobante"']);
- assert.ok(withoutToken.scenarios[0].validation.errors.includes('JIRA_ACCEPTANCE_COVERAGE_INCOMPLETE:AC1.2'));
+ assert.deepEqual(withoutToken.coverage?.[0].missingClauses.map(clause=>clause.id),['AC1.2']);
+ assert.ok(!withoutToken.scenarios[0].validation.errors.some(error=>error.startsWith('JIRA_ACCEPTANCE_COVERAGE_INCOMPLETE:')));
 });
 
 test('observed access-code submit is inserted once, before the first functional step, with requirement indices shifted',()=>{
@@ -602,7 +603,8 @@ test('coverage ignores candidates without navigation, repairs with validated jou
  assert.ok(!ok.result.scenarios.some(scenario=>scenario.validation.errors.some(error=>error.startsWith('JIRA_ACCEPTANCE_COVERAGE_INCOMPLETE'))));
  const blocked=await run([mk('Otra sin ruta',[open,'Validar que se muestre "Resumen"'],'AC2.1')]);
  assert.equal(blocked.payloads.length,1);
- assert.ok(blocked.result.scenarios.some(scenario=>scenario.validation.errors.includes('JIRA_ACCEPTANCE_COVERAGE_INCOMPLETE:AC2.1')));
+ assert.deepEqual(blocked.result.coverage?.[0].missingClauses.map(clause=>clause.id),['AC2.1']);
+ assert.ok(blocked.result.scenarios.some(scenario=>scenario.validation.errors.includes('JIRA_NAVIGATION_TO_TARGET_SCREEN_MISSING')));
  assert.ok(!blocked.result.scenarios.some(scenario=>scenario.validation.valid&&scenario.acceptanceCriteriaRefs?.includes('AC2.1')));
 });
 

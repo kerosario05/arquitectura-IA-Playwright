@@ -1,0 +1,9 @@
+{
+  "id": "aa-97-jira-1-completar-una-transferencia-entre-cuentas-propias",
+  "externalId": "AA-97:jira:1",
+  "title": "Completar una transferencia entre cuentas propias",
+  "source": "discovery",
+  "appSlug": "fenix",
+  "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+  "createdAt": "2026-10-23T18:55:36.411Z"
+}

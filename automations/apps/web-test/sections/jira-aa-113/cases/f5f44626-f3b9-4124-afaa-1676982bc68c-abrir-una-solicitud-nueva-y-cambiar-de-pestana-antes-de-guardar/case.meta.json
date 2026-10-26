@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "f5f44626-f3b9-4124-afaa-1676982bc68c",
+  "title": "Abrir una solicitud nueva y cambiar de pestaña antes de guardar",
+  "generatedAt": "2026-10-26T07:41:31.272Z",
+  "executionEngine": "jira_semantic"
+}

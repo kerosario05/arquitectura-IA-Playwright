@@ -9,7 +9,7 @@ import { mapJiraScenariosToTestDesign } from "./test-design-generator";
 import { generateTestDesignScenarios } from "./test-design-generator";
 import { generateJiraScenarios } from "../jira/jira-scenario-generator";
 import type { AiProvider } from "../ai/ai-provider.types";
-import { normalizeScenario } from "./test-design.validation";
+import { markEditedScenarios, normalizeScenario } from "./test-design.validation";
 import { designCaseInputRequirements, designCaseRuntimeValues, persistDesignCaseInputs, toCaseInput } from "./test-design-publisher";
 
 for (const [project, steps] of [
@@ -18,19 +18,24 @@ for (const [project, steps] of [
 ] as const) {
   test(`${project}: Jira -> Design -> save -> TestRail -> reload retains one steps/input/persistence contract`, async () => {
     const source = {
+      scenarioId: `${project}:jira:1`,
       title: "Journey", steps: [...steps], preconditions: [], expectedResult: "Resultado observado",
       inputRequirements: deriveJiraInputRequirements([...steps]), acceptanceCriteriaRefs: ["AC1", "AC2"],
       validation: { valid: true, errors: [], warnings: [] },
     } as unknown as ValidatedScenario;
     const [design] = mapJiraScenariosToTestDesign([source]);
     design.data = design.data.map((datum, index) => ({ ...datum, value: `fixture-${index}` }));
-    const saved = normalizeScenario(JSON.parse(JSON.stringify(design)), 0);
+    const normalized = normalizeScenario(JSON.parse(JSON.stringify(design)), 0);
+    const [saved] = markEditedScenarios([design], [normalized]);
     assert.deepEqual(designCaseInputRequirements(saved), source.inputRequirements);
     assert.deepEqual(saved.acceptanceCriteriaRefs, source.acceptanceCriteriaRefs);
     assert.deepEqual(saved.data.map(datum => datum.key), source.inputRequirements!.map(input => input.key));
     const published = toCaseInput(saved, "QA-1", { requiredCustomFields: {}, caseOracle: "QA" });
-    assert.deepEqual(published.stepsSeparated, scenarioCaseSteps(source.steps));
-    assert.equal(published.preconditions, undefined);
+    assert.deepEqual(published.stepsSeparated, scenarioCaseSteps(source.steps).map((step, index, all) => ({
+      ...step,
+      ...(index === all.length - 1 ? { expected: source.expectedResult } : {}),
+    })));
+    assert.match(published.preconditions ?? "", /^Datos de prueba requeridos:/, "published preconditions carry the launcher's required-data summary");
     assert.equal(JSON.stringify(published).includes("fixture-"), false);
     const reloaded = normalizeTestRailCase({ id: 123, title: published.title, custom_steps_separated: published.stepsSeparated });
     assert.deepEqual(reloaded.steps.map(step => step.action), source.steps);
@@ -65,12 +70,20 @@ test("Launcher and Design share the same valid generation cache with identical s
       calls++;
       const parsedJson = { scenarios: [{ sourceIssueKey: issue.key, title: "Pago", preconditions: [],
         steps: ['Abrir la aplicación configurada del proyecto', 'Ingresar una tarjeta válida en "Número de tarjeta"', 'Validar que se muestre "Comprobante"'],
-        expectedResult: 'Se muestra "Comprobante".', acceptanceCriteriaRefs: ["AC1"] }] };
+        expectedResult: 'Se muestra "Comprobante".', acceptanceCriteriaRefs: ["AC1", "AC2"] }] };
       return { parsedJson, rawText: JSON.stringify(parsedJson), model: "fixture", providerName: "shared-contract-fixture", durationMs: 1 };
     } };
   const launcher = await generateJiraScenarios([issue], "shared-contract-fixture", provider, { loadProjectKnowledge: true, useCache: true });
-  const design = await generateTestDesignScenarios(issue, { appSlug: "shared-contract-fixture", provider });
+  const design = await generateTestDesignScenarios(issue, {
+    appSlug: "shared-contract-fixture", provider, existingTitles: ["A title retained from an earlier draft"],
+  });
   assert.equal(calls, 1);
   assert.deepEqual(design[0].steps.map(step => step.action), launcher.scenarios[0].steps);
   assert.deepEqual(design[0].inputRequirements, launcher.scenarios[0].inputRequirements);
+  assert.deepEqual(design[0].jiraSourceScenario?.validation, launcher.scenarios[0].validation);
+  assert.deepEqual(design[0].acceptanceCriteriaRefs, launcher.scenarios[0].acceptanceCriteriaRefs);
+  assert.equal(launcher.coverage?.[0].total,2);
+  const cached=await generateJiraScenarios([issue], 'shared-contract-fixture', provider, {loadProjectKnowledge:true,useCache:true});
+  assert.equal(calls,1);
+  assert.deepEqual(cached.coverage,launcher.coverage);
 });

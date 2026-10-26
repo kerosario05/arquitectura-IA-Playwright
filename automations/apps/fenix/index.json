@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-10-23T17:12:28.058Z",
+  "updatedAt": "2026-10-26T21:41:24.615Z",
   "automations": [
     {
       "id": "preview-001-login",
@@ -1077,13 +1077,13 @@
       "source": "discovery",
       "appProfile": "fenix",
       "createdAt": "2026-10-05T12:08:45.731Z",
-      "updatedAt": "2026-10-22T15:09:16.780Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T15-04-00-163Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-24T00:11:35.471Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-24T00-01-54-012Z\\attempt-2\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-22T15-04-00-163Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-24T00-01-54-012Z\\attempt-2",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -1107,7 +1107,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 141757,
+          "durationMs": 124745,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -1158,7 +1158,7 @@
           "previousSpec": {
             "existed": true,
             "hash": "8da3594695cd78c22472b848698496a445bce0959df813120e09a19b04f7fd9e",
-            "lastModifiedAt": "2026-10-22T14:56:29.096Z"
+            "lastModifiedAt": "2026-10-23T22:22:19.170Z"
           }
         },
         "promotionStrategyDiagnostics": {
@@ -3071,6 +3071,246 @@
       "promotionPersisted": true,
       "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-edited-6718c9ee9dfadb49-transferencia-exitosa-entre-cuentas-propias\\case.spec.ts",
       "promotedSpecHash": "ebdb1b449ba85a48645cebeb75b3ad0dc65548c770ef2e901fc6c921d9cb5717"
+    },
+    {
+      "id": "aa-97-jira-1-completar-una-transferencia-entre-cuentas-propias",
+      "externalId": "AA-97:jira:1",
+      "title": "Completar una transferencia entre cuentas propias",
+      "planPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-completar-una-transferencia-entre-cuentas-propias\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-completar-una-transferencia-entre-cuentas-propias\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "2a7bf6928b41",
+      "createdAt": "2026-10-23T18:12:50.265Z",
+      "updatedAt": "2026-10-23T18:55:36.421Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      },
+      "caseId": 55333,
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-completar-una-transferencia-entre-cuentas-propias\\case.spec.ts",
+      "promotedSpecHash": "a46dd63f13b959ed0006bc19ba4b099d71dd4c65a28885c2c7b3c60d475197ff"
+    },
+    {
+      "id": "aa-97-jira-2-rechazar-credenciales-empresariales-no-validas",
+      "externalId": "AA-97:jira:2",
+      "title": "Rechazar credenciales empresariales no válidas",
+      "planPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-2-rechazar-credenciales-empresariales-no-validas\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-2-rechazar-credenciales-empresariales-no-validas\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "2a7bf6928b41",
+      "createdAt": "2026-10-23T18:16:00.934Z",
+      "updatedAt": "2026-10-23T18:56:24.659Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      },
+      "caseId": 55334,
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-2-rechazar-credenciales-empresariales-no-validas\\case.spec.ts",
+      "promotedSpecHash": "c08878feaa253a9f24a47b1e0d7b2961bbfd2f50395252ac719f8c3ebd729615"
+    },
+    {
+      "id": "aa-97-jira-1-edited-360f8ba99f25b34e-transferencia-exitosa-entre-cuentas-propias-con-verificacion-de-acceso-y-token",
+      "externalId": "AA-97:jira:1:edited-360f8ba99f25b34e",
+      "title": "Transferencia exitosa entre cuentas propias con verificación de acceso y token",
+      "planPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-edited-360f8ba99f25b34e-transferencia-exitosa-entre-cuentas-propias-con-verificacion-de-acceso-y-token\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-edited-360f8ba99f25b34e-transferencia-exitosa-entre-cuentas-propias-con-verificacion-de-acceso-y-token\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "2a7bf6928b41",
+      "createdAt": "2026-10-23T19:55:59.065Z",
+      "updatedAt": "2026-10-23T19:55:59.069Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      },
+      "caseId": 55340,
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-edited-360f8ba99f25b34e-transferencia-exitosa-entre-cuentas-propias-con-verificacion-de-acceso-y-token\\case.spec.ts",
+      "promotedSpecHash": "547f8027015981820b9887f36c4eefaf5c0df96eaedba367062cc435739ee9fa"
+    },
+    {
+      "id": "aa-97-jira-5-realizar-transferencia-entre-cuentas-propias-y-revisar-el-comprobante",
+      "externalId": "AA-97:jira:5",
+      "title": "Realizar transferencia entre cuentas propias y revisar el comprobante",
+      "planPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-5-realizar-transferencia-entre-cuentas-propias-y-revisar-el-comprobante\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-5-realizar-transferencia-entre-cuentas-propias-y-revisar-el-comprobante\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "2a7bf6928b41",
+      "createdAt": "2026-10-26T21:41:17.948Z",
+      "updatedAt": "2026-10-26T21:41:17.949Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      },
+      "caseId": 56367,
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-5-realizar-transferencia-entre-cuentas-propias-y-revisar-el-comprobante\\case.spec.ts",
+      "promotedSpecHash": "99d4f2d03bee264d3c8b6f812aa2161850ac22faeac3cbb0c0ecbc18489eabc0"
     }
   ]
 }

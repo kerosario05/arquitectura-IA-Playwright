@@ -1,0 +1,28 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-10-26T07:11:54.656Z",
+  "entries": [
+    {
+      "key": "jira_edit_2e5e34770b3c54dd_2",
+      "source": "unknown",
+      "fieldName": "[id=\"usuario\"]",
+      "stepIndex": 3,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "jira_edit_2e5e34770b3c54dd_3",
+      "source": "unknown",
+      "fieldName": "[id=\"clave\"]",
+      "stepIndex": 4,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

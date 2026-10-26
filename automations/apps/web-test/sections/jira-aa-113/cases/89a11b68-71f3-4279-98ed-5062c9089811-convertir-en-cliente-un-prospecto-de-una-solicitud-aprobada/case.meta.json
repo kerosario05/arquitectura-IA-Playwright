@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "89a11b68-71f3-4279-98ed-5062c9089811",
+  "title": "Convertir en cliente un prospecto de una solicitud aprobada",
+  "generatedAt": "2026-10-26T07:34:47.269Z",
+  "executionEngine": "jira_semantic"
+}

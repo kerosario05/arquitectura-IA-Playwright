@@ -1,0 +1,795 @@
+{
+  "recordingId": "6dc121c4-0f04-438a-8928-9faf8f356411",
+  "projectSlug": "web-test",
+  "appSlug": "web-test",
+  "platform": "web",
+  "baseUrl": "http://localhost:4310/#/login",
+  "label": "Login Diligencia y listado de solicitudes",
+  "recordingGoal": {
+    "declaredGoal": "Login Diligencia y listado de solicitudes",
+    "normalizedGoal": "Login Diligencia y listado de solicitudes",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-10-26T13:05:48.813Z",
+  "status": "stopped",
+  "events": [
+    {
+      "t": 4957,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "http://localhost:4310/#/login",
+      "seq": 0
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "9db5430202df",
+      "url": "http://localhost:4310/#/login",
+      "seq": 1
+    },
+    {
+      "t": 8903,
+      "interactionId": "pointer-1",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Usuario",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Usuario\"",
+      "observationType": "pointer",
+      "seq": 2
+    },
+    {
+      "t": 10587,
+      "interactionId": "pointer-2",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Contraseña",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Contraseña\"",
+      "observationType": "pointer",
+      "seq": 3
+    },
+    {
+      "t": 10592,
+      "kind": "fill",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Usuario",
+        "role": "input",
+        "tag": "input",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Usuario",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#usuario",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "usuario",
+            "confidence": 0.8
+          }
+        ],
+        "rawTypedValue": "diligencia",
+        "sensitive": false
+      },
+      "value": "diligencia",
+      "valueSource": "user",
+      "seq": 4
+    },
+    {
+      "t": 12347,
+      "interactionId": "pointer-3",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Iniciar sesión",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Iniciar sesión",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "login-form"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Iniciar sesión\"",
+      "observationType": "pointer",
+      "seq": 5
+    },
+    {
+      "t": 12352,
+      "kind": "fill",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Contraseña",
+        "role": "input",
+        "tag": "input",
+        "inputType": "password",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Contraseña",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#clave",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "clave",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": true
+      },
+      "redactedKey": "contrasena",
+      "valueSource": "user",
+      "seq": 6
+    },
+    {
+      "t": 12420,
+      "interactionId": "pointer-3",
+      "kind": "tap",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Iniciar sesión",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Iniciar sesión",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#btn-login",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "btn-login",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#btn-login",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "btn-login"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "login-form"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-login\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Iniciar sesión",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "login-form"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 7
+    },
+    {
+      "t": 13504,
+      "kind": "navigate",
+      "screenKey": "9db5430202df",
+      "url": "http://localhost:4310/#/",
+      "seq": 8
+    },
+    {
+      "t": 16193,
+      "interactionId": "pointer-4",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "9319d077558fafb5aa590ee21b1ff22346288a25c3af5544508e14ce55b23aa3",
+      "url": "http://localhost:4310/#/",
+      "target": {
+        "label": "Bandeja PLAFT",
+        "role": "link",
+        "tag": "a",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Bandeja PLAFT",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Bandeja PLAFT\"",
+      "observationType": "pointer",
+      "seq": 9
+    },
+    {
+      "t": 16242,
+      "interactionId": "pointer-4",
+      "kind": "tap",
+      "screenKey": "9db5430202df",
+      "fingerprint": "9319d077558fafb5aa590ee21b1ff22346288a25c3af5544508e14ce55b23aa3",
+      "url": "http://localhost:4310/#/",
+      "target": {
+        "label": "Bandeja PLAFT",
+        "role": "link",
+        "tag": "a",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "link|Bandeja PLAFT",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Bandeja PLAFT",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#/plaft"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "nav"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/plaft\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Bandeja PLAFT",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 10
+    },
+    {
+      "t": 16247,
+      "kind": "navigate",
+      "screenKey": "9db5430202df",
+      "url": "http://localhost:4310/#/plaft",
+      "seq": 11
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "9db5430202df",
+      "title": "Portal Comercial",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "firstSeenAt": 5007,
+      "controls": [],
+      "texts": [
+        "Portal Comercial"
+      ],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "8ab7a2ae3bf4",
+      "title": "8ab7a2ae3bf4",
+      "fingerprint": "9319d077558fafb5aa590ee21b1ff22346288a25c3af5544508e14ce55b23aa3",
+      "url": "http://localhost:4310/#/login",
+      "firstSeenAt": 12500,
+      "controls": [
+        {
+          "label": "Usuario",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingrese su usuario",
+          "attributes": {
+            "id": "usuario",
+            "name": "usuario",
+            "placeholder": "Ingrese su usuario"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "usuario",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Contraseña",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingrese su contraseña",
+          "attributes": {
+            "id": "clave",
+            "name": "clave",
+            "type": "password",
+            "placeholder": "Ingrese su contraseña"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "clave",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Iniciar sesión",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "btn-login",
+            "type": "submit"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "btn-login",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Datos de demostración",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Datos de demostración",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "490ecc89371d",
+      "title": "Bienvenida, Elena",
+      "fingerprint": "29484258afdb20790797e17cbafe0636e7ed71ae07ffb23e0a6302ca7cd59d80",
+      "url": "http://localhost:4310/#/plaft",
+      "firstSeenAt": 16336,
+      "controls": [
+        {
+          "label": "PCPortal Comercial",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "PCPortal Comercial  PJ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Bandeja PLAFT",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Bandeja PLAFT",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Solicitudes",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Solicitudes",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Salir",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Salir",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "0",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "0 Borrador",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "1",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "1 Verificación PLAFT",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "1",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "1 En Revisión Legal",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "1",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "1 Devuelta",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "1",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "1 Escalado",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "1",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "1 Aprobada",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "1",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "1 Cliente Creado",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Ir a la bandeja PLAFT",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Ir a la bandeja PLAFT",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "SOL-2026-0001",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "headerContext": "Solicitud",
+          "rowIdentity": "SOL-2026-0001",
+          "associatedField": "Solicitud",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "SOL-2026-0001",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "SOL-2026-0005",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "headerContext": "Solicitud",
+          "rowIdentity": "SOL-2026-0005",
+          "associatedField": "Solicitud",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "SOL-2026-0005",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "SOL-2026-0006",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "headerContext": "Solicitud",
+          "rowIdentity": "SOL-2026-0006",
+          "associatedField": "Solicitud",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "SOL-2026-0006",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "SOL-2026-0002",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "headerContext": "Solicitud",
+          "rowIdentity": "SOL-2026-0002",
+          "associatedField": "Solicitud",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "SOL-2026-0002",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "SOL-2026-0003",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "headerContext": "Solicitud",
+          "rowIdentity": "SOL-2026-0003",
+          "associatedField": "Solicitud",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "SOL-2026-0003",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Bienvenida, Elena",
+        "Solicitudes recientes"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 1,
+        "rows": 6,
+        "cells": 30,
+        "headers": [
+          "Solicitud",
+          "RNC",
+          "Denominación Social",
+          "Estado",
+          "Actualizada"
+        ],
+        "headerRelationships": [
+          {
+            "header": "Solicitud",
+            "field": "Solicitud"
+          },
+          {
+            "header": "Solicitud",
+            "field": "Solicitud"
+          },
+          {
+            "header": "Solicitud",
+            "field": "Solicitud"
+          },
+          {
+            "header": "Solicitud",
+            "field": "Solicitud"
+          },
+          {
+            "header": "Solicitud",
+            "field": "Solicitud"
+          }
+        ]
+      },
+      "headerRelationships": [
+        {
+          "header": "Solicitud",
+          "field": "Solicitud"
+        },
+        {
+          "header": "Solicitud",
+          "field": "Solicitud"
+        },
+        {
+          "header": "Solicitud",
+          "field": "Solicitud"
+        },
+        {
+          "header": "Solicitud",
+          "field": "Solicitud"
+        },
+        {
+          "header": "Solicitud",
+          "field": "Solicitud"
+        }
+      ]
+    }
+  ],
+  "endedAt": "2026-10-26T13:06:08.865Z",
+  "durationMs": 20052
+}

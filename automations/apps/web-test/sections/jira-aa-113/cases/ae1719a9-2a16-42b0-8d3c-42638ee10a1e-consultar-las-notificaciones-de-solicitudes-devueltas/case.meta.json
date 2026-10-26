@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "ae1719a9-2a16-42b0-8d3c-42638ee10a1e",
+  "title": "Consultar las notificaciones de solicitudes devueltas",
+  "generatedAt": "2026-10-26T07:00:52.903Z",
+  "executionEngine": "jira_semantic"
+}

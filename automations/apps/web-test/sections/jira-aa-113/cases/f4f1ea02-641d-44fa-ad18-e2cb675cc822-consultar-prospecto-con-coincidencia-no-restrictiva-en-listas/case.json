@@ -1,0 +1,9 @@
+{
+  "id": "f4f1ea02-641d-44fa-ad18-e2cb675cc822-consultar-prospecto-con-coincidencia-no-restrictiva-en-listas",
+  "externalId": "f4f1ea02-641d-44fa-ad18-e2cb675cc822",
+  "title": "Consultar prospecto con coincidencia no restrictiva en listas",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T06:41:19.881Z"
+}

@@ -1,0 +1,20 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\web-test\\sections\\portal-comercial\\cases\\preview-003-login-diligencia-y-listado-de-solicitudes\\case.spec.ts",
+  "specHash": "1e02c496e7c8dfe46d05381a3a23f3aa42829d45b49c185ef7b6d7dc434596b7",
+  "specSource": "generatedSpec"
+}

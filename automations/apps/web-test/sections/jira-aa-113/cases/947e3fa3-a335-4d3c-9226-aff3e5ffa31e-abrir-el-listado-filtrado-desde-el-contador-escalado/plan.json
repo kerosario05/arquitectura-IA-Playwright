@@ -1,0 +1,194 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-26T07:09:53.374Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "947e3fa3-a335-4d3c-9226-aff3e5ffa31e",
+    "title": "Abrir el listado filtrado desde el contador Escalado"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "fill [jira_edit_42e877e844969b96_2]",
+      "valueKey": "jira_edit_42e877e844969b96_2",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"usuario\"]"
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [jira_edit_42e877e844969b96_3]",
+      "valueKey": "jira_edit_42e877e844969b96_3",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"clave\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Presionar \"iniciar sesión\"",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"btn-login\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Presionar \"Escalado\"",
+      "target": {
+        "strategy": "text",
+        "value": "1Escalado",
+        "exact": true
+      }
+    },
+    {
+      "index": 7,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Solicitudes de prospectos PJ\"",
+      "target": {
+        "strategy": "text",
+        "value": "Solicitudes de prospectos PJ"
+      }
+    },
+    {
+      "index": 8,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Exportar CSV\"",
+      "target": {
+        "strategy": "text",
+        "value": "Exportar CSV"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "jira_edit_42e877e844969b96_2",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "jira_edit_42e877e844969b96_3",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Abrir el listado filtrado desde el contador Escalado",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "fill",
+        "valueKey": "jira_edit_42e877e844969b96_2",
+        "technicalTargetRefs": [
+          "css:[id=\"usuario\"]"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "jira_edit_42e877e844969b96_3",
+        "technicalTargetRefs": [
+          "css:[id=\"clave\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:[id=\"btn-login\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "click",
+        "technicalTargetRefs": [
+          "text:1Escalado"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Solicitudes de prospectos PJ\"",
+        "technicalTargetRefs": [
+          "text:Solicitudes de prospectos PJ"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Exportar CSV\"",
+        "technicalTargetRefs": [
+          "text:Exportar CSV"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-7",
+        "requirement": "Validar que se muestre \"Solicitudes de prospectos PJ\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 7,
+        "target": "Solicitudes de prospectos PJ",
+        "evidence": [
+          "live-step-7"
+        ],
+        "details": {
+          "observedText": "Solicitudes de prospectos PJ"
+        }
+      },
+      {
+        "id": "jira-oracle-8",
+        "requirement": "Validar que se muestre \"Exportar CSV\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 8,
+        "target": "Solicitudes de prospectos PJ\n\nConsulte y gestione las solicitudes de apertura de producto.\n\nCrear solicitud\nTodos los estados\nBorrador\nVerificación PLAFT\nEn Revisión Legal\nDevuelta\nEscalado\nAprobada\nCliente Creado\nProducto Abierto\nRechazada\n1 solicitud(es) · 0 seleccionada(s)\nExportar CSV\nEliminar seleccionadas\n\tSolicitud\tRNC\tDenominación Social\tEstado\tActualizada\n\tAcciones\n\tSOL-2026-0006\t130444555\tTRANSPORTES RAPIDOS DEL ESTE SRL\tEscalado\t26/10/2026, 01:09 a. m.\t\nFilas por página\n5\n10\n25\nPágina 1 de 1",
+        "evidence": [
+          "live-step-8"
+        ],
+        "details": {
+          "observedText": "Solicitudes de prospectos PJ\n\nConsulte y gestione las solicitudes de apertura de producto.\n\nCrear solicitud\nTodos los estados\nBorrador\nVerificación PLAFT\nEn Revisión Legal\nDevuelta\nEscalado\nAprobada\nCliente Creado\nProducto Abierto\nRechazada\n1 solicitud(es) · 0 seleccionada(s)\nExportar CSV\nEliminar seleccionadas\n\tSolicitud\tRNC\tDenominación Social\tEstado\tActualizada\n\tAcciones\n\tSOL-2026-0006\t130444555\tTRANSPORTES RAPIDOS DEL ESTE SRL\tEscalado\t26/10/2026, 01:09 a. m.\t\nFilas por página\n5\n10\n25\nPágina 1 de 1"
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "que se muestre \"Exportar CSV\""
+  }
+}

@@ -1,0 +1,296 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-26T06:51:45.863Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "13637593-f8a1-4fbb-bb13-0520b2d1b834",
+    "title": "Revisión Legal devuelve un caso con motivo y observación"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "fill [usuario]",
+      "valueKey": "usuario",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"usuario\"]"
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [contrasena]",
+      "valueKey": "contrasena",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"clave\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Presionar \"iniciar sesión\"",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"btn-login\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Presionar \"Bandeja Revisión Legal\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Bandeja Revisión Legal",
+        "exact": true
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"SOL-2026-0001\"",
+      "target": {
+        "strategy": "css",
+        "value": ":is(main,[role=\"main\"]) a[href=\"#/solicitud/SOL-2026-0001\"]"
+      }
+    },
+    {
+      "index": 8,
+      "action": "click",
+      "description": "Presionar \"Devolver solicitud\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Devolver solicitud",
+        "exact": true
+      }
+    },
+    {
+      "index": 9,
+      "action": "select",
+      "description": "select [jira_edit_3c41b15cbee3e8be_8]",
+      "valueKey": "jira_edit_3c41b15cbee3e8be_8",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"dvMotivo\"]"
+      }
+    },
+    {
+      "index": 10,
+      "action": "fill",
+      "description": "fill [jira_edit_3c41b15cbee3e8be_9]",
+      "valueKey": "jira_edit_3c41b15cbee3e8be_9",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"dvObs\"]"
+      }
+    },
+    {
+      "index": 11,
+      "action": "click",
+      "description": "Presionar \"Confirmar devolución\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Confirmar devolución",
+        "exact": true
+      }
+    },
+    {
+      "index": 12,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Flujo de Solicitud\"",
+      "target": {
+        "strategy": "text",
+        "value": "Flujo de Solicitud"
+      }
+    },
+    {
+      "index": 13,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Personas relacionadas\"",
+      "target": {
+        "strategy": "text",
+        "value": "Personas relacionadas"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "usuario",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "jira_edit_3c41b15cbee3e8be_8",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "jira_edit_3c41b15cbee3e8be_9",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Revisión Legal devuelve un caso con motivo y observación",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "fill",
+        "valueKey": "usuario",
+        "technicalTargetRefs": [
+          "css:[id=\"usuario\"]"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "contrasena",
+        "technicalTargetRefs": [
+          "css:[id=\"clave\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:[id=\"btn-login\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Bandeja Revisión Legal"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css::is(main,[role=\"main\"]) a[href=\"#/solicitud/SOL-2026-0001\"]"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Devolver solicitud"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "select",
+        "valueKey": "jira_edit_3c41b15cbee3e8be_8",
+        "technicalTargetRefs": [
+          "css:[id=\"dvMotivo\"]"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "fill",
+        "valueKey": "jira_edit_3c41b15cbee3e8be_9",
+        "technicalTargetRefs": [
+          "css:[id=\"dvObs\"]"
+        ]
+      },
+      {
+        "index": 11,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Confirmar devolución"
+        ]
+      },
+      {
+        "index": 12,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Flujo de Solicitud\"",
+        "technicalTargetRefs": [
+          "text:Flujo de Solicitud"
+        ]
+      },
+      {
+        "index": 13,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Personas relacionadas\"",
+        "technicalTargetRefs": [
+          "text:Personas relacionadas"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-12",
+        "requirement": "Validar que se muestre \"Flujo de Solicitud\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 12,
+        "target": "Flujo de Solicitud\nRegistro de Datos",
+        "evidence": [
+          "live-step-12"
+        ],
+        "details": {
+          "observedText": "Flujo de Solicitud\nRegistro de Datos"
+        }
+      },
+      {
+        "id": "jira-oracle-13",
+        "requirement": "Validar que se muestre \"Personas relacionadas\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 13,
+        "target": "Estado del flujo\n\nSeguimiento de la solicitud entre Negocios, Debida Diligencia y Revisión Legal.\n\n1\nRegistro de datos del prospecto\nNegocios · Consulta de RNC y datos de la empresa\n2\nDepuración en listas (Bizagi)\nDebida Diligencia · Listas restrictivas y no restrictivas\n3\nVerificación PLAFT\nDebida Diligencia · Coincidencias\n4\nRevisión legal inicial\nRevisión Legal · Aprobar, escalar, devolver o rechazar\n5\nConversión de prospecto a cliente\nNegocios · Código de cliente\n6\nConozca su cliente\nNegocios · Información KYC\n7\nApertura de producto\nNegocios · Cuenta y productos\nPersonas relacionadas",
+        "evidence": [
+          "live-step-13"
+        ],
+        "details": {
+          "observedText": "Estado del flujo\n\nSeguimiento de la solicitud entre Negocios, Debida Diligencia y Revisión Legal.\n\n1\nRegistro de datos del prospecto\nNegocios · Consulta de RNC y datos de la empresa\n2\nDepuración en listas (Bizagi)\nDebida Diligencia · Listas restrictivas y no restrictivas\n3\nVerificación PLAFT\nDebida Diligencia · Coincidencias\n4\nRevisión legal inicial\nRevisión Legal · Aprobar, escalar, devolver o rechazar\n5\nConversión de prospecto a cliente\nNegocios · Código de cliente\n6\nConozca su cliente\nNegocios · Información KYC\n7\nApertura de producto\nNegocios · Cuenta y productos\nPersonas relacionadas"
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "que se muestre \"Personas relacionadas\""
+  }
+}

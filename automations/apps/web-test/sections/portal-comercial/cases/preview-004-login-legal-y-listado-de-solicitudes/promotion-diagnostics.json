@@ -1,0 +1,20 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\web-test\\sections\\portal-comercial\\cases\\preview-004-login-legal-y-listado-de-solicitudes\\case.spec.ts",
+  "specHash": "a988ab7e998f01d314d799ff5caa295c4a0faa3c78c8785c2a29c2cb44731558",
+  "specSource": "generatedSpec"
+}

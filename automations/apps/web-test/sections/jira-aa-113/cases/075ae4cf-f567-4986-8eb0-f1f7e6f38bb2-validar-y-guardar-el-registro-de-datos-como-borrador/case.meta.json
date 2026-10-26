@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "075ae4cf-f567-4986-8eb0-f1f7e6f38bb2",
+  "title": "Validar y guardar el Registro de Datos como borrador",
+  "generatedAt": "2026-10-26T06:43:34.810Z",
+  "executionEngine": "jira_semantic"
+}

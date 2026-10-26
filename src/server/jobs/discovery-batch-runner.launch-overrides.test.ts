@@ -3,7 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { applyLaunchDataOverridesToRuntimeEntries, writeRuntimeContextIfPresent } from "./discovery-batch-runner";
+import { applyLaunchDataOverridesToRuntimeEntries, buildJiraSemanticChildDataOverrides, writeRuntimeContextIfPresent } from "./discovery-batch-runner";
 
 const publishedCases = [
   { scenarioId: "SC-1", caseId: 100, title: "a", sourceType: "jira_preview" },
@@ -35,6 +35,31 @@ test("launch dataOverrides reach the per-case runtime context by published-case 
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test("Jira semantic child receives mapped inputs scoped to its source scenario", async () => {
+  const entries = await applyLaunchDataOverridesToRuntimeEntries({
+    appSlug: "web-test",
+    caseIds: [100, 200],
+    publishedCases: [
+      { scenarioId: "TR-100", launchScenarioId: "LAUNCH-100", caseId: 100, title: "a", sourceType: "jira_preview" },
+      { scenarioId: "TR-200", launchScenarioId: "LAUNCH-200", caseId: 200, title: "b", sourceType: "jira_preview" },
+    ],
+    dataOverrides: {
+      "LAUNCH-100": { account_number: "synthetic-account-100" },
+      "LAUNCH-200": { account_number: "synthetic-account-200" },
+      "SOURCE-100": { note: "direct-scenario-value" },
+    },
+  } as any, never);
+
+  assert.deepEqual(buildJiraSemanticChildDataOverrides(entries, { scenarioId: "SOURCE-100" }, {
+    scenarioId: "TR-100", launchScenarioId: "LAUNCH-100", caseId: 100, title: "a", sourceType: "jira_preview",
+  }), {
+    "SOURCE-100": {
+      note: "direct-scenario-value",
+      account_number: "synthetic-account-100",
+    },
+  });
 });
 
 const rerun = (over: Record<string, unknown> = {}) => ({

@@ -263,11 +263,20 @@ export async function resolveSessionToken(token: string): Promise<ResolvedSessio
     throw new AuthError("account_disabled", "La cuenta está desactivada", 403);
   }
 
-  await sessionRepo.touchSession(session.id, conn);
+  // Full sessions use an inactivity timeout: any authenticated activity renews
+  // the same opaque token. Restricted first-login sessions keep their short,
+  // fixed deadline until the password-change flow issues a full session.
+  const renewedExpiresAt = session.scope === "full"
+    ? new Date(Date.now() + resolveAuthConfig().sessionTtlMs)
+    : undefined;
+  await sessionRepo.touchSession(session.id, conn, renewedExpiresAt);
+  const activeSession = renewedExpiresAt
+    ? { ...session, expiresAt: renewedExpiresAt.toISOString() }
+    : session;
   const publicUser = userRepo.stripSecret(user);
   return {
-    principal: await buildUserPrincipal(publicUser, session, conn),
-    session,
+    principal: await buildUserPrincipal(publicUser, activeSession, conn),
+    session: activeSession,
     user: publicUser,
   };
 }

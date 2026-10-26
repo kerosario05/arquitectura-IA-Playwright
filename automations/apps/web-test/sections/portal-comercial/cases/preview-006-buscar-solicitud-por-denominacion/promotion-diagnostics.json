@@ -1,0 +1,20 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\web-test\\sections\\portal-comercial\\cases\\preview-006-buscar-solicitud-por-denominacion\\case.spec.ts",
+  "specHash": "9030409554e12ade2ed0dd9444f34d551efef3a1fa3d34b641ab2cf748dab153",
+  "specSource": "generatedSpec"
+}

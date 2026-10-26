@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "4b06323f-2f6e-4f8a-a85f-d984b2f12699",
+  "title": "Consultar una empresa con identificación distinta a RNC",
+  "generatedAt": "2026-10-26T06:37:31.302Z",
+  "executionEngine": "jira_semantic"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "52e1df62-db59-4b4d-a5a8-3acbdf783e21-abrir-el-listado-filtrado-desde-el-contador-devuelta",
+  "externalId": "52e1df62-db59-4b4d-a5a8-3acbdf783e21",
+  "title": "Abrir el listado filtrado desde el contador Devuelta",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T07:08:57.929Z"
+}

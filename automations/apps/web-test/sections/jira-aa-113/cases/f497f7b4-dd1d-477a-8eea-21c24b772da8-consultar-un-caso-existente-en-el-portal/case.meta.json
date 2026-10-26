@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "f497f7b4-dd1d-477a-8eea-21c24b772da8",
+  "title": "Consultar un caso existente en el portal",
+  "generatedAt": "2026-10-26T06:29:44.030Z",
+  "executionEngine": "jira_semantic"
+}

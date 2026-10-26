@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "c2b20962-96a0-44ff-932e-b08516a84e13",
+  "title": "Validar los campos obligatorios del Registro de Datos",
+  "generatedAt": "2026-10-26T07:16:58.559Z",
+  "executionEngine": "jira_semantic"
+}

@@ -28,8 +28,14 @@ export function inferLegacyJiraRerunOrigin(
   return allCarryJiraOrigin ? { kind: "jira_generated", jiraKey } : undefined;
 }
 
-export function isScenarioEligibleForEngine(engine: ExecutionEngine | "legacy", scenario: { mcpExecutable?: boolean; validation?: { valid?: boolean } }): boolean {
-  return engine === "jira_semantic" || scenario.validation?.valid !== false && scenario.mcpExecutable === true;
+export function isScenarioEligibleForEngine(engine: ExecutionEngine | "legacy", scenario: { mcpExecutable?: boolean; validation?: { valid?: boolean; errors?: string[] } }): boolean {
+  if (engine === "jira_semantic") {
+    // Jira scenarios are run through Discovery, which reports a concrete step
+    // failure and keeps the scenario editable. Generation findings are not an
+    // admission gate; they remain visible as review diagnostics.
+    return true;
+  }
+  return scenario.validation?.valid !== false && scenario.mcpExecutable === true;
 }
 
 /** An absent recording is never evidence of Jira provenance. Legacy requests stay on their existing route. */

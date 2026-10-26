@@ -1,0 +1,9 @@
+{
+  "id": "cb258006-b573-4c3c-b9c6-8d6c299c16c2-verificar-el-menu-de-revision-legal",
+  "externalId": "cb258006-b573-4c3c-b9c6-8d6c299c16c2",
+  "title": "Verificar el menú de Revisión Legal",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T07:28:58.262Z"
+}

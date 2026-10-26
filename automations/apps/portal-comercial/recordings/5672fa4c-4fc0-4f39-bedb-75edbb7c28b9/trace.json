@@ -1,0 +1,160 @@
+{
+  "recordingId": "5672fa4c-4fc0-4f39-bedb-75edbb7c28b9",
+  "projectSlug": "portal-comercial",
+  "appSlug": "portal-comercial",
+  "platform": "web",
+  "baseUrl": "https://srvqacgowb01.local.bsc.com:5000/",
+  "label": "Smoke Chromium local 2026-10-26 16:06",
+  "recordingGoal": {
+    "declaredGoal": "Smoke Chromium local: verificar la apertura de Portal Comercial mediante el agente. No realizar acciones de negocio.",
+    "normalizedGoal": "Smoke Chromium local: verificar la apertura de Portal Comercial mediante el agente. No realizar acciones de negocio",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-10-26T20:06:10.540Z",
+  "status": "stopped",
+  "events": [
+    {
+      "t": 7127,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 0
+    },
+    {
+      "t": 8808,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 1
+    },
+    {
+      "t": 9256,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 2
+    },
+    {
+      "t": 9270,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 3
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "dc6c2cb3e533",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/",
+      "seq": 4
+    },
+    {
+      "t": 122910,
+      "kind": "navigate",
+      "screenKey": "dc6c2cb3e533",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 5
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "dc6c2cb3e533",
+      "title": "Banco Santa Cruz - Portal Comercial",
+      "fingerprint": "90cf40b16ddadeeeec43d594200d0afff527792b4bb59e1ce68bd189c51e2b8e",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "firstSeenAt": 9748,
+      "controls": [
+        {
+          "label": "Usuario",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingresa tu usuario",
+          "attributes": {
+            "id": "username",
+            "name": "username",
+            "placeholder": "Ingresa tu usuario"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "username",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Contraseña",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingresa tu contraseña",
+          "attributes": {
+            "id": "password",
+            "name": "password",
+            "type": "password",
+            "placeholder": "Ingresa tu contraseña"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "password",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Mantener la sesión iniciada",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "id": "remember-me",
+            "type": "checkbox"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "remember-me",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Iniciar sesión",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "submit",
+            "aria-label": "Iniciar sesión"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Iniciar sesión",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Banco Santa Cruz - Portal Comercial"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 1,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    }
+  ],
+  "endedAt": "2026-10-26T20:08:13.534Z",
+  "durationMs": 122994
+}

@@ -1,0 +1,10 @@
+{
+  "id": "preview-005-abrir-formulario-nueva-solicitud",
+  "externalId": "PREVIEW-005",
+  "caseId": 0,
+  "title": "Abrir formulario Nueva solicitud",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T13:23:02.986Z"
+}

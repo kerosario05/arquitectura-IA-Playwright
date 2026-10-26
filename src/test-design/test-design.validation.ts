@@ -205,6 +205,10 @@ export function markEditedScenarios(
     return {
       ...scenario,
       edited,
+      // Jira and project provenance are server-owned. A client save may not replace or drop them.
+      ...(stored.jiraSourceScenario ? { jiraSourceScenario: stored.jiraSourceScenario } : {}),
+      ...(stored.jiraSourceScenarioId ? { jiraSourceScenarioId: stored.jiraSourceScenarioId } : {}),
+      ...(stored.knowledgeProfileSlug !== undefined ? { knowledgeProfileSlug: stored.knowledgeProfileSlug } : {}),
       testRailCaseId: stored.testRailCaseId,
       testRailDirty: stored.testRailDirty === true || (stored.testRailCaseId !== null && contentChanged),
     };

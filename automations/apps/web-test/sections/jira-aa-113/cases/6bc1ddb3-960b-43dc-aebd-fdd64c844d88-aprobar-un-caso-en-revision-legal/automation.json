@@ -1,0 +1,56 @@
+{
+  "id": "6bc1ddb3-960b-43dc-aebd-fdd64c844d88-aprobar-un-caso-en-revision-legal",
+  "externalId": "6bc1ddb3-960b-43dc-aebd-fdd64c844d88",
+  "title": "Aprobar un caso En Revisión Legal",
+  "planPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\6bc1ddb3-960b-43dc-aebd-fdd64c844d88-aprobar-un-caso-en-revision-legal\\plan.json",
+  "specPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\6bc1ddb3-960b-43dc-aebd-fdd64c844d88-aprobar-un-caso-en-revision-legal\\case.spec.ts",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "web-test",
+  "baseUrlHash": "4e1194428e74",
+  "createdAt": "2026-10-26T07:33:20.159Z",
+  "updatedAt": "2026-10-26T07:33:20.159Z",
+  "specVerificationStatus": "passed",
+  "tags": [
+    "jira_semantic",
+    "jira_generated"
+  ],
+  "metadata": {
+    "specGeneration": {
+      "mode": "deterministic",
+      "provider": null,
+      "model": null,
+      "invocations": 0,
+      "invocationsConsumed": 0,
+      "durationMs": 0,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "passed",
+        "typescript": "skipped",
+        "playwrightDiscovery": "skipped",
+        "semanticCoverage": "passed",
+        "functionalExecution": "passed"
+      },
+      "promotionAllowed": true,
+      "specsRequested": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
+      "specWritten": true,
+      "errors": [],
+      "warnings": []
+    }
+  }
+}

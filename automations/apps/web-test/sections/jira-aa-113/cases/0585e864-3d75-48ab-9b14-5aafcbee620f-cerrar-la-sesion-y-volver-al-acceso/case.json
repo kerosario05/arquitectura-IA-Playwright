@@ -1,0 +1,9 @@
+{
+  "id": "0585e864-3d75-48ab-9b14-5aafcbee620f-cerrar-la-sesion-y-volver-al-acceso",
+  "externalId": "0585e864-3d75-48ab-9b14-5aafcbee620f",
+  "title": "Cerrar la sesión y volver al acceso",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T07:19:51.281Z"
+}

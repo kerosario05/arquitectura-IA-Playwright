@@ -1,0 +1,247 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-26T06:48:53.587Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "9e37648d-ab3d-4d63-aaee-5b264ef75573",
+    "title": "Revisión Legal aprueba un caso En Revisión Legal"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "fill [usuario]",
+      "valueKey": "usuario",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"usuario\"]"
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [contrasena]",
+      "valueKey": "contrasena",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"clave\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Presionar \"iniciar sesión\"",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"btn-login\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Presionar \"Bandeja Revisión Legal\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Bandeja Revisión Legal",
+        "exact": true
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"SOL-2026-0001\"",
+      "target": {
+        "strategy": "css",
+        "value": ":is(main,[role=\"main\"]) a[href=\"#/solicitud/SOL-2026-0001\"]"
+      }
+    },
+    {
+      "index": 8,
+      "action": "click",
+      "description": "Presionar \"Aprobar caso y enviar a Negocios\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Aprobar caso y enviar a Negocios",
+        "exact": true
+      }
+    },
+    {
+      "index": 9,
+      "action": "click",
+      "description": "Presionar \"Confirmar aprobación\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Confirmar aprobación",
+        "exact": true
+      }
+    },
+    {
+      "index": 10,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Flujo de Solicitud\"",
+      "target": {
+        "strategy": "text",
+        "value": "Flujo de Solicitud"
+      }
+    },
+    {
+      "index": 11,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Personas relacionadas\"",
+      "target": {
+        "strategy": "text",
+        "value": "Personas relacionadas"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "usuario",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Revisión Legal aprueba un caso En Revisión Legal",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "fill",
+        "valueKey": "usuario",
+        "technicalTargetRefs": [
+          "css:[id=\"usuario\"]"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "contrasena",
+        "technicalTargetRefs": [
+          "css:[id=\"clave\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:[id=\"btn-login\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Bandeja Revisión Legal"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css::is(main,[role=\"main\"]) a[href=\"#/solicitud/SOL-2026-0001\"]"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Aprobar caso y enviar a Negocios"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Confirmar aprobación"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Flujo de Solicitud\"",
+        "technicalTargetRefs": [
+          "text:Flujo de Solicitud"
+        ]
+      },
+      {
+        "index": 11,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Personas relacionadas\"",
+        "technicalTargetRefs": [
+          "text:Personas relacionadas"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-10",
+        "requirement": "Validar que se muestre \"Flujo de Solicitud\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 10,
+        "target": "Flujo de Solicitud\nRegistro de Datos",
+        "evidence": [
+          "live-step-10"
+        ],
+        "details": {
+          "observedText": "Flujo de Solicitud\nRegistro de Datos"
+        }
+      },
+      {
+        "id": "jira-oracle-11",
+        "requirement": "Validar que se muestre \"Personas relacionadas\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 11,
+        "target": "Estado del flujo\n\nSeguimiento de la solicitud entre Negocios, Debida Diligencia y Revisión Legal.\n\nRegistro de datos del prospecto\nNegocios · Consulta de RNC y datos de la empresa\nDepuración en listas (Bizagi)\nDebida Diligencia · Listas restrictivas y no restrictivas\nVerificación PLAFT\nDebida Diligencia · Coincidencias\nRevisión legal inicial\nRevisión Legal · Aprobar, escalar, devolver o rechazar\n5\nConversión de prospecto a cliente\nNegocios · Código de cliente\n6\nConozca su cliente\nNegocios · Información KYC\n7\nApertura de producto\nNegocios · Cuenta y productos\nPersonas relacionadas",
+        "evidence": [
+          "live-step-11"
+        ],
+        "details": {
+          "observedText": "Estado del flujo\n\nSeguimiento de la solicitud entre Negocios, Debida Diligencia y Revisión Legal.\n\nRegistro de datos del prospecto\nNegocios · Consulta de RNC y datos de la empresa\nDepuración en listas (Bizagi)\nDebida Diligencia · Listas restrictivas y no restrictivas\nVerificación PLAFT\nDebida Diligencia · Coincidencias\nRevisión legal inicial\nRevisión Legal · Aprobar, escalar, devolver o rechazar\n5\nConversión de prospecto a cliente\nNegocios · Código de cliente\n6\nConozca su cliente\nNegocios · Información KYC\n7\nApertura de producto\nNegocios · Cuenta y productos\nPersonas relacionadas"
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "que se muestre \"Personas relacionadas\""
+  }
+}

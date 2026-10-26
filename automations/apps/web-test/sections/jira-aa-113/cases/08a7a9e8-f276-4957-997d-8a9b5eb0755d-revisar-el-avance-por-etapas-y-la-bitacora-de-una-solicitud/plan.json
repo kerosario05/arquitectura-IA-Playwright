@@ -1,0 +1,211 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-26T07:14:34.470Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "08a7a9e8-f276-4957-997d-8a9b5eb0755d",
+    "title": "Revisar el avance por etapas y la bitácora de una solicitud"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "fill [usuario]",
+      "valueKey": "usuario",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"usuario\"]"
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [contrasena]",
+      "valueKey": "contrasena",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"clave\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Presionar \"iniciar sesión\"",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"btn-login\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Presionar \"Solicitudes\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Solicitudes",
+        "exact": true
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"SOL-2026-0001\"",
+      "target": {
+        "strategy": "css",
+        "value": ":is(main,[role=\"main\"]) a[href=\"#/solicitud/SOL-2026-0001\"]"
+      }
+    },
+    {
+      "index": 8,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Estado del flujo\"",
+      "target": {
+        "strategy": "text",
+        "value": "Estado del flujo"
+      }
+    },
+    {
+      "index": 9,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Bitácora\"",
+      "target": {
+        "strategy": "text",
+        "value": "Bitácora"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "usuario",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Revisar el avance por etapas y la bitácora de una solicitud",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "fill",
+        "valueKey": "usuario",
+        "technicalTargetRefs": [
+          "css:[id=\"usuario\"]"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "contrasena",
+        "technicalTargetRefs": [
+          "css:[id=\"clave\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:[id=\"btn-login\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Solicitudes"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css::is(main,[role=\"main\"]) a[href=\"#/solicitud/SOL-2026-0001\"]"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Estado del flujo\"",
+        "technicalTargetRefs": [
+          "text:Estado del flujo"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Bitácora\"",
+        "technicalTargetRefs": [
+          "text:Bitácora"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-8",
+        "requirement": "Validar que se muestre \"Estado del flujo\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 8,
+        "target": "Estado del flujo\n\nSeguimiento de la solicitud entre Negocios, Debida Diligencia y Revisión Legal.\n\nRegistro de datos del prospecto\nNegocios · Consulta de RNC y datos de la empresa\nDepuración en listas (Bizagi)\nDebida Diligencia · Listas restrictivas y no restrictivas\nVerificación PLAFT\nDebida Diligencia · Coincidencias\n4\nRevisión legal inicial\nRevisión Legal · Aprobar, escalar, devolver o rechazar\n5\nConversión de prospecto a cliente\nNegocios · Código de cliente\n6\nConozca su cliente\nNegocios · Información KYC\n7\nApertura de producto\nNegocios · Cuenta y productos\nPersonas relacionadas\nBitácora\n\nEventos registrados en la solicitud.\n\nEnviada a Revisión Legal\nSistema\n26/10/2026, 02:44 a. m.\nProspecto creado en B2000\nPRO-10001\nSistema\n26/10/2026, 01:44 a. m.\nDepuración en listas (Bizagi)\nSin coincidencias\nSistema\n26/10/2026, 01:14 a. m.\nSolicitud creada\nMaría Pérez\n25/10/2026, 10:14 p. m.",
+        "evidence": [
+          "live-step-8"
+        ],
+        "details": {
+          "observedText": "Estado del flujo\n\nSeguimiento de la solicitud entre Negocios, Debida Diligencia y Revisión Legal.\n\nRegistro de datos del prospecto\nNegocios · Consulta de RNC y datos de la empresa\nDepuración en listas (Bizagi)\nDebida Diligencia · Listas restrictivas y no restrictivas\nVerificación PLAFT\nDebida Diligencia · Coincidencias\n4\nRevisión legal inicial\nRevisión Legal · Aprobar, escalar, devolver o rechazar\n5\nConversión de prospecto a cliente\nNegocios · Código de cliente\n6\nConozca su cliente\nNegocios · Información KYC\n7\nApertura de producto\nNegocios · Cuenta y productos\nPersonas relacionadas\nBitácora\n\nEventos registrados en la solicitud.\n\nEnviada a Revisión Legal\nSistema\n26/10/2026, 02:44 a. m.\nProspecto creado en B2000\nPRO-10001\nSistema\n26/10/2026, 01:44 a. m.\nDepuración en listas (Bizagi)\nSin coincidencias\nSistema\n26/10/2026, 01:14 a. m.\nSolicitud creada\nMaría Pérez\n25/10/2026, 10:14 p. m."
+        }
+      },
+      {
+        "id": "jira-oracle-9",
+        "requirement": "Validar que se muestre \"Bitácora\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 9,
+        "target": "Bitácora\n\nEventos registrados en la solicitud.\n\nEnviada a Revisión Legal\nSistema\n26/10/2026, 02:44 a. m.\nProspecto creado en B2000\nPRO-10001\nSistema\n26/10/2026, 01:44 a. m.\nDepuración en listas (Bizagi)\nSin coincidencias\nSistema\n26/10/2026, 01:14 a. m.\nSolicitud creada\nMaría Pérez\n25/10/2026, 10:14 p. m.",
+        "evidence": [
+          "live-step-9"
+        ],
+        "details": {
+          "observedText": "Bitácora\n\nEventos registrados en la solicitud.\n\nEnviada a Revisión Legal\nSistema\n26/10/2026, 02:44 a. m.\nProspecto creado en B2000\nPRO-10001\nSistema\n26/10/2026, 01:44 a. m.\nDepuración en listas (Bizagi)\nSin coincidencias\nSistema\n26/10/2026, 01:14 a. m.\nSolicitud creada\nMaría Pérez\n25/10/2026, 10:14 p. m."
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "que se muestre \"Bitácora\""
+  }
+}

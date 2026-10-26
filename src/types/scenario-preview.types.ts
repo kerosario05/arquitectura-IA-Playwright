@@ -117,6 +117,7 @@ export type ScenarioPreviewRequest = {
   targetAppName?: string;
   sectionName?: string;
   sectionSlug?: string;
+  environment?: string;
   sectionId?: string | number;
   testrailProjectId?: number;
   testrailSuiteId?: number;

@@ -1,0 +1,20 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\web-test\\sections\\portal-comercial\\cases\\preview-001-alta-con-datos-y-listas-negocios-v4\\case.spec.ts",
+  "specHash": "8723dee3e02f5da7c46062ee617e77bcb531122c5f2a96aba555c87e2c10838d",
+  "specSource": "generatedSpec"
+}

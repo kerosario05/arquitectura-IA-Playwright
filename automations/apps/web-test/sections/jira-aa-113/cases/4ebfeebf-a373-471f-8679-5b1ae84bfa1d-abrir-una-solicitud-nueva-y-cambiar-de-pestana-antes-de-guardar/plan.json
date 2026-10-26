@@ -1,0 +1,249 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-26T07:44:48.327Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "4ebfeebf-a373-471f-8679-5b1ae84bfa1d",
+    "title": "Abrir una solicitud nueva y cambiar de pestaña antes de guardar"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "fill [jira_edit_1c55373b23f3d8da_2]",
+      "valueKey": "jira_edit_1c55373b23f3d8da_2",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"usuario\"]"
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [jira_edit_1c55373b23f3d8da_3]",
+      "valueKey": "jira_edit_1c55373b23f3d8da_3",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"clave\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Presionar \"iniciar sesión\"",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"btn-login\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Presionar \"Solicitudes\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Solicitudes",
+        "exact": true
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"Nueva solicitud\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Nueva solicitud",
+        "exact": true
+      }
+    },
+    {
+      "index": 8,
+      "action": "click",
+      "description": "Presionar \"Flujo de Solicitud\"",
+      "target": {
+        "strategy": "role",
+        "role": "tab",
+        "name": "Flujo de Solicitud",
+        "exact": true
+      }
+    },
+    {
+      "index": 9,
+      "action": "click",
+      "description": "Presionar \"Registro de Datos\"",
+      "target": {
+        "strategy": "role",
+        "role": "tab",
+        "name": "Registro de Datos",
+        "exact": true
+      }
+    },
+    {
+      "index": 10,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Denominación Social\"",
+      "target": {
+        "strategy": "text",
+        "value": "Denominación Social"
+      }
+    },
+    {
+      "index": 11,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Número de Identificación\"",
+      "target": {
+        "strategy": "text",
+        "value": "Número de Identificación"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "jira_edit_1c55373b23f3d8da_2",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "jira_edit_1c55373b23f3d8da_3",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Abrir una solicitud nueva y cambiar de pestaña antes de guardar",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "fill",
+        "valueKey": "jira_edit_1c55373b23f3d8da_2",
+        "technicalTargetRefs": [
+          "css:[id=\"usuario\"]"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "jira_edit_1c55373b23f3d8da_3",
+        "technicalTargetRefs": [
+          "css:[id=\"clave\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:[id=\"btn-login\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Solicitudes"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Nueva solicitud"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:tab|Flujo de Solicitud"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:tab|Registro de Datos"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Denominación Social\"",
+        "technicalTargetRefs": [
+          "text:Denominación Social"
+        ]
+      },
+      {
+        "index": 11,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Número de Identificación\"",
+        "technicalTargetRefs": [
+          "text:Número de Identificación"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-10",
+        "requirement": "Validar que se muestre \"Denominación Social\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 10,
+        "target": "No. Registro Mercantil\nDenominación Social*\nTipo Sociedad*\nSeleccione…\nSociedad de Responsabilidad Limitada (SRL)\nSociedad Anónima (SA)\nSociedad Anónima Simplificada (SAS)\nEmpresa Individual de Responsabilidad Limitada (EIRL)\nSociedad Anónima Cerrada (SAC)\nCooperativa\nFecha de Emisión\nFecha de Vencimiento\nSiglas\nNacionalidad\nSeleccione nacionalidad\nDominicana\nEstadounidense\nEspañola\nPanameña\nColombiana\nMexicana",
+        "evidence": [
+          "live-step-10"
+        ],
+        "details": {
+          "observedText": "No. Registro Mercantil\nDenominación Social*\nTipo Sociedad*\nSeleccione…\nSociedad de Responsabilidad Limitada (SRL)\nSociedad Anónima (SA)\nSociedad Anónima Simplificada (SAS)\nEmpresa Individual de Responsabilidad Limitada (EIRL)\nSociedad Anónima Cerrada (SAC)\nCooperativa\nFecha de Emisión\nFecha de Vencimiento\nSiglas\nNacionalidad\nSeleccione nacionalidad\nDominicana\nEstadounidense\nEspañola\nPanameña\nColombiana\nMexicana"
+        }
+      },
+      {
+        "id": "jira-oracle-11",
+        "requirement": "Validar que se muestre \"Número de Identificación\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 11,
+        "target": "Tipo de Identificación*\nSeleccione…\nRNC\nNIT\nRegistro Mercantil\nNúmero de Identificación*\nCONSULTAR",
+        "evidence": [
+          "live-step-11"
+        ],
+        "details": {
+          "observedText": "Tipo de Identificación*\nSeleccione…\nRNC\nNIT\nRegistro Mercantil\nNúmero de Identificación*\nCONSULTAR"
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "que se muestre \"Número de Identificación\""
+  }
+}

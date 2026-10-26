@@ -1,0 +1,6299 @@
+{
+  "version": 1,
+  "appSlug": "web-test",
+  "createdAt": "2026-10-23T23:56:44.417Z",
+  "updatedAt": "2026-10-26T07:44:48.338Z",
+  "items": [],
+  "jiraRoutes": [
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "82e8bc8962777e7d59d30831ba49759d667b6eb75c172d632cd04fdda27c8600",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:57",
+      "jobId": "c4eaa9f0-9c9f-4fdb-a3db-b10ea5a1d0b9",
+      "validatedAt": "2026-10-24T18:44:20.358Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Salir",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "ae4f31df7b17860122c2756275c20ded981d3b88e86b1bf2636376e2e0398541",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:11:edited-a44c588f2d6d07d1",
+      "jobId": "dd644550-cf0f-4a87-9aef-b1e40de16de7",
+      "validatedAt": "2026-10-25T02:23:51.871Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Enviar a Debida Diligencia",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-9-step-1.png",
+        "scenario-9-step-2.png",
+        "scenario-9-step-3.png",
+        "scenario-9-step-4.png",
+        "scenario-9-step-5.png",
+        "scenario-9-step-6.png",
+        "scenario-9-step-7.png",
+        "scenario-9-step-9.png",
+        "scenario-9-step-10.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "78f363f38d37286fb4d0d601958f62332ac4f7379eb4e43007b8b85a39c26772",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:12:edited-b5e3994478f6b43a",
+      "jobId": "24b06ece-4f2e-4581-97ac-f78fd4f83fed",
+      "validatedAt": "2026-10-25T03:14:16.293Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Número de Identificación",
+          "dataRef": "jira_edit_99f38e8e62f0a13c_7"
+        },
+        {
+          "action": "click",
+          "field": "Consultar",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Denominación Social",
+          "dataRef": "jira_edit_d8f712f93962fc83_10"
+        },
+        {
+          "action": "select",
+          "field": "Tipo Sociedad",
+          "dataRef": "jira_edit_2e2a0a09cb9a4fe9_11"
+        },
+        {
+          "action": "fill",
+          "field": "Fecha de Constitución",
+          "dataRef": "jira_edit_2e2a0a09cb9a4fe9_12"
+        },
+        {
+          "action": "fill",
+          "field": "Calle",
+          "dataRef": "jira_edit_2e2a0a09cb9a4fe9_13"
+        },
+        {
+          "action": "fill",
+          "field": "Municipio",
+          "dataRef": "jira_edit_2e2a0a09cb9a4fe9_14"
+        },
+        {
+          "action": "fill",
+          "field": "Teléfono 1",
+          "dataRef": "jira_edit_2e2a0a09cb9a4fe9_15"
+        },
+        {
+          "action": "fill",
+          "field": "Email",
+          "dataRef": "jira_edit_2e2a0a09cb9a4fe9_16"
+        },
+        {
+          "action": "select",
+          "field": "Actividad de la Sociedad",
+          "dataRef": "jira_edit_2e2a0a09cb9a4fe9_17"
+        },
+        {
+          "action": "click",
+          "field": "Guardar borrador",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png",
+        "scenario-1-step-13.png",
+        "scenario-1-step-14.png",
+        "scenario-1-step-15.png",
+        "scenario-1-step-16.png",
+        "scenario-1-step-17.png",
+        "scenario-1-step-18.png",
+        "scenario-1-step-19.png",
+        "scenario-1-step-20.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"INVERSIONES DEL CARIBE SRL\"",
+          "target": "INVERSIONES DEL CARIBE SRL"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "d7d7050c447b3fb6d70c61928debdee23a50313cfb56ad06f67839b2a4390f09",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:36:edited-e9629a795d50e1b2",
+      "jobId": "6b41d3d3-8706-45cc-823a-d3b8a75bb322",
+      "validatedAt": "2026-10-25T03:24:34.527Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_e9629a795d50e1b2_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_e9629a795d50e1b2_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Flujo de Solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Registro de Datos",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-22-step-1.png",
+        "scenario-22-step-2.png",
+        "scenario-22-step-3.png",
+        "scenario-22-step-4.png",
+        "scenario-22-step-5.png",
+        "scenario-22-step-6.png",
+        "scenario-22-step-7.png",
+        "scenario-22-step-8.png",
+        "scenario-22-step-9.png",
+        "scenario-22-step-10.png",
+        "scenario-22-step-11.png",
+        "scenario-22-step-12.png",
+        "scenario-22-step-13.png",
+        "scenario-22-step-14.png",
+        "scenario-22-step-15.png",
+        "scenario-22-step-16.png",
+        "scenario-22-step-17.png",
+        "scenario-22-step-18.png",
+        "scenario-22-step-19.png",
+        "scenario-22-step-20.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Verificar Solicitante\"",
+          "target": "Verificar Solicitante"
+        },
+        {
+          "requirement": "Validar que se muestre \"Datos Generales\"",
+          "target": "Datos Generales"
+        },
+        {
+          "requirement": "Validar que se muestre \"Capital y Finanzas\"",
+          "target": "Capital y Finanzas"
+        },
+        {
+          "requirement": "Validar que se muestre \"Dirección y Contacto\"",
+          "target": "Dirección y Contacto"
+        },
+        {
+          "requirement": "Validar que se muestre \"Actividad y Objeto Social\"",
+          "target": "Actividad y Objeto Social"
+        },
+        {
+          "requirement": "Validar que se muestre \"Órgano de gestión\"",
+          "target": "Órgano de gestión"
+        },
+        {
+          "requirement": "Validar que se muestre \"Recursos Humanos\"",
+          "target": "Recursos Humanos"
+        },
+        {
+          "requirement": "Validar que se muestre \"Información Comercial y Referencias\"",
+          "target": "Información Comercial y Referencias"
+        },
+        {
+          "requirement": "Validar que se muestre \"Gestión Documental\"",
+          "target": "Gestión Documental"
+        },
+        {
+          "requirement": "Validar que se muestre \"Verificar Solicitante\"",
+          "target": "Verificar Solicitante"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "790e4d10c59f3445b78577f5db84b305e757166130bdb2c2da57ed5946f9096e",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:38",
+      "jobId": "6b41d3d3-8706-45cc-823a-d3b8a75bb322",
+      "validatedAt": "2026-10-25T03:25:23.653Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Salir",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-23-step-1.png",
+        "scenario-23-step-2.png",
+        "scenario-23-step-3.png",
+        "scenario-23-step-4.png",
+        "scenario-23-step-5.png",
+        "scenario-23-step-6.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "9ae24ff17bf2301cdeba994bb99047c6e2ba65e386ff64f15d3dcdda80769dd1",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:48:edited-5a091afe6f68db74",
+      "jobId": "6b41d3d3-8706-45cc-823a-d3b8a75bb322",
+      "validatedAt": "2026-10-25T03:29:27.734Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_5a091afe6f68db74_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_5a091afe6f68db74_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Bandeja PLAFT",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-26-step-1.png",
+        "scenario-26-step-2.png",
+        "scenario-26-step-3.png",
+        "scenario-26-step-4.png",
+        "scenario-26-step-5.png",
+        "scenario-26-step-6.png",
+        "scenario-26-step-7.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "6a5d601978be3f980889c0006b2b09075ec3450c508671e476fa840361f28fc3",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:49:edited-0cfe77e0ed67ed22",
+      "jobId": "6b41d3d3-8706-45cc-823a-d3b8a75bb322",
+      "validatedAt": "2026-10-25T03:30:48.510Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_0cfe77e0ed67ed22_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_0cfe77e0ed67ed22_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0002",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-27-step-1.png",
+        "scenario-27-step-2.png",
+        "scenario-27-step-3.png",
+        "scenario-27-step-4.png",
+        "scenario-27-step-5.png",
+        "scenario-27-step-6.png",
+        "scenario-27-step-7.png",
+        "scenario-27-step-8.png",
+        "scenario-27-step-9.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar Se muestra el motivo de la devolución.",
+          "target": "Solicitud devuelta por Revisión Legal Motivo: Documentación incompleta. Observación: Adjuntar acta de la última asamblea y estatutos sociales vigentes."
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "9029dc0f19a3cbf55176306684c6e53d752aadfdff6e38aad30d6c3b71379124",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:23:edited-d202592083b48459",
+      "jobId": "719c189f-9aef-440e-aa3f-1c4a76160e1b",
+      "validatedAt": "2026-10-25T03:31:59.585Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_f8dbf3288e45ef1d_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_f8dbf3288e45ef1d_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Bandeja Revisión Legal",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0001",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Rechazar solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "select",
+          "field": "Motivo",
+          "dataRef": "jira_edit_d202592083b48459_8"
+        },
+        {
+          "action": "click",
+          "field": "Confirmar rechazo",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar El caso queda Rechazada.",
+          "target": "INVERSIONES DEL CARIBE SRL SOL-[numero]· RNC [numero]Rechazada · Rechazada · Solicitud rechazada Motivo: Solicitud del cliente."
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "4994ada9487eb50693fb4c3fa5e30896958f4dacdebf5670036d774f8143ae7e",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:50:edited-46fa952c065d63c8",
+      "jobId": "6b41d3d3-8706-45cc-823a-d3b8a75bb322",
+      "validatedAt": "2026-10-25T03:32:16.799Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_46fa952c065d63c8_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_46fa952c065d63c8_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0006",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-28-step-1.png",
+        "scenario-28-step-2.png",
+        "scenario-28-step-3.png",
+        "scenario-28-step-4.png",
+        "scenario-28-step-5.png",
+        "scenario-28-step-6.png",
+        "scenario-28-step-7.png",
+        "scenario-28-step-8.png",
+        "scenario-28-step-9.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar Se muestra el comentario de escalamiento.",
+          "target": "Caso escalado por Revisión Legal Falta el detalle de los beneficiarios finales y la composición accionaria actualizada."
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "94b3e2229443c26c4a7a381f4330dc2b1e1f0d2191c0fe448bae7d3d92efabf0",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:55:edited-d49c5e04841b99f3",
+      "jobId": "6b41d3d3-8706-45cc-823a-d3b8a75bb322",
+      "validatedAt": "2026-10-25T03:33:29.946Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_d49c5e04841b99f3_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_d49c5e04841b99f3_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0001",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-29-step-1.png",
+        "scenario-29-step-2.png",
+        "scenario-29-step-3.png",
+        "scenario-29-step-4.png",
+        "scenario-29-step-5.png",
+        "scenario-29-step-6.png",
+        "scenario-29-step-7.png",
+        "scenario-29-step-8.png",
+        "scenario-29-step-9.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "6bec09562fa343d279d1ea1d8aff93b508dc128957dffe7ebfdd4f79f8a0e3ef",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:56:edited-9e53194cac198538",
+      "jobId": "6b41d3d3-8706-45cc-823a-d3b8a75bb322",
+      "validatedAt": "2026-10-25T03:34:27.896Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_9e53194cac198538_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_9e53194cac198538_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Notificaciones",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-30-step-1.png",
+        "scenario-30-step-2.png",
+        "scenario-30-step-3.png",
+        "scenario-30-step-4.png",
+        "scenario-30-step-5.png",
+        "scenario-30-step-6.png",
+        "scenario-30-step-7.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Solicitudes de prospectos PJ\"",
+          "target": "Solicitudes de prospectos PJ"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "89c2cfb46532eb4a3443beb8f0031d796785101402ff53fba195f9e1ff070edf",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:26:edited-fdb3fdcd420241ee",
+      "jobId": "8b466c59-41d4-4ce6-9508-c712125d856a",
+      "validatedAt": "2026-10-25T03:34:34.391Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_fdb3fdcd420241ee_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_fdb3fdcd420241ee_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0003",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Convertir prospecto a cliente",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "646ab226093d7aacb44642de4ccfc4e00095617f90ab970bc1a90263dc768ff2",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:64:edited-092190b6026f67db",
+      "jobId": "6b41d3d3-8706-45cc-823a-d3b8a75bb322",
+      "validatedAt": "2026-10-25T03:36:01.395Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Número de Identificación",
+          "dataRef": "jira_edit_092190b6026f67db_7"
+        },
+        {
+          "action": "click",
+          "field": "Consultar",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Limpiar consulta",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-31-step-1.png",
+        "scenario-31-step-2.png",
+        "scenario-31-step-3.png",
+        "scenario-31-step-4.png",
+        "scenario-31-step-5.png",
+        "scenario-31-step-6.png",
+        "scenario-31-step-7.png",
+        "scenario-31-step-8.png",
+        "scenario-31-step-9.png",
+        "scenario-31-step-10.png",
+        "scenario-31-step-12.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que no se muestre \"Nuevo Prospecto\"",
+          "target": "Nuevo Prospecto"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "0d49bd5b41a6ac2211341007d14cc3d8657effbb6d9e62dcbe4c32bdd5a76dbe",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:28:edited-96e60b3ba3f3ae5e",
+      "jobId": "966fb0bb-41d9-4e7b-84b3-7779900276d1",
+      "validatedAt": "2026-10-25T03:37:10.055Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Cliente Creado",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0004",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Conozca su cliente",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Continuar",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Conozca a su Cliente\"",
+          "target": "Conozca a su Cliente"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "497ab202cbf2d6b52507b275b3a912d5560a2d1849fcaa15ca37e5c74e1571ba",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:66:edited-4ceed3b391464b57",
+      "jobId": "6b41d3d3-8706-45cc-823a-d3b8a75bb322",
+      "validatedAt": "2026-10-25T03:37:35.959Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-32-step-1.png",
+        "scenario-32-step-2.png",
+        "scenario-32-step-3.png",
+        "scenario-32-step-4.png",
+        "scenario-32-step-5.png",
+        "scenario-32-step-6.png",
+        "scenario-32-step-7.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Solicitudes de prospectos PJ\"",
+          "target": "Solicitudes de prospectos PJ"
+        },
+        {
+          "requirement": "Validar Se muestran los indicadores de carga y el listado.",
+          "target": "Cargando solicitudes…"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "d00831ab36a7b5dcb8b0d575c2c61ef58893d9d2daaf99f0bb829ed8c015432d",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:30:edited-0af2b1d2fb148db5",
+      "jobId": "5b8103d2-a560-4525-8dc3-d8e4474f343b",
+      "validatedAt": "2026-10-25T03:39:45.895Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Cliente Creado",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0004",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Conozca su cliente",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "select",
+          "field": "Departamento",
+          "dataRef": "jira_edit_0af2b1d2fb148db5_8"
+        },
+        {
+          "action": "select",
+          "field": "Provincia",
+          "dataRef": "jira_edit_0af2b1d2fb148db5_9"
+        },
+        {
+          "action": "select",
+          "field": "Municipio",
+          "dataRef": "jira_edit_0af2b1d2fb148db5_10"
+        },
+        {
+          "action": "select",
+          "field": "Sectores",
+          "dataRef": "jira_edit_0af2b1d2fb148db5_11"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "2befa804fbe62ba96e82e0fefc25bdab336aafbbfbc90ffc6bebc29bf540afbe",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:2:edited-4ca55ab2e95c1868",
+      "jobId": "b4db860e-d050-4553-8e2c-78aa7b03887e",
+      "validatedAt": "2026-10-25T23:19:40.266Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_4ca55ab2e95c1868_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_4ca55ab2e95c1868_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "0285fcc6389576f728eb6440a8c1ed273fa3a095eeb5c1b3320f37d94be4b621",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:1:edited-37066b3c8fd5e44d",
+      "jobId": "1d1371ee-0339-4237-9323-8e2a1b38135d",
+      "validatedAt": "2026-10-26T00:17:41.454Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Número de Identificación",
+          "dataRef": "jira_edit_86fa2ce23d98a508_7"
+        },
+        {
+          "action": "click",
+          "field": "Consultar",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "fc0e75d5b3003f689920bca75c89a3d4b7394871d7ed4e8f70cb06124cf99801",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:3:edited-a45d6117e58b1a79",
+      "jobId": "d36d4d91-d2d8-470a-b819-f69f5b8576b8",
+      "validatedAt": "2026-10-26T00:19:35.327Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Número de Identificación",
+          "dataRef": "jira_edit_42192b9758b6a373_7"
+        },
+        {
+          "action": "click",
+          "field": "Consultar",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "17773c2f6024b107c89e4f5d7f8802e99f99f9c78354560a6eefc72ab158b7aa",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:4:edited-363c4e8610d0117d",
+      "jobId": "e114af8a-82e4-44cf-94da-75603260a44e",
+      "validatedAt": "2026-10-26T00:21:23.779Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Número de Identificación",
+          "dataRef": "jira_edit_8e039c4b3b61bd95_7"
+        },
+        {
+          "action": "click",
+          "field": "Consultar",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "32a0a08266fb6f1eac157383ca1205d180aca7505bb365ed78c83ba34b2ffbce",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:5:edited-17e1842522927b3b",
+      "jobId": "7969da35-64f8-4173-b521-77d22951bafb",
+      "validatedAt": "2026-10-26T00:23:33.967Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Número de Identificación",
+          "dataRef": "jira_edit_34efdd7aabaa261f_7"
+        },
+        {
+          "action": "click",
+          "field": "Consultar",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "4dc09d62f40ca6615a70c3825d767229a1f3995a188f82e37d04a1ff6f3b25dc",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:6:edited-d8ffea777512bc0d",
+      "jobId": "de9c9cf6-0467-4560-9c4b-39aa70180a3f",
+      "validatedAt": "2026-10-26T00:25:19.336Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de Identificación",
+          "dataRef": "jira_edit_e80cb94a1c12c206_7"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "d36e97ed9361db83a4b822d02b93e6832dd1019eb06c626e0a6a18abeda3b03f",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:7:edited-d675cadcbc10b62f",
+      "jobId": "61b8411b-2e4c-486b-a736-bc2eb13b7402",
+      "validatedAt": "2026-10-26T00:27:35.948Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Número de Identificación",
+          "dataRef": "jira_edit_c16ea43dc4ed2678_7"
+        },
+        {
+          "action": "click",
+          "field": "Consultar",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "a6c6e013f85c37c92ce3bcb585ef5f08c42e75afd9a7f5f4c3645569c8c81be1",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:8:edited-b488c0b2d881cd4b",
+      "jobId": "5adda9d6-a2a7-4d54-abee-553ab6d18b6b",
+      "validatedAt": "2026-10-26T00:29:33.440Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Número de Identificación",
+          "dataRef": "jira_edit_5ba258fa348a0c50_7"
+        },
+        {
+          "action": "click",
+          "field": "Consultar",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "b6e181d7ea95900da8c256b3006ff27a9b69a1629920d888d4e3bd3243ef5c96",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:9:edited-2ca63104da64c4ab",
+      "jobId": "0fc27e83-8382-477c-87a9-44304edad816",
+      "validatedAt": "2026-10-26T00:31:13.634Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Enviar a Debida Diligencia",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "1f3baaab352b3d564314425a7c61cbc7738a1fbe13bd6f0e1329f640f450cceb",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:10:edited-d5fffff9f0505883",
+      "jobId": "817995e6-d364-469e-9e0d-ea005559fb92",
+      "validatedAt": "2026-10-26T00:33:02.287Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Número de Identificación",
+          "dataRef": "jira_edit_7548d1e57d790707_7"
+        },
+        {
+          "action": "click",
+          "field": "Consultar",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Denominación Social",
+          "dataRef": "jira_edit_7548d1e57d790707_9"
+        },
+        {
+          "action": "select",
+          "field": "Tipo Sociedad",
+          "dataRef": "jira_edit_7548d1e57d790707_10"
+        },
+        {
+          "action": "fill",
+          "field": "Fecha de Constitución",
+          "dataRef": "jira_edit_7548d1e57d790707_11"
+        },
+        {
+          "action": "fill",
+          "field": "Calle",
+          "dataRef": "jira_edit_7548d1e57d790707_12"
+        },
+        {
+          "action": "fill",
+          "field": "Municipio",
+          "dataRef": "jira_edit_7548d1e57d790707_13"
+        },
+        {
+          "action": "fill",
+          "field": "Teléfono 1",
+          "dataRef": "jira_edit_7548d1e57d790707_14"
+        },
+        {
+          "action": "fill",
+          "field": "Email",
+          "dataRef": "jira_edit_7548d1e57d790707_15"
+        },
+        {
+          "action": "select",
+          "field": "Actividad de la Sociedad",
+          "dataRef": "jira_edit_7548d1e57d790707_16"
+        },
+        {
+          "action": "click",
+          "field": "Guardar borrador",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png",
+        "scenario-1-step-13.png",
+        "scenario-1-step-14.png",
+        "scenario-1-step-15.png",
+        "scenario-1-step-16.png",
+        "scenario-1-step-17.png",
+        "scenario-1-step-18.png",
+        "scenario-1-step-19.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "85ebc1b43fb222a0668e9603e9b9a908988d1ccfca1efd3dcb6429ea81e82a3b",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:14:edited-bb9fe2f4e5ea0db4",
+      "jobId": "e0bc8e58-c2c2-4566-8868-c0ac430daa11",
+      "validatedAt": "2026-10-26T00:34:32.820Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_cd790bddfa0b0f96_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_cd790bddfa0b0f96_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Bandeja PLAFT",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0005",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Aprobar y continuar a Revisión Legal",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Comentario",
+          "dataRef": "jira_edit_cd790bddfa0b0f96_8"
+        },
+        {
+          "action": "click",
+          "field": "Confirmar aprobación PLAFT",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "4bb8b8ea9e43fdcee8cd136a9a9d3839daa920c13ac0623260794be792e84d48",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:15:edited-70886531d81f1284",
+      "jobId": "0fdf46a7-59ce-4d53-b091-862ca6cfbe53",
+      "validatedAt": "2026-10-26T00:35:47.841Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_3bae59aef99d7483_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_3bae59aef99d7483_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Bandeja PLAFT",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0005",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Rechazar solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "select",
+          "field": "Motivo",
+          "dataRef": "jira_edit_3bae59aef99d7483_8"
+        },
+        {
+          "action": "click",
+          "field": "Confirmar rechazo",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "781e1563c655079fb44568a411582ab39e81e19e29bde28cf4a1ba9531873620",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:16:edited-4a22246b4afb8e10",
+      "jobId": "d1bfc6b0-b936-48fa-afba-5fa6aca12cd3",
+      "validatedAt": "2026-10-26T00:37:02.126Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_b4fb7cbdc65bdefa_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_b4fb7cbdc65bdefa_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Bandeja Revisión Legal",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0001",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Aprobar caso y enviar a Negocios",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Confirmar aprobación",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "f6546c03fec31ad6326d09c912901df7015c19fb1d086c35c0ec511291a19f5e",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:17:edited-36a35316a69de08f",
+      "jobId": "5e3e284a-228c-433d-981d-d88fa33d5609",
+      "validatedAt": "2026-10-26T00:38:16.457Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_50864d93a32fdc01_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_50864d93a32fdc01_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Bandeja Revisión Legal",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0001",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Escalar caso",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Comentario",
+          "dataRef": "jira_edit_50864d93a32fdc01_8"
+        },
+        {
+          "action": "click",
+          "field": "Confirmar escalamiento",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "3f20a56fc01634a738025e6ecc368f0f8c678b83d573ade8e6983d63086854e6",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:18:edited-d32114addea3bf15",
+      "jobId": "56deca48-4f89-4b47-a785-f3a6542642b5",
+      "validatedAt": "2026-10-26T00:40:10.827Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_dd17598caa15492d_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_dd17598caa15492d_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Bandeja Revisión Legal",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0001",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Devolver solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "select",
+          "field": "Motivo",
+          "dataRef": "jira_edit_dd17598caa15492d_8"
+        },
+        {
+          "action": "fill",
+          "field": "Observación",
+          "dataRef": "jira_edit_dd17598caa15492d_9"
+        },
+        {
+          "action": "click",
+          "field": "Confirmar devolución",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "fb730848095b7a56baaa8089dd2b93c1eee90212ddba989c5c73739e0870cb84",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:19:edited-f56701d3ee58d686",
+      "jobId": "8d927944-6b79-4385-81a4-95bb4e3f86a7",
+      "validatedAt": "2026-10-26T00:42:21.061Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_33936aad06d6aede_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_33936aad06d6aede_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Bandeja Revisión Legal",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0001",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Rechazar solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "select",
+          "field": "Motivo",
+          "dataRef": "jira_edit_33936aad06d6aede_8"
+        },
+        {
+          "action": "click",
+          "field": "Confirmar rechazo",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "3589fe7ac57ff37c39f6c3ddbb6d04641b448172b9bc19b69924ef2c5db2571d",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:20:edited-d794fa81c896f7fc",
+      "jobId": "1e45d1ab-db87-4f3f-abdc-e7dcaa65ef0f",
+      "validatedAt": "2026-10-26T00:43:39.562Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_259d9df3bce87260_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_259d9df3bce87260_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0002",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "32913374326a7a38043a4978c068d2dd57992015a9cd6bb0c38bb917cb68bec2",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:21:edited-801065cfcb026778",
+      "jobId": "bdb03c5d-609e-48a9-9a8a-5e3a9190c4d0",
+      "validatedAt": "2026-10-26T00:44:49.122Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_aedf464b56355a5e_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_aedf464b56355a5e_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0006",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "332b7791b5acfc91774e774935b75d8b2c744df506964224bc44d36e5b4df34b",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:22:edited-f931f907420a2d71",
+      "jobId": "4046934a-11bd-41db-9ba6-19f643b2bad6",
+      "validatedAt": "2026-10-26T00:46:00.239Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_a206c8722c99d2af_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_a206c8722c99d2af_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0003",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Convertir prospecto a cliente",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "8d2172e43dbfe450529e1a269250c2c1854f211eb5f871b51f28d1f30bb6ee45",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:27:edited-691398e433fd7584",
+      "jobId": "8c2ebe68-0126-48fe-8d28-b18f662c45b7",
+      "validatedAt": "2026-10-26T00:47:13.494Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_202d06041c0fe06a_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_202d06041c0fe06a_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Notificaciones",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Solicitudes de prospectos PJ\"",
+          "target": "Solicitudes de prospectos PJ"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "ccbf1221828ea705326f80f25ba7317c8d8a7dbaa35cbc860777af3472345c0a",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:37:edited-f6b0c9685da2c859",
+      "jobId": "39e8751a-20b0-49a1-ba4e-1592b96d634c",
+      "validatedAt": "2026-10-26T00:48:18.838Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_88bc2f27c73ba39b_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_88bc2f27c73ba39b_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Salir",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "6c2ee5388f5dda22a7fc199be785fb8635d4ae136406a3e267ddc1465309ba28",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:39:edited-a0908a15014f97fd",
+      "jobId": "83958608-1ce5-40e5-8619-c5d9815f844a",
+      "validatedAt": "2026-10-26T00:50:33.436Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario_negocios_inicio"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena_negocios_inicio"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Solicitudes recientes\"",
+          "target": "Solicitudes recientes"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "44267b65c1b15dd6491ffd0e6e199053a2f1df3b19512ac29ebb88d0775fee0e",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:40:edited-84ddcae3be9801cf",
+      "jobId": "ae715a63-63a8-416f-8ac4-bf31737e13bd",
+      "validatedAt": "2026-10-26T00:51:49.569Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Borrador",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Solicitudes de prospectos PJ\"",
+          "target": "Solicitudes de prospectos PJ"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "4426e73031e2efe47515e2c164b8f80b5b7cf6e7d20cedfde6a3f39b2bdbb907",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:41:edited-1588950f9a4ae213",
+      "jobId": "e1d81a76-cfd3-4260-9720-0b847f05d887",
+      "validatedAt": "2026-10-26T00:53:15.187Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Verificación PLAFT",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Solicitudes de prospectos PJ\"",
+          "target": "Solicitudes de prospectos PJ"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "4530693b974c03dfd946794e25022c897dd21fb12f68b6959966153b694371f7",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:42:edited-0b5150040a2c268b",
+      "jobId": "f15149a2-bad9-4549-8f8b-0fb56b0f129c",
+      "validatedAt": "2026-10-26T00:54:31.594Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "En Revisión Legal",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Solicitudes de prospectos PJ\"",
+          "target": "Solicitudes de prospectos PJ"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "a4c96337980a9b3daf59eaf7286860f0a7404682b28506e671fb5cab4d8844d3",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:43:edited-510a1dde9bdfe75a",
+      "jobId": "8f4071e7-1fa0-4c1f-bca1-d432a4ad518a",
+      "validatedAt": "2026-10-26T00:55:49.359Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Devuelta",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Solicitudes de prospectos PJ\"",
+          "target": "Solicitudes de prospectos PJ"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "68ac71efee3442e1b5d7c8d81e5f34038f4fe85405662f2231e8f47d5d909535",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:44:edited-c9e09c548b1062d4",
+      "jobId": "9915d886-12b3-48b2-b3d3-37a39a755238",
+      "validatedAt": "2026-10-26T00:57:04.216Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Escalado",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Solicitudes de prospectos PJ\"",
+          "target": "Solicitudes de prospectos PJ"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "6b67c7e73ac93575e6e3a32efa90662e5c6c42fa8b45241e28d4c906dac1bb28",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:45:edited-fd8fa932b4ac83a8",
+      "jobId": "dbf2963a-b80f-48cc-912c-45df75b1bda3",
+      "validatedAt": "2026-10-26T00:58:14.865Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Aprobada",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Solicitudes de prospectos PJ\"",
+          "target": "Solicitudes de prospectos PJ"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "4e744afcd10e19b2e05d3f76370af62c63401ee8a47d57b6d8cd37a7c2126049",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:46:edited-751cb2840abb74a0",
+      "jobId": "16491663-2e9d-4800-bb78-60854462d4b8",
+      "validatedAt": "2026-10-26T00:59:25.169Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Cliente Creado",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Solicitudes de prospectos PJ\"",
+          "target": "Solicitudes de prospectos PJ"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "5d904933eafac827122b07bb9e30a48724f98a762210ec44975ad4f18928ba86",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:51:edited-0474421821293c76",
+      "jobId": "f0f98723-680b-4568-973a-eae8489beb3f",
+      "validatedAt": "2026-10-26T01:00:26.236Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_5b9eb26369bed196_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_5b9eb26369bed196_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "be1641c3f3f3e55ee615423fdd1dd28c0127fd8a062dd319d82316c3d0c63f0a",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-114",
+      "scenarioId": "AA-114:jira:61:edited-4b63c24ff7ded282",
+      "jobId": "92552669-2413-4184-a3c6-eef3f0553674",
+      "validatedAt": "2026-10-26T01:01:44.246Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_14d5d993ad163e4c_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_14d5d993ad163e4c_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0001",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "647532197830216124e2ac04e1846813350f039f59938ae3dddae79fa990e37e",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "6e50fdab-0a5c-4be7-881d-dbc12f843d81",
+      "jobId": "b3bc5b01-3076-41f6-ba27-1e1d36592bce",
+      "validatedAt": "2026-10-26T06:24:34.931Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_6e1b44ef95b68a6a_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_6e1b44ef95b68a6a_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "01624a657e8513635dc3b61acae792717ba044f5d9c737a0700bf3d41e1b341f",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "25a9086b-95fe-4a2f-9bdd-eceea821af5e",
+      "jobId": "ff5c3615-e7cc-4ce5-b65b-b1af0235a438",
+      "validatedAt": "2026-10-26T06:26:52.397Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Número de Identificación",
+          "dataRef": "jira_edit_152d481b694c0d6f_7"
+        },
+        {
+          "action": "click",
+          "field": "Consultar",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "8c32025e1cdde781ff3bb57e2d15aedd4922f7c7c7d11ce3682a3adbbdc24155",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "f497f7b4-dd1d-477a-8eea-21c24b772da8",
+      "jobId": "0cdd1c43-06b8-4f7e-a2c3-6a4990458e7b",
+      "validatedAt": "2026-10-26T06:29:14.030Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Número de Identificación",
+          "dataRef": "jira_edit_c3c6ff48e53e1afb_7"
+        },
+        {
+          "action": "click",
+          "field": "Consultar",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "646abf16bd66a48bce486aa005d53c0f49cdd6f6cc6b0736cd927e2165a0d93c",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "6c55505a-fe76-4bf9-bd82-65fc0e8beaa3",
+      "jobId": "dfa0b587-8ab9-4bb5-acd5-dc2c72f3e1a0",
+      "validatedAt": "2026-10-26T06:31:08.910Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Número de Identificación",
+          "dataRef": "jira_edit_24fa4cdaa96460e1_7"
+        },
+        {
+          "action": "click",
+          "field": "Consultar",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "e2455c8c5d2855a3c2b1357b63db66aeb02d5454542940a089561196c9e97859",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "942bcae9-fefa-42b3-be0d-72e6cba2c122",
+      "jobId": "4bca99d2-508d-4b60-a22f-43926aabd2e1",
+      "validatedAt": "2026-10-26T06:33:06.363Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Número de Identificación",
+          "dataRef": "jira_edit_4fdcf356519be211_7"
+        },
+        {
+          "action": "click",
+          "field": "Consultar",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "645cc153e7885f0238655af81d52215a10c2b9842a46859ada32120855c7990c",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "d82c230f-e875-4c04-8e26-d15218916e77",
+      "jobId": "6dc401c0-150b-4b4e-99e0-83fd842e8d72",
+      "validatedAt": "2026-10-26T06:35:08.783Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Número de Identificación",
+          "dataRef": "jira_edit_4f610a0edd43fc4a_7"
+        },
+        {
+          "action": "click",
+          "field": "Consultar",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "75fc723de01e59142703855dff3efe232a6e6e3b20f3386ed5a237ed23b28002",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "4b06323f-2f6e-4f8a-a85f-d984b2f12699",
+      "jobId": "6b22cae3-3eb1-4875-9104-ff514aaddc7e",
+      "validatedAt": "2026-10-26T06:37:02.742Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de Identificación",
+          "dataRef": "jira_edit_7f52218fd8e65670_7"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "5e416aac33521a1d6a906fae657762538a4e08b068e4b0382678031afb1f2f6b",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "9f7972cc-b7d5-48ec-b869-d084001932e4",
+      "jobId": "ff68f322-887c-4185-a98d-4c3ec8611b00",
+      "validatedAt": "2026-10-26T06:38:57.013Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Número de Identificación",
+          "dataRef": "jira_edit_c268a615ceeec482_7"
+        },
+        {
+          "action": "click",
+          "field": "Consultar",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "812a8c5ec55978951852c207219fbabd81defe3a85fdcd0563d0cbf4f0d20d01",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "f4f1ea02-641d-44fa-ad18-e2cb675cc822",
+      "jobId": "5ec67f2a-4433-4e77-822f-49c4c1110a52",
+      "validatedAt": "2026-10-26T06:40:52.644Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Número de Identificación",
+          "dataRef": "jira_edit_9a017c5b4d8b510e_7"
+        },
+        {
+          "action": "click",
+          "field": "Consultar",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "9dd850c3bbc3208cacb5aa650a947a82d62b6fe881164f700e6025143f9bd3fc",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "075ae4cf-f567-4986-8eb0-f1f7e6f38bb2",
+      "jobId": "62745fe6-a2bc-4a79-b0bf-f03222d68900",
+      "validatedAt": "2026-10-26T06:43:01.110Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Número de Identificación",
+          "dataRef": "jira_edit_c5710b11404d5ec2_7"
+        },
+        {
+          "action": "click",
+          "field": "Consultar",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Denominación Social",
+          "dataRef": "jira_edit_c5710b11404d5ec2_9"
+        },
+        {
+          "action": "select",
+          "field": "Tipo Sociedad",
+          "dataRef": "jira_edit_c5710b11404d5ec2_10"
+        },
+        {
+          "action": "fill",
+          "field": "Fecha de Constitución",
+          "dataRef": "jira_edit_c5710b11404d5ec2_11"
+        },
+        {
+          "action": "fill",
+          "field": "Calle",
+          "dataRef": "jira_edit_c5710b11404d5ec2_12"
+        },
+        {
+          "action": "fill",
+          "field": "Municipio",
+          "dataRef": "jira_edit_c5710b11404d5ec2_13"
+        },
+        {
+          "action": "fill",
+          "field": "Teléfono 1",
+          "dataRef": "jira_edit_c5710b11404d5ec2_14"
+        },
+        {
+          "action": "fill",
+          "field": "Email",
+          "dataRef": "jira_edit_c5710b11404d5ec2_15"
+        },
+        {
+          "action": "select",
+          "field": "Actividad de la Sociedad",
+          "dataRef": "jira_edit_c5710b11404d5ec2_16"
+        },
+        {
+          "action": "click",
+          "field": "Guardar borrador",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png",
+        "scenario-1-step-13.png",
+        "scenario-1-step-14.png",
+        "scenario-1-step-15.png",
+        "scenario-1-step-16.png",
+        "scenario-1-step-17.png",
+        "scenario-1-step-18.png",
+        "scenario-1-step-19.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "114bfa105e097a356c09756289fba32e520dfbf30caf040b894f7f717d370f90",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "ad6de06e-3e5e-438b-a25f-3e3aca11cdc4",
+      "jobId": "5cdd7ed5-9678-4d1b-865e-db3aead7b4d6",
+      "validatedAt": "2026-10-26T06:44:42.670Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_f76a158eeb27ec87_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_f76a158eeb27ec87_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Bandeja PLAFT",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Bandeja de Verificación PLAFT\"",
+          "target": "Bandeja de Verificación PLAFT"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "4c1f64a0e63ca53856c5d26d4465da8b340e7850f018c940c4f2d7fb0108f677",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "581db7b6-d89f-4b90-ad77-be9f70bea03b",
+      "jobId": "03180681-c5ff-41c2-97b7-eaf869124975",
+      "validatedAt": "2026-10-26T06:46:01.045Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Bandeja PLAFT",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0005",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Aprobar y continuar a Revisión Legal",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Comentario",
+          "dataRef": "jira_edit_a8aa7afba255f63f_8"
+        },
+        {
+          "action": "click",
+          "field": "Confirmar aprobación PLAFT",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "2765f5634e9678e27bbdbe27f3f7e0f64744d381058a712756a00e6c599361ab",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "92917deb-ea59-4b4d-bd37-251ae4da1791",
+      "jobId": "c54f9304-457a-423a-a13f-e5e3467c3c84",
+      "validatedAt": "2026-10-26T06:47:27.863Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Bandeja PLAFT",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0005",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Rechazar solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "select",
+          "field": "Motivo",
+          "dataRef": "jira_edit_3af81d7bd0a450ee_8"
+        },
+        {
+          "action": "click",
+          "field": "Confirmar rechazo",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "b60471d73c978356a291d3607ac332055134979cbe83a7ade4b036045d12c96f",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "9e37648d-ab3d-4d63-aaee-5b264ef75573",
+      "jobId": "45dd6d38-fab7-47b2-b031-f8268f9538bb",
+      "validatedAt": "2026-10-26T06:48:53.588Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Bandeja Revisión Legal",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0001",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Aprobar caso y enviar a Negocios",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Confirmar aprobación",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "48632da7a6d57cf1de8f2860c9c0c08ecf41eb4a04afbedb2d97402105d3b038",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "25da0177-a5dd-4115-b604-9afb2025396f",
+      "jobId": "dac8dd9e-05ae-41db-b5a1-6d81952ef21a",
+      "validatedAt": "2026-10-26T06:50:18.268Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Bandeja Revisión Legal",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0001",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Escalar caso",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Comentario",
+          "dataRef": "jira_edit_494a04e79b283adc_8"
+        },
+        {
+          "action": "click",
+          "field": "Confirmar escalamiento",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "788ff7f44172ea0148a16a556f367e220ae393e691d4535b2fa469ea7a0cb892",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "13637593-f8a1-4fbb-bb13-0520b2d1b834",
+      "jobId": "4985b451-9fa9-431a-9c24-77df9b24d5a8",
+      "validatedAt": "2026-10-26T06:51:45.864Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Bandeja Revisión Legal",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0001",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Devolver solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "select",
+          "field": "Motivo",
+          "dataRef": "jira_edit_3c41b15cbee3e8be_8"
+        },
+        {
+          "action": "fill",
+          "field": "Observación",
+          "dataRef": "jira_edit_3c41b15cbee3e8be_9"
+        },
+        {
+          "action": "click",
+          "field": "Confirmar devolución",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "9e3a4a78dc837cde4a6168bd035df5e27fb707425e95250c260a9e922d2d891c",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "fb49d859-6f82-4cf0-b866-ff4e740c2185",
+      "jobId": "15c94362-b757-4257-b234-24fd730effb3",
+      "validatedAt": "2026-10-26T06:53:22.567Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Bandeja Revisión Legal",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0001",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Rechazar solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "select",
+          "field": "Motivo",
+          "dataRef": "jira_edit_54f8c47d7dcd593f_8"
+        },
+        {
+          "action": "click",
+          "field": "Confirmar rechazo",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "79a45ad88a68c1abfd9900a3ca47353401769a00edbab5c1b0ccd0d44e8e9d97",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "be69ebab-8b00-4c35-887d-c8b6b03152ba",
+      "jobId": "3ba7a31e-c427-44b6-b54c-8c450efa5b66",
+      "validatedAt": "2026-10-26T06:54:45.854Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0002",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "4917bc8ec86756a5841c05c52de290847615a8d8f736c9c034739130d9b40240",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "229b19d2-5b07-4c99-91cd-3a274792f826",
+      "jobId": "46fe9e0a-8a53-4349-83fc-00634c8dd5e9",
+      "validatedAt": "2026-10-26T06:56:10.423Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0006",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "6b29117909d92a0a96d04838dbc778db2039062d105260896ff078acae62085c",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "293ec667-8ec2-40f3-8c6f-90f5183a2d24",
+      "jobId": "f62f6ef1-be5d-4420-ac29-a84f1a73a33b",
+      "validatedAt": "2026-10-26T06:57:33.647Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0003",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Convertir prospecto a cliente",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "ac3f340d46c6ad0d8278e1789fd7e6c43f830209a57bdd0dd990c5d431c7b86d",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "59a69d57-d803-4f6e-b0fa-9b379228bb01",
+      "jobId": "1a53826c-61d7-42fc-ae79-40b96acccd6c",
+      "validatedAt": "2026-10-26T06:58:55.665Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_1ea7d7cba7a496e1_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_1ea7d7cba7a496e1_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "8dbb0dc208a64b62cf23ca2c67ce89b2245eed7147554f6eee29f4a98e437820",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "ae1719a9-2a16-42b0-8d3c-42638ee10a1e",
+      "jobId": "0765500b-86c4-48da-9441-edb70a42549d",
+      "validatedAt": "2026-10-26T07:00:16.215Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_ecc2f999d9460baa_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_ecc2f999d9460baa_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Notificaciones",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "eee2d70843d72f72d14098fa7e9a5627cf3d2434379c9fa30d5138af2fa47140",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "9ea4390e-af5e-4f5c-a440-21802f53c002",
+      "jobId": "7d782d5e-c654-43be-93e9-c026706edbb7",
+      "validatedAt": "2026-10-26T07:01:43.320Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_318a34b22573bfa2_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_318a34b22573bfa2_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Salir",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "59edfeaf2a4b7efbdd0a51001379c1713383e3e16363d7030c2d1bf38070df3d",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "35ce2266-df68-4b58-a854-07425c3c5bc6",
+      "jobId": "114072a1-8c13-4f19-8df5-0345eb881c5e",
+      "validatedAt": "2026-10-26T07:03:05.630Z",
+      "startsFrom": "authenticated_state",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_482be5d6608dcc10_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_482be5d6608dcc10_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Solicitudes recientes\"",
+          "target": "Solicitudes recientes"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "2cef9ff0600b1b406296c7ef11d77282d2b998e8479278ed0a3c58dd920f6c75",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "6cad616a-514d-4a94-804b-4bd32c0705f2",
+      "jobId": "f4be725a-4d11-48c2-8d19-0927f3bf22c4",
+      "validatedAt": "2026-10-26T07:04:19.006Z",
+      "startsFrom": "authenticated_state",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_7b24a50eae50be7e_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_7b24a50eae50be7e_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Borrador",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Solicitudes de prospectos PJ\"",
+          "target": "Solicitudes de prospectos PJ"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "09a518cf70a64da41317237ff2ff3d1db77e9efa246de6d556200c5c7224519e",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "87cd48a1-c578-48a5-86e5-0fcda574a712",
+      "jobId": "cac9cc3b-2a99-4beb-bec6-55392f22ace9",
+      "validatedAt": "2026-10-26T07:05:42.437Z",
+      "startsFrom": "authenticated_state",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_853ff50289a5fdf4_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_853ff50289a5fdf4_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Verificación PLAFT",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Solicitudes de prospectos PJ\"",
+          "target": "Solicitudes de prospectos PJ"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "1db5810f19d595e64ff38f335d31d99780e254df54350df96f2ee07972c6d60b",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "1ed42417-17d6-41ed-8279-7011caeb7706",
+      "jobId": "ea02921a-b3d5-41a6-8c0c-a2e95bcf6c5d",
+      "validatedAt": "2026-10-26T07:07:06.054Z",
+      "startsFrom": "authenticated_state",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_933cd42afe52ddda_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_933cd42afe52ddda_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "En Revisión Legal",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Solicitudes de prospectos PJ\"",
+          "target": "Solicitudes de prospectos PJ"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "0a4d6d632cd691ad8bdcc406ac0f5ea26bab4ef989552086cf405d1ea773b445",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "52e1df62-db59-4b4d-a5a8-3acbdf783e21",
+      "jobId": "a65846a6-e59d-4a7c-9165-5856229edc5f",
+      "validatedAt": "2026-10-26T07:08:28.973Z",
+      "startsFrom": "authenticated_state",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_2224d4ce095fed61_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_2224d4ce095fed61_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Devuelta",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Solicitudes de prospectos PJ\"",
+          "target": "Solicitudes de prospectos PJ"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "58746beb8edb91d0a03113d9191d61db0e9b2d47435500aa5b7f2dc6c5c6a903",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "947e3fa3-a335-4d3c-9226-aff3e5ffa31e",
+      "jobId": "b005c377-c189-4c8f-aaf1-0538d245d283",
+      "validatedAt": "2026-10-26T07:09:53.375Z",
+      "startsFrom": "authenticated_state",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_42e877e844969b96_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_42e877e844969b96_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Escalado",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Solicitudes de prospectos PJ\"",
+          "target": "Solicitudes de prospectos PJ"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "06bd6cbba68871a5388f51a6b3f5ae060a27255a81fa53f76e9877866b6d9ef5",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "cbba506d-bdc3-4bd8-b552-0323b8ed2ad7",
+      "jobId": "fe6ec474-aa72-403b-88de-961c79a90f2b",
+      "validatedAt": "2026-10-26T07:11:18.955Z",
+      "startsFrom": "authenticated_state",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_2e5e34770b3c54dd_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_2e5e34770b3c54dd_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Aprobada",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Solicitudes de prospectos PJ\"",
+          "target": "Solicitudes de prospectos PJ"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "c7965c84c558bb5a81eb854a98428037aa629742a93dfb5364d2b6f9fca478fe",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "9052860e-4b22-4854-b4a6-66d06417e6f9",
+      "jobId": "a42155d7-bdb6-4ca8-81fd-1278fdfe1599",
+      "validatedAt": "2026-10-26T07:13:09.045Z",
+      "startsFrom": "authenticated_state",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_960e4daf38734079_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_960e4daf38734079_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Cliente Creado",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Solicitudes de prospectos PJ\"",
+          "target": "Solicitudes de prospectos PJ"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "497c283510ef9290268791c4bb2c837c815f1b1c0051b3dbfc1a77531c0d0ee1",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "08a7a9e8-f276-4957-997d-8a9b5eb0755d",
+      "jobId": "e7ac9d56-6e98-4b2e-b8b7-e1687a081e6a",
+      "validatedAt": "2026-10-26T07:14:34.471Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0001",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "83b1639fff076dd654eb2a41e75680ca1bef9e40af34e635e20302c1833bbe75",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "c2b20962-96a0-44ff-932e-b08516a84e13",
+      "jobId": "ba21754d-bf19-4296-853f-d25fcd6fcbe2",
+      "validatedAt": "2026-10-26T07:16:25.147Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Enviar a Debida Diligencia",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "5a5f0173c17aae3a2894e20f1653f74eb9ce5fdca9daae1966c534a406f75c13",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "917a5d8b-e03e-431e-ae9f-081ae4666444",
+      "jobId": "3fa766ce-bb9d-4977-90cc-1c9873cee431",
+      "validatedAt": "2026-10-26T07:17:54.626Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario_negocios"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena_negocios"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0001",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Personas relacionadas",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "570d9a9a3b2c7fa6117d2a502c48bf468f99c96c43de75be1823121ae132f405",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "0585e864-3d75-48ab-9b14-5aafcbee620f",
+      "jobId": "72fb6220-ae1e-43d1-9ac0-c82aa7d90030",
+      "validatedAt": "2026-10-26T07:19:22.198Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_c64667f07377bf9b_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_c64667f07377bf9b_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Salir",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "ae0875682c79bef7087ab55205d2e439be8eb3ffe577879e8090af05593d82a0",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "1c645021-e7d7-450b-9078-433c4bbfe16e",
+      "jobId": "3cfe99d3-9cf7-40fb-9d22-9c6cfc02ac80",
+      "validatedAt": "2026-10-26T07:20:38.731Z",
+      "startsFrom": "authenticated_state",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_1ea7d7cba7a496e1_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_1ea7d7cba7a496e1_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "925ff89c602f88429e436bcca88b2334c4717d1065e415834d900b9320ae1bdb",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "8436c327-4632-4242-b888-739c6a9e3d0e",
+      "jobId": "0bac384a-ca05-420f-9264-4e2214aaf936",
+      "validatedAt": "2026-10-26T07:21:51.628Z",
+      "startsFrom": "authenticated_state",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_c68fb14cc0e8f30d_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_c68fb14cc0e8f30d_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Solicitudes recientes\"",
+          "target": "Solicitudes recientes"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "c499dbf858a31f7b53106b255e35625507016f1346529e68c85b51bb623316f1",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "4af69114-c2d9-4781-bf8f-092adda830cb",
+      "jobId": "2a88519c-ea9c-49e7-a2d3-0b59f1047fea",
+      "validatedAt": "2026-10-26T07:23:57.097Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_74099750f176299e_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_74099750f176299e_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Número de Identificación",
+          "dataRef": "jira_edit_74099750f176299e_7"
+        },
+        {
+          "action": "click",
+          "field": "Consultar",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Denominación Social",
+          "dataRef": "jira_edit_74099750f176299e_9"
+        },
+        {
+          "action": "select",
+          "field": "Tipo Sociedad",
+          "dataRef": "jira_edit_74099750f176299e_10"
+        },
+        {
+          "action": "fill",
+          "field": "Fecha de Constitución",
+          "dataRef": "jira_edit_74099750f176299e_11"
+        },
+        {
+          "action": "fill",
+          "field": "Calle",
+          "dataRef": "jira_edit_74099750f176299e_12"
+        },
+        {
+          "action": "fill",
+          "field": "Municipio",
+          "dataRef": "jira_edit_74099750f176299e_13"
+        },
+        {
+          "action": "fill",
+          "field": "Teléfono 1",
+          "dataRef": "jira_edit_74099750f176299e_14"
+        },
+        {
+          "action": "fill",
+          "field": "Email",
+          "dataRef": "jira_edit_74099750f176299e_15"
+        },
+        {
+          "action": "select",
+          "field": "Actividad de la Sociedad",
+          "dataRef": "jira_edit_74099750f176299e_16"
+        },
+        {
+          "action": "click",
+          "field": "Guardar borrador",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png",
+        "scenario-1-step-13.png",
+        "scenario-1-step-14.png",
+        "scenario-1-step-15.png",
+        "scenario-1-step-16.png",
+        "scenario-1-step-17.png",
+        "scenario-1-step-18.png",
+        "scenario-1-step-19.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "40e1967aa32a492bbd7c107647b607871b84f7883d521f2ad57670b8915614ed",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "9541d40d-3acf-4bf9-aa22-e237fabf38f8",
+      "jobId": "a31d2f77-47d3-4178-9365-24b657aaa0fa",
+      "validatedAt": "2026-10-26T07:25:34.913Z",
+      "startsFrom": "authenticated_state",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_c0c7b455d335ae0e_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_c0c7b455d335ae0e_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Solicitudes de prospectos PJ\"",
+          "target": "Solicitudes de prospectos PJ"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "2e45989dd684572c1db19b732402c88eb1e0ba2912f1d4eadfd31addd19b8f76",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "c68aff7a-2c76-42e1-a841-060360edc990",
+      "jobId": "194fb860-54e4-4d67-8b72-263307ebee99",
+      "validatedAt": "2026-10-26T07:26:55.400Z",
+      "startsFrom": "authenticated_state",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_c29682df9c41ec2d_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_c29682df9c41ec2d_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Solicitudes recientes\"",
+          "target": "Solicitudes recientes"
+        },
+        {
+          "requirement": "Validar que se muestre \"Salir\"",
+          "target": "Salir"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "2985bea035e0d40f545c6aa3781df153fb2cae84b251cb0455d0b03be00a9853",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "cb258006-b573-4c3c-b9c6-8d6c299c16c2",
+      "jobId": "0acc8c8f-62c7-4c48-9ef3-51d0257a0ae2",
+      "validatedAt": "2026-10-26T07:28:29.398Z",
+      "startsFrom": "authenticated_state",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_5b43f2b1f5f216ec_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_5b43f2b1f5f216ec_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Solicitudes recientes\"",
+          "target": "Solicitudes recientes"
+        },
+        {
+          "requirement": "Validar que se muestre \"Salir\"",
+          "target": "Salir"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "a9dba1d1b6aae66507a32af105bd7eebd9e4b59deca32589995f778f25163aa5",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "b0d43d1c-bab0-4561-b849-524cb7f0b305",
+      "jobId": "de5ff3af-9dfa-4988-a259-35bf058472c5",
+      "validatedAt": "2026-10-26T07:29:45.677Z",
+      "startsFrom": "authenticated_state",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_83277bf3ac1aa27f_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_83277bf3ac1aa27f_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Bandeja PLAFT",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"Bandeja de Verificación PLAFT\"",
+          "target": "Bandeja de Verificación PLAFT"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "99eb7cb96b8e944a876ca337fc56715eaf8b0fefb6d48f859ea06662e4bde478",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "1f6e3b2c-ba9a-449b-8c73-55883fba17b0",
+      "jobId": "ff785979-c0f2-4b55-a375-a2007473278a",
+      "validatedAt": "2026-10-26T07:31:08.994Z",
+      "startsFrom": "authenticated_state",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_ebf56f1b56ccb482_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_ebf56f1b56ccb482_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Bandeja PLAFT",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0005",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Aprobar y continuar a Revisión Legal",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Comentario",
+          "dataRef": "jira_edit_ebf56f1b56ccb482_8"
+        },
+        {
+          "action": "click",
+          "field": "Confirmar aprobación PLAFT",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "f5d62342c8ec9a89a9c341708d82d4818408499051e54d19c2f569df6e0723b9",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "6bc1ddb3-960b-43dc-aebd-fdd64c844d88",
+      "jobId": "7f2202f3-8452-4545-b451-1d438f59d79a",
+      "validatedAt": "2026-10-26T07:32:49.593Z",
+      "startsFrom": "authenticated_state",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_7a2e9119adc46bcd_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_7a2e9119adc46bcd_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Bandeja Revisión Legal",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0001",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Aprobar caso y enviar a Negocios",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Confirmar aprobación",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "b70833565a96fb416f19709805a214356c734652bd583c0315cbbc53019d4051",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "89a11b68-71f3-4279-98ed-5062c9089811",
+      "jobId": "0d4f4d23-b4ef-4024-b0d4-54f524c8f789",
+      "validatedAt": "2026-10-26T07:34:18.246Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_6cf84e195c8806c3_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_6cf84e195c8806c3_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0003",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Convertir prospecto a cliente",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "84e76c1b1cf8606e7d5607e05b84b76ae32328951374a3952e734c254c6aead4",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "e268f290-633c-4ed8-9095-7e8b58d36cba",
+      "jobId": "d72dc2c1-8151-417e-a1d0-6dd07c2ca723",
+      "validatedAt": "2026-10-26T07:35:45.859Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_93ea23c9c2ec5f25_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_93ea23c9c2ec5f25_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0003",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Convertir prospecto a cliente",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "f0b814dbd90053d088ebb08f3ae81b160e711018fe068c99a577920f9c56f1d8",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "0d135519-8d19-452e-bb16-5d7a78873922",
+      "jobId": "6fbd14f8-2e4a-4b7f-a03f-eefcc49317cf",
+      "validatedAt": "2026-10-26T07:37:39.888Z",
+      "startsFrom": "authenticated_state",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_d522839872a4ebda_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_d522839872a4ebda_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Enviar a Debida Diligencia",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "419ed607daec2fdc507b6fc0ab1e1720fc9993b165603dafb59b864dc4db67f3",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "dd8b7fc5-d5a9-4fde-b594-8828a6f028aa",
+      "jobId": "b9e94d04-1898-4c78-be73-8f32e454919f",
+      "validatedAt": "2026-10-26T07:39:02.730Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario_negocios"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena_negocios"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0001",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "9c39a6f2eb951cb4ec65678b90a6c8f53bc145308893da4f8c4551b9abaf3411",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "f5f44626-f3b9-4124-afaa-1676982bc68c",
+      "jobId": "a533ae26-a7bd-49cc-ad04-1c2fee4ecc25",
+      "validatedAt": "2026-10-26T07:40:55.032Z",
+      "startsFrom": "authenticated_state",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_1c55373b23f3d8da_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_1c55373b23f3d8da_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Flujo de Solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Registro de Datos",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "ab98c92e389530a805778a3da94805616817605fbccab28fc1ddf8bbad0953d0",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "4dd1bbe4-39d9-4224-bd8b-0f3ba0131383",
+      "jobId": "3cc19158-950d-4012-8658-a33479fca0c6",
+      "validatedAt": "2026-10-26T07:42:30.600Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario_negocios_ac17_1"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena_negocios_ac17_1"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SOL-2026-0001",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "8c9d81328b0d7831d7fc112e13850b2caaa2504da452abc30df550d9d808a4f3",
+      "profileRevision": "e0854a0f0e9c601143464fc6a29fd7769a416dca75130b5dba2a5c77f3c5e04c",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "4ebfeebf-a373-471f-8679-5b1ae84bfa1d",
+      "jobId": "15447279-012e-49b6-ab7a-5faf46b7c2b0",
+      "validatedAt": "2026-10-26T07:44:48.328Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_1c55373b23f3d8da_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_1c55373b23f3d8da_3"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Flujo de Solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Registro de Datos",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png"
+      ],
+      "observables": []
+    }
+  ]
+}

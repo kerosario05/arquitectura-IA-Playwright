@@ -1,0 +1,9 @@
+{
+  "id": "08a7a9e8-f276-4957-997d-8a9b5eb0755d-revisar-el-avance-por-etapas-y-la-bitacora-de-una-solicitud",
+  "externalId": "08a7a9e8-f276-4957-997d-8a9b5eb0755d",
+  "title": "Revisar el avance por etapas y la bitácora de una solicitud",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T07:15:03.884Z"
+}

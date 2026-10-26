@@ -1,0 +1,56 @@
+{
+  "id": "9f7972cc-b7d5-48ec-b869-d084001932e4-consultar-prospecto-con-coincidencia-restrictiva-en-listas",
+  "externalId": "9f7972cc-b7d5-48ec-b869-d084001932e4",
+  "title": "Consultar prospecto con coincidencia restrictiva en listas",
+  "planPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\9f7972cc-b7d5-48ec-b869-d084001932e4-consultar-prospecto-con-coincidencia-restrictiva-en-listas\\plan.json",
+  "specPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\9f7972cc-b7d5-48ec-b869-d084001932e4-consultar-prospecto-con-coincidencia-restrictiva-en-listas\\case.spec.ts",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "web-test",
+  "baseUrlHash": "4e1194428e74",
+  "createdAt": "2026-10-26T06:39:25.286Z",
+  "updatedAt": "2026-10-26T06:39:25.286Z",
+  "specVerificationStatus": "passed",
+  "tags": [
+    "jira_semantic",
+    "jira_generated"
+  ],
+  "metadata": {
+    "specGeneration": {
+      "mode": "deterministic",
+      "provider": null,
+      "model": null,
+      "invocations": 0,
+      "invocationsConsumed": 0,
+      "durationMs": 0,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "passed",
+        "typescript": "skipped",
+        "playwrightDiscovery": "skipped",
+        "semanticCoverage": "passed",
+        "functionalExecution": "passed"
+      },
+      "promotionAllowed": true,
+      "specsRequested": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
+      "specWritten": true,
+      "errors": [],
+      "warnings": []
+    }
+  }
+}

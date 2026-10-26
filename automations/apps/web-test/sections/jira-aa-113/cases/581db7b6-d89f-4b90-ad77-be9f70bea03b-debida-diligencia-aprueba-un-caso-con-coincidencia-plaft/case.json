@@ -1,0 +1,9 @@
+{
+  "id": "581db7b6-d89f-4b90-ad77-be9f70bea03b-debida-diligencia-aprueba-un-caso-con-coincidencia-plaft",
+  "externalId": "581db7b6-d89f-4b90-ad77-be9f70bea03b",
+  "title": "Debida Diligencia aprueba un caso con coincidencia PLAFT",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T06:46:30.379Z"
+}

@@ -14,7 +14,8 @@ import type { DataContextEntry } from "../data/data-context";
 import { assertJiraSpecAbsentText, observeJiraNamedRowMatch, uniqueVisibleActionOwner, type JiraRowMatchStatus } from "./jira-spec-runtime";
 import { assertJiraDownloadContent, ensureJiraDownloadObserver, observeJiraVisibleTableRows, parseJiraDownloadExpectation, type JiraDownloadExpectation } from "./jira-download-assertion";
 import { resolveJiraDomAssertion } from "./jira-dom-assertion-ai";
-import { normalizeJiraAssertionSyntax } from "./jira-assertion-syntax";
+import { jiraHeaderAssertionTarget, normalizeJiraAssertionSyntax } from "./jira-assertion-syntax";
+import { observeJiraHeaderText, waitForJiraHeaderText } from "./jira-header-assertion";
 import { jiraCredentialRejectionMatches, jiraAlertErrorEquivalenceMatches, observeJiraCredentialRejection, readVisibleJiraAlertTexts, stripJiraNotificationChannelWord } from "./jira-assertion-matching";
 import { classifyAssertionPolarity } from "../scenarios/canonical-scenario";
 import type { JiraInputRequirement } from "./jira-input-requirements";
@@ -26,9 +27,13 @@ import { isJiraRangeMetadataAssertion, jiraNumericValueMatches, jiraRangeMetadat
 import { observeJiraFieldValidation, type JiraFieldValidationEvidence } from "./jira-field-validation";
 import { detectTransientScreen } from "../discovery/transient-screen-detector";
 import { DEFAULT_POLL_MS, DEFAULT_TIMEOUT_MS } from "../discovery/page-stability-detector";
+import { jiraEnabledFieldTargets, jiraExpectedResultCoveredByAuthoredSteps, jiraResetFieldTargets } from "./jira-expected-result-coverage";
 
 /** Quiet polls (not loading, no gate, no landing) tolerated before concluding no auth stage follows the submit. */
 const AUTH_STAGE_QUIET_POLLS = 8;
+const JIRA_LOADING_EVIDENCE_PATTERN = /\b(?:estado\s+(?:de\s+)?carga|indicador(?:es)?\s+(?:de\s+)?carga|cargando|loading|procesando|processing|actualizando|updating)\b/i;
+const JIRA_LOADING_ASSERTION_PATTERN = JIRA_LOADING_EVIDENCE_PATTERN;
+const JIRA_LOADING_INDICATOR_SELECTOR = '[role="status"],[role="progressbar"],[aria-live],[aria-label],[aria-busy="true"],[data-loading="true"],progress,[class*="spinner" i],[class*="loader" i],[class*="loading" i],[class*="cargando" i]';
 
 /** Explicit access/verification/one-time code wording; transfer/security-token labels deliberately do not match. */
 const ACCESS_CODE_LABEL = /\b(?:c[oó]digo|code)\s+(?:de\s+)?(?:acceso|verificaci[oó]n|un\s+solo\s+uso|sms|otp)\b|\b(?:access|verification|one[- ]time)\s+(?:code|password|passcode)\b|\botp\b/i;
@@ -72,6 +77,19 @@ export class JiraRequiredDataError extends Error {
     this.name='JiraRequiredDataError';
   }
 }
+function jiraScenarioCredentialFillTargets(steps: string[]): string[] {
+  return steps.flatMap(step => {
+    const [action] = step.split(/\nEsperado:\s*/i);
+    return parseStepIntent(normalizeJiraAssertionSyntax(action))
+      .filter(intent => intent.type === "action_fill" && /contrase[nñ]a|password|usuario|username/i.test(intent.actionTarget ?? ""))
+      .map(intent => intent.actionTarget!);
+  });
+}
+/** True when the authored scenario already owns username/password entry. In that case
+ * the configured AuthFlow must not run before those steps or override their data. */
+export function jiraScenarioHasAuthoredCredentialEntry(steps: string[]): boolean {
+  return jiraScenarioCredentialFillTargets(steps).length > 0;
+}
 /** Observed labels of a classic login form. `extra` holds additional credential fields identified by role (e.g. company_identifier); `blocked` reports a visible required control that cannot be identified. */
 export type JiraClassicLoginObservation =
   | { username: string; password: string; submit: string; extra?: Array<{ label: string; role: string }>; blocked?: undefined }
@@ -106,9 +124,11 @@ export type JiraBrowserPort = {
   /** Data rows of the single visible table (undefined when not safely scoped); binds filter-dependent exports to live content. */
   observeVisibleTable?(): Promise<string[][] | undefined>;
   assertValidation?(fieldLabel: string): Promise<JiraFieldValidationEvidence>;
+  assertFieldEnabled?(fieldLabel: string): Promise<{ kind: "field_enabled"; fieldLabel: string }>;
+  assertFieldEmpty?(fieldLabel: string): Promise<{ kind: "field_empty"; fieldLabel: string }>;
   /** Exactly one data row of the named container must contain every previously entered value; throws JIRA_ROW_* otherwise. */
   assertRowMatch?(container: string, values: string[]): Promise<{ kind: "table_row_match"; container: string; matchedRows: 1; boundValueCount: number }>;
-  assert(target: string, authGate: boolean, screenDescriptor?: boolean, columnHeader?: boolean): Promise<{ stage?: string; observedText?: string }>;
+  assert(target: string, authGate: boolean, screenDescriptor?: boolean, columnHeader?: boolean, headerScoped?: boolean): Promise<{ stage?: string; observedText?: string; assertionScope?: "header" }>;
 };
 
 type JiraNativeOption = { value: string; label: string };
@@ -352,6 +372,20 @@ async function resolveJiraContextualSelectionField(page: Page, target: string, s
 }
 
 async function resolveJiraFillTargetWhenReady(page: Page, target: string, semanticContext?: string) {
+  const deadline = Date.now() + DEFAULT_TIMEOUT_MS;
+  let result = await resolveJiraFillTargetOnce(page, target, semanticContext);
+  // DOMContentLoaded/network settlement does not prove SPA hydration is done.
+  // Observe the requested control, not a splash-screen label or a fixed delay.
+  // Stop immediately on ambiguity; waiting must never choose a different field.
+  while (result.status === 'not_found' && !page.isClosed() && Date.now() < deadline) {
+    await waitForJiraDomMutation(page, Math.min(DEFAULT_POLL_MS, deadline - Date.now()));
+    if (page.isClosed()) break;
+    result = await resolveJiraFillTargetOnce(page, target, semanticContext);
+  }
+  return result;
+}
+
+async function resolveJiraFillTargetOnce(page: Page, target: string, semanticContext?: string) {
   const rowScope = jiraExplicitRowScope(semanticContext, target);
   const gridContext = rowScope === undefined ? {} : { rowScope };
   const contextualField = rowScope === undefined ? await resolveJiraContextualFillField(page, target, semanticContext) : undefined;
@@ -408,6 +442,44 @@ export function jiraExplicitRowScope(...descriptions: Array<string | undefined>)
 function normalizeJiraOptionText(value: string): string {
   return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("es").replace(/[^\p{L}\p{N}]+/gu, " ").trim().replace(/\s+/g, " ")
     .split(" ").filter(token => !["de", "del", "la", "el", "los", "las"].includes(token)).join(" ");
+}
+
+/** Resolve a bare status label only through a uniquely observed native status filter. */
+async function resolveJiraNativeStatusFilter(page: Page, target: string): Promise<Locator | undefined> {
+  const selects = page.locator("select");
+  const candidates: Locator[] = [];
+  for (let index = 0; index < await selects.count(); index += 1) {
+    const inspected = selects.nth(index);
+    if (!await inspected.isVisible().catch(() => false) || !await inspected.isEnabled().catch(() => false)) continue;
+    const evidence = await inspected.evaluate(element => {
+      const select = element as HTMLSelectElement;
+      const labels = Array.from(select.labels ?? []).map(label => label.innerText).join(" ");
+      return {
+        label: select.getAttribute("aria-label") || labels || select.getAttribute("title") || "",
+        options: Array.from(select.options).filter(option => !option.disabled && !option.closest("optgroup[disabled]"))
+          .map(option => ({ label: option.label || option.textContent || "", value: option.value })),
+      };
+    });
+    const normalizedLabel = normalizeJiraOptionText(evidence.label);
+    const statusLabel = /\b(?:estado|status|state|situacion)\b/.test(normalizedLabel);
+    const hasAllStatusesOption = evidence.options.some(option =>
+      [option.label, option.value].some(value => /^(?:todos? estados?|all statuses?|all states?|cualquier estado|any status)$/.test(normalizeJiraOptionText(value))));
+    const exactOption = evidence.options.some(option =>
+      [option.label, option.value].some(value => normalizeJiraOptionText(value) === normalizeJiraOptionText(target)));
+    if (!statusLabel || !hasAllStatusesOption || !exactOption) continue;
+
+    // Re-resolve by the observed accessible name. The inspected ordinal is used
+    // only to read candidate metadata and never becomes locator authority.
+    const accessibleLine = (await inspected.ariaSnapshot().catch(() => "")).split("\n")[0];
+    const accessibleNameMatch = accessibleLine.match(/^-\s+combobox\s+("(?:\\.|[^"\\])*")/i);
+    if (!accessibleNameMatch) continue;
+    const accessibleName = JSON.parse(accessibleNameMatch[1]) as string;
+    if (!accessibleName) continue;
+    const named = page.getByRole("combobox", { name: accessibleName, exact: true });
+    if (await named.count() === 1 && await named.isVisible() && await named.isEnabled()
+      && await named.evaluate((element, other) => element === other, await inspected.elementHandle())) candidates.push(named);
+  }
+  return candidates.length === 1 ? candidates[0] : undefined;
 }
 
 function singularizeSpanishAssertionWord(word: string): string {
@@ -545,16 +617,35 @@ async function resolveJiraObservedFillField(page: Page, target: string): Promise
       .sort((a, b) => a.score - b.score)[0]?.label === pair.label);
     if (unique.length !== 1) return undefined;
     const field = unique[0].field as HTMLElement;
-    return { index: Array.from(elements).indexOf(field), tag: field.tagName.toLowerCase(), labelText: (unique[0].label as HTMLElement).innerText.trim() };
+    return { tag: field.tagName.toLowerCase(), labelText: (unique[0].label as HTMLElement).innerText.trim(),
+      id:field.id, testId:field.getAttribute('data-testid'), name:field.getAttribute('name'),
+      type:field.getAttribute('type'), placeholder:field.getAttribute('placeholder'), ariaLabel:field.getAttribute('aria-label') };
   }, normalizedTarget);
   if (!observed) return undefined;
-  const locator = page.locator("body *").nth(observed.index);
-  if (await locator.count() !== 1 || !await locator.isVisible() || !await locator.isEnabled()) return undefined;
-  const verified = await locator.evaluate((element, expected) => element.tagName.toLowerCase() === expected.tag
-    && element.matches("input,textarea,[contenteditable='true']"), { tag: observed.tag });
-  if (!verified) return undefined;
-  jiraSelectionLabelByLocator.set(locator, observed.labelText);
-  return locator;
+  // A body-wide DOM index changes as SPA content hydrates between resolution,
+  // certification and fill. Bind to the observed field identity instead.
+  const candidates:Locator[]=[];
+  if(observed.id)candidates.push(page.locator(`[id=${JSON.stringify(observed.id)}]`));
+  if(observed.testId)candidates.push(page.getByTestId(observed.testId));
+  if(observed.ariaLabel)candidates.push(page.getByLabel(observed.ariaLabel,{exact:true}));
+  if(observed.name)candidates.push(page.locator(`${observed.tag}[name=${JSON.stringify(observed.name)}]`));
+  if(observed.placeholder)candidates.push(page.getByPlaceholder(observed.placeholder,{exact:true}));
+  candidates.push(page.getByLabel(observed.labelText,{exact:true}));
+  const label=xpathStringLiteral(observed.labelText);
+  const identity=[observed.type&&`@type=${xpathStringLiteral(observed.type)}`,observed.placeholder&&`@placeholder=${xpathStringLiteral(observed.placeholder)}`].filter(Boolean).join(' and ');
+  const fields=".//input | .//textarea | .//*[@contenteditable='true']";
+  candidates.push(page.locator(`xpath=//*[normalize-space(.)=${label} and not(*[normalize-space(.)=${label}])]/ancestor::*[count(${fields})=1][1]//${observed.tag}${identity?`[${identity}]`:''}`));
+  for(const locator of candidates){
+    if(await locator.count()!==1 || !await locator.isVisible() || !await locator.isEnabled())continue;
+    const verified=await locator.evaluate((element,expected)=>element.tagName.toLowerCase()===expected.tag
+      && element.matches("input,textarea,[contenteditable='true']")
+      && ['id','name','type','placeholder'].every(attribute=>!expected[attribute as keyof typeof expected]
+        || element.getAttribute(attribute)===expected[attribute as keyof typeof expected]),observed);
+    if(!verified)continue;
+    jiraSelectionLabelByLocator.set(locator,observed.labelText);
+    return locator;
+  }
+  return undefined;
 }
 
 /**
@@ -883,6 +974,27 @@ export async function resolveJiraActionTarget(page: Page, snapshot: Awaited<Retu
       clickableCandidates: [{ text: target, normalizedText: normalizeJiraOptionText(target), type: role, role }] };
   }
   if (exactActions.length > 1) {
+    // Repeated navigation/content links are equivalent only when the live DOM
+    // proves the same concrete destination and browsing behavior. A unique
+    // main-region control gives a structural identity without using DOM order.
+    if(exactActions.every(action=>action.role==='link')){
+      const links=await Promise.all(exactActions.map(action=>action.locator.evaluate(element=>({
+        tag:element.tagName.toLowerCase(),href:element instanceof HTMLAnchorElement?element.href:'',
+        rawHref:element.getAttribute('href'),target:element.getAttribute('target')??'',
+        download:element.hasAttribute('download'),onclick:element.hasAttribute('onclick'),
+        rel:element.getAttribute('rel')??'',
+      }))));
+      const first=links[0];
+      const equivalent=first.tag==='a'&&/^https?:\/\//i.test(first.href)&&Boolean(first.rawHref?.trim())&&first.rawHref!.trim()!=='#'
+        &&!first.download&&!first.onclick&&links.every(link=>JSON.stringify(link)===JSON.stringify(first));
+      const main=page.getByRole('main').getByRole('link',{name:target,exact:true});
+      if(equivalent&&await main.count()===1&&await main.isVisible()&&await main.isEnabled()
+        &&await main.evaluate((element,href)=>element instanceof HTMLAnchorElement&&element.href===href,first.href)){
+        return {status:'resolved',target,locator:main,locatorStrategy:'role',confidence:1,
+          matchReason:'jira_equivalent_destination_in_main',candidateText:target,candidates:[],
+          clickableCandidates:[{text:target,normalizedText:normalizeJiraOptionText(target),type:'link',role:'link'}]};
+      }
+    }
     return { status: "ambiguous" as const, target, confidence: 0, matchReason: "jira_exact_accessible_action_ambiguous",
       candidateText: target, candidates: [], clickableCandidates: exactActions.map(({ role }) => ({
         text: target, normalizedText: normalizeJiraOptionText(target), type: role, role,
@@ -1051,6 +1163,11 @@ function jiraForwardActionLabel(target:string,label:string):boolean {
 async function resolveJiraActionTargetWithAi(page: Page, snapshot: Awaited<ReturnType<typeof scanCurrentPage>>, target: string, semanticContext?: string): Promise<TargetResolutionResult> {
   const deterministic = await resolveJiraActionTarget(page, snapshot, target);
   if (deterministic.status === "resolved") return deterministic;
+  if (deterministic.status === "ambiguous" || deterministic.status === "not_found") {
+    const statusFilter = await resolveJiraNativeStatusFilter(page, target);
+    if (statusFilter) return { status: "resolved", target, locator: statusFilter, locatorStrategy: "jira_native_status_filter",
+      confidence: 1, matchReason: "unique_observed_native_status_filter_option", candidateText: target, candidates: [] };
+  }
   const forwardIntent = /^\s*(?:continuar|continue|siguiente|next|avanzar|proceed)\b/i.test(target);
   const candidatesSnapshot = forwardIntent ? {...snapshot,elements:snapshot.elements.filter(element=>
     jiraForwardActionLabel(target,element.ariaLabel || element.accessibleName || element.label || element.text || ''))} : snapshot;
@@ -1298,6 +1415,93 @@ async function resolveJiraContextualCombobox(page: Page, context: string | undef
   return candidates[0].locator;
 }
 
+/**
+ * Some forms expose an identification type selector and its identifier value
+ * as adjacent controls. Generated Jira steps may name the value by the chosen
+ * type (for example, "RNC") while carrying the actual identifier as data. If
+ * that data cannot be an option, bind the fill to the uniquely paired,
+ * accessibly-labelled identifier field in the same live form group.
+ */
+async function resolveJiraIdentifierValueField(page: Page, selection: Locator, target: string,
+  value: string): Promise<Locator | undefined> {
+  const control = await selection.evaluate((element, expected) => {
+    if (!(element instanceof HTMLSelectElement)) return undefined;
+    const selectLabel = [Array.from(element.labels ?? []).map(label => label.textContent ?? "").join(" "),
+      (element.getAttribute("aria-labelledby") ?? "").split(/\s+/).map(id => document.getElementById(id)?.textContent ?? "").join(" "),
+      element.getAttribute("aria-label"), element.getAttribute("placeholder")].filter(Boolean).join(" ")
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase()
+      .replace(/[^\p{L}\p{N}]+/gu, " ").trim().replace(/\s+/g, " ");
+    if (!/(?:\b(?:tipo|clase)\s+(?:de\s+)?(?:identificacion|documento|identification|document)\b|\b(?:identification|document)\s+type\b)/.test(selectLabel)) return undefined;
+    const options = Array.from(element.options).filter(option => !option.disabled && !option.closest("optgroup[disabled]"))
+      .map(option => ({ label: (option.label || option.textContent || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim().replace(/\s+/g, " "),
+      value: option.value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase()
+        .replace(/[^\p{L}\p{N}]+/gu, " ").trim().replace(/\s+/g, " ") }));
+    const requestedTarget = expected.target;
+    const requestedValue = expected.value;
+    const targetIsTypeOption = options.some(option => option.label === requestedTarget || option.value === requestedTarget);
+    const valueIsTypeOption = options.some(option => option.label === requestedValue || option.value === requestedValue);
+    if (!targetIsTypeOption || valueIsTypeOption) return undefined;
+
+    const numberFields = Array.from(document.querySelectorAll("input:not([type=hidden]):not([type=password]):not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]),textarea,[contenteditable='true']"))
+      .filter(field => window.getComputedStyle(field).display !== "none" && window.getComputedStyle(field).visibility !== "hidden"
+        && field.getBoundingClientRect().width > 0 && field.getBoundingClientRect().height > 0
+        && !(field as HTMLInputElement).disabled && !(field as HTMLInputElement).readOnly
+        && !field.matches('[aria-disabled="true"]')
+        && /(?:\b(?:numero|number|nro|no)\s+(?:de\s+)?(?:identificacion|documento|identification|document)\b|\b(?:identification|document)\s+(?:id\s+)?number\b)/.test(
+          [Array.from((field as HTMLInputElement).labels ?? []).map(label => label.textContent ?? "").join(" "),
+            (field.getAttribute("aria-labelledby") ?? "").split(/\s+/).map(id => document.getElementById(id)?.textContent ?? "").join(" "),
+            field.getAttribute("aria-label"), field.getAttribute("placeholder")].filter(Boolean).join(" ")
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim().replace(/\s+/g, " ")));
+    if (numberFields.length !== 1) return undefined;
+    const candidate = numberFields[0];
+    let scope: Element | null = element.parentElement;
+    while (scope && scope !== document.body) {
+      const scopedTypeControls = Array.from(scope.querySelectorAll("select,[role=combobox]"))
+        .filter(field => window.getComputedStyle(field).display !== "none" && window.getComputedStyle(field).visibility !== "hidden"
+          && field.getBoundingClientRect().width > 0 && field.getBoundingClientRect().height > 0
+          && /(?:\b(?:tipo|clase)\s+(?:de\s+)?(?:identificacion|documento|identification|document)\b|\b(?:identification|document)\s+type\b)/.test(
+            [Array.from((field as HTMLSelectElement).labels ?? []).map(label => label.textContent ?? "").join(" "),
+              (field.getAttribute("aria-labelledby") ?? "").split(/\s+/).map(id => document.getElementById(id)?.textContent ?? "").join(" "),
+              field.getAttribute("aria-label"), field.getAttribute("placeholder")].filter(Boolean).join(" ")
+              .normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim().replace(/\s+/g, " ")));
+      const scopedNumberFields = Array.from(scope.querySelectorAll("input:not([type=hidden]):not([type=password]):not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]),textarea,[contenteditable='true']"))
+        .filter(field => window.getComputedStyle(field).display !== "none" && window.getComputedStyle(field).visibility !== "hidden"
+          && field.getBoundingClientRect().width > 0 && field.getBoundingClientRect().height > 0
+          && !(field as HTMLInputElement).disabled && !(field as HTMLInputElement).readOnly
+          && !field.matches('[aria-disabled="true"]')
+          && /(?:\b(?:numero|number|nro|no)\s+(?:de\s+)?(?:identificacion|documento|identification|document)\b|\b(?:identification|document)\s+(?:id\s+)?number\b)/.test(
+            [Array.from((field as HTMLInputElement).labels ?? []).map(label => label.textContent ?? "").join(" "),
+              (field.getAttribute("aria-labelledby") ?? "").split(/\s+/).map(id => document.getElementById(id)?.textContent ?? "").join(" "),
+              field.getAttribute("aria-label"), field.getAttribute("placeholder")].filter(Boolean).join(" ")
+              .normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim().replace(/\s+/g, " ")));
+      if (scopedTypeControls.length === 1 && scopedTypeControls[0] === element
+        && scopedNumberFields.length === 1 && scopedNumberFields[0] === candidate) break;
+      scope = scope.parentElement;
+    }
+    if (!scope || scope === document.body) return undefined;
+    const field = candidate as HTMLElement;
+    const input = candidate as HTMLInputElement;
+    return { id: field.id || undefined, name: field.getAttribute("name") || undefined,
+      label: Array.from(input.labels ?? []).map(label => label.textContent ?? "").join(" ").trim() || undefined,
+      ariaLabel: field.getAttribute("aria-label") || undefined,
+      placeholder: field.getAttribute("placeholder") || undefined };
+  }, { target: normalizeJiraOptionText(target), value: normalizeJiraOptionText(value) });
+  if (!control) return undefined;
+  const candidates: Locator[] = [];
+  if (control.id) candidates.push(page.locator(`[id=${JSON.stringify(control.id)}]`));
+  if (control.name) candidates.push(page.locator(`[name=${JSON.stringify(control.name)}]`));
+  if (control.label) candidates.push(page.getByLabel(control.label, { exact: true }));
+  if (control.ariaLabel) candidates.push(page.getByLabel(control.ariaLabel, { exact: true }));
+  if (control.placeholder) candidates.push(page.getByPlaceholder(control.placeholder, { exact: true }));
+  for (const locator of candidates) {
+    if (await locator.count() !== 1 || !await locator.isVisible() || !await locator.isEnabled() || !await locator.isEditable()) continue;
+    const isTextEntry = await locator.evaluate(element => element.matches("input:not([type=hidden]):not([type=password]):not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]),textarea,[contenteditable='true']"));
+    if (isTextEntry) return locator;
+  }
+  return undefined;
+}
+
 export function isAuthGateRequirement(text: string): boolean {
   return /(?:pantalla|formulario|puerta|gate|solicita).*(?:autenticaci[oó]n|iniciar sesi[oó]n|identificaci[oó]n)|(?:authentication|login) (?:screen|gate|form)/i.test(text);
 }
@@ -1331,6 +1535,41 @@ export function normalizeJiraFrameworkPreconditions(input: JiraScenarioInput, ru
 function explicitAssertionTarget(step: string): string | undefined {
   if (!/^\s*(?:validar|verificar|comprobar|assert)\b/i.test(step)) return undefined;
   return step.match(/["“]([^"”]+)["”]/)?.[1]?.trim();
+}
+
+function expectedResultIsCoveredByAssertion(expectedResult: string, assertion: string): boolean {
+  const target = explicitAssertionTarget(assertion);
+  if (!target) return false;
+  const negative = /\b(?:no\s+se\s+(?:muestre|muestra|presente|presenta|encuentre|encuentra)|no\s+aparezca|absent|not\s+visible)\b/i;
+  if (negative.test(expectedResult) !== negative.test(assertion)) return false;
+
+  // Expected results are often prose summaries of an already explicit screen
+  // assertion. Compare their meaningful terms (including common Spanish verb
+  // forms) so a paraphrase does not become a second, unexecutable oracle.
+  const stopWords = new Set("a al de del el la las lo los un una unos unas que se no en con por para y o es son esta estan como consulta consult indica indic informa inform muestra muestr sistema sistem durante permanece lista listas".split(" "));
+  const normalizeToken = (value: string) => {
+    let token = value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("es");
+    token = token.replace(/^(?:encuentra|encontrada|encontrado|encontrar|encuentran|encuentre|encuentren)$/, "encontr");
+    token = singularizeSpanishAssertionWord(token);
+    if (/(?:ado|ada|ido|ida)$/.test(token)) token = token.replace(/(?:ado|ada|ido|ida)$/, "");
+    else if (token.length > 5 && /[aeo]$/.test(token)) token = token.slice(0, -1);
+    return token.replace(/ue/g, "o");
+  };
+  const terms = (value: string) => normalizeJiraOptionText(value.replace(/^(?:Validar|Verificar)\b\s*/i, "")).split(" ")
+    .map(normalizeToken).filter(token => token.length > 1 && !stopWords.has(token));
+  const targetTerms = terms(target);
+  const absenceOutcome = expectedResult.match(/\bno\s+se\s+(?:muestra|muestre|presenta|presente)\s+(.+?)[.]?$/i)?.[1];
+  if (absenceOutcome && targetTerms.length > 0) {
+    const quotedOutcome = absenceOutcome.match(/^["“]([^"”]+)["”]$/)?.[1];
+    if (quotedOutcome && normalizeJiraOptionText(quotedOutcome) === normalizeJiraOptionText(target)) return true;
+    const outcomeTerms = terms(absenceOutcome);
+    if (outcomeTerms.length === targetTerms.length && targetTerms.every(token => outcomeTerms.includes(token))) return true;
+  }
+  const resultTerms = new Set(terms(expectedResult));
+  if (targetTerms.length === 0) return false;
+  // Require equivalent meaningful concepts in both directions. Partial
+  // overlap must not hide an additional outcome condition.
+  return targetTerms.length === resultTerms.size && targetTerms.every(token => resultTerms.has(token));
 }
 
 /**
@@ -1369,6 +1608,13 @@ export async function certifyJiraDurableTarget(page: Page, locator: Locator): Pr
   for (const candidate of candidates) {
     const durable = candidate.strategy === "testId" ? page.getByTestId(candidate.value!) : page.locator(candidate.value!);
     if (await durable.count() === 1 && await durable.evaluate((el, other) => el === other, await locator.elementHandle())) return candidate;
+  }
+  const mainLink=await locator.evaluate(element=>element instanceof HTMLAnchorElement&&element.closest('main,[role="main"]')
+    ? {href:element.getAttribute('href')} : undefined);
+  if(mainLink?.href){
+    const value=`:is(main,[role="main"]) a[href=${JSON.stringify(mainLink.href)}]`;
+    const scoped=page.locator(value);
+    if(await scoped.count()===1&&await scoped.evaluate((element,other)=>element===other,await locator.elementHandle()))return {strategy:'css',value};
   }
   // The resolved node's accessibility identity includes native roles and names
   // even when its text belongs to a nested span rather than the actionable node.
@@ -1540,6 +1786,10 @@ export function createJiraPlaywrightPort(page: Page, baseUrl: string, authFlow?:
     },
     async act(step, target, value, semanticContext) {
       return settleJiraAction(page, async (): Promise<PlanTarget> => {
+      // Loading evidence belongs to the most recent click. Keep it across
+      // assertions of that destination, and clear it when another action starts.
+      lastClickLoadingObservations = [];
+      const authoredFillIntent = step.action === "fill";
       // Jira prose can describe a choice as "enter X" even when the live page
       // exposes a native/custom combobox. Let the observed DOM correct that
       // action classification before target resolution, while leaving ordinary
@@ -1576,11 +1826,26 @@ export function createJiraPlaywrightPort(page: Page, baseUrl: string, authFlow?:
       let result = previousActionWasClick
         ? await resolveJiraStepTargetAfterClick(page, step, target, snapshot, resolutionContext, addedRow)
         : await resolveJiraStepTarget(page, step, target, snapshot, resolutionContext, addedRow);
+      if (step.action === "click" && result.status === "resolved"
+        && result.matchReason === "unique_observed_native_status_filter_option") {
+        step.action = "select";
+        value = target;
+      }
       if (step.action === "fill" && result.locatorStrategy !== JIRA_ADDED_ROW_STRATEGY) {
         const contextualCombobox = await resolveJiraContextualCombobox(page, semanticContext);
         if (contextualCombobox) result = { status: "resolved", target, locator: contextualCombobox,
           locatorStrategy: "jira_contextual_combobox", confidence: 1,
           matchReason: "unique_combobox_matches_semantic_step_context", candidateText: target, candidates: [] };
+      }
+      if (authoredFillIntent && value !== undefined && result.status === "resolved" && result.locator) {
+        const pairedIdentifierField = await resolveJiraIdentifierValueField(page, result.locator, target, value);
+        if (pairedIdentifierField) {
+          result = { status: "resolved", target, locator: pairedIdentifierField,
+            locatorStrategy: "jira_paired_identifier_value_field", confidence: 1,
+            matchReason: "identifier_type_option_target_pairs_with_unique_identifier_number_field",
+            candidateText: target, candidates: [] };
+          step.action = "fill";
+        }
       }
       const normalizedTarget = normalizeJiraOptionText(target);
       const isAuthorizationSubmit = /\b(?:autorizar|authorize|confirmar|confirm|completar|complete|submit)\b/.test(normalizedTarget);
@@ -1668,13 +1933,16 @@ export function createJiraPlaywrightPort(page: Page, baseUrl: string, authFlow?:
           capture?.observer?.disconnect();
           const state = { labels: [] as string[], observer: undefined as MutationObserver | undefined };
           state.observer = new MutationObserver(() => {
-            for (const element of Array.from(root.querySelectorAll<HTMLElement>('[role="status"],[aria-live],[aria-label]'))) {
+            for (const element of Array.from(root.querySelectorAll<HTMLElement>('[role="status"],[role="progressbar"],[aria-live],[aria-label],[aria-busy="true"],[data-loading="true"],progress,[class*="spinner" i],[class*="loader" i],[class*="loading" i],[class*="cargando" i]'))) {
               const style = window.getComputedStyle(element);
               // MutationObserver runs before the next paint; geometry can be
               // zero at that point even for an element that is about to render.
               if (style.display === "none" || style.visibility === "hidden") continue;
-              const label = `${element.getAttribute("aria-label") ?? ""} ${element.innerText.trim()}`.trim();
-              if (/\b(?:estado\s+(?:de\s+)?carga|cargando|loading|procesando|processing|actualizando|updating)\b/i.test(label)
+              const accessible = `${element.getAttribute("aria-label") ?? ""} ${element.innerText.trim()}`.trim();
+              const marker = element.matches('[role="progressbar"],[aria-busy="true"],[data-loading="true"],progress,[class*="spinner" i],[class*="loader" i],[class*="loading" i],[class*="cargando" i]');
+              const label = /\b(?:estado\s+(?:de\s+)?carga|indicador(?:es)?\s+de\s+carga|cargando|loading|procesando|processing|actualizando|updating)\b/i.test(accessible)
+                ? accessible : marker ? `Indicador de carga ${element.getAttribute("role") ?? ""} ${typeof element.className === "string" ? element.className : ""}`.trim() : "";
+              if (label
                 && !state.labels.includes(label)) state.labels.push(label);
             }
           });
@@ -1703,15 +1971,20 @@ export function createJiraPlaywrightPort(page: Page, baseUrl: string, authFlow?:
           if (state) delete (window as typeof window & { __qaLabJiraLoadingCapture?: unknown })[key];
           return state?.labels ?? [];
         });
-        const currentlyVisibleLoading = await page.locator('[role="status"],[aria-live],[aria-label]').evaluateAll(elements => elements
+        const currentlyVisibleLoading = await page.locator(JIRA_LOADING_INDICATOR_SELECTOR).evaluateAll(elements => elements
           .filter(element => {
             if (!(element instanceof HTMLElement)) return false;
             const style = window.getComputedStyle(element);
             const rect = element.getBoundingClientRect();
             return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
           })
-          .map(element => `${element.getAttribute("aria-label") ?? ""} ${(element as HTMLElement).innerText.trim()}`.trim())
-          .filter(label => /\b(?:estado\s+(?:de\s+)?carga|cargando|loading|procesando|processing|actualizando|updating)\b/i.test(label)));
+          .map(element => {
+            const html = element as HTMLElement;
+            const accessible = `${element.getAttribute("aria-label") ?? ""} ${html.innerText.trim()}`.trim();
+            if (/\b(?:estado\s+(?:de\s+)?carga|indicador(?:es)?\s+de\s+carga|cargando|loading|procesando|processing|actualizando|updating)\b/i.test(accessible)) return accessible;
+            const marker = element.matches('[role="progressbar"],[aria-busy="true"],[data-loading="true"],progress,[class*="spinner" i],[class*="loader" i],[class*="loading" i],[class*="cargando" i]');
+            return marker ? `Indicador de carga ${element.getAttribute("role") ?? ""} ${typeof html.className === "string" ? html.className : ""}`.trim() : "";
+          }).filter(Boolean));
         lastClickLoadingObservations = [...new Set([...lastClickLoadingObservations, ...currentlyVisibleLoading])];
       }
       return durable;
@@ -1741,7 +2014,27 @@ export function createJiraPlaywrightPort(page: Page, baseUrl: string, authFlow?:
       previousActionWasClick = false;
       return evidence!;
     },
-    async assert(target, authGate, screenDescriptor = false, columnHeader = false) {
+    async assertFieldEnabled(fieldLabel) {
+      const field = await resolveJiraObservedFillField(page, fieldLabel) ?? await resolveJiraSelectionField(page, fieldLabel);
+      if (!field || await field.count().catch(() => 0) !== 1 || !await field.isVisible().catch(() => false)) {
+        throw new Error("JIRA_FIELD_STATE_TARGET_UNOBSERVABLE");
+      }
+      await expect.poll(() => field.isEnabled().catch(() => false), { timeout: 15000 }).toBe(true)
+        .catch(() => { throw new Error("JIRA_FIELD_NOT_ENABLED"); });
+      previousActionWasClick = false;
+      return { kind: "field_enabled", fieldLabel };
+    },
+    async assertFieldEmpty(fieldLabel) {
+      const field = await resolveJiraObservedFillField(page, fieldLabel) ?? await resolveJiraSelectionField(page, fieldLabel);
+      if (!field || await field.count().catch(() => 0) !== 1 || !await field.isVisible().catch(() => false)) {
+        throw new Error("JIRA_FIELD_STATE_TARGET_UNOBSERVABLE");
+      }
+      await expect.poll(async () => (await field.inputValue().catch(() => "__not_a_value__")).trim(), { timeout: 15000 }).toBe("")
+        .catch(() => { throw new Error("JIRA_FIELD_NOT_EMPTY"); });
+      previousActionWasClick = false;
+      return { kind: "field_empty", fieldLabel };
+    },
+    async assert(target, authGate, screenDescriptor = false, columnHeader = false, headerScoped = false) {
       if (authGate) {
         let stage: string | undefined;
         await expect.poll(async () => { const gate = detectAuthGate(await scanCurrentPage(page));
@@ -1750,6 +2043,16 @@ export function createJiraPlaywrightPort(page: Page, baseUrl: string, authFlow?:
         return { stage };
       }
       const normalizedTarget = normalizeJiraOptionText(target);
+      if (headerScoped) {
+        let observedHeaderText: string;
+        try { observedHeaderText = await waitForJiraHeaderText(page, target, previousActionWasClick ? 90000 : 15000); }
+        catch {
+          previousActionWasClick = false;
+          throw new Error("JIRA_ASSERTION_NOT_SATISFIED");
+        }
+        previousActionWasClick = false;
+        return { observedText: observedHeaderText, assertionScope: "header" };
+      }
       // A menu item is valid evidence when the scenario explicitly asserts
       // access to that navigation entry. Keep this separate from page-content
       // assertions so arbitrary text elsewhere in the sidebar cannot satisfy it.
@@ -1766,17 +2069,25 @@ export function createJiraPlaywrightPort(page: Page, baseUrl: string, authFlow?:
       if (matchingNavigationItems.length === 1 && !previousActionWasClick) {
         return { observedText: (await matchingNavigationItems[0].innerText()).trim() };
       }
-      if (previousActionWasClick && /\b(?:estado\s+(?:de\s+)?carga|cargando|loading|procesando|processing|actualizando|updating)\b/.test(normalizedTarget)) {
-        const observed = lastClickLoadingObservations.find(label => jiraAssertionTextMatches(label, target))
-          ?? await page.locator('[role="status"],[aria-live],[aria-label]').evaluateAll(elements => elements
+      if (JIRA_LOADING_ASSERTION_PATTERN.test(normalizedTarget) && (previousActionWasClick || lastClickLoadingObservations.length > 0)) {
+        const currentLoadingObservation = previousActionWasClick
+          ? await page.locator(JIRA_LOADING_INDICATOR_SELECTOR).evaluateAll(elements => elements
             .filter(element => {
               if (!(element instanceof HTMLElement)) return false;
               const style = window.getComputedStyle(element);
               return style.display !== "none" && style.visibility !== "hidden";
             })
-            .map(element => `${element.getAttribute("aria-label") ?? ""} ${(element as HTMLElement).innerText.trim()}`.trim())
-            .find(label => /\b(?:estado\s+(?:de\s+)?carga|cargando|loading|procesando|processing|actualizando|updating)\b/i.test(label)
-              && jiraAssertionTextMatches(label, target)));
+            .map(element => {
+              const html = element as HTMLElement;
+              const accessible = `${element.getAttribute("aria-label") ?? ""} ${html.innerText.trim()}`.trim();
+              if (/\b(?:estado\s+(?:de\s+)?carga|indicador(?:es)?\s+de\s+carga|cargando|loading|procesando|processing|actualizando|updating)\b/i.test(accessible)) return accessible;
+              const marker = element.matches('[role="progressbar"],[aria-busy="true"],[data-loading="true"],progress,[class*="spinner" i],[class*="loader" i],[class*="loading" i],[class*="cargando" i]');
+              return marker ? `Indicador de carga ${element.getAttribute("role") ?? ""} ${typeof html.className === "string" ? html.className : ""}`.trim() : "";
+            }).filter(Boolean)
+            .find(label => JIRA_LOADING_EVIDENCE_PATTERN.test(label)))
+          : undefined;
+        const observed = lastClickLoadingObservations.find(label => JIRA_LOADING_EVIDENCE_PATTERN.test(label))
+          ?? currentLoadingObservation;
         previousActionWasClick = false;
         lastClickLoadingObservations = [];
         if (observed) {
@@ -1937,6 +2248,7 @@ export function createJiraPlaywrightPort(page: Page, baseUrl: string, authFlow?:
         return { observedText: visibleSelections.join(" · ") };
       }
       let observedText: string | undefined;
+      let observedAssertionScope: "header" | undefined;
       const isStandaloneObservation = async (candidate: Locator): Promise<boolean> => {
         if (!await candidate.isVisible()) return false;
         return !await candidate.evaluate(element => {
@@ -2047,6 +2359,15 @@ export function createJiraPlaywrightPort(page: Page, baseUrl: string, authFlow?:
             && !observation.containsGlobalHeader && isJiraResultCountText(observation.text));
           if (countLabel) { observedText = countLabel.text; return true; }
         }
+        // A generic quoted visible-text assertion may identify a signed-in user
+        // displayed in the app shell. Accept only one exact, visible, non-nav
+        // leaf in a global header; broad header/container text is insufficient.
+        const exactHeaderObservation = await observeJiraHeaderText(page, observableTarget);
+        if (exactHeaderObservation.matchCount === 1 && exactHeaderObservation.observedText) {
+          observedText = exactHeaderObservation.observedText;
+          observedAssertionScope = "header";
+          return true;
+        }
         // Assertions answer whether an observable exists; repeated labels like
         // “Monto” in a section title and its field label are not ambiguous
         // actions. Keep uniqueness requirements in action target resolution.
@@ -2087,7 +2408,7 @@ export function createJiraPlaywrightPort(page: Page, baseUrl: string, authFlow?:
         throw new Error("JIRA_ASSERTION_NOT_SATISFIED");
       });
       previousActionWasClick = false;
-      return { observedText: semanticEvidence ?? observedText };
+      return { observedText: semanticEvidence ?? observedText, ...(observedAssertionScope ? { assertionScope: observedAssertionScope } : {}) };
     },
   };
 }
@@ -2133,7 +2454,12 @@ export async function discoverJiraScenario(input: JiraScenarioInput, browser: Ji
   const satisfiedLoginControls = new Set<string>();
   const normalizeLabel = (value: string) => value.normalize("NFD").replace(/[̀-ͯ]/g, "").trim().toLowerCase();
   let residualAuthAfterIndex: number | undefined;
-  if (input.authIntent === "full_authentication" && !browser.authenticate && !(implicitLogin && browser.observeClassicLogin)) throw new Error("JIRA_AUTH_FLOW_UNAVAILABLE");
+  const hasAuthoredCredentialEntry = jiraScenarioHasAuthoredCredentialEntry(input.steps);
+  const authoredCredentialTargets = new Set(jiraScenarioCredentialFillTargets(input.steps).map(target => normalizeLabel(target)));
+  const filledAuthoredCredentialTargets = new Set<string>();
+  let authoredCredentialSubmitHandled = false;
+  if (input.authIntent === "full_authentication" && !hasAuthoredCredentialEntry
+    && !browser.authenticate && !(implicitLogin && browser.observeClassicLogin)) throw new Error("JIRA_AUTH_FLOW_UNAVAILABLE");
   const texts = input.steps.flatMap((step, offset) => {
     const [action, expected] = step.split(/\nEsperado:\s*/i);
     const [sourceAction, sourceExpected] = (sourceSteps[offset] ?? step).split(/\nEsperado:\s*/i);
@@ -2141,15 +2467,23 @@ export async function discoverJiraScenario(input: JiraScenarioInput, browser: Ji
     const expectedText = expected?.trim() ? normalizeJiraAssertionSyntax(`Validar ${expected}`) : undefined;
     const isScreenDescriptor = (value: string) => /(?:^|["“])pantalla\s+de\s+[^"”]+["”]/i.test(value);
     return [{ text: actionText, sourceIndex: offset + 1, authGate: isAuthGateRequirement(sourceAction),
-      screenDescriptor: isScreenDescriptor(sourceAction) }, ...(expectedText ? [{ text: expectedText, sourceIndex: offset + 1,
-        authGate: isAuthGateRequirement(`Validar ${sourceExpected ?? expected}`), screenDescriptor: isScreenDescriptor(sourceExpected ?? expected!) }] : [])];
+      screenDescriptor: isScreenDescriptor(sourceAction), headerScoped: Boolean(jiraHeaderAssertionTarget(actionText)) }, ...(expectedText ? [{ text: expectedText, sourceIndex: offset + 1,
+        authGate: isAuthGateRequirement(`Validar ${sourceExpected ?? expected}`), screenDescriptor: isScreenDescriptor(sourceExpected ?? expected!),
+        headerScoped: Boolean(jiraHeaderAssertionTarget(expectedText)) }] : [])];
   });
+  const enabledFieldTargets = jiraEnabledFieldTargets(input.expectedResult, input.steps);
+  const resetFieldTargets = jiraResetFieldTargets(input);
+  for (const fieldLabel of enabledFieldTargets) texts.push({ text: `Validar que el campo "${fieldLabel}" esté habilitado`,
+    sourceIndex: input.steps.length + 1, authGate: false, screenDescriptor: false, headerScoped: false });
+  for (const fieldLabel of resetFieldTargets) texts.push({ text: `Validar que el campo "${fieldLabel}" esté vacío`,
+    sourceIndex: input.steps.length + 1, authGate: false, screenDescriptor: false, headerScoped: false });
   const expectedResultAlreadyCoveredByGate = /autenticaci[oó]n|authentication/i.test(input.expectedResult ?? "")
     && texts.some(step => step.authGate || isAuthGateRequirement(step.text));
   const expectedResultAlreadyCoveredByExplicitAssertion = texts.some(({ text }) => {
-    const target = explicitAssertionTarget(text);
-    return Boolean(target && input.expectedResult?.toLocaleLowerCase().includes(target.toLocaleLowerCase()));
+    return Boolean(input.expectedResult && expectedResultIsCoveredByAssertion(input.expectedResult, text));
   });
+  const expectedResultAlreadyCoveredByStepBundle = jiraExpectedResultCoveredByAuthoredSteps(input)
+    || enabledFieldTargets.length > 0 || resetFieldTargets.length > 0;
   // An explicit row-match assertion (matching-row wording + named container) already verifies the same
   // filtered-row outcome that a prose expectedResult restates. Require the expected result to use the same
   // row wording, be non-negative, and not name a different quoted container.
@@ -2172,13 +2506,13 @@ export async function discoverJiraScenario(input: JiraScenarioInput, browser: Ji
     const match=text.trim().match(/^(?:Validar|Verificar) que (no )?se muestre ["“]([^"”]+)["”][.]?$/i);
     return match && Boolean(match[1])===negative && subjectWords(match[2])===subjectWords(rejectionSummary[negative?2:1]);
   })));
-  if (input.expectedResultMode !== "documentation" && input.expectedResult?.trim() && !expectedResultAlreadyCoveredByGate && !expectedResultAlreadyCoveredByExplicitAssertion && !expectedResultAlreadyCoveredByRowOracle && !rejectionSummaryCovered
+  if (input.expectedResultMode !== "documentation" && input.expectedResult?.trim() && !expectedResultAlreadyCoveredByGate && !expectedResultAlreadyCoveredByExplicitAssertion && !expectedResultAlreadyCoveredByStepBundle && !expectedResultAlreadyCoveredByRowOracle && !rejectionSummaryCovered
     && !texts.some(s => s.text.replace(/^Validar\s+/i, "") === input.expectedResult)) {
-    texts.push({ text: `Validar ${input.expectedResult}`, sourceIndex: input.steps.length + 1, authGate: false, screenDescriptor: false });
+    texts.push({ text: `Validar ${input.expectedResult}`, sourceIndex: input.steps.length + 1, authGate: false, screenDescriptor: false, headerScoped: false });
   }
   // Explicit login scenarios (positive or negative) own their credential entry.
-  const declaresCredentialEntry = texts.some(({ text, authGate }) => authGate || isAuthGateRequirement(text)
-    || parseStepIntent(text).some(intent => intent.type === "action_fill" && /contrase[nñ]a|password|usuario|username/i.test(intent.actionTarget ?? "")));
+  const declaresCredentialEntry = texts.some(({ text, authGate }) => authGate || isAuthGateRequirement(text)) || hasAuthoredCredentialEntry;
+  const authorsVerification = texts.some(({ text }) => jiraAuthorsVerification(text));
   for (const [offset, { text, sourceIndex }] of texts.entries()) {
     if (cancelled()) throw new Error("JIRA_CANCELLED");
     if (reviewed.skippedAssertionSteps.includes(sourceIndex)) {
@@ -2187,6 +2521,22 @@ export async function discoverJiraScenario(input: JiraScenarioInput, browser: Ji
       continue;
     }
     await progress(sourceIndex, "resolving");
+    const fieldState = text.match(/^Validar que el campo ["“]([^"”]+)["”] esté (habilitado|vacío)[.]?$/i);
+    if (fieldState) {
+      const fieldLabel = fieldState[1];
+      const state = fieldState[2].toLocaleLowerCase("es");
+      const observation = state === "habilitado"
+        ? browser.assertFieldEnabled ? await browser.assertFieldEnabled(fieldLabel) : undefined
+        : browser.assertFieldEmpty ? await browser.assertFieldEmpty(fieldLabel) : undefined;
+      if (!observation) throw new Error("JIRA_ASSERTION_CAPABILITY_UNSUPPORTED");
+      const index = nextIndex++;
+      steps.push({ index, action: "assertVisible", description: text, target: { strategy: "text", value: fieldLabel } });
+      oracles.push({ id: `jira-oracle-${index}`, requirement: text, type: "field_state", backed: true,
+        source: "discovery", stepIndex: index, target: fieldLabel, evidence: [`live-step-${sourceIndex}`],
+        details: { kind: observation.kind } });
+      await progress(sourceIndex, "passed");
+      continue;
+    }
     if (/\b(?:cuando aplique|si aplica|when applicable|if applicable|con la condici[oó]n de que|provided that)\b/i.test(text)) throw new Error("JIRA_TEST_CONDITION_UNDECLARED");
     const intents = parseStepIntent(text);
     const authGate = texts[offset].authGate || isAuthGateRequirement(text);
@@ -2208,7 +2558,8 @@ export async function discoverJiraScenario(input: JiraScenarioInput, browser: Ji
       // Profile credentials + an observed classic login form (loginMode=password) are
       // satisfied as recorded steps; the identification/OTP AuthFlow only covers gates
       // the classic form cannot. Public pages (no gate observed) skip login entirely.
-      const wantsLogin = input.authIntent === "full_authentication" || (!input.authIntent && !declaresCredentialEntry);
+      const wantsLogin = (input.authIntent === "full_authentication" && !hasAuthoredCredentialEntry)
+        || (!input.authIntent && !declaresCredentialEntry);
       const observed = wantsLogin && implicitLogin ? await browser.observeClassicLogin?.() : undefined;
       const login = observed && observed.blocked === undefined ? observed : undefined;
       if (login && implicitLogin) {
@@ -2250,7 +2601,7 @@ export async function discoverJiraScenario(input: JiraScenarioInput, browser: Ji
           if (!authResult.success) throw new Error("JIRA_AUTHENTICATION_FAILED");
           residualAuthAfterIndex = nextIndex - 1;
         }
-      } else if (input.authIntent === "full_authentication") {
+      } else if (input.authIntent === "full_authentication" && !hasAuthoredCredentialEntry) {
         // The classic form is visible but not identifiable: only the real AuthFlow may continue; otherwise stop with the reason.
         if (observed?.blocked && !browser.authenticate) throw new Error(observed.blocked);
         const authResult = await browser.authenticate!();
@@ -2361,7 +2712,7 @@ export async function discoverJiraScenario(input: JiraScenarioInput, browser: Ji
       const automaticCondition=input.conditionRequirements?.find(requirement=>requirement.stepIndices.includes(sourceIndex)
         && typeof input.reviewConfiguration?.conditions?.[requirement.key]!=='boolean');
       let observation: Awaited<ReturnType<JiraBrowserPort['assert']>>;
-      try { observation = await browser.assert(target, authGate, texts[offset].screenDescriptor, columnHeader); }
+      try { observation = await browser.assert(target, authGate, texts[offset].screenDescriptor, columnHeader, texts[offset].headerScoped); }
       catch (error) {
         if (automaticCondition && error instanceof Error && error.message==='JIRA_ASSERTION_NOT_SATISFIED') {
           throw new Error(`JIRA_CONDITION_APPLICABILITY_UNRESOLVED:${automaticCondition.subject}`);
@@ -2369,9 +2720,11 @@ export async function discoverJiraScenario(input: JiraScenarioInput, browser: Ji
         throw error;
       }
       if (automaticCondition) await progress(sourceIndex,'condition_applies_observed');
-      steps.push({ index, action: "assertVisible", description: text, target: { strategy: "text", value: target } });
+      const assertionScope = texts[offset].headerScoped || observation.assertionScope === "header";
+      steps.push({ index, action: "assertVisible", description: text, target: { strategy: "text", value: target,
+        ...(assertionScope ? { assertionScope: "header" as const } : {}) } });
       oracles.push({ id: `jira-oracle-${index}`, requirement: text, type: authGate ? "auth_gate" : "literal_visible_text", backed: true,
-        source: "discovery", stepIndex: index, target: observation.observedText || target, evidence: [`live-step-${index}`], details: observation });
+        source: "discovery", stepIndex: index, target: observation.observedText || target, evidence: [`live-step-${index}`], details: { ...observation, ...(assertionScope ? { assertionScope: "header" } : {}) } });
     } else if (intents.length !== 1 || !intent) throw new Error("JIRA_COMPOSITE_STEP_REQUIRES_EXPLICIT_ACTIONS");
     else if (/^(?:abrir|open) (?:la )?aplicaci[oó]n configurada(?: del proyecto)?[.!]?$/i.test(text.trim())) {
       // Project entry (+ implicit login) already opened the app live; replaying goto in the spec would drop that session.
@@ -2418,6 +2771,26 @@ export async function discoverJiraScenario(input: JiraScenarioInput, browser: Ji
       }
       if (input.unresolvedUiRequirements?.some(item=>item.stepIndex===sourceIndex)) await progress(sourceIndex,"ui_target_observed");
       if (valueKey) entries.push({ key: valueKey, value: value!, sensitive: true, source: "explicit_runtime_input" });
+      if (action === "fill" && authoredCredentialTargets.has(normalizeLabel(intent.actionTarget))) {
+        filledAuthoredCredentialTargets.add(normalizeLabel(intent.actionTarget));
+      }
+      const credentialSubmit = intent.type === "action_submit"
+        || (intent.type === "action_click" && /\b(?:login|log\s+in|sign\s+in|iniciar|ingresar|entrar|acceder|continuar|submit|autenticar)\b/i.test(normalizeLabel(intent.actionTarget ?? "")));
+      if (!authoredCredentialSubmitHandled && authoredCredentialTargets.size > 0
+        && filledAuthoredCredentialTargets.size === authoredCredentialTargets.size && credentialSubmit) {
+        authoredCredentialSubmitHandled = true;
+        // Keep authored credential entry in order. If the submit exposes an un-authored gate,
+        // finish it from that observed stage and bind the flow after the submit in the spec.
+        if (!authorsVerification && browser.observeAuthStage) {
+          const observedStage = await browser.observeAuthStage();
+          if (observedStage) {
+            if (!browser.authenticate) throw new Error("JIRA_AUTH_FLOW_UNAVAILABLE");
+            const authResult = await browser.authenticate(observedStage);
+            if (!authResult.success) throw new Error("JIRA_AUTHENTICATION_FAILED");
+            residualAuthAfterIndex = index;
+          }
+        }
+      }
       // Credential/auth/secret fields never become row-match evidence (no value, no key reaches the oracle).
       if (step.action === "fill" && value && !isSensitiveRowBindingField(intent.actionTarget, valueKey)) {
         enteredFills.set(intent.actionTarget, { value, valueKey });
@@ -2428,7 +2801,8 @@ export async function discoverJiraScenario(input: JiraScenarioInput, browser: Ji
     await progress(sourceIndex, "passed");
   }
   if (reviewed.skippedAssertionSteps.length && !oracles.some(oracle=>oracle.backed && oracle.polarity!=="negative")) throw new Error("JIRA_CONDITION_REQUIRES_MEANINGFUL_OUTCOME");
-  const needsAuthFlow = residualAuthAfterIndex !== undefined || (input.authIntent === "full_authentication" && !classicLoginPerformed);
+  const needsAuthFlow = residualAuthAfterIndex !== undefined
+    || (input.authIntent === "full_authentication" && !classicLoginPerformed && !hasAuthoredCredentialEntry);
   const plan: ExecutionPlan = { version: "1.0", source: "discovery_generated", status: "validated", createdAt: new Date().toISOString(),
     scenario: { source: "jira", externalId: input.scenarioId, title: input.title }, steps,
     requiredData: entries.map(e => ({ key: e.key, required: true, resolved: true, sensitive: e.sensitive })) };

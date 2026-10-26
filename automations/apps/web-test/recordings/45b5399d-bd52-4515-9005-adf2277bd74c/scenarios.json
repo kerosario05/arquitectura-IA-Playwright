@@ -1,0 +1,2327 @@
+[
+  {
+    "scenarioId": "REC-45B5399D-01",
+    "title": "Alta con datos y listas Negocios v3",
+    "description": "Recorrido observado para completar \"Alta con datos y listas Negocios v3\". Se registraron 17 acciones funcionales.",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "http://localhost:4310/#/login",
+        "description": "Navegar a http://localhost:4310/#/login"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Usuario"
+        },
+        "valueKey": "usuario",
+        "description": "Ingresar [usuario] en \"Usuario\"",
+        "interactionId": "interaction-5"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Contraseña"
+        },
+        "valueKey": "contrasena",
+        "description": "Ingresar [contrasena] en \"Contraseña\"",
+        "interactionId": "interaction-7"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Iniciar sesión"
+        },
+        "description": "Presionar \"Iniciar sesión\"",
+        "interactionId": "interaction-8"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "link|Nueva solicitud"
+        },
+        "description": "Presionar \"Nueva solicitud\"",
+        "interactionId": "interaction-11"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Número de Identificación*"
+        },
+        "valueKey": "numero_de_identificacion",
+        "description": "Ingresar [numero_de_identificacion] en \"Número de Identificación*\"",
+        "interactionId": "interaction-15"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|No. Registro Mercantil"
+        },
+        "valueKey": "no_registro_mercantil",
+        "description": "Ingresar [no_registro_mercantil] en \"No. Registro Mercantil\"",
+        "interactionId": "interaction-17"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Denominación Social*"
+        },
+        "valueKey": "denominacion_social",
+        "description": "Ingresar [denominacion_social] en \"Denominación Social*\"",
+        "interactionId": "interaction-18"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "combobox|Tipo Sociedad*"
+        },
+        "valueKey": "tipo_sociedad_seleccion",
+        "description": "Seleccionar [tipo_sociedad_seleccion] en \"Tipo Sociedad*\"",
+        "interactionId": "interaction-19"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "select[id=\"tipoSociedad\"]"
+        },
+        "valueKey": "tipo_sociedad_seleccion",
+        "description": "Seleccionar [tipo_sociedad_seleccion] en \"Tipo Sociedad*\"",
+        "interactionId": "interaction-20"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Siglas"
+        },
+        "valueKey": "siglas",
+        "description": "Ingresar [siglas] en \"Siglas\"",
+        "interactionId": "interaction-22"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "combobox|Nacionalidad"
+        },
+        "valueKey": "nacionalidad_seleccion",
+        "description": "Seleccionar [nacionalidad_seleccion] en \"Nacionalidad\"",
+        "interactionId": "interaction-23"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "select[id=\"nacionalidad\"]"
+        },
+        "valueKey": "nacionalidad_seleccion",
+        "description": "Seleccionar [nacionalidad_seleccion] en \"Nacionalidad\"",
+        "interactionId": "interaction-24"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "tab|Registro de Datos"
+        },
+        "description": "Presionar \"Registro de Datos\"",
+        "interactionId": "interaction-26"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "status|Cargando solicitud…"
+        },
+        "description": "Presionar \"Cargando solicitud…\"",
+        "interactionId": "interaction-28"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "status|Cargando solicitud…"
+        },
+        "description": "Presionar \"Cargando solicitud…\"",
+        "interactionId": "interaction-29"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "link|Solicitudes"
+        },
+        "description": "Presionar \"Solicitudes\"",
+        "interactionId": "interaction-31"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Salir"
+        },
+        "description": "Presionar \"Salir\"",
+        "interactionId": "interaction-34"
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Ingresar [usuario] en \"Usuario\"",
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "stepTemplate": "Ingresar [usuario] en \"Usuario\"",
+        "renderedStep": "Ingresar \"negocios\" en \"Usuario\"",
+        "valueKey": "usuario",
+        "interactionId": "interaction-5",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/login",
+        "stateScope": "9db5430202df",
+        "stepNumber": 2
+      },
+      {
+        "content": "Ingresar [contrasena] en \"Contraseña\"",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "stepTemplate": "Ingresar [contrasena] en \"Contraseña\"",
+        "renderedStep": "Ingresar el valor seguro asociado a \"Contraseña\"",
+        "valueKey": "contrasena",
+        "interactionId": "interaction-7",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/login",
+        "stateScope": "9db5430202df",
+        "stepNumber": 3
+      },
+      {
+        "content": "Presionar \"Iniciar sesión\"",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "renderedStep": "Presionar \"Iniciar sesión\"",
+        "interactionId": "interaction-8",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/login",
+        "routeAfter": "http://localhost:4310/#/",
+        "stateScope": "9db5430202df",
+        "stepNumber": 4
+      },
+      {
+        "content": "Presionar \"Nueva solicitud\"",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "renderedStep": "Presionar \"Nueva solicitud\"",
+        "interactionId": "interaction-11",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/",
+        "routeAfter": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "stepNumber": 5
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de Identificación*\"",
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de Identificación*\"",
+        "renderedStep": "Ingresar \"101234567\" en \"Número de Identificación*\"",
+        "valueKey": "numero_de_identificacion",
+        "interactionId": "interaction-15",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "stepNumber": 6
+      },
+      {
+        "content": "Ingresar [no_registro_mercantil] en \"No. Registro Mercantil\"",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "stepTemplate": "Ingresar [no_registro_mercantil] en \"No. Registro Mercantil\"",
+        "renderedStep": "Ingresar \"RM-2026-0801\" en \"No. Registro Mercantil\"",
+        "valueKey": "no_registro_mercantil",
+        "interactionId": "interaction-17",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "stepNumber": 7
+      },
+      {
+        "content": "Ingresar [denominacion_social] en \"Denominación Social*\"",
+        "sourceEventRefs": [
+          "event-18"
+        ],
+        "stepTemplate": "Ingresar [denominacion_social] en \"Denominación Social*\"",
+        "renderedStep": "Ingresar \"EMPRESA PRUEBA OCHO SRL\" en \"Denominación Social*\"",
+        "valueKey": "denominacion_social",
+        "interactionId": "interaction-18",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "stepNumber": 8
+      },
+      {
+        "content": "Seleccionar [tipo_sociedad_seleccion] en \"Tipo Sociedad*\"",
+        "sourceEventRefs": [
+          "event-19"
+        ],
+        "stepTemplate": "Seleccionar [tipo_sociedad_seleccion] en \"Tipo Sociedad*\"",
+        "renderedStep": "Seleccionar \"Tipo Sociedad*\" en \"Tipo Sociedad*\"",
+        "valueKey": "tipo_sociedad_seleccion",
+        "interactionId": "interaction-19",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "stepNumber": 9
+      },
+      {
+        "content": "Seleccionar [tipo_sociedad_seleccion] en \"Tipo Sociedad*\"",
+        "sourceEventRefs": [
+          "event-20"
+        ],
+        "stepTemplate": "Seleccionar [tipo_sociedad_seleccion] en \"Tipo Sociedad*\"",
+        "renderedStep": "Seleccionar \"Tipo Sociedad*\" en \"Tipo Sociedad*\"",
+        "valueKey": "tipo_sociedad_seleccion",
+        "interactionId": "interaction-20",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "stepNumber": 10
+      },
+      {
+        "content": "Ingresar [siglas] en \"Siglas\"",
+        "sourceEventRefs": [
+          "event-22"
+        ],
+        "stepTemplate": "Ingresar [siglas] en \"Siglas\"",
+        "renderedStep": "Ingresar \"EPO\" en \"Siglas\"",
+        "valueKey": "siglas",
+        "interactionId": "interaction-22",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "stepNumber": 11
+      },
+      {
+        "content": "Seleccionar [nacionalidad_seleccion] en \"Nacionalidad\"",
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "stepTemplate": "Seleccionar [nacionalidad_seleccion] en \"Nacionalidad\"",
+        "renderedStep": "Seleccionar \"Nacionalidad\" en \"Nacionalidad\"",
+        "valueKey": "nacionalidad_seleccion",
+        "interactionId": "interaction-23",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "stepNumber": 12
+      },
+      {
+        "content": "Seleccionar [nacionalidad_seleccion] en \"Nacionalidad\"",
+        "sourceEventRefs": [
+          "event-24"
+        ],
+        "stepTemplate": "Seleccionar [nacionalidad_seleccion] en \"Nacionalidad\"",
+        "renderedStep": "Seleccionar \"Nacionalidad\" en \"Nacionalidad\"",
+        "valueKey": "nacionalidad_seleccion",
+        "interactionId": "interaction-24",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "stepNumber": 13
+      },
+      {
+        "content": "Presionar \"Registro de Datos\"",
+        "sourceEventRefs": [
+          "event-26"
+        ],
+        "renderedStep": "Presionar \"Registro de Datos\"",
+        "interactionId": "interaction-26",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "routeAfter": "http://localhost:4310/#/solicitud/nueva?tab=registro",
+        "stateScope": "9db5430202df",
+        "stepNumber": 14
+      },
+      {
+        "content": "Presionar \"Cargando solicitud…\"",
+        "sourceEventRefs": [
+          "event-28"
+        ],
+        "renderedStep": "Presionar \"Cargando solicitud…\"",
+        "interactionId": "interaction-28",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva?tab=registro",
+        "stateScope": "9db5430202df",
+        "stepNumber": 15
+      },
+      {
+        "content": "Presionar \"Cargando solicitud…\"",
+        "sourceEventRefs": [
+          "event-29"
+        ],
+        "renderedStep": "Presionar \"Cargando solicitud…\"",
+        "interactionId": "interaction-29",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva?tab=registro",
+        "stateScope": "9db5430202df",
+        "stepNumber": 16
+      },
+      {
+        "content": "Presionar \"Solicitudes\"",
+        "sourceEventRefs": [
+          "event-31"
+        ],
+        "renderedStep": "Presionar \"Solicitudes\"",
+        "interactionId": "interaction-31",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva?tab=registro",
+        "routeAfter": "http://localhost:4310/#/solicitudes",
+        "stateScope": "9db5430202df",
+        "stepNumber": 17
+      },
+      {
+        "content": "Presionar \"Salir\"",
+        "sourceEventRefs": [
+          "event-34"
+        ],
+        "renderedStep": "Presionar \"Salir\"",
+        "interactionId": "interaction-34",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitudes",
+        "routeAfter": "http://localhost:4310/#/login",
+        "stateScope": "9db5430202df",
+        "stepNumber": 18
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "usuario",
+        "label": "Usuario",
+        "stepIndex": 1,
+        "technicalTargetRefs": [
+          "role:textbox|Usuario",
+          "css:#usuario",
+          "id:usuario"
+        ],
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "exampleValue": "negocios",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Usuario",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "contrasena",
+        "label": "Contraseña",
+        "stepIndex": 2,
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#clave",
+          "id:clave"
+        ],
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "secure",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Contraseña",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "numero_de_identificacion",
+        "label": "Número de Identificación*",
+        "stepIndex": 5,
+        "technicalTargetRefs": [
+          "role:textbox|Número de Identificación*",
+          "css:#idNumero",
+          "id:idNumero"
+        ],
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "exampleValue": "101234567",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Número de Identificación*",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "no_registro_mercantil",
+        "label": "No. Registro Mercantil",
+        "stepIndex": 6,
+        "technicalTargetRefs": [
+          "role:textbox|No. Registro Mercantil",
+          "css:#registroMercantil",
+          "id:registroMercantil"
+        ],
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "exampleValue": "RM-2026-0801",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "No. Registro Mercantil",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "denominacion_social",
+        "label": "Denominación Social*",
+        "stepIndex": 7,
+        "technicalTargetRefs": [
+          "role:textbox|Denominación Social*",
+          "css:#denominacion",
+          "id:denominacion"
+        ],
+        "sourceEventRefs": [
+          "event-18"
+        ],
+        "exampleValue": "EMPRESA PRUEBA OCHO SRL",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Denominación Social*",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "tipo_sociedad_seleccion",
+        "label": "Tipo Sociedad*",
+        "stepIndex": 8,
+        "technicalTargetRefs": [
+          "role:combobox|Tipo Sociedad*"
+        ],
+        "sourceEventRefs": [
+          "event-19"
+        ],
+        "exampleValue": "Tipo Sociedad*",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED"
+      },
+      {
+        "key": "siglas",
+        "label": "Siglas",
+        "stepIndex": 10,
+        "technicalTargetRefs": [
+          "role:textbox|Siglas",
+          "css:#siglas",
+          "id:siglas"
+        ],
+        "sourceEventRefs": [
+          "event-22"
+        ],
+        "exampleValue": "EPO",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Siglas",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "nacionalidad_seleccion",
+        "label": "Nacionalidad",
+        "stepIndex": 11,
+        "technicalTargetRefs": [
+          "role:combobox|Nacionalidad"
+        ],
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "exampleValue": "Nacionalidad",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED"
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Ingresar [usuario] en \"Usuario\"",
+        "strategy": "role",
+        "value": "textbox|Usuario"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Ingresar [contrasena] en \"Contraseña\"",
+        "strategy": "role",
+        "value": "textbox|Contraseña"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Iniciar sesión\"",
+        "strategy": "role",
+        "value": "button|Iniciar sesión"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Presionar \"Nueva solicitud\"",
+        "strategy": "role",
+        "value": "link|Nueva solicitud"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Ingresar [numero_de_identificacion] en \"Número de Identificación*\"",
+        "strategy": "role",
+        "value": "textbox|Número de Identificación*"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Ingresar [no_registro_mercantil] en \"No. Registro Mercantil\"",
+        "strategy": "role",
+        "value": "textbox|No. Registro Mercantil"
+      },
+      {
+        "stepIndex": 7,
+        "description": "Ingresar [denominacion_social] en \"Denominación Social*\"",
+        "strategy": "role",
+        "value": "textbox|Denominación Social*"
+      },
+      {
+        "stepIndex": 8,
+        "description": "Seleccionar [tipo_sociedad_seleccion] en \"Tipo Sociedad*\"",
+        "strategy": "role",
+        "value": "combobox|Tipo Sociedad*"
+      },
+      {
+        "stepIndex": 9,
+        "description": "Seleccionar [tipo_sociedad_seleccion] en \"Tipo Sociedad*\"",
+        "strategy": "css",
+        "value": "select[id=\"tipoSociedad\"]"
+      },
+      {
+        "stepIndex": 10,
+        "description": "Ingresar [siglas] en \"Siglas\"",
+        "strategy": "role",
+        "value": "textbox|Siglas"
+      },
+      {
+        "stepIndex": 11,
+        "description": "Seleccionar [nacionalidad_seleccion] en \"Nacionalidad\"",
+        "strategy": "role",
+        "value": "combobox|Nacionalidad"
+      },
+      {
+        "stepIndex": 12,
+        "description": "Seleccionar [nacionalidad_seleccion] en \"Nacionalidad\"",
+        "strategy": "css",
+        "value": "select[id=\"nacionalidad\"]"
+      },
+      {
+        "stepIndex": 13,
+        "description": "Presionar \"Registro de Datos\"",
+        "strategy": "role",
+        "value": "tab|Registro de Datos"
+      },
+      {
+        "stepIndex": 14,
+        "description": "Presionar \"Cargando solicitud…\"",
+        "strategy": "role",
+        "value": "status|Cargando solicitud…"
+      },
+      {
+        "stepIndex": 15,
+        "description": "Presionar \"Cargando solicitud…\"",
+        "strategy": "role",
+        "value": "status|Cargando solicitud…"
+      },
+      {
+        "stepIndex": 16,
+        "description": "Presionar \"Solicitudes\"",
+        "strategy": "role",
+        "value": "link|Solicitudes"
+      },
+      {
+        "stepIndex": 17,
+        "description": "Presionar \"Salir\"",
+        "strategy": "role",
+        "value": "button|Salir"
+      }
+    ],
+    "sourceRecordingId": "45b5399d-bd52-4515-9005-adf2277bd74c",
+    "hasUncertainSteps": false,
+    "primary": true,
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7",
+      "event-8",
+      "event-9",
+      "event-10",
+      "event-11",
+      "event-12",
+      "event-13",
+      "event-14",
+      "event-15",
+      "event-16",
+      "event-17",
+      "event-18",
+      "event-19",
+      "event-20",
+      "event-21",
+      "event-22",
+      "event-23",
+      "event-24",
+      "event-25",
+      "event-26",
+      "event-27",
+      "event-28",
+      "event-29",
+      "event-30",
+      "event-31",
+      "event-32",
+      "event-33",
+      "event-34",
+      "event-35"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": false,
+    "functionalReadiness": true,
+    "technicalReadiness": true,
+    "expectedResultCandidate": "La aplicación carga su pantalla inicial",
+    "oracleAuthority": "observed_only",
+    "confidence": 0.95,
+    "scenarioStepCount": 18,
+    "functionalActionCount": 17,
+    "nonUserSetupSteps": 1,
+    "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
+    "scenarioGoal": "Alta con datos y listas Negocios v3",
+    "stateSequenceValid": true,
+    "stateSequenceIssues": [],
+    "postGoalObservations": [],
+    "goalContract": {
+      "nonGeneric": true,
+      "goalCoherent": true,
+      "mutationIntentExpressed": true
+    },
+    "selectorOptionInventories": [
+      {
+        "selectorRef": "9db5430202df|Tipo Sociedad*|selection",
+        "semanticField": "Tipo Sociedad*",
+        "surfaceRef": "9db5430202df|9db5430202df|Tipo Sociedad*|selection|option-surface",
+        "options": [
+          "Sociedad de Responsabilidad Limitada (SRL)",
+          "Sociedad Anónima (SA)",
+          "Sociedad Anónima Simplificada (SAS)",
+          "Empresa Individual de Responsabilidad Limitada (EIRL)",
+          "Sociedad Anónima Cerrada (SAC)",
+          "Cooperativa"
+        ],
+        "observationRefs": [
+          "obs-19",
+          "obs-20"
+        ],
+        "selectedOption": "Sociedad de Responsabilidad Limitada (SRL)"
+      },
+      {
+        "selectorRef": "9db5430202df|Nacionalidad|selection",
+        "semanticField": "Nacionalidad",
+        "surfaceRef": "9db5430202df|9db5430202df|Nacionalidad|selection|option-surface",
+        "options": [
+          "Dominicana",
+          "Estadounidense",
+          "Española",
+          "Panameña",
+          "Colombiana",
+          "Mexicana"
+        ],
+        "observationRefs": [
+          "obs-23",
+          "obs-24"
+        ],
+        "selectedOption": "Dominicana"
+      }
+    ],
+    "replayEligible": true,
+    "canonicalInteractions": [
+      {
+        "id": "interaction-1",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-1"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "http://localhost:4310/#/login",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-5",
+        "controlIdentity": "9db5430202df|Usuario|role|textbox|Usuario",
+        "semanticField": "Usuario",
+        "action": "fill",
+        "valueKey": "usuario",
+        "recordedValue": "negocios",
+        "rawTypedValue": "negocios",
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Usuario",
+          "css:#usuario",
+          "id:usuario"
+        ],
+        "editingSessionRef": "edit-1",
+        "description": "Ingresar en \"Usuario\"",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/login",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-7",
+        "controlIdentity": "9db5430202df|Contraseña|role|textbox|Contraseña",
+        "semanticField": "Contraseña",
+        "action": "fill",
+        "valueKey": "contrasena",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#clave",
+          "id:clave"
+        ],
+        "editingSessionRef": "edit-2",
+        "description": "Ingresar en \"Contraseña\"",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/login",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-8",
+        "controlIdentity": "9db5430202df|Iniciar sesión|role|button|Iniciar sesión",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión",
+          "css:#btn-login",
+          "id:btn-login"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#btn-login",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "btn-login"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "login-form"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-login\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Iniciar sesión",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "login-form"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/login",
+        "routeAfter": "http://localhost:4310/#/",
+        "stateScope": "9db5430202df",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-11",
+        "controlIdentity": "9db5430202df|Nueva solicitud|role|link|Nueva solicitud",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "technicalTargetRefs": [
+          "role:link|Nueva solicitud"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Nueva solicitud",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#/solicitud/nueva"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "nav"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/solicitud/nueva\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Nueva solicitud",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/",
+        "routeAfter": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-15",
+        "controlIdentity": "9db5430202df|Número de Identificación*|role|textbox|Número de Identificación*",
+        "semanticField": "Número de Identificación*",
+        "action": "fill",
+        "valueKey": "numero_de_identificacion",
+        "recordedValue": "101234567",
+        "rawTypedValue": "101234567",
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Número de Identificación*",
+          "css:#idNumero",
+          "id:idNumero"
+        ],
+        "editingSessionRef": "edit-3",
+        "description": "Ingresar en \"Número de Identificación*\"",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-17",
+        "controlIdentity": "9db5430202df|No. Registro Mercantil|role|textbox|No. Registro Mercantil",
+        "semanticField": "No. Registro Mercantil",
+        "action": "fill",
+        "valueKey": "no_registro_mercantil",
+        "recordedValue": "RM-2026-0801",
+        "rawTypedValue": "RM-2026-0801",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|No. Registro Mercantil",
+          "css:#registroMercantil",
+          "id:registroMercantil"
+        ],
+        "editingSessionRef": "edit-4",
+        "description": "Ingresar en \"No. Registro Mercantil\"",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-18",
+        "controlIdentity": "9db5430202df|Denominación Social*|role|textbox|Denominación Social*",
+        "semanticField": "Denominación Social*",
+        "action": "fill",
+        "valueKey": "denominacion_social",
+        "recordedValue": "EMPRESA PRUEBA OCHO SRL",
+        "rawTypedValue": "EMPRESA PRUEBA OCHO SRL",
+        "sourceEventRefs": [
+          "event-18"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Denominación Social*",
+          "css:#denominacion",
+          "id:denominacion"
+        ],
+        "editingSessionRef": "edit-5",
+        "description": "Ingresar en \"Denominación Social*\"",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-19",
+        "controlIdentity": "9db5430202df|Tipo Sociedad*|role|combobox|Tipo Sociedad*",
+        "semanticField": "Tipo Sociedad*",
+        "action": "select",
+        "valueKey": "tipo_sociedad_seleccion",
+        "recordedValue": "Tipo Sociedad*",
+        "sourceEventRefs": [
+          "event-19"
+        ],
+        "technicalTargetRefs": [
+          "role:combobox|Tipo Sociedad*"
+        ],
+        "selectorControlId": "selector:css:nav:has(a[href=\"#/\"])",
+        "optionSurfaceId": "9db5430202df|selector:css:nav:has(a[href=\"#/\"])|option-surface",
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "combobox",
+          "normalizedName": "Tipo Sociedad*",
+          "targetTag": "select",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(select[id=\"tipoSociedad\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "nativeSelection": {
+            "controlIdentity": {
+              "strategy": "id",
+              "value": "tipoSociedad"
+            },
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "select[id=\"tipoSociedad\"]"
+            },
+            "fieldLabel": "Tipo Sociedad*",
+            "options": [
+              {
+                "value": "",
+                "label": "Seleccione…",
+                "disabled": false
+              },
+              {
+                "value": "Sociedad de Responsabilidad Limitada (SRL)",
+                "label": "Sociedad de Responsabilidad Limitada (SRL)",
+                "disabled": false
+              },
+              {
+                "value": "Sociedad Anónima (SA)",
+                "label": "Sociedad Anónima (SA)",
+                "disabled": false
+              },
+              {
+                "value": "Sociedad Anónima Simplificada (SAS)",
+                "label": "Sociedad Anónima Simplificada (SAS)",
+                "disabled": false
+              },
+              {
+                "value": "Empresa Individual de Responsabilidad Limitada (EIRL)",
+                "label": "Empresa Individual de Responsabilidad Limitada (EIRL)",
+                "disabled": false
+              },
+              {
+                "value": "Sociedad Anónima Cerrada (SAC)",
+                "label": "Sociedad Anónima Cerrada (SAC)",
+                "disabled": false
+              },
+              {
+                "value": "Cooperativa",
+                "label": "Cooperativa",
+                "disabled": false
+              }
+            ],
+            "selectedValue": ""
+          }
+        },
+        "description": "Seleccionar en \"Tipo Sociedad*\"",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-20",
+        "controlIdentity": "9db5430202df|Tipo Sociedad*|css|select[id=\"tipoSociedad\"]",
+        "semanticField": "Tipo Sociedad*",
+        "action": "select",
+        "valueKey": "tipo_sociedad_seleccion",
+        "recordedValue": "Sociedad de Responsabilidad Limitada (SRL)",
+        "sourceEventRefs": [
+          "event-20"
+        ],
+        "technicalTargetRefs": [
+          "css:select[id=\"tipoSociedad\"]"
+        ],
+        "selectorControlId": "selector:id:tipoSociedad",
+        "optionSurfaceId": "9db5430202df|selector:id:tipoSociedad|option-surface",
+        "observedOptions": [
+          "Sociedad de Responsabilidad Limitada (SRL)",
+          "Sociedad Anónima (SA)",
+          "Sociedad Anónima Simplificada (SAS)",
+          "Empresa Individual de Responsabilidad Limitada (EIRL)",
+          "Sociedad Anónima Cerrada (SAC)",
+          "Cooperativa"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Sociedad de Responsabilidad Limitada (SRL)",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "select[id=\"tipoSociedad\"]"
+          },
+          "runtimeResolutionRequired": true,
+          "nativeSelection": {
+            "controlIdentity": {
+              "strategy": "id",
+              "value": "tipoSociedad"
+            },
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "select[id=\"tipoSociedad\"]"
+            },
+            "fieldLabel": "Tipo Sociedad*",
+            "options": [
+              {
+                "value": "",
+                "label": "Seleccione…",
+                "disabled": false
+              },
+              {
+                "value": "Sociedad de Responsabilidad Limitada (SRL)",
+                "label": "Sociedad de Responsabilidad Limitada (SRL)",
+                "disabled": false
+              },
+              {
+                "value": "Sociedad Anónima (SA)",
+                "label": "Sociedad Anónima (SA)",
+                "disabled": false
+              },
+              {
+                "value": "Sociedad Anónima Simplificada (SAS)",
+                "label": "Sociedad Anónima Simplificada (SAS)",
+                "disabled": false
+              },
+              {
+                "value": "Empresa Individual de Responsabilidad Limitada (EIRL)",
+                "label": "Empresa Individual de Responsabilidad Limitada (EIRL)",
+                "disabled": false
+              },
+              {
+                "value": "Sociedad Anónima Cerrada (SAC)",
+                "label": "Sociedad Anónima Cerrada (SAC)",
+                "disabled": false
+              },
+              {
+                "value": "Cooperativa",
+                "label": "Cooperativa",
+                "disabled": false
+              }
+            ],
+            "selectedValue": "Sociedad de Responsabilidad Limitada (SRL)",
+            "clickedOption": {
+              "value": "Sociedad de Responsabilidad Limitada (SRL)",
+              "label": "Sociedad de Responsabilidad Limitada (SRL)"
+            },
+            "selectionMode": "index",
+            "selectedOptionIndex": 0
+          },
+          "captureMatchCount": 1
+        },
+        "description": "Seleccionar en \"Tipo Sociedad*\"",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-22",
+        "controlIdentity": "9db5430202df|Siglas|role|textbox|Siglas",
+        "semanticField": "Siglas",
+        "action": "fill",
+        "valueKey": "siglas",
+        "recordedValue": "EPO",
+        "rawTypedValue": "EPO",
+        "sourceEventRefs": [
+          "event-22"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Siglas",
+          "css:#siglas",
+          "id:siglas"
+        ],
+        "editingSessionRef": "edit-7",
+        "description": "Ingresar en \"Siglas\"",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-23",
+        "controlIdentity": "9db5430202df|Nacionalidad|role|combobox|Nacionalidad",
+        "semanticField": "Nacionalidad",
+        "action": "select",
+        "valueKey": "nacionalidad_seleccion",
+        "recordedValue": "Nacionalidad",
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "technicalTargetRefs": [
+          "role:combobox|Nacionalidad"
+        ],
+        "selectorControlId": "selector:css:div:has(select[id=\"tipoSociedad\"])",
+        "optionSurfaceId": "9db5430202df|selector:css:div:has(select[id=\"tipoSociedad\"])|option-surface",
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "combobox",
+          "normalizedName": "Nacionalidad",
+          "targetTag": "select",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(select[id=\"nacionalidad\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "nativeSelection": {
+            "controlIdentity": {
+              "strategy": "id",
+              "value": "nacionalidad"
+            },
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "select[id=\"nacionalidad\"]"
+            },
+            "fieldLabel": "Nacionalidad",
+            "options": [
+              {
+                "value": "",
+                "label": "Seleccione nacionalidad",
+                "disabled": false
+              },
+              {
+                "value": "Dominicana",
+                "label": "Dominicana",
+                "disabled": false
+              },
+              {
+                "value": "Estadounidense",
+                "label": "Estadounidense",
+                "disabled": false
+              },
+              {
+                "value": "Española",
+                "label": "Española",
+                "disabled": false
+              },
+              {
+                "value": "Panameña",
+                "label": "Panameña",
+                "disabled": false
+              },
+              {
+                "value": "Colombiana",
+                "label": "Colombiana",
+                "disabled": false
+              },
+              {
+                "value": "Mexicana",
+                "label": "Mexicana",
+                "disabled": false
+              }
+            ],
+            "selectedValue": ""
+          }
+        },
+        "description": "Seleccionar en \"Nacionalidad\"",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-24",
+        "controlIdentity": "9db5430202df|Nacionalidad|css|select[id=\"nacionalidad\"]",
+        "semanticField": "Nacionalidad",
+        "action": "select",
+        "valueKey": "nacionalidad_seleccion",
+        "recordedValue": "Dominicana",
+        "sourceEventRefs": [
+          "event-24"
+        ],
+        "technicalTargetRefs": [
+          "css:select[id=\"nacionalidad\"]"
+        ],
+        "selectorControlId": "selector:id:nacionalidad",
+        "optionSurfaceId": "9db5430202df|selector:id:nacionalidad|option-surface",
+        "observedOptions": [
+          "Dominicana",
+          "Estadounidense",
+          "Española",
+          "Panameña",
+          "Colombiana",
+          "Mexicana"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Dominicana",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "select[id=\"nacionalidad\"]"
+          },
+          "runtimeResolutionRequired": true,
+          "nativeSelection": {
+            "controlIdentity": {
+              "strategy": "id",
+              "value": "nacionalidad"
+            },
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "select[id=\"nacionalidad\"]"
+            },
+            "fieldLabel": "Nacionalidad",
+            "options": [
+              {
+                "value": "",
+                "label": "Seleccione nacionalidad",
+                "disabled": false
+              },
+              {
+                "value": "Dominicana",
+                "label": "Dominicana",
+                "disabled": false
+              },
+              {
+                "value": "Estadounidense",
+                "label": "Estadounidense",
+                "disabled": false
+              },
+              {
+                "value": "Española",
+                "label": "Española",
+                "disabled": false
+              },
+              {
+                "value": "Panameña",
+                "label": "Panameña",
+                "disabled": false
+              },
+              {
+                "value": "Colombiana",
+                "label": "Colombiana",
+                "disabled": false
+              },
+              {
+                "value": "Mexicana",
+                "label": "Mexicana",
+                "disabled": false
+              }
+            ],
+            "selectedValue": "Dominicana",
+            "clickedOption": {
+              "value": "Dominicana",
+              "label": "Dominicana"
+            },
+            "selectionMode": "index",
+            "selectedOptionIndex": 0
+          },
+          "captureMatchCount": 1
+        },
+        "description": "Seleccionar en \"Nacionalidad\"",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-26",
+        "controlIdentity": "9db5430202df|Registro de Datos|role|tab|Registro de Datos",
+        "semanticField": "Registro de Datos",
+        "action": "click",
+        "valueKey": "registro_de_datos",
+        "sourceEventRefs": [
+          "event-26"
+        ],
+        "technicalTargetRefs": [
+          "role:tab|Registro de Datos"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "tab|Registro de Datos",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button",
+                "role": "tab"
+              },
+              "stableDirectAttributes": {
+                "role": "tab"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 2,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\",\"role\":\"tab\"},\"stableDirectAttributes\":{\"role\":\"tab\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 2
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Registro de Datos",
+          "role": "tab",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(button[role=\"tab\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "main:has(button[role=\"tab\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "tab",
+          "normalizedName": "Registro de Datos",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(button[role=\"tab\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Registro de Datos\"",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "routeAfter": "http://localhost:4310/#/solicitud/nueva?tab=registro",
+        "stateScope": "9db5430202df",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-28",
+        "controlIdentity": "9db5430202df|Cargando solicitud…|role|status|Cargando solicitud…",
+        "semanticField": "Cargando solicitud…",
+        "action": "click",
+        "valueKey": "cargando_solicitud",
+        "sourceEventRefs": [
+          "event-28"
+        ],
+        "technicalTargetRefs": [
+          "role:status|Cargando solicitud…"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "status",
+          "normalizedName": "Cargando solicitud…",
+          "targetTag": "div",
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Cargando solicitud…\"",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva?tab=registro",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-29",
+        "controlIdentity": "9db5430202df|Cargando solicitud…|role|status|Cargando solicitud…",
+        "semanticField": "Cargando solicitud…",
+        "action": "click",
+        "valueKey": "cargando_solicitud",
+        "sourceEventRefs": [
+          "event-29"
+        ],
+        "technicalTargetRefs": [
+          "role:status|Cargando solicitud…"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "status",
+          "normalizedName": "Cargando solicitud…",
+          "targetTag": "div",
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Cargando solicitud…\"",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva?tab=registro",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-31",
+        "controlIdentity": "9db5430202df|Solicitudes|role|link|Solicitudes",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-31"
+        ],
+        "technicalTargetRefs": [
+          "role:link|Solicitudes"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Solicitudes",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#/solicitudes"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "nav"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/solicitudes\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Solicitudes",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva?tab=registro",
+        "routeAfter": "http://localhost:4310/#/solicitudes",
+        "stateScope": "9db5430202df",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-34",
+        "controlIdentity": "9db5430202df|Salir|role|button|Salir",
+        "semanticField": "Salir",
+        "action": "click",
+        "valueKey": "salir",
+        "sourceEventRefs": [
+          "event-34"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Salir"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Salir",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "svg"
+              ],
+              "landmarkAncestor": {
+                "tag": "header"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"svg\",1]],\"descendantEntries\":[[\"path\",3],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"svg\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"svg\\\",1]],\\\"descendantEntries\\\":[[\\\"path\\\",3],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Salir",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(button[aria-label=\"Notificaciones\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(a[href=\"#/\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "header:has(a[href=\"#/\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Salir",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(button[aria-label=\"Notificaciones\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Salir\"",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitudes",
+        "routeAfter": "http://localhost:4310/#/login",
+        "stateScope": "9db5430202df",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      }
+    ],
+    "entityActionBlocks": [],
+    "readiness": {
+      "functionalReadiness": true,
+      "dataReadiness": false,
+      "technicalReadiness": true,
+      "oracleReadiness": true,
+      "reviewReadiness": true,
+      "publicationContentReadiness": true,
+      "executionReadiness": false,
+      "publicationReadiness": false,
+      "missingInputs": [
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 2,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "datasetAuthorityMismatches": [],
+      "dataReadinessReasons": [
+        "missing_runtime_input:contrasena",
+        "RUNTIME_DATA_REQUIRED"
+      ]
+    },
+    "technicalKnowledgeRefs": [],
+    "runtimeInputRequirements": [
+      {
+        "valueKey": "usuario",
+        "semanticField": "Usuario",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "negocios",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 1,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "negocios",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "contrasena",
+        "semanticField": "Contraseña",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": null,
+        "source": "unresolved",
+        "resolved": false,
+        "sensitive": true,
+        "stepIndex": 2,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "unresolved",
+        "authorityValue": null,
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "numero_de_identificacion",
+        "semanticField": "Número de Identificación*",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "101234567",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 5,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "101234567",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "no_registro_mercantil",
+        "semanticField": "No. Registro Mercantil",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "RM-2026-0801",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 6,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "RM-2026-0801",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "denominacion_social",
+        "semanticField": "Denominación Social*",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "EMPRESA PRUEBA OCHO SRL",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 7,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "EMPRESA PRUEBA OCHO SRL",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "tipo_sociedad_seleccion",
+        "semanticField": "Tipo Sociedad*",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "Tipo Sociedad*",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 8,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "Tipo Sociedad*",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "siglas",
+        "semanticField": "Siglas",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "EPO",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 10,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "EPO",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "nacionalidad_seleccion",
+        "semanticField": "Nacionalidad",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "Nacionalidad",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 11,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "Nacionalidad",
+        "datasetAuthorityMismatch": false
+      }
+    ],
+    "runtimeDataset": {
+      "scenarioId": "REC-45B5399D-01",
+      "requirements": [
+        {
+          "valueKey": "usuario",
+          "semanticField": "Usuario",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "negocios",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 1,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "negocios",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 2,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "numero_de_identificacion",
+          "semanticField": "Número de Identificación*",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "101234567",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 5,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "101234567",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "no_registro_mercantil",
+          "semanticField": "No. Registro Mercantil",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "RM-2026-0801",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 6,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "RM-2026-0801",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "denominacion_social",
+          "semanticField": "Denominación Social*",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "EMPRESA PRUEBA OCHO SRL",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 7,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "EMPRESA PRUEBA OCHO SRL",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "tipo_sociedad_seleccion",
+          "semanticField": "Tipo Sociedad*",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "Tipo Sociedad*",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 8,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "Tipo Sociedad*",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "siglas",
+          "semanticField": "Siglas",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "EPO",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 10,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "EPO",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "nacionalidad_seleccion",
+          "semanticField": "Nacionalidad",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "Nacionalidad",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 11,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "Nacionalidad",
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "resolvedValues": {
+        "usuario": "negocios",
+        "numero_de_identificacion": "101234567",
+        "no_registro_mercantil": "RM-2026-0801",
+        "denominacion_social": "EMPRESA PRUEBA OCHO SRL",
+        "tipo_sociedad_seleccion": "Tipo Sociedad*",
+        "siglas": "EPO",
+        "nacionalidad_seleccion": "Nacionalidad"
+      },
+      "missingValues": [
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 2,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        }
+      ]
+    },
+    "mutationOpportunities": [
+      {
+        "opportunityId": "REC-45B5399D-01:field_omission",
+        "title": "Alta con datos y listas negocios v3: comprobar la omisión de un dato",
+        "mutationType": "FIELD_OMISSION",
+        "basePrimaryScenarioId": "REC-45B5399D-01",
+        "operations": [
+          {
+            "type": "remove_action",
+            "interactionId": "interaction-5"
+          }
+        ],
+        "evidenceRefs": [
+          "event-1",
+          "event-2",
+          "event-3",
+          "event-4",
+          "event-5",
+          "event-6",
+          "event-7",
+          "event-8",
+          "event-9",
+          "event-10",
+          "event-11",
+          "event-12",
+          "event-13",
+          "event-14",
+          "event-15",
+          "event-16",
+          "event-17",
+          "event-18",
+          "event-19",
+          "event-20",
+          "event-21",
+          "event-22",
+          "event-23",
+          "event-24",
+          "event-25",
+          "event-26",
+          "event-27",
+          "event-28",
+          "event-29",
+          "event-30",
+          "event-31",
+          "event-32",
+          "event-33",
+          "event-34",
+          "event-35"
+        ],
+        "rationale": "Existen varios inputs observados; se propone una omisión agrupada sin inventar el resultado.",
+        "oracleAuthority": "MISSING",
+        "confidence": 0.5,
+        "needsReview": true
+      }
+    ]
+  }
+]

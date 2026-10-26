@@ -10,7 +10,7 @@ export type ScenarioPreviewCaseMapping = {
   projectId: number;
   suiteId?: number;
   updatedAt: string;
-  source: "created" | "updated" | "reused" | "recovered" | "recovered_after_add_case_500" | "reused_from_same_launch_after_previous_500" | "skipped_already_published" | "created_with_unique_title" | "recovered_after_unique_title_500";
+  source: "created" | "updated" | "reused" | "recovered" | "recovered_after_add_case_500" | "recovered_after_add_case_5xx" | "reused_from_same_launch_after_previous_500" | "skipped_already_published" | "created_with_unique_title" | "recovered_after_unique_title_500";
 };
 
 export type ScenarioPreviewTestRailResult = {

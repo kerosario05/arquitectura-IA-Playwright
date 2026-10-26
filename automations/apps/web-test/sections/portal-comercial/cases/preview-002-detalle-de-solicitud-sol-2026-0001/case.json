@@ -1,0 +1,10 @@
+{
+  "id": "preview-002-detalle-de-solicitud-sol-2026-0001",
+  "externalId": "PREVIEW-002",
+  "caseId": 0,
+  "title": "Detalle de solicitud SOL-2026-0001",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T13:44:22.973Z"
+}

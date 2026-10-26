@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-recorrido-largo-legal-bandeja-y-solicitudes",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Recorrido largo Legal bandeja y solicitudes",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T16:18:07.733Z"
+}

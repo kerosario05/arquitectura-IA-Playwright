@@ -1,0 +1,9 @@
+{
+  "id": "9052860e-4b22-4854-b4a6-66d06417e6f9-abrir-el-listado-filtrado-desde-el-contador-cliente-creado",
+  "externalId": "9052860e-4b22-4854-b4a6-66d06417e6f9",
+  "title": "Abrir el listado filtrado desde el contador Cliente Creado",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T07:13:44.837Z"
+}

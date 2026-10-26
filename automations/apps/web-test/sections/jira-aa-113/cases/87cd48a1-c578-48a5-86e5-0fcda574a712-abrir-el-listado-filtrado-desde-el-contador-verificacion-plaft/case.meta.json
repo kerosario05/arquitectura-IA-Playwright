@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "87cd48a1-c578-48a5-86e5-0fcda574a712",
+  "title": "Abrir el listado filtrado desde el contador Verificación PLAFT",
+  "generatedAt": "2026-10-26T07:06:10.658Z",
+  "executionEngine": "jira_semantic"
+}

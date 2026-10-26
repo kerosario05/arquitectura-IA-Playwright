@@ -1,0 +1,39 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-10-26T06:50:48.433Z",
+  "entries": [
+    {
+      "key": "usuario",
+      "source": "unknown",
+      "fieldName": "[id=\"usuario\"]",
+      "stepIndex": 3,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "contrasena",
+      "source": "unknown",
+      "fieldName": "[id=\"clave\"]",
+      "stepIndex": 4,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "jira_edit_494a04e79b283adc_8",
+      "source": "unknown",
+      "fieldName": "[id=\"esObs\"]",
+      "stepIndex": 9,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

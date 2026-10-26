@@ -1,0 +1,9 @@
+{
+  "id": "947e3fa3-a335-4d3c-9226-aff3e5ffa31e-abrir-el-listado-filtrado-desde-el-contador-escalado",
+  "externalId": "947e3fa3-a335-4d3c-9226-aff3e5ffa31e",
+  "title": "Abrir el listado filtrado desde el contador Escalado",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T07:10:21.979Z"
+}

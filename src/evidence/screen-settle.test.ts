@@ -89,6 +89,21 @@ test("an already static page settles after the quiet window only", async () => {
   }
 });
 
+test("a page with a strict CSP can still run the visual-settle probe", async () => {
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage();
+    await page.setContent(`
+      <meta http-equiv="Content-Security-Policy" content="script-src 'self'">
+      <p>static page under CSP</p>
+    `);
+    const result = await waitForVisualSettle(page, { timeoutMs: 3000, quietMs: 100 });
+    assert.equal(result.settled, true);
+  } finally {
+    await browser.close();
+  }
+});
+
 test("a spinner that never ends is bounded by the timeout and reported", async () => {
   const browser = await chromium.launch();
   try {

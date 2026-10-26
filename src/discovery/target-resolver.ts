@@ -7267,7 +7267,7 @@ export async function resolveRecordedStructuralOwner(
   // landmark, never by preferring one owner over the other positionally. Optional: an owner with
   // no recorded landmark (or a genuinely landmark-less page) resolves exactly as before.
   const landmarkAncestor = context.landmarkAncestor;
-  const landmarkPrefix = landmarkSelectorPrefix(landmarkAncestor);
+  let landmarkPrefix = landmarkSelectorPrefix(landmarkAncestor);
 
   let scopeRoot: Page | Locator = page;
   let scopeCssSelectorForTopology: string | undefined;
@@ -7358,6 +7358,17 @@ export async function resolveRecordedStructuralOwner(
     }
   }
 
+  // A chained locator only matches descendants of its root, so `landmark owner` finds nothing when
+  // the landmark is an ANCESTOR of the unique scope (e.g. `#list` inside `<main>`). The scope is
+  // already stricter than the landmark there: drop the redundant prefix, keep it otherwise.
+  if (landmarkPrefix && scopeRoot !== page) {
+    const landmarkSelector = landmarkPrefix.trim();
+    const scopeInsideLandmark = await (scopeRoot as Locator)
+      .evaluate((element, selector) => Boolean(element.closest(selector)), landmarkSelector)
+      .catch(() => false);
+    if (scopeInsideLandmark) landmarkPrefix = "";
+  }
+
   console.log(
     `[recording-replay][structural-match] invoked=true ownerTag=${owner.tag} ` +
     `stableDirectAttributes=${Object.keys(stableDirectAttributes).length} ` +
@@ -7380,6 +7391,13 @@ export async function resolveRecordedStructuralOwner(
     await scopeRoot.locator(readinessSelector).waitFor({ state: "visible", timeout: remainingReadinessTimeout() }).catch(() => undefined);
   }
 
+  // A SPA list/table can still be loading right after a route change (async rows). Wait, within
+  // the caller's readiness budget only, for the SAME owner tag to mount; the counts and every
+  // uniqueness/visibility check below still run unchanged.
+  while (readinessDeadline !== undefined && Date.now() < readinessDeadline
+    && await scopeRoot.locator(`${landmarkPrefix}${owner.tag}`).count().catch(() => 0) === 0) {
+    await page.waitForTimeout(100).catch(() => undefined);
+  }
   const structuralCandidateCountBeforeFilter = await scopeRoot.locator("*").count().catch(() => 0);
   const structuralCandidateCountAfterOwnerTag = await scopeRoot.locator(`${landmarkPrefix}${owner.tag}`).count().catch(() => 0);
   if (structuralCandidateCountAfterOwnerTag === 0) {

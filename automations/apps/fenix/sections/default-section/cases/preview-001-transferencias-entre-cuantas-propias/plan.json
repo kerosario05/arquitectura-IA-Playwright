@@ -57,7 +57,7 @@
     {
       "index": 3,
       "action": "fill",
-      "description": "Ingresar \"130872392\" en \"RNC:\"",
+      "description": "Ingresar \"130047596\" en \"RNC:\"",
       "target": {
         "strategy": "text",
         "value": "RNC",
@@ -69,7 +69,7 @@
     {
       "index": 4,
       "action": "fill",
-      "description": "Ingresar \"SAMOTA\" en \"Usuario:\"",
+      "description": "Ingresar \"jpmota\" en \"Usuario:\"",
       "target": {
         "strategy": "text",
         "value": "Usuario",
@@ -180,11 +180,11 @@
       "description": "Seleccionar opción que contiene Cuenta Corriente (coincidencia 1) en el campo \"account-from-select-input\"",
       "target": {
         "strategy": "recorded_visible_option_identity",
-        "value": "Cuenta Corrientes / 11121000000739 / RD$820,533.27",
+        "value": "Cuenta Corrientes / 11081020001299 / RD$27,207,684.00",
         "exact": false,
         "metadata": {
           "originalTarget": "account-from-select-input",
-          "resolvedTargetName": "Cuenta Corrientes / 11121000000739 / RD$820,533.27",
+          "resolvedTargetName": "Cuenta Corrientes / 11081020001299 / RD$27,207,684.00",
           "aiAssisted": false,
           "repairType": "target_resolution",
           "decisionStatus": "resolved",
@@ -212,11 +212,11 @@
       "description": "Seleccionar opción que contiene Cuenta de Ahorros (coincidencia 1) en el campo \"account-to-select-input\"",
       "target": {
         "strategy": "recorded_visible_option_identity",
-        "value": "Cuenta de Ahorro / 21122020001253 / US$1,380.35",
+        "value": "Cuenta de Ahorro / 21082020000619 / US$280.00",
         "exact": false,
         "metadata": {
           "originalTarget": "account-to-select-input",
-          "resolvedTargetName": "Cuenta de Ahorro / 21122020001253 / US$1,380.35",
+          "resolvedTargetName": "Cuenta de Ahorro / 21082020000619 / US$280.00",
           "aiAssisted": false,
           "repairType": "target_resolution",
           "decisionStatus": "resolved",
@@ -314,7 +314,7 @@
   "notes": [
     "Discovery completed successfully. All targets and concrete assertions passed."
   ],
-  "createdAt": "2026-10-22T15:06:54.349Z",
+  "createdAt": "2026-10-24T00:08:42.216Z",
   "metadata": {
     "authFlowRequired": false,
     "authFlowAlias": "defaultClient",
@@ -382,8 +382,8 @@
       },
       {
         "index": 3,
-        "action": "Ingresar \"130872392\" en \"RNC:\"",
-        "description": "Ingresar \"130872392\" en \"RNC:\"",
+        "action": "Ingresar \"130047596\" en \"RNC:\"",
+        "description": "Ingresar \"130047596\" en \"RNC:\"",
         "valueKey": "rnc",
         "technicalTargetRef": "role:textbox|RNC:",
         "technicalTargetRefs": [
@@ -397,8 +397,8 @@
       },
       {
         "index": 4,
-        "action": "Ingresar \"SAMOTA\" en \"Usuario:\"",
-        "description": "Ingresar \"SAMOTA\" en \"Usuario:\"",
+        "action": "Ingresar \"jpmota\" en \"Usuario:\"",
+        "description": "Ingresar \"jpmota\" en \"Usuario:\"",
         "valueKey": "usuario",
         "technicalTargetRef": "role:textbox|Usuario:",
         "technicalTargetRefs": [
@@ -1287,7 +1287,7 @@
       {
         "contractStepIndex": 2,
         "scenarioStepIndex": 3,
-        "originalText": "Ingresar \"130872392\" en \"RNC:\"",
+        "originalText": "Ingresar \"130047596\" en \"RNC:\"",
         "operation": "fill",
         "target": {
           "strategy": "label",
@@ -1330,7 +1330,7 @@
       {
         "contractStepIndex": 3,
         "scenarioStepIndex": 4,
-        "originalText": "Ingresar \"SAMOTA\" en \"Usuario:\"",
+        "originalText": "Ingresar \"jpmota\" en \"Usuario:\"",
         "operation": "fill",
         "target": {
           "strategy": "label",
@@ -2019,7 +2019,7 @@
           "kind": "runtime",
           "runtimeMethod": "clickPromotedTarget"
         },
-        "resolvedExecutionTarget": "Cuenta Corrientes / 11121000000739 / RD$820,533.27",
+        "resolvedExecutionTarget": "Cuenta Corrientes / 11081020001299 / RD$27,207,684.00",
         "evidenceRefs": []
       },
       {
@@ -2161,7 +2161,7 @@
           "kind": "runtime",
           "runtimeMethod": "clickPromotedTarget"
         },
-        "resolvedExecutionTarget": "Cuenta de Ahorro / 21122020001253 / US$1,380.35",
+        "resolvedExecutionTarget": "Cuenta de Ahorro / 21082020000619 / US$280.00",
         "evidenceRefs": []
       },
       {

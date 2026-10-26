@@ -1,4 +1,5 @@
 import { resolveDataKey } from "../data/data-key-resolver";
+import { parseStepIntent } from "../discovery/step-intent-parser";
 
 /** QA Lab sends overrides grouped by scenario. Never borrow another scenario's inputs. */
 export function jiraRuntimeValues(overrides: unknown, scenarioId: string, displayId?: string): Record<string, string> {
@@ -12,8 +13,65 @@ export function jiraRuntimeValues(overrides: unknown, scenarioId: string, displa
 export type JiraRuntimeInputRequirement = {
   key: string;
   label: string;
+  stepIndex?: number;
   dataCondition?: "valid" | "invalid" | "expired";
 };
+
+const normalizeConditionText = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  .toLocaleLowerCase("es").replace(/[^\p{L}\p{N}]+/gu, " ").trim().replace(/\s+/g, " ");
+
+/**
+ * Recover a missing negative-data qualifier only when one negative outcome clause
+ * names exactly one editable field. This prevents a profile's valid default from
+ * silently replacing the intended invalid/expired input in edited scenarios.
+ */
+export function inferJiraScenarioInputConditions<T extends {
+  title?: string;
+  expectedResult?: string;
+  inputRequirements?: JiraRuntimeInputRequirement[];
+}>(scenario: T): T {
+  const requirements = scenario.inputRequirements ?? [];
+  if (!requirements.length) return scenario;
+  const outcomeClauses = `${scenario.title ?? ""}. ${scenario.expectedResult ?? ""}`
+    .split(/[.!?;\n]+/).map(value => normalizeConditionText(value)).filter(Boolean)
+    .map(text => ({ text, condition: /\b(?:expirad[oa]s?|vencid[oa]s?|expired|lapsed)\b/.test(text) ? "expired" as const
+      : /\b(?:inv[aá]lid[oa]s?|no valid[oa]s?|incorrect[oa]s?|err[oó]ne[oa]s?|invalid|wrong|incorrect)\b/.test(text) ? "invalid" as const : undefined }))
+    .filter((clause): clause is { text: string; condition: "invalid" | "expired" } => Boolean(clause.condition));
+  if (!outcomeClauses.length) return scenario;
+
+  const labelTokens = (label: string) => normalizeConditionText(label).split(" ")
+    .filter(token => token.length >= 3 && !new Set(["del", "las", "los", "una", "uno", "campo", "numero", "dato"]).has(token));
+  const inferred = new Map<string, "invalid" | "expired">();
+  for (const clause of outcomeClauses) {
+    const candidates = requirements.filter(requirement => !requirement.dataCondition
+      && labelTokens(requirement.label).some(token => clause.text.split(" ").includes(token)));
+    if (candidates.length === 1) inferred.set(candidates[0].key, clause.condition);
+  }
+  if (!inferred.size) return scenario;
+  return { ...scenario, inputRequirements: requirements.map(requirement => ({ ...requirement,
+    ...(inferred.has(requirement.key) ? { dataCondition: inferred.get(requirement.key) } : {}),
+  })) };
+}
+
+/** Read an explicitly authored concrete value for a negative input without logging it. */
+export function authoredNegativeInputValues(
+  steps: string[],
+  requirements: JiraRuntimeInputRequirement[],
+): Record<string, string> {
+  const values: Record<string, string> = {};
+  for (const requirement of requirements) {
+    if (requirement.dataCondition !== "invalid" && requirement.dataCondition !== "expired") continue;
+    const text = steps[(requirement.stepIndex ?? 0) - 1];
+    if (!text) continue;
+    const intents = parseStepIntent(text.replace(/^\s*\d+[.)]\s*/, ""));
+    if (intents.length !== 1 || !["action_fill", "action_select"].includes(intents[0].type)) continue;
+    const intent = intents[0];
+    if (normalizeConditionText(intent.actionTarget ?? "") !== normalizeConditionText(requirement.label)) continue;
+    const value = typeof intent.value === "string" ? intent.value.trim() : "";
+    if (value) values[requirement.key] = value;
+  }
+  return values;
+}
 
 export type JiraScenarioRuntimeInputSet = {
   scenarioId: string;
@@ -27,6 +85,20 @@ export type JiraInvalidInputCollision = {
   inputKey: string;
   matchingScenarioId: string;
 };
+
+export function jiraInvalidInputCollisionDiagnostic(
+  collision: JiraInvalidInputCollision,
+  requirements: JiraRuntimeInputRequirement[],
+): { severity: "warning"; action: "continue_to_runtime_assertion"; inputKey: string; matchingScenarioId: string; stepIndex?: number } {
+  const stepIndex = requirements.find(requirement => requirement.key === collision.inputKey)?.stepIndex;
+  return {
+    severity: "warning",
+    action: "continue_to_runtime_assertion",
+    inputKey: collision.inputKey,
+    matchingScenarioId: collision.matchingScenarioId,
+    ...(stepIndex ? { stepIndex } : {}),
+  };
+}
 
 function normalizedInputLabel(value: string): string {
   return value.trim().toLocaleLowerCase("es").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ");

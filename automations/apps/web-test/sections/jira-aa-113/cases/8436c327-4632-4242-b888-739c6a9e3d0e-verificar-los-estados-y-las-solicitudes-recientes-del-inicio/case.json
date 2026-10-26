@@ -1,0 +1,9 @@
+{
+  "id": "8436c327-4632-4242-b888-739c6a9e3d0e-verificar-los-estados-y-las-solicitudes-recientes-del-inicio",
+  "externalId": "8436c327-4632-4242-b888-739c6a9e3d0e",
+  "title": "Verificar los estados y las solicitudes recientes del inicio",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T07:22:27.995Z"
+}

@@ -7,7 +7,7 @@ import {buildJiraLearnedRoute} from './jira-knowledge-learning';
 import {resolveJiraGenerationKnowledge} from './jira-generation-knowledge';
 import type {AiProvider} from '../ai/ai-provider.types';
 
-test('generated narrative clicks, compound checks and message placeholders cannot pass delivery',()=>{
+test('generated narrative clicks, compound checks and message placeholders cannot pass delivery',async()=>{
  for(const [step,reason] of [
   ['Presionar "el código por SMS"','JIRA_GENERATED_REQUEST_AS_CONTROL'],
   ['Presionar "la confirmación por correo"','JIRA_GENERATED_REQUEST_AS_CONTROL'],
@@ -15,9 +15,34 @@ test('generated narrative clicks, compound checks and message placeholders canno
   ['Validar el rechazo del token y que no se presente la operación como exitosa','JIRA_GENERATED_ASSERTION_NOT_ATOMIC'],
   ['Validar que se muestre "un mensaje que informe el problema"','JIRA_GENERATED_NARRATIVE_TARGET'],
  ])assert.equal(auditJiraStepDelivery([step],[])[0]?.reason,reason);
+ for(const step of ['Solicitar crear una nueva solicitud','Solicitar consultar el RNC']) {
+  assert.equal(auditJiraStepDelivery([step],[])[0]?.reason,'JIRA_GENERATED_REQUEST_AS_CONTROL',step);
+ }
  assert.deepEqual(auditJiraStepDelivery(['Presionar "SMS"'],[]),[]);
+ assert.deepEqual(auditJiraStepDelivery(['Solicitar el código por SMS'],[]),[]);
+ assert.deepEqual(auditJiraStepDelivery(['Solicitar "Consultar RNC"'],[],'El control se llama "Consultar RNC"'),[]);
+ assert.equal(auditJiraStepDelivery(['Presionar la acción para abrir Solicitudes'],[])[0]?.reason,'JIRA_GENERATED_REQUEST_AS_CONTROL');
+ assert.deepEqual(auditJiraStepDelivery(['Presionar la acción para continuar'],[]),[],'the engine has a dedicated continuation target fallback');
  assert.deepEqual(auditJiraStepDelivery(['Presionar "el código por SMS"'],[],'El botón se llama "el código por SMS"'),[]);
  assert.deepEqual(auditJiraStepDelivery(['Validar que se muestre "A, B y C"'],[]),[],'quoted literal labels retain punctuation');
+ const wrapper=await auditGeneratedJiraSyntax([{title:'Abrir solicitudes',sourceIssueKey:'HU-OPEN',steps:[
+  'Abrir la aplicación configurada del proyecto','Presionar la acción para abrir Solicitudes','Validar que se muestre "Solicitudes"',
+ ],expectedResult:'Se muestra "Solicitudes".'}],[{key:'HU-OPEN',summary:'Solicitudes',description:'El cliente abre Solicitudes.'} as any]);
+ assert.ok(wrapper.some(failure=>failure.reason==='JIRA_GENERATED_REQUEST_AS_CONTROL'),JSON.stringify(wrapper));
+});
+
+test('business request phrasing cannot certify acceptance coverage without a named executable control',async()=>{
+ const source={key:'HU-REQUEST',summary:'Solicitudes',description:'',acceptanceCriteria:'AC1 — Nueva solicitud\nEl cliente puede solicitar crear una nueva solicitud.'};
+ const draft={sourceIssueKey:source.key,title:'Crear una solicitud',preconditions:[],steps:[
+  'Abrir la aplicación configurada del proyecto','Solicitar crear una nueva solicitud','Validar que se muestre "Nueva solicitud"',
+ ],expectedResult:'Se muestra "Nueva solicitud".',acceptanceCriteriaRefs:['AC1.1']};
+ const provider:AiProvider={providerType:'fake',providerName:'request-fixture',model:'fixture',async completeJson(){
+  return {rawText:'',model:'fixture',providerName:'request-fixture',durationMs:0,parsedJson:{scenarios:[draft]}};
+ }};
+ const result=await generateJiraScenarios([source as any],'request-fixture',provider,{loginMode:'no_login'});
+ assert.equal(result.scenarios.length,1);
+ assert.ok(result.scenarios[0].validation.errors.includes('JIRA_GENERATED_REQUEST_AS_CONTROL'));
+ assert.equal(result.coverage?.[0]?.status,'incomplete','an unsupported request verb is not executable AC evidence');
 });
 
 test('readiness prose is not a functional expected result',async()=>{

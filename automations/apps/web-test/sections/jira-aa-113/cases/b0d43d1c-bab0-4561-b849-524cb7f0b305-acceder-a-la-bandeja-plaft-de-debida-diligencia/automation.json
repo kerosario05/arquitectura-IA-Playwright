@@ -1,0 +1,56 @@
+{
+  "id": "b0d43d1c-bab0-4561-b849-524cb7f0b305-acceder-a-la-bandeja-plaft-de-debida-diligencia",
+  "externalId": "b0d43d1c-bab0-4561-b849-524cb7f0b305",
+  "title": "Acceder a la bandeja PLAFT de Debida Diligencia",
+  "planPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\b0d43d1c-bab0-4561-b849-524cb7f0b305-acceder-a-la-bandeja-plaft-de-debida-diligencia\\plan.json",
+  "specPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\b0d43d1c-bab0-4561-b849-524cb7f0b305-acceder-a-la-bandeja-plaft-de-debida-diligencia\\case.spec.ts",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "web-test",
+  "baseUrlHash": "4e1194428e74",
+  "createdAt": "2026-10-26T07:30:14.270Z",
+  "updatedAt": "2026-10-26T07:30:14.270Z",
+  "specVerificationStatus": "passed",
+  "tags": [
+    "jira_semantic",
+    "jira_generated"
+  ],
+  "metadata": {
+    "specGeneration": {
+      "mode": "deterministic",
+      "provider": null,
+      "model": null,
+      "invocations": 0,
+      "invocationsConsumed": 0,
+      "durationMs": 0,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "passed",
+        "typescript": "skipped",
+        "playwrightDiscovery": "skipped",
+        "semanticCoverage": "passed",
+        "functionalExecution": "passed"
+      },
+      "promotionAllowed": true,
+      "specsRequested": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
+      "specWritten": true,
+      "errors": [],
+      "warnings": []
+    }
+  }
+}

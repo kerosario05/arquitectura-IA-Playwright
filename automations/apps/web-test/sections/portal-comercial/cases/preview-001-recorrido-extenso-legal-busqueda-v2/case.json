@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-recorrido-extenso-legal-busqueda-v2",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Recorrido extenso Legal busqueda v2",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T16:40:50.554Z"
+}

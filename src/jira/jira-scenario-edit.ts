@@ -1,7 +1,7 @@
 import {createHash} from 'node:crypto';
 import type {JiraIssueSource} from '../scenarios/scenario-types';
 import {deriveJiraInputRequirements, type JiraInputRequirement} from './jira-input-requirements';
-import {auditGeneratedJiraSyntax,jiraScenarioQualityGaps,uncoveredAcceptanceClauses,jiraNavigationMissing} from './jira-scenario-generator';
+import {auditGeneratedJiraSyntax,jiraScenarioQualityGaps,jiraNavigationMissing} from './jira-scenario-generator';
 import {jiraGenerationContractErrors,jiraSourceConditions} from './jira-generation-contract';
 import {isJiraStepAutoResolvable} from './jira-scenario-review';
 import {normalizeAuthoredJiraStep} from './jira-authored-step-format';
@@ -31,8 +31,13 @@ function removedExpectedResultAssertion(original:EditableJiraScenario,editedStep
  });
 }
 
+/** `full_authentication` demands the app's AuthFlow. A project that has none cannot satisfy it, so a reviewed scenario falls back to its authored login steps. Project capability decides, never step wording. */
+function authIntentAfterEdit(original:EditableJiraScenario,authFlowAvailable?:boolean):EditableJiraScenario['authIntent']{
+ return original.authIntent==='full_authentication'&&authFlowAvailable===false?undefined:original.authIntent;
+}
+
 /** Validate human-authored steps without AI rewrites or DOM certification. */
-export async function reviewEditedJiraScenarios(issue:JiraIssueSource,scenarios:EditableJiraScenario[],scenarioId:string,patch:JiraScenarioEditPatch,loginMode?:string){
+export async function reviewEditedJiraScenarios(issue:JiraIssueSource,scenarios:EditableJiraScenario[],scenarioId:string,patch:JiraScenarioEditPatch,loginMode?:string,authFlowAvailable?:boolean){
  if(!Array.isArray(scenarios)||!scenarios.length||scenarios.length>100||scenarios.some(s=>!s||typeof s!=='object')||new Set(scenarios.map(s=>s.scenarioId)).size!==scenarios.length
   ||scenarios.some(s=>s.sourceIssueKey!==issue.key||typeof s.scenarioId!=='string'||!s.scenarioId.trim())
   ||scenarios.some(s=>typeof s.title!=='string'||typeof s.expectedResult!=='string'||!Array.isArray(s.steps)||s.steps.some(step=>typeof step!=='string')||(s.inputRequirements!==undefined&&!Array.isArray(s.inputRequirements)))
@@ -43,7 +48,9 @@ export async function reviewEditedJiraScenarios(issue:JiraIssueSource,scenarios:
  for(const original of scenarios){
   const changed=original.scenarioId===scenarioId&&JSON.stringify([original.title,original.steps,original.expectedResult])!==JSON.stringify([patch.title,patch.steps,patch.expectedResult]);
   const editedSteps=patch.steps.map(normalizeAuthoredJiraStep);
-  const draft:EditableJiraScenario=changed?{...original,title:patch.title.trim(),steps:editedSteps,expectedResult:patch.expectedResult.trim(),expectedResultMode:removedExpectedResultAssertion(original,editedSteps,patch.expectedResult)?'documentation':original.expectedResultMode}:original;
+  const edited:EditableJiraScenario=changed?{...original,title:patch.title.trim(),steps:editedSteps,expectedResult:patch.expectedResult.trim(),expectedResultMode:removedExpectedResultAssertion(original,editedSteps,patch.expectedResult)?'documentation':original.expectedResultMode}:original;
+  // The edited scenario is always re-evaluated, even when the authored steps are unchanged: a stale generator intent must not outlive a review.
+  const draft:EditableJiraScenario=original.scenarioId===scenarioId?{...edited,authIntent:authIntentAfterEdit(original,authFlowAvailable)}:edited;
   if(!Array.isArray(draft.steps)||draft.steps.some(s=>typeof s!=='string'))throw new Error('JIRA_EDIT_CONTENT_INVALID');
   const revision=digest([draft.title,draft.steps,draft.expectedResult,draft.preconditions]);
   // Preserve values only for uniquely unchanged authored inputs, never by their old numeric position.
@@ -60,22 +67,20 @@ export async function reviewEditedJiraScenarios(issue:JiraIssueSource,scenarios:
   const unresolvedUiRequirements=draft.steps.flatMap((step,i)=>isJiraStepAutoResolvable(step)?[]:[{stepIndex:i+1,requirement:step}]);
   const candidate={...draft,inputRequirements,conditionRequirements,reviewConfiguration,unresolvedUiRequirements};
   const syntaxIssues=await auditGeneratedJiraSyntax([candidate],[issue]);
-  const errors=[...syntaxIssues.map(f=>f.reason),...jiraGenerationContractErrors(candidate,issue),...jiraScenarioQualityGaps(candidate,draft.steps)];
-  if(jiraNavigationMissing(candidate,draft.steps,loginMode,[issue.summary,issue.description,issue.acceptanceCriteria].join(' ')))errors.push('JIRA_NAVIGATION_TO_TARGET_SCREEN_MISSING');
+  // Editing is an authoring operation: source coverage and navigation heuristics
+  // must not discard a user's explicit change. Discovery owns runtime validation
+  // of the resulting journey and may report a concrete step for correction.
+  const reviewFindings=[...syntaxIssues.map(f=>f.reason),...jiraGenerationContractErrors(candidate,issue),...jiraScenarioQualityGaps(candidate,draft.steps)];
+  const reviewIssues=syntaxIssues.filter(f=>f.stepIndex>0).map(f=>({code:f.reason,stepIndex:f.stepIndex,step:f.step}));
+  if(jiraNavigationMissing(candidate,draft.steps,loginMode,[issue.summary,issue.description,issue.acceptanceCriteria].join(' ')))reviewFindings.push('JIRA_NAVIGATION_TO_TARGET_SCREEN_MISSING');
   reviewed.push({...candidate,
    scenarioId:changed?`${original.scenarioId.replace(/:edited-[a-f0-9]+$/,'')}:edited-${revision}`:original.scenarioId,
    unresolvedUiRequirements,
-   validation:{valid:errors.length===0,errors:[...new Set(errors)],issues:syntaxIssues.filter(issue=>issue.stepIndex>0).map(issue=>({code:issue.reason,stepIndex:issue.stepIndex,step:issue.step})),warnings:['Los pasos editados requieren Discovery para verificar controles y resultados.']},
-   executionReadiness:errors.length?'blocked_syntax':'requires_discovery',mcpExecutable:false});
- }
- const missing=uncoveredAcceptanceClauses(issue,reviewed.filter(s=>s.validation.valid));
- if(missing.length)for(const scenario of reviewed){
-  // Coverage is a suite-level property. A missing clause in a sibling scenario
-  // must not make an unrelated scenario edit impossible to apply.
-  const scenarioMissing=missing.filter(clause=>scenario.acceptanceCriteriaRefs?.includes(clause.id));
-  if(!scenarioMissing.length)continue;
-  scenario.validation.errors.push(`JIRA_ACCEPTANCE_COVERAGE_INCOMPLETE:${scenarioMissing.map(c=>c.id).join(',')}`);
-  scenario.validation.valid=false;scenario.executionReadiness='blocked_acceptance_coverage';
+   validation:{valid:true,errors:[] as string[],issues:reviewIssues,warnings:[
+    'Edición guardada. Discovery verificará el recorrido al ejecutar el escenario.',
+    ...(reviewFindings.length?['La revisión automática encontró observaciones que Discovery comprobará durante la ejecución.']:[]),
+   ]},
+   executionReadiness:'requires_discovery',mcpExecutable:false});
  }
  return reviewed;
 }

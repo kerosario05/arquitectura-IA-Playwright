@@ -1142,6 +1142,21 @@ function isDerivedDisplayClick(events: readonly RecordedEvent[], index: number):
   return Boolean(priorInput && targetLooksDerived && noDelta && noMeaningfulAfterState);
 }
 
+const NON_ACTIONABLE_LIVE_REGION_ROLES = new Set(["status", "progressbar", "timer", "marquee", "log"]);
+const ACTIONABLE_TAGS = new Set(["button", "a", "input", "select", "textarea", "summary", "option", "label"]);
+
+/**
+ * A tap that landed on a transient, non-interactive live region (a loading/"busy" indicator:
+ * role status/progressbar/... on a non-actionable element) is capture noise: the user's click hit
+ * an overlay that was momentarily on top, not a business control. It carries no replay authority
+ * and must not become a step. Decided purely from the captured role/tag, never from label text.
+ */
+export function isTransientStatusTap(target: { role?: string; tag?: string } | undefined): boolean {
+  const role = target?.role?.toLowerCase();
+  const tag = target?.tag?.toLowerCase();
+  return Boolean(role && NON_ACTIONABLE_LIVE_REGION_ROLES.has(role) && !(tag && ACTIONABLE_TAGS.has(tag)));
+}
+
 export function isMaskActivation(events: readonly RecordedEvent[], index: number): boolean {
   const event = events[index];
   if (event.kind !== "tap" || isSelection(event) || !event.target) return false;
@@ -1297,6 +1312,7 @@ export function buildCanonicalInteractions(
     }
     if (event.kind !== "tap" && event.kind !== "fill" && event.kind !== "press") continue;
     if (isMaskActivation(events, index)) continue;
+    if (event.kind === "tap" && isTransientStatusTap(target)) continue;
     const correlatedKeyboardEvidence = event.kind === "tap" && event.interactionId
       ? virtualKeyboardEvidenceByInteractionId.get(event.interactionId)
       : undefined;

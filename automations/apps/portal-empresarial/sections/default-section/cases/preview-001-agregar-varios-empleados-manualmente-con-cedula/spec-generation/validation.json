@@ -10,7 +10,7 @@
   },
   "invocations": 0,
   "invocationsConsumed": 0,
-  "durationMs": 155440,
+  "durationMs": 141209,
   "usage": {
     "inputTokens": null,
     "cachedInputTokens": null,
@@ -29,29 +29,21 @@
     "typescript": "passed",
     "playwrightDiscovery": "passed",
     "semanticCoverage": "passed",
-    "functionalExecution": "failed"
+    "functionalExecution": "passed"
   },
-  "promotionAllowed": false,
+  "promotionAllowed": true,
   "specsRequested": 1,
-  "specsValidated": 0,
-  "specsRejected": 1,
+  "specsValidated": 1,
+  "specsRejected": 0,
   "specGenerationAttempts": 0,
   "specRepairAttempts": 0,
-  "firstPassPromotion": false,
-  "failedGatesAttempt1": [
-    "functionalExecution"
-  ],
+  "firstPassPromotion": true,
+  "failedGatesAttempt1": [],
   "regressedGates": [],
   "missingRequirements": [],
   "oracleTypes": [],
-  "errors": [
-    "functional_execution_failed:exitCode=1",
-    "functional_execution_error:Error: Promoted click failed at step 32 target=\"role:button|Validar\". failureClass=ACTION_EFFECT_OBSERVED_CALLBACK_UNRESOLVED exactRuntimeError=\"Retry failed: click retry timed out after 15000ms\" currentUrl=https://172.27.4.31/payroll/payrollInProcess clickPath=pom_callback nativeClickAttempted=true nativeClickSucceeded=false callbackAttempted=true callbackSucceeded=false retryAttempted=true diagnostics={\"currentUrl\":\"https://172.27.4.31/payroll/payrollInProcess\",\"actionIntent\":\"click\",\"target\":\"role:button|Validar\",\"stepIndex\":32,\"timeoutMs\":15000,\"stability\":{\"currentUrl\":\"https://172.27.4.31/payroll/payrollInProcess\",\"title\":\"\",\"visibleHeadings\":[],\"visibleButtons\":[\"Descargar lista\",\"SASULE CONFESOR  ALCANTARA MENENDEZ\",\"Marcar para registro digital\",\"Anterior\",\"Siguiente\",\"Descargar lista\",\"ROQUE ADAME  BURGOS MEDINA\",\"Solicitar Cuenta\",\"Anterior\",\"Siguiente\"],\"visibleTexts\":[\"Empresa:\",\"Oliva Medina\",\"Gestión de la nómina en proceso\",\"Todavía está en curso la creación de la nómina.\",\"Colaboradores\",\"Etapas del proceso\",\"En validación\",\"50.0\",\"Listo, pendiente de información regulatoria\",\"50.0\",\"Clientes\",\"Excluidos\",\"Colaboradores\",\"Vista general\",\"Marcados para registro digital\",\"colaboradores completos\",\"En validación\",\"Estamos revisando la información proporcionada para asegurar que todo esté en orden.\",\"No hay resultados\",\"Listo, pendiente de información regulatoria\"],\"loadingDetected\":false,\"skeletonDetected\":false,\"listReadiness\":{\"cardsVisible\":0,\"listItemsVisible\":0,\"loadingDetected\":false,\"zeroProductsDetected\":true,\"hasEntityContainers\":true,\"visibleHeadings\":[],\"visibleButtons\":[\"Descargar lista\",\"SASULE CONFESOR  ALCANTARA MENENDEZ\",\"Marcar para registro digital\",\"Anterior\",\"Siguiente\",\"Descargar lista\",\"ROQUE ADAME  BURGOS MEDINA\",\"Solicitar Cuenta\",\"Anterior\",\"Siguiente\"],\"ready\":false},\"diagnosticStatus\":\"completed\"},\"retryAttempted\":true,\"clickPath\":\"pom_callback\",\"nativeClickAttempted\":true,\"nativeClickSucceeded\":false,\"callbackAttempted\":true,\"callbackSucceeded\":false,\"callbackError\":\"Retry failed: click retry timed out after 15000ms\",\"expectedEffect\":\"ui_change\",\"effectDetected\":false,\"fallbackUsed\":\"callback\",\"matchedLocatorStrategy\":\"callback\",\"screenshotPath\":\"[REDACTED]\"}"
-  ],
-  "warnings": [
-    "functional_execution_screenshots=31",
-    "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 32)."
-  ],
+  "errors": [],
+  "warnings": [],
   "finalSpec": {
     "origin": "deterministic_compiler",
     "generatedBy": "core",
@@ -59,8 +51,8 @@
     "fallback": null
   },
   "runtimeGate": {
-    "decision": "block",
-    "promotionStatus": "blocked",
-    "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 32)."
+    "decision": "promote",
+    "promotionStatus": "promoted",
+    "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
   }
 }

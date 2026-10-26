@@ -43,6 +43,58 @@ test('generation syntax audit exercises source conditional review before present
  assert.deepEqual(await auditGeneratedJiraSyntax([{...draft,steps:[draft.steps[0],'Validar que se muestre "Comisión" en la confirmación.',draft.steps[2]]}],[source]),[]);
 });
 
+test('large-story coverage batches still audit and repair initial executable syntax', async () => {
+ const source = {
+  ...issue,
+  description: '',
+  acceptanceCriteria: Array.from({ length: 9 }, (_, index) =>
+   `AC${index + 1} — Consulta\nEl cliente puede consultar "Resultados".`).join('\n'),
+ };
+ const clauses = jiraAcceptanceClauses(source);
+ assert.ok(clauses.length > 8, 'fixture must use scoped coverage generation');
+ let initialBatches = 0;
+ let syntaxRepairSeen = false;
+ let scopedRepairSeen = false;
+ const provider = fakeProvider([]);
+ provider.completeJson = async request => {
+  const user = JSON.parse(request.messages.find(message => message.role === 'user')!.content);
+  if (user.generationScope) {
+   initialBatches++;
+   const refs = user.generationScope.requiredClauses.map((clause: { id: string }) => clause.id);
+   return { rawText: '', model: 'fixture', providerName: 'fixture', durationMs: 0, parsedJson: { scenarios: [{
+    sourceIssueKey: source.key,
+    title: `Consulta ${initialBatches}`,
+    steps: ['Abrir la aplicación configurada del proyecto', 'Validar que se muestre "el valor esperado en la segunda fila del historial"'],
+    expectedResult: 'Se muestra "Resultados".',
+    acceptanceCriteriaRefs: refs,
+   }] } };
+  }
+  if (Array.isArray(user.issues?.[0]?.missingClauses)) {
+   return { rawText: '', model: 'fixture', providerName: 'fixture', durationMs: 0, parsedJson: { scenarios: [] } };
+  }
+  if (Array.isArray(user.syntaxFailures)) {
+   if (request.messages[0].content.includes('coverage-repair scenario drafts')) {
+    scopedRepairSeen = true;
+    return { rawText: '', model: 'fixture', providerName: 'fixture', durationMs: 0, parsedJson: { scenarios: [] } };
+   }
+   syntaxRepairSeen = true;
+   assert.ok(user.syntaxFailures.some((failure: { reason: string }) => failure.reason === 'JIRA_ASSERTION_CAPABILITY_UNSUPPORTED'));
+   return { rawText: '', model: 'fixture', providerName: 'fixture', durationMs: 0, parsedJson: { scenarios: user.scenarios.map((scenario: Record<string, unknown>) => ({
+    ...scenario,
+    steps: ['Abrir la aplicación configurada del proyecto', 'Validar que se muestre "Resultados"'],
+   })) } };
+  }
+  throw new Error('Unexpected provider phase in scoped-generation regression');
+ };
+
+ const result = await generateJiraScenarios([source], 'fixture-profile', provider);
+ assert.ok(initialBatches >= 3, 'the story was generated in bounded batches');
+ assert.equal(scopedRepairSeen, true, 'initial candidates reach the scoped repair');
+ assert.equal(syntaxRepairSeen, true, 'unresolved scoped candidates receive the shared repair fallback');
+ assert.ok(result.scenarios.every(scenario => !scenario.validation.errors.includes('JIRA_ASSERTION_CAPABILITY_UNSUPPORTED')),
+  JSON.stringify(result.scenarios.map(scenario => ({ title: scenario.title, steps: scenario.steps, errors: scenario.validation.errors }))));
+});
+
 const issue: JiraIssueSource = {key:"HU-1",summary:"Acceso y operación",description:"El usuario inicia sesión y autoriza una operación con otro código.",acceptanceCriteria:"",labels:[],components:[],status:"Open",issueType:"Story"};
 
 test('generation audits, repairs and revalidates negative authentication before delivering the journey',async()=>{
@@ -99,6 +151,8 @@ test("Jira output instructions require one structured response with inline conte
   assert.match(systemPrompt, /Treat each new row independently/);
   assert.match(systemPrompt, /If the source explicitly describes filling the first row and then adding a second row, treat the first row as already present/);
   assert.match(systemPrompt, /To test an incomplete newly added row, first complete the pre-existing row/);
+  assert.match(systemPrompt, /Keep each scenario within one user identity\/session and one coherent business objective/);
+  assert.match(systemPrompt, /never combine logout and login as one step or continue one scenario under a different role/);
   assert.match(systemPrompt, /Field-level validation is supported only with this exact syntax: Validar que el campo/);
   assert.match(systemPrompt, /uniquely identified control is invalid and has an associated visible or ARIA-linked error/);
   assert.match(systemPrompt, /Do not assert structural row counts or empty-row structure as simple visible text/);
@@ -258,7 +312,7 @@ test("an unresolved conditional is retained for review instead of being certifie
   const result=await generateJiraScenarios([issue],'app-b',provider);
   assert.equal(calls,2);
   assert.equal(result.scenarios[0].validation.valid,false);
-  assert.equal(result.scenarios[0].executionReadiness,'blocked_syntax');
+  assert.equal(result.scenarios[0].executionReadiness,'requires_discovery');
   assert.equal(result.scenarios[0].mcpExecutable,false);
 });
 test("an unquoted positive visibility subject is preserved without changing negative requirements", () => {
@@ -548,6 +602,36 @@ test("Jira coverage repair adds only exact missing criteria and blocks any remai
  assert.ok(result.scenarios.every(scenario=>scenario.validation.valid));
 });
 
+test('coverage retries use prior launchability failures to avoid repeating unsupported steps',async()=>{
+ const source={...issue,description:'',acceptanceCriteria:'AC1 — Perfil\nEl cliente consulta su perfil. El cliente puede actualizar el nombre y la dirección del perfil.'};
+ const initial={sourceIssueKey:source.key,title:'Consultar perfil',steps:['Abrir la aplicación configurada del proyecto','Validar que se muestre "Perfil"'],expectedResult:'Se muestra el perfil.',acceptanceCriteriaRefs:['AC1.1']};
+ const invalid={sourceIssueKey:source.key,title:'Actualizar perfil',steps:['Abrir la aplicación configurada del proyecto','Ingresar "Ana Ruiz" en "Nombre"','Ingresar "Calle 1" en "Dirección"','Guardar el perfil','Validar que se muestre "Ana Ruiz - Calle 1"'],expectedResult:'El perfil queda actualizado.',acceptanceCriteriaRefs:['AC1.2']};
+ const valid={...invalid,steps:['Abrir la aplicación configurada del proyecto','Ingresar "Ana Ruiz" en "Nombre"','Ingresar "Calle 1" en "Dirección"','Presionar "Guardar"','Validar que se muestre "Ana Ruiz - Calle 1"']};
+ let calls=0;const provider=fakeProvider([]);
+ provider.completeJson=async request=>{
+  calls++;
+  if(calls===1)return {rawText:'',parsedJson:{scenarios:[initial]},model:'fixture',providerName:'fixture',durationMs:0};
+  if(calls===2)return {rawText:'',parsedJson:{scenarios:[invalid]},model:'fixture',providerName:'fixture',durationMs:0};
+  if(calls===3){
+   const payload=JSON.parse(request.messages[1].content);
+   assert.ok(payload.syntaxFailures.some((failure:{reason:string})=>failure.reason.startsWith('JIRA_UNSUPPORTED_INTENT')));
+   return {rawText:'',parsedJson:{scenarios:[{...invalid,inputRequirements:[],unresolvedUiRequirements:[]}]},model:'fixture',providerName:'fixture',durationMs:0};
+  }
+  assert.equal(calls,4);
+  const payload=JSON.parse(request.messages[1].content);
+  assert.match(request.messages[0].content,/priorNonExecutableCandidates are failed examples/i);
+  assert.ok(payload.priorNonExecutableCandidates.some((candidate:{title:string;blockers:string[]})=>candidate.title==='Actualizar perfil'&&candidate.blockers.includes('JIRA_UNSUPPORTED_INTENT')));
+  return {rawText:'',parsedJson:{scenarios:[valid]},model:'fixture',providerName:'fixture',durationMs:0};
+ };
+ const result=await generateJiraScenarios([source],'app-a',provider);
+ assert.equal(calls,4);
+ assert.equal(result.coverage?.[0]?.status,'complete',JSON.stringify(result.coverage));
+ assert.equal(result.scenarios.length,3,JSON.stringify(result.rejected));
+ assert.equal(result.scenarios.filter(scenario=>scenario.validation.valid).length,2,JSON.stringify(result.scenarios.map(scenario=>scenario.validation.errors)));
+ assert.ok(result.scenarios.some(scenario=>scenario.title==='Actualizar perfil'&&!scenario.validation.valid),'the failed attempt remains available as an editable draft');
+ assert.ok(result.scenarios.some(scenario=>scenario.title==='Actualizar perfil'&&scenario.validation.valid),'the corrected retry is retained as a launchable complement');
+});
+
 test("coverage candidates receive a second atomic-field repair before validation across app profiles",async()=>{
  const source={...issue,key:"HU-PROFILE",description:"",acceptanceCriteria:"AC1 — Perfil\nEl cliente consulta sus cuentas. Puede actualizar su perfil al ingresar Nombre completo y Dirección."};
  for(const appSlug of ["app-alpha","app-beta"]){
@@ -606,6 +690,10 @@ test("post-coverage repair that stays invalid keeps the acceptance gate closed",
  const provider=journeyProvider(()=>[{sourceIssueKey:journeySource.key,title:"Actualizar perfil",steps:["Abrir la aplicación configurada del proyecto","Completar los datos del perfil: nombre completo y dirección",`Validar que se muestre "Perfil actualizado"`],expectedResult:"Se muestra el perfil actualizado.",acceptanceCriteriaRefs:["AC1.2"]}]);
  const result=await generateJiraScenarios([journeySource],"app-a",provider);
  assert.ok(result.rejected.some(item=>item.reason.startsWith("JIRA_ACCEPTANCE_COVERAGE_INCOMPLETE")&&item.reason.includes("AC1.2")));
+  assert.ok(result.coverage);
+  assert.ok(result.scenarios.every(scenario=>!scenario.validation.warnings.some(warning=>warning.includes("AC1.2"))),"story coverage must not be copied onto each case");
+  assert.equal(result.coverage[0]?.status,"incomplete");
+  assert.ok(result.coverage[0]?.missingClauses.some(clause=>clause.id==="AC1.2"),"the story-level result retains the exact uncovered criterion");
  assert.ok(result.scenarios.some(scenario=>scenario.validation.valid));
  assert.ok(result.scenarios.filter(scenario=>scenario.acceptanceCriteriaRefs?.includes("AC1.2")).every(scenario=>!scenario.validation.valid));
 });
@@ -645,7 +733,7 @@ test('a failed context repair cannot remove the negative assertion gate',async()
 test("repair aligns a negative expectedResult with the explicit final negative assertion after a source-backed invalid input",async()=>{
  assert.ok((await auditGeneratedJiraSyntax([negativeReceiptDraft])).some(failure=>failure.reason==="JIRA_ASSERTION_CAPABILITY_UNSUPPORTED"));
  const expectedResult=alignRepairedNegativeExpectedResult(negativeReceiptDraft,negativeReceiptSource) as string;
- assert.equal(expectedResult,'Mientras la transferencia no se completa, no se muestra un comprobante exitoso ("comprobante de transacción exitosa").');
+ assert.equal(expectedResult,'No se muestra "comprobante de transacción exitosa".');
  assert.deepEqual(await auditGeneratedJiraSyntax([{...negativeReceiptDraft,expectedResult}]),[]);
 });
 test("repair leaves expectedResult unchanged for unrelated outcome, flipped polarity or a trigger-less scenario",()=>{
@@ -711,6 +799,48 @@ test("coverage repair makes another targeted pass when the provider only closes 
  assert.equal(calls,3);
  assert.equal(result.scenarios.length,3,JSON.stringify({scenarios:result.scenarios,rejected:result.rejected},null,2));
  assert.ok(result.scenarios.every(scenario=>scenario.validation.valid));
+});
+
+test('coverage repair receives and repairs added-row identity gaps before coverage is counted',async()=>{
+ const source={...issue,description:'',acceptanceCriteria:'AC1 — Destinatarios\nEl usuario consulta destinatarios. El usuario puede crear un destinatario.'};
+ const initial={sourceIssueKey:source.key,title:'Consultar destinatarios',steps:['Abrir la aplicación configurada del proyecto','Validar que se muestre "Destinatarios"'],expectedResult:'Se muestran los destinatarios.',acceptanceCriteriaRefs:['AC1.1']};
+ const incomplete={sourceIssueKey:source.key,title:'Crear destinatario',steps:['Abrir la aplicación configurada del proyecto','Presionar "Añadir"','Ingresar "Ana Ruiz" en "Nombre"','Ingresar "Atlas" en "Alias"','Presionar "Guardar"'],expectedResult:'Se crea el destinatario.',acceptanceCriteriaRefs:['AC1.2']};
+ let calls=0;const provider=fakeProvider([]);
+ provider.completeJson=async request=>{
+  calls++;
+  if(calls===1)return {rawText:'',parsedJson:{scenarios:[initial]},model:'fixture',providerName:'fixture',durationMs:0};
+  if(calls===2)return {rawText:'',parsedJson:{scenarios:[incomplete]},model:'fixture',providerName:'fixture',durationMs:0};
+  const payload=JSON.parse(request.messages[1].content);
+  assert.ok(payload.syntaxFailures.some((failure:{reason:string})=>failure.reason==='JIRA_ADDED_ROW_IDENTITY_INCOMPLETE'));
+  assert.equal(request.jsonSchema?.name,'jira_scenario_repair');
+  assert.match(request.messages[0].content,/one assertion after saving that names all identifying values/i);
+  return {rawText:'',parsedJson:{scenarios:[{sourceIssueKey:source.key,title:incomplete.title,steps:[...incomplete.steps,'Validar que se muestre "Ana Ruiz - Atlas"'],inputRequirements:[],unresolvedUiRequirements:[]}]},model:'fixture',providerName:'fixture',durationMs:0};
+ };
+ const result=await generateJiraScenarios([source],'app-a',provider);
+ assert.equal(calls,3);
+ assert.equal(result.scenarios.length,2,JSON.stringify({scenarios:result.scenarios,rejected:result.rejected},null,2));
+ assert.ok(result.scenarios.every(scenario=>scenario.validation.valid),JSON.stringify(result.scenarios.map(scenario=>scenario.validation.errors)));
+ assert.equal(result.scenarios[1].expectedResult,incomplete.expectedResult);
+ assert.deepEqual(result.scenarios[1].acceptanceCriteriaRefs,incomplete.acceptanceCriteriaRefs);
+ assert.deepEqual(uncoveredAcceptanceClauses(source,result.scenarios),[]);
+});
+
+test('initial generation repairs added-row identity before returning a launchable scenario',async()=>{
+ const source={...issue,description:'',acceptanceCriteria:'AC1 — Destinatarios\nEl usuario crea un destinatario.'};
+ const incomplete={sourceIssueKey:source.key,title:'Crear destinatario',steps:['Abrir la aplicación configurada del proyecto','Presionar "Añadir"','Ingresar "Ana Ruiz" en "Nombre"','Ingresar "Atlas" en "Alias"','Presionar "Guardar"','Validar que se muestre "Guardado"'],expectedResult:'Se crea el destinatario.',acceptanceCriteriaRefs:['AC1.1']};
+ let calls=0;const provider=fakeProvider([]);
+ provider.completeJson=async request=>{
+  calls++;
+  if(calls===1)return {rawText:'',parsedJson:{scenarios:[incomplete]},model:'fixture',providerName:'fixture',durationMs:0};
+  assert.match(request.messages[0].content,/JIRA_ADDED_ROW_IDENTITY_INCOMPLETE/);
+  assert.match(request.messages[0].content,/add one assertion after saving that names all identifying values/i);
+  return {rawText:'',parsedJson:{scenarios:[{...incomplete,steps:[...incomplete.steps.slice(0,-1),'Validar que se muestre "Ana Ruiz - Atlas"']}]},model:'fixture',providerName:'fixture',durationMs:0};
+ };
+ const result=await generateJiraScenarios([source],'app-a',provider);
+ assert.equal(calls,2);
+ assert.equal(result.scenarios.length,1);
+ assert.equal(result.scenarios[0].validation.valid,true,JSON.stringify(result.scenarios[0].validation.errors));
+ assert.ok(result.scenarios[0].steps.includes('Validar que se muestre "Ana Ruiz - Atlas"'));
 });
 
 test("Jira coverage repair rejects disconnected scenarios with future-screen preconditions", async () => {
@@ -948,6 +1078,10 @@ test('added-row rule scopes to create/add intent; ordinary multi-field forms are
   assert.deepEqual(gaps(form,{title:'Crear destinatario'}),['JIRA_ADDED_ROW_IDENTITY_INCOMPLETE']);
   assert.deepEqual(gaps(['Presionar "Agregar"',...form]),['JIRA_ADDED_ROW_IDENTITY_INCOMPLETE']);
 });
+test('a create-story title does not classify login and intermediate forms as added rows',()=>{
+ const steps=['Abrir la aplicación configurada del proyecto','Ingresar "qa" en "Usuario"','Ingresar "clave" en "Contraseña"','Presionar "Ingresar"','Presionar "Solicitudes"','Presionar "Nueva solicitud"','Ingresar "RNC-123" en "RNC"','Presionar "Consultar RNC"','Validar que se muestre "Nuevo Prospecto"','Ingresar "Empresa Atlas" en "Denominación"','Presionar "Adjuntar documento"'];
+ assert.deepEqual(gaps(steps,{title:'Registrar y aperturar producto para prospecto jurídico sin coincidencias'}),[]);
+});
 test('search exclusion evidence is required only when the scenario itself claims exclusion',()=>{
   const noRows=['Ingresar "Zeta" en "Buscar"','Validar que se muestre "Zeta"'];
   assert.deepEqual(gaps(noRows,{title:'Búsqueda simple'}),[]);
@@ -969,28 +1103,29 @@ test('search over created rows requires a nonmatching row to disappear; exclusio
   // A saved value overlapping the term is ambiguous, not evidence of a nonmatching row.
   assert.deepEqual(gaps(['Ingresar "Ana Ruiz" en "Nombre"','Presionar "Guardar"','Ingresar "Ana" en "Buscar"','Validar que se muestre "Ana"']),[]);
 });
-test('dialog open assertions must target the dialog or an exclusive field, not background text',()=>{
-  const base=['Validar que se muestre "Beneficiarios"','Presionar "Añadir beneficiario"'];
-  const form=['Ingresar "Ana" en "Nombre"','Presionar "Guardar"'];
-  assert.deepEqual(gaps([...base,'Validar que se muestre "Beneficiarios"',...form]),['JIRA_DIALOG_ASSERTION_TARGET_UNSCOPED']);
-  assert.deepEqual(gaps([...base,'Validar que se muestre "Añadir beneficiario"',...form]),['JIRA_DIALOG_ASSERTION_TARGET_UNSCOPED']);
-  assert.deepEqual(gaps([...base,'Validar que se muestre "Nombre"',...form]),[]);
-  assert.deepEqual(gaps([...base,'Validar que se muestre "Formulario de alta"',...form]),[]);
-  assert.deepEqual(gaps([...base,'Validar que se muestre "Cuenta"',...form]),['JIRA_DIALOG_ASSERTION_TARGET_UNSCOPED']);
+test('static scenario quality does not guess whether a control opens a dialog from its wording',()=>{
+  for(const control of ['Nueva solicitud','Añadir beneficiario','Crear beneficiario','Abrir beneficiario','Continuar']){
+    const steps=['Validar que se muestre "Beneficiarios"',`Presionar "${control}"`,'Validar que se muestre "Registro de Datos"','Ingresar un nombre en "Nombre"'];
+    assert.ok(!gaps(steps).some(error=>error.startsWith('JIRA_DIALOG')),`control: ${control}`);
+  }
 });
-test('reopening a form after a verified save drops the closed modal labels from background; page labels stay rejected',()=>{
+test('navigating to a new request screen remains a normal page assertion',()=>{
+ const steps=['Presionar "Solicitudes"','Presionar "Nueva solicitud"','Validar que se muestre "Registro de Datos"','Ingresar un RNC en "RNC"'];
+ assert.deepEqual(gaps(steps),[]);
+});
+test('reopening a form after a verified save does not infer dialog state from control wording',()=>{
   const first=['Validar que se muestre "Beneficiarios"','Presionar "Añadir beneficiario"','Validar que se muestre "Nombre"','Ingresar "Ana" en "Nombre"','Presionar "Guardar"'];
   assert.deepEqual(gaps([...first,'Presionar "Añadir beneficiario"','Validar que se muestre "Nombre"','Ingresar "Zoe" en "Nombre"','Presionar "Guardar"']),[]);
-  assert.deepEqual(gaps([...first,'Presionar "Añadir beneficiario"','Validar que se muestre "Beneficiarios"','Ingresar "Zoe" en "Nombre"','Presionar "Guardar"']),['JIRA_DIALOG_ASSERTION_TARGET_UNSCOPED']);
+  assert.deepEqual(gaps([...first,'Presionar "Añadir beneficiario"','Validar que se muestre "Beneficiarios"','Ingresar "Zoe" en "Nombre"','Presionar "Guardar"']),[]);
 });
-test('add -> exclusive field anchors -> save -> reopen -> anchors passes; background button/page label still rejected',()=>{
+test('add -> field anchors -> save -> reopen stays free of lexical dialog false positives',()=>{
   const cycle=(open2:string,id1=['Validar que se muestre "Ana - Atlas"'],id2=['Validar que se muestre "Zoe - Luna"'])=>['Validar que se muestre "Beneficiarios"','Presionar "Añadir beneficiario"','Validar que se muestre "Nombre"','Validar que se muestre "Alias"','Ingresar "Ana" en "Nombre"','Ingresar "Atlas" en "Alias"','Presionar "Guardar"',...id1,'Presionar "Añadir beneficiario"',open2,'Ingresar "Zoe" en "Nombre"','Ingresar "Luna" en "Alias"','Presionar "Guardar"',...id2];
   assert.deepEqual(gaps(cycle('Validar que se muestre "Alias"')),[]);
   // Reopen anchors never replace row identity: each successful save needs its own.
   assert.deepEqual(gaps(cycle('Validar que se muestre "Alias"',[])),['JIRA_ADDED_ROW_IDENTITY_INCOMPLETE']);
   assert.deepEqual(gaps(cycle('Validar que se muestre "Alias"',undefined,[])),['JIRA_ADDED_ROW_IDENTITY_INCOMPLETE']);
-  assert.deepEqual(gaps(cycle('Validar que se muestre "Añadir beneficiario"')),['JIRA_DIALOG_ASSERTION_TARGET_UNSCOPED']);
-  assert.deepEqual(gaps(cycle('Validar que se muestre "Beneficiarios"')),['JIRA_DIALOG_ASSERTION_TARGET_UNSCOPED']);
+  assert.deepEqual(gaps(cycle('Validar que se muestre "Añadir beneficiario"')),[]);
+  assert.deepEqual(gaps(cycle('Validar que se muestre "Beneficiarios"')),[]);
 });
 test('loose "fila con ..." wording normalizes to executable matching-row wording',()=>{
   const out=normalizeJiraGeneratedSteps(['Validar que la fila con el nombre y alias ingresados aparezca en "Destinatarios guardados"']);
@@ -1018,11 +1153,11 @@ test('unquoted dynamic inputs bind by field label: row identity, modal cycle, no
   assert.deepEqual(gaps(dyn),['JIRA_ADDED_ROW_IDENTITY_INCOMPLETE']);
   assert.deepEqual(gaps([...dyn,'Validar que se muestre "Guardado"']),['JIRA_ADDED_ROW_IDENTITY_INCOMPLETE']);
   assert.deepEqual(gaps([...dyn,'Validar que la fila coincidente con el nombre y alias ingresados aparezca en "Destinatarios guardados"']),[]);
-  // modal open/save/reopen: dialog-exclusive dynamic labels anchor; page labels do not
+  // The static checker does not infer modal state from add/button words.
   const rowId='Validar que la fila coincidente con el nombre y alias ingresados aparezca en "Destinatarios guardados"';
   const cycle=(open2:string)=>['Validar que se muestre "Beneficiarios"','Presionar "Añadir beneficiario"','Validar que se muestre "Alias"','Ingresar un nombre nuevo en "Nombre del beneficiario"','Ingresar un alias nuevo en "Alias"','Presionar "Guardar"',rowId,'Presionar "Añadir beneficiario"',open2,'Ingresar otro nombre en "Nombre del beneficiario"','Ingresar otro alias en "Alias"','Presionar "Guardar"',rowId];
   assert.deepEqual(gaps(cycle('Validar que se muestre "Alias"')),[]);
-  assert.deepEqual(gaps(cycle('Validar que se muestre "Beneficiarios"')),['JIRA_DIALOG_ASSERTION_TARGET_UNSCOPED']);
+  assert.deepEqual(gaps(cycle('Validar que se muestre "Beneficiarios"')),[]);
   // login / transfer forms are not rows
   assert.deepEqual(gaps(['Ingresar el usuario en "Usuario"','Ingresar el monto en "Monto"','Presionar "Continuar"','Validar que se muestre "Inicio"'],{title:'Ingreso'}),[]);
   assert.deepEqual(gaps(['Presionar "Transferir"','Seleccionar cuenta en "Cuenta de origen"','Ingresar un monto válido en "Monto"','Presionar "Confirmar"','Validar que se muestre "Éxito"'],{title:'Transferencia'}),[]);

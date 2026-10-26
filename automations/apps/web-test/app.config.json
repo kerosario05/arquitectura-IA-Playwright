@@ -1,0 +1,29 @@
+{
+  "appProfile": {
+    "appSlug": "web-test",
+    "source": "default",
+    "name": "localhost",
+    "baseUrl": "http://localhost:4310/#/login",
+    "baseUrlHash": "4e1194428e74",
+    "createdAt": "2026-10-26T17:12:15.852Z",
+    "updatedAt": "2026-10-26T17:12:15.853Z",
+    "ignoreHTTPSErrors": true
+  },
+  "baseUrl": "http://localhost:4310/#/login",
+  "loginMode": "password",
+  "testData": {},
+  "testDataAliases": {},
+  "testDataRefs": {},
+  "username": "adminr",
+  "password": "admin123",
+  "usernameRef": "APP_USERNAME",
+  "passwordRef": "APP_PASSWORD",
+  "missingInputBehavior": "auto_generate",
+  "ignoreHTTPSErrors": true,
+  "updatedAt": "2026-10-26T19:56:54.338Z",
+  "lastUsedSource": {
+    "type": "request",
+    "sectionName": null,
+    "updatedAt": "2026-10-26T19:56:54.338Z"
+  }
+}

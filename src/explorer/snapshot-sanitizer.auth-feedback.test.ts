@@ -11,10 +11,8 @@ test("scanner preserves credential rejection meaning while removing sensitive va
     const page = await browser.newPage();
     await page.setContent(`
       <main>
-        <div class="modal fade show" role="dialog">
-          <div class="modal-body"><p>Usuario o Contraseña inválidos.</p></div>
-          <p>(Code:1059)</p>
-        </div>
+        <div class="error-message">Usuario o Contraseña inválidos.</div>
+        <div class="page-content">Contenido ordinario</div>
         <div class="notice">Contraseña: PrivatePass123!</div>
       </main>
     `);
@@ -24,6 +22,7 @@ test("scanner preserves credential rejection meaning while removing sensitive va
 
     assert.equal(sanitizeSnapshotText("Usuario o Contraseña inválidos."), "Credenciales inválidas");
     assert.equal(snapshot.elements.some((element) => element.text === "Credenciales inválidas"), true);
+    assert.equal(snapshot.elements.some((element) => element.className === "page-content"), false);
     assert.equal(result.passed, true);
     assert.equal(result.capturedMessage?.text, "Credenciales inválidas");
     assert.equal(JSON.stringify(snapshot).includes("PrivatePass123!"), false);

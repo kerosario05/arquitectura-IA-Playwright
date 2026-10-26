@@ -4,9 +4,9 @@
     "source": "default",
     "name": "santacruz",
     "baseUrl": "https://qa1.santacruz.do/onlinebanking",
-    "baseUrlHash": "1423ba294517",
-    "createdAt": "2026-10-23T14:24:27.953Z",
-    "updatedAt": "2026-10-23T14:24:27.955Z",
+    "baseUrlHash": "2a7bf6928b41",
+    "createdAt": "2026-10-24T00:11:35.457Z",
+    "updatedAt": "2026-10-24T00:11:35.457Z",
     "ignoreHTTPSErrors": true
   },
   "baseUrl": "https://qa1.santacruz.do/onlinebanking",
@@ -20,10 +20,10 @@
   "passwordRef": "APP_PASSWORD",
   "missingInputBehavior": "auto_generate",
   "ignoreHTTPSErrors": true,
-  "updatedAt": "2026-10-23T17:03:59.167Z",
+  "updatedAt": "2026-10-26T21:30:31.721Z",
   "lastUsedSource": {
     "type": "request",
     "sectionName": null,
-    "updatedAt": "2026-10-23T17:03:59.167Z"
+    "updatedAt": "2026-10-26T21:30:31.721Z"
   }
 }

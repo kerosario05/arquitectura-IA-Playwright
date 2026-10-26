@@ -15,6 +15,7 @@ import { buildJiraDomOptionSnapshot, chooseJiraDomTarget, locatorForJiraDomCandi
 import { isJiraDomAssertionSupported } from "./jira-dom-assertion-ai";
 import { jiraCredentialRejectionMatches, jiraAlertErrorEquivalenceMatches, readVisibleJiraAlertTexts, stripJiraNotificationChannelWord } from "./jira-assertion-matching";
 import { settleJiraAction } from "./jira-action-settlement";
+import { waitForJiraHeaderText } from "./jira-header-assertion";
 export { settleJiraAction } from "./jira-action-settlement";
 import { ensureJiraDownloadObserver } from "./jira-download-assertion";
 import { chooseJiraMatchingOption, jiraOptionTextMatches, jiraOptionSearchRoot, jiraOptionBelongsToRoot } from "./jira-option-choice";
@@ -976,6 +977,7 @@ export async function assertJiraSpecVisibleText(page: Page, expected: string, ti
             if (!text || !parent) continue;
             const inNavigation = Boolean(parent.closest(excludedAncestor));
             if (inNavigation && (parent.closest("[aria-hidden='true']") || !parent.closest("nav,aside,[role='navigation'],[role='menu']"))) continue;
+            if (parent.closest("header,[role='banner']")) continue;
             let visible = true;
             for (let element: HTMLElement | null = parent; element && root.contains(element); element = element.parentElement) {
               const style = getComputedStyle(element);
@@ -1077,6 +1079,12 @@ export async function assertJiraSpecVisibleText(page: Page, expected: string, ti
   }
 }
 
+/** Match an explicitly scoped signed-in identity/role only inside the global application header. */
+export async function assertJiraSpecHeaderText(page: Page, expected: string, timeoutMs = 15000): Promise<void> {
+  try { await waitForJiraHeaderText(page, expected, timeoutMs); }
+  catch { throw new Error("JIRA_SPEC_HEADER_ASSERTION_NOT_SATISFIED"); }
+}
+
 function isJiraSpecNavigationContextError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
   return /execution context was destroyed|cannot find context with specified id/i.test(message);
@@ -1114,6 +1122,33 @@ export async function assertJiraSpecFieldValidation(page: Page, fieldLabel: stri
   if (!fieldLabel.trim()) throw new Error("JIRA_SPEC_FIELD_VALIDATION_LABEL_MISSING");
   await expect.poll(async () => Boolean(await observeJiraFieldValidation(page, fieldLabel)), { timeout: timeoutMs })
     .toBe(true).catch(() => { throw new Error("JIRA_SPEC_FIELD_VALIDATION_NOT_OBSERVED"); });
+}
+
+async function resolveJiraSpecFieldStateTarget(page: Page, fieldLabel: string, timeoutMs: number): Promise<Locator> {
+  if (!fieldLabel.trim()) throw new Error("JIRA_SPEC_FIELD_STATE_LABEL_MISSING");
+  const field = page.getByLabel(fieldLabel, { exact: true });
+  await expect(field).toHaveCount(1, { timeout: timeoutMs }).catch(() => {
+    throw new Error("JIRA_SPEC_FIELD_STATE_TARGET_UNOBSERVABLE");
+  });
+  await expect(field).toBeVisible({ timeout: timeoutMs }).catch(() => {
+    throw new Error("JIRA_SPEC_FIELD_STATE_TARGET_UNOBSERVABLE");
+  });
+  return field;
+}
+
+/** A field-state oracle is backed only by a uniquely labelled, visible control. */
+export async function assertJiraSpecFieldEnabled(page: Page, fieldLabel: string, timeoutMs = 15000): Promise<void> {
+  const field = await resolveJiraSpecFieldStateTarget(page, fieldLabel, timeoutMs);
+  await expect(field).toBeEnabled({ timeout: timeoutMs }).catch(() => {
+    throw new Error("JIRA_SPEC_FIELD_NOT_ENABLED");
+  });
+}
+
+/** A field reset oracle reads the actual form control value; surrounding prose is never used as evidence. */
+export async function assertJiraSpecFieldEmpty(page: Page, fieldLabel: string, timeoutMs = 15000): Promise<void> {
+  const field = await resolveJiraSpecFieldStateTarget(page, fieldLabel, timeoutMs);
+  await expect.poll(async () => field.inputValue().catch(() => "__not_a_form_control__"), { timeout: timeoutMs })
+    .toBe("").catch(() => { throw new Error("JIRA_SPEC_FIELD_NOT_EMPTY"); });
 }
 
 export async function resolveJiraSpecValue(key: string, appSlug: string, sectionSlug: string, automationId: string): Promise<string> {

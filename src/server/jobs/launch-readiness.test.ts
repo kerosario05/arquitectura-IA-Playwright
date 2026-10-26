@@ -2,7 +2,7 @@ import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import { buildDiscoveryBatchParamsFromLaunch, classifyLaunchScenarioAuthority, classifyRouteDiscoveryEligibility, partitionLaunchScenarios } from "./launch-orchestrator";
 import { extractLaunchScenariosFromPayload } from "../routes/runs";
-import {resolveExecutionEngine} from '../../jira/execution-origin';
+import {isScenarioEligibleForEngine,resolveExecutionEngine} from '../../jira/execution-origin';
 import {deriveJiraInputRequirements} from '../../jira/jira-input-requirements';
 import type {JiraScenarioInput} from '../../jira/jira-semantic-executor';
 
@@ -22,6 +22,20 @@ test('edited Jira input keys survive route normalization and the execution job h
  }
 });
 
+test('Jira generation findings survive normalization without blocking scenario review or launch',()=>{
+ const [scenario]=extractLaunchScenariosFromPayload({selectedScenarios:[{
+  scenarioId:'HU-8:jira:1',sourceIssueKey:'HU-8',title:'Filtrar solicitudes',steps:['Validar que las solicitudes correspondan al estado seleccionado'],
+  preconditions:[],expectedResult:'',validation:{valid:false,errors:['JIRA_FILTER_TEST_DATA_UNSPECIFIED']},
+ }]});
+ assert.deepEqual(scenario.validation,{valid:false,errors:['JIRA_FILTER_TEST_DATA_UNSPECIFIED']});
+ assert.equal(isScenarioEligibleForEngine('jira_semantic',scenario),true);
+ assert.equal(isScenarioEligibleForEngine('recording_replay',{...scenario,mcpExecutable:true,validation:{valid:true,errors:['SOME_OTHER_WARNING']}}),true);
+ assert.equal(isScenarioEligibleForEngine('jira_semantic',{...scenario,validation:{valid:false,errors:['JIRA_ASSERTION_CAPABILITY_UNSUPPORTED']}}),true);
+ const partition=partitionLaunchScenarios([{...scenario,launchClassification:'adaptive',mcpExecutable:false}], 'jira_semantic');
+ assert.equal(partition.standard.length,1);
+ assert.equal(partition.nonAutomatable.length,0);
+});
+
 test('explicit Jira provenance admits valid pending scenarios for publication without adaptive or runtime certification',()=>{
  for(const appSlug of ['fixture-shop','fixture-service']) {
   const scenarios=extractLaunchScenariosFromPayload({selectedScenarios:[{scenarioId:'HU-7:jira:1',sourceIssueKey:'HU-7',title:'Pending',steps:['Validar "Result"'],preconditions:[],expectedResult:'Result',validation:{valid:true},mcpExecutable:false,executionReadiness:'requires_discovery'}]});
@@ -32,8 +46,8 @@ test('explicit Jira provenance admits valid pending scenarios for publication wi
   assert.equal(partition.routeDiscovery.length,0);
   assert.equal(partition.standard[0].mcpExecutable,false);
   assert.equal(partitionLaunchScenarios(scenarios).adaptiveFunctional.length,1);
-  assert.equal(partitionLaunchScenarios([{...scenarios[0],validation:{valid:false}}],engine).nonAutomatable.length,1);
-  assert.equal(partitionLaunchScenarios([{...scenarios[0],validation:undefined}],engine).nonAutomatable.length,1);
+  assert.equal(partitionLaunchScenarios([{...scenarios[0],validation:{valid:false}}],engine).standard.length,1);
+  assert.equal(partitionLaunchScenarios([{...scenarios[0],validation:undefined}],engine).standard.length,1);
   assert.throws(()=>resolveExecutionEngine({executionEngine:'jira_semantic',scenarioOrigin:{kind:'jira_generated',jiraKey:'OTHER-1'},scenarios}),/PROVENANCE_MISMATCH/);
   const recorded=extractLaunchScenariosFromPayload({selectedScenarios:[{...scenarios[0],recordingId:'fixture-recording'}]});
   assert.throws(()=>resolveExecutionEngine({executionEngine:'jira_semantic',scenarioOrigin:{kind:'jira_generated',jiraKey:'HU-7'},scenarios:recorded}),/RECORDING_CANNOT_USE_JIRA_ENGINE/);

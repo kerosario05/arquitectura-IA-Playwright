@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "35ce2266-df68-4b58-a854-07425c3c5bc6",
+  "title": "Ver el conteo de solicitudes por estado y las solicitudes recientes en el inicio",
+  "generatedAt": "2026-10-26T07:03:32.204Z",
+  "executionEngine": "jira_semantic"
+}

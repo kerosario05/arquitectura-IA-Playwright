@@ -345,4 +345,23 @@ CREATE TABLE IF NOT EXISTS TestDesignDraftStory (
   updatedAt           TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
   UNIQUE (draftId, issueKey)
 );
+
+CREATE TABLE IF NOT EXISTS TestDesignPublishedCaseLink (
+  testRailCaseId       INTEGER PRIMARY KEY,
+  testRailProjectId    INTEGER NOT NULL,
+  testRailSuiteId      INTEGER,
+  testRailSectionId    INTEGER NOT NULL,
+  projectSlug          TEXT NOT NULL COLLATE NOCASE,
+  jiraProjectKey       TEXT NOT NULL COLLATE NOCASE,
+  issueKey             TEXT NOT NULL COLLATE NOCASE,
+  draftId              TEXT NOT NULL COLLATE NOCASE,
+  storyId              TEXT NOT NULL COLLATE NOCASE,
+  designScenarioId     TEXT NOT NULL COLLATE NOCASE,
+  jiraScenarioId       TEXT,
+  contentVersion       TEXT NOT NULL,
+  scenarioJson         TEXT NOT NULL,
+  publishedAt          TEXT NOT NULL DEFAULT (${UTC_NOW_EXPR})
+);
+CREATE INDEX IF NOT EXISTS IX_TestDesignPublishedCaseLink_project
+  ON TestDesignPublishedCaseLink (projectSlug, testRailProjectId, issueKey);
 `;

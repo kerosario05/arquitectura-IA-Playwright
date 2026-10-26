@@ -1,0 +1,9 @@
+{
+  "id": "b0d43d1c-bab0-4561-b849-524cb7f0b305-acceder-a-la-bandeja-plaft-de-debida-diligencia",
+  "externalId": "b0d43d1c-bab0-4561-b849-524cb7f0b305",
+  "title": "Acceder a la bandeja PLAFT de Debida Diligencia",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T07:30:14.259Z"
+}

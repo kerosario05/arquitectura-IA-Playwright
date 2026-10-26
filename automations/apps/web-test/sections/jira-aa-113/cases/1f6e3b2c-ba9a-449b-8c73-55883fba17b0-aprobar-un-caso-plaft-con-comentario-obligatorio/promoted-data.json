@@ -1,0 +1,39 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-10-26T07:31:40.478Z",
+  "entries": [
+    {
+      "key": "jira_edit_ebf56f1b56ccb482_2",
+      "source": "unknown",
+      "fieldName": "[id=\"usuario\"]",
+      "stepIndex": 3,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "jira_edit_ebf56f1b56ccb482_3",
+      "source": "unknown",
+      "fieldName": "[id=\"clave\"]",
+      "stepIndex": 4,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "jira_edit_ebf56f1b56ccb482_8",
+      "source": "unknown",
+      "fieldName": "[id=\"plObs\"]",
+      "stepIndex": 9,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

@@ -1,0 +1,255 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-26T06:40:52.643Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "f4f1ea02-641d-44fa-ad18-e2cb675cc822",
+    "title": "Consultar prospecto con coincidencia no restrictiva en listas"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "fill [usuario]",
+      "valueKey": "usuario",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"usuario\"]"
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [contrasena]",
+      "valueKey": "contrasena",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"clave\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Presionar \"iniciar sesión\"",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"btn-login\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Presionar \"Solicitudes\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Solicitudes",
+        "exact": true
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"Nueva solicitud\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Nueva solicitud",
+        "exact": true
+      }
+    },
+    {
+      "index": 8,
+      "action": "fill",
+      "description": "fill [jira_edit_9a017c5b4d8b510e_7]",
+      "valueKey": "jira_edit_9a017c5b4d8b510e_7",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"idNumero\"]"
+      }
+    },
+    {
+      "index": 9,
+      "action": "click",
+      "description": "Presionar \"Consultar\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Consultar",
+        "exact": true
+      }
+    },
+    {
+      "index": 10,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Número de Identificación\"",
+      "target": {
+        "strategy": "text",
+        "value": "Número de Identificación"
+      }
+    },
+    {
+      "index": 11,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Denominación Social\"",
+      "target": {
+        "strategy": "text",
+        "value": "Denominación Social"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "usuario",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "jira_edit_9a017c5b4d8b510e_7",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Consultar prospecto con coincidencia no restrictiva en listas",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "fill",
+        "valueKey": "usuario",
+        "technicalTargetRefs": [
+          "css:[id=\"usuario\"]"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "contrasena",
+        "technicalTargetRefs": [
+          "css:[id=\"clave\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:[id=\"btn-login\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Solicitudes"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Nueva solicitud"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "fill",
+        "valueKey": "jira_edit_9a017c5b4d8b510e_7",
+        "technicalTargetRefs": [
+          "css:[id=\"idNumero\"]"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Consultar"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Número de Identificación\"",
+        "technicalTargetRefs": [
+          "text:Número de Identificación"
+        ]
+      },
+      {
+        "index": 11,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Denominación Social\"",
+        "technicalTargetRefs": [
+          "text:Denominación Social"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-10",
+        "requirement": "Validar que se muestre \"Número de Identificación\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 10,
+        "target": "Tipo de Identificación*\nSeleccione…\nRNC\nNIT\nRegistro Mercantil\nNúmero de Identificación*\nCONSULTAR\nNuevo Prospecto\nCliente no registrado en la Cámara de Comercio. Complete los datos manualmente (status 'Nuevo').\nCoincidencia en listas no restrictivas\nEl caso requerirá verificación PLAFT al enviarse.",
+        "evidence": [
+          "live-step-10"
+        ],
+        "details": {
+          "observedText": "Tipo de Identificación*\nSeleccione…\nRNC\nNIT\nRegistro Mercantil\nNúmero de Identificación*\nCONSULTAR\nNuevo Prospecto\nCliente no registrado en la Cámara de Comercio. Complete los datos manualmente (status 'Nuevo').\nCoincidencia en listas no restrictivas\nEl caso requerirá verificación PLAFT al enviarse."
+        }
+      },
+      {
+        "id": "jira-oracle-11",
+        "requirement": "Validar que se muestre \"Denominación Social\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 11,
+        "target": "No. Registro Mercantil\nDenominación Social*\nTipo Sociedad*\nSeleccione…\nSociedad de Responsabilidad Limitada (SRL)\nSociedad Anónima (SA)\nSociedad Anónima Simplificada (SAS)\nEmpresa Individual de Responsabilidad Limitada (EIRL)\nSociedad Anónima Cerrada (SAC)\nCooperativa\nFecha de Emisión\nFecha de Vencimiento\nSiglas\nNacionalidad\nSeleccione nacionalidad\nDominicana\nEstadounidense\nEspañola\nPanameña\nColombiana\nMexicana",
+        "evidence": [
+          "live-step-11"
+        ],
+        "details": {
+          "observedText": "No. Registro Mercantil\nDenominación Social*\nTipo Sociedad*\nSeleccione…\nSociedad de Responsabilidad Limitada (SRL)\nSociedad Anónima (SA)\nSociedad Anónima Simplificada (SAS)\nEmpresa Individual de Responsabilidad Limitada (EIRL)\nSociedad Anónima Cerrada (SAC)\nCooperativa\nFecha de Emisión\nFecha de Vencimiento\nSiglas\nNacionalidad\nSeleccione nacionalidad\nDominicana\nEstadounidense\nEspañola\nPanameña\nColombiana\nMexicana"
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "que se muestre \"Denominación Social\""
+  }
+}

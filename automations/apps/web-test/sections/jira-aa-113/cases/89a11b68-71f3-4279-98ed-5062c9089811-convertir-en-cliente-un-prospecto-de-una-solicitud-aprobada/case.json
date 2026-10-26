@@ -1,0 +1,9 @@
+{
+  "id": "89a11b68-71f3-4279-98ed-5062c9089811-convertir-en-cliente-un-prospecto-de-una-solicitud-aprobada",
+  "externalId": "89a11b68-71f3-4279-98ed-5062c9089811",
+  "title": "Convertir en cliente un prospecto de una solicitud aprobada",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T07:34:47.273Z"
+}

@@ -194,6 +194,7 @@ async function main(): Promise<void> {
   console.log("\nprimer login: cambio de contraseña obligatorio");
 
   let restrictedToken = "";
+  let restrictedExpiresAt = "";
 
   await test("issues a restricted token when a password change is pending", async () => {
     const res = await call("POST", "/api/auth/login", {
@@ -209,6 +210,7 @@ async function main(): Promise<void> {
     assert.deepStrictEqual(res.body.roles.map((r: any) => r.slug), ["admin"]);
     assert.ok(res.body.permissions.includes("admin.users"));
     restrictedToken = res.body.token;
+    restrictedExpiresAt = res.body.expiresAt;
   });
 
   await test("the restricted token cannot reach a business route", async () => {
@@ -230,7 +232,7 @@ async function main(): Promise<void> {
     assert.strictEqual(res.body.mustChangePassword, true);
     assert.strictEqual(res.body.user.username, "admin");
     assert.strictEqual(res.body.allProjects, true);
-    assert.ok(res.body.session.expiresAt);
+    assert.strictEqual(res.body.session.expiresAt, restrictedExpiresAt, "restricted sessions keep their short fixed deadline");
   });
 
   await test("rejects a change with the wrong current password", async () => {
@@ -291,6 +293,25 @@ async function main(): Promise<void> {
 
     const adminRoute = await call("GET", "/api/solo-admin", { token: fullToken });
     assert.strictEqual(adminRoute.status, 200);
+  });
+
+  await test("renews a full session expiry after authenticated activity", async () => {
+    const login = await call("POST", "/api/auth/login", {
+      body: { username: "admin", password: NEW_PASSWORD },
+    });
+    assert.strictEqual(login.status, 200);
+    const issuedExpiresAt = Date.parse(login.body.expiresAt);
+
+    const identity = await call("GET", "/api/auth/me", { token: login.body.token });
+    assert.strictEqual(identity.status, 200);
+    const renewedExpiresAt = Date.parse(identity.body.session.expiresAt);
+    assert.ok(renewedExpiresAt > issuedExpiresAt, "authenticated activity must slide the inactivity deadline");
+
+    const stored = await conn.query<{ expiresAt: string }>(
+      "SELECT expiresAt FROM dbo.UserSessions WHERE tokenHash = ?",
+      [hashSessionToken(login.body.token)],
+    );
+    assert.equal(Date.parse(stored[0].expiresAt), renewedExpiresAt, "the renewed deadline must be persisted");
   });
 
   await test("the flag is cleared for subsequent logins", async () => {

@@ -5,8 +5,8 @@
     "name": "4",
     "baseUrl": "https://172.27.4.31/login",
     "baseUrlHash": "a95c985f6b9c",
-    "createdAt": "2026-10-22T19:51:08.812Z",
-    "updatedAt": "2026-10-22T19:51:08.812Z",
+    "createdAt": "2026-10-24T00:43:00.447Z",
+    "updatedAt": "2026-10-24T00:43:00.447Z",
     "ignoreHTTPSErrors": true
   },
   "baseUrl": "https://172.27.4.31/login",
@@ -20,5 +20,5 @@
   "passwordRef": "APP_PASSWORD",
   "missingInputBehavior": "auto_generate",
   "ignoreHTTPSErrors": true,
-  "updatedAt": "2026-10-22T19:51:08.812Z"
+  "updatedAt": "2026-10-24T00:43:00.447Z"
 }

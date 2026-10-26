@@ -1,0 +1,56 @@
+{
+  "id": "9541d40d-3acf-4bf9-aa22-e237fabf38f8-verificar-el-menu-y-acceder-a-solicitudes-como-negocios",
+  "externalId": "9541d40d-3acf-4bf9-aa22-e237fabf38f8",
+  "title": "Verificar el menú y acceder a Solicitudes como Negocios",
+  "planPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\9541d40d-3acf-4bf9-aa22-e237fabf38f8-verificar-el-menu-y-acceder-a-solicitudes-como-negocios\\plan.json",
+  "specPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\9541d40d-3acf-4bf9-aa22-e237fabf38f8-verificar-el-menu-y-acceder-a-solicitudes-como-negocios\\case.spec.ts",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "web-test",
+  "baseUrlHash": "4e1194428e74",
+  "createdAt": "2026-10-26T07:26:04.206Z",
+  "updatedAt": "2026-10-26T07:26:04.206Z",
+  "specVerificationStatus": "passed",
+  "tags": [
+    "jira_semantic",
+    "jira_generated"
+  ],
+  "metadata": {
+    "specGeneration": {
+      "mode": "deterministic",
+      "provider": null,
+      "model": null,
+      "invocations": 0,
+      "invocationsConsumed": 0,
+      "durationMs": 0,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "passed",
+        "typescript": "skipped",
+        "playwrightDiscovery": "skipped",
+        "semanticCoverage": "passed",
+        "functionalExecution": "passed"
+      },
+      "promotionAllowed": true,
+      "specsRequested": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
+      "specWritten": true,
+      "errors": [],
+      "warnings": []
+    }
+  }
+}

@@ -1,3 +1,9 @@
+/** Read an explicitly scoped assertion for signed-in identity/role shown in the global header. */
+export function jiraHeaderAssertionTarget(text: string): string | undefined {
+  const match = text.trim().match(/^(?:Validar|Verificar) que (?:(?:en )?el encabezado(?: de (?:la )?sesi[oó]n)? se muestre|el encabezado(?: de (?:la )?sesi[oó]n)? muestre) ["“]([^"”]+)["”][.]?$/i);
+  return match?.[1]?.trim() || undefined;
+}
+
 /** Normalize atomic visibility wording without changing its target or polarity. */
 export function normalizeJiraAssertionSyntax(text: string): string {
   const unquotedVisibility = text.trim().match(/^(?:Validar|Verificar) que (?:el|la|los|las|un|una) ([^"“”]+?) (no )?(?:est[eé]|est[aá]|est[eé]n|est[aá]n) (?:visibles?|presentes?)[.]?$/i);

@@ -1,0 +1,56 @@
+{
+  "id": "1f6e3b2c-ba9a-449b-8c73-55883fba17b0-aprobar-un-caso-plaft-con-comentario-obligatorio",
+  "externalId": "1f6e3b2c-ba9a-449b-8c73-55883fba17b0",
+  "title": "Aprobar un caso PLAFT con comentario obligatorio",
+  "planPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\1f6e3b2c-ba9a-449b-8c73-55883fba17b0-aprobar-un-caso-plaft-con-comentario-obligatorio\\plan.json",
+  "specPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\1f6e3b2c-ba9a-449b-8c73-55883fba17b0-aprobar-un-caso-plaft-con-comentario-obligatorio\\case.spec.ts",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "web-test",
+  "baseUrlHash": "4e1194428e74",
+  "createdAt": "2026-10-26T07:31:40.482Z",
+  "updatedAt": "2026-10-26T07:31:40.482Z",
+  "specVerificationStatus": "passed",
+  "tags": [
+    "jira_semantic",
+    "jira_generated"
+  ],
+  "metadata": {
+    "specGeneration": {
+      "mode": "deterministic",
+      "provider": null,
+      "model": null,
+      "invocations": 0,
+      "invocationsConsumed": 0,
+      "durationMs": 0,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "passed",
+        "typescript": "skipped",
+        "playwrightDiscovery": "skipped",
+        "semanticCoverage": "passed",
+        "functionalExecution": "passed"
+      },
+      "promotionAllowed": true,
+      "specsRequested": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
+      "specWritten": true,
+      "errors": [],
+      "warnings": []
+    }
+  }
+}

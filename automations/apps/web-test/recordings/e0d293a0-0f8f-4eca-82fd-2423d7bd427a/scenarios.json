@@ -1,0 +1,913 @@
+[
+  {
+    "scenarioId": "REC-E0D293A0-01",
+    "title": "Inicio seccion",
+    "description": "Recorrido observado para completar \"Inicio seccion\". Se registraron 7 acciones funcionales.",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "http://localhost:4310/#/login",
+        "description": "Navegar a http://localhost:4310/#/login"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Usuario"
+        },
+        "valueKey": "usuario",
+        "description": "Ingresar [usuario] en \"Usuario\"",
+        "interactionId": "interaction-5"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Contraseña"
+        },
+        "valueKey": "contrasena",
+        "description": "Ingresar [contrasena] en \"Contraseña\"",
+        "interactionId": "interaction-6"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "link|Crear solicitud"
+        },
+        "description": "Presionar \"Crear solicitud\"",
+        "interactionId": "interaction-10"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Número de Identificación*"
+        },
+        "valueKey": "numero_de_identificacion",
+        "description": "Ingresar [numero_de_identificacion] en \"Número de Identificación*\"",
+        "interactionId": "interaction-14"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Consultar"
+        },
+        "description": "Presionar \"Consultar\"",
+        "interactionId": "interaction-15"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Enviar a Debida Diligencia"
+        },
+        "description": "Presionar \"Enviar a Debida Diligencia\"",
+        "interactionId": "interaction-17"
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Ingresar [usuario] en \"Usuario\"",
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "stepTemplate": "Ingresar [usuario] en \"Usuario\"",
+        "renderedStep": "Ingresar \"negocios\" en \"Usuario\"",
+        "valueKey": "usuario",
+        "interactionId": "interaction-5",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/login",
+        "stateScope": "9db5430202df",
+        "stepNumber": 2
+      },
+      {
+        "content": "Ingresar [contrasena] en \"Contraseña\"",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "stepTemplate": "Ingresar [contrasena] en \"Contraseña\"",
+        "renderedStep": "Ingresar \"••••••\" en \"Contraseña\"",
+        "valueKey": "contrasena",
+        "interactionId": "interaction-6",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/login",
+        "stateScope": "9db5430202df",
+        "stepNumber": 3
+      },
+      {
+        "content": "Presionar \"Enter\" en \"Contraseña\"",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "renderedStep": "Presionar \"Enter\" en \"Contraseña\"",
+        "interactionId": "interaction-7",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/login",
+        "routeAfter": "http://localhost:4310/#/",
+        "stateScope": "9db5430202df",
+        "stepNumber": 4
+      },
+      {
+        "content": "Presionar \"Crear solicitud\"",
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "renderedStep": "Presionar \"Crear solicitud\"",
+        "interactionId": "interaction-10",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/",
+        "routeAfter": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "stepNumber": 5
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de Identificación*\"",
+        "sourceEventRefs": [
+          "event-14"
+        ],
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de Identificación*\"",
+        "renderedStep": "Ingresar \"101000013\" en \"Número de Identificación*\"",
+        "valueKey": "numero_de_identificacion",
+        "interactionId": "interaction-14",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "stepNumber": 6
+      },
+      {
+        "content": "Presionar \"Consultar\"",
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "renderedStep": "Presionar \"Consultar\"",
+        "interactionId": "interaction-15",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "stepNumber": 7
+      },
+      {
+        "content": "Presionar \"Enviar a Debida Diligencia\"",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "renderedStep": "Presionar \"Enviar a Debida Diligencia\"",
+        "interactionId": "interaction-17",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "stepNumber": 8
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "usuario",
+        "label": "Usuario",
+        "stepIndex": 1,
+        "technicalTargetRefs": [
+          "role:textbox|Usuario",
+          "css:#usuario",
+          "id:usuario"
+        ],
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "exampleValue": "negocios",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Usuario",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "contrasena",
+        "label": "Contraseña",
+        "stepIndex": 2,
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#clave",
+          "id:clave"
+        ],
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "secure",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Contraseña",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "numero_de_identificacion",
+        "label": "Número de Identificación*",
+        "stepIndex": 4,
+        "technicalTargetRefs": [
+          "role:textbox|Número de Identificación*",
+          "css:#idNumero",
+          "id:idNumero"
+        ],
+        "sourceEventRefs": [
+          "event-14"
+        ],
+        "exampleValue": "101000013",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Número de Identificación*",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Ingresar [usuario] en \"Usuario\"",
+        "strategy": "role",
+        "value": "textbox|Usuario"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Ingresar [contrasena] en \"Contraseña\"",
+        "strategy": "role",
+        "value": "textbox|Contraseña"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Crear solicitud\"",
+        "strategy": "role",
+        "value": "link|Crear solicitud"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Ingresar [numero_de_identificacion] en \"Número de Identificación*\"",
+        "strategy": "role",
+        "value": "textbox|Número de Identificación*"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"Consultar\"",
+        "strategy": "role",
+        "value": "button|Consultar"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Presionar \"Enviar a Debida Diligencia\"",
+        "strategy": "role",
+        "value": "button|Enviar a Debida Diligencia"
+      }
+    ],
+    "sourceRecordingId": "e0d293a0-0f8f-4eca-82fd-2423d7bd427a",
+    "hasUncertainSteps": false,
+    "primary": true,
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7",
+      "event-8",
+      "event-9",
+      "event-10",
+      "event-11",
+      "event-12",
+      "event-13",
+      "event-14",
+      "event-15",
+      "event-16",
+      "event-17"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": false,
+    "functionalReadiness": true,
+    "technicalReadiness": true,
+    "expectedResultCandidate": "La aplicación carga su pantalla inicial",
+    "oracleAuthority": "observed_only",
+    "confidence": 0.95,
+    "scenarioStepCount": 8,
+    "functionalActionCount": 7,
+    "nonUserSetupSteps": 1,
+    "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
+    "scenarioGoal": "Inicio seccion",
+    "stateSequenceValid": true,
+    "stateSequenceIssues": [],
+    "postGoalObservations": [],
+    "goalContract": {
+      "nonGeneric": true,
+      "goalCoherent": true,
+      "mutationIntentExpressed": true
+    },
+    "replayEligible": true,
+    "canonicalInteractions": [
+      {
+        "id": "interaction-1",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-1"
+        ],
+        "technicalTargetRefs": [],
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9,
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "http://localhost:4310/#/login"
+      },
+      {
+        "id": "interaction-5",
+        "controlIdentity": "9db5430202df|Usuario|role|textbox|Usuario",
+        "semanticField": "Usuario",
+        "action": "fill",
+        "valueKey": "usuario",
+        "recordedValue": "negocios",
+        "rawTypedValue": "negocios",
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Usuario",
+          "css:#usuario",
+          "id:usuario"
+        ],
+        "editingSessionRef": "edit-1",
+        "description": "Ingresar en \"Usuario\"",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/login"
+      },
+      {
+        "id": "interaction-6",
+        "controlIdentity": "9db5430202df|Contraseña|role|textbox|Contraseña",
+        "semanticField": "Contraseña",
+        "action": "fill",
+        "valueKey": "contrasena",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#clave",
+          "id:clave"
+        ],
+        "editingSessionRef": "edit-2",
+        "description": "Ingresar en \"Contraseña\"",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/login"
+      },
+      {
+        "id": "interaction-7",
+        "controlIdentity": "9db5430202df|Contraseña|role|textbox|Contraseña",
+        "action": "press",
+        "key": "Enter",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#clave",
+          "id:clave"
+        ],
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/login",
+        "routeAfter": "http://localhost:4310/#/",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-10",
+        "controlIdentity": "9db5430202df|Crear solicitud|role|link|Crear solicitud",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "technicalTargetRefs": [
+          "role:link|Crear solicitud"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Crear solicitud",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#/solicitud/nueva"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "svg"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"svg\",1]],\"descendantEntries\":[[\"path\",2],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/solicitud/nueva\"},\"stableDescendants\":[],\"semanticShape\":[\"svg\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"svg\\\",1]],\\\"descendantEntries\\\":[[\\\"path\\\",2],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Crear solicitud",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "main:has(a[href=\"#/solicitud/nueva\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/",
+        "routeAfter": "http://localhost:4310/#/solicitud/nueva",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-14",
+        "controlIdentity": "9db5430202df|Número de Identificación*|role|textbox|Número de Identificación*",
+        "semanticField": "Número de Identificación*",
+        "action": "fill",
+        "valueKey": "numero_de_identificacion",
+        "recordedValue": "101000013",
+        "rawTypedValue": "101000013",
+        "sourceEventRefs": [
+          "event-14"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Número de Identificación*",
+          "css:#idNumero",
+          "id:idNumero"
+        ],
+        "editingSessionRef": "edit-3",
+        "description": "Ingresar en \"Número de Identificación*\"",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva"
+      },
+      {
+        "id": "interaction-15",
+        "controlIdentity": "9db5430202df|Consultar|role|button|Consultar",
+        "semanticField": "Consultar",
+        "action": "click",
+        "valueKey": "consultar",
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Consultar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Consultar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "svg"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"svg\",1]],\"descendantEntries\":[[\"circle\",1],[\"path\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "registro-form"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"svg\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"svg\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Consultar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(button[aria-label=\"Limpiar consulta\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Consultar\"",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva"
+      },
+      {
+        "id": "interaction-17",
+        "controlIdentity": "9db5430202df|Enviar a Debida Diligencia|role|button|Enviar a Debida Diligencia",
+        "semanticField": "Enviar a Debida Diligencia",
+        "action": "click",
+        "valueKey": "enviar_a_debida_diligencia",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Enviar a Debida Diligencia"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Enviar a Debida Diligencia",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 2,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "registro-form"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 2
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Enviar a Debida Diligencia",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "registro-form"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "main:has(a[href=\"#/solicitud/SOL-2026-0001\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Enviar a Debida Diligencia",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "registro-form"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Enviar a Debida Diligencia\"",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva"
+      }
+    ],
+    "entityActionBlocks": [],
+    "readiness": {
+      "functionalReadiness": true,
+      "dataReadiness": true,
+      "technicalReadiness": true,
+      "oracleReadiness": true,
+      "reviewReadiness": true,
+      "publicationContentReadiness": true,
+      "executionReadiness": true,
+      "publicationReadiness": true,
+      "missingInputs": [],
+      "datasetAuthorityMismatches": [],
+      "dataReadinessReasons": []
+    },
+    "technicalKnowledgeRefs": [],
+    "runtimeInputRequirements": [
+      {
+        "valueKey": "usuario",
+        "semanticField": "Usuario",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "negocios",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 1,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "negocios",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "contrasena",
+        "semanticField": "Contraseña",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": "101000013",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": true,
+        "stepIndex": 2,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "101000013",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "numero_de_identificacion",
+        "semanticField": "Número de Identificación*",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "101000013",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 4,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "101000013",
+        "datasetAuthorityMismatch": false
+      }
+    ],
+    "runtimeDataset": {
+      "scenarioId": "REC-E0D293A0-01",
+      "requirements": [
+        {
+          "valueKey": "usuario",
+          "semanticField": "Usuario",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "negocios",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 1,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "negocios",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": "101000013",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": true,
+          "stepIndex": 2,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "101000013",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "numero_de_identificacion",
+          "semanticField": "Número de Identificación*",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "101000013",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 4,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "101000013",
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "resolvedValues": {
+        "usuario": "negocios",
+        "contrasena": "101000013",
+        "numero_de_identificacion": "101000013"
+      },
+      "missingValues": []
+    },
+    "mutationOpportunities": [
+      {
+        "opportunityId": "REC-E0D293A0-01:field_omission",
+        "title": "Inicio seccion: comprobar la omisión de un dato",
+        "mutationType": "FIELD_OMISSION",
+        "basePrimaryScenarioId": "REC-E0D293A0-01",
+        "operations": [
+          {
+            "type": "remove_action",
+            "interactionId": "interaction-5"
+          }
+        ],
+        "evidenceRefs": [
+          "event-1",
+          "event-2",
+          "event-3",
+          "event-4",
+          "event-5",
+          "event-6",
+          "event-7",
+          "event-8",
+          "event-9",
+          "event-10",
+          "event-11",
+          "event-12",
+          "event-13",
+          "event-14",
+          "event-15",
+          "event-16",
+          "event-17"
+        ],
+        "rationale": "Existen varios inputs observados; se propone una omisión agrupada sin inventar el resultado.",
+        "oracleAuthority": "MISSING",
+        "confidence": 0.5,
+        "needsReview": true
+      }
+    ],
+    "testRailCaseId": 56100,
+    "testRailDestination": {
+      "projectId": "56",
+      "suiteId": "1731",
+      "sectionId": "4755"
+    }
+  }
+]

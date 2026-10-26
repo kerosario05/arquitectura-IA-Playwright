@@ -306,6 +306,7 @@ export type SpecGenerationObservableOracleType =
   | "heading_or_control"
   | "auth_gate"
   | "field_validation"
+  | "field_state"
   | "runtime_state"
   | "page_object_state"
   | "unsupported_or_unresolved";
@@ -327,6 +328,7 @@ export type SpecGenerationObservableOracle = {
 export type PromotedOracleImplementationKind =
   | "auth_stage"
   | "field_validation"
+  | "field_state"
   | "url_state"
   | "heading_or_control"
   | "runtime_auth_state";
@@ -340,6 +342,7 @@ export type PromotedOracleImplementation = {
   target?: string;
   expectedStage?: string;
   expectedUrlPattern?: string;
+  expectedState?: "field_enabled" | "field_empty";
   sourceEvidenceId?: string;
 };
 
@@ -1635,6 +1638,7 @@ function normalizeObservableOracleType(value: string | undefined): SpecGeneratio
     case "heading_or_control":
     case "auth_gate":
     case "field_validation":
+    case "field_state":
     case "runtime_state":
     case "page_object_state":
       return value as SpecGenerationObservableOracleType;
@@ -2245,6 +2249,14 @@ export function buildPromotedOracleImplementations(
         target: oracle.target,
         sourceEvidenceId: oracle.id,
       });
+      continue;
+    }
+    if (oracle.type === "field_state") {
+      const kind = details.kind;
+      if (!oracle.target || (kind !== "field_enabled" && kind !== "field_empty")) throw new Error("PROMOTED_FIELD_STATE_ORACLE_INVALID");
+      implementations.push({ oracleType: oracle.type, scenarioStepIndex: oracle.stepIndex, backed: true,
+        polarity: oracle.polarity, implementationKind: "field_state", target: oracle.target,
+        expectedState: kind, sourceEvidenceId: oracle.id });
       continue;
     }
     if (oracle.type === "heading_or_control" || oracle.type === "literal_visible_text" || oracle.type === "page_object_state") {

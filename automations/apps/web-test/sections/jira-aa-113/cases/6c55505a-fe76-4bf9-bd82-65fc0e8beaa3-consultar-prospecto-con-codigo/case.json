@@ -1,0 +1,9 @@
+{
+  "id": "6c55505a-fe76-4bf9-bd82-65fc0e8beaa3-consultar-prospecto-con-codigo",
+  "externalId": "6c55505a-fe76-4bf9-bd82-65fc0e8beaa3",
+  "title": "Consultar prospecto con código",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T06:31:38.633Z"
+}

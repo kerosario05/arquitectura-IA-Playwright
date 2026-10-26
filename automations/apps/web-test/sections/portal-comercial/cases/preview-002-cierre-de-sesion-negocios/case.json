@@ -1,0 +1,10 @@
+{
+  "id": "preview-002-cierre-de-sesion-negocios",
+  "externalId": "PREVIEW-002",
+  "caseId": 0,
+  "title": "Cierre de sesion Negocios",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T13:19:00.634Z"
+}

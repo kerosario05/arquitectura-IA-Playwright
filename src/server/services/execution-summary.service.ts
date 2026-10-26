@@ -252,11 +252,11 @@ function buildTestRailRunUrl(runId?: number | string): string | undefined {
   return `${base.replace(/\/+$/, "")}/index.php?/runs/view/${runId}`;
 }
 
-/** True when a consolidated evidence docx exists for this run's jobId. */
-function hasEvidenceDocx(jobId?: string): boolean {
+/** True when a consolidated evidence PDF or editable Word document exists for this run's jobId. */
+function hasEvidenceDocument(jobId?: string): boolean {
   if (!jobId) return false;
   try {
-    // Structured layout: .artifacts/evidence/<appSlug>/<sectionSlug>/runs/<jobId>/evidencia.docx
+    // Structured layout: .artifacts/evidence/<appSlug>/<sectionSlug>/runs/<jobId>/evidencia.{pdf,docx}
     // Fall back to a shallow scan since appSlug/sectionSlug aren't needed to confirm existence.
     const stack: string[] = [EVIDENCE_ROOT];
     while (stack.length) {
@@ -272,7 +272,10 @@ function hasEvidenceDocx(jobId?: string): boolean {
         if (e.isDirectory()) {
           // Only descend where the jobId could live to keep the scan cheap.
           if (e.name === jobId) {
-            if (fs.existsSync(path.join(full, "evidencia.docx"))) return true;
+            if (
+              fs.existsSync(path.join(full, "evidencia.pdf"))
+              || fs.existsSync(path.join(full, "evidencia.docx"))
+            ) return true;
           }
           stack.push(full);
         }
@@ -437,7 +440,7 @@ export function buildExecutionSummary(launchId: string): ExecutionSummary | null
           syncFailed: typeof persistedSummary.syncFailed === "number" ? persistedSummary.syncFailed : undefined,
         },
         defects: buildDefectSummaries(undefined, persistedJob.id, launchId),
-        evidenceAvailable: hasEvidenceDocx(launchId),
+        evidenceAvailable: hasEvidenceDocument(launchId),
       };
     }
     if (!isTerminalPreviewStatus(preview.status)) return null;
@@ -497,7 +500,7 @@ export function buildExecutionSummary(launchId: string): ExecutionSummary | null
         persistedJob?.id,
         launchId,
       ),
-      evidenceAvailable: hasEvidenceDocx(launchId),
+      evidenceAvailable: hasEvidenceDocument(launchId),
     };
   }
 
@@ -534,7 +537,7 @@ export function buildExecutionSummary(launchId: string): ExecutionSummary | null
       syncFailed: manifest.summary?.syncFailed,
     },
     defects: buildDefectSummaries(huKey, manifest.jobId, launchId),
-    evidenceAvailable: hasEvidenceDocx(manifest.jobId),
+    evidenceAvailable: hasEvidenceDocument(manifest.jobId),
   };
 }
 

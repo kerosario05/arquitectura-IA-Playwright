@@ -1,0 +1,9 @@
+{
+  "id": "293ec667-8ec2-40f3-8c6f-90f5183a2d24-negocios-convierte-en-cliente-una-solicitud-aprobada",
+  "externalId": "293ec667-8ec2-40f3-8c6f-90f5183a2d24",
+  "title": "Negocios convierte en cliente una solicitud aprobada",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T06:58:03.595Z"
+}

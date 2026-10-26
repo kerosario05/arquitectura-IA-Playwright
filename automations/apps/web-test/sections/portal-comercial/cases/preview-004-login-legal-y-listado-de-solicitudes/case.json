@@ -1,0 +1,10 @@
+{
+  "id": "preview-004-login-legal-y-listado-de-solicitudes",
+  "externalId": "PREVIEW-004",
+  "caseId": 0,
+  "title": "Login Legal y listado de solicitudes",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T13:21:47.555Z"
+}

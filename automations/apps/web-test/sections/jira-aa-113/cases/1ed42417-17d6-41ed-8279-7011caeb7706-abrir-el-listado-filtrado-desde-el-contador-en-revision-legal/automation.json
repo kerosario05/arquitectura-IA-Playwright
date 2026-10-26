@@ -1,0 +1,56 @@
+{
+  "id": "1ed42417-17d6-41ed-8279-7011caeb7706-abrir-el-listado-filtrado-desde-el-contador-en-revision-legal",
+  "externalId": "1ed42417-17d6-41ed-8279-7011caeb7706",
+  "title": "Abrir el listado filtrado desde el contador En Revisión Legal",
+  "planPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\1ed42417-17d6-41ed-8279-7011caeb7706-abrir-el-listado-filtrado-desde-el-contador-en-revision-legal\\plan.json",
+  "specPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\1ed42417-17d6-41ed-8279-7011caeb7706-abrir-el-listado-filtrado-desde-el-contador-en-revision-legal\\case.spec.ts",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "web-test",
+  "baseUrlHash": "4e1194428e74",
+  "createdAt": "2026-10-26T07:07:34.295Z",
+  "updatedAt": "2026-10-26T07:07:34.295Z",
+  "specVerificationStatus": "passed",
+  "tags": [
+    "jira_semantic",
+    "jira_generated"
+  ],
+  "metadata": {
+    "specGeneration": {
+      "mode": "deterministic",
+      "provider": null,
+      "model": null,
+      "invocations": 0,
+      "invocationsConsumed": 0,
+      "durationMs": 0,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "passed",
+        "typescript": "skipped",
+        "playwrightDiscovery": "skipped",
+        "semanticCoverage": "passed",
+        "functionalExecution": "passed"
+      },
+      "promotionAllowed": true,
+      "specsRequested": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
+      "specWritten": true,
+      "errors": [],
+      "warnings": []
+    }
+  }
+}

@@ -14,6 +14,24 @@ test("explicit full_authentication still gets the AuthFlow", async () => {
   assert.equal(await resolveJiraAuthFlow({ ...base, authIntent: "full_authentication", loginMode: "password" }), flow);
 });
 
+test("authored credential entry tolerates a missing project AuthFlow when the profile has no gate data", async () => {
+  let loads = 0;
+  const resolved = await resolveJiraAuthFlow({ authIntent: "full_authentication", loginMode: "no_login",
+    hasPasswordCredentials: false, hasAuthoredCredentialEntry: true,
+    load: async () => { loads++; throw new Error("JIRA_AUTH_FLOW_UNAVAILABLE"); } });
+  assert.equal(resolved, undefined);
+  assert.equal(loads, 1);
+});
+
+test("authored credential entry keeps the configured AuthFlow available when gate data exists", async () => {
+  let loads = 0;
+  const resolved = await resolveJiraAuthFlow({ ...base, authIntent: "full_authentication", loginMode: "no_login",
+    hasAuthoredCredentialEntry: true, hasAuthGateData: true,
+    load: async () => { loads++; return flow; } });
+  assert.equal(resolved, flow);
+  assert.equal(loads, 1);
+});
+
 test("no_login, manual, missing mode and gate_observation never load the AuthFlow", async () => {
   let loads = 0;
   const load = async () => { loads++; return flow; };

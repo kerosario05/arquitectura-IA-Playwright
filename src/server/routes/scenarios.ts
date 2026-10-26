@@ -1,3 +1,5 @@
+import fs from "node:fs/promises";
+import path from "node:path";
 import { Router } from "express";
 import { config, requireJiraConfig } from "../../config/env";
 import { JiraClient } from "../../clients/jira.client";
@@ -29,7 +31,8 @@ scenariosRouter.post('/jira/review-edit',async(req,res,next)=>{
   const issue={key:raw.key,summary:raw.fields.summary??raw.key,description:extractTextFromAdf(raw.fields.description),
    acceptanceCriteria:extractTextFromAdf(raw.fields[jiraConfig.acceptanceCriteriaField] as any)||null,labels:[],components:[],status:'',issueType:'Story'};
   const app=await loadAppConfig(appSlug);
-  const reviewed=await reviewEditedJiraScenarios(issue,scenarios,scenarioId,patch,typeof app?.loginMode==='string'?app.loginMode:undefined);
+  const authFlowAvailable=await fs.access(path.resolve('automations/apps',appSlug,'flows','auth.flow.ts')).then(()=>true,()=>false);
+  const reviewed=await reviewEditedJiraScenarios(issue,scenarios,scenarioId,patch,typeof app?.loginMode==='string'?app.loginMode:undefined,authFlowAvailable);
   res.json({ok:true,scenarios:reviewed});
  }catch(error){
   if(error instanceof Error&&error.message.startsWith('JIRA_EDIT_')){res.status(400).json({ok:false,error:error.message});return;}

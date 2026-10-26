@@ -58,6 +58,35 @@ export async function observeJiraFieldValidation(
         ...(control.getAttribute("aria-labelledby") ?? "").split(/\s+/).map((id) => document.getElementById(id)?.innerText ?? ""),
       ].map((value) => value.replace(/\s+/g, " ").trim()).filter(Boolean);
     }
+    // A generic required-field assertion has no field name to resolve. It is
+    // still observable when a control's local field group exposes the required
+    // message. Many applications render custom validation styles/messages
+    // without setting aria-invalid or native required attributes, so the local
+    // message itself is authoritative when tied to a visible control. Keep it
+    // scoped to that control's immediate form group; a page-level toast or a
+    // neighboring field's error cannot satisfy it.
+    if (/^(?:campo requerido|campo obligatorio|required field|field required)$/.test(target)) {
+      const visibleControls = Array.from(document.querySelectorAll("input,select,textarea,[contenteditable='true']"))
+        .filter(visible);
+      for (const control of visibleControls) {
+        const labels = labelsOf(control);
+        const referencedIds = [control.getAttribute("aria-describedby"), control.getAttribute("aria-errormessage")]
+          .filter(Boolean).flatMap((value) => value.split(/\s+/));
+        const linkedMessages = referencedIds.map((id) => document.getElementById(id))
+          .filter((element) => Boolean(element && visible(element)))
+          .map((element) => normalizeText(element.innerText || element.textContent || ""));
+        let current = control.parentElement;
+        const localMessages = [];
+        for (let depth = 0; current && depth < 3 && !current.matches("form,body"); depth += 1, current = current.parentElement) {
+          localMessages.push(...Array.from(current.querySelectorAll("[role='alert'],[aria-live],small,span,p,[class*='error'],[class*='invalid']"))
+            .filter(visible).map((element) => normalizeText(element.innerText || element.textContent || "")));
+        }
+        const requiredMessage = /(?:^|\b)(?:campo requerido|campo obligatorio|required field|field required)(?:\b|$)/;
+        if (![...linkedMessages, ...localMessages].some((message) => requiredMessage.test(message))) continue;
+        return { fieldLabel: labels[0] ?? "Required field", invalid: true, associatedError: true };
+      }
+      return undefined;
+    }
     function columnStart(cell) {
       let start = 0;
       for (const sibling of Array.from(cell.parentElement.children)) {

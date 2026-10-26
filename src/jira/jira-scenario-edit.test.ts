@@ -20,6 +20,16 @@ test('Jira edited steps receive a revision and uniquely unchanged fields retain 
  assert.equal(again.scenarioId,edited.scenarioId);
  assert.equal(original.steps.length,3);
 });
+test('full_authentication is dropped on review only when the project has no AuthFlow; step wording never decides',async()=>{
+ const withIntent:EditableJiraScenario={...original,authIntent:'full_authentication'};
+ const same={title:withIntent.title,steps:withIntent.steps,expectedResult:withIntent.expectedResult};
+ const [noFlow]=await reviewEditedJiraScenarios(issue,[withIntent],withIntent.scenarioId,same,undefined,false);
+ assert.equal(noFlow.authIntent,undefined);
+ const [hasFlow]=await reviewEditedJiraScenarios(issue,[withIntent],withIntent.scenarioId,same,undefined,true);
+ assert.equal(hasFlow.authIntent,'full_authentication');
+ const [unknown]=await reviewEditedJiraScenarios(issue,[withIntent],withIntent.scenarioId,{...same,steps:[...same.steps,'Presionar "Consulta"']});
+ assert.equal(unknown.authIntent,'full_authentication');
+});
 test('renaming a field never reuses a value key from the old step position',async()=>{
  const [edited]=await reviewEditedJiraScenarios(issue,[original],original.scenarioId,{...original,steps:[original.steps[0],'Ingresar identificación en "Documento"',original.steps[2]]});
  assert.notEqual(edited.inputRequirements[0].key,original.inputRequirements![0].key);
@@ -32,12 +42,13 @@ test('conditional diagnostics follow the edited step position in the response',a
  const patch={title:original.title,steps:[original.steps[0],'Presionar "Consultar"','Validar que se muestre "Comisión" en otra pantalla.','Validar que se muestre "Resultado"'],expectedResult:original.expectedResult};
  const [edited]=await reviewEditedJiraScenarios(source,[original],original.scenarioId,patch);
  assert.ok(edited.validation.issues.some(item=>item.code==='JIRA_CONDITION_STEP_UNSUPPORTED' && item.stepIndex===3 && item.step===patch.steps[2]));
- assert.equal(edited.validation.valid,false);
+ assert.equal(edited.validation.valid,true);
 });
-test('unsupported manual steps and loss of acceptance coverage block launch rather than certify edits',async()=>{
+test('unsupported manual steps and coverage gaps keep an edit pending Discovery without rejecting it',async()=>{
  const [edited]=await reviewEditedJiraScenarios(issue,[original],original.scenarioId,{...original,steps:['Hacer todo automáticamente']});
- assert.equal(edited.validation.valid,false);
- assert.ok(edited.validation.errors.some(error=>error.startsWith('JIRA_ACCEPTANCE_COVERAGE_INCOMPLETE')));
+ assert.equal(edited.validation.valid,true);
+ assert.ok(edited.validation.warnings.some(warning=>warning.includes('Discovery')));
+ assert.equal(edited.executionReadiness,'requires_discovery');
  assert.equal(edited.mcpExecutable,false);
 });
 test('manual review rejects foreign issue ownership and empty steps',async()=>{

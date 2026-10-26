@@ -1,0 +1,270 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-26T06:37:02.741Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "4b06323f-2f6e-4f8a-a85f-d984b2f12699",
+    "title": "Consultar una empresa con identificación distinta a RNC"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "fill [usuario]",
+      "valueKey": "usuario",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"usuario\"]"
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [contrasena]",
+      "valueKey": "contrasena",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"clave\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Presionar \"iniciar sesión\"",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"btn-login\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Presionar \"Solicitudes\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Solicitudes",
+        "exact": true
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"Nueva solicitud\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Nueva solicitud",
+        "exact": true
+      }
+    },
+    {
+      "index": 8,
+      "action": "select",
+      "description": "select [jira_edit_7f52218fd8e65670_7]",
+      "valueKey": "jira_edit_7f52218fd8e65670_7",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"idTipo\"]"
+      }
+    },
+    {
+      "index": 9,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"País de Origen\"",
+      "target": {
+        "strategy": "text",
+        "value": "País de Origen"
+      }
+    },
+    {
+      "index": 10,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Registro en País de Origen\"",
+      "target": {
+        "strategy": "text",
+        "value": "Registro en País de Origen"
+      }
+    },
+    {
+      "index": 11,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Representante en el País\"",
+      "target": {
+        "strategy": "text",
+        "value": "Representante en el País"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "usuario",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "jira_edit_7f52218fd8e65670_7",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Consultar una empresa con identificación distinta a RNC",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "fill",
+        "valueKey": "usuario",
+        "technicalTargetRefs": [
+          "css:[id=\"usuario\"]"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "contrasena",
+        "technicalTargetRefs": [
+          "css:[id=\"clave\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:[id=\"btn-login\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Solicitudes"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Nueva solicitud"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "select",
+        "valueKey": "jira_edit_7f52218fd8e65670_7",
+        "technicalTargetRefs": [
+          "css:[id=\"idTipo\"]"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"País de Origen\"",
+        "technicalTargetRefs": [
+          "text:País de Origen"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Registro en País de Origen\"",
+        "technicalTargetRefs": [
+          "text:Registro en País de Origen"
+        ]
+      },
+      {
+        "index": 11,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Representante en el País\"",
+        "technicalTargetRefs": [
+          "text:Representante en el País"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-9",
+        "requirement": "Validar que se muestre \"País de Origen\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 9,
+        "target": "País de Origen\nSeleccione país\nRepública Dominicana\nEstados Unidos\nEspaña\nPanamá\nColombia\nMéxico\nPuerto Rico\nRegistro en País de Origen\nRepresentante en el País",
+        "evidence": [
+          "live-step-9"
+        ],
+        "details": {
+          "observedText": "País de Origen\nSeleccione país\nRepública Dominicana\nEstados Unidos\nEspaña\nPanamá\nColombia\nMéxico\nPuerto Rico\nRegistro en País de Origen\nRepresentante en el País"
+        }
+      },
+      {
+        "id": "jira-oracle-10",
+        "requirement": "Validar que se muestre \"Registro en País de Origen\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 10,
+        "target": "País de Origen\nSeleccione país\nRepública Dominicana\nEstados Unidos\nEspaña\nPanamá\nColombia\nMéxico\nPuerto Rico\nRegistro en País de Origen\nRepresentante en el País",
+        "evidence": [
+          "live-step-10"
+        ],
+        "details": {
+          "observedText": "País de Origen\nSeleccione país\nRepública Dominicana\nEstados Unidos\nEspaña\nPanamá\nColombia\nMéxico\nPuerto Rico\nRegistro en País de Origen\nRepresentante en el País"
+        }
+      },
+      {
+        "id": "jira-oracle-11",
+        "requirement": "Validar que se muestre \"Representante en el País\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 11,
+        "target": "País de Origen\nSeleccione país\nRepública Dominicana\nEstados Unidos\nEspaña\nPanamá\nColombia\nMéxico\nPuerto Rico\nRegistro en País de Origen\nRepresentante en el País",
+        "evidence": [
+          "live-step-11"
+        ],
+        "details": {
+          "observedText": "País de Origen\nSeleccione país\nRepública Dominicana\nEstados Unidos\nEspaña\nPanamá\nColombia\nMéxico\nPuerto Rico\nRegistro en País de Origen\nRepresentante en el País"
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "que se muestre \"Representante en el País\""
+  }
+}

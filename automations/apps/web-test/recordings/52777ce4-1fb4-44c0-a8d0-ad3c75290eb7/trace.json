@@ -1,0 +1,708 @@
+{
+  "recordingId": "52777ce4-1fb4-44c0-a8d0-ad3c75290eb7",
+  "projectSlug": "web-test",
+  "appSlug": "web-test",
+  "platform": "web",
+  "baseUrl": "http://localhost:4310/#/login",
+  "label": "Inicio de sesión de Negocios y apertura de Solicitudes",
+  "recordingGoal": {
+    "declaredGoal": "Inicio de sesión de Negocios y apertura de Solicitudes",
+    "normalizedGoal": "Inicio de sesión de Negocios y apertura de Solicitudes",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-10-26T12:45:52.562Z",
+  "status": "stopped",
+  "events": [
+    {
+      "t": 12677,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "http://localhost:4310/#/login",
+      "seq": 0
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "9db5430202df",
+      "url": "http://localhost:4310/#/login",
+      "seq": 1
+    },
+    {
+      "t": 68947,
+      "interactionId": "pointer-1",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Usuario",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Usuario\"",
+      "observationType": "pointer",
+      "seq": 2
+    },
+    {
+      "t": 81642,
+      "interactionId": "pointer-2",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Contraseña",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Contraseña\"",
+      "observationType": "pointer",
+      "seq": 3
+    },
+    {
+      "t": 96257,
+      "interactionId": "pointer-3",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Iniciar sesión",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Iniciar sesión",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "login-form"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Iniciar sesión\"",
+      "observationType": "pointer",
+      "seq": 4
+    },
+    {
+      "t": 96265,
+      "kind": "fill",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Contraseña",
+        "role": "input",
+        "tag": "input",
+        "inputType": "password",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Contraseña",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#clave",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "clave",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": true
+      },
+      "redactedKey": "contrasena",
+      "valueSource": "user",
+      "seq": 5
+    },
+    {
+      "t": 119802,
+      "interactionId": "pointer-3",
+      "kind": "tap",
+      "screenKey": "9db5430202df",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Iniciar sesión",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Iniciar sesión",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#btn-login",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "btn-login",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#btn-login",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "btn-login"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "login-form"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-login\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Iniciar sesión",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "login-form"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 6
+    },
+    {
+      "t": 128354,
+      "interactionId": "pointer-4",
+      "kind": "tap",
+      "screenKey": "9db5430202df",
+      "fingerprint": "9319d077558fafb5aa590ee21b1ff22346288a25c3af5544508e14ce55b23aa3",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "control",
+        "tag": "form",
+        "locators": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "form"
+              },
+              "stableDirectAttributes": {
+                "id": "login-form"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "button",
+                  "stableAttributes": {
+                    "id": "btn-login"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "role": "alert",
+                  "stableAttributes": {
+                    "id": "login-error",
+                    "role": "alert"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "clave",
+                    "name": "clave"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "usuario",
+                    "name": "usuario"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "button",
+                "div",
+                "div:alert",
+                "p"
+              ],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"form\"},\"stableDirectAttributes\":{\"id\":\"login-form\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"button\",\"stableAttributes\":{\"id\":\"btn-login\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"role\":\"alert\",\"stableAttributes\":{\"id\":\"login-error\",\"role\":\"alert\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"clave\",\"name\":\"clave\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"usuario\",\"name\":\"usuario\"}}],\"semanticShape\":[\"button\",\"div\",\"div:alert\",\"p\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"button\\\",1],[\\\"div\\\",5],[\\\"p\\\",1]],\\\"descendantEntries\\\":[[\\\"button\\\",2],[\\\"div\\\",5],[\\\"input\\\",2],[\\\"label\\\",2],[\\\"p\\\",1],[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner",
+              "v2_scoped_structural_runtime_evidence"
+            ],
+            "confidence": 0.6,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 7
+    },
+    {
+      "t": 199847,
+      "interactionId": "pointer-5",
+      "kind": "tap",
+      "screenKey": "9db5430202df",
+      "fingerprint": "9319d077558fafb5aa590ee21b1ff22346288a25c3af5544508e14ce55b23aa3",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "control",
+        "tag": "form",
+        "locators": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "form"
+              },
+              "stableDirectAttributes": {
+                "id": "login-form"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "button",
+                  "stableAttributes": {
+                    "id": "btn-login"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "role": "alert",
+                  "stableAttributes": {
+                    "id": "login-error",
+                    "role": "alert"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "clave",
+                    "name": "clave"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "usuario",
+                    "name": "usuario"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "button",
+                "div",
+                "div:alert",
+                "p"
+              ],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"form\"},\"stableDirectAttributes\":{\"id\":\"login-form\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"button\",\"stableAttributes\":{\"id\":\"btn-login\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"role\":\"alert\",\"stableAttributes\":{\"id\":\"login-error\",\"role\":\"alert\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"clave\",\"name\":\"clave\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"usuario\",\"name\":\"usuario\"}}],\"semanticShape\":[\"button\",\"div\",\"div:alert\",\"p\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"button\\\",1],[\\\"div\\\",5],[\\\"p\\\",1]],\\\"descendantEntries\\\":[[\\\"button\\\",2],[\\\"div\\\",5],[\\\"input\\\",2],[\\\"label\\\",2],[\\\"p\\\",1],[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner",
+              "v2_scoped_structural_runtime_evidence"
+            ],
+            "confidence": 0.6,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 8
+    },
+    {
+      "t": 291323,
+      "interactionId": "pointer-6",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "9319d077558fafb5aa590ee21b1ff22346288a25c3af5544508e14ce55b23aa3",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Usuario",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Usuario\"",
+      "observationType": "pointer",
+      "seq": 9
+    },
+    {
+      "t": 292148,
+      "interactionId": "pointer-7",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "9319d077558fafb5aa590ee21b1ff22346288a25c3af5544508e14ce55b23aa3",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Contraseña",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Contraseña\"",
+      "observationType": "pointer",
+      "seq": 10
+    },
+    {
+      "t": 292169,
+      "kind": "fill",
+      "screenKey": "9db5430202df",
+      "fingerprint": "9319d077558fafb5aa590ee21b1ff22346288a25c3af5544508e14ce55b23aa3",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Usuario",
+        "role": "input",
+        "tag": "input",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Usuario",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#usuario",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "usuario",
+            "confidence": 0.8
+          }
+        ],
+        "rawTypedValue": "negocios",
+        "sensitive": false
+      },
+      "value": "negocios",
+      "valueSource": "user",
+      "seq": 11
+    },
+    {
+      "t": 294414,
+      "interactionId": "pointer-8",
+      "kind": "note",
+      "screenKey": "9db5430202df",
+      "fingerprint": "9319d077558fafb5aa590ee21b1ff22346288a25c3af5544508e14ce55b23aa3",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Iniciar sesión",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Iniciar sesión",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "login-form"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Iniciar sesión\"",
+      "observationType": "pointer",
+      "seq": 12
+    },
+    {
+      "t": 294431,
+      "kind": "fill",
+      "screenKey": "9db5430202df",
+      "fingerprint": "9319d077558fafb5aa590ee21b1ff22346288a25c3af5544508e14ce55b23aa3",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Contraseña",
+        "role": "input",
+        "tag": "input",
+        "inputType": "password",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Contraseña",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#clave",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "clave",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": true
+      },
+      "redactedKey": "contrasena",
+      "valueSource": "user",
+      "seq": 13
+    },
+    {
+      "t": 294725,
+      "interactionId": "pointer-8",
+      "kind": "tap",
+      "screenKey": "9db5430202df",
+      "fingerprint": "9319d077558fafb5aa590ee21b1ff22346288a25c3af5544508e14ce55b23aa3",
+      "url": "http://localhost:4310/#/login",
+      "target": {
+        "label": "Iniciar sesión",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Iniciar sesión",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#btn-login",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "btn-login",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#btn-login",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "btn-login"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "login-form"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-login\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Iniciar sesión",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "login-form"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 14
+    },
+    {
+      "t": 295641,
+      "kind": "navigate",
+      "screenKey": "9db5430202df",
+      "url": "http://localhost:4310/#/",
+      "seq": 15
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "9db5430202df",
+      "title": "Portal Comercial",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://localhost:4310/#/login",
+      "firstSeenAt": 12826,
+      "controls": [],
+      "texts": [
+        "Portal Comercial"
+      ],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "8ab7a2ae3bf4",
+      "title": "8ab7a2ae3bf4",
+      "fingerprint": "9319d077558fafb5aa590ee21b1ff22346288a25c3af5544508e14ce55b23aa3",
+      "url": "http://localhost:4310/#/login",
+      "firstSeenAt": 119918,
+      "controls": [
+        {
+          "label": "Usuario",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingrese su usuario",
+          "attributes": {
+            "id": "usuario",
+            "name": "usuario",
+            "placeholder": "Ingrese su usuario"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "usuario",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Contraseña",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingrese su contraseña",
+          "attributes": {
+            "id": "clave",
+            "name": "clave",
+            "type": "password",
+            "placeholder": "Ingrese su contraseña"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "clave",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Iniciar sesión",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "btn-login",
+            "type": "submit"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "btn-login",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Datos de demostración",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Datos de demostración",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    }
+  ],
+  "endedAt": "2026-10-26T12:51:09.408Z",
+  "durationMs": 316846
+}

@@ -1,0 +1,9 @@
+{
+  "id": "25da0177-a5dd-4115-b604-9afb2025396f-revision-legal-escala-un-caso-con-comentario",
+  "externalId": "25da0177-a5dd-4115-b604-9afb2025396f",
+  "title": "Revisión Legal escala un caso con comentario",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T06:50:48.430Z"
+}

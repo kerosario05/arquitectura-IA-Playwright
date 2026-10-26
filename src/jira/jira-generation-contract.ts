@@ -408,6 +408,40 @@ function jiraReactiveFilterResultMissing(steps:string[],issue?:JiraIssueSource):
   && !steps.slice(index+1).some(next=>/^\s*(?:Validar|Verificar)\b/i.test(next)&&resultTerm.test(normalized(next))));
 }
 
+/**
+ * A result assertion after a list filter/search needs a known row fixture. Without one,
+ * a perfectly valid empty result (as on a clean project) makes the generated assertion
+ * impossible to prove. Accept explicit source-authored setup or a declared data precondition;
+ * never silently assume the target environment is seeded.
+ */
+function jiraFilterResultFixtureMissing(candidate:Record<string,unknown>,steps:string[]):boolean {
+ const assertsFilteredCollection=steps.some((step,index)=>{
+  if(!/^\s*(?:validar|verificar|comprobar)\b/i.test(step)) return false;
+  const assertion=normalized(step);
+  const collection=/\b(?:solicitudes?|resultados?|filas?|registros?|listados?|records?|rows?|results?|items?)\b/i.test(assertion);
+  const relation=/\b(?:correspond\w*|coincid\w*|pertenec\w*|match\w*|filtrad\w*|selected\s+state|estado\s+seleccionado|filtro\s+seleccionado|criterio\s+seleccionado)\b/i.test(assertion);
+  if(!collection||!relation) return false;
+  return steps.slice(0,index).some(prior=>
+   /\b(?:seleccionar|ingresar|escribir|digitar|introducir|buscar|filtrar|search|filter)\b/i.test(normalized(prior))
+   && /\b(?:estado|filtro|buscar|b[uú]squeda|search|filter|criterio)\b/i.test(normalized(prior))
+  );
+ });
+ if(!assertsFilteredCollection) return false;
+
+ const preconditions=Array.isArray(candidate.preconditions)
+  ? candidate.preconditions.filter((value):value is string=>typeof value==='string').join(' ')
+  : '';
+ const explicitDataFixture=/\b(?:existe|existen|hay|disponible|preparad\w*|cargad\w*|seed\w*|fixture|datos?\s+de\s+prueba|data\s+set)\b[^.!?]{0,140}\b(?:solicitud|solicitudes|registro|registros|fila|filas|resultado|resultados|request|record|row|rows)\b/i.test(preconditions)
+  || /\b(?:solicitud|solicitudes|registro|registros|fila|filas|resultado|resultados|request|record|row|rows)\b[^.!?]{0,140}\b(?:existe|existen|hay|disponible|preparad\w*|cargad\w*|seed\w*|fixture|datos?\s+de\s+prueba|data\s+set)\b/i.test(preconditions);
+ const createsRecordBeforeFilter=steps.some((step,index)=>{
+  if(!/^\s*(?:presionar|pulsar|hacer\s+clic|clic|click|press)\b/i.test(step)
+   || !/\b(?:guardar|crear|registrar|agregar|a[nñ]adir|save|create|register|add|submit)\b/i.test(normalized(step))) return false;
+  return steps.slice(0,index).some(prior=>/\b(?:nueva?\s+solicitud|crear\s+(?:una\s+)?(?:solicitud|registro)|agregar\s+(?:una\s+)?(?:solicitud|registro)|new\s+(?:request|record)|create\s+(?:a\s+)?(?:request|record))\b/i.test(normalized(prior)))
+   && steps.slice(index+1).some(next=>/\b(?:filtrar|filtro|buscar|b[uú]squeda|search|filter)\b/i.test(normalized(next)));
+ });
+ return !explicitDataFixture&&!createsRecordBeforeFilter;
+}
+
 /** Remove a structural new-row assertion only when a later row-scoped field action already proves the row can be used. */
 export function repairUnsupportedAddedRowAssertions<T extends Record<string, unknown>>(candidate: T): T {
  const steps=Array.isArray(candidate.steps)?candidate.steps.filter((step):step is string=>typeof step==='string'):[];
@@ -727,6 +761,7 @@ export function jiraGenerationContractErrors(candidate: Record<string,unknown>, 
  if(jiraDuplicateCaseSetupUndeclared(candidate,steps,issue)) errors.push("JIRA_DUPLICATE_CASE_SETUP_UNDECLARED");
  if(jiraUnsupportedLiteralBranchRefs(candidate,steps,issue).length) errors.push("JIRA_LITERAL_BRANCH_CLAIM_UNSUPPORTED");
  if(jiraUnbackedFilterSubmitIndices(steps,issue).length||jiraReactiveFilterResultMissing(steps,issue)) errors.push("JIRA_FILTER_RESULT_EVIDENCE_MISSING");
+ if(jiraFilterResultFixtureMissing(candidate,steps)) errors.push("JIRA_FILTER_TEST_DATA_UNSPECIFIED");
  errors.push(...jiraRowFormContractErrors(candidate,issue));
  return [...new Set(errors)];
 }

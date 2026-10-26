@@ -1,0 +1,9 @@
+{
+  "id": "1c645021-e7d7-450b-9078-433c4bbfe16e-rechazar-credenciales-invalidas-sin-iniciar-sesion",
+  "externalId": "1c645021-e7d7-450b-9078-433c4bbfe16e",
+  "title": "Rechazar credenciales inválidas sin iniciar sesión",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T07:21:05.346Z"
+}

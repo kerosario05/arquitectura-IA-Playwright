@@ -10,7 +10,7 @@
   },
   "invocations": 0,
   "invocationsConsumed": 0,
-  "durationMs": 141757,
+  "durationMs": 124745,
   "usage": {
     "inputTokens": null,
     "cachedInputTokens": null,

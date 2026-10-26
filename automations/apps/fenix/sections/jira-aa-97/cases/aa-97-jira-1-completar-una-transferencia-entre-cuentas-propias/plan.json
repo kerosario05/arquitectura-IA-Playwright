@@ -1,0 +1,617 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-23T18:52:41.377Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "AA-97:jira:1",
+    "title": "Completar una transferencia entre cuentas propias"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Presionar \"perfil empresarial\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Empresarial",
+        "exact": true
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [rnc]",
+      "valueKey": "rnc",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"Enterprise\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "fill",
+      "description": "fill [usuario]",
+      "valueKey": "usuario",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"UserNameE\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "fill",
+      "description": "fill [contrasena]",
+      "valueKey": "contrasena",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"PasswordE\"]"
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"Iniciar sesión\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Iniciar sesión",
+        "exact": true
+      }
+    },
+    {
+      "index": 8,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"la pantalla de verificación de usuario\"",
+      "target": {
+        "strategy": "text",
+        "value": "la pantalla de verificación de usuario"
+      }
+    },
+    {
+      "index": 9,
+      "action": "click",
+      "description": "Presionar \"SMS\"",
+      "target": {
+        "strategy": "css",
+        "value": "div:visible:text-is(\"SMS\")"
+      }
+    },
+    {
+      "index": 10,
+      "action": "fill",
+      "description": "fill [codigo_acceso]",
+      "valueKey": "codigo_acceso",
+      "target": {
+        "strategy": "semantic",
+        "value": "segmented_code",
+        "metadata": {
+          "originalTarget": "Código",
+          "resolvedTargetName": "segmented code input group",
+          "resolvedCandidateId": "6",
+          "repairType": "jira_segmented_code",
+          "validationStatus": "runtime_resolution_required"
+        }
+      },
+      "resolutionState": "runtime_resolution_required"
+    },
+    {
+      "index": 11,
+      "action": "click",
+      "description": "Presionar \"continuar\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Continuar",
+        "exact": true
+      }
+    },
+    {
+      "index": 12,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"el resumen de sus productos\"",
+      "target": {
+        "strategy": "text",
+        "value": "el resumen de sus productos"
+      }
+    },
+    {
+      "index": 13,
+      "action": "click",
+      "description": "Presionar \"Transferencias\"",
+      "target": {
+        "strategy": "css",
+        "value": "div:visible:text-is(\"Transferencias\")"
+      }
+    },
+    {
+      "index": 14,
+      "action": "click",
+      "description": "Presionar \"Cuentas Propias\"",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"TRANSFERS_INDIVIDUAL\"]"
+      }
+    },
+    {
+      "index": 15,
+      "action": "select",
+      "description": "select [cuenta_origen]",
+      "valueKey": "cuenta_origen",
+      "target": {
+        "strategy": "xpath",
+        "value": "(//*[normalize-space(.)='Cuenta Origen' and not(*[normalize-space(.)='Cuenta Origen'])]/following::span[normalize-space(.)='Seleccione una Cuenta'][1])[1]"
+      }
+    },
+    {
+      "index": 16,
+      "action": "select",
+      "description": "select [cuenta_destino]",
+      "valueKey": "cuenta_destino",
+      "target": {
+        "strategy": "xpath",
+        "value": "(//*[normalize-space(.)='Cuenta Destino' and not(*[normalize-space(.)='Cuenta Destino'])]/following::span[normalize-space(.)='Seleccione una Cuenta'][1])[1]"
+      }
+    },
+    {
+      "index": 17,
+      "action": "fill",
+      "description": "fill [monto]",
+      "valueKey": "monto",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"transactionDetails_0__AmountPayment\"]"
+      }
+    },
+    {
+      "index": 18,
+      "action": "click",
+      "description": "Presionar \"Continuar\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Continuar",
+        "exact": true
+      }
+    },
+    {
+      "index": 19,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"el resumen de confirmación de la transferencia\"",
+      "target": {
+        "strategy": "text",
+        "value": "el resumen de confirmación de la transferencia"
+      }
+    },
+    {
+      "index": 20,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"tasa de cambio\"",
+      "target": {
+        "strategy": "text",
+        "value": "tasa de cambio"
+      }
+    },
+    {
+      "index": 21,
+      "action": "click",
+      "description": "Presionar \"continuar\"",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"frmContinue\"]"
+      }
+    },
+    {
+      "index": 22,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"la pantalla de validación de identidad\"",
+      "target": {
+        "strategy": "text",
+        "value": "la pantalla de validación de identidad"
+      }
+    },
+    {
+      "index": 23,
+      "action": "click",
+      "description": "Presionar \"SMS\"",
+      "target": {
+        "strategy": "css",
+        "value": "div:visible:text-is(\"SMS\")"
+      }
+    },
+    {
+      "index": 24,
+      "action": "fill",
+      "description": "fill [token_transferencia]",
+      "valueKey": "token_transferencia",
+      "target": {
+        "strategy": "semantic",
+        "value": "segmented_code",
+        "metadata": {
+          "originalTarget": "Token",
+          "resolvedTargetName": "segmented code input group",
+          "resolvedCandidateId": "6",
+          "repairType": "jira_segmented_code",
+          "validationStatus": "runtime_resolution_required"
+        }
+      },
+      "resolutionState": "runtime_resolution_required"
+    },
+    {
+      "index": 25,
+      "action": "click",
+      "description": "Presionar \"Autorizar transferencia\"",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"validate_submit_token\"]"
+      }
+    },
+    {
+      "index": 26,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"comprobante de transacción exitosa\"",
+      "target": {
+        "strategy": "text",
+        "value": "comprobante de transacción exitosa"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "rnc",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "usuario",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "codigo_acceso",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "cuenta_origen",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "cuenta_destino",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "monto",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "token_transferencia",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Completar una transferencia entre cuentas propias",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Empresarial"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "rnc",
+        "technicalTargetRefs": [
+          "css:[id=\"Enterprise\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "fill",
+        "valueKey": "usuario",
+        "technicalTargetRefs": [
+          "css:[id=\"UserNameE\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "fill",
+        "valueKey": "contrasena",
+        "technicalTargetRefs": [
+          "css:[id=\"PasswordE\"]"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"la pantalla de verificación de usuario\"",
+        "technicalTargetRefs": [
+          "text:la pantalla de verificación de usuario"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:div:visible:text-is(\"SMS\")"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "fill",
+        "valueKey": "codigo_acceso",
+        "technicalTargetRefs": [
+          "semantic:segmented_code"
+        ]
+      },
+      {
+        "index": 11,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ]
+      },
+      {
+        "index": 12,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"el resumen de sus productos\"",
+        "technicalTargetRefs": [
+          "text:el resumen de sus productos"
+        ]
+      },
+      {
+        "index": 13,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:div:visible:text-is(\"Transferencias\")"
+        ]
+      },
+      {
+        "index": 14,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:[id=\"TRANSFERS_INDIVIDUAL\"]"
+        ]
+      },
+      {
+        "index": 15,
+        "action": "select",
+        "valueKey": "cuenta_origen",
+        "technicalTargetRefs": [
+          "xpath:(//*[normalize-space(.)='Cuenta Origen' and not(*[normalize-space(.)='Cuenta Origen'])]/following::span[normalize-space(.)='Seleccione una Cuenta'][1])[1]"
+        ]
+      },
+      {
+        "index": 16,
+        "action": "select",
+        "valueKey": "cuenta_destino",
+        "technicalTargetRefs": [
+          "xpath:(//*[normalize-space(.)='Cuenta Destino' and not(*[normalize-space(.)='Cuenta Destino'])]/following::span[normalize-space(.)='Seleccione una Cuenta'][1])[1]"
+        ]
+      },
+      {
+        "index": 17,
+        "action": "fill",
+        "valueKey": "monto",
+        "technicalTargetRefs": [
+          "css:[id=\"transactionDetails_0__AmountPayment\"]"
+        ]
+      },
+      {
+        "index": 18,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ]
+      },
+      {
+        "index": 19,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"el resumen de confirmación de la transferencia\"",
+        "technicalTargetRefs": [
+          "text:el resumen de confirmación de la transferencia"
+        ]
+      },
+      {
+        "index": 20,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"tasa de cambio\"",
+        "technicalTargetRefs": [
+          "text:tasa de cambio"
+        ]
+      },
+      {
+        "index": 21,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:[id=\"frmContinue\"]"
+        ]
+      },
+      {
+        "index": 22,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"la pantalla de validación de identidad\"",
+        "technicalTargetRefs": [
+          "text:la pantalla de validación de identidad"
+        ]
+      },
+      {
+        "index": 23,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:div:visible:text-is(\"SMS\")"
+        ]
+      },
+      {
+        "index": 24,
+        "action": "fill",
+        "valueKey": "token_transferencia",
+        "technicalTargetRefs": [
+          "semantic:segmented_code"
+        ]
+      },
+      {
+        "index": 25,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:[id=\"validate_submit_token\"]"
+        ]
+      },
+      {
+        "index": 26,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"comprobante de transacción exitosa\"",
+        "technicalTargetRefs": [
+          "text:comprobante de transacción exitosa"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-8",
+        "requirement": "Validar que se muestre \"la pantalla de verificación de usuario\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 8,
+        "target": "Verificación de Usuario · Para poder continuar con el acceso a su banca en línea, por favor seleccione un medio por el cual recibir su código de seguridad, luego digite su código de seguridad y haga clic en",
+        "evidence": [
+          "live-step-8"
+        ],
+        "details": {
+          "observedText": "Verificación de Usuario · Para poder continuar con el acceso a su banca en línea, por favor seleccione un medio por el cual recibir su código de seguridad, luego digite su código de seguridad y haga clic en"
+        }
+      },
+      {
+        "id": "jira-oracle-12",
+        "requirement": "Validar que se muestre \"el resumen de sus productos\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 12,
+        "target": "Resumen · Cuentas Cuenta de Ahorro [numero]Cuenta de Ahorro US$190.00 Balance Disponible Cuenta Corriente [numero]Cuenta Corrientes RD$27,213,129.00 Balance Disponible · Tarjetas de Crédito 480861XXXXXX7601 80% Pesos Tarjeta de Crédito RD$24,032.93 Balance Actual RD$5,967.07 Balance Disponible · Tarjetas de Crédito 480861XXXXXX7577 56% Pesos Tarjeta de Crédito RD$36,578.41 Balance Actual RD$28,421.59 Balance Disponible",
+        "evidence": [
+          "live-step-12"
+        ],
+        "details": {
+          "observedText": "Resumen · Cuentas Cuenta de Ahorro [numero]Cuenta de Ahorro US$190.00 Balance Disponible Cuenta Corriente [numero]Cuenta Corrientes RD$27,213,129.00 Balance Disponible · Tarjetas de Crédito 480861XXXXXX7601 80% Pesos Tarjeta de Crédito RD$24,032.93 Balance Actual RD$5,967.07 Balance Disponible · Tarjetas de Crédito 480861XXXXXX7577 56% Pesos Tarjeta de Crédito RD$36,578.41 Balance Actual RD$28,421.59 Balance Disponible"
+        }
+      },
+      {
+        "id": "jira-oracle-19",
+        "requirement": "Validar que se muestre \"el resumen de confirmación de la transferencia\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 19,
+        "target": "Visible heading and nearby content: Volver Atrás Transferencias a Mis Cuentas Datos Confirmación Validación Comprobante Confirmación Cuenta Origen Cuenta Corriente [numero]Cuenta Corrientes RD$27,213,129.00 Balance Disponible Cuenta Destino Cuenta de Ahorro [numero]Cuenta de Ahorro US$190.00 Balance Disponible Detalles Monto a Acreditar US$10.00 Comisión RD$0.00 Impuesto 0.20% RD$0.00 Tasa de Cambio RD$60.50\\US$1.00 No. Acuerdo Trader No disponible Total a Debitar RD$605.00 Más Detalles Cancelar Continuar * Esta transacción está sometida a todos los términos y condiciones del contrato de servicio de canales electrónicos. · Confirmación · Cuenta Origen Cuenta Corriente [numero]Cuenta Corrientes RD$27,213,129.00 Balance Disponible · Cuenta Destino Cuenta de Ahorro [numero]Cuenta de Ahorro US$190.00 Balance Disponible · Monto a Acreditar US$10.00 Comisión RD$0.00 Impuesto 0.20% RD$0.00 Tasa de Cambio RD$60.50\\US$1.00 No. Acuerdo Trader No disponible Total a Debitar RD$605.00",
+        "evidence": [
+          "live-step-19"
+        ],
+        "details": {
+          "observedText": "Visible heading and nearby content: Volver Atrás Transferencias a Mis Cuentas Datos Confirmación Validación Comprobante Confirmación Cuenta Origen Cuenta Corriente [numero]Cuenta Corrientes RD$27,213,129.00 Balance Disponible Cuenta Destino Cuenta de Ahorro [numero]Cuenta de Ahorro US$190.00 Balance Disponible Detalles Monto a Acreditar US$10.00 Comisión RD$0.00 Impuesto 0.20% RD$0.00 Tasa de Cambio RD$60.50\\US$1.00 No. Acuerdo Trader No disponible Total a Debitar RD$605.00 Más Detalles Cancelar Continuar * Esta transacción está sometida a todos los términos y condiciones del contrato de servicio de canales electrónicos. · Confirmación · Cuenta Origen Cuenta Corriente [numero]Cuenta Corrientes RD$27,213,129.00 Balance Disponible · Cuenta Destino Cuenta de Ahorro [numero]Cuenta de Ahorro US$190.00 Balance Disponible · Monto a Acreditar US$10.00 Comisión RD$0.00 Impuesto 0.20% RD$0.00 Tasa de Cambio RD$60.50\\US$1.00 No. Acuerdo Trader No disponible Total a Debitar RD$605.00"
+        }
+      },
+      {
+        "id": "jira-oracle-20",
+        "requirement": "Validar que se muestre \"tasa de cambio\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 20,
+        "target": "Cuenta Origen\nCuenta Corriente\n11081020001299\nCuenta Corrientes\nRD$27,213,129.00\nBalance Disponible\nCuenta Destino\nCuenta de Ahorro\n21082020000619\nCuenta de Ahorro\nUS$190.00\nBalance Disponible\nDetalles\nMonto a Acreditar\nUS$10.00\nComisión\nRD$0.00\nImpuesto 0.20%\nRD$0.00\nTasa de Cambio\nRD$60.50\\US$1.00\nNo. Acuerdo Trader\nNo disponible\nTotal a Debitar\nRD$605.00\nMás Detalles",
+        "evidence": [
+          "live-step-20"
+        ],
+        "details": {
+          "observedText": "Cuenta Origen\nCuenta Corriente\n11081020001299\nCuenta Corrientes\nRD$27,213,129.00\nBalance Disponible\nCuenta Destino\nCuenta de Ahorro\n21082020000619\nCuenta de Ahorro\nUS$190.00\nBalance Disponible\nDetalles\nMonto a Acreditar\nUS$10.00\nComisión\nRD$0.00\nImpuesto 0.20%\nRD$0.00\nTasa de Cambio\nRD$60.50\\US$1.00\nNo. Acuerdo Trader\nNo disponible\nTotal a Debitar\nRD$605.00\nMás Detalles"
+        }
+      },
+      {
+        "id": "jira-oracle-22",
+        "requirement": "Validar que se muestre \"la pantalla de validación de identidad\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 22,
+        "target": "Visible heading and nearby content: Token de Seguridad Datos Confirmación Validación Comprobante Validación Validar Identidad Elige el medio para recibir un Token y colócalo debajo para confirmar la transacción. E-MAIL SMS Cancelar · Validar Identidad",
+        "evidence": [
+          "live-step-22"
+        ],
+        "details": {
+          "observedText": "Visible heading and nearby content: Token de Seguridad Datos Confirmación Validación Comprobante Validación Validar Identidad Elige el medio para recibir un Token y colócalo debajo para confirmar la transacción. E-MAIL SMS Cancelar · Validar Identidad"
+        }
+      },
+      {
+        "id": "jira-oracle-26",
+        "requirement": "Validar que se muestre \"comprobante de transacción exitosa\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 26,
+        "target": "Comprobante\nTransacción Exitosa\nRD$605.00\n23/10/2026 02:52:07 PM\nCuenta Origen\nCuenta Corriente\n11081020001299\nCuenta Corrientes\nCuenta Destino\nCuenta de Ahorro\n21082020000619\nCuenta de Ahorro\nUS$190.00\nBalance Disponible\nDetalles\nMonto a Acreditar:\nUS$10.00\nComisión:\nRD$0.00\nImpuesto 0.20%:\nRD$0.00\nTasa de Cambio:\nRD$60.50\\US$1.00\nNo. Acuerdo Trader\n0\nTotal debitado\nRD$605.00\n# Referencia:\n15263959\nMás Detalles\n\n\nRecibido por los valores indicados en este comprobante.",
+        "evidence": [
+          "live-step-26"
+        ],
+        "details": {
+          "observedText": "Comprobante\nTransacción Exitosa\nRD$605.00\n23/10/2026 02:52:07 PM\nCuenta Origen\nCuenta Corriente\n11081020001299\nCuenta Corrientes\nCuenta Destino\nCuenta de Ahorro\n21082020000619\nCuenta de Ahorro\nUS$190.00\nBalance Disponible\nDetalles\nMonto a Acreditar:\nUS$10.00\nComisión:\nRD$0.00\nImpuesto 0.20%:\nRD$0.00\nTasa de Cambio:\nRD$60.50\\US$1.00\nNo. Acuerdo Trader\n0\nTotal debitado\nRD$605.00\n# Referencia:\n15263959\nMás Detalles\n\n\nRecibido por los valores indicados en este comprobante."
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "Se muestra \"comprobante de transacción exitosa\"."
+  }
+}

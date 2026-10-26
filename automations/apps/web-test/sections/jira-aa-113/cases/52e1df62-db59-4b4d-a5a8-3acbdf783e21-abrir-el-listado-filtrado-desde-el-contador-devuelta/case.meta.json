@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "52e1df62-db59-4b4d-a5a8-3acbdf783e21",
+  "title": "Abrir el listado filtrado desde el contador Devuelta",
+  "generatedAt": "2026-10-26T07:08:57.925Z",
+  "executionEngine": "jira_semantic"
+}

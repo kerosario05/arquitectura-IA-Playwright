@@ -1,0 +1,9 @@
+{
+  "id": "c2b20962-96a0-44ff-932e-b08516a84e13-validar-los-campos-obligatorios-del-registro-de-datos",
+  "externalId": "c2b20962-96a0-44ff-932e-b08516a84e13",
+  "title": "Validar los campos obligatorios del Registro de Datos",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T07:16:58.563Z"
+}

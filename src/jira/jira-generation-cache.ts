@@ -2,7 +2,8 @@ import {createHash} from 'node:crypto';
 import type {ValidatedScenario} from '../scenarios/scenario-types';
 import type {AiMessage,AiProvider} from '../ai/ai-provider.types';
 
-export type JiraGenerationResult={scenarios:ValidatedScenario[];rejected:Array<{sourceIssueKey:string;title:string;reason:string}>};
+export type JiraGenerationResult={scenarios:ValidatedScenario[];rejected:Array<{sourceIssueKey:string;title:string;reason:string}>;
+ coverage?:Array<{sourceIssueKey:string;total:number;covered:number;status:'complete'|'incomplete';missingClauses:Array<{id:string;text:string}>}>};
 export function jiraGenerationCacheKey(provider:Pick<AiProvider,'model'|'providerName'|'providerType'>,messages:AiMessage[]):string{
  return createHash('sha256').update(JSON.stringify({provider,messages})).digest('hex');
 }

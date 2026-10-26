@@ -11,22 +11,33 @@ Ingresar <data description> en "<exact field label>"
 Seleccionar <data description> en "<exact field label>"
 Validar que se muestre "<source-backed observable target>"
 Validar que no se muestre "<source-backed observable target>"
+Validar que en el encabezado se muestre "<source-backed authenticated identity or role>"
 Validar que el campo "<exact field label>" muestre un error de validación
 Templates are not UI labels. Use ONLY the selected project's source/knowledge.
+Use the header template only when the story or this project's validated knowledge explicitly requires checking the signed-in user's identity/role in the application header. Require one exact visible match outside navigation; never infer a name/role or use header scope for ordinary page content.
 An observed and validated edited action outranks a generic request description. If this project's
 validated route clicks a channel control, preserve Presionar "<observed label>" at that same stage;
 do not turn it back into Solicitar el código por SMS. This is evidence priority, not a global SMS rule.
-Knowledge targetKind=semantic_request is a request INTENT, not a literal button label: render it as
-Solicitar <request>, never Presionar "<request>". Missing targetKind is legacy evidence, not control-label certification.
+Knowledge targetKind=semantic_request is intent, not a control label. Render Solicitar only for a
+runtime-supported request for a source-named security code/token through its named channel. For any
+other business request, use Presionar "<exact observed control label>" only when the source or a
+validated route identifies it; otherwise keep the requirement unresolved and do not claim executable
+coverage. Never write pseudo-controls such as "Solicitar crear una solicitud" or
+"Presionar la acción para abrir..." as clickable targets. Missing targetKind is legacy evidence, not
+control-label certification.
 Keep editable values in inputRequirements, never {{placeholders}}, selectors or secret literals in steps.
 Each fill/select needs one matching inputRequirement with label, operation and 1-based stepIndex.
 Preserve its semantic key when repairing; update indices after inserting/splitting/reordering steps.
 Distinct security challenges need distinct keys even when field labels repeat.
+For a search/list/table match, use the runtime's row oracle: "Validar que la fila coincidente aparezca en \"<exact visible list or table label>\"".
+The journey must enter/select the search value in its exact field before that assertion so the row oracle can bind it.
+Never write a neutral claim such as "la consulta indica una coincidencia" or infer a list/table label.
+Use this row form only when the exact container is in the source or this project's validated knowledge; otherwise leave that observation unresolved and do not claim the criterion as executable coverage.
 Preserve every intervening observed action in journey order; never append missing setup at the end.
 After the expected rejection, assert its source-backed feedback and forbidden outcome, then STOP that branch.
 Never continue into authenticated actions after rejected credentials or an invalid access code.
 Keep applicability in conditionRequirements, not "if applicable" inside executable prose.
-Never replace value comparisons, field errors or row relations with simple visibility assertions.
+Never replace value comparisons, field errors or row relations with simple visibility assertions. Ordinary text assertions target active page content; use the explicit header template only for a source-backed authenticated identity/role rendered in the application header.
 Missing route/label/condition evidence stays unresolved: never invent UI or omit an acceptance criterion.
 For JIRA_GENERATED_STEP_NOT_ATOMIC split only the affected action using source-backed labels.
 For JIRA_GENERATED_FIELD_UNBOUND bind the exact field and operation to its inputRequirement.
@@ -38,8 +49,9 @@ and mark its actual message surface unresolved when no project observation ident
 For JIRA_GENERATED_ASSERTION_NOT_ATOMIC split only the failing validation into separate supported checks,
 preserving every subject, polarity and condition binding. Do not split a literal quoted label itself.
 For JIRA_GENERATED_NARRATIVE_TARGET use the source-backed rejection requirement with an unresolved
-message observation, not a fabricated literal message. For JIRA_GENERATED_REQUEST_AS_CONTROL restore
-the learned semantic request when that is the evidence, or the verified control label when available.
+message observation, not a fabricated literal message. For JIRA_GENERATED_REQUEST_AS_CONTROL keep a
+Solicitar action only for a runtime-supported source-named security code/token request; otherwise
+replace it with the exact verified control label when available, or leave the requirement unresolved.
 For JIRA_GENERATED_EXPECTED_RESULT_IS_READINESS summarize the explicit functional assertions and retain
 all preparation uncertainties separately. Never repair an error by deleting its business requirement.
 `;
@@ -112,6 +124,20 @@ export function auditJiraStepDelivery(steps: string[], fields: JiraInputRequirem
   return steps.flatMap((step, offset) => {
     const operations = parseStepIntent(step).filter(intent => OPERATIONS.has(intent.type));
     const issue = (reason: string) => [{ reason, stepIndex: offset + 1, step }];
+    const sourceLabels = [...sourceText.matchAll(/["“]([^"”]+)["”]/g)]
+      .map(match => match[1].normalize('NFKD').replace(/[\u0300-\u036f]/g, '').trim().toLocaleLowerCase());
+    const request = step.trim().replace(/[.!?]+$/, '').match(/^(?:Solicitar|Request)\s+(.+)$/i);
+    const supportedChannelRequest = request && /^(?:(?:el|un)\s+)?(?:c[oó]digo(?:\s+de\s+(?:acceso|verificaci[oó]n))?|token(?:\s+de\s+seguridad)?)\s+(?:por|v[ií]a|by|via)\s+(?:el\s+)?(?:SMS|correo electr[oó]nico|email)$/i.test(request[1]);
+    const requestTarget = operations.find(intent => intent.type === 'action_click')?.actionTarget
+      ?.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').trim().toLocaleLowerCase();
+    if (request && !supportedChannelRequest && (!requestTarget || !sourceLabels.includes(requestTarget))) {
+      return issue('JIRA_GENERATED_REQUEST_AS_CONTROL');
+    }
+    const narrativeAction = step.trim().match(/^(?:Presionar|Pulsar|Hacer clic en|Click)\s+(?:la\s+)?acci[oó]n\s+(?:para|de)\s+(.+)$/i)?.[1]
+      ?.replace(/[.!?]+$/, '').trim().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase();
+    if (narrativeAction && narrativeAction !== 'continuar' && !sourceLabels.includes(narrativeAction)) {
+      return issue('JIRA_GENERATED_REQUEST_AS_CONTROL');
+    }
     const requestAsControl=step.match(/^Presionar "((?:el|la)\s+.+?\s+(?:por|by)\s+.+)"[.]?$/i)?.[1];
     if (requestAsControl && !sourceText.includes(`"${requestAsControl}"`)) return issue('JIRA_GENERATED_REQUEST_AS_CONTROL');
     if (/^(?:Validar|Verificar)\b/i.test(step)

@@ -4,6 +4,8 @@ import path from "path";
 import fs from "fs";
 import { randomUUID, createHash } from "crypto";
 import { loadScenarios, saveScenarios } from "../../recording/recording-store";
+import { loadRecordingEvidenceSources, type RecordingEvidenceSelection, type RecordingEvidenceSource } from "../../recording/recording-document-source";
+export type { RecordingEvidenceSource } from "../../recording/recording-document-source";
 import { verifyPromotedSpec } from "../../automations/promote-plan";
 import { startJiraSemanticRun } from "./jira-semantic-runner";
 import { jobStore, type JobSummary, type JobStatus } from "./job-store";
@@ -95,6 +97,7 @@ export async function consolidateRunEvidence(
   caseOutcomeMap?: Map<string, CaseOutcomeEntry>,
   additionalScenarios: EvidenceScenarioRecord[] = [],
   evidenceRequirement?: string,
+  recordingScenarioSources: readonly RecordingEvidenceSource[] = [],
 ): Promise<{ docxPath?: string; evidenceJsonPath?: string } | undefined> {
   try {
     const evidenceConfig = loadEvidenceConfig();
@@ -112,6 +115,7 @@ export async function consolidateRunEvidence(
       sectionName,
       requirement: evidenceRequirement,
       analystName: String(jobStore.get(jobId)?.params.analystName || "") || undefined,
+      environment: String(jobStore.get(jobId)?.params.environment || "") || undefined,
       runId: jobId,
       outputRoot: evidenceRoot,
     });
@@ -137,6 +141,7 @@ export async function consolidateRunEvidence(
       }
     }
     const includedScenarioIds = new Set<string>();
+    const recordingSourceById = new Map(recordingScenarioSources.map((scenario) => [scenario.scenarioId, scenario]));
 
     console.log(`[evidence:run] searching for scenarios in runDirs=${[...runDirs].join("|")}`);
 
@@ -163,7 +168,13 @@ export async function consolidateRunEvidence(
             continue;
           }
           console.log(`[evidence:run] loading scenario evidence from ${evidenceJsonPath}`);
-          await runRecorder.addScenarioFromFile(evidenceJsonPath);
+          const source = scenarioId ? recordingSourceById.get(scenarioId) : undefined;
+          if (source) {
+            const parsedEvidence = JSON.parse(fs.readFileSync(evidenceJsonPath, "utf8")) as EvidenceScenarioRecord;
+            runRecorder.addScenario(projectRecordingEvidence(parsedEvidence, source));
+          } else {
+            await runRecorder.addScenarioFromFile(evidenceJsonPath);
+          }
           if (scenarioId) includedScenarioIds.add(scenarioId);
         } else {
           console.log(`[evidence:run] evidence.json not found in ${scenarioDir}`);
@@ -224,6 +235,62 @@ export async function consolidateRunEvidence(
     console.log(`[evidence:run] consolidation failed jobId=${jobId}: ${err.message}`);
     return undefined;
   }
+}
+
+/** Restore the authored Recording case contract at report time. Runtime evidence contains
+ * low-level Playwright actions (including one row per virtual-keyboard character); those are
+ * execution diagnostics, not the steps QA authored and should not be published in the PDF. */
+function projectRecordingEvidence(
+  evidence: EvidenceScenarioRecord,
+  source: RecordingEvidenceSource,
+): EvidenceScenarioRecord {
+  const authoredSteps = source.documentSteps?.length
+    ? source.documentSteps
+    : source.steps?.map((text, index) => ({ text, sourceStepIndexes: [index + 1] })) ?? [];
+  if (authoredSteps.length === 0) return evidence;
+  const steps = authoredSteps.map((authoredStep, index) => {
+    const authoredIndex = index + 1;
+    const matchingRuntimeSteps = evidence.steps.filter((step) => authoredStep.sourceStepIndexes.includes(step.stepIndex ?? -1));
+    const observedSteps = matchingRuntimeSteps.length > 0
+      ? matchingRuntimeSteps
+      : !source.documentSteps && evidence.steps[index] ? [evidence.steps[index]] : [];
+    const isProjectEntry = /^(?:abrir la aplicaci[oó]n|project entry)\b/i.test(authoredStep.text.trim());
+    const initialScreenReady = evidence.initialScreenEvidence?.status === "ready"
+      && evidence.initialScreenEvidence?.captured === true;
+    // Evidence rows are emitted for actions that produce runtime checkpoints. Setup/navigation
+    // and keyboard actions can execute successfully without a dedicated row, so rely on the
+    // authoritative functional outcome only when the step itself has no contradictory result.
+    const successfulRunConfirmsUnobservedStep = observedSteps.length === 0
+      && (evidence.functionalStatus === "passed" || evidence.status === "Exitoso");
+    const status = observedSteps.some((step) => step.status === "failed")
+      ? "failed" as const
+      : observedSteps.length === 0 && (successfulRunConfirmsUnobservedStep || (isProjectEntry && initialScreenReady))
+        ? "passed" as const
+        : observedSteps.length === 0 || observedSteps.every((step) => step.status === "skipped")
+        ? "skipped" as const
+        : "passed" as const;
+    const representative = [...observedSteps].reverse().find((step) => step.screenshotPath || step.screenId) ?? observedSteps.at(-1);
+    return {
+      index: authoredIndex,
+      stepIndex: authoredIndex,
+      stepText: authoredStep.text,
+      status,
+      timestamp: representative?.timestamp ?? evidence.date,
+      ...(representative?.screenId ? { screenId: representative.screenId } : {}),
+      ...(representative?.screenTitle ? { screenTitle: representative.screenTitle } : {}),
+      ...(representative?.screenshotPath ? { screenshotPath: representative.screenshotPath } : {}),
+      ...(representative?.screenshotSettled !== undefined ? { screenshotSettled: representative.screenshotSettled } : {}),
+    };
+  });
+  return {
+    ...evidence,
+    scenarioTitle: source.title || evidence.scenarioTitle,
+    expectedResult: source.expectedResult?.trim() || evidence.expectedResult,
+    preconditions: source.preconditions?.length ? source.preconditions : evidence.preconditions,
+    testData: source.testData?.length ? source.testData : evidence.testData,
+    evidenceKind: "recording_replay",
+    steps,
+  };
 }
 
 function isTechnicalSlug(slug: string): boolean {
@@ -401,6 +468,10 @@ export type ReuseExistingPromotedSpecScenario = {
   title: string;
   /** Human-readable steps are sent with case_started so the live panel can render the active case immediately. */
   steps?: string[];
+  documentSteps?: Array<{ text: string; sourceStepIndexes: number[] }>;
+  expectedResult?: string;
+  preconditions?: string[];
+  testData?: Array<{ label: string; value: string }>;
   /** This scenario's own current "Datos de este escenario" values -- see rerun-runner.ts's
    * PromotedSpecReuseEntry.runtimeValues doc comment for provenance. */
   runtimeValues?: Record<string, string>;
@@ -599,6 +670,11 @@ export async function startReuseExistingPromotedSpecRun(
         caseOutcomeMap,
         [],
         typeof job.params.evidenceRequirement === "string" ? job.params.evidenceRequirement : undefined,
+        Array.isArray(job.params.recordingDocumentSources)
+          ? job.params.recordingDocumentSources as RecordingEvidenceSource[]
+          : Array.isArray(job.params.recordingSelections)
+            ? loadRecordingEvidenceSources(job.params.recordingSelections as RecordingEvidenceSelection[])
+            : scenarios,
       );
   // Only claim a document exists if the DOCX was actually written to disk — a consolidation
   // pass with zero scenario evidence.json files (or one that threw) never fabricates one.
@@ -3079,6 +3155,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
         targetAppName: params.targetAppName ?? params.targetAppSlug ?? appSlug,
         sectionName: p.sectionName,
         sectionSlug: sectionSlug ?? null,
+        environment: typeof params.environment === "string" ? params.environment.trim() : undefined,
         sourceJobId: params.sourceJobId,
         rerunMode: params.rerunMode,
         options: params.options,
@@ -3095,7 +3172,12 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
     // Consolidate run evidence into single DOCX — skipped when a mixed-rerun orchestrator owns
     // consolidation for the parent run this subset belongs to.
     if (!executionContext?.suppressEvidenceConsolidation) {
-      await consolidateRunEvidence(evidenceRunId, appSlug, sectionSlug, p.sectionName, caseOutcomeMap, [], p.evidenceRequirement);
+      const recordingScenarioSources = Array.isArray(job.params.recordingDocumentSources)
+        ? job.params.recordingDocumentSources as RecordingEvidenceSource[]
+        : Array.isArray(job.params.recordingSelections)
+          ? loadRecordingEvidenceSources(job.params.recordingSelections as RecordingEvidenceSelection[])
+          : [];
+      await consolidateRunEvidence(evidenceRunId, appSlug, sectionSlug, p.sectionName, caseOutcomeMap, [], p.evidenceRequirement, recordingScenarioSources);
     }
     recordQaLabDiagnosticPhase(diagnosticManifestPath, "completed", finalStatus, {
       resultPath: finalResultsPath,

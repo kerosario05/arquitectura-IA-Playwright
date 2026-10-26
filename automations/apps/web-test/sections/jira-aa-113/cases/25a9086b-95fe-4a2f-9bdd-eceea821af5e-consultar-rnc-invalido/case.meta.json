@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "25a9086b-95fe-4a2f-9bdd-eceea821af5e",
+  "title": "Consultar RNC inválido",
+  "generatedAt": "2026-10-26T06:27:37.753Z",
+  "executionEngine": "jira_semantic"
+}

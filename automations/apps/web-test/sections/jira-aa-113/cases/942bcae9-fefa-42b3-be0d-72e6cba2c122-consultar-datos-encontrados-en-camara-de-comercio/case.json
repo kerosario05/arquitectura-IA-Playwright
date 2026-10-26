@@ -1,0 +1,9 @@
+{
+  "id": "942bcae9-fefa-42b3-be0d-72e6cba2c122-consultar-datos-encontrados-en-camara-de-comercio",
+  "externalId": "942bcae9-fefa-42b3-be0d-72e6cba2c122",
+  "title": "Consultar datos encontrados en Cámara de Comercio",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T06:33:40.959Z"
+}

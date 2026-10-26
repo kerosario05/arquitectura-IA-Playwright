@@ -3,6 +3,7 @@ import path from 'node:path';
 import {runCodexCli} from '../agent/codex-cli-runner';
 import {resolveCodexCliPath} from '../agent/codex-cli-resolver';
 import {AiProviderError,type AiProvider,type AiProviderConfig} from '../ai/ai-provider.types';
+import {JIRA_SCENARIO_REPAIR_SCHEMA_NAME,jiraScenarioRepairOutputSchema} from './jira-scenario-repair-contract';
 
 const text={type:'string'};
 const strings={type:'array',items:text};
@@ -35,7 +36,8 @@ export async function createJiraCodexProvider(config:AiProviderConfig,runner=run
  return {providerType:'codex_cli',providerName:config.providerName,model:config.model,async completeJson(request){
   const purpose=request.purpose ?? 'general';
   if(!jiraStructuredPurposes.has(purpose)) throw new AiProviderError('ai_provider_unsupported','Dedicated Jira provider received an unsupported task purpose.');
-  const outputSchema=purpose==='scenario_generation' ? jiraScenarioOutputSchema : request.jsonSchema?.schema;
+  const repair=purpose==='scenario_generation' && request.jsonSchema?.name===JIRA_SCENARIO_REPAIR_SCHEMA_NAME;
+  const outputSchema=purpose==='scenario_generation' ? (repair ? jiraScenarioRepairOutputSchema : jiraScenarioOutputSchema) : request.jsonSchema?.schema;
   if(!outputSchema) throw new AiProviderError('ai_provider_schema_invalid','Jira DOM decisions require an output schema.');
   const root=path.resolve('.artifacts/ai-provider/jira-structured');
   await mkdir(root,{recursive:true});
@@ -67,7 +69,7 @@ export async function createJiraCodexProvider(config:AiProviderConfig,runner=run
    if(result.timedOut) throw new AiProviderError('ai_provider_timeout',`${outputLabel(purpose)} timed out before writing a complete response.`,diagnostics);
    throw new AiProviderError('ai_provider_invalid_json',`${outputLabel(purpose)} response was invalid JSON.`,diagnostics);
   }
-  if(purpose==='scenario_generation' && (!Array.isArray(parsedJson.scenarios) || !parsedJson.scenarios.length || !parsedJson.scenarios.every(item=>item && typeof item==='object' && typeof item.sourceIssueKey==='string' && typeof item.title==='string' && Array.isArray(item.steps) && item.steps.every((step:unknown)=>typeof step==='string') && typeof item.expectedResult==='string'))) throw new AiProviderError('ai_provider_schema_invalid','Jira structured response did not contain valid scenario drafts.',diagnostics);
+  if(purpose==='scenario_generation' && (!Array.isArray(parsedJson.scenarios) || (!repair && !parsedJson.scenarios.length) || !parsedJson.scenarios.every(item=>item && typeof item==='object' && typeof item.sourceIssueKey==='string' && typeof item.title==='string' && Array.isArray(item.steps) && item.steps.every((step:unknown)=>typeof step==='string') && (repair ? Array.isArray(item.inputRequirements) && Array.isArray(item.unresolvedUiRequirements) : typeof item.expectedResult==='string')))) throw new AiProviderError('ai_provider_schema_invalid','Jira structured response did not contain valid scenario drafts.',diagnostics);
   if(purpose!=='scenario_generation' && !isValidDomDecision(purpose,parsedJson)) throw new AiProviderError('ai_provider_schema_invalid','Jira DOM decision response did not match its decision contract.',diagnostics);
   // Small, read-only DOM tasks may finish their structured response at the
   // deadline while the CLI is still shutting down. Accept only a complete,

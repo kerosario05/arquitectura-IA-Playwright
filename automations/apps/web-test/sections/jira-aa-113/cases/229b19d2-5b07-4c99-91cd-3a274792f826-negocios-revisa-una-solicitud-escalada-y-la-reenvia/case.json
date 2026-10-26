@@ -1,0 +1,9 @@
+{
+  "id": "229b19d2-5b07-4c99-91cd-3a274792f826-negocios-revisa-una-solicitud-escalada-y-la-reenvia",
+  "externalId": "229b19d2-5b07-4c99-91cd-3a274792f826",
+  "title": "Negocios revisa una solicitud escalada y la reenvía",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T06:56:39.537Z"
+}

@@ -23,13 +23,13 @@ function humanize(value: string): string {
 }
 
 function inputLabel(key: string, step: ExecutionPlanStep | undefined, scenario: TestScenario, plan: ExecutionPlan): string {
-  const sourceStep = key.match(/^jira_step_(\d+)$/i);
-  if (sourceStep) {
+  const sourceStepIndex = jiraSourceInputStepIndex(key);
+  if (sourceStepIndex !== undefined) {
     const jiraStepDescription = jiraSourceStepDescription(plan, key);
     if (jiraStepDescription) return jiraStepDescription;
     const observedTargetLabel = jiraTargetLabel(step);
     if (observedTargetLabel) return observedTargetLabel;
-    const authoredStep = scenario.steps.find((candidate) => candidate.index === Number(sourceStep[1]));
+    const authoredStep = scenario.steps.find((candidate) => candidate.index === sourceStepIndex);
     if (authoredStep?.action.trim()) return authoredStep.action.trim();
   }
   if (step?.description?.trim()) {
@@ -37,6 +37,14 @@ function inputLabel(key: string, step: ExecutionPlanStep | undefined, scenario: 
     if (!/^\[[^\]]+\]$/.test(description)) return description;
   }
   return humanize(key);
+}
+
+function jiraSourceInputStepIndex(key: string): number | undefined {
+  const match = key.match(/^jira_step_(\d+)$/i)
+    ?? key.match(/^jira_edit_[a-f0-9]{8,}_(\d+)$/i);
+  if (!match) return undefined;
+  const stepIndex = Number(match[1]);
+  return Number.isSafeInteger(stepIndex) && stepIndex > 0 ? stepIndex : undefined;
 }
 
 function jiraSourceStepDescription(plan: ExecutionPlan, key: string): string | undefined {
@@ -63,6 +71,7 @@ function humanizeTargetIdentifier(value: string): string | undefined {
     password: "Contraseña",
     token: "Token",
     code: "Código",
+    clave: "Contraseña",
   };
   return tokens.map((token) => localized[token.toLowerCase()] ?? token).join(" ");
 }

@@ -1,0 +1,9 @@
+{
+  "id": "9f7972cc-b7d5-48ec-b869-d084001932e4-consultar-prospecto-con-coincidencia-restrictiva-en-listas",
+  "externalId": "9f7972cc-b7d5-48ec-b869-d084001932e4",
+  "title": "Consultar prospecto con coincidencia restrictiva en listas",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T06:39:25.276Z"
+}

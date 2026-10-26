@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { chromium } from "@playwright/test";
 import type { TestInfo } from "@playwright/test";
-import { assertJiraSpecVisibleText, awaitJiraSpecPostLoginTransition, clickJiraSpecTarget, completeJiraSpecAccessCodeGate, isJiraAuthenticatedShell, JIRA_NO_SHELL_EVIDENCE, jiraAccessCodeGatePageDriver, mergeJiraAuthTestData, resolveJiraAccessCodeOtp, type JiraAccessCodeGateDriver, type JiraAccessCodeGateEvidence, type JiraAuthenticatedShellEvidence, performJiraSpecSelection, reportJiraSpecStepComplete, resolveJiraSpecTarget, resolveJiraSpecValue } from "./jira-spec-runtime";
+import { assertJiraSpecFieldEmpty, assertJiraSpecFieldEnabled, assertJiraSpecHeaderText, assertJiraSpecVisibleText, awaitJiraSpecPostLoginTransition, clickJiraSpecTarget, completeJiraSpecAccessCodeGate, isJiraAuthenticatedShell, JIRA_NO_SHELL_EVIDENCE, jiraAccessCodeGatePageDriver, mergeJiraAuthTestData, resolveJiraAccessCodeOtp, type JiraAccessCodeGateDriver, type JiraAccessCodeGateEvidence, type JiraAuthenticatedShellEvidence, performJiraSpecSelection, reportJiraSpecStepComplete, resolveJiraSpecTarget, resolveJiraSpecValue } from "./jira-spec-runtime";
 import { __setJiraDomTargetResolverForTesting } from "./jira-dom-target-ai";
 import { __setJiraDomAssertionResolverForTesting } from "./jira-dom-assertion-ai";
 import { compileJiraSpec } from "./jira-spec-compiler";
@@ -335,6 +335,20 @@ test("Jira semantic assertion accepts duplicate page text but ignores navigation
 
     await page.setContent('<nav><a>Resumen</a></nav><main><h1>Otra pantalla</h1></main>');
     await assert.rejects(assertJiraSpecVisibleText(page, "Resumen", 200));
+  } finally {
+    await browser.close();
+  }
+});
+
+test("Jira header identity assertion requires one exact visible non-navigation header leaf", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    await page.setContent('<header><nav><a>Inicio</a></nav><div><span>María Pérez</span></div></header><main><h1>Bienvenida</h1></main>');
+    await assertJiraSpecHeaderText(page, "Maria Perez", 500);
+    await assertJiraSpecVisibleText(page, "Bienvenida", 500);
+    await assert.rejects(assertJiraSpecHeaderText(page, "Inicio", 100), /JIRA_SPEC_HEADER_ASSERTION_NOT_SATISFIED/);
+    await assert.rejects(assertJiraSpecHeaderText(page, "No existe", 100), /JIRA_SPEC_HEADER_ASSERTION_NOT_SATISFIED/);
   } finally {
     await browser.close();
   }
@@ -1133,4 +1147,20 @@ test("Jira compiler carries step semantics alongside a technical locator for run
   const compiled = compileJiraSpec({ plan, sourceScenario: {}, appSlug: "fixture", sectionSlug: "jira", automationId: "case", specPath: "fixture/case.spec.ts" });
   assert.deepEqual(compiled.unsupported, []);
   assert.ok(compiled.source.includes('clickJiraSpecTarget(page, {"strategy":"css","value":"#discovery-id"}, 2500, "Presionar \\\"Autorizar transferencia\\\"")'));
+});
+
+test("promoted field-state assertions verify actual enabled and empty control state", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    await page.setContent('<label for="country">País de Origen</label><input id="country" value=""><label for="registration">Registro</label><input id="registration" disabled value="x">');
+    await assertJiraSpecFieldEmpty(page, "País de Origen");
+    await assert.rejects(assertJiraSpecFieldEnabled(page, "Registro"), /JIRA_SPEC_FIELD_NOT_ENABLED/);
+    await page.locator("#registration").evaluate(field => { (field as HTMLInputElement).disabled = false; });
+    await assertJiraSpecFieldEnabled(page, "Registro");
+    await page.locator("#country").fill("NIT");
+    await assert.rejects(assertJiraSpecFieldEmpty(page, "País de Origen"), /JIRA_SPEC_FIELD_NOT_EMPTY/);
+  } finally {
+    await browser.close();
+  }
 });

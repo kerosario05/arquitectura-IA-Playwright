@@ -1,0 +1,9 @@
+{
+  "id": "4b06323f-2f6e-4f8a-a85f-d984b2f12699-consultar-una-empresa-con-identificacion-distinta-a-rnc",
+  "externalId": "4b06323f-2f6e-4f8a-a85f-d984b2f12699",
+  "title": "Consultar una empresa con identificación distinta a RNC",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T06:37:31.305Z"
+}

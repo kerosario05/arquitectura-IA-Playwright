@@ -1,0 +1,56 @@
+{
+  "id": "be69ebab-8b00-4c35-887d-c8b6b03152ba-negocios-revisa-una-solicitud-devuelta-y-la-reenvia",
+  "externalId": "be69ebab-8b00-4c35-887d-c8b6b03152ba",
+  "title": "Negocios revisa una solicitud devuelta y la reenvía",
+  "planPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\be69ebab-8b00-4c35-887d-c8b6b03152ba-negocios-revisa-una-solicitud-devuelta-y-la-reenvia\\plan.json",
+  "specPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\be69ebab-8b00-4c35-887d-c8b6b03152ba-negocios-revisa-una-solicitud-devuelta-y-la-reenvia\\case.spec.ts",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "web-test",
+  "baseUrlHash": "4e1194428e74",
+  "createdAt": "2026-10-26T06:55:16.366Z",
+  "updatedAt": "2026-10-26T06:55:16.366Z",
+  "specVerificationStatus": "passed",
+  "tags": [
+    "jira_semantic",
+    "jira_generated"
+  ],
+  "metadata": {
+    "specGeneration": {
+      "mode": "deterministic",
+      "provider": null,
+      "model": null,
+      "invocations": 0,
+      "invocationsConsumed": 0,
+      "durationMs": 0,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "passed",
+        "typescript": "skipped",
+        "playwrightDiscovery": "skipped",
+        "semanticCoverage": "passed",
+        "functionalExecution": "passed"
+      },
+      "promotionAllowed": true,
+      "specsRequested": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
+      "specWritten": true,
+      "errors": [],
+      "warnings": []
+    }
+  }
+}

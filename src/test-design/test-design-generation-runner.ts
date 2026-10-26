@@ -1,8 +1,7 @@
 import type { AiProvider } from "../ai/ai-provider.types";
 import * as repo from "../db/test-design-repository";
 import {
-  generateTestDesignScenarios,
-  keptScenarioTitles,
+  generateTestDesignScenariosWithCoverage,
   mergeRegenerated,
   testDesignReviewWarning,
 } from "./test-design-generator";
@@ -119,16 +118,18 @@ async function generateOne(
   const started = Date.now();
   try {
     const issue = await deps.loadIssue(story.issueKey);
-    const generated = await generateTestDesignScenarios(issue, {
+    const generated = await generateTestDesignScenariosWithCoverage(issue, {
       provider,
       appSlug,
       instructions,
-      existingTitles: keptScenarioTitles(story.scenarios),
     });
     // Re-read: the story may have been edited while the model was working.
     const current = (await repo.getStory(draftId, story.id))?.scenarios ?? story.scenarios;
-    const scenarios = mergeRegenerated(current, generated);
-    const reviewWarning = testDesignReviewWarning(generated);
+    const scenarios = mergeRegenerated(current, generated.scenarios.map(scenario => ({
+      ...scenario,
+      knowledgeProfileSlug: appSlug,
+    })));
+    const reviewWarning = testDesignReviewWarning(generated.scenarios, generated.coverage);
     await finish(draftId, story, {
       status: reviewWarning ? "failed" : "ready",
       ...(reviewWarning ? { error: reviewWarning } : {}),
@@ -136,7 +137,7 @@ async function generateOne(
       issueSummary: issue.summary,
     });
     console.log(
-      `[test-design:generation] ${story.issueKey} ${reviewWarning ? "incompleta; borradores para revisión" : "lista"}: ${generated.length} generados, ` +
+      `[test-design:generation] ${story.issueKey} ${reviewWarning ? "incompleta; borradores para revisión" : "lista"}: ${generated.scenarios.length} generados, ` +
         `${scenarios.length} en total (${Date.now() - started} ms)`,
     );
   } catch (err) {

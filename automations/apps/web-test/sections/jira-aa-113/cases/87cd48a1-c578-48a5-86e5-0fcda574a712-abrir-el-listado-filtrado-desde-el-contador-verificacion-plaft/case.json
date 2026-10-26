@@ -1,0 +1,9 @@
+{
+  "id": "87cd48a1-c578-48a5-86e5-0fcda574a712-abrir-el-listado-filtrado-desde-el-contador-verificacion-plaft",
+  "externalId": "87cd48a1-c578-48a5-86e5-0fcda574a712",
+  "title": "Abrir el listado filtrado desde el contador Verificación PLAFT",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T07:06:10.663Z"
+}

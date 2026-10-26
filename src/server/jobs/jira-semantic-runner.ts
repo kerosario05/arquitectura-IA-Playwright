@@ -6,18 +6,18 @@ import { chromium, firefox, webkit } from "@playwright/test";
 import { jobStore } from "./job-store";
 import { config, requireTestRailConfig } from "../../config/env";
 import { loadAppConfig } from "../../automations/app-auto-resolver";
-import { discoverJiraScenario, createJiraPlaywrightPort, normalizeJiraScenarioForExecution, observeAuthStageSettled, JiraRequiredDataError, jiraTargetDiagnosticField, type JiraScenarioInput } from "../../jira/jira-semantic-executor";
+import { discoverJiraScenario, createJiraPlaywrightPort, normalizeJiraScenarioForExecution, observeAuthStageSettled, JiraRequiredDataError, jiraScenarioHasAuthoredCredentialEntry, jiraTargetDiagnosticField, type JiraScenarioInput } from "../../jira/jira-semantic-executor";
 import { completeObservedOtpStage } from "../../jira/jira-observed-otp";
 import { scanCurrentPage } from "../../explorer/page-scanner";
 import { hasJiraAuthGateData, mapJiraAuthTestData, resolveJiraAuthFlow } from "./jira-auth-flow-wiring";
 import { resolveExecutionEngine } from "../../jira/execution-origin";
 import { launchRuntimeBrowserSession, type RuntimeBrowserSession } from "../../browser/browser-session";
-import { JiraSpecVerificationError, promoteJiraSpec } from "../../jira/jira-spec-promotion";
+import { JiraPromotionIndexError, JiraSpecVerificationError, promoteJiraSpec } from "../../jira/jira-spec-promotion";
 import { TestRailClient } from "../../clients/testrail.client";
 import { buildDataContext } from "../../data/data-context";
 import { detectCredentialRole } from "../../data/data-key-resolver";
 import { redactJiraScenarioInputs } from "../../jira/jira-rerun-manifest";
-import { findJiraInvalidInputCollisions, jiraScenarioRuntimeValues, resolveJiraConfiguredInputValues } from "../../jira/jira-runtime-values";
+import { authoredNegativeInputValues, findJiraInvalidInputCollisions, inferJiraScenarioInputConditions, jiraInvalidInputCollisionDiagnostic, jiraScenarioRuntimeValues, resolveJiraConfiguredInputValues } from "../../jira/jira-runtime-values";
 import { RunEvidenceRecorder } from "../../evidence/run-evidence-recorder";
 import { buildEvidenceRunPaths } from "../../evidence/evidence-paths";
 import { loadEvidenceConfig } from "../../evidence/evidence-types";
@@ -46,6 +46,7 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
   let session: RuntimeBrowserSession | undefined;
   let passed = 0, failed = 0;
   const results: Array<Record<string, unknown>> = [];
+  const dataValuesByScenario: Record<string, Record<string, string>> = {};
   const dir = path.resolve(".artifacts/scenario-preview-runs", jobId);
   const emit = (event: Record<string, unknown>) => jobStore.appendLog(jobId, JSON.stringify({ executionEngine: "jira_semantic", ...event }));
   const cancelled = () => jobStore.get(jobId)?.status === "cancelled";
@@ -106,7 +107,8 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
       let discoveryCompleted = false;
       const caseId = scenario.scenarioId;
       const normalization = normalizeJiraScenarioForExecution({ ...scenario, appSlug }, appSlug);
-      const reviewed = prepareJiraScenarioReview(normalization.scenario);
+      const conditionedScenario = inferJiraScenarioInputConditions(normalization.scenario);
+      const reviewed = prepareJiraScenarioReview(conditionedScenario);
       const executionScenario = reviewed.scenario;
       if (normalization.removedFrameworkPreconditions) emit({ type: "framework_preconditions_normalized", caseId, removedCount: 6 });
       if (normalization.removedRedundantOrdinalSelectionCount) emit({ type: "redundant_ordinal_selection_removed", caseId,
@@ -128,6 +130,16 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
           profileUsername: runtimeConfig.app.username,
           profilePassword: runtimeConfig.app.password,
         });
+        // A negative scenario that authors its concrete input (e.g. an invalid
+        // identifier) must not inherit a valid profile default. Explicit launch
+        // overrides still win; the authored value fills only an unresolved
+        // negative requirement.
+        for (const [key, value] of Object.entries(authoredNegativeInputValues(
+          executionScenario.steps,
+          executionScenario.inputRequirements ?? [],
+        ))) {
+          if (!resolvedScenarioValues[key]) resolvedScenarioValues[key] = value;
+        }
         // Use the scenario resolver's scoped values only. Merging the whole project
         // data context here can reintroduce a valid configured OTP/token into a
         // negative input that the resolver intentionally left unresolved.
@@ -136,6 +148,7 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
           configuredRuntimeValues,
           executionScenario.inputRequirements ?? [],
         );
+        dataValuesByScenario[scenario.scenarioId] = effectiveRuntimeValues;
         const requiredInputs = (executionScenario.inputRequirements ?? []).filter(input => input.required);
         const missingInputs = requiredInputs
           .filter(input => !String(effectiveRuntimeValues[input.key] ?? "").trim())
@@ -161,9 +174,11 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
           },
         ]).find((candidate) => candidate.scenarioId === caseId);
         if (collision) {
-          emit({ type: "negative_input_collision_detected", caseId, inputKey: collision.inputKey,
-            matchingScenarioId: collision.matchingScenarioId });
-          throw new Error("JIRA_NEGATIVE_INPUT_MATCHES_VALID_SCENARIO_INPUT");
+          // A value collision is a data-quality warning, not proof that the
+          // scenario's negative outcome is wrong. Let Discovery execute and
+          // require its actual business assertion before any promotion.
+          emit({ type: "negative_input_collision_detected", caseId,
+            ...jiraInvalidInputCollisionDiagnostic(collision, executionScenario.inputRequirements ?? []) });
         }
         session = await launchRuntimeBrowserSession({ browserType: ({ chromium, firefox, webkit })[config.execution.browser],
           headless: !options.headed, targetUrl: baseUrl, contextOptions: { ignoreHTTPSErrors: profile.ignoreHTTPSErrors === true } });
@@ -173,6 +188,7 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
           authIntent: executionScenario.authIntent,
           loginMode: typeof profile.loginMode === "string" ? profile.loginMode : undefined,
           hasPasswordCredentials: Boolean(runtimeConfig.app.username && runtimeConfig.app.password),
+          hasAuthoredCredentialEntry: jiraScenarioHasAuthoredCredentialEntry(executionScenario.steps),
           hasAuthGateData: hasJiraAuthGateData(authTestData),
           load: () => loadConfiguredJiraAuthFlow(appSlug, session!.page, authTestData),
         });
@@ -188,8 +204,10 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
                 const identity = await readJiraScreenIdentity(session!.page);
                 if (identity) stepScreenIdentities[String(stepIndex)] = identity;
                 emit({ type: "step_evidence_captured", caseId, stepIndex });
-              } catch {
-                emit({ type: "step_evidence_capture_failed", caseId, stepIndex, reason: "screenshot_unavailable" });
+              } catch (error) {
+                const reason = error instanceof Error && error.message.startsWith("JIRA_EVIDENCE_")
+                  ? error.message : "screenshot_unavailable";
+                emit({ type: "step_evidence_capture_failed", caseId, stepIndex, reason });
               }
             }
           }, cancelled, async () => {
@@ -200,9 +218,11 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
               await captureJiraEvidenceScreenshot(session!.page, { path: initialScreenshotPath, fullPage: true });
               initialScreenIdentity = await readJiraScreenIdentity(session!.page);
               emit({ type: "initial_evidence_captured", caseId });
-            } catch {
+            } catch (error) {
               initialScreenshotPath = undefined;
-              emit({ type: "initial_evidence_capture_failed", caseId, reason: "screenshot_unavailable" });
+              const reason = error instanceof Error && error.message.startsWith("JIRA_EVIDENCE_")
+                ? error.message : "screenshot_unavailable";
+              emit({ type: "initial_evidence_capture_failed", caseId, reason });
             }
           }, profile.loginMode === "password" && runtimeConfig.app.username && runtimeConfig.app.password
             ? { username: runtimeConfig.app.username, password: runtimeConfig.app.password, fields: configuredCredentialFields } : undefined);
@@ -272,6 +292,10 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
         // proves its navigation may be stale. A generated assertion or missing
         // business step must not erase a route that Discovery previously proved.
         const code = error instanceof Error ? error.message.match(/^([A-Z][A-Z_]+)(?::[a-z_]+)?/)?.[1] ?? "JIRA_EXECUTION_FAILED" : "JIRA_EXECUTION_FAILED";
+        if (code === "JIRA_EXECUTION_FAILED" && error instanceof Error) {
+          // Unclassified failures lose their cause; keep the error class and the first message line (no fill values).
+          console.log(`[jira-semantic-unclassified] caseId=${caseId} step=${failedAtStep ?? "unknown"} error=${error.name} message=${error.message.split("\n")[0].replace(/fill\([^)]*\)/g, "fill(...)").slice(0, 200)}`);
+        }
         const applicationHttpError = jiraApplicationHttpErrorDiagnostic(error);
         if (applicationHttpError) emit({ type: "application_http_error", caseId, failedAtStep,
           ...applicationHttpError, reason: "same_origin_application_response_5xx" });
@@ -294,6 +318,9 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
           ...(applicationHttpError ? { applicationHttpError } : {}),
           ...(error instanceof JiraSpecVerificationError ? { specVerificationCategory: error.category,
             specVerificationDiagnosticPath: error.diagnosticPath, specVerificationArtifactsDir: error.artifactsDir } : {}),
+          ...(error instanceof JiraPromotionIndexError ? { promotionIndexDiagnostic: {
+            indexPath: error.indexPath, reason: error.reason,
+          } } : {}),
           ...(error instanceof JiraRequiredDataError ? {missingInputs:error.missingInputs} : {}),
           ...jiraTargetDiagnosticField(error),
           failurePhase: discoveryCompleted ? "spec_generation" : "discovery",
@@ -308,7 +335,7 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
     }
     await fs.writeFile(path.join(dir, "results.json"), JSON.stringify({ results, summary: { passed, failed } }, null, 2));
     if (cancelled()) return;
-    const evidence = await generateJiraEvidence(jobId, p, scenarios, results, dir);
+    const evidence = await generateJiraEvidence(jobId, p, scenarios, results, dir, dataValuesByScenario);
     if (evidence.attempted) {
       emit({ type: "evidence_document_finished", status: evidence.generated ? "ready" : "failed",
         pdfReady: evidence.pdfReady, docxReady: evidence.docxReady, reasonCode: evidence.reasonCode });
@@ -345,6 +372,7 @@ async function generateJiraEvidence(
   scenarios: JiraScenarioInput[],
   outcomes: Array<Record<string, unknown>>,
   artifactsDir: string,
+  dataValuesByScenario: Record<string, Record<string, string>>,
 ): Promise<{ attempted: boolean; generated: boolean; pathPresent: boolean; documentPath?: string; pdfReady: boolean; docxReady: boolean; reasonCode?: string }> {
   const config = loadEvidenceConfig();
   if (!config.enabled || !config.docxEnabled) {
@@ -363,10 +391,11 @@ async function generateJiraEvidence(
   try {
     const recorder = new RunEvidenceRecorder({ appSlug, sectionSlug, sectionName,
       requirement: requirementKey ? [requirementKey, requirementTitle].filter(Boolean).join(" ") : undefined,
-      runId: jobId, outputRoot: config.outputRoot, analystName: analyst });
+      runId: jobId, outputRoot: config.outputRoot, analystName: analyst,
+      environment: typeof params.environment === "string" ? params.environment.trim() : undefined });
     await recorder.start();
     const records = buildJiraEvidenceScenarioRecords(scenarios, outcomes as Parameters<typeof buildJiraEvidenceScenarioRecords>[1], {
-      appSlug, sectionSlug, sectionName, analyst, requirementTitle });
+      appSlug, sectionSlug, sectionName, analyst, requirementTitle, dataValuesByScenario });
     for (const record of records) recorder.addScenario(record);
     const runRecord = await recorder.finish();
     const paths = buildEvidenceRunPaths({ appSlug, sectionSlug, sectionName, runId: jobId, outputRoot: config.outputRoot });

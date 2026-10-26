@@ -282,6 +282,26 @@ test("field-validation assertions require an invalid control plus its associated
   }
 });
 
+test("generic required-field validation needs a local error tied to an invalid control", { timeout: 30000 }, async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    await page.setContent('<main><form><div><label for="name">Denominación Social</label><input id="name" aria-invalid="true"><small>Campo requerido</small></div></form></main>');
+    const observed = await observeJiraFieldValidation(page, "Campo requerido");
+    assert.deepEqual(observed, { fieldLabel: "Denominación Social", invalid: true, associatedError: true });
+
+    await page.setContent('<main><form><div><label for="name">Denominación Social *</label><input id="name"><small class="text-danger">Campo requerido</small></div></form></main>');
+    assert.deepEqual(await observeJiraFieldValidation(page, "Campo requerido"),
+      { fieldLabel: "Denominación Social *", invalid: true, associatedError: true },
+      "a visible custom field error remains evidence when the application omits aria-invalid and native required");
+
+    await page.setContent('<main><form><div><label for="name">Denominación Social</label><input id="name"></div><p role="alert">Campo requerido</p></form></main>');
+    assert.equal(await observeJiraFieldValidation(page, "Campo requerido"), undefined,
+      "a generic alert without a visibly invalid field must not satisfy the assertion");
+    await page.close();
+  } finally { await browser.close(); }
+});
+
 test("field-validation resolves a table column header to the single invalid row corroborated by a named error and fails closed otherwise", { timeout: 60000 }, async () => {
   const table = (invalid: number[], alert: string) => `<main><table><thead><tr><th>Fuente</th><th>Importe mensual (RD$)</th></tr></thead><tbody>${[1, 2].map((row) =>
     `<tr><td>Fila ${row}</td><td><input aria-label="Importe de ingreso fila ${row}" ${invalid.includes(row) ? 'aria-invalid="true"' : ""}></td></tr>`).join("")}</tbody></table>${alert}</main>`;
@@ -542,6 +562,50 @@ test("Jira confirms a transient loading state captured immediately after the act
     assert.equal(await page.getByText("Ingresos", { exact: true }).isVisible(), true);
     const observation = await port.assert("Estado de carga", false);
     assert.equal(observation.observedText, "Estado de carga Cargando información");
+  } finally {
+    await browser.close();
+  }
+});
+
+test("Jira retains observed loading evidence across the destination assertion", { timeout: 30000 }, async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    await page.setContent(`<html><body><button id="open">Solicitudes</button><div id="view"></div></body></html>`);
+    await page.locator("#open").evaluate(button => button.addEventListener("click", () => {
+      const view = document.querySelector("#view");
+      if (!view) return;
+      view.innerHTML = '<div role="status" aria-label="Indicador de carga">Cargando solicitudes</div>';
+      window.setTimeout(() => { view.innerHTML = "<h1>Solicitudes de prospectos PJ</h1>"; }, 30);
+    }));
+    const port = createJiraPlaywrightPort(page, "https://fixture.invalid");
+    await port.act({ index: 1, action: "click", description: 'Presionar "Solicitudes"' } as never, "Solicitudes");
+    await page.waitForTimeout(100);
+    assert.equal((await port.assert("Solicitudes de prospectos PJ", false)).observedText, "Solicitudes de prospectos PJ");
+    const loading = await port.assert("Se muestran los indicadores de carga y el listado", false);
+    assert.equal(loading.observedText, "Indicador de carga Cargando solicitudes");
+  } finally {
+    await browser.close();
+  }
+});
+
+test("Jira recognizes a transient CSS loader without accessible status text", { timeout: 30000 }, async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    await page.setContent(`<html><body><button id="open">Solicitudes</button><div id="view"></div></body></html>`);
+    await page.locator("#open").evaluate(button => button.addEventListener("click", () => {
+      const view = document.querySelector("#view");
+      if (!view) return;
+      view.innerHTML = '<div class="loading-spinner"></div>';
+      window.setTimeout(() => { view.innerHTML = "<h1>Solicitudes de prospectos PJ</h1>"; }, 30);
+    }));
+    const port = createJiraPlaywrightPort(page, "https://fixture.invalid");
+    await port.act({ index: 1, action: "click", description: 'Presionar "Solicitudes"' } as never, "Solicitudes");
+    await page.waitForTimeout(100);
+    assert.equal((await port.assert("Solicitudes de prospectos PJ", false)).observedText, "Solicitudes de prospectos PJ");
+    const loading = await port.assert("Se muestran los indicadores de carga y el listado", false);
+    assert.match(loading.observedText ?? "", /indicador de carga.*loading-spinner/i);
   } finally {
     await browser.close();
   }

@@ -1,0 +1,9 @@
+{
+  "id": "e268f290-633c-4ed8-9095-7e8b58d36cba-convertir-el-prospecto-aprobado-en-cliente-y-registrar-el-evento",
+  "externalId": "e268f290-633c-4ed8-9095-7e8b58d36cba",
+  "title": "Convertir el prospecto aprobado en cliente y registrar el evento",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T07:36:15.102Z"
+}

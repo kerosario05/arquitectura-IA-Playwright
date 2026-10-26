@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "1f6e3b2c-ba9a-449b-8c73-55883fba17b0",
+  "title": "Aprobar un caso PLAFT con comentario obligatorio",
+  "generatedAt": "2026-10-26T07:31:40.469Z",
+  "executionEngine": "jira_semantic"
+}

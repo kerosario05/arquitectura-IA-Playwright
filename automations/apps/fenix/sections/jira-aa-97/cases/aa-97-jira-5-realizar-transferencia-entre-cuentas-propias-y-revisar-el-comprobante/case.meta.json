@@ -1,0 +1,8 @@
+{
+  "appSlug": "fenix",
+  "sectionSlug": "jira-aa-97",
+  "sourceScenarioId": "AA-97:jira:5",
+  "title": "Realizar transferencia entre cuentas propias y revisar el comprobante",
+  "generatedAt": "2026-10-26T21:41:17.935Z",
+  "executionEngine": "jira_semantic"
+}

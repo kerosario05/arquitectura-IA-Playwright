@@ -129,6 +129,14 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   R("DELETE", "/api/recordings/:recordingId", ["recordings.create"], "required"),
   R("GET", "/api/recordings/:recordingId", ["recordings.view"], "required"),
 
+  // --- local agent (Chromium on the user's PC for recordings) ----------
+  // The agent itself never calls these: its WebSockets authenticate apart
+  // (agent id + optional LOCAL_AGENT_KEY). These are the panel's questions
+  // about the agent on the caller's own PC.
+  R("GET", "/api/local-agent/status", ["recordings.view"]),
+  R("POST", "/api/local-agent/install", ["recordings.create"]),
+  R("POST", "/api/local-agent/select", ["recordings.create"]),
+
   // --- executions --------------------------------------------------------
   R("GET", "/api/executions", ["executions.view"], "optional"),
   R("GET", "/api/executions/:launchId", ["executions.view"]),

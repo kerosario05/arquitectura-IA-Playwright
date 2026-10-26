@@ -1,0 +1,272 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-26T06:47:27.862Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "92917deb-ea59-4b4d-bd37-251ae4da1791",
+    "title": "Debida Diligencia rechaza un caso con coincidencia PLAFT"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "fill [usuario]",
+      "valueKey": "usuario",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"usuario\"]"
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [contrasena]",
+      "valueKey": "contrasena",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"clave\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Presionar \"iniciar sesión\"",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"btn-login\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Presionar \"Bandeja PLAFT\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Bandeja PLAFT",
+        "exact": true
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"SOL-2026-0005\"",
+      "target": {
+        "strategy": "css",
+        "value": ":is(main,[role=\"main\"]) a[href=\"#/solicitud/SOL-2026-0005\"]"
+      }
+    },
+    {
+      "index": 8,
+      "action": "click",
+      "description": "Presionar \"Rechazar solicitud\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Rechazar solicitud",
+        "exact": true
+      }
+    },
+    {
+      "index": 9,
+      "action": "select",
+      "description": "select [jira_edit_3af81d7bd0a450ee_8]",
+      "valueKey": "jira_edit_3af81d7bd0a450ee_8",
+      "selectionControlKind": "native_select",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"rzMotivo\"]"
+      }
+    },
+    {
+      "index": 10,
+      "action": "click",
+      "description": "Presionar \"Confirmar rechazo\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Confirmar rechazo",
+        "exact": true
+      }
+    },
+    {
+      "index": 11,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Flujo de Solicitud\"",
+      "target": {
+        "strategy": "text",
+        "value": "Flujo de Solicitud"
+      }
+    },
+    {
+      "index": 12,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Personas relacionadas\"",
+      "target": {
+        "strategy": "text",
+        "value": "Personas relacionadas"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "usuario",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "jira_edit_3af81d7bd0a450ee_8",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Debida Diligencia rechaza un caso con coincidencia PLAFT",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "fill",
+        "valueKey": "usuario",
+        "technicalTargetRefs": [
+          "css:[id=\"usuario\"]"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "contrasena",
+        "technicalTargetRefs": [
+          "css:[id=\"clave\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:[id=\"btn-login\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Bandeja PLAFT"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css::is(main,[role=\"main\"]) a[href=\"#/solicitud/SOL-2026-0005\"]"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Rechazar solicitud"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "select",
+        "valueKey": "jira_edit_3af81d7bd0a450ee_8",
+        "technicalTargetRefs": [
+          "css:[id=\"rzMotivo\"]"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Confirmar rechazo"
+        ]
+      },
+      {
+        "index": 11,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Flujo de Solicitud\"",
+        "technicalTargetRefs": [
+          "text:Flujo de Solicitud"
+        ]
+      },
+      {
+        "index": 12,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Personas relacionadas\"",
+        "technicalTargetRefs": [
+          "text:Personas relacionadas"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-11",
+        "requirement": "Validar que se muestre \"Flujo de Solicitud\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 11,
+        "target": "Flujo de Solicitud\nRegistro de Datos",
+        "evidence": [
+          "live-step-11"
+        ],
+        "details": {
+          "observedText": "Flujo de Solicitud\nRegistro de Datos"
+        }
+      },
+      {
+        "id": "jira-oracle-12",
+        "requirement": "Validar que se muestre \"Personas relacionadas\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 12,
+        "target": "Estado del flujo\n\nSeguimiento de la solicitud entre Negocios, Debida Diligencia y Revisión Legal.\n\n1\nRegistro de datos del prospecto\nNegocios · Consulta de RNC y datos de la empresa\n2\nDepuración en listas (Bizagi)\nDebida Diligencia · Listas restrictivas y no restrictivas\n3\nVerificación PLAFT\nDebida Diligencia · Coincidencias\nRevisión legal inicial\nRevisión Legal · Aprobar, escalar, devolver o rechazar\nConversión de prospecto a cliente\nNegocios · Código de cliente\n6\nConozca su cliente\nNegocios · Información KYC\n7\nApertura de producto\nNegocios · Cuenta y productos\nPersonas relacionadas",
+        "evidence": [
+          "live-step-12"
+        ],
+        "details": {
+          "observedText": "Estado del flujo\n\nSeguimiento de la solicitud entre Negocios, Debida Diligencia y Revisión Legal.\n\n1\nRegistro de datos del prospecto\nNegocios · Consulta de RNC y datos de la empresa\n2\nDepuración en listas (Bizagi)\nDebida Diligencia · Listas restrictivas y no restrictivas\n3\nVerificación PLAFT\nDebida Diligencia · Coincidencias\nRevisión legal inicial\nRevisión Legal · Aprobar, escalar, devolver o rechazar\nConversión de prospecto a cliente\nNegocios · Código de cliente\n6\nConozca su cliente\nNegocios · Información KYC\n7\nApertura de producto\nNegocios · Cuenta y productos\nPersonas relacionadas"
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "que se muestre \"Personas relacionadas\""
+  }
+}

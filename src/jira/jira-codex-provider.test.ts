@@ -6,8 +6,23 @@ import {AiProviderError,type AiProviderConfig} from '../ai/ai-provider.types';
 import type {CodexCliRunnerResult} from '../types/codex-auto-repair.types';
 import {auditGeneratedJiraSyntax} from './jira-scenario-generator';
 import {jiraScenarioGenerationInstructions} from './jira-input-requirements';
+import {JIRA_SCENARIO_REPAIR_SCHEMA_NAME,jiraScenarioRepairOutputSchema} from './jira-scenario-repair-contract';
 const config:AiProviderConfig={enabled:true,provider:'codex_cli',providerName:'fixture',baseUrl:'',apiKey:'',model:'configured-model',timeoutMs:9000,requireJson:true,requireJsonSchema:true,command:'fixture-only',extraArgs:['-c','model_reasoning_effort=low']};
 function result(overrides:Partial<CodexCliRunnerResult>={}):CodexCliRunnerResult{return {exitCode:0,stdout:'',stderr:'',timedOut:false,durationMs:1,...overrides} as CodexCliRunnerResult;}
+
+test('repair transport allows an empty delta and full corrections without forcing unchanged scenarios',async()=>{
+ for(const scenarios of [[],[{sourceIssueKey:'REPAIR-1',title:'Correction',steps:['Presionar "Enviar"'],inputRequirements:[],unresolvedUiRequirements:[]}]]) {
+  const provider=await createJiraCodexProvider(config,async input=>{
+   const schemaPath=input.extraArgs[input.extraArgs.indexOf('--output-schema')+1];
+   assert.deepEqual(JSON.parse(await readFile(schemaPath,'utf8')),jiraScenarioRepairOutputSchema);
+   const output=input.extraArgs[input.extraArgs.indexOf('--output-last-message')+1];
+   await writeFile(output,JSON.stringify({scenarios}),'utf8');
+   return result();
+  });
+  const response=await provider.completeJson({purpose:'scenario_generation',messages:[],jsonSchema:{name:JIRA_SCENARIO_REPAIR_SCHEMA_NAME,schema:jiraScenarioRepairOutputSchema}});
+  assert.deepEqual(response.parsedJson,{scenarios});
+ }
+});
 
 test('Jira sources travel inline with structured final output and preserved next-boundary syntax',async()=>{
  assert.match(jiraScenarioGenerationInstructions(),/all story context is supplied inline/);

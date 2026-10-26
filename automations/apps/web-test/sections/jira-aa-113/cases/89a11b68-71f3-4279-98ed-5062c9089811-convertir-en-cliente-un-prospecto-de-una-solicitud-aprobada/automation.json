@@ -1,0 +1,56 @@
+{
+  "id": "89a11b68-71f3-4279-98ed-5062c9089811-convertir-en-cliente-un-prospecto-de-una-solicitud-aprobada",
+  "externalId": "89a11b68-71f3-4279-98ed-5062c9089811",
+  "title": "Convertir en cliente un prospecto de una solicitud aprobada",
+  "planPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\89a11b68-71f3-4279-98ed-5062c9089811-convertir-en-cliente-un-prospecto-de-una-solicitud-aprobada\\plan.json",
+  "specPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\89a11b68-71f3-4279-98ed-5062c9089811-convertir-en-cliente-un-prospecto-de-una-solicitud-aprobada\\case.spec.ts",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "web-test",
+  "baseUrlHash": "4e1194428e74",
+  "createdAt": "2026-10-26T07:34:47.281Z",
+  "updatedAt": "2026-10-26T07:34:47.281Z",
+  "specVerificationStatus": "passed",
+  "tags": [
+    "jira_semantic",
+    "jira_generated"
+  ],
+  "metadata": {
+    "specGeneration": {
+      "mode": "deterministic",
+      "provider": null,
+      "model": null,
+      "invocations": 0,
+      "invocationsConsumed": 0,
+      "durationMs": 0,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "passed",
+        "typescript": "skipped",
+        "playwrightDiscovery": "skipped",
+        "semanticCoverage": "passed",
+        "functionalExecution": "passed"
+      },
+      "promotionAllowed": true,
+      "specsRequested": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
+      "specWritten": true,
+      "errors": [],
+      "warnings": []
+    }
+  }
+}

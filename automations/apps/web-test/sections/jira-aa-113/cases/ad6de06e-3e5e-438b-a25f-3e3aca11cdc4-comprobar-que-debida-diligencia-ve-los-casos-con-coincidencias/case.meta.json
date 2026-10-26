@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "ad6de06e-3e5e-438b-a25f-3e3aca11cdc4",
+  "title": "Comprobar que Debida Diligencia ve los casos con coincidencias",
+  "generatedAt": "2026-10-26T06:45:08.812Z",
+  "executionEngine": "jira_semantic"
+}

@@ -1,0 +1,56 @@
+{
+  "id": "aa-97-jira-1-completar-una-transferencia-entre-cuentas-propias",
+  "externalId": "AA-97:jira:1",
+  "title": "Completar una transferencia entre cuentas propias",
+  "planPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-completar-una-transferencia-entre-cuentas-propias\\plan.json",
+  "specPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-1-completar-una-transferencia-entre-cuentas-propias\\case.spec.ts",
+  "appSlug": "fenix",
+  "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "fenix",
+  "baseUrlHash": "2a7bf6928b41",
+  "createdAt": "2026-10-23T18:55:36.418Z",
+  "updatedAt": "2026-10-23T18:55:36.418Z",
+  "specVerificationStatus": "passed",
+  "tags": [
+    "jira_semantic",
+    "jira_generated"
+  ],
+  "metadata": {
+    "specGeneration": {
+      "mode": "deterministic",
+      "provider": null,
+      "model": null,
+      "invocations": 0,
+      "invocationsConsumed": 0,
+      "durationMs": 0,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "passed",
+        "typescript": "skipped",
+        "playwrightDiscovery": "skipped",
+        "semanticCoverage": "passed",
+        "functionalExecution": "passed"
+      },
+      "promotionAllowed": true,
+      "specsRequested": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
+      "specWritten": true,
+      "errors": [],
+      "warnings": []
+    }
+  }
+}

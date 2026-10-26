@@ -13,11 +13,14 @@ import type { PromotedAutomationIndexEntry } from "../../types/automation-promot
 import { defectChecklistStore } from "../services/defect-checklist-store";
 import { jobStore } from "./job-store";
 import { buildRediscoveryProvenanceLine, startDiscoveryBatchRun, validatePromotedEntryForExecution } from "./discovery-batch-runner";
+import { loadAppConfig } from "../../automations/app-auto-resolver";
 import { buildMcpScenarioContractFromTestRailCase, evaluateCaseContractSufficiency, extractCaseContractMetadata } from "../../automations/case-contract-evaluator";
 import { normalizeTestRailCase } from "../../testrail/testrail-normalizer";
 import type { RawTestRailCase } from "../../types/testrail.types";
 import {resolveExecutionEngine,type ExecutionOrigin,type ExecutionEngine} from '../../jira/execution-origin';
 import type {JiraInputRequirement} from '../../jira/jira-input-requirements';
+import { toJiraSemanticDesignScenario } from "../../test-design/test-design-lineage";
+import type { TestDesignPublishedCaseLink } from "../../test-design/test-design.types";
 
 const ROOT = path.resolve(__dirname, "..", "..", "..");
 const LAUNCH_ARTIFACTS_DIR = path.join(ROOT, ".artifacts", "scenario-launch-runs");
@@ -46,7 +49,7 @@ export type LaunchScenario = {
   targetScreen?: string;
   actualChain?: unknown;
   requiredChain?: unknown;
-  validation?: { valid?: boolean };
+  validation?: { valid?: boolean; errors?: string[] };
   functionalBranch?: { branchId?: string; actionIntent?: string; expectedDestination?: string; destination?: { semanticDeclaration?: string } };
   branchAssociation?: { branchId?: string };
   branchId?: string;
@@ -56,6 +59,7 @@ export type LaunchScenario = {
 
 export type LaunchExecutionInput = {
   analystName?: string;
+  environment?: string;
   executionEngine?: ExecutionEngine;
   scenarioOrigin?: ExecutionOrigin;
   appSlug: string;
@@ -78,6 +82,7 @@ export type LaunchExecutionInput = {
   dataOverrides?: Record<string, Record<string, string>>;
   adaptiveScenarios?: LaunchScenario[];
   publishStrategy?: "always_create" | "use_existing";
+  testDesignLinkedCases?: TestDesignPublishedCaseLink[];
 };
 
 export function buildRediscoveryCreateHandoffLine(input: {
@@ -114,6 +119,7 @@ export function buildDiscoveryBatchParamsFromLaunch(input: {
     sectionSlug: input.launch.sectionSlug,
     sectionName: input.launch.sectionName,
     analystName: input.launch.analystName,
+    environment: input.launch.environment,
     executePromotedSpecs: true,
     ...(input.launch.projectId !== undefined ? { testRailProjectId: input.launch.projectId } : {}),
     ...(input.launch.suiteId !== undefined ? { testRailSuiteId: input.launch.suiteId } : {}),
@@ -127,11 +133,20 @@ export function buildDiscoveryBatchParamsFromLaunch(input: {
     jiraKey: input.launch.jiraKey,
     jiraTitle: input.launch.jiraTitle,
     publishedCases: input.publishedCases,
-    ...(input.launch.executionEngine === "jira_semantic" && input.launch.scenarioOrigin
+    ...((input.launch.executionEngine === "jira_semantic" || input.launch.testDesignLinkedCases?.some(link => link.scenario.jiraSourceScenario))
+      && (input.launch.scenarioOrigin || input.launch.testDesignLinkedCases?.length)
       ? {
-        executionEngine: input.launch.executionEngine,
-        scenarioOrigin: input.launch.scenarioOrigin,
-        jiraSemanticScenarios: input.launch.selectedScenarios,
+        executionEngine: "jira_semantic",
+        ...(input.launch.scenarioOrigin ? { scenarioOrigin: input.launch.scenarioOrigin } : {}),
+        jiraSemanticScenarios: [
+          ...input.launch.selectedScenarios,
+          ...(input.launch.testDesignLinkedCases ?? []).flatMap(link => {
+            const scenario = toJiraSemanticDesignScenario(link.scenario, link.issueKey);
+            return scenario ? [scenario] : [];
+          }),
+        ],
+        jiraSemanticCaseIds: (input.launch.testDesignLinkedCases ?? []).filter(link => link.scenario.jiraSourceScenario).map(link => link.testRailCaseId),
+        jiraSemanticScenarioOrigins: Object.fromEntries((input.launch.testDesignLinkedCases ?? []).map(link => [link.designScenarioId, link.issueKey])),
       }
       : {}),
     ...(input.launch.contextOnly === true ? { contextOnly: true } : {}),
@@ -162,6 +177,7 @@ export type PublishedCaseEntry = {
   automationId?: string;
   specPath?: string;
   appSlug?: string;
+  lineageSource?: "test_design";
 };
 
 export type ExistingCaseExecutionUnit = {
@@ -249,13 +265,10 @@ export function partitionLaunchScenarios(scenarios: LaunchScenario[], engine:Exe
   const standard: LaunchScenario[] = [];
   const adaptiveFunctional: LaunchScenario[] = [];
   const nonAutomatable: LaunchScenario[] = [];
-  const jiraReviewOnlyErrors = (errors: string[] | undefined) => Boolean(errors?.length)
-    && errors.every(error => error === "JIRA_CONDITION_ASSERTION_MISSING" || error.startsWith("JIRA_ACCEPTANCE_COVERAGE_INCOMPLETE:"));
   for (const scenario of scenarios) {
     if(engine==='jira_semantic') {
-      const reviewableValidationGap = scenario.validation?.valid === false && jiraReviewOnlyErrors(scenario.validation.errors);
-      if((scenario.validation?.valid!==true && !reviewableValidationGap) || scenario.nonAutomatable===true || scenario.launchClassification==='nonAutomatable') nonAutomatable.push(scenario);
-      else standard.push(scenario); // Review gaps do not certify coverage, but need not prevent an execution attempt.
+      if(scenario.nonAutomatable===true || scenario.launchClassification==='nonAutomatable') nonAutomatable.push(scenario);
+      else standard.push(scenario); // Jira validation findings stay editable; Discovery reports the first runtime step that cannot proceed.
     }
     else if (classifyRouteDiscoveryEligibility(scenario).allowed) routeDiscovery.push(scenario);
     else if (classifyLaunchScenarioAuthority(scenario) === "nonAutomatable") nonAutomatable.push(scenario);
@@ -430,6 +443,7 @@ export function buildCanonicalPublishedCases(
       const automationId = readIdentity("automationId");
       const specPath = readIdentity("specPath");
       const appSlug = readIdentity("appSlug");
+      const lineageSource = record.lineageSource === "test_design" ? "test_design" : undefined;
       const sourceType = record.sourceType === "jira_preview" || record.sourceType === "testrail_case"
         ? record.sourceType
         : undefined;
@@ -447,6 +461,7 @@ export function buildCanonicalPublishedCases(
         ...(automationId ? { automationId } : {}),
         ...(specPath ? { specPath } : {}),
         ...(appSlug ? { appSlug } : {}),
+        ...(lineageSource ? { lineageSource } : {}),
       };
       const existing = byCaseId.get(caseId);
       byCaseId.set(caseId, existing ? {
@@ -669,8 +684,29 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
     return { ok: false, error: "missing_section_id", message: "TestRail sectionId is required." };
   }
 
+  const appProfile = input.appSlug ? await loadAppConfig(input.appSlug) : null;
+  const appProfileDetails = appProfile?.appProfile && typeof appProfile.appProfile === "object" && !Array.isArray(appProfile.appProfile)
+    ? appProfile.appProfile as Record<string, unknown>
+    : null;
+  const configuredUrl = [appProfile?.baseUrl, appProfileDetails?.baseUrl]
+    .find((value): value is string => typeof value === "string" && value.trim().length > 0)
+    ?.trim() ?? "";
+  let configuredEnvironment = input.environment?.trim();
+  if (configuredUrl) {
+    try {
+      const url = new URL(configuredUrl);
+      url.username = "";
+      url.password = "";
+      configuredEnvironment = url.toString();
+    } catch {
+      // Keep the supplied compatibility value when an older project has a malformed URL.
+    }
+  }
+
   const selectedScenarios = input.selectedScenarios ?? [];
-  const engine=resolveExecutionEngine({...input,scenarios:selectedScenarios});
+  const resolvedEngine=resolveExecutionEngine({...input,scenarios:selectedScenarios});
+  const engine:ExecutionEngine|'legacy' = input.testDesignLinkedCases?.some(link=>Boolean(link.scenario.jiraSourceScenario))
+    ? "jira_semantic" : resolvedEngine;
   const scenarioGroups = partitionLaunchScenarios(selectedScenarios,engine);
   const routeDiscoveryScenarios = [...scenarioGroups.routeDiscovery];
   const routeDiscoverySet = new Set(routeDiscoveryScenarios);
@@ -740,10 +776,16 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
     reasonCode: string;
     recommendedRoute?: "targeted_discovery" | "full_discovery" | "automation_from_case_contract" | "blocked";
   }>();
+  const linkedCasesById = new Map((input.testDesignLinkedCases ?? []).map(link => [link.testRailCaseId, link]));
   if (selectionPlan.existingTestRailCaseIds.length > 0) {
     try {
       const trClient = new TestRailClient(requireTestRailConfig(config));
       for (const caseId of selectionPlan.existingTestRailCaseIds) {
+        const designLink = linkedCasesById.get(caseId);
+        if (designLink?.scenario.jiraSourceScenario) {
+          caseContracts.set(caseId, { usable: true, reasonCode: "test_design_jira_lineage", recommendedRoute: "automation_from_case_contract" });
+          continue;
+        }
         try {
           const rawCase: RawTestRailCase = await trClient.getCase(caseId);
           const normalizedCase = normalizeTestRailCase(rawCase);
@@ -786,6 +828,7 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
   }
   if (selectionPlan.scenariosToPublish.length === 0
     && !existingCasePlan.launchAccepted
+    && !(input.testDesignLinkedCases ?? []).some(link => Boolean(link.scenario.jiraSourceScenario))
     && validAdaptive.length === 0
     && routeDiscoveryScenarios.length === 0) {
     return {
@@ -946,6 +989,7 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
   );
   const existingPublishedCases: PublishedCaseEntry[] = existingCasePlan.admitted
     .filter((unit): unit is ExistingCaseExecutionUnit & { executionSource: "existing_spec" | "mcp_required" } => unit.executionSource !== "blocked")
+    .filter(unit => !linkedCasesById.get(unit.caseId)?.scenario.jiraSourceScenario)
     .map((unit) => {
       const selectedScenario = existingScenarioByCaseId.get(unit.caseId);
       return {
@@ -964,14 +1008,29 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
     };
   });
 
+  const linkedSemanticPublishedCases: PublishedCaseEntry[] = (input.testDesignLinkedCases ?? [])
+    .filter(link => Boolean(link.scenario.jiraSourceScenario))
+    .map(link => ({
+      scenarioId: link.designScenarioId,
+      caseId: link.testRailCaseId,
+      title: link.scenario.title,
+      sourceType: "jira_preview",
+      sourceIssueKey: link.issueKey,
+      launchScenarioId: link.designScenarioId,
+      executionScenarioId: link.designScenarioId,
+      appSlug: link.projectSlug,
+      lineageSource: "test_design",
+    }));
+
   const canonicalMapping = buildCanonicalPublishedCases([
     { source: "standard_publication", entries: standardPublishedCases },
+    { source: "test_design_lineage", entries: linkedSemanticPublishedCases },
     { source: "existing_cases", entries: existingPublishedCases },
     { source: "route_discovery_publication", entries: routeDiscoveryPublishedCases },
   ]);
   const publishedCases = canonicalMapping.publishedCases;
   for (const published of publishedCases) {
-    if (published.sourceType !== "jira_preview" || !published.launchScenarioId) continue;
+    if (published.sourceType !== "jira_preview" || !published.launchScenarioId || published.lineageSource === "test_design") continue;
     try {
       const link = await linkJiraAutomationToTestRailCase({
         appSlug: input.appSlug,
@@ -1044,6 +1103,7 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
       refs: runRefs || undefined,
     },
     jira: input.jiraKey ? { key: input.jiraKey, ...(input.jiraTitle ? { title: input.jiraTitle } : {}) } : undefined,
+    environment: configuredEnvironment,
     sprintName: input.sprintName,
     publishStrategy: input.publishStrategy ?? "always_create",
     selectedScenarioCount: publishedCases.filter((entry) => !selectedExistingCaseIdSet.has(entry.caseId)).length,
@@ -1069,7 +1129,7 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
   const executionCaseIds = resolveLaunchExecutionCaseIds({
     engine,
     routeDiscoveryPublishedCases,
-    existingPublishedCases,
+    existingPublishedCases: [...existingPublishedCases, ...linkedSemanticPublishedCases],
     standardPublishedCases,
   }).filter((caseId) => canonicalCaseIdSet.has(caseId));
   let discoveryJobId: string | undefined;
@@ -1090,7 +1150,7 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
       valueSource: hasForceRediscovery ? "input.forceRediscovery" : "absent",
     }));
     const discoveryJobParams = buildDiscoveryBatchParamsFromLaunch({
-      launch: input,
+      launch: { ...input, environment: configuredEnvironment },
       executionCaseIds,
       publishedCases: childPublishedCases,
       routeProfile,

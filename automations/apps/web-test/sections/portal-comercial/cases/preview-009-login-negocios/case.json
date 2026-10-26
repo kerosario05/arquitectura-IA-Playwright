@@ -1,0 +1,10 @@
+{
+  "id": "preview-009-login-negocios",
+  "externalId": "PREVIEW-009",
+  "caseId": 0,
+  "title": "Login Negocios",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T13:29:44.662Z"
+}

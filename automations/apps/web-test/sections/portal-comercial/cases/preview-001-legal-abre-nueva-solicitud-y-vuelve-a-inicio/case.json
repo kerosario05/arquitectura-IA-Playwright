@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-legal-abre-nueva-solicitud-y-vuelve-a-inicio",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Legal abre Nueva solicitud y vuelve a Inicio",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T13:17:55.014Z"
+}

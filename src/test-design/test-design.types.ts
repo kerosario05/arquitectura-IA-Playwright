@@ -57,6 +57,29 @@ export type TestDesignScenario = {
   origin: "ai" | "manual";
   /** True once a person changed it: regeneration keeps edited scenarios. */
   edited: boolean;
+  /** Original Jira-engine output retained across the Design editor for semantic TestRail replay. */
+  jiraSourceScenario?: import("../scenarios/scenario-types").ValidatedScenario;
+  jiraSourceScenarioId?: string;
+  /** Automation profile whose project knowledge informed this scenario generation. */
+  knowledgeProfileSlug?: string | null;
+};
+
+/** Exact Design -> TestRail publication lineage; the content version is a SHA-256 digest. */
+export type TestDesignPublishedCaseLink = {
+  testRailCaseId: number;
+  testRailProjectId: number;
+  testRailSuiteId: number | null;
+  testRailSectionId: number;
+  projectSlug: string;
+  jiraProjectKey: string;
+  issueKey: string;
+  draftId: string;
+  storyId: string;
+  designScenarioId: string;
+  jiraScenarioId: string | null;
+  contentVersion: string;
+  scenario: TestDesignScenario;
+  publishedAt: string;
 };
 
 export type TestDesignGenerationStatus = "pending" | "generating" | "ready" | "failed";

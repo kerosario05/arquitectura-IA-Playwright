@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "6c55505a-fe76-4bf9-bd82-65fc0e8beaa3",
+  "title": "Consultar prospecto con código",
+  "generatedAt": "2026-10-26T06:31:38.629Z",
+  "executionEngine": "jira_semantic"
+}

@@ -376,8 +376,13 @@ testDesignRouter.post(
       badRequest(res, "Selecciona el proyecto de automatización para cargar su conocimiento antes de generar escenarios");
       return;
     }
-    if (projectSlug && !(await getProjectBySlug(projectSlug))) {
+    const automationProject = projectSlug ? await getProjectBySlug(projectSlug) : null;
+    if (!automationProject) {
       badRequest(res, `No existe el proyecto ${projectSlug}`);
+      return;
+    }
+    if (!principal.allProjects && !canWriteProject(principal, automationProject.id)) {
+      res.status(403).json({ ok: false, error: "project_access_denied", message: "No tienes permiso para usar este proyecto de automatización" });
       return;
     }
 
@@ -421,9 +426,36 @@ testDesignRouter.put(
       badRequest(res, "El proyecto de automatización es obligatorio para generar escenarios con su conocimiento");
       return;
     }
-    if (projectSlug && !(await getProjectBySlug(projectSlug))) {
-      badRequest(res, `No existe el proyecto ${projectSlug}`);
-      return;
+    if (projectSlug) {
+      const automationProject = await getProjectBySlug(projectSlug);
+      if (!automationProject) {
+        badRequest(res, `No existe el proyecto ${projectSlug}`);
+        return;
+      }
+      if (!principalOf(req).allProjects && !canWriteProject(principalOf(req), automationProject.id)) {
+        res.status(403).json({ ok: false, error: "project_access_denied", message: "No tienes permiso para usar este proyecto de automatización" });
+        return;
+      }
+    }
+
+    const projectChanged = projectSlug !== undefined
+      && projectSlug.toLocaleLowerCase() !== (draft.projectSlug ?? "").toLocaleLowerCase();
+    if (projectChanged) {
+      const runningStories = draft.stories.filter(story => story.generationStatus === "generating" || isStoryRunning(story.id));
+      if (runningStories.length > 0) {
+        generating(res, runningStories.map(story => story.issueKey));
+        return;
+      }
+      const existingScenarioCount = draft.stories.reduce((count, story) => count + story.scenarios.length, 0);
+      if (existingScenarioCount > 0 && body.confirmProjectChange !== true) {
+        res.status(409).json({
+          ok: false,
+          error: "project_change_confirmation_required",
+          message: `El borrador contiene ${existingScenarioCount} escenario(s). Confirma el cambio: las generaciones futuras usarán el nuevo proyecto y los escenarios existentes conservarán su perfil de origen.`,
+          scenarioCount: existingScenarioCount,
+        });
+        return;
+      }
     }
 
     const addIssues = body.addIssues === undefined ? [] : parseIssues(body.addIssues, draft.jiraProjectKey);
@@ -483,7 +515,11 @@ testDesignRouter.put(
       return;
     }
     const incoming = normalizeScenarios((req.body ?? {}).scenarios, { origin: "manual" });
-    const scenarios = markEditedScenarios(story.scenarios, incoming);
+    const scenarios = markEditedScenarios(story.scenarios, incoming).map(scenario =>
+      scenario.knowledgeProfileSlug === undefined
+        ? { ...scenario, knowledgeProfileSlug: draft.projectSlug }
+        : scenario,
+    );
     const saved = await repo.saveStoryScenarios(draft.id, story.id, scenarios);
     res.json({ story: saved });
   }),

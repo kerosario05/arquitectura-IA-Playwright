@@ -7,6 +7,7 @@ import type {
   TestDesignDraftStory,
   TestDesignDraftSummary,
   TestDesignDraftWithStories,
+  TestDesignPublishedCaseLink,
   TestDesignGenerationStatus,
   TestDesignScenario,
   TestDesignTestRailTarget,
@@ -321,7 +322,37 @@ export async function listDrafts(filter: ListDraftsFilter = {}): Promise<TestDes
 }
 
 export async function updateDraft(id: string, patch: UpdateDraftInput): Promise<TestDesignDraft | null> {
-  return withConnection(async (c) => {
+  return withTransaction(async (c) => {
+    const nextProjectSlug = patch.projectSlug === undefined ? undefined : patch.projectSlug?.trim() || null;
+    if (nextProjectSlug !== undefined) {
+      const currentRows = await c.query<{ projectSlug: string | null }>(
+        `SELECT projectSlug FROM dbo.TestDesignDraft WHERE id = ?`, [id],
+      );
+      const previousProjectSlug = currentRows[0]?.projectSlug?.trim() || null;
+      if (currentRows.length > 0 && previousProjectSlug?.toLocaleLowerCase() !== nextProjectSlug?.toLocaleLowerCase()) {
+        // Keep each existing case tied to the project whose knowledge informed it.
+        // A first-time link gives legacy, unscoped cases the explicitly selected profile.
+        const scenarioProfile = previousProjectSlug ?? nextProjectSlug;
+        const stories = await c.query<{ id: string; scenariosJson: unknown }>(
+          `SELECT id, scenariosJson FROM dbo.TestDesignDraftStory WHERE draftId = ?`, [id],
+        );
+        for (const story of stories) {
+          const scenarios = parseScenarios(story.scenariosJson);
+          let changed = false;
+          const scoped = scenarios.map(scenario => {
+            if (scenario.knowledgeProfileSlug !== undefined) return scenario;
+            changed = true;
+            return { ...scenario, knowledgeProfileSlug: scenarioProfile };
+          });
+          if (changed) {
+            await c.query(
+              `UPDATE dbo.TestDesignDraftStory SET scenariosJson = ?, updatedAt = SYSUTCDATETIME() WHERE id = ?`,
+              [jsonParam(scoped), story.id],
+            );
+          }
+        }
+      }
+    }
     const sets: string[] = [];
     const params: unknown[] = [];
     const set = (column: string, value: unknown) => {
@@ -329,7 +360,7 @@ export async function updateDraft(id: string, patch: UpdateDraftInput): Promise<
       params.push(value);
     };
     if (patch.title !== undefined) set("title", patch.title?.trim() || null);
-    if (patch.projectSlug !== undefined) set("projectSlug", patch.projectSlug?.trim() || null);
+    if (nextProjectSlug !== undefined) set("projectSlug", nextProjectSlug);
     if (patch.instructions !== undefined) set("instructions", patch.instructions?.trim() || null);
     if (patch.status !== undefined) set("status", patch.status);
     if (patch.testRail?.projectId !== undefined) set("testRailProjectId", patch.testRail.projectId);
@@ -495,5 +526,63 @@ export async function markStoryPublished(
       );
     }
     await touchDraft(c, draftId);
+  });
+}
+
+type PublishedLinkRow = Omit<TestDesignPublishedCaseLink, "scenario" | "publishedAt" | "testRailSuiteId"> & {
+  testRailSuiteId: unknown;
+  scenarioJson: unknown;
+  publishedAt: unknown;
+};
+
+function mapPublishedLink(row: PublishedLinkRow): TestDesignPublishedCaseLink {
+  const raw = Buffer.isBuffer(row.scenarioJson) ? row.scenarioJson.toString("utf16le") : String(row.scenarioJson ?? "{}");
+  let scenario: TestDesignScenario;
+  try { scenario = JSON.parse(raw) as TestDesignScenario; }
+  catch { throw new Error(`Invalid Test Design lineage JSON for TestRail case ${row.testRailCaseId}`); }
+  return { ...row, testRailSuiteId: toIntOrNull(row.testRailSuiteId), scenario, publishedAt: toIso(row.publishedAt) };
+}
+
+/** Persist the exact design case, its source scenario and content revision after a successful TestRail write. */
+export async function savePublishedCaseLink(link: TestDesignPublishedCaseLink): Promise<void> {
+  await withTransaction(async c => {
+    const exists = await c.query<{ testRailCaseId: unknown }>(
+      `SELECT testRailCaseId FROM dbo.TestDesignPublishedCaseLink WHERE testRailCaseId = ?`,
+      [link.testRailCaseId],
+    );
+    const values = [link.testRailProjectId, link.testRailSuiteId, link.testRailSectionId, link.projectSlug,
+      link.jiraProjectKey, link.issueKey, link.draftId, link.storyId, link.designScenarioId, link.jiraScenarioId,
+      link.contentVersion, Buffer.from(JSON.stringify(link.scenario), "utf16le"), link.publishedAt];
+    if (exists.length) {
+      await c.query(
+        `UPDATE dbo.TestDesignPublishedCaseLink SET testRailProjectId = ?, testRailSuiteId = ?, testRailSectionId = ?,
+         projectSlug = ?, jiraProjectKey = ?, issueKey = ?, draftId = ?, storyId = ?, designScenarioId = ?, jiraScenarioId = ?,
+         contentVersion = ?, scenarioJson = ?, publishedAt = ? WHERE testRailCaseId = ?`,
+        [...values, link.testRailCaseId],
+      );
+    } else {
+      await c.query(
+        `INSERT INTO dbo.TestDesignPublishedCaseLink
+         (testRailCaseId, testRailProjectId, testRailSuiteId, testRailSectionId, projectSlug, jiraProjectKey, issueKey,
+          draftId, storyId, designScenarioId, jiraScenarioId, contentVersion, scenarioJson, publishedAt)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [link.testRailCaseId, ...values],
+      );
+    }
+  });
+}
+
+/** Case ID is globally unique in TestRail; project scoping is still checked as a second boundary. */
+export async function getPublishedCaseLinks(caseIds: number[], testRailProjectId?: number): Promise<TestDesignPublishedCaseLink[]> {
+  const ids = [...new Set(caseIds.filter(id => Number.isInteger(id) && id > 0))];
+  if (!ids.length) return [];
+  return withConnection(async c => {
+    const rows = await c.query<PublishedLinkRow>(
+      `SELECT testRailCaseId, testRailProjectId, testRailSuiteId, testRailSectionId, projectSlug, jiraProjectKey, issueKey,
+       draftId, storyId, designScenarioId, jiraScenarioId, contentVersion, scenarioJson, publishedAt
+       FROM dbo.TestDesignPublishedCaseLink WHERE testRailCaseId IN (${placeholders(ids.length)})${testRailProjectId ? " AND testRailProjectId = ?" : ""}`,
+      testRailProjectId ? [...ids, testRailProjectId] : ids,
+    );
+    return rows.map(mapPublishedLink);
   });
 }

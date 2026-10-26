@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-regresion-negocios-alta-parcial-y-navegacion",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Regresion Negocios alta parcial y navegacion",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T17:12:15.836Z"
+}

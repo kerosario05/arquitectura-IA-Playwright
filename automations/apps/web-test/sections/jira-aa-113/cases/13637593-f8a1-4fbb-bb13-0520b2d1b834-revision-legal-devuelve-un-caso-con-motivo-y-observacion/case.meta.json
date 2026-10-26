@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "13637593-f8a1-4fbb-bb13-0520b2d1b834",
+  "title": "Revisión Legal devuelve un caso con motivo y observación",
+  "generatedAt": "2026-10-26T06:52:23.715Z",
+  "executionEngine": "jira_semantic"
+}

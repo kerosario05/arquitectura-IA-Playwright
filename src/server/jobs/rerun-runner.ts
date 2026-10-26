@@ -61,6 +61,7 @@ export type RerunPrepareResult = {
   targetAppName?: string;
   sectionName?: string;
   sectionSlug?: string;
+  environment?: string;
   /** One entry per selected scenario; see PromotedSpecReuseEntry. */
   promotedSpecReuse: PromotedSpecReuseEntry[];
   /** True only when EVERY selected scenario has a fresh, reusable promoted spec. */
@@ -108,6 +109,7 @@ type JobMetadata = {
   targetAppName?: string;
   sectionName?: string;
   sectionSlug?: string;
+  environment?: string;
   createdAt?: string;
   completedAt?: string;
   status?: string;
@@ -312,6 +314,7 @@ async function prepareRerunFromRecordingBatchJob(
     allReusable,
     sectionSlug: typeof params.sectionSlug === "string" ? params.sectionSlug : undefined,
     sectionName: typeof params.sectionName === "string" ? params.sectionName : undefined,
+    environment: typeof params.environment === "string" ? params.environment : undefined,
   };
 }
 
@@ -831,6 +834,7 @@ async function prepareRerunFromScenarioPreviewRoot(
   const targetAppName = metadata.targetAppName || allScenarios[0]?.targetAppName || targetAppSlug;
   const sectionName = metadata.sectionName;
   const sectionSlug = metadata.sectionSlug;
+  const environment = metadata.environment;
 
   let selectedVcs: VirtualCase[];
 
@@ -888,11 +892,12 @@ async function prepareRerunFromScenarioPreviewRoot(
     totalCount: allScenarios.length,
     sourceJobId: returnedSourceJobId,
     rerunMode: mode,
+    environment,
+    sectionName,
+    sectionSlug,
     appSlug,
     targetAppSlug,
     targetAppName,
-    sectionName,
-    sectionSlug,
     promotedSpecReuse,
     allReusable,
     options: metadata.options,

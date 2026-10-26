@@ -1,0 +1,197 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-26T07:17:54.626Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "917a5d8b-e03e-431e-ae9f-081ae4666444",
+    "title": "Consultar el Registro de Datos y navegar a Personas relacionadas"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "fill [usuario_negocios]",
+      "valueKey": "usuario_negocios",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"usuario\"]"
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [contrasena_negocios]",
+      "valueKey": "contrasena_negocios",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"clave\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Presionar \"iniciar sesión\"",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"btn-login\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Presionar \"Solicitudes\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Solicitudes",
+        "exact": true
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"SOL-2026-0001\"",
+      "target": {
+        "strategy": "css",
+        "value": ":is(main,[role=\"main\"]) a[href=\"#/solicitud/SOL-2026-0001\"]"
+      }
+    },
+    {
+      "index": 8,
+      "action": "click",
+      "description": "Presionar \"Personas relacionadas\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Personas relacionadas",
+        "exact": true
+      }
+    },
+    {
+      "index": 9,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Volver\"",
+      "target": {
+        "strategy": "text",
+        "value": "Volver"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "usuario_negocios",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena_negocios",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Consultar el Registro de Datos y navegar a Personas relacionadas",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "fill",
+        "valueKey": "usuario_negocios",
+        "technicalTargetRefs": [
+          "css:[id=\"usuario\"]"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "contrasena_negocios",
+        "technicalTargetRefs": [
+          "css:[id=\"clave\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:[id=\"btn-login\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Solicitudes"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css::is(main,[role=\"main\"]) a[href=\"#/solicitud/SOL-2026-0001\"]"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Personas relacionadas"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Volver\"",
+        "technicalTargetRefs": [
+          "text:Volver"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-9",
+        "requirement": "Validar que se muestre \"Volver\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 9,
+        "target": "Volver\nConsulta Personas Relacionadas\n\nINVERSIONES DEL CARIBE SRL\n\nSeleccionar todas\nCliente existe en el sistema\nCliente restringido (PLAFT)\nNo encontrado en el sistema\n0\nSocios\n0\nAccionistas\n1\nGerentes\n0\nFirmantes\nGerentes (1)\n\tValidación\tCódigo\tNombre\tDocumento\tCargo\tAcciones\tNacionalidad\tEstado Civil\tEstatus\tAcciones\n\t\nEn sistema\tPRO-43941\tJUAN SOTO\t00100000029\tGerente Comercial\t456\tDominicana\tCasado/a\tcreado",
+        "evidence": [
+          "live-step-9"
+        ],
+        "details": {
+          "observedText": "Volver\nConsulta Personas Relacionadas\n\nINVERSIONES DEL CARIBE SRL\n\nSeleccionar todas\nCliente existe en el sistema\nCliente restringido (PLAFT)\nNo encontrado en el sistema\n0\nSocios\n0\nAccionistas\n1\nGerentes\n0\nFirmantes\nGerentes (1)\n\tValidación\tCódigo\tNombre\tDocumento\tCargo\tAcciones\tNacionalidad\tEstado Civil\tEstatus\tAcciones\n\t\nEn sistema\tPRO-43941\tJUAN SOTO\t00100000029\tGerente Comercial\t456\tDominicana\tCasado/a\tcreado"
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "que se muestre \"Volver\""
+  }
+}

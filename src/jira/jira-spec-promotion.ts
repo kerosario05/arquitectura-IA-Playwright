@@ -71,6 +71,37 @@ export class JiraSpecVerificationError extends Error {
   }
 }
 
+export class JiraPromotionIndexError extends Error {
+  readonly code = "JIRA_PROMOTION_INDEX_INVALID";
+
+  constructor(
+    readonly indexPath: string,
+    readonly reason: "invalid_json" | "unsupported_version" | "unreadable",
+  ) {
+    super("JIRA_PROMOTION_INDEX_INVALID");
+    this.name = "JiraPromotionIndexError";
+  }
+}
+
+export async function preflightJiraPromotionIndexes(appIndexPath: string, globalIndexPath: string) {
+  const load = async (indexPath: string) => {
+    try {
+      return await loadAutomationIndex(indexPath);
+    } catch (error) {
+      const reason = error instanceof SyntaxError
+        ? "invalid_json"
+        : error instanceof Error && error.message.startsWith("Unsupported index version:")
+          ? "unsupported_version"
+          : "unreadable";
+      throw new JiraPromotionIndexError(path.resolve(indexPath), reason);
+    }
+  };
+
+  const appIndex = await load(appIndexPath);
+  const globalIndex = await load(globalIndexPath);
+  return { appIndex, globalIndex };
+}
+
 function redactVerificationOutput(output: string, secrets: Array<string | undefined>): string {
   let safe = output;
   for (const secret of secrets) {
@@ -179,6 +210,10 @@ export async function promoteJiraSpec(input: PromoteJiraSpecInput): Promise<Prom
     throw new Error("JIRA_SPEC_OUTPUT_PATH_UNAVAILABLE");
   }
 
+  const globalIndexPath = path.resolve("automations/index.json");
+  // Validate both registries before creating backups, candidate specs, or canonical outputs.
+  await preflightJiraPromotionIndexes(appPaths.indexPath, globalIndexPath);
+
   if (!input.overwrite) {
     await assertNoCanonicalJiraOutputs([appPaths.specPath, appPaths.planPath, appPaths.caseConfigPath,
       appPaths.caseAutomationPath, path.join(appPaths.caseDir, "case.meta.json"), path.join(appPaths.caseDir, "promoted-data.json")]);
@@ -211,6 +246,16 @@ export async function promoteJiraSpec(input: PromoteJiraSpecInput): Promise<Prom
     await verifyJiraSpec(candidatePath, input, timeoutMs);
     input.signal?.throwIfAborted();
   } catch (error) { throw error; }
+
+  // Re-read immediately before committing canonical artifacts so concurrent changes
+  // during browser verification cannot turn a valid preflight into a partial promotion.
+  let promotionIndexes: Awaited<ReturnType<typeof preflightJiraPromotionIndexes>>;
+  try {
+    promotionIndexes = await preflightJiraPromotionIndexes(appPaths.indexPath, globalIndexPath);
+  } catch (error) {
+    await fs.rm(candidatePath, { force: true }).catch(() => undefined);
+    throw error;
+  }
 
   const planPayload = { ...input.plan, sourceScenario: input.sourceScenario };
   const dataContext = buildDataContext(input.fullConfig);
@@ -258,11 +303,8 @@ export async function promoteJiraSpec(input: PromoteJiraSpecInput): Promise<Prom
       specsRejected: verificationStatus === "passed" ? 0 : 1, specWritten: verificationStatus === "passed", errors: [], warnings: [],
     } },
   };
-  const appIndex = await loadAutomationIndex(appPaths.indexPath);
-  await saveAutomationIndex(upsertAutomationIndexEntry(appIndex, entry), appPaths.indexPath);
+  await saveAutomationIndex(upsertAutomationIndexEntry(promotionIndexes.appIndex, entry), appPaths.indexPath);
   await writeJsonAtomic(appPaths.caseAutomationPath, entry);
-  const globalIndexPath = path.resolve("automations/index.json");
-  const globalIndex = await loadAutomationIndex(globalIndexPath);
-  await saveAutomationIndex(upsertAutomationIndexEntry(globalIndex, entry), globalIndexPath);
+  await saveAutomationIndex(upsertAutomationIndexEntry(promotionIndexes.globalIndex, entry), globalIndexPath);
   return entry;
 }

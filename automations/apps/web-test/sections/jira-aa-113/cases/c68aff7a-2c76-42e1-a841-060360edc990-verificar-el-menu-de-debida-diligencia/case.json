@@ -1,0 +1,9 @@
+{
+  "id": "c68aff7a-2c76-42e1-a841-060360edc990-verificar-el-menu-de-debida-diligencia",
+  "externalId": "c68aff7a-2c76-42e1-a841-060360edc990",
+  "title": "Verificar el menú de Debida Diligencia",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T07:27:32.356Z"
+}

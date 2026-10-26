@@ -228,6 +228,50 @@ function dropSteps(draft:Draft,removed:Set<number>):Draft{
   ...(Array.isArray(draft.conditionRequirements)?{conditionRequirements:reindexConditions(draft.conditionRequirements)}:{})};
 }
 
+/**
+ * A reviewed summary has one transition into the later authorization stage.
+ * Repeated adjacent generic Continue actions before a transactional token are
+ * ambiguous and can submit the operation before the token is entered. Remove
+ * only the duplicate action when the source and authored journey establish
+ * that review -> authorization order; keep the first transition and all
+ * source-backed channel, token, and authorization actions.
+ */
+function repairRepeatedContinueBeforeTransactionToken(draft:Draft,issue:JiraIssueSource):Draft{
+ const source=[issue.description,issue.acceptanceCriteria].filter(Boolean).join('\n');
+ const reviewAt=source.search(/\b(?:revis\w*|review\w*)\b/i);
+ const authorizationAfterReview=reviewAt<0?-1:source.slice(reviewAt).search(/\b(?:token|autoriz\w*|authoriz\w*)\b/i);
+ if(reviewAt<0||authorizationAfterReview<0||! /\b(?:resumen|confirmaci[oó]n|summary|confirmation)\b/i.test(source))return draft;
+ const steps=stepsOf(draft);
+ const fields=deriveJiraInputRequirements(steps,draft.inputRequirements);
+ const tokenFields=fields.filter(field=>field.operation==='fill'&&/\btoken\b/i.test(field.label)
+  &&!ACCESS_CODE_LABEL.test(field.label)
+  &&steps.slice(0,field.stepIndex-1).some(step=>/^\s*(?:Validar|Verificar|Comprobar)\b/i.test(step)
+   &&/\b(?:resumen|confirmaci[oó]n|summary|confirmation)\b/i.test(step)));
+ if(tokenFields.length!==1)return draft;
+ const tokenIndex=tokenFields[0].stepIndex-1;
+ const lastReview=steps.reduce((found,step,index)=>index<tokenIndex&&/^\s*(?:Validar|Verificar|Comprobar)\b/i.test(step)
+  &&/\b(?:resumen|confirmaci[oó]n|summary|confirmation)\b/i.test(step)?index:found,-1);
+ if(lastReview<0)return draft;
+ const continuationTarget=(step:string):string|undefined=>{
+  const intent=parseStepIntent(step).find(item=>['action_click','action_submit','action_press'].includes(item.type));
+  const target=intent?.actionTarget?.trim();
+  return target&&/^(?:continuar|siguiente|continue|next)$/i.test(target)?target.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase():undefined;
+ };
+ const removed=new Set<number>();
+ for(let index=lastReview+1;index<tokenIndex;index++){
+  const current=continuationTarget(steps[index]);
+  if(!current)continue;
+  let next=index+1;
+  while(next<tokenIndex&&current===continuationTarget(steps[next]))removed.add(next++);
+  // Keep one transition from the reviewed summary. Duplicates have no
+  // intervening observation that would establish a separate screen stage.
+  index=next-1;
+ }
+ if(!removed.size)return draft;
+ console.log(`[jira-generation:sequence-repair] sourceIssueKey=${issue.key} reason=duplicate_continue_before_transaction_token removed=${removed.size}`);
+ return dropSteps(draft,removed);
+}
+
 const norm=(text:string)=>text.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
 // Generic navigation wording only; says nothing about any destination.
 const NAV_FILLER=new Set(['navegar','navigate','por','la','el','los','las','de','del','a','al','hacia','to','the','ruta','route','pantalla','screen','seccion','section','menu','opcion','option','path']);
@@ -557,6 +601,7 @@ export function prepareJiraGenerationDrafts(candidates:unknown[],issues:JiraIssu
   const issue=issues.find(issue=>issue.key===draft.sourceIssueKey);
   if(!issue)return draft;
   const withControlledSetup=controlledSetup(draft,peers,issue);
-  return contextCriteria(expandCompositeFailureJourney(withControlledSetup,peers,issue),issue);
+  const prepared=contextCriteria(expandCompositeFailureJourney(withControlledSetup,peers,issue),issue);
+  return repairRepeatedContinueBeforeTransactionToken(prepared,issue);
  });
 }

@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "1ed42417-17d6-41ed-8279-7011caeb7706",
+  "title": "Abrir el listado filtrado desde el contador En Revisión Legal",
+  "generatedAt": "2026-10-26T07:07:34.282Z",
+  "executionEngine": "jira_semantic"
+}

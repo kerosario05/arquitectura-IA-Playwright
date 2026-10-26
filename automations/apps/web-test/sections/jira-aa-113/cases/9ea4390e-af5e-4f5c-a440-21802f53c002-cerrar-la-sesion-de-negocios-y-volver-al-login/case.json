@@ -1,0 +1,9 @@
+{
+  "id": "9ea4390e-af5e-4f5c-a440-21802f53c002-cerrar-la-sesion-de-negocios-y-volver-al-login",
+  "externalId": "9ea4390e-af5e-4f5c-a440-21802f53c002",
+  "title": "Cerrar la sesión de Negocios y volver al login",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T07:02:17.115Z"
+}

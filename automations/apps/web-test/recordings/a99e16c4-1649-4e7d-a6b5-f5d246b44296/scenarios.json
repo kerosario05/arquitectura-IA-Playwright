@@ -1,0 +1,3339 @@
+[
+  {
+    "scenarioId": "REC-A99E16C4-01",
+    "title": "Alta de solicitud con registro de datos y navegacion completa",
+    "description": "Recorrido observado para completar \"Alta de solicitud con registro de datos y navegacion completa\". Se registraron 19 acciones funcionales.",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "http://localhost:4310/#/login",
+        "description": "Navegar a http://localhost:4310/#/login"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Usuario"
+        },
+        "valueKey": "usuario",
+        "description": "Ingresar [usuario] en \"Usuario\"",
+        "interactionId": "interaction-5"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Contraseña"
+        },
+        "valueKey": "contrasena",
+        "description": "Ingresar [contrasena] en \"Contraseña\"",
+        "interactionId": "interaction-7"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Iniciar sesión"
+        },
+        "description": "Presionar \"Iniciar sesión\"",
+        "interactionId": "interaction-8"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "link|Nueva solicitud"
+        },
+        "description": "Presionar \"Nueva solicitud\"",
+        "interactionId": "interaction-11"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Número de Identificación*"
+        },
+        "valueKey": "numero_de_identificacion",
+        "description": "Ingresar [numero_de_identificacion] en \"Número de Identificación*\"",
+        "interactionId": "interaction-15"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Consultar"
+        },
+        "description": "Presionar \"Consultar\"",
+        "interactionId": "interaction-16"
+      },
+      {
+        "action": "click",
+        "description": "Presionar \"Información del Registro\"",
+        "interactionId": "interaction-17"
+      },
+      {
+        "action": "click",
+        "description": "Presionar \"Información del Registro\"",
+        "interactionId": "interaction-18"
+      },
+      {
+        "action": "click",
+        "description": "Presionar \"Información del Registro\"",
+        "interactionId": "interaction-19"
+      },
+      {
+        "action": "click",
+        "description": "Presionar \"Información del Registro\"",
+        "interactionId": "interaction-20"
+      },
+      {
+        "action": "click",
+        "description": "Presionar \"Información del Registro\"",
+        "interactionId": "interaction-21"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "id",
+          "value": "registro-form"
+        },
+        "description": "Presionar \"Calle*Sector Municipio*Teléfono 1*Teléfono 2 Email*FaxPágina Web\"",
+        "interactionId": "interaction-22"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "link|Inicio"
+        },
+        "description": "Presionar \"Inicio\"",
+        "interactionId": "interaction-24"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "link|Solicitudes"
+        },
+        "description": "Presionar \"Solicitudes\"",
+        "interactionId": "interaction-27"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Buscar solicitudes"
+        },
+        "valueKey": "buscar_solicitudes",
+        "description": "Ingresar [buscar_solicitudes] en \"Buscar solicitudes\"",
+        "interactionId": "interaction-31"
+      },
+      {
+        "action": "click",
+        "description": "Presionar el control grabado",
+        "interactionId": "interaction-32"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "link|Inicio"
+        },
+        "description": "Presionar \"Inicio\"",
+        "interactionId": "interaction-35"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "link|Solicitudes"
+        },
+        "description": "Presionar \"Solicitudes\"",
+        "interactionId": "interaction-38"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Salir"
+        },
+        "description": "Presionar \"Salir\"",
+        "interactionId": "interaction-41"
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Ingresar [usuario] en \"Usuario\"",
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "stepTemplate": "Ingresar [usuario] en \"Usuario\"",
+        "renderedStep": "Ingresar \"negocios\" en \"Usuario\"",
+        "valueKey": "usuario",
+        "interactionId": "interaction-5",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/login",
+        "stateScope": "9db5430202df",
+        "stepNumber": 2
+      },
+      {
+        "content": "Ingresar [contrasena] en \"Contraseña\"",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "stepTemplate": "Ingresar [contrasena] en \"Contraseña\"",
+        "renderedStep": "Ingresar el valor seguro asociado a \"Contraseña\"",
+        "valueKey": "contrasena",
+        "interactionId": "interaction-7",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/login",
+        "stateScope": "9db5430202df",
+        "stepNumber": 3
+      },
+      {
+        "content": "Presionar \"Iniciar sesión\"",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "renderedStep": "Presionar \"Iniciar sesión\"",
+        "interactionId": "interaction-8",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/login",
+        "routeAfter": "http://localhost:4310/#/",
+        "stateScope": "9db5430202df",
+        "stepNumber": 4
+      },
+      {
+        "content": "Presionar \"Nueva solicitud\"",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "renderedStep": "Presionar \"Nueva solicitud\"",
+        "interactionId": "interaction-11",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/",
+        "routeAfter": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "stepNumber": 5
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de Identificación*\"",
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de Identificación*\"",
+        "renderedStep": "Ingresar \"101234567\" en \"Número de Identificación*\"",
+        "valueKey": "numero_de_identificacion",
+        "interactionId": "interaction-15",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "stepNumber": 6
+      },
+      {
+        "content": "Presionar \"Consultar\"",
+        "sourceEventRefs": [
+          "event-16"
+        ],
+        "renderedStep": "Presionar \"Consultar\"",
+        "interactionId": "interaction-16",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "stepNumber": 7
+      },
+      {
+        "content": "Presionar \"Información del Registro\"",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "renderedStep": "Presionar \"Información del Registro\"",
+        "interactionId": "interaction-17",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "stepNumber": 8
+      },
+      {
+        "content": "Presionar \"Información del Registro\"",
+        "sourceEventRefs": [
+          "event-18"
+        ],
+        "renderedStep": "Presionar \"Información del Registro\"",
+        "interactionId": "interaction-18",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "stepNumber": 9
+      },
+      {
+        "content": "Presionar \"Información del Registro\"",
+        "sourceEventRefs": [
+          "event-19"
+        ],
+        "renderedStep": "Presionar \"Información del Registro\"",
+        "interactionId": "interaction-19",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "stepNumber": 10
+      },
+      {
+        "content": "Presionar \"Información del Registro\"",
+        "sourceEventRefs": [
+          "event-20"
+        ],
+        "renderedStep": "Presionar \"Información del Registro\"",
+        "interactionId": "interaction-20",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "stepNumber": 11
+      },
+      {
+        "content": "Presionar \"Información del Registro\"",
+        "sourceEventRefs": [
+          "event-21"
+        ],
+        "renderedStep": "Presionar \"Información del Registro\"",
+        "interactionId": "interaction-21",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "stepNumber": 12
+      },
+      {
+        "content": "Presionar \"Calle*Sector Municipio*Teléfono 1*Teléfono 2 Email*FaxPágina Web\"",
+        "sourceEventRefs": [
+          "event-22"
+        ],
+        "renderedStep": "Presionar \"Calle*Sector Municipio*Teléfono 1*Teléfono 2 Email*FaxPágina Web\"",
+        "interactionId": "interaction-22",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "stepNumber": 13
+      },
+      {
+        "content": "Presionar \"Inicio\"",
+        "sourceEventRefs": [
+          "event-24"
+        ],
+        "renderedStep": "Presionar \"Inicio\"",
+        "interactionId": "interaction-24",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "routeAfter": "http://localhost:4310/#/",
+        "stateScope": "9db5430202df",
+        "stepNumber": 14
+      },
+      {
+        "content": "Presionar \"Solicitudes\"",
+        "sourceEventRefs": [
+          "event-27"
+        ],
+        "renderedStep": "Presionar \"Solicitudes\"",
+        "interactionId": "interaction-27",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/",
+        "routeAfter": "http://localhost:4310/#/solicitudes",
+        "stateScope": "9db5430202df",
+        "stepNumber": 15
+      },
+      {
+        "content": "Ingresar [buscar_solicitudes] en \"Buscar solicitudes\"",
+        "sourceEventRefs": [
+          "event-31"
+        ],
+        "stepTemplate": "Ingresar [buscar_solicitudes] en \"Buscar solicitudes\"",
+        "renderedStep": "Ingresar \"TRANSPORTES\" en \"Buscar solicitudes\"",
+        "valueKey": "buscar_solicitudes",
+        "interactionId": "interaction-31",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitudes",
+        "stateScope": "9db5430202df",
+        "stepNumber": 16
+      },
+      {
+        "content": "Presionar el control grabado",
+        "sourceEventRefs": [
+          "event-32"
+        ],
+        "renderedStep": "Presionar el control grabado",
+        "interactionId": "interaction-32",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitudes",
+        "routeAfter": "http://localhost:4310/#/solicitud/SOL-2026-0006",
+        "stateScope": "9db5430202df",
+        "stepNumber": 17
+      },
+      {
+        "content": "Presionar \"Inicio\"",
+        "sourceEventRefs": [
+          "event-35"
+        ],
+        "renderedStep": "Presionar \"Inicio\"",
+        "interactionId": "interaction-35",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/SOL-2026-0006",
+        "routeAfter": "http://localhost:4310/#/",
+        "stateScope": "9db5430202df",
+        "stepNumber": 18
+      },
+      {
+        "content": "Presionar \"Solicitudes\"",
+        "sourceEventRefs": [
+          "event-38"
+        ],
+        "renderedStep": "Presionar \"Solicitudes\"",
+        "interactionId": "interaction-38",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/",
+        "routeAfter": "http://localhost:4310/#/solicitudes",
+        "stateScope": "9db5430202df",
+        "stepNumber": 19
+      },
+      {
+        "content": "Presionar \"Salir\"",
+        "sourceEventRefs": [
+          "event-41"
+        ],
+        "renderedStep": "Presionar \"Salir\"",
+        "interactionId": "interaction-41",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitudes",
+        "routeAfter": "http://localhost:4310/#/login",
+        "stateScope": "9db5430202df",
+        "stepNumber": 20
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "usuario",
+        "label": "Usuario",
+        "stepIndex": 1,
+        "technicalTargetRefs": [
+          "role:textbox|Usuario",
+          "css:#usuario",
+          "id:usuario"
+        ],
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "exampleValue": "negocios",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Usuario",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "contrasena",
+        "label": "Contraseña",
+        "stepIndex": 2,
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#clave",
+          "id:clave"
+        ],
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "secure",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Contraseña",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "numero_de_identificacion",
+        "label": "Número de Identificación*",
+        "stepIndex": 5,
+        "technicalTargetRefs": [
+          "role:textbox|Número de Identificación*",
+          "css:#idNumero",
+          "id:idNumero"
+        ],
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "exampleValue": "101234567",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Número de Identificación*",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "buscar_solicitudes",
+        "label": "Buscar solicitudes",
+        "stepIndex": 15,
+        "technicalTargetRefs": [
+          "role:textbox|Buscar solicitudes",
+          "css:#sol-search",
+          "id:sol-search"
+        ],
+        "sourceEventRefs": [
+          "event-31"
+        ],
+        "exampleValue": "TRANSPORTES",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Buscar solicitudes",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Ingresar [usuario] en \"Usuario\"",
+        "strategy": "role",
+        "value": "textbox|Usuario"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Ingresar [contrasena] en \"Contraseña\"",
+        "strategy": "role",
+        "value": "textbox|Contraseña"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Iniciar sesión\"",
+        "strategy": "role",
+        "value": "button|Iniciar sesión"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Presionar \"Nueva solicitud\"",
+        "strategy": "role",
+        "value": "link|Nueva solicitud"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Ingresar [numero_de_identificacion] en \"Número de Identificación*\"",
+        "strategy": "role",
+        "value": "textbox|Número de Identificación*"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Presionar \"Consultar\"",
+        "strategy": "role",
+        "value": "button|Consultar"
+      },
+      {
+        "stepIndex": 12,
+        "description": "Presionar \"Calle*Sector Municipio*Teléfono 1*Teléfono 2 Email*FaxPágina Web\"",
+        "strategy": "id",
+        "value": "registro-form"
+      },
+      {
+        "stepIndex": 13,
+        "description": "Presionar \"Inicio\"",
+        "strategy": "role",
+        "value": "link|Inicio"
+      },
+      {
+        "stepIndex": 14,
+        "description": "Presionar \"Solicitudes\"",
+        "strategy": "role",
+        "value": "link|Solicitudes"
+      },
+      {
+        "stepIndex": 15,
+        "description": "Ingresar [buscar_solicitudes] en \"Buscar solicitudes\"",
+        "strategy": "role",
+        "value": "textbox|Buscar solicitudes"
+      },
+      {
+        "stepIndex": 17,
+        "description": "Presionar \"Inicio\"",
+        "strategy": "role",
+        "value": "link|Inicio"
+      },
+      {
+        "stepIndex": 18,
+        "description": "Presionar \"Solicitudes\"",
+        "strategy": "role",
+        "value": "link|Solicitudes"
+      },
+      {
+        "stepIndex": 19,
+        "description": "Presionar \"Salir\"",
+        "strategy": "role",
+        "value": "button|Salir"
+      }
+    ],
+    "sourceRecordingId": "a99e16c4-1649-4e7d-a6b5-f5d246b44296",
+    "hasUncertainSteps": true,
+    "primary": true,
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7",
+      "event-8",
+      "event-9",
+      "event-10",
+      "event-11",
+      "event-12",
+      "event-13",
+      "event-14",
+      "event-15",
+      "event-16",
+      "event-17",
+      "event-18",
+      "event-19",
+      "event-20",
+      "event-21",
+      "event-22",
+      "event-23",
+      "event-24",
+      "event-25",
+      "event-26",
+      "event-27",
+      "event-28",
+      "event-29",
+      "event-30",
+      "event-31",
+      "event-32",
+      "event-33",
+      "event-34",
+      "event-35",
+      "event-36",
+      "event-37",
+      "event-38",
+      "event-39",
+      "event-40",
+      "event-41",
+      "event-42"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": false,
+    "functionalReadiness": true,
+    "technicalReadiness": false,
+    "expectedResultCandidate": "La aplicación carga su pantalla inicial",
+    "oracleAuthority": "observed_only",
+    "confidence": 0.95,
+    "scenarioStepCount": 20,
+    "functionalActionCount": 19,
+    "nonUserSetupSteps": 1,
+    "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
+    "scenarioGoal": "Alta de solicitud con registro de datos y navegacion completa",
+    "stateSequenceValid": true,
+    "stateSequenceIssues": [],
+    "postGoalObservations": [],
+    "goalContract": {
+      "nonGeneric": true,
+      "goalCoherent": true,
+      "mutationIntentExpressed": true
+    },
+    "replayEligible": true,
+    "canonicalInteractions": [
+      {
+        "id": "interaction-1",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-1"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "http://localhost:4310/#/login",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-5",
+        "controlIdentity": "9db5430202df|Usuario|role|textbox|Usuario",
+        "semanticField": "Usuario",
+        "action": "fill",
+        "valueKey": "usuario",
+        "recordedValue": "negocios",
+        "rawTypedValue": "negocios",
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Usuario",
+          "css:#usuario",
+          "id:usuario"
+        ],
+        "editingSessionRef": "edit-1",
+        "description": "Ingresar en \"Usuario\"",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/login",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-7",
+        "controlIdentity": "9db5430202df|Contraseña|role|textbox|Contraseña",
+        "semanticField": "Contraseña",
+        "action": "fill",
+        "valueKey": "contrasena",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#clave",
+          "id:clave"
+        ],
+        "editingSessionRef": "edit-2",
+        "description": "Ingresar en \"Contraseña\"",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/login",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-8",
+        "controlIdentity": "9db5430202df|Iniciar sesión|role|button|Iniciar sesión",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión",
+          "css:#btn-login",
+          "id:btn-login"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#btn-login",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "btn-login"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "login-form"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-login\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Iniciar sesión",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "login-form"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/login",
+        "routeAfter": "http://localhost:4310/#/",
+        "stateScope": "9db5430202df",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-11",
+        "controlIdentity": "9db5430202df|Nueva solicitud|role|link|Nueva solicitud",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "technicalTargetRefs": [
+          "role:link|Nueva solicitud"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Nueva solicitud",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#/solicitud/nueva"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "nav"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/solicitud/nueva\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Nueva solicitud",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/",
+        "routeAfter": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-15",
+        "controlIdentity": "9db5430202df|Número de Identificación*|role|textbox|Número de Identificación*",
+        "semanticField": "Número de Identificación*",
+        "action": "fill",
+        "valueKey": "numero_de_identificacion",
+        "recordedValue": "101234567",
+        "rawTypedValue": "101234567",
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Número de Identificación*",
+          "css:#idNumero",
+          "id:idNumero"
+        ],
+        "editingSessionRef": "edit-3",
+        "description": "Ingresar en \"Número de Identificación*\"",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-16",
+        "controlIdentity": "9db5430202df|Consultar|role|button|Consultar",
+        "semanticField": "Consultar",
+        "action": "click",
+        "valueKey": "consultar",
+        "sourceEventRefs": [
+          "event-16"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Consultar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Consultar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "svg"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"svg\",1]],\"descendantEntries\":[[\"circle\",1],[\"path\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "registro-form"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"svg\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"svg\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Consultar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(button[aria-label=\"Limpiar consulta\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Consultar\"",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-17",
+        "controlIdentity": "9db5430202df|Información del Registro",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "form"
+              },
+              "stableDirectAttributes": {
+                "id": "registro-form"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "button",
+                  "stableAttributes": {
+                    "aria-label": "Limpiar consulta"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "role": "status",
+                  "stableAttributes": {
+                    "role": "status"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "capitalAportado"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "capitalAutorizado"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "capitalSuscrito"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "denominacion"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "fechaConstitucion"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "fechaEmision"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "fechaInicioOps"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "fechaVencimiento"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "idNumero"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "idTipo"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "moneda"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "nacionalidad"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "registroMercantil"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "siglas"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "tipoSociedad"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "id": "consulta-banner"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "capitalAportado",
+                    "name": "capitalAportado"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "capitalAutorizado",
+                    "name": "capitalAutorizado"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "capitalSuscrito",
+                    "name": "capitalSuscrito"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "denominacion",
+                    "name": "denominacion"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "fechaConstitucion",
+                    "name": "fechaConstitucion"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "fechaEmision",
+                    "name": "fechaEmision"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "fechaVencimiento",
+                    "name": "fechaVencimiento"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "idNumero",
+                    "name": "idNumero"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "registroMercantil",
+                    "name": "registroMercantil"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "siglas",
+                    "name": "siglas"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "select",
+                  "stableAttributes": {
+                    "id": "idTipo",
+                    "name": "idTipo"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "select",
+                  "stableAttributes": {
+                    "id": "moneda",
+                    "name": "moneda"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "select",
+                  "stableAttributes": {
+                    "id": "nacionalidad",
+                    "name": "nacionalidad"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "select",
+                  "stableAttributes": {
+                    "id": "tipoSociedad",
+                    "name": "tipoSociedad"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "div",
+                "h3",
+                "p"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"form\"},\"stableDirectAttributes\":{\"id\":\"registro-form\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"div\",\"role\":\"status\",\"stableAttributes\":{\"role\":\"status\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"capitalAportado\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"capitalAutorizado\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"capitalSuscrito\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"denominacion\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"fechaConstitucion\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"fechaEmision\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"fechaInicioOps\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"fechaVencimiento\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"idNumero\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"idTipo\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"moneda\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"nacionalidad\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"registroMercantil\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"siglas\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"tipoSociedad\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"id\":\"consulta-banner\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"capitalAportado\",\"name\":\"capitalAportado\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"capitalAutorizado\",\"name\":\"capitalAutorizado\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"capitalSuscrito\",\"name\":\"capitalSuscrito\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"denominacion\",\"name\":\"denominacion\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"fechaConstitucion\",\"name\":\"fechaConstitucion\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"fechaEmision\",\"name\":\"fechaEmision\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"fechaVencimiento\",\"name\":\"fechaVencimiento\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"idNumero\",\"name\":\"idNumero\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"registroMercantil\",\"name\":\"registroMercantil\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"siglas\",\"name\":\"siglas\"}},{\"relation\":\"descendant\",\"tag\":\"select\",\"stableAttributes\":{\"id\":\"idTipo\",\"name\":\"idTipo\"}},{\"relation\":\"descendant\",\"tag\":\"select\",\"stableAttributes\":{\"id\":\"moneda\",\"name\":\"moneda\"}},{\"relation\":\"descendant\",\"tag\":\"select\",\"stableAttributes\":{\"id\":\"nacionalidad\",\"name\":\"nacionalidad\"}},{\"relation\":\"descendant\",\"tag\":\"select\",\"stableAttributes\":{\"id\":\"tipoSociedad\",\"name\":\"tipoSociedad\"}}],\"semanticShape\":[\"div\",\"h3\",\"p\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",21],[\\\"h3\\\",1],[\\\"p\\\",1]],\\\"descendantEntries\\\":[[\\\"b\\\",1],[\\\"button\\\",2],[\\\"circle\\\",2],[\\\"div\\\",16],[\\\"h3\\\",1],[\\\"input\\\",4],[\\\"label\\\",7],[\\\"option\\\",11],[\\\"p\\\",1],[\\\"path\\\",7],[\\\"select\\\",2],[\\\"span\\\",7],[\\\"svg\\\",3]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner",
+              "v2_scoped_structural_runtime_evidence"
+            ],
+            "confidence": 0.6,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-18",
+        "controlIdentity": "9db5430202df|Información del Registro",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-18"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "form"
+              },
+              "stableDirectAttributes": {
+                "id": "registro-form"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "button",
+                  "stableAttributes": {
+                    "aria-label": "Limpiar consulta"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "role": "status",
+                  "stableAttributes": {
+                    "role": "status"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "capitalAportado"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "capitalAutorizado"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "capitalSuscrito"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "denominacion"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "fechaConstitucion"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "fechaEmision"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "fechaInicioOps"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "fechaVencimiento"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "idNumero"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "idTipo"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "moneda"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "nacionalidad"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "registroMercantil"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "siglas"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "tipoSociedad"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "id": "consulta-banner"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "capitalAportado",
+                    "name": "capitalAportado"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "capitalAutorizado",
+                    "name": "capitalAutorizado"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "capitalSuscrito",
+                    "name": "capitalSuscrito"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "denominacion",
+                    "name": "denominacion"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "fechaConstitucion",
+                    "name": "fechaConstitucion"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "fechaEmision",
+                    "name": "fechaEmision"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "fechaVencimiento",
+                    "name": "fechaVencimiento"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "idNumero",
+                    "name": "idNumero"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "registroMercantil",
+                    "name": "registroMercantil"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "siglas",
+                    "name": "siglas"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "select",
+                  "stableAttributes": {
+                    "id": "idTipo",
+                    "name": "idTipo"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "select",
+                  "stableAttributes": {
+                    "id": "moneda",
+                    "name": "moneda"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "select",
+                  "stableAttributes": {
+                    "id": "nacionalidad",
+                    "name": "nacionalidad"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "select",
+                  "stableAttributes": {
+                    "id": "tipoSociedad",
+                    "name": "tipoSociedad"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "div",
+                "h3",
+                "p"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"form\"},\"stableDirectAttributes\":{\"id\":\"registro-form\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"div\",\"role\":\"status\",\"stableAttributes\":{\"role\":\"status\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"capitalAportado\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"capitalAutorizado\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"capitalSuscrito\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"denominacion\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"fechaConstitucion\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"fechaEmision\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"fechaInicioOps\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"fechaVencimiento\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"idNumero\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"idTipo\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"moneda\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"nacionalidad\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"registroMercantil\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"siglas\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"tipoSociedad\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"id\":\"consulta-banner\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"capitalAportado\",\"name\":\"capitalAportado\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"capitalAutorizado\",\"name\":\"capitalAutorizado\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"capitalSuscrito\",\"name\":\"capitalSuscrito\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"denominacion\",\"name\":\"denominacion\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"fechaConstitucion\",\"name\":\"fechaConstitucion\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"fechaEmision\",\"name\":\"fechaEmision\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"fechaVencimiento\",\"name\":\"fechaVencimiento\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"idNumero\",\"name\":\"idNumero\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"registroMercantil\",\"name\":\"registroMercantil\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"siglas\",\"name\":\"siglas\"}},{\"relation\":\"descendant\",\"tag\":\"select\",\"stableAttributes\":{\"id\":\"idTipo\",\"name\":\"idTipo\"}},{\"relation\":\"descendant\",\"tag\":\"select\",\"stableAttributes\":{\"id\":\"moneda\",\"name\":\"moneda\"}},{\"relation\":\"descendant\",\"tag\":\"select\",\"stableAttributes\":{\"id\":\"nacionalidad\",\"name\":\"nacionalidad\"}},{\"relation\":\"descendant\",\"tag\":\"select\",\"stableAttributes\":{\"id\":\"tipoSociedad\",\"name\":\"tipoSociedad\"}}],\"semanticShape\":[\"div\",\"h3\",\"p\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",21],[\\\"h3\\\",1],[\\\"p\\\",1]],\\\"descendantEntries\\\":[[\\\"b\\\",1],[\\\"button\\\",2],[\\\"circle\\\",2],[\\\"div\\\",16],[\\\"h3\\\",1],[\\\"input\\\",4],[\\\"label\\\",7],[\\\"option\\\",11],[\\\"p\\\",1],[\\\"path\\\",7],[\\\"select\\\",2],[\\\"span\\\",7],[\\\"svg\\\",3]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner",
+              "v2_scoped_structural_runtime_evidence"
+            ],
+            "confidence": 0.6,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-19",
+        "controlIdentity": "9db5430202df|Información del Registro",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-19"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "form"
+              },
+              "stableDirectAttributes": {
+                "id": "registro-form"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "button",
+                  "stableAttributes": {
+                    "aria-label": "Limpiar consulta"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "role": "status",
+                  "stableAttributes": {
+                    "role": "status"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "capitalAportado"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "capitalAutorizado"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "capitalSuscrito"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "denominacion"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "fechaConstitucion"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "fechaEmision"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "fechaInicioOps"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "fechaVencimiento"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "idNumero"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "idTipo"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "moneda"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "nacionalidad"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "registroMercantil"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "siglas"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "tipoSociedad"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "id": "consulta-banner"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "capitalAportado",
+                    "name": "capitalAportado"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "capitalAutorizado",
+                    "name": "capitalAutorizado"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "capitalSuscrito",
+                    "name": "capitalSuscrito"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "denominacion",
+                    "name": "denominacion"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "fechaConstitucion",
+                    "name": "fechaConstitucion"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "fechaEmision",
+                    "name": "fechaEmision"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "fechaVencimiento",
+                    "name": "fechaVencimiento"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "idNumero",
+                    "name": "idNumero"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "registroMercantil",
+                    "name": "registroMercantil"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "siglas",
+                    "name": "siglas"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "select",
+                  "stableAttributes": {
+                    "id": "idTipo",
+                    "name": "idTipo"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "select",
+                  "stableAttributes": {
+                    "id": "moneda",
+                    "name": "moneda"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "select",
+                  "stableAttributes": {
+                    "id": "nacionalidad",
+                    "name": "nacionalidad"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "select",
+                  "stableAttributes": {
+                    "id": "tipoSociedad",
+                    "name": "tipoSociedad"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "div",
+                "h3",
+                "p"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"form\"},\"stableDirectAttributes\":{\"id\":\"registro-form\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"div\",\"role\":\"status\",\"stableAttributes\":{\"role\":\"status\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"capitalAportado\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"capitalAutorizado\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"capitalSuscrito\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"denominacion\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"fechaConstitucion\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"fechaEmision\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"fechaInicioOps\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"fechaVencimiento\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"idNumero\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"idTipo\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"moneda\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"nacionalidad\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"registroMercantil\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"siglas\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"tipoSociedad\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"id\":\"consulta-banner\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"capitalAportado\",\"name\":\"capitalAportado\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"capitalAutorizado\",\"name\":\"capitalAutorizado\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"capitalSuscrito\",\"name\":\"capitalSuscrito\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"denominacion\",\"name\":\"denominacion\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"fechaConstitucion\",\"name\":\"fechaConstitucion\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"fechaEmision\",\"name\":\"fechaEmision\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"fechaVencimiento\",\"name\":\"fechaVencimiento\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"idNumero\",\"name\":\"idNumero\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"registroMercantil\",\"name\":\"registroMercantil\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"siglas\",\"name\":\"siglas\"}},{\"relation\":\"descendant\",\"tag\":\"select\",\"stableAttributes\":{\"id\":\"idTipo\",\"name\":\"idTipo\"}},{\"relation\":\"descendant\",\"tag\":\"select\",\"stableAttributes\":{\"id\":\"moneda\",\"name\":\"moneda\"}},{\"relation\":\"descendant\",\"tag\":\"select\",\"stableAttributes\":{\"id\":\"nacionalidad\",\"name\":\"nacionalidad\"}},{\"relation\":\"descendant\",\"tag\":\"select\",\"stableAttributes\":{\"id\":\"tipoSociedad\",\"name\":\"tipoSociedad\"}}],\"semanticShape\":[\"div\",\"h3\",\"p\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",21],[\\\"h3\\\",1],[\\\"p\\\",1]],\\\"descendantEntries\\\":[[\\\"b\\\",1],[\\\"button\\\",2],[\\\"circle\\\",2],[\\\"div\\\",16],[\\\"h3\\\",1],[\\\"input\\\",4],[\\\"label\\\",7],[\\\"option\\\",11],[\\\"p\\\",1],[\\\"path\\\",7],[\\\"select\\\",2],[\\\"span\\\",7],[\\\"svg\\\",3]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner",
+              "v2_scoped_structural_runtime_evidence"
+            ],
+            "confidence": 0.6,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-20",
+        "controlIdentity": "9db5430202df|Información del Registro",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-20"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "form"
+              },
+              "stableDirectAttributes": {
+                "id": "registro-form"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "button",
+                  "stableAttributes": {
+                    "aria-label": "Limpiar consulta"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "role": "status",
+                  "stableAttributes": {
+                    "role": "status"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "capitalAportado"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "capitalAutorizado"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "capitalSuscrito"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "denominacion"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "fechaConstitucion"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "fechaEmision"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "fechaInicioOps"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "fechaVencimiento"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "idNumero"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "idTipo"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "moneda"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "nacionalidad"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "registroMercantil"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "siglas"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "tipoSociedad"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "id": "consulta-banner"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "capitalAportado",
+                    "name": "capitalAportado"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "capitalAutorizado",
+                    "name": "capitalAutorizado"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "capitalSuscrito",
+                    "name": "capitalSuscrito"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "denominacion",
+                    "name": "denominacion"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "fechaConstitucion",
+                    "name": "fechaConstitucion"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "fechaEmision",
+                    "name": "fechaEmision"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "fechaVencimiento",
+                    "name": "fechaVencimiento"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "idNumero",
+                    "name": "idNumero"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "registroMercantil",
+                    "name": "registroMercantil"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "siglas",
+                    "name": "siglas"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "select",
+                  "stableAttributes": {
+                    "id": "idTipo",
+                    "name": "idTipo"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "select",
+                  "stableAttributes": {
+                    "id": "moneda",
+                    "name": "moneda"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "select",
+                  "stableAttributes": {
+                    "id": "nacionalidad",
+                    "name": "nacionalidad"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "select",
+                  "stableAttributes": {
+                    "id": "tipoSociedad",
+                    "name": "tipoSociedad"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "div",
+                "h3",
+                "p"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"form\"},\"stableDirectAttributes\":{\"id\":\"registro-form\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"div\",\"role\":\"status\",\"stableAttributes\":{\"role\":\"status\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"capitalAportado\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"capitalAutorizado\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"capitalSuscrito\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"denominacion\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"fechaConstitucion\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"fechaEmision\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"fechaInicioOps\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"fechaVencimiento\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"idNumero\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"idTipo\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"moneda\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"nacionalidad\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"registroMercantil\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"siglas\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"tipoSociedad\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"id\":\"consulta-banner\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"capitalAportado\",\"name\":\"capitalAportado\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"capitalAutorizado\",\"name\":\"capitalAutorizado\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"capitalSuscrito\",\"name\":\"capitalSuscrito\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"denominacion\",\"name\":\"denominacion\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"fechaConstitucion\",\"name\":\"fechaConstitucion\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"fechaEmision\",\"name\":\"fechaEmision\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"fechaVencimiento\",\"name\":\"fechaVencimiento\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"idNumero\",\"name\":\"idNumero\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"registroMercantil\",\"name\":\"registroMercantil\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"siglas\",\"name\":\"siglas\"}},{\"relation\":\"descendant\",\"tag\":\"select\",\"stableAttributes\":{\"id\":\"idTipo\",\"name\":\"idTipo\"}},{\"relation\":\"descendant\",\"tag\":\"select\",\"stableAttributes\":{\"id\":\"moneda\",\"name\":\"moneda\"}},{\"relation\":\"descendant\",\"tag\":\"select\",\"stableAttributes\":{\"id\":\"nacionalidad\",\"name\":\"nacionalidad\"}},{\"relation\":\"descendant\",\"tag\":\"select\",\"stableAttributes\":{\"id\":\"tipoSociedad\",\"name\":\"tipoSociedad\"}}],\"semanticShape\":[\"div\",\"h3\",\"p\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",21],[\\\"h3\\\",1],[\\\"p\\\",1]],\\\"descendantEntries\\\":[[\\\"b\\\",1],[\\\"button\\\",2],[\\\"circle\\\",2],[\\\"div\\\",16],[\\\"h3\\\",1],[\\\"input\\\",4],[\\\"label\\\",7],[\\\"option\\\",11],[\\\"p\\\",1],[\\\"path\\\",7],[\\\"select\\\",2],[\\\"span\\\",7],[\\\"svg\\\",3]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner",
+              "v2_scoped_structural_runtime_evidence"
+            ],
+            "confidence": 0.6,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-21",
+        "controlIdentity": "9db5430202df|Información del Registro",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-21"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "form"
+              },
+              "stableDirectAttributes": {
+                "id": "registro-form"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "button",
+                  "stableAttributes": {
+                    "aria-label": "Limpiar consulta"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "role": "status",
+                  "stableAttributes": {
+                    "role": "status"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "capitalAportado"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "capitalAutorizado"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "capitalSuscrito"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "denominacion"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "fechaConstitucion"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "fechaEmision"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "fechaInicioOps"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "fechaVencimiento"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "idNumero"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "idTipo"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "moneda"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "nacionalidad"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "registroMercantil"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "siglas"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "data-field": "tipoSociedad"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "div",
+                  "stableAttributes": {
+                    "id": "consulta-banner"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "capitalAportado",
+                    "name": "capitalAportado"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "capitalAutorizado",
+                    "name": "capitalAutorizado"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "capitalSuscrito",
+                    "name": "capitalSuscrito"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "denominacion",
+                    "name": "denominacion"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "fechaConstitucion",
+                    "name": "fechaConstitucion"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "fechaEmision",
+                    "name": "fechaEmision"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "fechaVencimiento",
+                    "name": "fechaVencimiento"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "idNumero",
+                    "name": "idNumero"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "registroMercantil",
+                    "name": "registroMercantil"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "stableAttributes": {
+                    "id": "siglas",
+                    "name": "siglas"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "select",
+                  "stableAttributes": {
+                    "id": "idTipo",
+                    "name": "idTipo"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "select",
+                  "stableAttributes": {
+                    "id": "moneda",
+                    "name": "moneda"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "select",
+                  "stableAttributes": {
+                    "id": "nacionalidad",
+                    "name": "nacionalidad"
+                  }
+                },
+                {
+                  "relation": "descendant",
+                  "tag": "select",
+                  "stableAttributes": {
+                    "id": "tipoSociedad",
+                    "name": "tipoSociedad"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "div",
+                "h3",
+                "p"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"form\"},\"stableDirectAttributes\":{\"id\":\"registro-form\"},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"div\",\"role\":\"status\",\"stableAttributes\":{\"role\":\"status\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"capitalAportado\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"capitalAutorizado\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"capitalSuscrito\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"denominacion\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"fechaConstitucion\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"fechaEmision\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"fechaInicioOps\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"fechaVencimiento\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"idNumero\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"idTipo\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"moneda\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"nacionalidad\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"registroMercantil\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"siglas\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"data-field\":\"tipoSociedad\"}},{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"id\":\"consulta-banner\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"capitalAportado\",\"name\":\"capitalAportado\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"capitalAutorizado\",\"name\":\"capitalAutorizado\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"capitalSuscrito\",\"name\":\"capitalSuscrito\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"denominacion\",\"name\":\"denominacion\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"fechaConstitucion\",\"name\":\"fechaConstitucion\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"fechaEmision\",\"name\":\"fechaEmision\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"fechaVencimiento\",\"name\":\"fechaVencimiento\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"idNumero\",\"name\":\"idNumero\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"registroMercantil\",\"name\":\"registroMercantil\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"siglas\",\"name\":\"siglas\"}},{\"relation\":\"descendant\",\"tag\":\"select\",\"stableAttributes\":{\"id\":\"idTipo\",\"name\":\"idTipo\"}},{\"relation\":\"descendant\",\"tag\":\"select\",\"stableAttributes\":{\"id\":\"moneda\",\"name\":\"moneda\"}},{\"relation\":\"descendant\",\"tag\":\"select\",\"stableAttributes\":{\"id\":\"nacionalidad\",\"name\":\"nacionalidad\"}},{\"relation\":\"descendant\",\"tag\":\"select\",\"stableAttributes\":{\"id\":\"tipoSociedad\",\"name\":\"tipoSociedad\"}}],\"semanticShape\":[\"div\",\"h3\",\"p\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",21],[\\\"h3\\\",1],[\\\"p\\\",1]],\\\"descendantEntries\\\":[[\\\"b\\\",1],[\\\"button\\\",2],[\\\"circle\\\",2],[\\\"div\\\",16],[\\\"h3\\\",1],[\\\"input\\\",4],[\\\"label\\\",7],[\\\"option\\\",11],[\\\"p\\\",1],[\\\"path\\\",7],[\\\"select\\\",2],[\\\"span\\\",7],[\\\"svg\\\",3]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner",
+              "v2_scoped_structural_runtime_evidence"
+            ],
+            "confidence": 0.6,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-22",
+        "controlIdentity": "9db5430202df|Calle*Sector Municipio*Teléfono 1*Teléfono 2 Email*FaxPágina Web|id|registro-form",
+        "semanticField": "Calle*Sector Municipio*Teléfono 1*Teléfono 2 Email*FaxPágina Web",
+        "action": "click",
+        "valueKey": "calle_sector_municipio_telefono_1_telefono_2_email_faxpagina_web",
+        "sourceEventRefs": [
+          "event-22"
+        ],
+        "technicalTargetRefs": [
+          "id:registro-form"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Calle*Sector Municipio*Teléfono 1*Teléfono 2 Email*FaxPágina Web",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "registro-form"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Calle*Sector Municipio*Teléfono 1*Teléfono 2 Email*FaxPágina Web\"",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.55
+      },
+      {
+        "id": "interaction-24",
+        "controlIdentity": "9db5430202df|Inicio|role|link|Inicio",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-24"
+        ],
+        "technicalTargetRefs": [
+          "role:link|Inicio"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Inicio",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#/"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "nav"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Inicio",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/nueva",
+        "routeAfter": "http://localhost:4310/#/",
+        "stateScope": "9db5430202df",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-27",
+        "controlIdentity": "9db5430202df|Solicitudes|role|link|Solicitudes",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-27"
+        ],
+        "technicalTargetRefs": [
+          "role:link|Solicitudes"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Solicitudes",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#/solicitudes"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "nav"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/solicitudes\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Solicitudes",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/",
+        "routeAfter": "http://localhost:4310/#/solicitudes",
+        "stateScope": "9db5430202df",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-31",
+        "controlIdentity": "9db5430202df|Buscar solicitudes|role|textbox|Buscar solicitudes",
+        "semanticField": "Buscar solicitudes",
+        "action": "fill",
+        "valueKey": "buscar_solicitudes",
+        "recordedValue": "TRANSPORTES",
+        "rawTypedValue": "TRANSPORTES",
+        "sourceEventRefs": [
+          "event-31"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Buscar solicitudes",
+          "css:#sol-search",
+          "id:sol-search"
+        ],
+        "editingSessionRef": "edit-4",
+        "description": "Ingresar en \"Buscar solicitudes\"",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitudes",
+        "stateScope": "9db5430202df",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-32",
+        "controlIdentity": "9db5430202df|SOL-2026-0006|role|link|SOL-2026-0006",
+        "action": "click",
+        "dynamicTargetLabel": true,
+        "sourceEventRefs": [
+          "event-32"
+        ],
+        "technicalTargetRefs": [
+          "role:link|SOL-2026-0006"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|SOL-2026-0006",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#/solicitud/SOL-2026-0006"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "sol-list"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/solicitud/SOL-2026-0006\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitudes",
+        "routeAfter": "http://localhost:4310/#/solicitud/SOL-2026-0006",
+        "stateScope": "9db5430202df",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-35",
+        "controlIdentity": "9db5430202df|Inicio|role|link|Inicio",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-35"
+        ],
+        "technicalTargetRefs": [
+          "role:link|Inicio"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Inicio",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#/"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "nav"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Inicio",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitud/SOL-2026-0006",
+        "routeAfter": "http://localhost:4310/#/",
+        "stateScope": "9db5430202df",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-38",
+        "controlIdentity": "9db5430202df|Solicitudes|role|link|Solicitudes",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-38"
+        ],
+        "technicalTargetRefs": [
+          "role:link|Solicitudes"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Solicitudes",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#/solicitudes"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "nav"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#/solicitudes\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Solicitudes",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "nav:has(a[href=\"#/\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/",
+        "routeAfter": "http://localhost:4310/#/solicitudes",
+        "stateScope": "9db5430202df",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-41",
+        "controlIdentity": "9db5430202df|Salir|role|button|Salir",
+        "semanticField": "Salir",
+        "action": "click",
+        "valueKey": "salir",
+        "sourceEventRefs": [
+          "event-41"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Salir"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Salir",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "svg"
+              ],
+              "landmarkAncestor": {
+                "tag": "header"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"svg\",1]],\"descendantEntries\":[[\"path\",3],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"svg\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"svg\\\",1]],\\\"descendantEntries\\\":[[\\\"path\\\",3],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Salir",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(button[aria-label=\"Notificaciones\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(a[href=\"#/\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "header:has(a[href=\"#/\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Salir",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(button[aria-label=\"Notificaciones\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Salir\"",
+        "screenBeforeRef": "9db5430202df",
+        "screenAfterRef": "9db5430202df",
+        "routeBefore": "http://localhost:4310/#/solicitudes",
+        "routeAfter": "http://localhost:4310/#/login",
+        "stateScope": "9db5430202df",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      }
+    ],
+    "entityActionBlocks": [],
+    "readiness": {
+      "functionalReadiness": true,
+      "dataReadiness": false,
+      "technicalReadiness": false,
+      "oracleReadiness": true,
+      "reviewReadiness": true,
+      "publicationContentReadiness": true,
+      "executionReadiness": false,
+      "publicationReadiness": false,
+      "missingInputs": [
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 2,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "datasetAuthorityMismatches": [],
+      "dataReadinessReasons": [
+        "missing_runtime_input:contrasena",
+        "RUNTIME_DATA_REQUIRED"
+      ]
+    },
+    "technicalKnowledgeRefs": [],
+    "runtimeInputRequirements": [
+      {
+        "valueKey": "usuario",
+        "semanticField": "Usuario",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "negocios",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 1,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "negocios",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "contrasena",
+        "semanticField": "Contraseña",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": null,
+        "source": "unresolved",
+        "resolved": false,
+        "sensitive": true,
+        "stepIndex": 2,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "unresolved",
+        "authorityValue": null,
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "numero_de_identificacion",
+        "semanticField": "Número de Identificación*",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "101234567",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 5,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "101234567",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "buscar_solicitudes",
+        "semanticField": "Buscar solicitudes",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "TRANSPORTES",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 15,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "TRANSPORTES",
+        "datasetAuthorityMismatch": false
+      }
+    ],
+    "runtimeDataset": {
+      "scenarioId": "REC-A99E16C4-01",
+      "requirements": [
+        {
+          "valueKey": "usuario",
+          "semanticField": "Usuario",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "negocios",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 1,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "negocios",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 2,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "numero_de_identificacion",
+          "semanticField": "Número de Identificación*",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "101234567",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 5,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "101234567",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "buscar_solicitudes",
+          "semanticField": "Buscar solicitudes",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "TRANSPORTES",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 15,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "TRANSPORTES",
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "resolvedValues": {
+        "usuario": "negocios",
+        "numero_de_identificacion": "101234567",
+        "buscar_solicitudes": "TRANSPORTES"
+      },
+      "missingValues": [
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 2,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        }
+      ]
+    },
+    "mutationOpportunities": [
+      {
+        "opportunityId": "REC-A99E16C4-01:field_omission",
+        "title": "Alta de solicitud con registro de datos y navegacion completa: comprobar la omisión de un dato",
+        "mutationType": "FIELD_OMISSION",
+        "basePrimaryScenarioId": "REC-A99E16C4-01",
+        "operations": [
+          {
+            "type": "remove_action",
+            "interactionId": "interaction-5"
+          }
+        ],
+        "evidenceRefs": [
+          "event-1",
+          "event-2",
+          "event-3",
+          "event-4",
+          "event-5",
+          "event-6",
+          "event-7",
+          "event-8",
+          "event-9",
+          "event-10",
+          "event-11",
+          "event-12",
+          "event-13",
+          "event-14",
+          "event-15",
+          "event-16",
+          "event-17",
+          "event-18",
+          "event-19",
+          "event-20",
+          "event-21",
+          "event-22",
+          "event-23",
+          "event-24",
+          "event-25",
+          "event-26",
+          "event-27",
+          "event-28",
+          "event-29",
+          "event-30",
+          "event-31",
+          "event-32",
+          "event-33",
+          "event-34",
+          "event-35",
+          "event-36",
+          "event-37",
+          "event-38",
+          "event-39",
+          "event-40",
+          "event-41",
+          "event-42"
+        ],
+        "rationale": "Existen varios inputs observados; se propone una omisión agrupada sin inventar el resultado.",
+        "oracleAuthority": "MISSING",
+        "confidence": 0.5,
+        "needsReview": true
+      }
+    ]
+  }
+]

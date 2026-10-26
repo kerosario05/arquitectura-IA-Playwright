@@ -108,8 +108,8 @@ export async function waitForVisualSettle(page: Page, options: VisualSettleOptio
   if (typeof (page as any).waitForFunction !== "function") {
     return { settled: true, waitedMs: 0, loaderVisible: false };
   }
-  const probe = `(() => {
-    const win = window;
+  const probe = (quietMs: number) => {
+    const win = window as Window & { __evidenceSettle?: { lastMutation: number } };
     if (!win.__evidenceSettle) {
       const created = { lastMutation: performance.now() };
       new MutationObserver(() => { created.lastMutation = performance.now(); }).observe(document.documentElement, {
@@ -118,34 +118,40 @@ export async function waitForVisualSettle(page: Page, options: VisualSettleOptio
       win.__evidenceSettle = created;
     }
     const state = win.__evidenceSettle;
-    const isVisible = function (element) {
+    const semanticLoader = Array.from(document.querySelectorAll('[aria-busy="true"], [role="progressbar"], progress, [data-loading="true"], [aria-label*="loading" i], [aria-label*="cargando" i], [title*="loading" i], [title*="cargando" i]')).some(element => {
       if (!element || !element.getBoundingClientRect) return false;
       const rect = element.getBoundingClientRect();
-      if (rect.width < 4 || rect.height < 4) return false;
       const style = getComputedStyle(element);
-      return style.visibility !== 'hidden' && style.display !== 'none' && Number(style.opacity) > 0.05;
-    };
-    const semanticLoader = Array.from(document.querySelectorAll('[aria-busy="true"], [role="progressbar"], progress, [data-loading="true"], [aria-label*="loading" i], [aria-label*="cargando" i], [title*="loading" i], [title*="cargando" i]')).some(isVisible);
+      return rect.width >= 4 && rect.height >= 4 && style.visibility !== 'hidden' && style.display !== 'none' && Number(style.opacity) > 0.05;
+    });
     const loaderCandidates = '[class*="spin" i], [class*="load" i], [class*="skeleton" i], [class*="progress" i], [id*="spin" i], [id*="load" i], [data-testid*="spin" i], [data-testid*="load" i]';
-    const namedLoader = Array.from(document.querySelectorAll(loaderCandidates)).some(function (element) {
-      if (!isVisible(element)) return false;
+    const namedLoader = Array.from(document.querySelectorAll(loaderCandidates)).some(element => {
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      if (rect.width < 4 || rect.height < 4 || style.visibility === 'hidden' || style.display === 'none' || Number(style.opacity) <= 0.05) return false;
       const names = [element.id, typeof element.className === 'string' ? element.className : '', element.getAttribute('data-testid') || '', element.getAttribute('role') || ''].join(' ');
       return /(^|[-_\\s])(spinner|spin|loader|loading|skeleton|progress)([-_\\s]|$)/i.test(names);
     });
-    const animated = typeof document.getAnimations === 'function' && document.getAnimations().some(function (animation) {
+    const animated = typeof document.getAnimations === 'function' && document.getAnimations().some(animation => {
       if (animation.playState !== 'running') return false;
       const effect = animation.effect;
-      return Boolean(effect) && effect.getComputedTiming().iterations === Infinity && isVisible(effect.target || null);
+      if (!effect || effect.getComputedTiming().iterations !== Infinity) return false;
+      if (!(effect instanceof KeyframeEffect)) return false;
+      const target = effect.target;
+      if (!(target instanceof Element)) return false;
+      const rect = target.getBoundingClientRect();
+      const style = getComputedStyle(target);
+      return rect.width >= 4 && rect.height >= 4 && style.visibility !== 'hidden' && style.display !== 'none' && Number(style.opacity) > 0.05;
     });
     const busy = semanticLoader || namedLoader || animated;
     if (busy) {
       state.lastMutation = performance.now();
       return false;
     }
-    return performance.now() - state.lastMutation >= ${Math.max(0, Math.floor(options.quietMs))};
-  })()`;
+    return performance.now() - state.lastMutation >= quietMs;
+  };
   try {
-    await page.waitForFunction(probe, undefined, { timeout: options.timeoutMs, polling: 100 });
+    await page.waitForFunction(probe, Math.max(0, Math.floor(options.quietMs)), { timeout: options.timeoutMs, polling: 100 });
     return { settled: true, waitedMs: Date.now() - startedAt, loaderVisible: false };
   } catch (error) {
     // Do not disguise probe/script failures as visual timeouts; retain the actual boundary.

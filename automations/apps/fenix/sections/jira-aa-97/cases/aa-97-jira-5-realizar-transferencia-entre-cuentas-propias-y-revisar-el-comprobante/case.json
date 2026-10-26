@@ -1,0 +1,9 @@
+{
+  "id": "aa-97-jira-5-realizar-transferencia-entre-cuentas-propias-y-revisar-el-comprobante",
+  "externalId": "AA-97:jira:5",
+  "title": "Realizar transferencia entre cuentas propias y revisar el comprobante",
+  "source": "discovery",
+  "appSlug": "fenix",
+  "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+  "createdAt": "2026-10-26T21:41:17.939Z"
+}

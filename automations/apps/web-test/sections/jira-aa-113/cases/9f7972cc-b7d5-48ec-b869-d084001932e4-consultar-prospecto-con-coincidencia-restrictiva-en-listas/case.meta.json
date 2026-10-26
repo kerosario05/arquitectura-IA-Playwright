@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "9f7972cc-b7d5-48ec-b869-d084001932e4",
+  "title": "Consultar prospecto con coincidencia restrictiva en listas",
+  "generatedAt": "2026-10-26T06:39:25.272Z",
+  "executionEngine": "jira_semantic"
+}

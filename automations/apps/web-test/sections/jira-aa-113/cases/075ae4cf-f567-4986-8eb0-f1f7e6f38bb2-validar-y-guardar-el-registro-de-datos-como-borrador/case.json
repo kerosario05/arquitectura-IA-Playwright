@@ -1,0 +1,9 @@
+{
+  "id": "075ae4cf-f567-4986-8eb0-f1f7e6f38bb2-validar-y-guardar-el-registro-de-datos-como-borrador",
+  "externalId": "075ae4cf-f567-4986-8eb0-f1f7e6f38bb2",
+  "title": "Validar y guardar el Registro de Datos como borrador",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T06:43:34.816Z"
+}

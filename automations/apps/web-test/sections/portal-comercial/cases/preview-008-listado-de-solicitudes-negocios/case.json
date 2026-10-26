@@ -1,0 +1,10 @@
+{
+  "id": "preview-008-listado-de-solicitudes-negocios",
+  "externalId": "PREVIEW-008",
+  "caseId": 0,
+  "title": "Listado de solicitudes Negocios",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T13:27:58.237Z"
+}

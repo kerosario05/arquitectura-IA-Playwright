@@ -1,0 +1,9 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "portal-comercial",
+  "sectionName": "Portal Comercial",
+  "sourceScenarioId": "PREVIEW-004",
+  "testRailCaseId": 0,
+  "generatedAt": "2026-10-26T13:20:51.759Z",
+  "title": "Login Legal y listado de solicitudes"
+}

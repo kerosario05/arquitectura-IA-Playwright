@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "6bc1ddb3-960b-43dc-aebd-fdd64c844d88",
+  "title": "Aprobar un caso En Revisión Legal",
+  "generatedAt": "2026-10-26T07:33:20.146Z",
+  "executionEngine": "jira_semantic"
+}

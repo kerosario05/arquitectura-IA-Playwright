@@ -39,3 +39,14 @@ test("runtime values schema is created idempotently and scoped to a project, cas
  assert.throws(()=>db.prepare("INSERT INTO ProjectCaseRuntimeValue(projectId,caseId,[key],valueType,[value],source) VALUES ('missing',1,'x','string','v','confirmed_case_runtime')").run(),/FOREIGN KEY/);
  }finally{db.close();}
 });
+
+test("Test Design publication lineage is durable, versioned, and keyed by TestRail case id",()=>{
+ const db=new DatabaseSync(":memory:");try{
+ db.exec(SQLITE_SCHEMA);
+ const insert=translateSql("INSERT INTO dbo.TestDesignPublishedCaseLink (testRailCaseId,testRailProjectId,testRailSuiteId,testRailSectionId,projectSlug,jiraProjectKey,issueKey,draftId,storyId,designScenarioId,jiraScenarioId,contentVersion,scenarioJson) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
+ insert && db.prepare(insert).run(701,15,2,3,"payments","PAY","PAY-7","draft-1","story-1","design-1","PAY-7:jira:4","a".repeat(64),"{}");
+ const link=db.prepare("SELECT testRailProjectId,issueKey,designScenarioId,jiraScenarioId,contentVersion,scenarioJson FROM TestDesignPublishedCaseLink WHERE testRailCaseId=701").get() as any;
+ assert.deepEqual({...link},{testRailProjectId:15,issueKey:"PAY-7",designScenarioId:"design-1",jiraScenarioId:"PAY-7:jira:4",contentVersion:"a".repeat(64),scenarioJson:"{}"});
+ assert.throws(()=>db.prepare(insert).run(701,15,2,3,"payments","PAY","PAY-8","draft-2","story-2","design-2",null,"b".repeat(64),"{}"),/UNIQUE/);
+ }finally{db.close();}
+});

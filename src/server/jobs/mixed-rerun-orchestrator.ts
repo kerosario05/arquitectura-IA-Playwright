@@ -5,11 +5,13 @@ import {
   startReuseExistingPromotedSpecRun,
   startScenarioPreviewRun,
   consolidateRunEvidence,
+  type RecordingEvidenceSource,
   type ReuseExistingPromotedSpecScenario,
 } from "./scenario-preview-runner";
 import type { McpScenario } from "../../scenarios/scenario-types";
 import type { JobStatus } from "./job-store";
 import type { EvidenceScenarioRecord } from "../../evidence/evidence-types";
+import { loadRecordingEvidenceSources, type RecordingEvidenceSelection } from "../../recording/recording-document-source";
 
 const TERMINAL_JOB_STATUSES = new Set<JobStatus>([
   "done",
@@ -161,13 +163,14 @@ function relayCaseEvents(
   });
 
   return (line: string) => {
-    // Relay the case events plus the runner's own lifecycle/output lines. The latter are needed
-    // to explain a fallback child that exits before it can emit case_started.
+    // Relay the case events plus the runner's own lifecycle/output lines. The promoted-step
+    // markers are also consumed by the Panorama live panel; dropping them leaves the parent job
+    // stuck displaying the first step even while the reused spec is progressing in its child.
     const typeMarker = line.indexOf('"type"');
     const eventStart = typeMarker >= 0 ? line.lastIndexOf("{", typeMarker) : -1;
     const eventLine = eventStart >= 0 ? line.slice(eventStart).trim() : line;
     if (!/"type"\s*:\s*"case_(?:started|finished)"/.test(eventLine)) {
-      if (/^\[(?:reuse-existing|promoted-spec-reuse|promoted-child(?::stderr)?|run:scenario-preview|scenario-preview|discovery:preview)\]/.test(line)) {
+      if (/^\[(?:reuse-existing|promoted-spec-reuse|promoted-step|promoted-child(?::stderr)?|run:scenario-preview|scenario-preview|discovery:preview)\]/.test(line)) {
         jobStore.appendLog(parentJobId, `[mixed-rerun:${subset}] ${line}`);
       }
       return;
@@ -437,7 +440,12 @@ export async function startMixedRerun(
   // passed: with reuse/fallback scenarios mutually exclusive by construction (prepareRerun never
   // puts the same scenario in both subsets), each scenario's own freshly-captured runtime
   // evidence status is already authoritative — there is nothing to reconcile across subsets.
-  const consolidation = await consolidateRunEvidence(parentJobId, appSlug, sectionSlug, sectionName, undefined, missingEvidence, evidenceRequirement);
+  const recordingScenarioSources = Array.isArray(parentParams.recordingDocumentSources)
+    ? parentParams.recordingDocumentSources as RecordingEvidenceSource[]
+    : Array.isArray(parentParams.recordingSelections)
+      ? loadRecordingEvidenceSources(parentParams.recordingSelections as RecordingEvidenceSelection[])
+      : [];
+  const consolidation = await consolidateRunEvidence(parentJobId, appSlug, sectionSlug, sectionName, undefined, missingEvidence, evidenceRequirement, recordingScenarioSources);
   const evidenceDir = consolidation?.docxPath && fs.existsSync(consolidation.docxPath)
     ? path.dirname(consolidation.docxPath)
     : undefined;

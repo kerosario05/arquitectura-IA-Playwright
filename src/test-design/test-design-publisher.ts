@@ -8,6 +8,7 @@ import { scenarioCaseSteps } from "../scenarios/scenario-case-transport";
 import { buildSubtaskDescription, buildSubtaskSummary, testRailCaseUrl } from "./jira-subtask-formatter";
 import { resolveSubtaskType } from "./jira-subtask-type";
 import { testRailContentSignature } from "./test-design.validation";
+import { sanitizeTestDesignLineageScenario, testRailPayloadContentVersion } from "./test-design-lineage";
 import type {
   TestDesignDraftStatus,
   TestDesignDraftStory,
@@ -48,6 +49,32 @@ export type TestRailPublishDeps = {
   testRailBaseUrl?: string | null;
 };
 
+async function savePublishedLineage(
+  draft: TestDesignDraftWithStories,
+  story: TestDesignDraftStory,
+  scenario: TestDesignScenario,
+  caseId: number,
+  deps: TestRailPublishDeps,
+): Promise<void> {
+  const payload = toCaseInput(scenario, story.issueKey, deps);
+  await repo.savePublishedCaseLink({
+    testRailCaseId: caseId,
+    testRailProjectId: draft.testRail.projectId!,
+    testRailSuiteId: draft.testRail.suiteId,
+    testRailSectionId: draft.testRail.sectionId!,
+    projectSlug: scenario.knowledgeProfileSlug ?? draft.projectSlug ?? "",
+    jiraProjectKey: draft.jiraProjectKey,
+    issueKey: story.issueKey,
+    draftId: draft.id,
+    storyId: story.id,
+    designScenarioId: scenario.id,
+    jiraScenarioId: scenario.jiraSourceScenarioId ?? null,
+    contentVersion: testRailPayloadContentVersion(payload),
+    scenario: sanitizeTestDesignLineageScenario(scenario),
+    publishedAt: new Date().toISOString(),
+  });
+}
+
 export type ScenarioPublishOutcome = {
   scenarioId: string;
   title: string;
@@ -64,6 +91,8 @@ export type StoryTestRailResult = {
   scenarios: ScenarioPublishOutcome[];
   message?: string;
 };
+
+const DEFAULT_TEST_DESIGN_PRECONDITION = "La aplicación configurada del proyecto está disponible y los datos de prueba requeridos están preparados.";
 
 /**
  * Maps low/medium/high/critical onto the instance's own priorities, ordered by
@@ -94,7 +123,9 @@ export function toCaseInput(
     title: scenario.title,
     refs: issueKey,
     priorityId,
-    preconditions: scenario.preconditions || undefined,
+    preconditions: scenario.preconditions || (scenario.jiraSourceScenarioId || scenario.jiraSourceScenario
+      ? undefined
+      : DEFAULT_TEST_DESIGN_PRECONDITION),
     stepsSeparated: scenarioCaseSteps(scenario.steps),
     customExpected: scenario.expectedResult || undefined,
     customCaseOracle: deps.caseOracle,
@@ -209,10 +240,11 @@ async function publishStoryToTestRail(
       if (scenario.testRailCaseId !== null) {
         try {
           await deps.client.updateCase(scenario.testRailCaseId, input);
+          // Retain the remote case ID even if a local persistence step fails so a retry updates it.
           caseIds.set(scenario.id, scenario.testRailCaseId);
-          await persistDesignCaseInputs(draft.projectSlug, scenario.testRailCaseId, scenario);
+          await persistDesignCaseInputs(scenario.knowledgeProfileSlug ?? draft.projectSlug, scenario.testRailCaseId, scenario);
+          await savePublishedLineage(draft, story, scenario, scenario.testRailCaseId, deps);
           outcomes.push({ scenarioId: scenario.id, title: scenario.title, status: "updated", caseId: scenario.testRailCaseId });
-          caseIds.set(scenario.id, scenario.testRailCaseId);
           continue;
         } catch (err) {
           if (!isMissingCase(err)) throw err;
@@ -232,8 +264,10 @@ async function publishStoryToTestRail(
         caseId = recovered;
       }
       knownIds.add(caseId);
+      // Record the successful TestRail write before dependent local persistence.
       caseIds.set(scenario.id, caseId);
-      await persistDesignCaseInputs(draft.projectSlug, caseId, scenario);
+      await persistDesignCaseInputs(scenario.knowledgeProfileSlug ?? draft.projectSlug, caseId, scenario);
+      await savePublishedLineage(draft, story, scenario, caseId, deps);
       outcomes.push({
         scenarioId: scenario.id,
         title: scenario.title,
@@ -263,7 +297,7 @@ async function publishStoryToTestRail(
       return {
         ...s,
         testRailCaseId: caseIds.get(s.id)!,
-        testRailDirty: successfulScenarioIds.has(s.id) ? !unchangedDuringPublish : s.testRailDirty,
+        testRailDirty: successfulScenarioIds.has(s.id) ? !unchangedDuringPublish : true,
       };
     });
     await repo.markStoryPublished(draft.id, story.id, { destination: "testrail", scenarios: merged });

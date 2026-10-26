@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "e268f290-633c-4ed8-9095-7e8b58d36cba",
+  "title": "Convertir el prospecto aprobado en cliente y registrar el evento",
+  "generatedAt": "2026-10-26T07:36:15.099Z",
+  "executionEngine": "jira_semantic"
+}

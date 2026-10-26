@@ -1,0 +1,9 @@
+{
+  "id": "917a5d8b-e03e-431e-ae9f-081ae4666444-consultar-el-registro-de-datos-y-navegar-a-personas-relacionadas",
+  "externalId": "917a5d8b-e03e-431e-ae9f-081ae4666444",
+  "title": "Consultar el Registro de Datos y navegar a Personas relacionadas",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T07:18:29.918Z"
+}

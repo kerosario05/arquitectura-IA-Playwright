@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "d82c230f-e875-4c04-8e26-d15218916e77",
+  "title": "Consultar un nuevo prospecto para captura manual",
+  "generatedAt": "2026-10-26T06:35:37.952Z",
+  "executionEngine": "jira_semantic"
+}

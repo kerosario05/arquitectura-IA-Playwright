@@ -1,0 +1,9 @@
+{
+  "id": "ad6de06e-3e5e-438b-a25f-3e3aca11cdc4-comprobar-que-debida-diligencia-ve-los-casos-con-coincidencias",
+  "externalId": "ad6de06e-3e5e-438b-a25f-3e3aca11cdc4",
+  "title": "Comprobar que Debida Diligencia ve los casos con coincidencias",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T06:45:08.815Z"
+}

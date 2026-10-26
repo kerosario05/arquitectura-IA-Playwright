@@ -42,11 +42,13 @@ import { buildSemanticRecordingModel, attachScenarioSuggestions } from "../../re
 import { applyRuntimeDatasetValues, hydrateCanonicalInteractionsFromSemanticModel, toSharedMcpScenario, type RecordedScenarioMcpContract } from "../../recording/canonical-recording-contract";
 import { hydratePersistedScenarios } from "../../recording/persisted-scenario-hydration";
 import { jobStore } from "../jobs/job-store";
-import { startScenarioPreviewRun, startReuseExistingPromotedSpecRun, type ReuseExistingPromotedSpecScenario } from "../jobs/scenario-preview-runner";
+import { startScenarioPreviewRun, startReuseExistingPromotedSpecRun, type RecordingEvidenceSource, type ReuseExistingPromotedSpecScenario } from "../jobs/scenario-preview-runner";
 import { buildTestRailRunName } from "../services/testrail-run-reporter";
 import { resolveReplayAdmission } from "../services/replay-admission";
 import { resolveScenarioAutomationPlans, partitionScenariosForExecution, computeTestRailPublishCandidates, type ScenarioAutomationPlan, type TestRailCaseLookup, type TestRailDestination } from "../../automations/recording-automation-resolution";
 import { startMixedRerun } from "../jobs/mixed-rerun-orchestrator";
+import { clientIpOf } from "../local-agent/agent-endpoint";
+import { localAgentRegistry, LocalAgentError } from "../local-agent/agent-registry";
 import type { SessionTrace } from "../../recording/session-trace.types";
 
 export const recordingsRouter = Router();
@@ -57,6 +59,63 @@ type RecordingBatchSelection = {
   datasetValues?: Record<string, string | undefined>;
   dataOverrides?: Record<number, string>;
 };
+
+function buildRecordingDocumentSteps(scenario: RecordedScenario): Array<{ text: string; sourceStepIndexes: number[] }> {
+  const result: Array<{ text: string; sourceStepIndexes: number[]; valueKey?: string }> = [];
+  scenario.testRailSteps.forEach((step, index) => {
+    if (step.classification === "TECHNICAL_NOISE" || step.classification === "FOCUS_ONLY" || step.classification === "DYNAMIC_EDITOR_INTERNAL") return;
+    const sourceStepIndex = index + 1;
+    const field = step.valueKey
+      ? scenario.requiredData.find((candidate) => candidate.key === step.valueKey)
+      : undefined;
+    const isSensitive = Boolean(step.sensitive || field?.sensitive);
+    const fieldLabel = field?.label || step.valueKey || "campo indicado";
+    // A countdown label can become the inferred field name when a segmented OTP is recorded.
+    // In the report, describe the actual segmented action without publishing that UI timer as
+    // if it were the name of the input.
+    const documentFieldLabel = step.segmentPosition && /reenviar|segundos?|resend|countdown|timer/i.test(fieldLabel)
+      ? "código de verificación"
+      : fieldLabel;
+    const actionText = step.renderedStep?.trim() || step.content;
+    const isInput = /^(?:ingresar|seleccionar|fill|select)\b/i.test(actionText);
+    const isSelection = /^(?:seleccionar|select)\b/i.test(actionText);
+    let text = isInput
+      ? `${isSelection ? "Seleccionar" : "Ingresar"} ${isSensitive ? "valor protegido" : (field?.label || "dato de prueba")} en "${documentFieldLabel}"`
+      : actionText;
+    for (const dataField of scenario.requiredData) {
+      const value = scenario.runtimeDataset?.resolvedValues?.[dataField.key];
+      const literal = value == null ? "" : String(value);
+      if (literal.length < 3) continue;
+      text = text.split(literal).join(dataField.sensitive ? "[Protegido]" : dataField.label);
+    }
+
+    // Segmented inputs (OTP and similar controls) represent one authored field. Keep one
+    // readable row while retaining every source index so the execution status remains exact.
+    const prior = result.at(-1);
+    if (step.segmentPosition && step.valueKey && prior?.valueKey === step.valueKey) {
+      prior.sourceStepIndexes.push(sourceStepIndex);
+      return;
+    }
+    result.push({ text, sourceStepIndexes: [sourceStepIndex], valueKey: step.segmentPosition ? step.valueKey : undefined });
+  });
+  return result.map(({ text, sourceStepIndexes }) => ({ text, sourceStepIndexes }));
+}
+
+function buildRecordingEvidenceSource(scenario: RecordedScenario): RecordingEvidenceSource {
+  return {
+    scenarioId: scenario.scenarioId,
+    title: scenario.title,
+    steps: scenario.testRailSteps.map((step) => step.content),
+    documentSteps: buildRecordingDocumentSteps(scenario),
+    expectedResult: scenario.reviewedExpectedResult?.trim() || scenario.expectedResultCandidate?.trim(),
+    preconditions: scenario.preconditions,
+    testData: scenario.requiredData.flatMap((field) => {
+      const value = scenario.runtimeDataset?.resolvedValues?.[field.key];
+      if (value === undefined || value === null || String(value).trim() === "") return [];
+      return [{ label: field.label, value: field.sensitive ? "[Protegido]" : String(value) }];
+    }),
+  };
+}
 
 export function recordingTraceReadinessError(
   trace: Pick<SessionTrace, "status"> | null,
@@ -109,6 +168,7 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
 
     const fallbackContracts: RecordedScenarioMcpContract[] = [];
     const reuseScenarios: ReuseExistingPromotedSpecScenario[] = [];
+    const recordingDocumentSources: RecordingEvidenceSource[] = [];
     const publishedCaseIdsByScenarioId = new Map<string, number>();
     const requestedIds: string[] = [];
     const destinationInput = body.testRailDestination && typeof body.testRailDestination === "object"
@@ -218,6 +278,9 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
       executableScenarioIdsByRecording.set(recordingId, new Set(executableIds));
       const materializedById = new Map(materialized.map((scenario) => [scenario.scenarioId, scenario]));
       saveScenarios(groupAppSlug, recordingId, all.map((scenario) => materializedById.get(scenario.scenarioId) ?? scenario));
+      recordingDocumentSources.push(...materialized
+        .filter((scenario) => executableIds.includes(scenario.scenarioId))
+        .map(buildRecordingEvidenceSource));
 
       if (destination) {
         let plans = await resolveScenarioAutomationPlans(admissionResult.selected, destination, undefined, lookupCase);
@@ -273,7 +336,13 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
               ?? (plan?.testRail.status === "existing" ? plan.testRail.caseId : 0),
             specPath: scenario.promotedSpec.specPath,
             title: scenario.title,
-            runtimeValues: scenario.runtimeDataset?.resolvedValues,
+            // Values supplied with this very launch (sensitive ones are never persisted) must reach
+            // the reused spec, on top of what the scenario already resolved.
+            runtimeValues: {
+              ...(scenario.runtimeDataset?.resolvedValues as Record<string, string> | undefined),
+              ...Object.fromEntries(Object.entries(values).filter((entry): entry is [string, string] => typeof entry[1] === "string" && entry[1] !== "")),
+            },
+            ...recordingDocumentSources.find((source) => source.scenarioId === scenario.scenarioId),
           }];
         }));
         const fallbackIds = new Set(admissionResult.selected.filter((scenario) => !reuseIds.has(scenario.scenarioId)).map((scenario) => scenario.scenarioId));
@@ -349,6 +418,7 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
       recordingIds: Array.from(groups.keys()),
       recordingSelections,
       executionMode: "recording_batch",
+      recordingDocumentSources,
       publishToTestRailInvoked,
       ...(destination ? { testRailCaseIdsByScenarioId: Object.fromEntries(publishedCaseIdsByScenarioId) } : {}),
       ...(testRailRun ? { testRunId: testRailRun.id } : {}),
@@ -448,6 +518,10 @@ function handle(res: any, err: unknown): void {
           ? 409
           : 400;
     sendError(res, status, err.code, err.message);
+    return;
+  }
+  if (err instanceof LocalAgentError) {
+    sendError(res, 409, err.code, err.message);
     return;
   }
   const message = err instanceof Error ? err.message : String(err);
@@ -627,9 +701,34 @@ recordingsRouter.post("/start", async (req, res) => {
       return;
     }
     const browserMode = body.browserMode;
-    if (browserMode !== undefined && browserMode !== "integrated" && browserMode !== "desktop") {
-      sendError(res, 400, "INVALID_BROWSER_MODE", 'browserMode debe ser "integrated" o "desktop"');
+    if (browserMode !== undefined && browserMode !== "integrated" && browserMode !== "desktop" && browserMode !== "agent") {
+      sendError(res, 400, "INVALID_BROWSER_MODE", 'browserMode debe ser "integrated", "desktop" o "agent"');
       return;
+    }
+    // "agent": the Chromium on the caller's own PC. Paired by the IP the panel request came
+    // from (the agent connects from the same PC), never by a client-supplied agent id alone.
+    let localAgentId: string | undefined;
+    if (browserMode === "agent") {
+      const pairing = localAgentRegistry.findForUser(
+        { userId: req.principal?.userId ?? null, username: req.principal?.username ?? "" },
+        clientIpOf(req),
+      );
+      if (pairing.status !== "found") {
+        sendError(
+          res,
+          409,
+          pairing.status === "none" ? "LOCAL_AGENT_NOT_FOUND" : "LOCAL_AGENT_AMBIGUOUS",
+          pairing.status === "none"
+            ? "No hay un agente de QA Lab conectado desde tu equipo"
+            : "Hay varios equipos de QA Lab en tu red: elige el tuyo antes de grabar",
+        );
+        return;
+      }
+      if (!localAgentRegistry.hasChromium(pairing.agent)) {
+        sendError(res, 409, "LOCAL_AGENT_CHROMIUM_MISSING", "Tu equipo aún no tiene instalado el Chromium de grabación");
+        return;
+      }
+      localAgentId = pairing.agent.agentId;
     }
     console.log(`[recordings:goal-lineage] proxyGoal=${JSON.stringify(typeof body.recordingGoal === "string" ? body.recordingGoal : undefined)} label=${JSON.stringify(typeof body.label === "string" ? body.label : undefined)}`);
     // captureAuthority is deliberately NOT read from the request body: CaptureEngine V2 is the
@@ -654,6 +753,7 @@ recordingsRouter.post("/start", async (req, res) => {
       // Browser presentation is independent from capture authority. The integrated view keeps
       // the existing headless Chromium + live stream; desktop opens that same recorder-owned
       // Page in a visible Chromium window. Omitted mode preserves legacy headless compatibility.
+      localAgentId,
       headless: browserMode === "integrated"
         ? true
         : browserMode === "desktop"
@@ -1134,6 +1234,14 @@ recordingsRouter.post("/:recordingId/execute", async (req, res) => {
             specPath: scenario.promotedSpec!.specPath,
             title: scenario.title,
             steps: scenario.testRailSteps.map((step) => step.content),
+            documentSteps: buildRecordingDocumentSteps(scenario),
+            expectedResult: scenario.reviewedExpectedResult?.trim() || scenario.expectedResultCandidate?.trim(),
+            preconditions: scenario.preconditions,
+            testData: scenario.requiredData.flatMap((field) => {
+              const value = scenario.runtimeDataset?.resolvedValues?.[field.key];
+              if (value === undefined || value === null || String(value).trim() === "") return [];
+              return [{ label: field.label, value: field.sensitive ? "[Protegido]" : String(value) }];
+            }),
             runtimeValues: scenario.runtimeDataset?.resolvedValues,
           };
         });
@@ -1179,6 +1287,9 @@ recordingsRouter.post("/:recordingId/execute", async (req, res) => {
       appSlug,
       targetAppSlug: appSlug,
       scenarios: executableContracts,
+      recordingDocumentSources: materialized
+        .filter((scenario) => executableContracts.some((contract) => contract.scenarioId === scenario.scenarioId))
+        .map(buildRecordingEvidenceSource),
       source: { projectKey: `REC-${req.params.recordingId}` },
       recordingId: req.params.recordingId,
       requestedScenarioIds,

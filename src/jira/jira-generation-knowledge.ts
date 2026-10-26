@@ -22,6 +22,16 @@ function cutAfterClick(actions: JiraLearnedRoute["actions"], clickIndex: number)
 const normalize = (text: string) => text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
 // ponytail: 7-char prefix stems tolerate plural/derivation (transferencia/transferencias/transferir); upgrade to a real stemmer if it over-matches.
 const stem = (token: string) => token.replace(/s$/, "").slice(0, 7);
+const MAX_EXACT_ISSUE_ROUTES = 16;
+
+function learnedRouteSignature(route: JiraLearnedRoute): string {
+  const actions = route.actions.map(action => [action.action, normalize(action.field ?? ""), action.targetKind ?? "",
+    action.action === "press" && /^(?:Enter|Tab|Escape|ArrowUp|ArrowDown|ArrowLeft|ArrowRight)$/.test(action.key ?? "") ? action.key : ""]);
+  const observables = (route.observables ?? [])
+    .map(observable => [normalize(observable.requirement), normalize(observable.target)])
+    .sort((a, b) => a.join("\u0000").localeCompare(b.join("\u0000")));
+  return JSON.stringify({ startsFrom: route.startsFrom, actions, observables });
+}
 
 /** True when every token of a (>=5 char) UI label appears, stem-wise, in the text. */
 export function jiraLabelInText(label: string, text: string): boolean {
@@ -63,8 +73,31 @@ export function resolveJiraGenerationKnowledge(appSlug: string, issues: JiraIssu
     };
     const relatedIssue = structurallyValid.filter(route => route.sourceIssueKey !== issue.key && matchedClick(route) >= 0);
     const eligible = exactIssue.length ? exactIssue : relatedIssue;
-    const selected = eligible
-      .sort((a,b) => Date.parse(b.validatedAt) - Date.parse(a.validatedAt)).slice(0,2)
+    const sourceText = normalize(text);
+    const relevance = (route: JiraLearnedRoute) => (route.observables ?? []).reduce((score, observable) =>
+      score + Number(jiraLabelInText(observable.target, sourceText)
+        || jiraLabelInText(observable.requirement, sourceText)), 0);
+    const ordered = [...eligible].sort((a, b) => {
+      if (exactIssue.length) {
+        // Outcomes already observed for this exact story are more useful to
+        // generation than a newer navigation-only route. Keep all distinct
+        // evidence journeys up to a bounded per-story budget.
+        const byRelevantObservables = relevance(b) - relevance(a);
+        if (byRelevantObservables) return byRelevantObservables;
+        const byObservableCount = (b.observables?.length ?? 0) - (a.observables?.length ?? 0);
+        if (byObservableCount) return byObservableCount;
+      }
+      return Date.parse(b.validatedAt) - Date.parse(a.validatedAt);
+    });
+    const seenJourneys = new Set<string>();
+    const distinct = ordered.filter(route => {
+      const signature = learnedRouteSignature(route);
+      if (seenJourneys.has(signature)) return false;
+      seenJourneys.add(signature);
+      return true;
+    });
+    const selected = distinct
+      .slice(0, exactIssue.length ? MAX_EXACT_ISSUE_ROUTES : 2)
       .map(route => ({
         // Preserve the observed interaction order, including fields between
         // repeated Continue clicks, but never transport values or data bindings.

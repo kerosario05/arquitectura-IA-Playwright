@@ -54,6 +54,7 @@ export type MobileLaunchExecutionParams = {
   publishedCases: PublishedCaseEntry[];
   scenarios: MobileLaunchScenario[];
   appSlug: string;
+  environment?: string;
   sectionSlug?: string;
   /** User-supplied real values for fill steps, keyed by scenarioId -> { stepIndex: value }. */
   dataOverrides?: Record<string, Record<number, string>>;

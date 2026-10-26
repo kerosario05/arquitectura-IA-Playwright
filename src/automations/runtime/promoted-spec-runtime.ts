@@ -3389,7 +3389,7 @@ export class PromotedSpecRuntime {
         throw new Error("PROMOTED_FINAL_OUTCOME_UNVERIFIED");
       }
       const signals = await readPromotedOutcomeSignals(this.page, true);
-      const routeOf = (url: string) => { try { const parsed = new URL(url); return parsed.origin + parsed.pathname; } catch { return url; } };
+      const routeOf = (url: string) => { try { const parsed = new URL(url); return parsed.origin + parsed.pathname + (parsed.hash.startsWith("#/") ? parsed.hash.split("?")[0] : ""); } catch { return url; } };
       const finalActionNavigated = !check.hasFinalAssertion
         && Boolean(check.urlBeforeFinalAction)
         && routeOf(this.page.url()) !== routeOf(check.urlBeforeFinalAction!);
@@ -5823,6 +5823,14 @@ export class PromotedSpecRuntime {
         }
         if (transitionDetected) {
           console.log(`[runtime:post-action] target="${target ?? "unknown"}" expectedEffect=selection_state_change signal=target_selection_state_changed`);
+          return;
+        }
+        // A tab/toggle that is already in its target state can leave the control unchanged while
+        // the click still moves the app's route (e.g. a `?tab=` query): that route change is the
+        // causal, observed outcome of this very click.
+        if (this.page.url() !== previousUrl) {
+          console.log(`[runtime:post-action] target="${target ?? "unknown"}" expectedEffect=selection_state_change signal=route_changed previousUrl=${previousUrl} currentUrl=${this.page.url()}`);
+          await this.waitForPromotedUiStable(-1, target ?? "post_action");
           return;
         }
         await this.page.waitForTimeout(100);

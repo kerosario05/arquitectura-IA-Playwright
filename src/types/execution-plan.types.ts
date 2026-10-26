@@ -48,6 +48,8 @@ export type PlanTarget = {
   role?: string;
   name?: string;
   exact?: boolean;
+  /** Assertion-only scope; keeps verified application-shell checks distinct from page-content checks. */
+  assertionScope?: "header";
   // AI-assisted resolution metadata
   metadata?: {
     originalTarget?: string;

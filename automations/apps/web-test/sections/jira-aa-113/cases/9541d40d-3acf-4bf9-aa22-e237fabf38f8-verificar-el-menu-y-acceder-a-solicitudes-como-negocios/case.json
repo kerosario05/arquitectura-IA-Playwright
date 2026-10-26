@@ -1,0 +1,9 @@
+{
+  "id": "9541d40d-3acf-4bf9-aa22-e237fabf38f8-verificar-el-menu-y-acceder-a-solicitudes-como-negocios",
+  "externalId": "9541d40d-3acf-4bf9-aa22-e237fabf38f8",
+  "title": "Verificar el menú y acceder a Solicitudes como Negocios",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T07:26:04.192Z"
+}

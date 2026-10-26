@@ -1,0 +1,9 @@
+{
+  "id": "cbba506d-bdc3-4bd8-b552-0323b8ed2ad7-abrir-el-listado-filtrado-desde-el-contador-aprobada",
+  "externalId": "cbba506d-bdc3-4bd8-b552-0323b8ed2ad7",
+  "title": "Abrir el listado filtrado desde el contador Aprobada",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T07:11:54.651Z"
+}

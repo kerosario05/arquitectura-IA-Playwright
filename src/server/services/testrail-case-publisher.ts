@@ -25,6 +25,9 @@ function ensureDir(filePath: string): void {
 }
 
 const RECOVERY_TIMEOUT_MS = 30000;
+const ADD_CASE_RECONCILIATION_ATTEMPTS = Math.max(1, Number(process.env.TESTRAIL_ADD_CASE_RECONCILIATION_ATTEMPTS ?? 5));
+const ADD_CASE_RECONCILIATION_DEADLINE_MS = Math.max(500, Number(process.env.TESTRAIL_ADD_CASE_RECONCILIATION_DEADLINE_MS ?? 10000));
+const ADD_CASE_RECONCILIATION_INITIAL_DELAY_MS = Math.max(50, Number(process.env.TESTRAIL_ADD_CASE_RECONCILIATION_INITIAL_DELAY_MS ?? 250));
 
 /**
  * TestRail can commit an add_case and fail while running its post-processing hook.  Recording
@@ -68,7 +71,7 @@ function newlyAppearedCases(
   return withRefs.length > 0 ? withRefs : delta;
 }
 
-async function recoverCaseCreatedAfterHttp500(params: {
+async function recoverCaseCreatedAfterHttp5xx(params: {
   client: TestRailClient;
   ctx: ScenarioPreviewPublishContext;
   scenarioTitle: string;
@@ -79,27 +82,39 @@ async function recoverCaseCreatedAfterHttp500(params: {
   const scenarioLabel = scenarioId ?? "unknown";
 
   const runRecovery = async (): Promise<{ found: true; case: RawTestRailCase } | { found: false; matches: number }> => {
-    if (!marker || typeof client.getCases !== "function") {
-      return { found: false, matches: 0 };
-    }
+    if (!marker || typeof client.getCases !== "function") return { found: false, matches: 0 };
 
-    const sectionCases = await client.getCases(
-      String(ctx.projectId),
-      ctx.suiteId ? String(ctx.suiteId) : undefined,
-      String(ctx.sectionId),
-    );
-    const normalizedScenarioTitle = normalizeTitle(scenarioTitle);
-    const matches = sectionCases.filter((testCase) => {
-      const sameSection = testCase.section_id === ctx.sectionId;
-      const sameTitle = normalizeTitle(testCase.title) === normalizedScenarioTitle;
-      const preconditions = String(testCase.custom_preconds ?? "");
-      return sameSection && sameTitle && preconditions.includes(marker);
-    });
-
-    if (matches.length === 1) {
-      return { found: true, case: matches[0] };
+    let lastMatchCount = 0;
+    let delayMs = ADD_CASE_RECONCILIATION_INITIAL_DELAY_MS;
+    const startedAt = Date.now();
+    for (let attempt = 1; attempt <= ADD_CASE_RECONCILIATION_ATTEMPTS; attempt += 1) {
+      try {
+        const sectionCases = await client.getCases(
+          String(ctx.projectId),
+          ctx.suiteId ? String(ctx.suiteId) : undefined,
+          String(ctx.sectionId),
+        );
+        const normalizedScenarioTitle = normalizeTitle(scenarioTitle);
+        const matches = sectionCases.filter((testCase) => {
+          const sameSection = testCase.section_id === ctx.sectionId;
+          const sameTitle = normalizeTitle(testCase.title) === normalizedScenarioTitle;
+          const preconditions = String(testCase.custom_preconds ?? "");
+          return sameSection && sameTitle && preconditions.includes(marker);
+        });
+        lastMatchCount = matches.length;
+        if (matches.length === 1) return { found: true, case: matches[0] };
+        // Multiple exact-marker matches are not safe to choose between. Stop and let the
+        // caller surface the ambiguity; never issue another add_case from this path.
+        if (matches.length > 1) return { found: false, matches: matches.length };
+      } catch (lookupError) {
+        console.warn(`[testrail-publish-recovery] lookup_failed attempt=${attempt} scenario=${scenarioLabel} reason=${lookupError instanceof Error ? lookupError.message.slice(0, 160) : String(lookupError).slice(0, 160)}`);
+      }
+      const remainingMs = ADD_CASE_RECONCILIATION_DEADLINE_MS - (Date.now() - startedAt);
+      if (attempt >= ADD_CASE_RECONCILIATION_ATTEMPTS || remainingMs <= 0) break;
+      await new Promise<void>((resolve) => setTimeout(resolve, Math.min(delayMs, remainingMs)));
+      delayMs = Math.min(delayMs * 2, 2000);
     }
-    return { found: false, matches: matches.length };
+    return { found: false, matches: lastMatchCount };
   };
 
   // Total deadline for the whole recovery (not per-page). If the caller's timeout fires first,
@@ -108,7 +123,7 @@ async function recoverCaseCreatedAfterHttp500(params: {
   const timeoutPromise = new Promise<never>((_, reject) => {
     timer = setTimeout(() => {
       console.warn(`[testrail-publish-recovery] status=timeout scenario=${scenarioLabel} sectionId=${ctx.sectionId} timeoutMs=${RECOVERY_TIMEOUT_MS}`);
-      reject(new Error(`testrail_add_case_500_recovery_timeout: sectionId=${ctx.sectionId} scenarioId=${scenarioLabel} timeoutMs=${RECOVERY_TIMEOUT_MS}`));
+      reject(new Error(`testrail_add_case_5xx_recovery_timeout: sectionId=${ctx.sectionId} scenarioId=${scenarioLabel} timeoutMs=${RECOVERY_TIMEOUT_MS}`));
     }, RECOVERY_TIMEOUT_MS);
     if (typeof timer.unref === "function") timer.unref();
   });
@@ -646,9 +661,14 @@ function buildAutomationScenarioMarker(scenarioId: string, launchId?: string): s
   return markerId ? `[automationScenarioId: ${markerId}]` : undefined;
 }
 
-function isAddCaseHttp500Error(error: unknown): boolean {
+export function isAmbiguousAddCaseFailure(error: unknown): boolean {
+  const status = (error as { status?: unknown } | null)?.status;
   const message = error instanceof Error ? error.message : String(error);
-  return message.includes("HTTP 500") && message.includes("add_case/");
+  if (typeof status === "number") return status >= 500 && status <= 599;
+  const parsedStatus = message.match(/HTTP (\d{3})/i)?.[1];
+  if (parsedStatus) return Number(parsedStatus) >= 500 && Number(parsedStatus) <= 599 && message.includes("add_case/");
+  // Fetch/network failures do not tell us whether the remote write committed.
+  return true;
 }
 
 function stripHtml(value: string): string {
@@ -957,14 +977,14 @@ export async function publishScenariosToTestRail(
             created += 1;
           } catch (addErr: any) {
           const addMsg = addErr.message ?? String(addErr);
-          if (isAddCaseHttp500Error(addErr)) {
+          if (isAmbiguousAddCaseFailure(addErr)) {
             if (ctx.recordingBatch) {
               // Preserve the original TestRail status/error id.  The outer Recording batch
               // handler classifies this as post-send ambiguous and performs bounded polling.
               throw addErr;
             }
             console.warn(`[testrail-publish-recovery] status=started scenario=${scenarioId} sectionId=${ctx.sectionId}`);
-            const recovered = await recoverCaseCreatedAfterHttp500({
+            const recovered = await recoverCaseCreatedAfterHttp5xx({
               client,
               ctx,
               scenarioTitle: scenario.title,
@@ -973,12 +993,17 @@ export async function publishScenariosToTestRail(
             });
             if (recovered.found) {
               testRailCase = recovered.case;
-              mappingSource = "recovered_after_add_case_500";
+              mappingSource = "recovered_after_add_case_5xx";
               created += 1;
               console.log(`[testrail-publish-recovery] status=recovered caseId=${testRailCase.id}`);
             } else {
-              console.warn(`[testrail-publish-recovery] status=failed matches=${recovered.matches}`);
-              throw addErr;
+              console.warn(`[testrail-publish-recovery] status=unresolved matches=${recovered.matches}; add_case will not be retried automatically`);
+              const status = (addErr as { status?: unknown })?.status;
+              const statusText = typeof status === "number" ? `HTTP ${status}` : "a network error";
+              throw new Error(
+                `testrail_add_case_ambiguous: TestRail returned ${statusText} for scenario ${scenarioId}; ` +
+                `reconciliation found ${recovered.matches} exact matches. Do not relaunch this selection until the TestRail section is checked.`,
+              );
             }
           } else if (addMsg.includes("Undefined array key") && addMsg.includes("refs")) {
             // RECOVERY #1: full addCase 500 — try to find the case that was created

@@ -6,6 +6,7 @@ import { spawn } from "node:child_process";
 import { evidenceActorEnvironment } from "../../auth/report-attribution";
 import { RunEvidenceRecorder } from "../../evidence/run-evidence-recorder";
 import { buildEvidencePaths, buildEvidenceRunPaths } from "../../evidence/evidence-paths";
+import { loadEvidenceConfig, type EvidenceScenarioRecord } from "../../evidence/evidence-types";
 import { linkJiraAutomationToTestRailCase, loadAutomationIndex } from "../../automations/automation-index";
 import { validatePromotedArtifactForReuse } from "../../automations/automation-reuse";
 import {
@@ -85,16 +86,56 @@ type DiscoveryBatchParams = {
   executionEngine?: string;
   scenarioOrigin?: unknown;
   jiraSemanticScenarios?: Array<Record<string, unknown>>;
+  /** Server-resolved Test Design links; never inferred from title or HU key. */
+  jiraSemanticCaseIds?: number[];
+  jiraSemanticScenarioOrigins?: Record<string, string>;
 };
 
 /** Selects the Jira scenario for a jira_preview published case; undefined keeps the generic discovery path. */
 export function selectJiraSemanticScenario(
-  params: Pick<DiscoveryBatchParams, "executionEngine" | "scenarioOrigin" | "jiraSemanticScenarios">,
+  params: Pick<DiscoveryBatchParams, "executionEngine" | "scenarioOrigin" | "jiraSemanticScenarios" | "jiraSemanticCaseIds">,
   entry: PublishedCaseEntry | undefined,
 ): Record<string, unknown> | undefined {
-  if (!entry || entry.sourceType !== "jira_preview" || params.executionEngine !== "jira_semantic" || !params.scenarioOrigin) return undefined;
+  if (!entry || entry.sourceType !== "jira_preview" || params.executionEngine !== "jira_semantic") return undefined;
+  const linkedCase = params.jiraSemanticCaseIds?.includes(entry.caseId) === true;
+  if (!params.scenarioOrigin && !linkedCase) return undefined;
   const ids = [entry.launchScenarioId, entry.executionScenarioId, entry.scenarioId].filter(Boolean);
-  return params.jiraSemanticScenarios?.find((scenario) => ids.includes(String(scenario.scenarioId)));
+  const scenario = params.jiraSemanticScenarios?.find((candidate) => ids.includes(String(candidate.scenarioId)));
+  if (!scenario) return undefined;
+  if (linkedCase && (scenario.sourceIssueKey !== entry.sourceIssueKey || !String(scenario.sourceIssueKey ?? "").trim())) return undefined;
+  return scenario;
+}
+
+/**
+ * Re-scope parent launch inputs to the Jira scenario selected for one published
+ * case. The batch runner materializes accepted aliases into runtimeEntriesByCase;
+ * the Jira child must receive those values under its own scenarioId.
+ */
+export function buildJiraSemanticChildDataOverrides(
+  params: Pick<DiscoveryBatchParams, "dataOverrides" | "runtimeEntriesByCase">,
+  scenario: Record<string, unknown>,
+  entry: PublishedCaseEntry,
+): Record<string, Record<string, string>> | undefined {
+  const scenarioId = typeof scenario.scenarioId === "string" ? scenario.scenarioId.trim() : "";
+  if (!scenarioId) return undefined;
+
+  const values: Record<string, string> = {};
+  const direct = params.dataOverrides?.[scenarioId];
+  if (direct && typeof direct === "object" && !Array.isArray(direct)) {
+    for (const [key, value] of Object.entries(direct)) {
+      if (typeof value === "string" && value.trim()) values[key] = value;
+    }
+  }
+
+  for (const input of params.runtimeEntriesByCase?.[String(entry.caseId)] ?? []) {
+    if (typeof input?.key !== "string" || !input.key.trim()
+      || typeof input.value !== "string" || !input.value.trim()) continue;
+    // Per-case runtime entries carry the launcher's resolved authority and win
+    // over a duplicate direct override for the same exact requirement key.
+    values[input.key] = input.value;
+  }
+
+  return Object.keys(values).length ? { [scenarioId]: values } : undefined;
 }
 
 async function runJiraSemanticDiscoveryChild(
@@ -103,22 +144,122 @@ async function runJiraSemanticDiscoveryChild(
   scenario: Record<string, unknown>,
   entry: PublishedCaseEntry,
   appSlug: string,
-): Promise<{ exitCode: number }> {
+): Promise<{ exitCode: number; outcome?: JiraSemanticChildOutcome; evidenceRunPath?: string }> {
   // No testRunId: the batch runner keeps ownership of TestRail result sync.
   const child = jobStore.create("scenario-preview", {
     executionEngine: "jira_semantic",
-    scenarioOrigin: params.scenarioOrigin,
-    jiraKey: params.jiraKey,
+    scenarioOrigin: { kind: "jira_generated", jiraKey: String(scenario.sourceIssueKey ?? entry.sourceIssueKey ?? "").trim().toUpperCase() },
+    jiraKey: String(scenario.sourceIssueKey ?? entry.sourceIssueKey ?? "").trim().toUpperCase(),
     appSlug,
     sectionSlug: params.sectionSlug,
     sectionName: params.sectionName,
     scenarios: [scenario],
     publishedCases: [entry],
-    dataOverrides: params.dataOverrides,
+    dataOverrides: buildJiraSemanticChildDataOverrides(params, scenario, entry),
     options: { headed: params.headed === true, autoPromote: true, overwrite: params.overwrite === true },
   }, { parentJobId });
-  await startJiraSemanticRun(child.id);
-  return { exitCode: jobStore.get(child.id)?.status === "done" ? 0 : 1 };
+  const unsubscribe = jobStore.subscribe(child.id, {
+    onLog: line => relayJiraChildProgress(parentJobId, line, String(scenario.scenarioId ?? "")),
+    onUpdate: () => {},
+  });
+  try {
+    await startJiraSemanticRun(child.id);
+  } finally {
+    unsubscribe();
+  }
+  const childJob = jobStore.get(child.id);
+  const outcome = parseJiraSemanticChildOutcome(childJob?.logs ?? [], String(scenario.scenarioId ?? ""));
+  const childEvidencePaths = buildEvidenceRunPaths({
+    appSlug,
+    sectionSlug: params.sectionSlug ?? "default-section",
+    sectionName: params.sectionName,
+    runId: child.id,
+    outputRoot: loadEvidenceConfig().outputRoot,
+  });
+  const evidenceRunPath = fs.existsSync(childEvidencePaths.evidenceJsonPath)
+    ? path.resolve(childEvidencePaths.evidenceJsonPath)
+    : undefined;
+  return {
+    exitCode: childJob?.status === "done" ? 0 : 1,
+    ...(outcome ? { outcome } : {}),
+    ...(evidenceRunPath ? { evidenceRunPath } : {}),
+  };
+}
+
+/** Relay only the structured lifecycle fields consumed by the parent live panel. */
+function relayJiraChildProgress(parentJobId: string, line: string, expectedScenarioId: string): void {
+  let event: Record<string, unknown>;
+  try {
+    const parsed: unknown = JSON.parse(line);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return;
+    event = parsed as Record<string, unknown>;
+  } catch { return; }
+  if (event.executionEngine !== "jira_semantic") return;
+  const caseId = typeof event.caseId === "string" ? event.caseId : "";
+  if (!caseId || caseId !== expectedScenarioId) return;
+
+  const base = { executionEngine: "jira_semantic", caseId };
+  let projected: Record<string, unknown> | undefined;
+  if (event.type === "case_started") {
+    const steps = Array.isArray(event.steps) ? event.steps.filter((step): step is string => typeof step === "string") : [];
+    projected = {
+      ...base,
+      type: "case_started",
+      title: typeof event.title === "string" ? event.title : expectedScenarioId,
+      index: Number.isFinite(Number(event.index)) ? Number(event.index) : 1,
+      total: Number.isFinite(Number(event.total)) ? Number(event.total) : 1,
+      steps,
+    };
+  } else if (event.type === "step_progress") {
+    const stepIndex = Number(event.stepIndex);
+    const phase = typeof event.phase === "string" ? event.phase : "";
+    if (Number.isInteger(stepIndex) && stepIndex > 0 && ["resolving", "passed", "failed"].includes(phase)) {
+      projected = { ...base, type: "step_progress", stepIndex, phase };
+    }
+  } else if (event.type === "spec_generation_started") {
+    projected = { ...base, type: "spec_generation_started" };
+  } else if (event.type === "case_finished") {
+    const failedAtStep = Number(event.failedAtStep);
+    projected = {
+      ...base,
+      type: "case_finished",
+      scenarioId: typeof event.scenarioId === "string" ? event.scenarioId : caseId,
+      status: event.status === "passed" ? "passed" : "failed",
+      ...(Number.isInteger(failedAtStep) && failedAtStep > 0 ? { failedAtStep } : {}),
+      ...(typeof event.title === "string" ? { title: event.title } : {}),
+    };
+  }
+  if (projected) jobStore.appendLog(parentJobId, JSON.stringify(projected));
+}
+
+export type JiraSemanticChildOutcome = {
+  status: "passed" | "failed";
+  failedAtStep?: number;
+  failedReason?: string;
+  failurePhase?: string;
+  screenshotPath?: string;
+};
+
+/** Extract only safe, structured failure details for the requested scenario from child events. */
+export function parseJiraSemanticChildOutcome(logs: readonly string[], scenarioId: string): JiraSemanticChildOutcome | undefined {
+  for (let index = logs.length - 1; index >= 0; index -= 1) {
+    let event: Record<string, unknown>;
+    try {
+      const parsed: unknown = JSON.parse(logs[index]);
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) continue;
+      event = parsed as Record<string, unknown>;
+    } catch { continue; }
+    if (event.type !== "case_finished" || String(event.scenarioId ?? event.caseId ?? "") !== scenarioId
+      || (event.status !== "passed" && event.status !== "failed")) continue;
+    return {
+      status: event.status,
+      ...(Number.isInteger(event.failedAtStep) && Number(event.failedAtStep) > 0 ? { failedAtStep: Number(event.failedAtStep) } : {}),
+      ...(typeof event.failedReason === "string" && /^[A-Z][A-Z0-9_]+$/.test(event.failedReason) ? { failedReason: event.failedReason } : {}),
+      ...(typeof event.failurePhase === "string" && /^[a-z][a-z0-9_]+$/.test(event.failurePhase) ? { failurePhase: event.failurePhase } : {}),
+      ...(typeof event.screenshotPath === "string" && event.screenshotPath.trim() ? { screenshotPath: event.screenshotPath.trim() } : {}),
+    };
+  }
+  return undefined;
 }
 
 export async function persistRuntimeValuesForExecutedCase(input: {
@@ -1858,6 +1999,7 @@ export async function consolidateRunEvidenceForExecution(
   sourceSectionSlugs: string[] = [],
   legacyScenarioEvidence: LegacyScenarioEvidenceCandidate[] = [],
   notBeforeMs = 0,
+  additionalEvidenceRunFiles: string[] = [],
 ): Promise<ConsolidationResult> {
   const safeAppSlug = (appSlug ?? "").trim() || "default";
   const sections = [...new Set([sectionSlug, ...sourceSectionSlugs]
@@ -1879,7 +2021,9 @@ export async function consolidateRunEvidenceForExecution(
     ...runEvidenceFiles,
     ...collectFreshLegacyScenarioEvidenceFiles(legacyScenarioEvidence, notBeforeMs),
   ])];
-  if (evidenceFiles.length === 0) {
+  const additionalScenarios = readAdditionalEvidenceRunScenarios(additionalEvidenceRunFiles, safeAppSlug);
+  const evidenceCount = evidenceFiles.length + additionalScenarios.length;
+  if (evidenceCount === 0) {
     return {
       attempted: true,
       generated: false,
@@ -1893,6 +2037,7 @@ export async function consolidateRunEvidenceForExecution(
     const recorder = new RunEvidenceRecorder({
       appSlug: safeAppSlug,
       analystName: String(jobStore.get(runId)?.params.analystName || "") || undefined,
+      environment: String(jobStore.get(runId)?.params.environment || "") || undefined,
       sectionSlug: safeSectionSlug,
       sectionName,
       runId,
@@ -1901,6 +2046,7 @@ export async function consolidateRunEvidenceForExecution(
     for (const evidenceJsonPath of evidenceFiles) {
       await recorder.addScenarioFromFile(evidenceJsonPath);
     }
+    for (const scenario of additionalScenarios) recorder.addScenario(scenario);
     await recorder.finish();
     const documentPath = fs.existsSync(paths.pdfPath) ? paths.pdfPath
       : fs.existsSync(paths.docxPath) ? paths.docxPath : undefined;
@@ -1910,7 +2056,7 @@ export async function consolidateRunEvidenceForExecution(
       generated,
       documentPathPresent: generated,
       ...(documentPath ? { documentPath } : {}),
-      scenarioEvidenceCount: evidenceFiles.length,
+      scenarioEvidenceCount: evidenceCount,
       ...(generated ? {} : { error: "consolidated_document_missing" }),
     };
   } catch (err: any) {
@@ -1918,10 +2064,31 @@ export async function consolidateRunEvidenceForExecution(
       attempted: true,
       generated: false,
       documentPathPresent: false,
-      scenarioEvidenceCount: evidenceFiles.length,
+      scenarioEvidenceCount: evidenceCount,
       error: err?.message ?? String(err),
     };
   }
+}
+
+function readAdditionalEvidenceRunScenarios(files: string[], expectedAppSlug: string): EvidenceScenarioRecord[] {
+  const scenarios = new Map<string, EvidenceScenarioRecord>();
+  for (const file of files) {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(file, "utf8")) as { scenarios?: unknown };
+      if (!Array.isArray(parsed.scenarios)) continue;
+      for (const value of parsed.scenarios) {
+        if (!value || typeof value !== "object" || Array.isArray(value)) continue;
+        const scenario = value as Partial<EvidenceScenarioRecord>;
+        if (scenario.appSlug !== expectedAppSlug || typeof scenario.scenarioId !== "string"
+          || !scenario.scenarioId.trim() || !Array.isArray(scenario.steps) || scenario.steps.length === 0) continue;
+        const identity = `${scenario.appSlug}:${scenario.sectionSlug}:${scenario.scenarioId}`;
+        if (!scenarios.has(identity)) scenarios.set(identity, scenario as EvidenceScenarioRecord);
+      }
+    } catch {
+      // A missing/corrupt child artifact must not prevent other run evidence from being consolidated.
+    }
+  }
+  return [...scenarios.values()];
 }
 
 export function buildDiscoveryBatchExecutionPlan(
@@ -2052,6 +2219,7 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
   const forceRediscovery = rediscoveryIntent.explicit;
   const targetedDiscoverySupported = supportsTargetedDiscoveryPreview();
   const routeDecisions = new Map<number, RouteDecision>();
+  const jiraChildEvidenceRunFiles: string[] = [];
   const fullDiscoveryCommandParams: DiscoveryBatchParams = {
     ...params,
     // An explicit rediscovery request must be able to re-run an already active
@@ -2220,6 +2388,9 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
     errorMessage: string;
     durationMs: number;
     completedAt: string;
+    failedStep?: number;
+    screenshotPath?: string;
+    evidencePath?: string;
     caseLifecycleStartedAt: number;
     groupIndex: number;
     overallIndex: number;
@@ -2241,6 +2412,9 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
       launchId: nonEmptyString(params.launchId),
       failureReason: input.reasonCode,
       errorMessage: input.errorMessage,
+      ...(input.failedStep ? { failedStep: input.failedStep } : {}),
+      ...(input.screenshotPath ? { screenshotPath: input.screenshotPath } : {}),
+      ...(input.evidencePath ? { evidencePath: input.evidencePath } : {}),
     });
 
     await reportCaseFailureSafely(async () => {
@@ -2269,6 +2443,9 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
         failureReason: input.reasonCode,
         errorMessage: input.errorMessage,
         launchId: nonEmptyString(params.launchId),
+        ...(input.failedStep ? { failedAtStep: input.failedStep } : {}),
+        ...(input.screenshotPath ? { screenshotPath: input.screenshotPath } : {}),
+        ...(input.evidencePath ? { evidencePath: input.evidencePath } : {}),
       },
     });
     const defectCount = syncChecklistMetadata();
@@ -2480,6 +2657,7 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
     let promotionReason = route.route === "promoted_reuse" ? "promoted_reuse" : route.reason;
     let promotionDurationMs = 0;
 
+    let jiraSemanticOutcome: JiraSemanticChildOutcome | undefined;
     const runFullDiscoveryForCase = async (currentRoute: RouteDecision): Promise<RouteDecision> => {
       const fullDiscoveryArgs = buildDiscoveryBatchArgs(fullDiscoveryCommandParams, [caseId]);
       let discoveredState: string | undefined;
@@ -2490,9 +2668,16 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
       log(jobId, `[run:discovery-batch] command=${cmd} ${fullDiscoveryArgs.join(" ")}`);
       const jiraScenario = params.contextOnly === true ? undefined : selectJiraSemanticScenario(params, scenarioRef);
       if (jiraScenario && scenarioRef) log(jobId, `[run:jira-semantic] caseId=${caseId} scenarioId=${String(jiraScenario.scenarioId)} sourceType=jira_preview`);
-      const discoveryResult = jiraScenario && scenarioRef
-        ? await runJiraSemanticDiscoveryChild(jobId, params, jiraScenario, scenarioRef, effectiveAppSlug)
-        : await runCommand(
+      let discoveryResult: { exitCode: number };
+      if (jiraScenario && scenarioRef) {
+        const childResult = await runJiraSemanticDiscoveryChild(jobId, params, jiraScenario, scenarioRef, effectiveAppSlug);
+        discoveryResult = childResult;
+        jiraSemanticOutcome = childResult.outcome;
+        if (childResult.evidenceRunPath && !jiraChildEvidenceRunFiles.includes(childResult.evidenceRunPath)) {
+          jiraChildEvidenceRunFiles.push(childResult.evidenceRunPath);
+          log(jobId, `[jira-child-evidence] caseId=${caseId} linked=true`);
+        }
+      } else discoveryResult = await runCommand(
         jobId,
         cmd,
         fullDiscoveryArgs,
@@ -2516,25 +2701,29 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
         discoveredState = "promoted";
         promotionPersisted = true;
       }
+      if (jiraScenario && jiraSemanticOutcome?.status === "failed") discoveredState = "failed";
       runnerContextMaterialized = structuredChildResult?.contextMaterialized === true;
       if (structuredChildResult?.status) discoveredState = structuredChildResult.status;
-      log(jobId, `[structured-child-result] caseId=${caseId} childStatus=${discoveredState ?? "unknown"} contextMaterialized=${runnerContextMaterialized}`);
+      const jiraFailureDetails = jiraSemanticOutcome?.status === "failed"
+        ? ` jiraFailureCode=${jiraSemanticOutcome.failedReason ?? "unknown"} failedAtStep=${jiraSemanticOutcome.failedAtStep ?? "unknown"} failurePhase=${jiraSemanticOutcome.failurePhase ?? "unknown"} screenshot=${jiraSemanticOutcome.screenshotPath ?? "none"}`
+        : "";
+      log(jobId, `[structured-child-result] caseId=${caseId} childStatus=${discoveredState ?? "unknown"} contextMaterialized=${runnerContextMaterialized}${jiraFailureDetails}`);
 
       if (discoveryResult.exitCode !== 0) {
         const blockedRoute: RouteDecision = {
           caseId,
           appSlug: effectiveAppSlug,
           route: "blocked",
-          reason: "full_discovery_failed",
+          reason: jiraSemanticOutcome?.failedReason ?? "full_discovery_failed",
           specPath: currentRoute.specPath,
         };
         prepareResult = "failed";
-        prepareReason = "full_discovery_failed";
+        prepareReason = jiraSemanticOutcome?.failedReason ?? "full_discovery_failed";
         promotionResult = "failed";
-        promotionReason = "full_discovery_failed";
+        promotionReason = jiraSemanticOutcome?.failedReason ?? "full_discovery_failed";
         log(
           jobId,
-          `[execution-phase] jobId=${jobId} caseId=${caseId} phase=full_discovery durationMs=${discoveryDurationMs} result=failed reason=full_discovery_failed`,
+          `[execution-phase] jobId=${jobId} caseId=${caseId} phase=full_discovery durationMs=${discoveryDurationMs} result=failed reason=${jiraSemanticOutcome?.failedReason ?? "full_discovery_failed"}${jiraSemanticOutcome?.failedAtStep ? ` failedAtStep=${jiraSemanticOutcome.failedAtStep}` : ""}`,
         );
         return blockedRoute;
       }
@@ -2786,15 +2975,20 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
         return;
       }
       const blockedReason = route.reason;
+      const jiraFailure = jiraSemanticOutcome?.status === "failed" ? jiraSemanticOutcome : undefined;
       await recordPreFunctionalFailure({
         caseId,
         sourceGroup,
         scenarioId,
         scenarioTitle,
         reasonCode: blockedReason,
-        errorMessage: `Case cannot continue before functional execution: ${blockedReason}`,
+        errorMessage: jiraFailure
+          ? `Jira semantic Discovery failed${jiraFailure.failedAtStep ? ` at step ${jiraFailure.failedAtStep}` : ""}: ${jiraFailure.failedReason ?? blockedReason}.`
+          : `Case cannot continue before functional execution: ${blockedReason}`,
         durationMs: 0,
         completedAt: new Date().toISOString(),
+        ...(jiraFailure?.failedAtStep ? { failedStep: jiraFailure.failedAtStep } : {}),
+        ...(jiraFailure?.screenshotPath ? { screenshotPath: jiraFailure.screenshotPath, evidencePath: jiraFailure.screenshotPath } : {}),
         caseLifecycleStartedAt,
         groupIndex: scheduledCase.groupIndex,
         overallIndex: scheduledCase.overallIndex,
@@ -3086,6 +3280,7 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
       evidenceSectionSlugs,
       legacyScenarioEvidence,
       runStartedAt.getTime(),
+      jiraChildEvidenceRunFiles,
     )
     : {
       attempted: false,

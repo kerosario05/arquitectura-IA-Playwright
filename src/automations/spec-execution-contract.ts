@@ -29,7 +29,7 @@ export type ContractSourceScenarioAuth = {
 export type ContractObservableOracle = {
   id: string;
   requirement: string;
-  type: "literal_visible_text" | "negative_visibility" | "credential_rejection" | "navigation_transition" | "url_state" | "heading_or_control" | "auth_gate" | "field_validation" | "runtime_state" | "page_object_state" | "unsupported_or_unresolved";
+  type: "literal_visible_text" | "negative_visibility" | "credential_rejection" | "navigation_transition" | "url_state" | "heading_or_control" | "auth_gate" | "field_validation" | "field_state" | "runtime_state" | "page_object_state" | "unsupported_or_unresolved";
   backed: boolean;
   source: "discovery" | "scenario" | "inferred";
   stepIndex?: number;
@@ -124,6 +124,7 @@ export type SpecStepOracle = {
   requirement?: string;
   /** Exact, observed UI text used to compile a backed visible-text oracle. */
   target?: string;
+  expectedState?: "field_enabled" | "field_empty";
   /** Multiple exact labels required to establish a composite visible outcome. */
   targets?: string[];
   requirementRefs?: string[];
@@ -325,6 +326,9 @@ function resolveOracleImplementationKind(oracle: ContractObservableOracle): stri
     return "heading_or_control";
   }
   if (oracle.type === "url_state") return "url_state";
+  if (oracle.type === "field_state") {
+    return oracle.details?.kind === "field_enabled" || oracle.details?.kind === "field_empty" ? "field_state" : undefined;
+  }
   if (oracle.type === "literal_visible_text" || oracle.type === "heading_or_control" || oracle.type === "page_object_state") {
     return "heading_or_control";
   }
@@ -431,6 +435,8 @@ function resolveStepOracle(
         sourceActionStepIndex: findSourceActionStepIndex(direct, planSteps),
         requirement: direct.requirement,
         target: direct.target,
+        expectedState: direct.type === "field_state"
+          && (direct.details?.kind === "field_enabled" || direct.details?.kind === "field_empty") ? direct.details.kind : undefined,
         requirementRefs: direct.requirementRefs ? [...direct.requirementRefs] : undefined,
         targets: Array.isArray(direct.details?.visibleTargets)
           ? direct.details.visibleTargets.filter((value): value is string => typeof value === "string" && value.trim().length > 0)

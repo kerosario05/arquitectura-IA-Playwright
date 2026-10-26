@@ -1,0 +1,10 @@
+{
+  "id": "preview-010-recorrido-extenso-de-navegacion-negocios",
+  "externalId": "PREVIEW-010",
+  "caseId": 0,
+  "title": "Recorrido extenso de navegacion Negocios",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T13:32:55.807Z"
+}

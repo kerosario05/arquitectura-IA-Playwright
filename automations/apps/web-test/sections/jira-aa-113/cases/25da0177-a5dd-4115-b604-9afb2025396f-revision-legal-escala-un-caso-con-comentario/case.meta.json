@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "25da0177-a5dd-4115-b604-9afb2025396f",
+  "title": "Revisión Legal escala un caso con comentario",
+  "generatedAt": "2026-10-26T06:50:48.426Z",
+  "executionEngine": "jira_semantic"
+}

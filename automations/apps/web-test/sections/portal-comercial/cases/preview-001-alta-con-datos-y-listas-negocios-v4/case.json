@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-alta-con-datos-y-listas-negocios-v4",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Alta con datos y listas Negocios v4",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T15:39:40.625Z"
+}

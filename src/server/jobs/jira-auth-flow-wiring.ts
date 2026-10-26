@@ -3,7 +3,8 @@ export type JiraAuthFlow = (observedStage?: string) => Promise<{ success: boolea
 
 /**
  * Decides whether the browser port gets the profile's AuthFlow.
- * - explicit full_authentication: required (load failure throws unless classic password login can cover it).
+ * - explicit full_authentication: required; when authored credential entry is present without
+ *   configured auth-gate data, loading is best-effort because the scenario owns the login steps.
  * - implicit (no authIntent) with loginMode=password: best effort, so the executor can finish a gate
  *   (e.g. OTP) that follows the classic login; load failure just means no flow.
  * - gate_observation / no_login / other modes: never loaded.
@@ -12,6 +13,8 @@ export async function resolveJiraAuthFlow(input: {
   authIntent?: string;
   loginMode?: string;
   hasPasswordCredentials: boolean;
+  /** The scenario already contains executable username/password fill steps. */
+  hasAuthoredCredentialEntry?: boolean;
   /** Profile configures an auth gate (identification/otp): a load failure must not be swallowed. */
   hasAuthGateData?: boolean;
   load: () => Promise<JiraAuthFlow>;
@@ -22,6 +25,9 @@ export async function resolveJiraAuthFlow(input: {
   try {
     return await input.load();
   } catch (error) {
+    // The scenario owns the login interaction. Without configured MFA/identity data, do not
+    // make execution depend on an unrelated project AuthFlow being present.
+    if (explicit && input.hasAuthoredCredentialEntry && !input.hasAuthGateData) return undefined;
     if (input.hasAuthGateData) throw error;
     if (implicit || (input.loginMode === "password" && input.hasPasswordCredentials)) return undefined;
     throw error;

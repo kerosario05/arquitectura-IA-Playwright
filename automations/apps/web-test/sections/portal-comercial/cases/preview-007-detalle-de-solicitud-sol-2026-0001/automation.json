@@ -1,0 +1,130 @@
+{
+  "id": "preview-007-detalle-de-solicitud-sol-2026-0001",
+  "externalId": "PREVIEW-007",
+  "caseId": 0,
+  "title": "Detalle de solicitud SOL-2026-0001",
+  "planPath": "automations\\apps\\web-test\\sections\\portal-comercial\\cases\\preview-007-detalle-de-solicitud-sol-2026-0001\\plan.json",
+  "specPath": "automations\\apps\\web-test\\sections\\portal-comercial\\cases\\preview-007-detalle-de-solicitud-sol-2026-0001\\case.spec.ts",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "status": "spec_failed",
+  "source": "discovery",
+  "appProfile": "web-test",
+  "createdAt": "2026-10-26T13:26:23.944Z",
+  "updatedAt": "2026-10-26T13:26:23.944Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-007\\2026-10-26T13-24-45-366Z\\discovered-plans.pending.json",
+  "pomStatus": "needs_manual_review",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "failed",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-007\\2026-10-26T13-24-45-366Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "specGeneration": {
+      "mode": "deterministic",
+      "provider": null,
+      "model": null,
+      "skill": {
+        "name": null,
+        "version": null,
+        "hash": null,
+        "loaded": false
+      },
+      "invocations": 0,
+      "invocationsConsumed": 0,
+      "durationMs": 59547,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "skipped",
+        "structure": "passed",
+        "traceFidelity": "skipped",
+        "typescript": "passed",
+        "playwrightDiscovery": "passed",
+        "semanticCoverage": "passed",
+        "functionalExecution": "failed"
+      },
+      "promotionAllowed": false,
+      "specsRequested": 1,
+      "specsValidated": 0,
+      "specsRejected": 1,
+      "specGenerationAttempts": 0,
+      "specRepairAttempts": 0,
+      "firstPassPromotion": false,
+      "failedGatesAttempt1": [
+        "functionalExecution"
+      ],
+      "regressedGates": [],
+      "missingRequirements": [],
+      "oracleTypes": [
+        "navigation_transition"
+      ],
+      "errors": [
+        "functional_execution_failed:exitCode=1",
+        "functional_execution_error:Error: Promoted click failed at step 6 target=\"css:[href=\"#/solicitud/SOL-2026-0001\"]\". reason=structural_authority_not_unique_or_unresolved structuralFailureReason=owner_tag_not_present structuralFailureMatchCount=n/a suggestedFix=\"Certified structural authority did not resolve to exactly one visible, enabled element -- never falls back to a weaker locator, text match, or position.\""
+      ],
+      "warnings": [
+        "step_index_not_explicit_in_spec:1",
+        "functional_execution_screenshots=5",
+        "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 6)."
+      ],
+      "finalSpec": {
+        "origin": "deterministic_compiler",
+        "generatedBy": "core",
+        "strategy": "deterministic_compiler",
+        "fallback": null
+      },
+      "runtimeGate": {
+        "decision": "block",
+        "promotionStatus": "blocked",
+        "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 6)."
+      },
+      "specWritten": false,
+      "previousSpec": {
+        "existed": false,
+        "hash": null,
+        "lastModifiedAt": null
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "spec_generation_validation_failed",
+      "blockers": [
+        "spec_generation_validation_failed"
+      ],
+      "availablePageObjects": [
+        "ProductListPage",
+        "OperationsMenuPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false,
+      "specPath": "automations\\apps\\web-test\\sections\\portal-comercial\\cases\\preview-007-detalle-de-solicitud-sol-2026-0001\\case.spec.ts",
+      "specHash": "8b8b58a4d34240f27a1a6265e25b46bb045c8b5c1c05be486a0fcac3dfd93adf",
+      "specSource": "ai_candidate"
+    }
+  }
+}

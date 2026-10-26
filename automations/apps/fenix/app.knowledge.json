@@ -2,7 +2,7 @@
   "version": 1,
   "appSlug": "fenix",
   "createdAt": "2026-09-23T13:48:01.218Z",
-  "updatedAt": "2026-10-23T17:10:16.420Z",
+  "updatedAt": "2026-10-26T21:39:38.437Z",
   "items": [],
   "jiraRoutes": [
     {
@@ -628,8 +628,8 @@
       "profileRevision": "854d1a28d006225af70656f58f8801b66c7a12dbb7f540424b4ef83491a12a0f",
       "sourceIssueKey": "AA-97",
       "scenarioId": "AA-97:jira:2",
-      "jobId": "cacc3334-95e4-4640-97b8-ca1ef6c152dc",
-      "validatedAt": "2026-10-23T15:39:43.585Z",
+      "jobId": "63a063a9-94ed-496b-b80c-36336aa7179e",
+      "validatedAt": "2026-10-23T18:55:51.859Z",
       "startsFrom": "project_entry",
       "actions": [
         {
@@ -665,13 +665,13 @@
         }
       ],
       "evidenceRefs": [
-        "scenario-1-step-1.png",
-        "scenario-1-step-2.png",
-        "scenario-1-step-3.png",
-        "scenario-1-step-4.png",
-        "scenario-1-step-5.png",
-        "scenario-1-step-6.png",
-        "scenario-1-step-7.png"
+        "scenario-2-step-1.png",
+        "scenario-2-step-2.png",
+        "scenario-2-step-3.png",
+        "scenario-2-step-4.png",
+        "scenario-2-step-5.png",
+        "scenario-2-step-6.png",
+        "scenario-2-step-7.png"
       ],
       "observables": [
         {
@@ -687,9 +687,9 @@
       "id": "9366c2269a2eded3fc9935a4a8a37d645d72f25b2b979dd1af3f5501a026c582",
       "profileRevision": "854d1a28d006225af70656f58f8801b66c7a12dbb7f540424b4ef83491a12a0f",
       "sourceIssueKey": "AA-97",
-      "scenarioId": "AA-97:jira:1",
-      "jobId": "38eff796-333a-4d63-83b0-a86db0ba9177",
-      "validatedAt": "2026-10-23T17:10:16.415Z",
+      "scenarioId": "AA-97:jira:1:edited-360f8ba99f25b34e",
+      "jobId": "9da8906c-21db-4dc6-ac00-3dff94a1d346",
+      "validatedAt": "2026-10-23T19:53:12.597Z",
       "startsFrom": "project_entry",
       "actions": [
         {
@@ -782,6 +782,143 @@
           "action": "fill",
           "field": "Token",
           "dataRef": "token_autorizacion"
+        },
+        {
+          "action": "click",
+          "field": "Autorizar transferencia",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png",
+        "scenario-1-step-13.png",
+        "scenario-1-step-14.png",
+        "scenario-1-step-15.png",
+        "scenario-1-step-16.png",
+        "scenario-1-step-17.png",
+        "scenario-1-step-18.png",
+        "scenario-1-step-19.png",
+        "scenario-1-step-20.png",
+        "scenario-1-step-21.png",
+        "scenario-1-step-22.png",
+        "scenario-1-step-23.png",
+        "scenario-1-step-24.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "fenix",
+      "id": "fec05cb3027f67191d2948d4f95fa2867b00f48a7fd6ef600158b90708a5d870",
+      "profileRevision": "854d1a28d006225af70656f58f8801b66c7a12dbb7f540424b4ef83491a12a0f",
+      "sourceIssueKey": "AA-97",
+      "scenarioId": "AA-97:jira:5",
+      "jobId": "6a8661fa-f688-4ba8-b9ef-bee1ffc3622c",
+      "validatedAt": "2026-10-26T21:39:38.427Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "perfil empresarial",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "RNC",
+          "dataRef": "rnc"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SMS",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Código",
+          "dataRef": "codigo_acceso_sms"
+        },
+        {
+          "action": "click",
+          "field": "continuar",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Transferencias",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Cuentas Propias",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "select",
+          "field": "Cuenta de origen",
+          "dataRef": "cuenta_origen"
+        },
+        {
+          "action": "select",
+          "field": "Cuenta de destino",
+          "dataRef": "cuenta_destino"
+        },
+        {
+          "action": "fill",
+          "field": "Monto",
+          "dataRef": "monto_transferencia"
+        },
+        {
+          "action": "click",
+          "field": "Continuar",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "continuar",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SMS",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Token",
+          "dataRef": "token_autorizacion_sms"
         },
         {
           "action": "click",

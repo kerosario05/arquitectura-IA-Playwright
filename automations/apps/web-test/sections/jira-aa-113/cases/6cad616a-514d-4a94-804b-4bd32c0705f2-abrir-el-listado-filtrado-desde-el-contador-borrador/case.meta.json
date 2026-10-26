@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "6cad616a-514d-4a94-804b-4bd32c0705f2",
+  "title": "Abrir el listado filtrado desde el contador Borrador",
+  "generatedAt": "2026-10-26T07:04:47.046Z",
+  "executionEngine": "jira_semantic"
+}

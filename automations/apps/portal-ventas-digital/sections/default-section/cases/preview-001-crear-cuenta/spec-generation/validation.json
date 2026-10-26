@@ -10,7 +10,7 @@
   },
   "invocations": 0,
   "invocationsConsumed": 0,
-  "durationMs": 75588,
+  "durationMs": 97567,
   "usage": {
     "inputTokens": null,
     "cachedInputTokens": null,
@@ -48,7 +48,7 @@
   ],
   "errors": [
     "functional_execution_failed:exitCode=1",
-    "functional_execution_error:[evidence:settle] probe failed reason=page.waitForFunction: EvalError: Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://*.qualtrics.com https://*.siteintercept.qualtrics.com https://cdn.evgnet.com https://*.evgnet.com https://connect.facebook.net\"."
+    "functional_execution_error:Error: PROMOTED_FINAL_OUTCOME_UNVERIFIED"
   ],
   "warnings": [
     "functional_execution_screenshots=19",

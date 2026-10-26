@@ -3,7 +3,43 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { assertNoCanonicalJiraOutputs, persistJiraSpecVerificationFailure, resolveJiraSpecVerificationTimeoutMs } from "./jira-spec-promotion";
+import { assertNoCanonicalJiraOutputs, JiraPromotionIndexError, persistJiraSpecVerificationFailure,
+  preflightJiraPromotionIndexes, resolveJiraSpecVerificationTimeoutMs } from "./jira-spec-promotion";
+
+test("Jira promotion preflight rejects malformed app or global index before promotion writes", async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "jira-promotion-index-preflight-"));
+  try {
+    const appIndexPath = path.join(root, "app-index.json");
+    const globalIndexPath = path.join(root, "global-index.json");
+    const malformed = '{"version":"1.0","automations":[]} trailing';
+    await fs.writeFile(appIndexPath, JSON.stringify({ version: "1.0", automations: [] }), "utf8");
+    await fs.writeFile(globalIndexPath, malformed, "utf8");
+
+    await assert.rejects(preflightJiraPromotionIndexes(appIndexPath, globalIndexPath), error => {
+      assert.ok(error instanceof JiraPromotionIndexError);
+      assert.equal(error.code, "JIRA_PROMOTION_INDEX_INVALID");
+      assert.equal(error.indexPath, path.resolve(globalIndexPath));
+      assert.equal(error.reason, "invalid_json");
+      return true;
+    });
+
+    assert.equal(await fs.readFile(globalIndexPath, "utf8"), malformed);
+    assert.deepEqual((await fs.readdir(root)).sort(), ["app-index.json", "global-index.json"]);
+
+    await fs.writeFile(appIndexPath, malformed, "utf8");
+    await fs.writeFile(globalIndexPath, JSON.stringify({ version: "1.0", automations: [] }), "utf8");
+    await assert.rejects(preflightJiraPromotionIndexes(appIndexPath, globalIndexPath), error => {
+      assert.ok(error instanceof JiraPromotionIndexError);
+      assert.equal(error.indexPath, path.resolve(appIndexPath));
+      assert.equal(error.reason, "invalid_json");
+      return true;
+    });
+    assert.equal(await fs.readFile(appIndexPath, "utf8"), malformed);
+    assert.deepEqual((await fs.readdir(root)).sort(), ["app-index.json", "global-index.json"]);
+  } finally {
+    await fs.rm(root, { recursive: true, force: true });
+  }
+});
 
 test("Jira non-overwrite guard: candidate-only case dir allows promotion and keeps candidates; canonical state fails closed", async () => {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), "jira-spec-guard-"));

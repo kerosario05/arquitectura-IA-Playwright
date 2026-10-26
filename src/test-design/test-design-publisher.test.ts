@@ -107,6 +107,18 @@ test("the TestRail case carries steps with their expected results and the story 
   assert.deepEqual(input.customFields, { custom_area: "QA" });
 });
 
+test("legacy cases without preconditions receive the generic web test setup in TestRail", () => {
+  const input = toCaseInput({ ...scenario(), preconditions: "" }, "PAY-1", { requiredCustomFields: {}, caseOracle: "QA" });
+  assert.equal(input.preconditions, "La aplicación configurada del proyecto está disponible y los datos de prueba requeridos están preparados.");
+});
+
+test("published Jira-linked scenarios preserve empty launch preconditions", () => {
+  const input = toCaseInput({ ...scenario(), preconditions: "", jiraSourceScenarioId: "PAY-1:jira:1" }, "PAY-1", {
+    requiredCustomFields: {}, caseOracle: "QA",
+  });
+  assert.equal(input.preconditions, undefined);
+});
+
 test("draft status follows what each story still has to publish", () => {
   const story = (over: Partial<TestDesignDraftStory>): TestDesignDraftStory => ({
     id: "s",

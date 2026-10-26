@@ -887,6 +887,7 @@ function buildRecord(
       ? `Automatización - ${context.sectionName}`
       : `Automatización - ${context.sectionSlug}`),
     dataLabels: context.dataLabels,
+    testData: context.testData,
     analyst: context.analystName ?? "",
     date: date ?? new Date().toLocaleDateString("es-ES", {
       year: "numeric", month: "long", day: "numeric",

@@ -251,6 +251,24 @@ test('drops invented search submit after a fill unless the story declares a subm
  assert.equal(repairUnbackedFilterSubmitActions(draft,explicit),draft);
  assert.equal(jiraGenerationContractErrors(draft,explicit).includes('JIRA_FILTER_RESULT_EVIDENCE_MISSING'),false);
 });
+test('filtered-list assertions require a declared row fixture or in-journey record setup',()=>{
+ const issue={description:'El usuario selecciona un estado, filtra las solicitudes y valida que las solicitudes mostradas correspondan al estado seleccionado.'} as JiraIssueSource;
+ const steps=[
+  'Seleccionar estado en "Estado"',
+  'Solicitar filtrar las solicitudes por estado',
+  'Validar que las solicitudes mostradas correspondan al estado seleccionado',
+ ];
+ const draft={steps,preconditions:[]};
+ assert.ok(jiraGenerationContractErrors(draft,issue).includes('JIRA_FILTER_TEST_DATA_UNSPECIFIED'));
+ assert.equal(jiraGenerationContractErrors({...draft,preconditions:['Hay solicitudes de prueba disponibles en el estado seleccionado.']},issue).includes('JIRA_FILTER_TEST_DATA_UNSPECIFIED'),false);
+ assert.equal(jiraGenerationContractErrors({...draft,steps:[
+  'Presionar "Nueva solicitud"',
+  'Ingresar datos de prueba en "Denominación"',
+  'Presionar "Guardar solicitud"',
+  ...steps,
+ ]},issue).includes('JIRA_FILTER_TEST_DATA_UNSPECIFIED'),false);
+ assert.match(jiraScenarioGenerationInstructions(),/Do not assume the environment contains rows: an empty list cannot prove filter\/search correctness/);
+});
 test('generation drops only the invented filter submit for reactive sources and keeps it for explicit-submit sources',async()=>{
  const fill='Ingresar "term" en "Filtro de registro"';
  const press='Presionar la acción de buscar en Registro de auditoría';
@@ -259,7 +277,9 @@ test('generation drops only the invented filter submit for reactive sources and 
  const run=(description:string)=>generateJiraScenarios([{key:'HU-9',summary:'Filtro',description} as JiraIssueSource],'app-a',{providerType:'fake',providerName:'fake',model:'fixture',async completeJson(){return {rawText:'',model:'fixture',providerName:'fake',durationMs:0,parsedJson:{scenarios:[{...draft}]}};}});
  const reactive=await run('El usuario filtra el registro escribiendo en el campo de filtro y la tabla muestra solo las filas coincidentes.');
  assert.deepEqual(reactive.scenarios[0].steps,[draft.steps[0],fill,assertion]);
- assert.equal(reactive.scenarios[0].validation.valid,true);
+ assert.equal(reactive.scenarios[0].validation.valid,false);
+ assert.ok(reactive.scenarios[0].validation.errors.includes('JIRA_FILTER_TEST_DATA_UNSPECIFIED'));
+ assert.ok(reactive.scenarios[0].validation.issues?.some(issue=>issue.code==='JIRA_FILTER_TEST_DATA_UNSPECIFIED'&&issue.stepIndex===3&&issue.step===assertion));
  const explicit=await run('El usuario escribe el término y presiona el botón Buscar para filtrar la tabla.');
  assert.ok(explicit.scenarios[0].steps.some(step=>/^Presionar\b.*buscar en Registro de auditor[ií]a/i.test(step)));
  assert.ok(explicit.scenarios[0].steps.includes(assertion));
@@ -405,13 +425,13 @@ test('generation normalizes configured-app entry and contextual conditional text
   assert.deepEqual(result.scenarios[0].conditionRequirements?.[0].stepIndices,[3]);
  }
 });
-test('semantic action wrappers become a single click instead of a click plus inferred assertion',async()=>{
+test('source-named semantic action wrappers become a single executable click',async()=>{
  const draft={sourceIssueKey:'HU-7',title:'Confirm transfer',steps:[
   'Abrir la aplicación configurada del proyecto',
   'Presionar la acción para confirmar la autorización',
   'Validar que se muestre "comprobante"',
  ],expectedResult:'comprobante'};
- const result=await generateJiraScenarios([{key:'HU-7',summary:'Transferencia',description:'El usuario confirma la autorización y ve el comprobante.'} as JiraIssueSource],'portal-comercial',{providerType:'fake',providerName:'fake',model:'fixture',async completeJson(){return {rawText:'',model:'fixture',providerName:'fake',durationMs:0,parsedJson:{scenarios:[draft]}};}});
+ const result=await generateJiraScenarios([{key:'HU-7',summary:'Transferencia',description:'El control "confirmar la autorización" permite confirmar la autorización y ver el comprobante.'} as JiraIssueSource],'portal-comercial',{providerType:'fake',providerName:'fake',model:'fixture',async completeJson(){return {rawText:'',model:'fixture',providerName:'fake',durationMs:0,parsedJson:{scenarios:[draft]}};}});
  assert.deepEqual(result.scenarios[0].steps,[
   'Abrir la aplicación configurada del proyecto',
   'Presionar "confirmar la autorización"',
@@ -468,7 +488,7 @@ test('AA-97 rejection language normalizes to supported observations without inve
  assert.equal(generated.scenarios[0].expectedResult,'Se informa problema de credenciales y no se presenta operación exitosa.');
 });
 
-test('Jira generation repairs unsupported assertions and excludes non-executable negative skeletons',async()=>{
+test('Jira generation keeps unresolved assertions editable and excludes non-executable negative skeletons',async()=>{
  const issue={key:'AA-97',description:'AC8 — Manejo de errores. Si las credenciales no son válidas, Fenix informa el problema y no presenta la operación como exitosa.'} as JiraIssueSource;
  const valid={sourceIssueKey:'AA-97',title:'Rechazo de credenciales empresariales no válidas',acceptanceCriteriaRefs:['AC8.1'],expectedResult:'No se muestra "operación exitosa".',steps:[
   'Abrir la aplicación configurada del proyecto','Presionar "perfil empresarial"','Ingresar RNC en "RNC"','Ingresar usuario en "Usuario"',
@@ -492,12 +512,17 @@ test('Jira generation repairs unsupported assertions and excludes non-executable
   return {rawText:'',parsedJson:{scenarios},model:'fixture',providerName:'fixture',durationMs:0};
  }});
  assert.equal(call,3,'unsupported assertion is repaired and missing source obligations receive a coverage pass');
- assert.equal(result.scenarios.length,1);
- assert.equal(result.scenarios[0].validation.valid,true);
- assert.deepEqual(result.scenarios[0].validation.errors,[]);
+ assert.equal(result.scenarios.length,2);
+ const validScenario=result.scenarios.find(scenario=>scenario.title===valid.title);
+ const reviewScenario=result.scenarios.find(scenario=>scenario.title===unsupported.title);
+ assert.equal(validScenario?.validation.valid,true);
+ assert.deepEqual(validScenario?.validation.errors,[]);
+ assert.equal(reviewScenario?.validation.valid,false);
+ assert.equal(reviewScenario?.executionReadiness,'requires_discovery');
+ assert.ok(reviewScenario?.validation.errors.includes('JIRA_ASSERTION_CAPABILITY_UNSUPPORTED'));
+ assert.ok(reviewScenario?.validation.issues?.some(issue=>issue.code==='JIRA_ASSERTION_CAPABILITY_UNSUPPORTED'&&issue.stepIndex>0&&reviewScenario.steps[issue.stepIndex-1]===issue.step),JSON.stringify(reviewScenario?.validation));
  assert.ok(result.rejected.some(item=>item.reason.startsWith('JIRA_ACCEPTANCE_COVERAGE_INCOMPLETE:')));
- assert.equal(result.scenarios.some(s=>s.validation.errors.includes('JIRA_ASSERTION_CAPABILITY_UNSUPPORTED')),false);
- assert.ok(result.rejected.some(item=>item.title===unsupported.title));
+ assert.equal(result.rejected.some(item=>item.title===unsupported.title),false);
  assert.ok(result.rejected.some(item=>item.title===emptyFailure.title && item.reason==='jira_failure_condition_not_executable'));
 });
 

@@ -1,0 +1,56 @@
+{
+  "id": "4af69114-c2d9-4781-bf8f-092adda830cb-guardar-como-borrador-gestionar-documentos-y-extraer-datos-del-registro-mercantil",
+  "externalId": "4af69114-c2d9-4781-bf8f-092adda830cb",
+  "title": "Guardar como borrador, gestionar documentos y extraer datos del Registro Mercantil",
+  "planPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\4af69114-c2d9-4781-bf8f-092adda830cb-guardar-como-borrador-gestionar-documentos-y-extraer-datos-del-registro-mercantil\\plan.json",
+  "specPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\4af69114-c2d9-4781-bf8f-092adda830cb-guardar-como-borrador-gestionar-documentos-y-extraer-datos-del-registro-mercantil\\case.spec.ts",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "web-test",
+  "baseUrlHash": "4e1194428e74",
+  "createdAt": "2026-10-26T07:24:30.344Z",
+  "updatedAt": "2026-10-26T07:24:30.344Z",
+  "specVerificationStatus": "passed",
+  "tags": [
+    "jira_semantic",
+    "jira_generated"
+  ],
+  "metadata": {
+    "specGeneration": {
+      "mode": "deterministic",
+      "provider": null,
+      "model": null,
+      "invocations": 0,
+      "invocationsConsumed": 0,
+      "durationMs": 0,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "passed",
+        "typescript": "skipped",
+        "playwrightDiscovery": "skipped",
+        "semanticCoverage": "passed",
+        "functionalExecution": "passed"
+      },
+      "promotionAllowed": true,
+      "specsRequested": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
+      "specWritten": true,
+      "errors": [],
+      "warnings": []
+    }
+  }
+}

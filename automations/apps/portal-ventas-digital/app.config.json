@@ -5,8 +5,8 @@
     "name": "solicitudedigitalesdev",
     "baseUrl": "https://solicitudedigitalesdev/",
     "baseUrlHash": "e77c9768c372",
-    "createdAt": "2026-10-22T16:53:12.073Z",
-    "updatedAt": "2026-10-22T16:53:12.074Z",
+    "createdAt": "2026-10-24T00:46:59.230Z",
+    "updatedAt": "2026-10-24T00:46:59.231Z",
     "ignoreHTTPSErrors": true
   },
   "baseUrl": "https://solicitudedigitalesdev/",
@@ -20,5 +20,5 @@
   "passwordRef": "APP_PASSWORD",
   "missingInputBehavior": "auto_generate",
   "ignoreHTTPSErrors": true,
-  "updatedAt": "2026-10-22T16:53:12.074Z"
+  "updatedAt": "2026-10-24T00:46:59.231Z"
 }

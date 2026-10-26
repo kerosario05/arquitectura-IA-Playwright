@@ -34,10 +34,36 @@ export type JiraEvidenceContext = {
   sectionName?: string;
   analyst?: string;
   date?: string;
+  /** Effective runtime values keyed by scenario ID; secret values are masked before entering evidence records. */
+  dataValuesByScenario?: Record<string, Record<string, string>>;
 };
 
-/** Turns the scenario's visible test-data requirements into safe report preconditions.
- * Runtime values are deliberately omitted; only field, condition, and step are shown.
+const SENSITIVE_EVIDENCE_DATA = /(?:password|contrase[nñ]a|clave|\bpin\b|\botp\b|token|secret|secreto)/i;
+
+function jiraEvidenceTestData(
+  source: JiraScenarioInput,
+  values: Record<string, string> | undefined,
+): Array<{ label: string; value: string }> {
+  if (!values) return [];
+  const seen = new Set<string>();
+  return (source.inputRequirements ?? []).flatMap(requirement => {
+    const label = requirement.label.trim();
+    const value = String(values[requirement.key] ?? "").trim();
+    if (!label || !value) return [];
+    const identity = `${requirement.key}\u0000${label}`;
+    if (seen.has(identity)) return [];
+    seen.add(identity);
+    return [{
+      label,
+      value: requirement.sensitive || SENSITIVE_EVIDENCE_DATA.test(`${requirement.key} ${label}`)
+        ? "[Protegido]"
+        : value,
+    }];
+  });
+}
+
+/** Turns the scenario's visible test-data requirements into report preconditions.
+ * Actual values are stored separately in testData after sensitive-value masking.
  */
 export function jiraEvidencePreconditions(source: {
   preconditions?: unknown;
@@ -158,6 +184,7 @@ export function buildJiraEvidenceScenarioRecords(
       testType: source.testType,
       testApproach: source.testApproach,
       preconditions: jiraEvidencePreconditions(source),
+      testData: jiraEvidenceTestData(source, context.dataValuesByScenario?.[source.scenarioId]),
       requirement: [source.sourceIssueKey, context.requirementTitle?.trim()].filter(Boolean).join(" "),
       analyst: context.analyst || "QA Lab",
       date: formatEvidenceDate(timestamp),

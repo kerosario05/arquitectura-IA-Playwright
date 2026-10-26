@@ -239,10 +239,18 @@ export async function scanCurrentPage(page: Page): Promise<PageSnapshot> {
           })
         : actionability !== "NON_ACTIONABLE";
       const knownElement = selectors.some((selector) => el.matches(selector));
-      if ((!knownElement && actionability === "NON_ACTIONABLE")
+      // Keep semantically marked feedback in snapshots even when it is a plain,
+      // non-interactive div (common for inline auth errors without ARIA roles).
+      // This lets outcome classifiers see real visible feedback without adding
+      // arbitrary page text or weakening assertion requirements.
+      const feedbackSurface = Boolean(
+        role && ["alert", "alertdialog", "status", "log"].includes(role),
+      ) || el.hasAttribute("aria-live")
+        || /alert|error|message|notification|toast|feedback|snackbar|status/i.test(className ?? "");
+      if ((!knownElement && actionability === "NON_ACTIONABLE" && !feedbackSurface)
         || (actionability === "FRAMEWORK_ACTIONABLE" && !actionOwner)) continue;
 
-      const score =
+      const score = feedbackSurface ? 3 :
         type === "button" ||
         type === "link" ||
         type === "input" ||

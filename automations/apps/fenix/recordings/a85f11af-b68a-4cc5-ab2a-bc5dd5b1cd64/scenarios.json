@@ -2188,7 +2188,7 @@
       "oracleReadiness": true,
       "reviewReadiness": true,
       "publicationContentReadiness": true,
-      "executionReadiness": true,
+      "executionReadiness": false,
       "publicationReadiness": true,
       "missingInputs": [],
       "datasetAuthorityMismatches": [],
@@ -2618,7 +2618,7 @@
       "specHash": "8da3594695cd78c22472b848698496a445bce0959df813120e09a19b04f7fd9e",
       "automationId": "preview-001-transferencias-entre-cuantas-propias",
       "sectionSlug": "default-section",
-      "generatedAt": "2026-10-22T15:09:45.341Z"
+      "generatedAt": "2026-10-24T00:11:42.188Z"
     }
   }
 ]

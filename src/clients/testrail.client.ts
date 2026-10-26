@@ -615,7 +615,13 @@ export class TestRailClient {
       try {
         payload = JSON.parse(rawText);
       } catch {
-        throw new Error(`Invalid JSON response from TestRail (HTTP ${response.status}).`);
+        // A gateway may return HTML or an empty/truncated body after TestRail has
+        // already committed a write. Preserve the status so callers can reconcile
+        // the write instead of treating it like a definite pre-send failure.
+        throw new TestRailApiError(
+          `Invalid JSON response from TestRail (HTTP ${response.status}) at ${endpointName}.`,
+          response.status,
+        );
       }
     }
 

@@ -1,0 +1,9 @@
+{
+  "id": "35ce2266-df68-4b58-a854-07425c3c5bc6-ver-el-conteo-de-solicitudes-por-estado-y-las-solicitudes-recientes-en-el-inicio",
+  "externalId": "35ce2266-df68-4b58-a854-07425c3c5bc6",
+  "title": "Ver el conteo de solicitudes por estado y las solicitudes recientes en el inicio",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T07:03:32.207Z"
+}

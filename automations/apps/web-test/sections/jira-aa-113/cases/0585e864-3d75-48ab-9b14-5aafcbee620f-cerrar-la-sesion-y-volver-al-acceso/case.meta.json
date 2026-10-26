@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "0585e864-3d75-48ab-9b14-5aafcbee620f",
+  "title": "Cerrar la sesión y volver al acceso",
+  "generatedAt": "2026-10-26T07:19:51.276Z",
+  "executionEngine": "jira_semantic"
+}

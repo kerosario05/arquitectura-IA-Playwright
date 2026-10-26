@@ -17,7 +17,7 @@ import type { RecordingAiScenarioProposal } from "./ai-scenario-contract";
 import type { SelectorOptionInventory } from "./semantic-recording";
 import type { ConditionalAction } from "../discovery/step-intent-parser";
 import { isSelectionListRecoveryControlLabel } from "../scenarios/selection-list-recovery";
-import { buildCanonicalInteractions, enrichRecordedScenarioContract, evaluateRecordingReadiness, hasExecutionAuthority, hasReusableStructuralClickIdentity, isMaskActivation, materializedSemanticSignature, reconcileRecordedScenarioOptionOwnerLineage, validateInteractionStateSequence, type CanonicalInteraction, type EntityActionBlock, type MutationOpportunity, type RecordingReadiness, type RuntimeInputRequirement, type ScenarioMutationProposal } from "./canonical-recording-contract";
+import { buildCanonicalInteractions, enrichRecordedScenarioContract, evaluateRecordingReadiness, hasExecutionAuthority, hasReusableStructuralClickIdentity, isMaskActivation, isTransientStatusTap, materializedSemanticSignature, reconcileRecordedScenarioOptionOwnerLineage, validateInteractionStateSequence, type CanonicalInteraction, type EntityActionBlock, type MutationOpportunity, type RecordingReadiness, type RuntimeInputRequirement, type ScenarioMutationProposal } from "./canonical-recording-contract";
 
 /**
  * Builds executable scenarios from a recorded walkthrough — deterministically.
@@ -275,7 +275,7 @@ export function projectNativeSelectionOpeningTaps(
   }
   return interactions.map((interaction) =>
     openingTapRefs.has(interaction.sourceEventRefs[0] ?? "")
-      && interaction.action === "click"
+      && (interaction.action === "click" || interaction.action === "select")
       ? { ...interaction, technicalOnly: true, executionAuthority: false }
       : interaction,
   );
@@ -998,6 +998,7 @@ export function buildHappyPathScenario(
     // classified as technical-only is omitted from the executable projection.
     if (canonical?.technicalOnly && event.kind !== "screen_change") continue;
     if (isMaskActivation(events, eventIndex)) continue;
+    if (event.kind === "tap" && isTransientStatusTap(event.target)) continue;
     const nextMeaningful = events.slice(eventIndex + 1).find((candidate) => candidate.kind === "tap" || candidate.kind === "fill");
     const classification = classifySemanticEvent(event, nextMeaningful);
     if (classification === "FOCUS_ONLY" || classification === "DYNAMIC_EDITOR_INTERNAL" || classification === "TECHNICAL_NOISE") continue;
@@ -1277,7 +1278,10 @@ export function buildHappyPathScenario(
             skipAllowedWhenConditionFalse: true,
           }
           : undefined;
+        // A button's own accessible name is the user-visible identity: the field relation never
+        // replaces it (only non-button controls, e.g. an option, are shown under their owner field).
         const unresolvedSemanticDisplay = !targetLocatorsForPlan.length
+          && event.target?.role?.toLowerCase() !== "button"
           && associatedField
           && !isGenericUnresolvedLabel(associatedField);
         const canonicalInteraction = canonicalByEvent.get(`event-${eventIndex + 1}`);

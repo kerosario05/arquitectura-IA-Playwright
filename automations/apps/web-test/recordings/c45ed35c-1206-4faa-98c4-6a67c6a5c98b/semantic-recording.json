@@ -1,0 +1,674 @@
+{
+  "version": "1.0",
+  "recordingId": "c45ed35c-1206-4faa-98c4-6a67c6a5c98b",
+  "projectSlug": "web-test",
+  "appSlug": "web-test",
+  "platform": "web",
+  "recordingGoal": {
+    "declaredGoal": "Inicio de sesión de Negocios y apertura de Solicitudes",
+    "normalizedGoal": "Inicio de sesión de Negocios y apertura de Solicitudes",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "selectorOptionInventories": [],
+  "semanticScreens": [
+    {
+      "screenIdentity": "9db5430202df",
+      "title": "Portal Comercial",
+      "url": "http://localhost:4310/#/login",
+      "classification": "SAME_SCREEN_MUTATION",
+      "sourceScreenKey": "9db5430202df"
+    },
+    {
+      "screenIdentity": "8ab7a2ae3bf4",
+      "url": "http://localhost:4310/#/login",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "8ab7a2ae3bf4"
+    }
+  ],
+  "semanticComponents": [
+    {
+      "componentId": "9db5430202df:control:9db5430202df|Portal Comercial|control",
+      "componentType": "control",
+      "screenIdentity": "9db5430202df",
+      "label": "Portal Comercial",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-3"
+      ]
+    },
+    {
+      "componentId": "9db5430202df:control:9db5430202df|Contraseña|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "9db5430202df",
+      "label": "Contraseña",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-6"
+      ]
+    },
+    {
+      "componentId": "9db5430202df:control:9db5430202df|Iniciar sesión|button",
+      "componentType": "button",
+      "screenIdentity": "9db5430202df",
+      "label": "Iniciar sesión",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-7"
+      ]
+    }
+  ],
+  "semanticEvents": [
+    {
+      "eventRef": "event-1",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-2",
+      "action": "observe",
+      "screenIdentity": "9db5430202df",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-3",
+      "action": "activate",
+      "screenIdentity": "9db5430202df",
+      "componentType": "control",
+      "controlAffordance": "observable_control",
+      "technicalTargetRef": "9db5430202df:control:9db5430202df|Portal Comercial|control",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-4",
+      "action": "observe",
+      "screenIdentity": "9db5430202df",
+      "componentType": "textbox",
+      "controlAffordance": "editable",
+      "technicalTargetRef": "9db5430202df:control:9db5430202df|Contraseña|amount_or_text",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-5",
+      "action": "observe",
+      "screenIdentity": "9db5430202df",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9db5430202df:control:9db5430202df|Iniciar sesión|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-6",
+      "action": "fill",
+      "screenIdentity": "9db5430202df",
+      "componentType": "textbox",
+      "field": "Contraseña",
+      "controlAffordance": "editable",
+      "valueKey": "contrasena",
+      "valueRole": "secure_input",
+      "technicalTargetRef": "9db5430202df:control:role:textbox|Contraseña",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-7",
+      "action": "click",
+      "screenIdentity": "9db5430202df",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9db5430202df:control:role:button|Iniciar sesión",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    }
+  ],
+  "datasets": [
+    {
+      "valueKey": "contrasena",
+      "semanticField": "Contraseña",
+      "valueRole": "secure_input",
+      "source": "secure",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": true,
+      "generated": false,
+      "instanceIdentity": "9db5430202df:control:role:textbox|Contraseña",
+      "recordingId": "c45ed35c-1206-4faa-98c4-6a67c6a5c98b",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    }
+  ],
+  "technicalObservations": [
+    {
+      "observationId": "obs-3",
+      "status": "VALIDATED",
+      "screenIdentity": "9db5430202df",
+      "componentType": "control",
+      "label": "Portal Comercial",
+      "tag": "div",
+      "locatorCandidates": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "div"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "div",
+                "stableAttributes": {
+                  "id": "splash-fill"
+                }
+              },
+              {
+                "relation": "descendant",
+                "tag": "p",
+                "stableAttributes": {
+                  "id": "splash-msg"
+                }
+              }
+            ],
+            "semanticShape": [
+              "div",
+              "h1",
+              "p"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "splash"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"div\"},\"stableDirectAttributes\":{},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"id\":\"splash-fill\"}},{\"relation\":\"descendant\",\"tag\":\"p\",\"stableAttributes\":{\"id\":\"splash-msg\"}}],\"semanticShape\":[\"div\",\"h1\",\"p\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2],[\\\"h1\\\",1],[\\\"p\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",3],[\\\"h1\\\",1],[\\\"p\\\",2],[\\\"span\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner",
+            "v2_scoped_structural_runtime_evidence"
+          ],
+          "confidence": 0.6,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.4,
+      "technicalTargetRef": "9db5430202df:control:9db5430202df|Portal Comercial|control",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-4",
+      "status": "OBSERVED",
+      "screenIdentity": "9db5430202df",
+      "componentType": "textbox",
+      "label": "Contraseña",
+      "tag": "input",
+      "role": "textbox",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "9db5430202df:control:9db5430202df|Contraseña|amount_or_text",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-5",
+      "status": "OBSERVED",
+      "screenIdentity": "9db5430202df",
+      "componentType": "button",
+      "label": "Iniciar sesión",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "9db5430202df:control:9db5430202df|Iniciar sesión|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-6",
+      "status": "VALIDATED",
+      "screenIdentity": "9db5430202df",
+      "componentType": "textbox",
+      "label": "Contraseña",
+      "tag": "input",
+      "role": "input",
+      "semanticField": "Contraseña",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Contraseña",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#clave",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "clave",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9db5430202df:control:role:textbox|Contraseña",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-1",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-7",
+      "status": "VALIDATED",
+      "screenIdentity": "9db5430202df",
+      "componentType": "button",
+      "label": "Iniciar sesión",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Iniciar sesión",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#btn-login",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "btn-login",
+          "confidence": 0.8
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#btn-login",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "id": "btn-login"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "login-form"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-login\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9db5430202df:control:role:button|Iniciar sesión",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-8ab7a2ae3bf4-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "8ab7a2ae3bf4",
+      "componentType": "textbox",
+      "label": "Usuario",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "usuario",
+        "name": "usuario",
+        "placeholder": "Ingrese su usuario"
+      },
+      "placeholder": "Ingrese su usuario",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "usuario",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "8ab7a2ae3bf4:control:1",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-8ab7a2ae3bf4-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "8ab7a2ae3bf4",
+      "componentType": "textbox",
+      "label": "Contraseña",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "clave",
+        "name": "clave",
+        "type": "password",
+        "placeholder": "Ingrese su contraseña"
+      },
+      "placeholder": "Ingrese su contraseña",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "clave",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "8ab7a2ae3bf4:control:2",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-8ab7a2ae3bf4-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "8ab7a2ae3bf4",
+      "componentType": "button",
+      "label": "Iniciar sesión",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "btn-login",
+        "type": "submit"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "btn-login",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "8ab7a2ae3bf4:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-8ab7a2ae3bf4-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "8ab7a2ae3bf4",
+      "componentType": "button",
+      "label": "Datos de demostración",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Datos de demostración",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "8ab7a2ae3bf4:control:4",
+      "selectable": false,
+      "editable": false
+    }
+  ],
+  "editingSessions": [
+    {
+      "editingSessionId": "edit-1",
+      "controlIdentity": "9db5430202df|Contraseña|amount_or_text",
+      "screenIdentity": "9db5430202df",
+      "startedAt": 16799,
+      "endedAt": 18480,
+      "rawEventRefs": [
+        "event-4",
+        "event-6"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "9db5430202df:9db5430202df|Contraseña|amount_or_text",
+        "9db5430202df:role:textbox|Contraseña"
+      ]
+    }
+  ],
+  "scenarioSuggestions": [],
+  "canonicalInteractions": [
+    {
+      "id": "interaction-1",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-1"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "http://localhost:4310/#/login",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-3",
+      "controlIdentity": "9db5430202df|Portal Comercial",
+      "semanticField": "Portal Comercial",
+      "action": "click",
+      "valueKey": "portal_comercial",
+      "sourceEventRefs": [
+        "event-3"
+      ],
+      "technicalTargetRefs": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "div"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "div",
+                "stableAttributes": {
+                  "id": "splash-fill"
+                }
+              },
+              {
+                "relation": "descendant",
+                "tag": "p",
+                "stableAttributes": {
+                  "id": "splash-msg"
+                }
+              }
+            ],
+            "semanticShape": [
+              "div",
+              "h1",
+              "p"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "splash"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"div\"},\"stableDirectAttributes\":{},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"div\",\"stableAttributes\":{\"id\":\"splash-fill\"}},{\"relation\":\"descendant\",\"tag\":\"p\",\"stableAttributes\":{\"id\":\"splash-msg\"}}],\"semanticShape\":[\"div\",\"h1\",\"p\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2],[\\\"h1\\\",1],[\\\"p\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",3],[\\\"h1\\\",1],[\\\"p\\\",2],[\\\"span\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner",
+            "v2_scoped_structural_runtime_evidence"
+          ],
+          "confidence": 0.6,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Portal Comercial\"",
+      "screenBeforeRef": "9db5430202df",
+      "screenAfterRef": "9db5430202df",
+      "routeBefore": "http://localhost:4310/#/login",
+      "stateScope": "9db5430202df",
+      "admissionStatus": "accepted",
+      "resolutionState": "runtime_resolution_required",
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-6",
+      "controlIdentity": "9db5430202df|Contraseña|role|textbox|Contraseña",
+      "semanticField": "Contraseña",
+      "action": "fill",
+      "valueKey": "contrasena",
+      "sourceEventRefs": [
+        "event-6"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Contraseña",
+        "css:#clave",
+        "id:clave"
+      ],
+      "editingSessionRef": "edit-1",
+      "description": "Ingresar en \"Contraseña\"",
+      "screenBeforeRef": "9db5430202df",
+      "screenAfterRef": "9db5430202df",
+      "routeBefore": "http://localhost:4310/#/login",
+      "stateScope": "9db5430202df",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-7",
+      "controlIdentity": "9db5430202df|Iniciar sesión|role|button|Iniciar sesión",
+      "action": "click",
+      "sourceEventRefs": [
+        "event-7"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Iniciar sesión",
+        "css:#btn-login",
+        "id:btn-login"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#btn-login",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "id": "btn-login"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "login-form"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-login\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "playwrightRecorderEvidence": {
+        "kind": "role",
+        "role": "button",
+        "normalizedName": "Iniciar sesión",
+        "targetTag": "button",
+        "scopeIdentity": {
+          "strategy": "id",
+          "value": "login-form"
+        },
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true
+      },
+      "screenBeforeRef": "9db5430202df",
+      "screenAfterRef": "9db5430202df",
+      "routeBefore": "http://localhost:4310/#/login",
+      "stateScope": "9db5430202df",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    }
+  ],
+  "gridMetadata": {
+    "detected": false,
+    "grids": 0,
+    "rows": 0,
+    "cells": 0,
+    "headers": [],
+    "headerRelationships": []
+  },
+  "source": "SessionTrace"
+}

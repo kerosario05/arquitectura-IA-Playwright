@@ -2928,7 +2928,7 @@
       {
         "id": "interaction-58",
         "controlIdentity": "a6979159960e|entity_2|USD|role|option|USD",
-        "semanticField": "Moneda",
+        "semanticField": "DOP",
         "entityScope": "entity_2",
         "action": "click",
         "valueKey": "entity_2.usd",
@@ -3015,10 +3015,10 @@
       {
         "id": "interaction-59",
         "controlIdentity": "a6979159960e|entity_2|DOP|role|option|USD",
-        "semanticField": "Moneda",
+        "semanticField": "DOP",
         "entityScope": "entity_2",
         "action": "select",
-        "valueKey": "entity_2.moneda_seleccion",
+        "valueKey": "entity_2.dop_seleccion",
         "recordedValue": "USD",
         "sourceEventRefs": [
           "event-59"
@@ -4824,7 +4824,7 @@
       "oracleReadiness": true,
       "reviewReadiness": true,
       "publicationContentReadiness": true,
-      "executionReadiness": true,
+      "executionReadiness": false,
       "publicationReadiness": true,
       "missingInputs": [],
       "datasetAuthorityMismatches": [],
@@ -5836,11 +5836,11 @@
     },
     "promotedSpec": {
       "appSlug": "portal-empresarial",
-      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\api-tests\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",
-      "specHash": "962fcda5b9da877baf20550f93c9728b131329bed08a9118eca76e189828aade",
+      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-empresarial\\sections\\default-section\\cases\\preview-001-agregar-varios-empleados-manualmente-con-cedula\\case.spec.ts",
+      "specHash": "390b6eeb65e73b55b9178d5ce770364b00ab4e16d6db19423211ca36cd6717b2",
       "automationId": "preview-001-agregar-varios-empleados-manualmente-con-cedula",
-      "sectionSlug": "api-tests",
-      "generatedAt": "2026-10-22T19:51:32.641Z"
+      "sectionSlug": "default-section",
+      "generatedAt": "2026-10-23T22:35:24.666Z"
     }
   }
 ]

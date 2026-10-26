@@ -1,0 +1,9 @@
+{
+  "id": "1f6e3b2c-ba9a-449b-8c73-55883fba17b0-aprobar-un-caso-plaft-con-comentario-obligatorio",
+  "externalId": "1f6e3b2c-ba9a-449b-8c73-55883fba17b0",
+  "title": "Aprobar un caso PLAFT con comentario obligatorio",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T07:31:40.474Z"
+}

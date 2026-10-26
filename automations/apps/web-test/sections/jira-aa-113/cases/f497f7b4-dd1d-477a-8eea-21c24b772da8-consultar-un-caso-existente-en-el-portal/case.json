@@ -1,0 +1,9 @@
+{
+  "id": "f497f7b4-dd1d-477a-8eea-21c24b772da8-consultar-un-caso-existente-en-el-portal",
+  "externalId": "f497f7b4-dd1d-477a-8eea-21c24b772da8",
+  "title": "Consultar un caso existente en el portal",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T06:29:44.039Z"
+}

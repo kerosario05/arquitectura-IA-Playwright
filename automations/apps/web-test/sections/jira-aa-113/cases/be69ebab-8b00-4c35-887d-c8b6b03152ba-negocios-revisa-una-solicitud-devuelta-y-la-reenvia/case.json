@@ -1,0 +1,9 @@
+{
+  "id": "be69ebab-8b00-4c35-887d-c8b6b03152ba-negocios-revisa-una-solicitud-devuelta-y-la-reenvia",
+  "externalId": "be69ebab-8b00-4c35-887d-c8b6b03152ba",
+  "title": "Negocios revisa una solicitud devuelta y la reenvía",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T06:55:16.357Z"
+}

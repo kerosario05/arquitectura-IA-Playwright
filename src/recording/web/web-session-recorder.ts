@@ -68,6 +68,12 @@ export type WebRecorderOptions = {
   browserName?: "chromium" | "firefox" | "webkit";
   /** Browser presentation only; capture scripts and authority are identical in both modes. */
   headless?: boolean;
+  /**
+   * Supplies an already-running browser instead of launching one -- the Chromium on the user's
+   * PC, reached through the local agent with `connectOverCDP`. Everything after the browser
+   * (context, bindings, init scripts, capture) is identical; `headless`/`browserName` are ignored.
+   */
+  connectBrowser?: () => Promise<Browser>;
   /** Labels or names whose typed content must never be stored verbatim. */
   sensitiveLabels?: string[];
   /**
@@ -1966,7 +1972,9 @@ export class WebSessionRecorder {
     const engine =
       this.options.browserName === "firefox" ? firefox : this.options.browserName === "webkit" ? webkit : chromium;
 
-    this.browser = await engine.launch({ headless: this.options.headless ?? true });
+    this.browser = this.options.connectBrowser
+      ? await this.options.connectBrowser()
+      : await engine.launch({ headless: this.options.headless ?? true });
     this.context = await this.browser.newContext(
       buildWebRecorderContextOptions(this.options.ignoreHTTPSErrors),
     );

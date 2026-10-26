@@ -1,0 +1,9 @@
+{
+  "id": "dd8b7fc5-d5a9-4fde-b594-8828a6f028aa-verificar-pestanas-y-accesos-de-una-solicitud",
+  "externalId": "dd8b7fc5-d5a9-4fde-b594-8828a6f028aa",
+  "title": "Verificar pestañas y accesos de una solicitud",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T07:39:31.703Z"
+}

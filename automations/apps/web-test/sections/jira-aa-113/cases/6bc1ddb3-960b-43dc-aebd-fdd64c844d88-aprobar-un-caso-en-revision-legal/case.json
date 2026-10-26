@@ -1,0 +1,9 @@
+{
+  "id": "6bc1ddb3-960b-43dc-aebd-fdd64c844d88-aprobar-un-caso-en-revision-legal",
+  "externalId": "6bc1ddb3-960b-43dc-aebd-fdd64c844d88",
+  "title": "Aprobar un caso En Revisión Legal",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-26T07:33:20.152Z"
+}

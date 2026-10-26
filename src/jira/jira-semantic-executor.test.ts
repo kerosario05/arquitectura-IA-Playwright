@@ -106,7 +106,7 @@ test('missing data reports field metadata only and all missing fields before nav
  });
 });
 import { isScenarioEligibleForEngine, resolveExecutionEngine } from "./execution-origin";
-import { observeAuthStageSettled, discoverJiraScenario,normalizeJiraFrameworkPreconditions, normalizeJiraScenarioForExecution, type JiraBrowserPort, type JiraClassicLoginObservation, type JiraImplicitLogin, type JiraScenarioInput } from "./jira-semantic-executor";
+import { observeAuthStageSettled, discoverJiraScenario, jiraScenarioHasAuthoredCredentialEntry, normalizeJiraFrameworkPreconditions, normalizeJiraScenarioForExecution, type JiraBrowserPort, type JiraClassicLoginObservation, type JiraImplicitLogin, type JiraScenarioInput } from "./jira-semantic-executor";
 import { buildSpecExecutionContract } from "../automations/spec-execution-contract";
 import { compileDeterministicSpec } from "../automations/spec-compiler/deterministic-spec-compiler";
 
@@ -123,6 +123,9 @@ test("only explicit validated Jira provenance selects the new engine", () => {
   assert.equal(isScenarioEligibleForEngine("legacy", { mcpExecutable: false }), false);
   assert.equal(isScenarioEligibleForEngine("jira_semantic", { mcpExecutable: false }), true);
   assert.equal(isScenarioEligibleForEngine("jira_semantic", { mcpExecutable: false, validation: { valid: false } }), true);
+  assert.equal(isScenarioEligibleForEngine("jira_semantic", { mcpExecutable: false, validation: { valid: false, errors: ["JIRA_FILTER_TEST_DATA_UNSPECIFIED"] } }), true);
+  assert.equal(isScenarioEligibleForEngine("jira_semantic", { validation: { valid: false, errors: ["JIRA_ASSERTION_CAPABILITY_UNSUPPORTED"] } }), true);
+  assert.equal(isScenarioEligibleForEngine("jira_semantic", { validation: { valid: true } }), true);
 });
 test("gate observation preserves the requested clicks without ordinal selection or authentication", async () => {
   const calls: string[] = [];
@@ -150,6 +153,89 @@ test("gate observation does not append a redundant prose expected result as an u
   }, port(calls));
   assert.deepEqual(calls, ["navigate", "click:Solicitar", "assert:true"]);
   assert.deepEqual(discovered.plan.steps.map(step => step.action), ["navigate", "click", "assertVisible"]);
+});
+test("expected-result paraphrases already covered by an explicit assertion do not become duplicate oracles", async () => {
+  const cases = [
+    ['Validar que se muestre "Persona encontrada"', "La persona se encuentra en el sistema."],
+    ['Validar que se muestre "Coincidencia en listas no restrictivas"', "La consulta indica coincidencia no restrictiva."],
+  ] as const;
+  for (const [step, expectedResult] of cases) {
+    const calls: string[] = [];
+    const targets: string[] = [];
+    let discovered: Awaited<ReturnType<typeof discoverJiraScenario>>;
+    try {
+      discovered = await discoverJiraScenario({ ...scenario, authIntent: undefined, steps: [step], expectedResult }, {
+        ...port(calls), async assert(target) { targets.push(target); return { observedText: target }; },
+      });
+    } catch (error) { throw new Error(`${step} / ${expectedResult}: ${(error as Error).message}`); }
+    assert.equal(targets.length, 1, `${step} already verifies its expected result: ${targets.join(" | ")}`);
+    assert.equal(discovered.plan.steps.filter(item => item.action === "assertVisible").length, 1);
+  }
+  const partialCalls: string[] = [];
+  const partialTargets: string[] = [];
+  await discoverJiraScenario({ ...scenario, authIntent: undefined,
+    steps: ['Validar que se muestre "Persona encontrada"'],
+    expectedResult: "La persona encontrada está autorizada como representante." }, {
+    ...port(partialCalls), async assert(target) { partialTargets.push(target); return { observedText: target }; },
+  });
+  assert.equal(partialTargets.length, 2, "an additional expected-result condition must not be silently suppressed");
+  for (const [step, expectedResult] of [
+    ['Validar que no se muestre "Resultado"', "No se muestra Resultado."],
+    ['Validar que no se muestre "Solicitud recibida"', "No se muestra Solicitud recibida."],
+  ] as const) {
+    const calls: string[] = [];
+    await discoverJiraScenario({ ...scenario, authIntent: undefined,
+      steps: ['Validar que se muestre "Error"', step], expectedResult }, {
+      ...port(calls), async assertAbsent(target) { calls.push(`absent:${target}`); return { absent: true }; },
+    });
+    assert.equal(calls.filter(call => call.startsWith("absent:")).length, 1,
+      `${expectedResult} is already verified by its explicit negative step`);
+  }
+  const calls: string[] = [];
+  const targets: string[] = [];
+  await discoverJiraScenario({ ...scenario, authIntent: undefined, steps: ['Validar que se muestre "Solicitudes de prospectos PJ"'],
+    expectedResult: "Se muestran los indicadores de carga y el listado." }, {
+    ...port(calls), async assert(target) { targets.push(target); return { observedText: target }; },
+  });
+  assert.equal(targets.length, 2, "a distinct loading outcome must remain a required oracle");
+});
+test("expected-result narrative is covered by explicit notification action and list-state assertions", async () => {
+  const targets: string[] = [];
+  const input = { ...scenario, authIntent: undefined,
+    steps: ['Presionar "Notificaciones"', 'Validar que se muestre "Solicitudes de prospectos PJ"',
+      'Validar que se muestre "Devuelta"'],
+    expectedResult: "La campana abre el listado filtrado por Devuelta." };
+  const discovered = await discoverJiraScenario(input, {
+    ...port([]), async assert(target) { targets.push(target); return { observedText: target }; },
+  });
+  assert.deepEqual(targets, ["Solicitudes de prospectos PJ", "Devuelta"]);
+  assert.equal(discovered.plan.steps.filter(step => step.action === "assertVisible").length, 2);
+
+  const incompleteTargets: string[] = [];
+  await discoverJiraScenario({ ...input, steps: input.steps.slice(0, 2) }, {
+    ...port([]), async assert(target) { incompleteTargets.push(target); return { observedText: target }; },
+  });
+  assert.ok(incompleteTargets.some(target => /filtrado por Devuelta/i.test(target)),
+    "the summary remains required when its filtered status has no authored oracle");
+});
+
+test("field-state summary requirements become backed, executable field oracles", async () => {
+  const enabled: string[] = [];
+  const input = { ...scenario, authIntent: undefined, expectedResult: "Se habilitan país de origen, registro y representante.",
+    steps: ['Seleccionar "NIT" en "Tipo de Identificación"', 'Validar que se muestre "País de Origen"',
+      'Validar que se muestre "Registro en País de Origen"', 'Validar que se muestre "Representante en el País"'] };
+  const discovered = await discoverJiraScenario(input, { ...port([]),
+    async assert(target) { return { observedText: target }; },
+    async assertFieldEnabled(label) { enabled.push(label); return { kind: "field_enabled", fieldLabel: label }; },
+  });
+  assert.deepEqual(enabled, ["País de Origen", "Registro en País de Origen", "Representante en el País"]);
+  const fieldOracles = discovered.sourceScenario.observableOracles?.filter(item => item.type === "field_state") ?? [];
+  assert.equal(fieldOracles.length, 3);
+  assert.ok(fieldOracles.every(item => item.backed && item.details?.kind === "field_enabled"));
+  const compiled = compileJiraSpec({ plan: discovered.plan, sourceScenario: discovered.sourceScenario, appSlug: "fixture", sectionSlug: "jira",
+    automationId: "field-state", specPath: path.resolve(".artifacts/tmp/field-state/case.spec.ts") });
+  assert.deepEqual(compiled.unsupported, []);
+  assert.equal((compiled.source.match(/assertJiraSpecFieldEnabled\(/g) ?? []).length, 3);
 });
 test("native fill keeps runtime binding and excludes literals from plan and source", async () => {
   const discovered = await discoverJiraScenario({ ...scenario, steps: ['Ingresar "synthetic-secret" en "Clave"'] }, port([]));
@@ -510,6 +596,49 @@ test("full authentication is explicit, runs configured flow and compiles an Auth
   assert.deepEqual(compiled.unsupportedCapabilities, []);
   assert.match(compiled.source, /authFlow\.ensureAuthenticated\(/);
   assert.ok(compiled.source.indexOf("page.goto") < compiled.source.indexOf("authFlow.ensureAuthenticated("));
+});
+
+test("credential entry detection is generic across authored username and password field labels", () => {
+  assert.equal(jiraScenarioHasAuthoredCredentialEntry([
+    'Ingresar usuario en "Usuario"',
+    'Ingresar contraseña en "Contraseña"',
+  ]), true);
+  assert.equal(jiraScenarioHasAuthoredCredentialEntry(['Ingresar el monto en "Monto"']), false);
+});
+
+test("full authentication with authored credentials executes those steps without preemptive AuthFlow", async () => {
+  const steps = ["Abrir la aplicación configurada del proyecto", 'Ingresar usuario en "Usuario"',
+    'Ingresar contraseña en "Contraseña"', 'Presionar "Iniciar sesión"'];
+  const inputRequirements = deriveJiraInputRequirements(steps);
+  const runtimeValues = Object.fromEntries(inputRequirements.map(requirement => [
+    requirement.key, requirement.label === "Usuario" ? "synthetic-user" : "synthetic-pass",
+  ]));
+  const calls: string[] = [];
+  const browser = { ...port(calls), authenticate: undefined };
+  const discovered = await discoverJiraScenario({ ...scenario, authIntent: "full_authentication", expectedResult: "",
+    steps, inputRequirements }, browser, runtimeValues);
+
+  assert.deepEqual(calls, ["navigate", "fill:Usuario", "fill:Contraseña", "click:Iniciar sesión"]);
+  assert.equal(discovered.sourceScenario.auth?.required, false);
+  assert.deepEqual(discovered.plan.steps.map(step => step.action), ["navigate", "navigate", "fill", "fill", "click"]);
+  assert.ok(!JSON.stringify(discovered.plan).includes("synthetic-pass"));
+});
+
+test("authored credentials defer AuthFlow until the submitted form exposes a pending gate", async () => {
+  const steps = ['Ingresar usuario en "Usuario"', 'Ingresar contraseña en "Contraseña"', 'Presionar "Iniciar sesión"'];
+  const inputRequirements = deriveJiraInputRequirements(steps);
+  const runtimeValues = Object.fromEntries(inputRequirements.map(requirement => [
+    requirement.key, requirement.label === "Usuario" ? "synthetic-user" : "synthetic-pass",
+  ]));
+  const calls: string[] = [];
+  const browser = { ...port(calls), async observeAuthStage() { calls.push("observe-stage"); return "otp"; },
+    async authenticate(stage?: string) { calls.push(`authenticate:${stage}`); return { success: true }; } };
+  const discovered = await discoverJiraScenario({ ...scenario, authIntent: "full_authentication", expectedResult: "",
+    steps, inputRequirements }, browser, runtimeValues);
+
+  assert.deepEqual(calls, ["navigate", "fill:Usuario", "fill:Contraseña", "click:Iniciar sesión", "observe-stage", "authenticate:otp"]);
+  assert.equal(discovered.sourceScenario.auth?.required, true);
+  assert.equal(discovered.sourceScenario.auth?.insertionAfterStepIndex, discovered.plan.steps.at(-1)?.index);
 });
 
 const classicForm = { username: "Usuario", password: "Contraseña", submit: "Ingresar" };
@@ -1209,6 +1338,34 @@ test("business scenario without login steps satisfies an observed classic login 
   assert.ok(!explicit.discovered.runtimeEntries.some(e => e.key.startsWith("auth.")));
   assert.ok(!(await run(['Validar que se muestre "Inicio"'], "gate_observation")).calls.includes("observe"));
   assert.ok(!(await run(['Validar que se muestre "Inicio"'], undefined, false)).calls.includes("observe"));
+});
+
+test("Jira visible-text assertion can bind an exact signed-in identity from the non-navigation header and compiles that scope", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    await page.setContent('<header><nav><a>Inicio</a></nav><div><span>María Pérez</span></div></header><main><h1>Bienvenida</h1></main>');
+    const port = createJiraPlaywrightPort(page, "http://localhost/");
+    const headerObservation = await port.assert("María Pérez", false);
+    assert.equal(headerObservation.observedText, "María Pérez");
+    assert.equal(headerObservation.assertionScope, "header");
+    const pageObservation = await port.assert("Bienvenida", false);
+    assert.equal(pageObservation.observedText, "Bienvenida");
+    assert.equal(pageObservation.assertionScope, undefined);
+
+    const { discoverJiraScenario } = await import("./jira-semantic-executor");
+    const discovered = await discoverJiraScenario({ scenarioId: "AA-1:jira:1", sourceIssueKey: "AA-1", title: "Signed-in identity",
+      steps: ['Validar que se muestre "María Pérez"'], expectedResult: "" }, { ...port, async navigate() {} } as never);
+    const step = discovered.plan.steps.find(item => item.action === "assertVisible");
+    assert.equal(step?.target && typeof step.target === "object" ? step.target.assertionScope : undefined, "header");
+    assert.equal(discovered.sourceScenario.observableOracles?.[0]?.details?.assertionScope, "header");
+    const compiled = compileJiraSpec({ plan: discovered.plan, sourceScenario: discovered.sourceScenario, appSlug: "generic-app",
+      sectionSlug: "jira-aa-1", automationId: "header-assertion", specPath: path.resolve(".artifacts/tmp/header-assertion/case.spec.ts") });
+    assert.deepEqual(compiled.unsupported, []);
+    assert.match(compiled.source, /assertJiraSpecHeaderText\(page, "María Pérez"/);
+  } finally {
+    await browser.close();
+  }
 });
 
 test("Jira classic-login observation requires one unambiguous visible form", async () => {

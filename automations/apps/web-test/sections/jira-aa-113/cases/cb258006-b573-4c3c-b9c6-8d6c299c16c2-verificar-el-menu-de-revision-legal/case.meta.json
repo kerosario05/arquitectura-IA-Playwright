@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "cb258006-b573-4c3c-b9c6-8d6c299c16c2",
+  "title": "Verificar el menú de Revisión Legal",
+  "generatedAt": "2026-10-26T07:28:58.259Z",
+  "executionEngine": "jira_semantic"
+}

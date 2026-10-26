@@ -18,6 +18,19 @@ test('simple human clicks are quoted without hiding conditions or compounds',()=
  for(const step of ['Presionar SMS y continuar','Presionar SMS si está visible','Ingresar el valor en "Nombre"','Solicitar el código por SMS'])assert.equal(normalizeAuthoredJiraStep(step),step);
 });
 
+test('simple field actions quote their target while composite actions stay untouched',()=>{
+ for(const [source,target] of [
+  ['Ingresar monto en Monto','Ingresar monto en "Monto"'],
+  ['Seleccionar Cuenta Corriente en cuenta de origen','Seleccionar Cuenta Corriente en "Cuenta de origen"'],
+  ['Escribir el correo en el campo Email','Escribir el correo en "Email"'],
+ ]) assert.equal(normalizeAuthoredJiraStep(source),target);
+ for(const step of [
+  'Ingresar el valor en "Contraseña"',
+  'Ingresar usuario y contraseña en el formulario',
+  'Seleccionar la cuenta de origen y luego validar el saldo',
+ ]) assert.equal(normalizeAuthoredJiraStep(step),step);
+});
+
 test('review-edit returns normalized human steps',async()=>{
  const original={scenarioId:'HU-1:jira:1',sourceIssueKey:'HU-1',title:'Consulta',steps:['Abrir la aplicación configurada del proyecto','Presionar "Email"','Validar que se muestre "Resultado"'],expectedResult:'Resultado'};
  const [edited]=await reviewEditedJiraScenarios({key:'HU-1',summary:'Consulta',description:''} as any,[original],original.scenarioId,{...original,steps:[original.steps[0],'presionar el boton sms',original.steps[2]]});

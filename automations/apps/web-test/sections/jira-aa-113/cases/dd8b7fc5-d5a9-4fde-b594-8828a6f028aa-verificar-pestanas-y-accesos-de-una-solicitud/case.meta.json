@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "dd8b7fc5-d5a9-4fde-b594-8828a6f028aa",
+  "title": "Verificar pestañas y accesos de una solicitud",
+  "generatedAt": "2026-10-26T07:39:31.699Z",
+  "executionEngine": "jira_semantic"
+}
