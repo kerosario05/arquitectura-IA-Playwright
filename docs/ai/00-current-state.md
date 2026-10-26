@@ -2,26 +2,24 @@
 
 ## Active objective
 
-Repair the generated Jira transaction-token sequence that caused Fenix scenario `AA-97:jira:9` to click Continue twice before selecting SMS and entering the token. User explicitly authorized a generic Jira generation change. Do not change Jira execution/runtime or Recording, and do not start a physical QA run.
+Publish the current local backend version on `QA_Record_V2_Backup_Final`, preserving the user's Jira generation/execution and Recording behavior. User authorized the Chromium and Jira project-selection work earlier, but explicitly restricted other engine changes.
 
-## Evidence and repair
+## Evidence and integration
 
-- The first Continue after the reviewed transfer summary reached `Token de Seguridad` (step 24). A second adjacent Continue reached the success receipt (step 25), so the next SMS click failed at step 26 with `JIRA_TARGET_NOT_FOUND`.
-- Latest user run: parent job `3b99533f-9a8e-49ea-b9b0-283f7a8b6bd6`, launch `e3aa7988-2a60-446a-91fc-21f2aa35631f`. Step 8's SMS passed on the login `IdentifyUser` screen. For the transfer token, step 24 reached `Token de Seguridad`, but step 25's extra Continue advanced to the successful receipt; step 26 then looked for SMS on that receipt and failed. The screenshot at step 24 shows SMS was available on the prior token screen.
-- `launch-manifest.json` confirms this was the previously saved `jira_preview` scenario `AA-97:jira:9`, with both Continue actions still present; this run did not regenerate the scenario, so it did not exercise the generation repair.
-- `src/jira/jira-generation-preparation.ts`: added a generic source-backed preparation repair. For journeys where the source orders summary review before transactional authorization, it removes only adjacent duplicate generic Continue/Next actions between a summary assertion and a transactional-token input. It reindexes step requirements through the existing removal helper and preserves the first transition and the channel/token/authorization actions.
-- `src/jira/jira-scenario-generator.ts`: clarified generation guidance to keep the order summary transition → channel → transaction token → final authorization, distinct from login verification.
+- Local branch was clean at `c6944f08c7405d29abb423552369f517b2953038`; remote was two commits ahead at `b9e4fea2c658bf93480fd2d43ab704193eccbd27` (`c2ea0ab` and `b9e4fea`).
+- Remote changes included Recording route changes and a substantial `launch-orchestrator.ts` rewrite. The local branch already contains the Chromium local-agent implementation. To preserve the explicitly protected local code, merged remote ancestry with the `ours` strategy; the resulting merge tree matched the local tree exactly before publishing.
+- Published merge commit `25c3aef3b5aabef426f97398e946a7289141a37b`, with parents local `c6944f0` and remote `b9e4fea`. Remote `ls-remote` confirmed the branch points to `25c3aef`.
+- Created safety branch `backup-QA_Record_V2_Backup_Final-before-merge-20261026` at the original local commit.
 
 ## Validation and remaining work
 
-- `npm.cmd run typecheck` passed (exit 0).
-- `git diff --check -- src/jira/jira-generation-preparation.ts src/jira/jira-scenario-generator.ts` passed.
-- No tests or physical QA run were performed. Existing generated drafts are unchanged; restart the backend and regenerate the affected scenario before relaunching, otherwise its old step order remains. The latest user run confirms the stale scenario still has the duplicate action, not whether regeneration fixes it.
-- Working tree contains many unrelated existing changes; preserve them. No commit, push, reset, or cleanup.
+- `git diff --quiet HEAD^1 HEAD` passed before push (`LOCAL_TREE_PRESERVED=YES`).
+- Push to `origin/QA_Record_V2_Backup_Final` succeeded; final status was clean and local/remote HEADs matched.
+- No tests or build were run in this Git-only operation. Remote code changes outside the user's approved scope were not added to the resulting tree.
 
 ## Next action
 
-User restarts the backend, regenerates this scenario, and reviews the emitted steps for one Continue after the summary followed by SMS/token/authorization. Then the scenario can be relaunched to confirm live behavior.
+No backend push action remains. If the user later wants specific remote-only deployment or engine changes, review and integrate those files separately within the existing engine restrictions.
 ## Latest physical log review — 2026-10-24
 
 - Attachment `C:\Users\radames\.codex\attachments\d04c0754-68f0-419b-884f-29a5e2868d68\Pasted text.txt` is an 85-line partial log for `AA-114`.
