@@ -9,17 +9,18 @@ Publish the current local backend version on `QA_Record_V2_Backup_Final`, preser
 - Local branch was clean at `c6944f08c7405d29abb423552369f517b2953038`; remote was two commits ahead at `b9e4fea2c658bf93480fd2d43ab704193eccbd27` (`c2ea0ab` and `b9e4fea`).
 - Remote changes included Recording route changes and a substantial `launch-orchestrator.ts` rewrite. The local branch already contains the Chromium local-agent implementation. To preserve the explicitly protected local code, merged remote ancestry with the `ours` strategy; the resulting merge tree matched the local tree exactly before publishing.
 - Published merge commit `25c3aef3b5aabef426f97398e946a7289141a37b`, with parents local `c6944f0` and remote `b9e4fea`. Remote `ls-remote` confirmed the branch points to `25c3aef`.
+- Added the approved Jira project-selection compatibility in `src/scenarios/jira-scenario-source.ts`: selected story lookup now accepts either a project key or a positive numeric project ID, while rejecting malformed identifiers. Added focused coverage in `src/scenarios/jira-scenario-source.issue-keys.test.ts`. Commit: `59f49a6`.
 - Created safety branch `backup-QA_Record_V2_Backup_Final-before-merge-20261026` at the original local commit.
 
 ## Validation and remaining work
 
-- `git diff --quiet HEAD^1 HEAD` passed before push (`LOCAL_TREE_PRESERVED=YES`).
-- Push to `origin/QA_Record_V2_Backup_Final` succeeded; final status was clean and local/remote HEADs matched.
-- No tests or build were run in this Git-only operation. Remote code changes outside the user's approved scope were not added to the resulting tree.
+- `git diff --quiet HEAD^1 HEAD` passed before the ancestry merge (`LOCAL_TREE_PRESERVED=YES`).
+- Baseline `npm.cmd run typecheck` passed before the project-selection change; it passed again afterward. `node --import tsx --test src/scenarios/jira-scenario-source.issue-keys.test.ts` passed all 4 tests; `git diff --check` passed.
+- Merge push succeeded; the Jira project-selection commit is ready to push. No Jira execution/runtime or Recording source changes were included. Remote code changes outside the user's approved scope were not added to the resulting tree.
 
 ## Next action
 
-No backend push action remains. If the user later wants specific remote-only deployment or engine changes, review and integrate those files separately within the existing engine restrictions.
+Push commit `59f49a6` and the checkpoint update to `origin/QA_Record_V2_Backup_Final`, then verify local and remote HEADs match. Do not import remote changes to Jira execution/runtime or Recording without the user's explicit approval.
 ## Latest physical log review — 2026-10-24
 
 - Attachment `C:\Users\radames\.codex\attachments\d04c0754-68f0-419b-884f-29a5e2868d68\Pasted text.txt` is an 85-line partial log for `AA-114`.
