@@ -663,6 +663,69 @@ export function listExecutionSummaries(): ExecutionSummaryListItem[] {
   return items;
 }
 
+export type CaseExecutionResult = {
+  caseId: number;
+  result: "passed" | "failed";
+  launchId: string;
+  executedAt: string;
+  appSlug?: string;
+  huKey?: string;
+};
+
+let caseResultsCache: { createdAt: number; items: CaseExecutionResult[] } | null = null;
+
+/**
+ * One decided result per TestRail case per launch, read from the launch manifests.
+ *
+ * Results are matched to cases by `caseId` first: a launch can record the published case
+ * under one scenario id (`L-<launch>-001`) and its result under another (`PREVIEW-001`),
+ * so matching only by scenario id would leave real results as "pending". Scenario-id
+ * matching remains the fallback for results written without a case id.
+ */
+export function listCaseExecutionResults(): CaseExecutionResult[] {
+  if (caseResultsCache && Date.now() - caseResultsCache.createdAt < EXECUTION_LIST_CACHE_MS) {
+    return caseResultsCache.items;
+  }
+  let dirs: string[];
+  try {
+    dirs = fs
+      .readdirSync(LAUNCH_ARTIFACTS_DIR, { withFileTypes: true })
+      .filter((e) => e.isDirectory())
+      .map((e) => e.name);
+  } catch {
+    dirs = [];
+  }
+
+  const items: CaseExecutionResult[] = [];
+  for (const launchId of dirs) {
+    const m = readManifest(launchId);
+    if (!m) continue;
+    const executedAt = m.completedAt ?? m.createdAt;
+    if (!executedAt) continue;
+
+    const byCase = new Map<number, "passed" | "failed">();
+    const resultById = new Map<string, NonNullable<ManifestShape["results"]>[number]>();
+    for (const r of m.results ?? []) {
+      if (r.scenarioId) resultById.set(r.scenarioId, r);
+      const result = toResult(r.discoveryStatus);
+      // Later entries win: a rerun inside the same launch replaces the earlier outcome.
+      if (typeof r.caseId === "number" && result !== "pending") byCase.set(r.caseId, result);
+    }
+    for (const pc of m.publishedCases ?? []) {
+      if (typeof pc.caseId !== "number" || byCase.has(pc.caseId)) continue;
+      const ids = [pc.scenarioId, pc.executionScenarioId, pc.launchScenarioId, pc.testrailCustomScenarioId].filter(Boolean) as string[];
+      const result = toResult(ids.map((id) => resultById.get(id)).find(Boolean)?.discoveryStatus);
+      if (result !== "pending") byCase.set(pc.caseId, result);
+    }
+    for (const [caseId, result] of byCase) {
+      items.push({ caseId, result, launchId, executedAt, appSlug: m.appSlug, huKey: m.jira?.key });
+    }
+  }
+
+  caseResultsCache = { createdAt: Date.now(), items };
+  return items;
+}
+
 function nonNegativeCount(value: unknown): number {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;

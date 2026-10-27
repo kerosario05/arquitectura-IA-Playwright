@@ -631,6 +631,25 @@ async function main(): Promise<void> {
   });
 
   // ------------------------------------------------------------------------
+  console.log("\nmétricas");
+
+  await test("metrics count only the drafts the caller can see", async () => {
+    const ana = await call("GET", "/api/test-design/metrics?days=30", anaToken);
+    assert.strictEqual(ana.status, 200, JSON.stringify(ana.body));
+    assert.ok(ana.body.metrics.funnel.designed > 0, JSON.stringify(ana.body.metrics.funnel));
+    assert.strictEqual(ana.body.metrics.period.days, 30);
+
+    const eva = await call("GET", "/api/test-design/metrics", evaToken);
+    assert.strictEqual(eva.status, 200, JSON.stringify(eva.body));
+    assert.strictEqual(eva.body.metrics.funnel.designed, 0);
+  });
+
+  await test("metrics refuse a project the caller was not granted", async () => {
+    const res = await call("GET", "/api/test-design/metrics?projectSlug=kiosko", evaToken);
+    assert.strictEqual(res.status, 403, JSON.stringify(res.body));
+  });
+
+  // ------------------------------------------------------------------------
   await new Promise<void>((resolve) => server.close(() => resolve()));
   await sqlConnection.closeConnection();
   fs.rmSync(tempDir, { recursive: true, force: true });

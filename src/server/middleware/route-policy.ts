@@ -29,6 +29,8 @@ export type RoutePolicy = {
   path: string;
   /** All of these are required. Empty means "any authenticated caller". */
   permissions: PermissionKey[];
+  /** At least one of these is required, on top of `permissions`. */
+  anyPermissions?: PermissionKey[];
   project: ProjectScopeMode;
   /** The router enforces its own policy (auth, users, roles). */
   skip?: boolean;
@@ -40,6 +42,14 @@ const R = (
   permissions: PermissionKey[],
   project: ProjectScopeMode = "none",
 ): RoutePolicy => ({ method, path, permissions, project });
+
+/** Like `R`, but any one of `anyPermissions` is enough. */
+const ANY = (
+  method: string,
+  path: string,
+  anyPermissions: PermissionKey[],
+  project: ProjectScopeMode = "none",
+): RoutePolicy => ({ method, path, permissions: [], anyPermissions, project });
 
 const SKIP = (path: string): RoutePolicy => ({
   method: "*",
@@ -159,6 +169,8 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   R("GET", "/api/test-design/jira/*", ["testdesign.view"]),
   R("GET", "/api/test-design/testrail/*", ["testdesign.view"]),
   R("GET", "/api/test-design/drafts", ["testdesign.view"], "optional"),
+  // Dashboard summary: readable from the dashboard or the module itself, narrowed to the caller's drafts.
+  ANY("GET", "/api/test-design/metrics", ["dashboard.view", "testdesign.view"], "optional"),
   R("POST", "/api/test-design/drafts", ["testdesign.generate"], "optional"),
   R("GET", "/api/test-design/drafts/:draftId", ["testdesign.view"]),
   R("PUT", "/api/test-design/drafts/:draftId", ["testdesign.generate"]),
@@ -346,6 +358,15 @@ export function enforceRoutePolicy(): RequestHandler {
       deny(res, 403, "forbidden", "No tienes permiso para esta acción", {
         requiredPermissions: policy.permissions,
         missingPermissions: missing,
+      });
+      return;
+    }
+
+    const anyOf = policy.anyPermissions ?? [];
+    if (anyOf.length > 0 && !anyOf.some((permission) => hasPermission(principal, permission))) {
+      deny(res, 403, "forbidden", "No tienes permiso para esta acción", {
+        requiredAnyPermissions: anyOf,
+        missingPermissions: anyOf,
       });
       return;
     }

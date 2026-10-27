@@ -13,7 +13,9 @@ import {
 } from "../../test-design/test-design-publisher";
 import { resolveSubtaskType, SubtaskTypeNotFoundError } from "../../test-design/jira-subtask-type";
 import { canAccessProject, canWriteProject, type Principal } from "../../auth/principal";
-import { getProjectBySlug } from "../../db/project-repository";
+import { getProjectBySlug, listProjects } from "../../db/project-repository";
+import { listCaseExecutionResults } from "../services/execution-summary.service";
+import { computeTestDesignExecutionMetrics, executionMetricsRange } from "../../test-design/test-design-execution-metrics";
 import * as repo from "../../db/test-design-repository";
 import { loadTestDesignJiraIssue } from "../../test-design/jira-story-loader";
 import {
@@ -774,5 +776,42 @@ testDesignRouter.post(
       `[test-design:jira] draft=${draft.id} ` + results.map((r) => `${r.issueKey}:${r.status}${r.subtaskKey ? `->${r.subtaskKey}` : ""}`).join(" "),
     );
     res.json({ draft: updated, results });
+  }),
+);
+
+// ---------------------------------------------------------------------------
+// Dashboard metrics
+// ---------------------------------------------------------------------------
+
+/**
+ * Design cases and how they did when executed, over the last `days` (default 30).
+ * Limited to the drafts the caller can see, and to `projectSlug` when given (the
+ * route policy already checked the caller may read that project).
+ */
+testDesignRouter.get(
+  "/metrics",
+  handle(async (req, res) => {
+    const principal = principalOf(req);
+    const requestedDays = Number(req.query.days);
+    const days = Number.isInteger(requestedDays) && requestedDays >= 1 && requestedDays <= 365 ? requestedDays : 30;
+    const projectSlug = typeof req.query.projectSlug === "string" ? req.query.projectSlug.trim().toLowerCase() : "";
+
+    const drafts = (await repo.listDraftsWithStories())
+      .filter((draft) => canSeeDraft(principal, draft))
+      .filter((draft) => !projectSlug || draft.projectSlug?.toLowerCase() === projectSlug);
+    const projectNames = new Map((await listProjects()).map((p) => [p.slug.toLowerCase(), p.name]));
+    let testRailBaseUrl: string | null = null;
+    try {
+      testRailBaseUrl = requireTestRailConfig(config).url;
+    } catch {
+      // TestRail not configured: cases are listed without links.
+    }
+
+    res.json({
+      metrics: computeTestDesignExecutionMetrics(drafts, listCaseExecutionResults(), executionMetricsRange(days), {
+        projectNames,
+        testRailBaseUrl,
+      }),
+    });
   }),
 );

@@ -12,12 +12,15 @@ import { execFileSync } from "node:child_process";
  *
  *   npx tsx deploy/3-empaquetar.ts
  *   npx tsx deploy/3-empaquetar.ts --con-dependencias   (servidor sin internet)
+ *   npx tsx deploy/3-empaquetar.ts --ligero             (sin node_modules: el servidor conserva los suyos;
+ *                                                        solo si package-lock.json no cambió desde la última instalación)
  *   npx tsx deploy/3-empaquetar.ts --con-navegadores    (añade Playwright, ~400 MB)
  *
  * El front debe estar compilado antes: en el repo de QA-lab, `npm run build`.
  */
 
 const withDeps = process.argv.includes("--con-dependencias");
+const ligero = !withDeps && process.argv.includes("--ligero");
 const withBrowsers = process.argv.includes("--con-navegadores");
 
 const engineRoot = process.cwd();
@@ -162,11 +165,15 @@ function revisarPaquete(staging: string): boolean {
     fs.existsSync(instalador) && fs.readFileSync(instalador, "utf8").includes("serviciosWin"),
     "instalador compatible con WinSW (serviciosWin)",
   );
-  req(
-    fs.existsSync(path.join(staging, "qa-engine", "node_modules", "tsx", "dist", "cli.mjs")),
-    "qa-engine\\node_modules\\tsx\\dist\\cli.mjs",
-    "el servidor no tiene internet: empaqueta con --con-dependencias",
-  );
+  if (ligero) {
+    say("aviso", "paquete ligero: sin node_modules, el instalador conserva los del servidor");
+  } else {
+    req(
+      fs.existsSync(path.join(staging, "qa-engine", "node_modules", "tsx", "dist", "cli.mjs")),
+      "qa-engine\\node_modules\\tsx\\dist\\cli.mjs",
+      "el servidor no tiene internet: empaqueta con --con-dependencias (o --ligero si las dependencias no cambiaron)",
+    );
+  }
   req(fs.existsSync(path.join(staging, "qa-lab", "dist", "index.html")), "qa-lab\\dist\\index.html");
 
   const assets = path.join(staging, "qa-lab", "dist", "assets");

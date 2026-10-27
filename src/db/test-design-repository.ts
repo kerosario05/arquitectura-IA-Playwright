@@ -321,6 +321,29 @@ export async function listDrafts(filter: ListDraftsFilter = {}): Promise<TestDes
   });
 }
 
+/**
+ * Every draft with its stories, archived ones included: a case published from a
+ * draft that was later archived still exists in TestRail and can still run.
+ * Read by the dashboard metrics; the caller narrows visibility.
+ */
+export async function listDraftsWithStories(): Promise<TestDesignDraftWithStories[]> {
+  return withConnection(async (c) => {
+    const drafts = await c.query<DraftRow>(`SELECT ${DRAFT_COLUMNS} FROM dbo.TestDesignDraft`);
+    if (drafts.length === 0) return [];
+    const stories = await c.query<StoryRow>(
+      `SELECT ${STORY_COLUMNS} FROM dbo.TestDesignDraftStory ORDER BY position, issueKey`,
+    );
+    const byDraft = new Map<string, TestDesignDraftStory[]>();
+    for (const row of stories) {
+      const key = row.draftId.toLowerCase();
+      const list = byDraft.get(key) ?? [];
+      list.push(mapStory(row));
+      byDraft.set(key, list);
+    }
+    return drafts.map((row) => ({ ...mapDraft(row), stories: byDraft.get(row.id.toLowerCase()) ?? [] }));
+  });
+}
+
 export async function updateDraft(id: string, patch: UpdateDraftInput): Promise<TestDesignDraft | null> {
   return withTransaction(async (c) => {
     const nextProjectSlug = patch.projectSlug === undefined ? undefined : patch.projectSlug?.trim() || null;
