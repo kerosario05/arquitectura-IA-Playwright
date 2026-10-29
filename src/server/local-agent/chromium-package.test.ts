@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import test from "node:test";
-import { ChromiumPackage, resolveChromiumSource } from "./chromium-package";
+import { ChromiumPackage, configuredChromiumSource, resolveChromiumSource } from "./chromium-package";
 
 function tmp(prefix: string): string {
   return fs.mkdtempSync(path.join(os.tmpdir(), prefix));
@@ -47,6 +47,21 @@ test("arma el zip una sola vez (aunque lo pidan a la vez), con sha256, y luego l
   const again = await new ChromiumPackage(downloads, () => ({ revision: "1223", revisionDir })).ensure(() => undefined);
   assert.equal(again.sha256, a.sha256);
   assert.equal(fs.statSync(path.join(downloads, "chromium-1223.zip")).mtimeMs, mtime);
+});
+
+test("LOCAL_AGENT_CHROMIUM_DIR reparte una revisión antigua con chrome-win", async () => {
+  const revisionDir = path.join(tmp("qalab-pkg-src-"), "chromium-1193");
+  fs.mkdirSync(path.join(revisionDir, "chrome-win"), { recursive: true });
+  fs.writeFileSync(path.join(revisionDir, "chrome-win", "chrome.exe"), "MZ-falso");
+  const source = configuredChromiumSource(revisionDir);
+  assert.deepEqual(source, { revision: "1193", revisionDir, chromeFolder: "chrome-win" });
+  assert.equal(configuredChromiumSource(undefined), undefined);
+  assert.equal(configuredChromiumSource(path.join(tmp("qalab-pkg-src-"), "chromium-1223")), undefined, "sin chrome.exe no se usa");
+
+  const downloads = tmp("qalab-pkg-out-");
+  const info = await new ChromiumPackage(downloads, () => source).ensure(() => undefined);
+  assert.equal(info.url, "/descargas/chromium-1193.zip");
+  assert.equal(fs.readFileSync(path.join(downloads, "chromium-1193.zip")).subarray(0, 2).toString(), "PK");
 });
 
 test("sin chrome.exe en el servidor falla con un mensaje claro", async () => {

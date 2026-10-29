@@ -30,6 +30,8 @@ export type ChromiumPackageSource = {
   revision: string;
   /** Carpeta ms-playwright\chromium-<rev> que contiene chrome-win64\chrome.exe. */
   revisionDir: string;
+  /** Subcarpeta con chrome.exe: chrome-win64 (por defecto) o chrome-win (revisiones antiguas). */
+  chromeFolder?: string;
 };
 
 export const DOWNLOADS_URL_PREFIX = "/descargas";
@@ -47,13 +49,27 @@ export function resolveChromiumSource(executablePath: string = chromium.executab
   return { revision: match[1], revisionDir };
 }
 
+/**
+ * `LOCAL_AGENT_CHROMIUM_DIR` fija la carpeta chromium-<rev> que se reparte, en lugar de la
+ * que pide Playwright: sirve para entregar una revisión que ya está en el servidor cuando
+ * la exigida no se puede descargar (servidor sin internet).
+ */
+export function configuredChromiumSource(dir: string | undefined = process.env.LOCAL_AGENT_CHROMIUM_DIR?.trim()): ChromiumPackageSource | undefined {
+  if (!dir) return undefined;
+  const revisionDir = path.resolve(dir);
+  const match = /^chromium-(\d+)$/.exec(path.basename(revisionDir));
+  if (!match) return undefined;
+  const chromeFolder = ["chrome-win64", "chrome-win"].find((folder) => fs.existsSync(path.join(revisionDir, folder, "chrome.exe")));
+  return chromeFolder ? { revision: match[1], revisionDir, chromeFolder } : undefined;
+}
+
 export class ChromiumPackage {
   private building?: Promise<ChromiumPackageInfo>;
   private cached?: ChromiumPackageInfo;
 
   constructor(
     private readonly downloadsDir: string = defaultDownloadsDir(),
-    private readonly sourceResolver: () => ChromiumPackageSource | undefined = () => resolveChromiumSource(),
+    private readonly sourceResolver: () => ChromiumPackageSource | undefined = () => configuredChromiumSource() ?? resolveChromiumSource(),
   ) {}
 
   get dir(): string {
@@ -104,7 +120,8 @@ export class ChromiumPackage {
     fs.mkdirSync(this.downloadsDir, { recursive: true });
 
     if (!fs.existsSync(zip)) {
-      const chromeDir = path.join(source.revisionDir, "chrome-win64");
+      const chromeFolder = source.chromeFolder ?? "chrome-win64";
+      const chromeDir = path.join(source.revisionDir, chromeFolder);
       if (!fs.existsSync(path.join(chromeDir, "chrome.exe"))) {
         throw new Error(`No existe ${path.join(chromeDir, "chrome.exe")}: falta instalar Chromium ${source.revision} en el servidor`);
       }
@@ -115,7 +132,7 @@ export class ChromiumPackage {
       const started = Date.now();
       log(`[agente-local] armando chromium-${source.revision}.zip desde ${source.revisionDir}`);
       const tar = path.join(process.env.SystemRoot || "C:\\Windows", "System32", "tar.exe");
-      await execFileAsync(tar, ["--format", "zip", "-c", "-f", tmp, "-C", source.revisionDir, "chrome-win64"], {
+      await execFileAsync(tar, ["--format", "zip", "-c", "-f", tmp, "-C", source.revisionDir, chromeFolder], {
         windowsHide: true,
         maxBuffer: 16 * 1024 * 1024,
       });

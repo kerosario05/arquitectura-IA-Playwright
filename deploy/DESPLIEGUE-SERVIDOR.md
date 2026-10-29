@@ -35,12 +35,19 @@ Windows Server, sin salida a internet). Léelo entero antes de tocar nada. Si un
   - motor: `C:\Program Files\nodejs\node.exe node_modules\tsx\dist\cli.mjs src\server\server.ts` en `C:\qa-v2\app\qa-engine`
   - BFF: `C:\Program Files\nodejs\node.exe node_modules\tsx\dist\cli.mjs server\index.ts` en `C:\qa-v2\app\qa-lab`
 - Logs: `C:\qa-v2\logs\QALabV2-<servicio>_AAAAMMDD.out.log` / `.err.log` y `QALabV2-*.wrapper.log`.
+- El motor corre como LocalSystem, que no tiene sesión de Codex CLI. Por eso `QALabV2-motor.xml` lleva
+  `<env name="CODEX_HOME" value="<carpeta .codex con login>"/>`. Sin esa línea, la generación de escenarios
+  devuelve `JIRA_SCENARIO_RESPONSE_EMPTY`.
 
 ### Variables relevantes del `.env` (no imprimas otras: pueden tener secretos)
 
 - `C:\qa-v2\app\qa-lab\.env`: `PORT=3003`
 - `C:\qa-v2\app\qa-engine\.env`: `PORT=3102`, `PLAYWRIGHT_BROWSERS_PATH=C:\qa\ms-playwright`,
   `AI_SPEC_FUNCTIONAL_EXECUTION_ENABLED=true`, `HEADLESS=true`
+- Opcional en el motor: `LOCAL_AGENT_CHROMIUM_DIR=C:\qa\ms-playwright\chromium-1193`. Es la carpeta
+  `chromium-<rev>` que el agente local instala en los PCs. Hace falta porque el servidor no tiene internet:
+  Playwright pide `chromium-1223`, pero solo existe `chromium-1193`, que trae `chrome-win` en lugar de
+  `chrome-win64`. Sin la variable se usa la revisión de Playwright.
 
 ### Red
 
@@ -72,6 +79,8 @@ Restart-Service QALabV2-motor, QALabV2-BFF
 Stop-Service    QALabV2-BFF, QALabV2-motor
 Start-Service   QALabV2-motor, QALabV2-BFF
 ```
+
+Para reiniciar solo el motor hace falta `Restart-Service QALabV2-motor -Force`, porque el BFF depende de él.
 
 Comprobación rápida:
 
