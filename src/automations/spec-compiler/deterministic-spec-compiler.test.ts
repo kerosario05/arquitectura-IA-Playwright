@@ -446,6 +446,24 @@ test("11c/assertion-only step with a backed literal oracle compiles without an a
   assert.equal((result.source.match(/promotedRuntime\.expectPromotedVisible\(/g) ?? []).length, 1);
 });
 
+test("11c.1/a scenario-authored visibility check without an oracle compiles to its quoted text", () => {
+  // Job a86f1bd9 ("cuenta 2", step 8): the whole flow passed, but spec generation failed closed
+  // on 'El sistema muestra "Selecciona la cuenta de tu preferencia"' (operation_unsupported).
+  const scenarioCheck = step({
+    scenarioStepIndex: 8,
+    operation: "assertVisible",
+    originalText: 'El sistema muestra "Selecciona la cuenta de tu preferencia"',
+  });
+  const result = compileDeterministicSpec(contract([scenarioCheck]));
+
+  assert.deepEqual(result.unsupportedCapabilities, []);
+  assert.equal(result.bindings[0].runtimeMethod, "expectPromotedVisible");
+  assert.match(result.source, /getByText\('Selecciona la cuenta de tu preferencia', \{ exact: true \}\)\.filter\(\{ visible: true \}\)\.first\(\)\)\.toBeVisible\(\)/);
+
+  const noText = compileDeterministicSpec(contract([step({ scenarioStepIndex: 9, operation: "assertVisible", originalText: "El sistema muestra la cuenta" })]));
+  assert.ok(noText.unsupportedCapabilities.some((reason) => reason.includes("operation_unsupported:assertVisible")));
+});
+
 test("11d/backed page_object_state assertion compiles visibly while an unbacked state fails closed", () => {
   const assertion = step({
     scenarioStepIndex: 41,

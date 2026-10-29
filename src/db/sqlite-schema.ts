@@ -179,6 +179,40 @@ CREATE TABLE IF NOT EXISTS ProjectTestRailConfiguration (
   updatedAt              TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR})
 );
 
+-- Catalog services a project enabled (Catálogo de servicios) and its settings for each.
+-- The services themselves are code (src/service-catalog); only per-project settings live here.
+CREATE TABLE IF NOT EXISTS ProjectServiceConfiguration (
+  projectId     TEXT    NOT NULL COLLATE NOCASE
+                        REFERENCES Projects(id) ON DELETE CASCADE,
+  serviceKey    TEXT    NOT NULL COLLATE NOCASE,
+  enabled       INTEGER NOT NULL DEFAULT 1,
+  settingsJson  TEXT    NOT NULL DEFAULT '{}',
+  createdAt     TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  updatedAt     TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  PRIMARY KEY (projectId, serviceKey)
+);
+
+-- Which catalog service fills which scenario field (valueKey). scenarioId '' = the general
+-- form of the owner (recording, test-design story or case); a scenario row overrides it.
+-- serviceKey NULL on a scenario row = "this scenario types the value by hand".
+CREATE TABLE IF NOT EXISTS ServiceBinding (
+  id              TEXT    PRIMARY KEY COLLATE NOCASE DEFAULT (${UUID_DEFAULT_EXPR}),
+  projectId       TEXT    NOT NULL COLLATE NOCASE
+                          REFERENCES Projects(id) ON DELETE CASCADE,
+  ownerType       TEXT    NOT NULL,   -- recording | test_design_story | case
+  ownerId         TEXT    NOT NULL COLLATE NOCASE,
+  scenarioId      TEXT    NOT NULL DEFAULT '' COLLATE NOCASE,
+  targetValueKey  TEXT    NOT NULL,
+  serviceKey      TEXT    COLLATE NOCASE,
+  paramsJson      TEXT    NOT NULL DEFAULT '{}',
+  updatedBy       TEXT,
+  createdAt       TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  updatedAt       TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  UNIQUE (projectId, ownerType, ownerId, scenarioId, targetValueKey)
+);
+
+CREATE INDEX IF NOT EXISTS IX_ServiceBinding_owner ON ServiceBinding (projectId, ownerType, ownerId);
+
 CREATE TABLE IF NOT EXISTS ProjectKnowledge (
   projectId     TEXT    PRIMARY KEY COLLATE NOCASE
                         REFERENCES Projects(id) ON DELETE CASCADE,

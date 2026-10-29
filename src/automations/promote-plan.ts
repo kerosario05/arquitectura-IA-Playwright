@@ -58,6 +58,7 @@ import { buildDataContext, type DataContextEntry } from "../data/data-context";
 import { buildPromotedDataManifest, savePromotedDataManifestSync } from "../data/promoted-data";
 import { validatePromotedSpecRuntimeContract } from "./runtime/promoted-runtime-contract";
 import { materializePromotedRuntimeEnv } from "./runtime/promoted-spec-runtime";
+import { materializeServiceBindingsEnv, type RuntimeServiceBinding } from "../service-catalog/runtime-service-values";
 import { getSectionSlug, rewritePromotedAuthFlowHelperImport, rewritePromotedRuntimeImport, runHybridSpecGeneration, validatePromotedSpecInternalImports, type SpecGenerationDiagnostics, type SpecGenerationSourceScenario } from "./spec-generation-hybrid";
 import { buildSpecExecutionContract } from "./spec-execution-contract";
 import { compileDeterministicSpec } from "./spec-compiler/deterministic-spec-compiler";
@@ -449,6 +450,8 @@ export type VerifyPromotedSpecOptions = {
      * carry -- never the reverse.
      */
     scenarioRuntimeValues?: Record<string, string>;
+    /** Catalog services (OTP...) the run's fields are bound to; resolved by the runtime at the step. */
+    serviceBindings?: RuntimeServiceBinding[];
   };
   /**
    * Live sink for the spawned child's stdout/stderr, called per completed line AS the process
@@ -572,7 +575,11 @@ export async function resolveVerifyPromotedSpecAppExecEnv(
   // global/default testData is used only as a fallback for keys the scenario doesn't supply.
   const appGlobalRuntimeValues = resolvedDeps.resolvePromotedScenarioRuntimeValues(appSlug);
   const effectiveRuntimeValues = { ...appGlobalRuntimeValues, ...(appContext.scenarioRuntimeValues ?? {}) };
-  execEnv = { ...execEnv, ...materializePromotedRuntimeEnv(effectiveRuntimeValues) };
+  execEnv = {
+    ...execEnv,
+    ...materializePromotedRuntimeEnv(effectiveRuntimeValues),
+    ...materializeServiceBindingsEnv(appContext.serviceBindings),
+  };
 
   const specSourceForRequiredKeys = await resolvedDeps.readSpecSource(specPath).catch(() => "");
   const requiredPromotedEnvKeys = resolveRequiredPromotedEnvKeysFromSource(specSourceForRequiredKeys);

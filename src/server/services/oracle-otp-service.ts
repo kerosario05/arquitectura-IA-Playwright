@@ -633,10 +633,13 @@ function ensureIdentity(rawIdentity: unknown, runtime: OracleOtpRuntimeConfig): 
   if (!identity) {
     throw new OracleOtpServiceError("invalid_request", 400, { message: "identity is required." });
   }
-  if (!/^\d+$/.test(identity)) {
-    throw new OracleOtpServiceError("invalid_request", 400, { message: "identity must contain only digits." });
+  // Dashes are kept: PKG_GENERA_TOKEN stores the cédula verbatim and each app validates with its
+  // own format (portal: 402-2999373-4), so it must reach Oracle unchanged.
+  if (!/^\d+(?:-\d+)*$/.test(identity)) {
+    throw new OracleOtpServiceError("invalid_request", 400, { message: "identity must contain only digits and dashes." });
   }
-  if (identity.length < runtime.identityMinLength || identity.length > runtime.identityMaxLength) {
+  const identityDigits = identity.replace(/-/g, "").length;
+  if (identityDigits < runtime.identityMinLength || identityDigits > runtime.identityMaxLength) {
     throw new OracleOtpServiceError("invalid_request", 400, {
       message: "identity length is out of configured range.",
     });

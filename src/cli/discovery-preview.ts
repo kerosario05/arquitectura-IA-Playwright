@@ -867,6 +867,11 @@ function getPreBusinessFailureSignals(workflowResult: any) {
   };
 }
 
+/** Step text for the live panel, with every typed value hidden. */
+export function maskCaseStartedSteps(steps: readonly string[]): string[] {
+  return steps.map((step) => step.replace(/^(\s*Ingresar\s+)"[^"]*"(\s+en\s+)/i, '$1"••••••"$2'));
+}
+
 async function runPreviewCase(
   vc: VirtualCase,
   args: PreviewCliArgs,
@@ -880,13 +885,16 @@ async function runPreviewCase(
 ): Promise<PreviewResult["cases"][number]> {
   const outputDir = path.resolve(`./.artifacts/preview/${vc.displayId}/${new Date().toISOString().replace(/[:.]/g, "-")}`);
 
-  // Emit JSON line for progress tracking (FASE 4)
+  // Emit JSON line for progress tracking (FASE 4). The live panel shows the current step from
+  // these steps; without them a run opened from history or search has no step text and stays on
+  // "Esperando el siguiente paso". Typed values are masked: this line reaches the job log as is.
   console.log(JSON.stringify({
     type: "case_started",
     caseId: vc.displayId,
     title: vc.title,
     index: index + 1,
     total,
+    ...(vc.steps?.length ? { steps: maskCaseStartedSteps(vc.steps) } : {}),
   }));
 
   console.log(`\n[discovery:preview] starting ${vc.displayId}: ${vc.title}`);

@@ -40,6 +40,8 @@ import { resolveTestDesignLaunchLinks, type TestDesignCaseResolution } from "../
 import { toJiraSemanticDesignScenario } from "../../test-design/test-design-lineage";
 import { refreshEditedJiraSource } from "../../test-design/test-design-edited-source";
 import { extractTextFromAdf } from "../../jira/adf-extractor";
+import { planRerunServiceBindings, serviceBindingBlockedBody, type RerunScenarioOwner } from "../../service-catalog/execution-bindings";
+import type { RuntimeServiceBinding } from "../../service-catalog/runtime-service-values";
 
 export const runsRouter = Router();
 
@@ -944,6 +946,19 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
     return;
   }
 
+  // Catalog services (OTP...) are planned again from today's bindings: the source job may
+  // never have carried them, and a rerun must not fall back to the recorded code.
+  let rerunServiceBindings: RuntimeServiceBinding[] = [];
+  if (prepared.jobType !== "discovery-batch" && prepared.jobType !== "mobile-launch-execution" && prepared.appSlug) {
+    const services = await planRerunServiceBindings(prepared.appSlug, (prepared.scenarios ?? []) as RerunScenarioOwner[]);
+    if (services.blocked.length > 0) {
+      res.status(409).json(serviceBindingBlockedBody(services.blocked));
+      return;
+    }
+    rerunServiceBindings = services.bindings;
+  }
+  const serviceBindingsParam = rerunServiceBindings.length > 0 ? { serviceBindings: rerunServiceBindings } : {};
+
   if (prepared.jobType === "discovery-batch") {
     const discoveryJob = jobStore.create("discovery-batch", prepared.discoveryParams);
     const checklistIdentity = buildDiscoveryBatchChecklistIdentity({ jobId: discoveryJob.id });
@@ -1107,6 +1122,7 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
         rerunMode: mode,
         rerun: true,
         executionMode: "mixed_rerun",
+        ...serviceBindingsParam,
         recordingSelections: prepared.recordingSelections,
         sectionName: prepared.sectionName,
         sectionSlug: prepared.sectionSlug,
@@ -1163,6 +1179,7 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
         executionMode: "reuse_existing_promoted_spec",
         recordingSelections: prepared.recordingSelections,
         environment: prepared.environment,
+        ...serviceBindingsParam,
       });
       jobStore.appendLog(reuseJob.id, `[runs:rerun] sourceJobId=${jobId} mode=${mode} selected=${prepared.selectedCount} total=${prepared.totalCount} dispatch=reuse_existing_promoted_spec`);
       for (const s of reuseJobScenarios) {
@@ -1204,6 +1221,8 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
       sourceJobId: jobId,
       rerunMode: mode,
       rerun: true,
+      // Today's bindings replace whatever the source job carried, including none.
+      serviceBindings: rerunServiceBindings.length > 0 ? rerunServiceBindings : undefined,
       issueKey,
       checklistUrl,
       sectionName: prevParams.sectionName,
@@ -1224,6 +1243,7 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
       sourceJobId: jobId,
       rerunMode: mode,
       rerun: true,
+      ...serviceBindingsParam,
       issueKey,
       checklistUrl,
       launchId: launchMeta?.launchId,
@@ -1256,6 +1276,7 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
    jobStore.appendLog(newJob.id, `[runs:rerun] newJobId=${newJob.id} issueKey=${issueKey || "?"} checklistUrl=${scopedChecklistUrl || "?"}`);
   jobStore.appendLog(newJob.id, `[runs:rerun] appSlug=${prepared.appSlug}`);
   jobStore.appendLog(newJob.id, `[runs:rerun] sourceJobType=${prepared.jobType}`);
+  jobStore.appendLog(newJob.id, `[runs:rerun] serviceBindings=${rerunServiceBindings.length}`);
 
   if (prepared.jobType === "mobile-launch-execution") {
     setImmediate(() => startMobileLaunchExecutionJob(newJob.id));

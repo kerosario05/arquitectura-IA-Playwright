@@ -50,6 +50,8 @@ import { startMixedRerun } from "../jobs/mixed-rerun-orchestrator";
 import { clientIpOf } from "../local-agent/agent-endpoint";
 import { localAgentRegistry, LocalAgentError } from "../local-agent/agent-registry";
 import type { SessionTrace } from "../../recording/session-trace.types";
+import { mergeRunServiceBindings, planExecutionServices, serviceBindingBlockedBody } from "../../service-catalog/execution-bindings";
+import type { RuntimeServiceBinding } from "../../service-catalog/runtime-service-values";
 
 export const recordingsRouter = Router();
 
@@ -204,6 +206,7 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
     let publishToTestRailInvoked = false;
     const recordingAppSlugs = new Map<string, string>();
     const executableScenarioIdsByRecording = new Map<string, Set<string>>();
+    let batchServiceBindings: RuntimeServiceBinding[] = [];
 
     const lookupCase: TestRailCaseLookup = async (caseId) => {
       try {
@@ -258,6 +261,22 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
           if (sameStep.length === 1 && typeof stepValue === "string" && values[field.key] === undefined) values[field.key] = stepValue;
         }
       }
+      // Catalog services bound to this recording (see the single-recording route below).
+      const groupServicePlan = await planExecutionServices({
+        projectSlug,
+        ownerType: "recording",
+        ownerId: recordingId,
+        scenarios: chosen.map((scenario) => ({ scenarioId: scenario.scenarioId, valueKeys: recordedScenarioValueKeys(scenario) })),
+        values,
+      });
+      const mergedServices = mergeRunServiceBindings(batchServiceBindings, groupServicePlan.bindings);
+      const serviceBlocks = [...groupServicePlan.blocked, ...mergedServices.conflicts];
+      if (serviceBlocks.length > 0) {
+        res.status(409).json(serviceBindingBlockedBody(serviceBlocks));
+        return;
+      }
+      batchServiceBindings = mergedServices.bindings;
+      Object.assign(values, groupServicePlan.placeholders);
       const admissionResult = evaluateRecordingExecutionAdmission({
         requested: ids,
         all,
@@ -420,6 +439,7 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
       executionMode: "recording_batch",
       recordingDocumentSources,
       publishToTestRailInvoked,
+      ...(batchServiceBindings.length > 0 ? { serviceBindings: batchServiceBindings } : {}),
       ...(destination ? { testRailCaseIdsByScenarioId: Object.fromEntries(publishedCaseIdsByScenarioId) } : {}),
       ...(testRailRun ? { testRunId: testRailRun.id } : {}),
       ...(jiraKey ? { jiraKey, huKey: jiraKey } : {}),
@@ -666,6 +686,14 @@ export function shouldRejectEmptyScenarioOverwrite(incomingCount: number, curren
 async function appSlugFor(projectSlug: string): Promise<string> {
   const target = await resolveRecordingTarget(projectSlug);
   return target.appSlug;
+}
+
+/** Every field a recorded scenario may type: its declared data plus its runtime requirements. */
+function recordedScenarioValueKeys(scenario: RecordedScenario): string[] {
+  return [
+    ...scenario.requiredData.map((field) => field.key),
+    ...(scenario.runtimeInputRequirements ?? []).map((requirement) => requirement.valueKey),
+  ];
 }
 
 function readRecordingScenarios(appSlug: string, recordingId: string): RecordedScenario[] {
@@ -1107,6 +1135,22 @@ recordingsRouter.post("/:recordingId/execute", async (req, res) => {
       }
     }
 
+    // Catalog services (OTP...) bound to this recording's fields. A service that cannot run
+    // refuses the request here; a bound field the request left empty gets a placeholder so
+    // admission sees it filled -- the real value is fetched at the step that types it.
+    const servicePlan = await planExecutionServices({
+      projectSlug,
+      ownerType: "recording",
+      ownerId: req.params.recordingId,
+      scenarios: selected.map((scenario) => ({ scenarioId: scenario.scenarioId, valueKeys: recordedScenarioValueKeys(scenario) })),
+      values,
+    });
+    if (servicePlan.blocked.length > 0) {
+      res.status(409).json(serviceBindingBlockedBody(servicePlan.blocked));
+      return;
+    }
+    Object.assign(values, servicePlan.placeholders);
+
     // ADMISSION GATE — invariant: NO SIDE EFFECT BEFORE ADMISSION. Evaluate the CURRENT
     // authoritative execution readiness for every requested scenario BEFORE any external
     // mutation (TestRail publish, automation resolution, spec generation/dispatch, discovery).
@@ -1245,12 +1289,20 @@ recordingsRouter.post("/:recordingId/execute", async (req, res) => {
             runtimeValues: scenario.runtimeDataset?.resolvedValues,
           };
         });
+        // Fields a catalog service fills carry its placeholder too, or the spec's required
+        // PROMOTED_* check refuses to start before the runtime can fetch the real value.
+        if (Object.keys(servicePlan.placeholders).length > 0) {
+          for (const entry of reuseJobScenarios) {
+            entry.runtimeValues = { ...entry.runtimeValues, ...servicePlan.placeholders };
+          }
+        }
         fastPathResults = reuseJobScenarios.map((s) => ({ scenarioId: s.scenarioId, caseId: s.caseId, specPath: s.specPath, status: "skipped" as const }));
         const reuseJob = jobStore.create("scenario-preview", {
           appSlug,
           recordingId: req.params.recordingId,
           scenarios: reuseJobScenarios,
           executionMode: "reuse_existing_promoted_spec",
+          ...(servicePlan.bindings.length > 0 ? { serviceBindings: servicePlan.bindings } : {}),
         });
         reuseJobId = reuseJob.id;
         console.log(`[recordings:execute:fast-path] recording=${req.params.recordingId} jobId=${reuseJobId} scenarios=${reuseJobScenarios.length} publishInvoked=false generationInvoked=false headless=true`);
@@ -1296,6 +1348,7 @@ recordingsRouter.post("/:recordingId/execute", async (req, res) => {
       ...admission,
       rejectedScenarios: admission.requestedRejectedScenarios,
       options: effectiveJobOptions,
+      ...(servicePlan.bindings.length > 0 ? { serviceBindings: servicePlan.bindings } : {}),
     });
     setImmediate(() => startScenarioPreviewRun(job.id));
     res.status(202).json({

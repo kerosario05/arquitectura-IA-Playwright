@@ -50,6 +50,21 @@ test("a later unmatched route still cannot replace an observed overlay-dismissal
   assert.equal(interactions[0].screenAfterRef, "underlying");
 });
 
+test("a screen photo that lands just before a real navigation does not keep the click on the old route", () => {
+  // Recording f8611294 interaction-19: screen_change 11 ms before the navigate, next tap on the new route.
+  const events = [
+    ev({ seq: 0, t: 1, kind: "note", observationType: "pointer", interactionId: "p5", screenKey: "id", url: "/cuentas?method=x" }),
+    ev({ seq: 1, t: 2, kind: "tap", interactionId: "p5", screenKey: "id", url: "/cuentas?method=x", target: { role: "button", associatedField: "Continuar", locators: [{ strategy: "css", value: "#confirm" }] } }),
+    ev({ seq: 2, t: 3, kind: "screen_change", screenKey: "id", url: "/cuentas?method=x", toScreenKey: "producto" }),
+    ev({ seq: 3, t: 4, kind: "navigate", screenKey: "producto", url: "/producto/ahorro" }),
+    ev({ seq: 4, t: 5, kind: "note", observationType: "pointer", interactionId: "p6", screenKey: "producto", url: "/producto/ahorro" }),
+    ev({ seq: 5, t: 6, kind: "tap", interactionId: "p6", screenKey: "producto", url: "/producto/ahorro", target: { role: "button", associatedField: "Seleccione", locators: [{ strategy: "css", value: "#select" }] } }),
+  ];
+  const interactions = buildCanonicalInteractions(events);
+  assert.equal(interactions[0].routeAfter, "/producto/ahorro");
+  assert.deepEqual(validateInteractionStateSequence(interactions), { stateSequenceValid: true, stateSequenceIssues: [] });
+});
+
 // ─── Test 1: fill → pointer → navigate → tap ──────────────────────────────
 
 test("1/fillThenPointerNavigation. fill does not steal navigation from subsequent pointer tap", () => {

@@ -1046,6 +1046,14 @@ function nextPointerBoundaryT(events: readonly RecordedEvent[], fromT: number, a
   return boundary;
 }
 
+/** The first user action after `from` that is not part of the anchor's own gesture. */
+function nextUserActionAfter(events: readonly RecordedEvent[], from: RecordedEvent, anchor: RecordedEvent): RecordedEvent | undefined {
+  return events.find((event) => event.t > from.t
+    && (event.kind === "tap" || event.kind === "fill" || event.kind === "back"
+      || (event.kind === "note" && event.observationType === "pointer"))
+    && !(anchor.interactionId && event.interactionId === anchor.interactionId));
+}
+
 /**
  * Route transitions between this action's pointerdown and the next pointerdown belong to
  * this physical gesture. Some applications emit intermediate routes before settling, so use
@@ -1074,11 +1082,15 @@ function causalTransition(events: readonly RecordedEvent[], index: number, exclu
     // the just-captured screen key and the captured screen shares the action's route surface,
     // the screen change is the action's immediate outcome; the later route has no matching
     // screen identity and must not be assigned to the click.
+    // Exception (recording f8611294, interaction-19): the screen photo can simply arrive a few
+    // ms before the URL event of a real navigation. When the user's next action happens on the
+    // later route, that route is where the click led, so it stays the click's outcome.
     if (
       ownedScreenChange?.toScreenKey
       && candidate.screenKey === ownedScreenChange.toScreenKey
       && routeSurface(ownedScreenChange.url) === routeSurface(anchor.url)
       && routeSurface(candidate.url) !== routeSurface(anchor.url)
+      && routeSurface(nextUserActionAfter(events, candidate, anchor)?.url) !== routeSurface(candidate.url)
     ) {
       screenBeforeUnmatchedRoute = ownedScreenChange;
     }

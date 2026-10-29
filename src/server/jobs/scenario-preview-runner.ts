@@ -1,5 +1,6 @@
 import { spawn } from "child_process";
 import { evidenceActorEnvironment } from "../../auth/report-attribution";
+import { materializeServiceBindingsEnv, type RuntimeServiceBinding } from "../../service-catalog/runtime-service-values";
 import path from "path";
 import fs from "fs";
 import { randomUUID, createHash } from "crypto";
@@ -581,6 +582,7 @@ export async function startReuseExistingPromotedSpecRun(
         // through verbatim so it takes precedence over the app-global fallback, never the other
         // way around.
         scenarioRuntimeValues: scenario.runtimeValues,
+        serviceBindings: job.params.serviceBindings as RuntimeServiceBinding[] | undefined,
       },
       // FIRST_LOSS fix: verifyPromotedSpec's child stdout/stderr was fully buffered -- the
       // existing Live Log/SSE channel (jobStore.appendLog, already streamed by runs.ts's
@@ -2401,6 +2403,9 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
       ...process.env,
       EVIDENCE_RUN_ID: evidenceRunId,
       ...evidenceActorEnvironment(job.params),
+      // Catalog services (OTP...) bound to this run's fields; discovery replay and the promoted
+      // spec it spawns resolve them at the step that types the value.
+      ...materializeServiceBindingsEnv(job.params.serviceBindings as RuntimeServiceBinding[] | undefined),
       AUTOMATION_SOURCE: "qalab",
       AUTOMATION_HEADLESS: headed ? "false" : "true",
       HEADLESS: headed ? "false" : "true",

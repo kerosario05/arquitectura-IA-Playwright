@@ -352,6 +352,7 @@ export async function startMixedRerun(
       executionMode: "reuse_existing_promoted_spec",
       ...(parentTestRunId ? { testRunId: parentTestRunId } : {}),
       executionContext: { evidenceRunId: parentJobId, suppressEvidenceConsolidation: true },
+      ...(parentParams.serviceBindings ? { serviceBindings: parentParams.serviceBindings } : {}),
     },
     { parentJobId },
   );
@@ -399,6 +400,7 @@ export async function startMixedRerun(
       reportResults: false,
       options: input.options ?? { overwrite: true, autoPromote: true, autoPom: true, rerunActive: true, headed: false },
       executionContext: { evidenceRunId: parentJobId, suppressEvidenceConsolidation: true },
+      ...(parentParams.serviceBindings ? { serviceBindings: parentParams.serviceBindings } : {}),
     },
     { parentJobId },
   );

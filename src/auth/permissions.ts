@@ -26,6 +26,8 @@ export type PermissionKey =
   | "testdesign.generate"
   | "testdesign.publish_testrail"
   | "testdesign.publish_jira"
+  | "services.view"
+  | "services.edit"
   | "admin.users"
   | "admin.roles";
 
@@ -169,6 +171,22 @@ export const PERMISSION_MODULES: PermissionModule[] = [
     ],
   },
   {
+    key: "services",
+    label: "Catálogo de servicios",
+    permissions: [
+      {
+        key: "services.view",
+        label: "Ver catálogo de servicios",
+        description: "Consultar los servicios reutilizables (OTP, tokens) y en qué proyectos están activos",
+      },
+      {
+        key: "services.edit",
+        label: "Configurar servicios",
+        description: "Activar un servicio en un proyecto, cambiar su configuración y probarlo",
+      },
+    ],
+  },
+  {
     key: "admin",
     label: "Administración",
     permissions: [
@@ -254,6 +272,7 @@ export const SYSTEM_ROLES: SystemRoleDefinition[] = [
       "executions.export",
       "testdesign.view",
       "testdesign.generate",
+      "services.view",
     ],
   },
   {

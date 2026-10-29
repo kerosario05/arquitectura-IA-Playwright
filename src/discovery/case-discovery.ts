@@ -1,4 +1,5 @@
 import path from "node:path";
+import { resolveServiceBoundValue } from "../service-catalog/runtime-service-values";
 import { runtimeFillValuesMatch, type RuntimeFillFormat } from "./runtime-fill-value";
 import { classifyAssertionPolarity } from "../scenarios/canonical-scenario";
 import { findActionServerError, isTerminalAuthenticationClientError } from "./action-http-outcome";
@@ -3576,6 +3577,51 @@ export function shouldDeferAssertionEvaluation(params: {
     && params.triggerExecuted !== true;
 }
 
+/**
+ * FIRST_LOSS (job fe5f2bbc, "cuenta 2" step 7): a recorded "El sistema muestra X" sits between two
+ * actions, and X lives only on the screen that the next action leaves. It was satisfied at its
+ * own position, yet the final evaluation ran on the last screen, left it pending, and the spec
+ * contract then refused the step as unresolved. Earlier runs only passed because the old screen
+ * was still on display during that final check. An assertion seen satisfied while it is the next
+ * thing in the scenario (index after `currentIndex`, before the next pending action) is remembered
+ * in `memory` and counts as satisfied in every later evaluation. Nothing is credited that was
+ * not actually observed at that position.
+ */
+export function creditPositionallySatisfiedAssertions<T extends {
+  satisfied: boolean;
+  satisfiedAssertions: string[];
+  pendingAssertions: string[];
+  deferredAssertions: string[];
+  blockingAssertions: string[];
+}>(
+  result: T,
+  assertionTargets: Array<{ index: number; target: string }>,
+  currentIndex: number,
+  nextActionIndex: number | undefined,
+  memory: Set<string>,
+): T {
+  for (const assertion of assertionTargets) {
+    const atItsPosition = assertion.index > currentIndex
+      && (nextActionIndex === undefined || assertion.index < nextActionIndex);
+    if (atItsPosition && result.satisfiedAssertions.includes(assertion.target)) memory.add(assertion.target);
+  }
+  const credited = result.pendingAssertions.filter((text) => memory.has(text));
+  if (credited.length === 0) return result;
+  for (const text of credited) {
+    console.log(`[early-completion-assertions] positionalCredit=true assertion="${text.slice(0, 120)}" reason=satisfied_at_scenario_position`);
+  }
+  const pendingAssertions = result.pendingAssertions.filter((text) => !memory.has(text));
+  const satisfiedAssertions = [...result.satisfiedAssertions, ...credited];
+  return {
+    ...result,
+    satisfiedAssertions,
+    pendingAssertions,
+    blockingAssertions: pendingAssertions,
+    satisfied: result.satisfied
+      || (pendingAssertions.length === 0 && result.deferredAssertions.length === 0 && satisfiedAssertions.length > 0),
+  };
+}
+
 export function evaluateEarlyCompletion(
   snapshot: PageSnapshot,
   assertionTargets: AssertionTargetInput[],
@@ -6147,6 +6193,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       }
     }
   };
+  // Assertions seen satisfied at their own scenario position (after the action before them,
+  // before the action after them). See creditPositionallySatisfiedAssertions.
+  const positionallySatisfiedAssertions = new Set<string>();
   const evaluateAndApplyEarlyCompletionAfterAction = async (
     currentIndex: number,
     currentTarget: string,
@@ -6406,16 +6455,22 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       })()
     }));
 
-    const earlyCompletion = evaluateEarlyCompletion(
-      currentSnapshot,
+    const earlyCompletion = creditPositionallySatisfiedAssertions(
+      evaluateEarlyCompletion(
+        currentSnapshot,
+        parsed.assertionTargets,
+        remainingActionTargets,
+        (options as any).appConfig,
+        {
+          currentStepIndex: currentIndex,
+          triggerStepIndex: finalProductClickStepIndex,
+          triggerExecuted: finalProductClickStepIndex != null && currentIndex >= finalProductClickStepIndex,
+        }
+      ),
       parsed.assertionTargets,
-      remainingActionTargets,
-      (options as any).appConfig,
-      {
-        currentStepIndex: currentIndex,
-        triggerStepIndex: finalProductClickStepIndex,
-        triggerExecuted: finalProductClickStepIndex != null && currentIndex >= finalProductClickStepIndex,
-      }
+      currentIndex,
+      remainingActionTargets.length > 0 ? Math.min(...remainingActionTargets.map((a) => a.index)) : undefined,
+      positionallySatisfiedAssertions,
     );
 
     // CRITICAL: Extract critical assertions from targetPath metadata for detail scenarios
@@ -8318,7 +8373,30 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         resolvedDataKeys.add(normalizedActionTarget.valueKey);
       }
 
-      const fillValue = dataResolution.value!;
+      // A field a catalog service fills (OTP) carried only a placeholder through the dataset;
+      // its real value is fetched now, when the screen asks for it.
+      const serviceFillValue = await resolveServiceBoundValue(normalizedActionTarget.valueKey, {
+        segmentPosition: normalizedActionTarget.segmentPosition,
+        // The service's own params (e.g. the cédula) come from this run's data, through the
+        // same resolver every fill uses -- never auto-generated for a key the run lacks.
+        readValue: (key) => {
+          const resolution = resolveDataKey(key, {
+            testData: testDataMap,
+            testDataAliases,
+            env: envVars,
+            missingInputBehavior: "skip",
+            autoGenerateConfig,
+            field: key,
+            context: scenario.title,
+            overrides,
+            suggestedData,
+            runtimeEntries: options.runtimeEntries,
+            credentialEnvAliases,
+          });
+          return resolution.status === "resolved" && typeof resolution.value === "string" ? resolution.value : undefined;
+        },
+      });
+      const fillValue = serviceFillValue ?? dataResolution.value!;
       if (normalizedActionTarget.playwrightRecorderEvidence?.kind === "virtual_keyboard") {
         const keyboardResult = await attemptVirtualKeyboardPress(
           page,

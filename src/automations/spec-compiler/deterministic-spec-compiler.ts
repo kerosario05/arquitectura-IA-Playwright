@@ -1029,6 +1029,14 @@ function compileNegativeVisibilityOracle(
   bindings.push({scenarioStepIndex:step.scenarioStepIndex,operation:step.operation,runtimeMethod:"expectPromotedVisible",targetRef:`text:${target}`});
 }
 
+/** The literal text a scenario-authored visibility check names: its text target, else its quoted text. */
+function scenarioVisibleText(step: SpecExecutionContractStep): string | undefined {
+  const targetText = step.target?.strategy === "text" ? step.target.value?.trim() : undefined;
+  if (targetText) return targetText;
+  const quoted = step.originalText?.match(/["“]([^"“”]+)["”]/)?.[1]?.trim();
+  return quoted || undefined;
+}
+
 function compileVisibleTextOracle(
   step: SpecExecutionContractStep,
   lines: string[],
@@ -1249,6 +1257,14 @@ export function compileDeterministicSpec(contract: SpecExecutionContract, compil
           );
           break;
       }
+    } else if (!step.oracle && step.operation === "assertVisible" && scenarioVisibleText(step)) {
+      // A verification the scenario itself authored ('El sistema muestra "X"', job a86f1bd9 step 8)
+      // compiles to the same literal visible-text check a backed oracle uses. The spec checks it
+      // live at this point of the flow, so a wrong expectation fails the spec, never passes it.
+      compileVisibleTextOracle({
+        ...step,
+        oracle: { type: "literal_visible_text", backed: true, target: scenarioVisibleText(step), requirement: step.originalText },
+      }, lines, bindings, unsupportedCapabilities);
     } else if (!hasNavigationOracle && !hasVisibleTextOracle && !hasAuthGateOracle && !hasNegativeVisibilityOracle && !hasCredentialRejectionOracle) {
       unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:operation_unsupported:${step.operation}`);
     }

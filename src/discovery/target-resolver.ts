@@ -6920,6 +6920,14 @@ function routeSurfaceMatches(currentUrl: string, expectedUrl: string | undefined
   return !result.hardIncompatibility && !result.routeMismatch;
 }
 
+/** A recorded locator that is nothing but a stable id (`id:x` or `css:#x`): no position, no text. */
+export function isPlainStableIdLocator(candidate: RecordedLocator): boolean {
+  const strategy = candidate.strategy.trim().toLowerCase();
+  const value = candidate.value.trim();
+  return (strategy === "id" && Boolean(value))
+    || (strategy === "css" && (/^#[A-Za-z_][A-Za-z0-9_-]*$/.test(value) || /^\[id="[A-Za-z_][A-Za-z0-9_-]*"\]$/.test(value)));
+}
+
 export function recordedLocatorFactory(page: Page | Locator, candidate: RecordedLocator, exact = false): Locator | undefined {
   const value = candidate.value.trim();
   if (!value) return undefined;
@@ -7418,8 +7426,20 @@ export async function resolveRecordedStructuralOwner(
   // unique owner itself remains the same. In that case the capture-time structural identity
   // plus the live unique id/test id is sufficient; keep visibility/actionability checks and do
   // not relax owners identified only by text, class, or position.
-  if (hasStableOwnerAnchor && structuralCandidateCountAfterStableAttributes === 1) {
-    const anchoredOwner = scopeRoot.locator(baseSelector);
+  // Same rule as the plain-id narrowing in the recorded-ref path (job dcb8e878, step 19): an
+  // app may render the anchored id twice and keep one copy hidden (#btn-continue). Exactly
+  // one VISIBLE copy still names one control; 0 or >1 visible copies keep failing closed.
+  let anchoredVisibleOnly = false;
+  if (hasStableOwnerAnchor && structuralCandidateCountAfterStableAttributes > 1) {
+    anchoredVisibleOnly = await scopeRoot.locator(baseSelector).filter({ visible: true }).count().catch(() => 0) === 1;
+    if (anchoredVisibleOnly) {
+      console.log(`[recorded-target-visible-id] strategy=structural-owner originalMatchCount>1 visibleMatchCount=1`);
+    }
+  }
+  if (hasStableOwnerAnchor && (structuralCandidateCountAfterStableAttributes === 1 || anchoredVisibleOnly)) {
+    const anchoredOwner = anchoredVisibleOnly
+      ? scopeRoot.locator(baseSelector).filter({ visible: true })
+      : scopeRoot.locator(baseSelector);
     const anchoredVisible = await anchoredOwner.isVisible().catch(() => false);
     const anchoredEnabled = anchoredVisible && await anchoredOwner.isEnabled().catch(() => true);
     if (anchoredVisible && anchoredEnabled) {
@@ -8298,6 +8318,19 @@ async function resolveRecordedTechnicalTarget(
           locator = nearestLocator;
           count = nearestCount;
           console.log(`[recorded-target-nearest-owner] strategy=css anchor=id_or_testid originalMatchCount>1 finalMatchCount=1`);
+        }
+      }
+      // FIRST_LOSS fix (jobId 7dfc3157-449a-49eb-916b-de8a05070145, step 18): some apps render
+      // the same recorded id twice and keep only one copy visible (#btn-continue). A stable id
+      // with exactly ONE visible copy still names one control the user can see; 0 or >1 visible
+      // copies keep failing closed. Positional or non-id selectors are never narrowed here.
+      if (count > 1 && isPlainStableIdLocator(candidate)) {
+        const visibleOnly = locator.filter({ visible: true });
+        const visibleCount = await visibleOnly.count().catch(() => 0);
+        if (visibleCount === 1) {
+          locator = visibleOnly;
+          count = 1;
+          console.log(`[recorded-target-visible-id] strategy=${candidate.strategy} originalMatchCount>1 visibleMatchCount=1`);
         }
       }
       const visible = count === 1 && await locator.isVisible().catch(() => false);

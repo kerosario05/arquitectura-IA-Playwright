@@ -246,3 +246,38 @@ test("10/multiproject. no app/business/route hardcode governs the request-failur
   assert.doesNotMatch(region, /solicitud multiproducto/i);
   assert.doesNotMatch(region, /numero.de.identificacion/i);
 });
+
+/**
+ * FIRST_LOSS (job e0cbf0d2, step 19): after "Continuar" the app reached its next route, then a
+ * third-party analytics xhr was blocked by CORS (net::ERR_FAILED). The post-click wait (no
+ * completionProbe) treated that cross-origin failure as terminal and the step was marked failed.
+ */
+class FakePageAt extends FakePage {
+  constructor(private readonly currentUrl: string) { super(); }
+  url(): string { return this.currentUrl; }
+}
+
+function requestTo(url: string, resourceType: string, errorText: string): any {
+  return { resourceType: () => resourceType, url: () => url, failure: () => ({ errorText }) };
+}
+
+test("F/crossOriginFailureNotTerminal. a third-party xhr failure never aborts a post-click wait", async () => {
+  const page = new FakePageAt("https://app.example.test/next");
+  const resultPromise = waitForStableInteractiveScreen(page as any, { absoluteDeadlineMs: 300 });
+  const thirdParty = requestTo("https://analytics.example.org/api2/event", "xhr", "net::ERR_FAILED");
+  page.emit("request", thirdParty);
+  page.emit("requestfailed", thirdParty);
+  const result = await resultPromise;
+  assert.notEqual(result.terminationReason, "request_failed");
+  assert.equal(result.stable, true);
+});
+
+test("G/sameOriginFailureStillTerminal. the app's own xhr failure still aborts the wait", async () => {
+  const page = new FakePageAt("https://app.example.test/next");
+  const resultPromise = waitForStableInteractiveScreen(page as any, { absoluteDeadlineMs: 2000 });
+  const own = requestTo("https://app.example.test/api/save", "xhr", "net::ERR_FAILED");
+  page.emit("request", own);
+  page.emit("requestfailed", own);
+  const result = await resultPromise;
+  assert.equal(result.terminationReason, "request_failed");
+});

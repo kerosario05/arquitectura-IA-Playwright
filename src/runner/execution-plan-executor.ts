@@ -111,6 +111,17 @@ export type ScreenStabilityResult = {
   reason?: "loading_timeout";
 };
 
+/** True when a request targets the page's own origin; unknown or unparseable URLs count as same-origin. */
+export function isSameOriginAsPage(requestUrl: string, page: Pick<Page, "url">): boolean {
+  try {
+    const pageOrigin = new URL(page.url()).origin;
+    if (!pageOrigin || pageOrigin === "null") return true;
+    return new URL(requestUrl, page.url()).origin === pageOrigin;
+  } catch {
+    return true;
+  }
+}
+
 /**
  * Wait for a stable screen while preserving the original bounded absolute
  * deadline. A request observed by the action watcher is an active operation
@@ -212,6 +223,16 @@ export async function waitForStableInteractiveScreen(
     const cancelledByNavigation = /aborted|cancell?ed/i.test(errorText);
     noteProgress(cancelledByNavigation ? "request_cancelled_by_navigation" : "request_failed");
     if (cancelledByNavigation) return;
+    // FIRST_LOSS fix (job e0cbf0d2, step 19): a third-party xhr/fetch blocked by CORS
+    // (net::ERR_FAILED on an analytics origin) right after the app reached its next route
+    // aborted the wait as `request_failed` although the click had worked. A failure on another
+    // origin is not the app's own transport; only same-origin xhr/fetch and any document load
+    // stay terminal, matching how the network observer already judges client errors.
+    const resourceTypeForOrigin = String(request.resourceType?.() ?? "other");
+    if (resourceTypeForOrigin !== "document" && !isSameOriginAsPage(String(request.url?.() ?? ""), page)) {
+      noteProgress("cross_origin_request_failed");
+      return;
+    }
     // FIRST_LOSS fix: a `completionProbe` is COMPLETION AUTHORITY (established for the generic
     // idle-screen branch two tickets ago) -- an unrelated ancillary request (xhr/fetch, never
     // the top-level document) failing anywhere on the page must never immediately abort a wait

@@ -1,4 +1,5 @@
 import { isSelectionRuleValue, parseSelectionRule } from "../../recording/dynamic-selection-rule";
+import { isServiceBoundValueKey, resolveServiceBoundValue } from "../../service-catalog/runtime-service-values";
 import fs from "node:fs";
 import { isCredentialRejectionExpectation, resolveFeedbackMessageAssertion } from "../../discovery/feedback-message-resolver";
 import path from "node:path";
@@ -16,7 +17,7 @@ import { normalizeSemanticText } from "../semantic-text-normalization";
 import { resolveSelectionOption } from "../../discovery/selection-option-policy";
 import { evaluatePromotedScenarioOutcome, type ScenarioOutcomeCheck } from "./promoted-scenario-outcome";
 import { findSemanticTargetMatch, type SemanticMatchOptions } from "./semantic-target-matcher";
-import { attemptVirtualKeyboardPress, resolveActionTarget, resolveFillTarget, recordedLocatorFactory, resolveRecordedStructuralOwner, verificationDigitPosition } from "../../discovery/target-resolver";
+import { attemptVirtualKeyboardPress, resolveActionTarget, resolveFillTarget, isPlainStableIdLocator, recordedLocatorFactory, resolveRecordedStructuralOwner, verificationDigitPosition } from "../../discovery/target-resolver";
 import { hasCausalSelectionTransition, type InteractiveState } from "../../discovery/selection-state-verification";
 import type { RecordedLocator, RecordedTechnicalTarget } from "../../recording/session-trace.types";
 import type { PlaywrightRecorderEvidence, SemanticRuntimeEvidence } from "../../recording/structural-owner-identity";
@@ -206,7 +207,10 @@ async function capturePromotedSelectionStateProbe(
   // the same recorded control; counting refs as separate candidates falsely makes state opaque.
   if (resolvedActionLocator) {
     const before = await readPromotedInteractiveState(resolvedActionLocator);
-    const recordedOption = Boolean(optionRef && selectionActivationField?.trim());
+    // A certified role=option keeps its exact dispatched locator even when the recording
+    // named no owning field (react-select "el control grabado", job f44d48bf): the listbox
+    // closing on the same route is the only observable proof that the option was chosen.
+    const recordedOption = Boolean(optionRef);
     console.log(
       `[selection-runtime] phase=before_dispatch probeAvailable=${Boolean(before)} ` +
       `strategy=${recordedOption ? "recorded-selection-option" : "resolved-action-target"} ` +
@@ -3702,12 +3706,34 @@ export class PromotedSpecRuntime {
       console.log(`[promoted-click-structural] stepIndex=${options.stepIndex} rowCheckboxByState candidates=${total} stateChanging=${stateChanging.length}`);
       if (stateChanging.length === 1) rowCheckboxLocator = stateChanging[0];
     }
+    // Duplicated stable id (job 035abfcc, step 19 #btn-continue): the app renders the certified
+    // id twice and hides one copy. Same rule Discovery applies to recorded refs: a plain id with
+    // exactly ONE visible, enabled copy names one control; 0 or >1 visible copies stay fatal.
+    let visibleIdLocator: ReturnType<Page["locator"]> | undefined;
+    if (!resolution?.locator
+      && !causalOptionResolution?.locator
+      && !rowCheckboxLocator
+      && /ambiguous|not_unique/i.test(structuralFailureReason ?? "")) {
+      const idCandidate = (options.structuralTarget?.locatorCandidates ?? [])
+        .find((candidate) => isPlainStableIdLocator(candidate as RecordedLocator));
+      const idLocator = idCandidate ? recordedLocatorFactory(this.page, idCandidate as RecordedLocator, true) : undefined;
+      const visibleCopies = idLocator?.filter({ visible: true });
+      if (visibleCopies
+        && await idLocator!.count().catch(() => 0) > 1
+        && await visibleCopies.count().catch(() => 0) === 1
+        && await visibleCopies.isEnabled().catch(() => false)) {
+        visibleIdLocator = visibleCopies;
+        console.log(`[recorded-target-visible-id] stepIndex=${options.stepIndex} strategy=promoted-structural originalMatchCount>1 visibleMatchCount=1`);
+      }
+    }
     const resolvedLocator = (causalOptionResolution?.status === "resolved" ? causalOptionResolution.locator : undefined)
       ?? resolution?.locator
-      ?? rowCheckboxLocator;
+      ?? rowCheckboxLocator
+      ?? visibleIdLocator;
     const resolvedStrategy = (causalOptionResolution?.status === "resolved" ? causalOptionResolution.locatorStrategy : undefined)
       ?? resolution?.strategy
-      ?? (rowCheckboxLocator ? "row_checkbox_by_state" : undefined);
+      ?? (rowCheckboxLocator ? "row_checkbox_by_state" : undefined)
+      ?? (visibleIdLocator ? "recorded:visible-id" : undefined);
     if (!resolvedLocator) {
       throw new Error(
         `Promoted click failed at step ${options.stepIndex} target="${options.target}". ` +
@@ -3816,6 +3842,12 @@ export class PromotedSpecRuntime {
     await this.ensureInitialEvidence();
     await this.dismissSessionExpiringWarningIfPresent();
     console.log(`[promoted-step] stepIndex=${options.stepIndex} phase=ensure_initial_evidence_done`);
+    // A virtual-keyboard character whose field a catalog service fills (OTP): the dataset only
+    // carried a placeholder, so take the real value now that the screen is asking for it.
+    if (options.keyboardValue !== undefined && options.valueKey) {
+      const serviceValue = await resolveServiceBoundValue(options.valueKey, { segmentPosition: options.segmentPosition });
+      if (serviceValue !== undefined) options = { ...options, keyboardValue: serviceValue, sensitive: true };
+    }
 
     // Certified structural authority (deterministic compiler, kind=certified_structural with a
     // usable owner) is a SEPARATE, exigent path -- reuses the exact same resolver Discovery's
@@ -4679,6 +4711,9 @@ export class PromotedSpecRuntime {
     await this.markBoundaryProgress();
     await this.ensureInitialEvidence();
     await this.dismissSessionExpiringWarningIfPresent();
+    // Fields a catalog service fills (OTP) get their real value at this step, never before.
+    const serviceValue = await resolveServiceBoundValue(options.valueKey);
+    if (serviceValue !== undefined) options = { ...options, value: serviceValue, sensitive: true };
     if (options.playwrightRecorderEvidence?.kind === "segmented_input") {
       await this.fillSegmentedInput(options);
       return;
@@ -5125,7 +5160,7 @@ export class PromotedSpecRuntime {
     console.log(`[promoted-segmented-input] stepIndex=${options.stepIndex} segmentCount=${segmentCount} inputReadback=verified valueKey=${options.valueKey ?? "none"}`);
     const resolvedField = resolvePromotedFieldTarget(options);
     const displayField = evidenceTargetLabel(resolvedField);
-    const sensitiveValue = isSensitiveEvidenceField(resolvedField, options.valueKey);
+    const sensitiveValue = isSensitiveEvidenceField(resolvedField, options.valueKey) || isServiceBoundValueKey(options.valueKey);
     const stepText = sensitiveValue
       ? `Ingreso del valor protegido en "${displayField}".`
       : `Ingreso de "${options.value}" en "${displayField}".`;
