@@ -3443,13 +3443,21 @@ export class PromotedSpecRuntime {
 
   async waitForPromotedUiStable(stepIndex: number, target: string): Promise<void> {
     if (!this.config.enabled) return;
-    const stability = await waitForStablePageState(this.page, {
-      timeoutMs: this.config.stabilityTimeoutMs,
-      pollMs: 500,
-      stableForMs: 700
-    });
+    const options = { timeoutMs: this.config.stabilityTimeoutMs, pollMs: 500, stableForMs: 700 };
+    let stability = await waitForStablePageState(this.page, options);
+    // A loader that is still visible when the window ends is the app still working, not an
+    // unstable UI (job cb758288: "Cargando..." for ~10 s while the identity was validated).
+    // Keep waiting for a bounded grace while the screen keeps reading as loading.
+    let lastDetection = stability.transientDetections.at(-1);
+    if (!stability.finalStable && lastDetection?.transient) {
+      const graceMs = numberFromEnv("PROMOTED_RUNTIME_LOADING_GRACE_MS", 20000);
+      console.log(`[promoted-ui-stable] stepIndex=${stepIndex} phase=loading_grace reason=${lastDetection.reason ?? "unknown"} graceMs=${graceMs}`);
+      stability = await waitForStablePageState(this.page, { ...options, timeoutMs: graceMs });
+      lastDetection = stability.transientDetections.at(-1) ?? lastDetection;
+    }
     if (!stability.finalStable) {
-      throw new Error(`UI not stable after step ${stepIndex} target="${target}"`);
+      const reason = lastDetection?.transient ? lastDetection.reason ?? "loading" : stability.reason;
+      throw new Error(`UI not stable after step ${stepIndex} target="${target}" reason=${reason}`);
     }
   }
 
