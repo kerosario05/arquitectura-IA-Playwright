@@ -82,6 +82,10 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   R("POST", "/api/projects/:slug/refresh-status", ["projects.edit"], "required"),
   R("PUT", "/api/projects/:slug/jira", ["projects.edit"], "required"),
   R("PUT", "/api/projects/:slug/testrail", ["projects.edit"], "required"),
+  R("GET", "/api/projects/:slug/repository", ["projects.view"], "required"),
+  R("PUT", "/api/projects/:slug/repository", ["projects.edit"], "required"),
+  R("DELETE", "/api/projects/:slug/repository", ["projects.edit"], "required"),
+  R("POST", "/api/projects/:slug/repository/test", ["projects.edit"], "required"),
   R("POST", "/api/projects/:slug/materialize", ["projects.materialize"], "required"),
   R("DELETE", "/api/projects/:slug", ["projects.delete"], "required"),
   R("GET", "/api/projects/:projectSlug/cases/:caseId/input-requirements", ["projects.view"], "required"),
@@ -196,6 +200,19 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   ANY("POST", "/api/service-bindings/view", ["recordings.view", "testdesign.view", "tests.launch", "services.view"], "required"),
   ANY("PUT", "/api/service-bindings", ["recordings.derive", "testdesign.generate", "tests.launch"], "required"),
   ANY("DELETE", "/api/service-bindings", ["recordings.derive", "testdesign.generate", "tests.launch"], "required"),
+
+  // --- test planning (test-plan-<HU>.md files in the project's git repo) ---
+  R("GET", "/api/test-planning/projects", ["testplanning.view"], "optional"),
+  R("GET", "/api/test-planning/projects/:slug/branches", ["testplanning.view"], "required"),
+  R("POST", "/api/test-planning/projects/:slug/fetch", ["testplanning.sync"], "required"),
+  R("POST", "/api/test-planning/projects/:slug/pull", ["testplanning.sync"], "required"),
+  R("GET", "/api/test-planning/projects/:slug/plans", ["testplanning.view"], "required"),
+  R("GET", "/api/test-planning/projects/:slug/plan", ["testplanning.view"], "required"),
+  R("POST", "/api/test-planning/projects/:slug/plan/preview", ["testplanning.edit"], "required"),
+  R("POST", "/api/test-planning/projects/:slug/plan/commit", ["testplanning.edit", "testplanning.commit"], "required"),
+  R("POST", "/api/test-planning/projects/:slug/plan/accept", ["testplanning.edit"], "required"),
+  // Dashboard summary: readable from the dashboard or the module itself, narrowed to the caller's projects.
+  ANY("GET", "/api/test-planning/metrics", ["dashboard.view", "testplanning.view"], "optional"),
 
   // --- external catalogues (read-only reference data) ---------------------
   R("GET", "/api/jira/*", ["dashboard.view"]),
